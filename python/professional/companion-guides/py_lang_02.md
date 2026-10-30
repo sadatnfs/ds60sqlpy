@@ -116,6 +116,7 @@ def worked_binding() -> None:
     print("Late binding:", [read() for read in late])
     print("Definition defaults:", [read() for read in early])
 
+
 worked_binding()
 ```
 
@@ -137,6 +138,8 @@ the independent tracing task asks you to distinguish success from failure.
 from functools import wraps
 
 events = []
+
+
 def announce(function):
     @wraps(function)
     def wrapper(*args, **kwargs):
@@ -145,12 +148,15 @@ def announce(function):
             return function(*args, **kwargs)
         finally:
             events.append("after")
+
     return wrapper
+
 
 @announce
 def reciprocal(value):
     """Return one divided by value."""
     return 1 / value
+
 
 assert reciprocal(2) == 0.5
 try:

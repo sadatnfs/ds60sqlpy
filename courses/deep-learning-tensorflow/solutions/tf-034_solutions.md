@@ -23,9 +23,12 @@ The question is: Use groupsA,A,B with predictions1,0,0 and truth1,1,0.
 Both numerator and denominator are visible. Reporting only rates would conceal the fact that groupB has a single observation.
 
 ```python
-rows=[('a','A',1,1),('b','A',1,0),('c','B',0,0)]
-report={g:(sum(t!=p for i,k,t,p in rows if k==g),sum(k==g for i,k,t,p in rows)) for g in ['A','B']}
-assert report=={'A':(1,2),'B':(0,1)}
+rows = [("a", "A", 1, 1), ("b", "A", 1, 0), ("c", "B", 0, 0)]
+report = {
+    g: (sum(t != p for i, k, t, p in rows if k == g), sum(k == g for i, k, t, p in rows))
+    for g in ["A", "B"]
+}
+assert report == {"A": (1, 2), "B": (0, 1)}
 ```
 
 **Expected:** A1/2 errors; B0/1.
@@ -39,8 +42,8 @@ The question is: Repeat the groupB row five times and compare row count with uni
 Duplicating a correct observation can improve a row-weighted score without testing a new case. Identity-aware evaluation prevents artificial increases in apparent evidence.
 
 ```python
-repeated=rows+[rows[-1]]*5
-assert len(repeated)==8 and len({r[0] for r in repeated})==3
+repeated = rows + [rows[-1]] * 5
+assert len(repeated) == 8 and len({r[0] for r in repeated}) == 3
 ```
 
 **Expected:** 8 rows but only3 unique IDs.
@@ -54,8 +57,10 @@ The question is: Use f(x)=x>=0 with base1 and perturbations-.1,-.9,-1.1.
 The last perturbation crosses the defined decision boundary. Whether it is a robustness failure depends on whether the label is supposed to remain unchanged under that shift.
 
 ```python
-base=1.; shifts=[-.1,-.9,-1.1]; pred=[int(base+s>=0) for s in shifts]
-assert pred==[1,1,0]
+base = 1.0
+shifts = [-0.1, -0.9, -1.1]
+pred = [int(base + s >= 0) for s in shifts]
+assert pred == [1, 1, 0]
 ```
 
 **Expected:** first two retain class1; final perturbation changes to0.
@@ -69,9 +74,10 @@ The question is: Record one severe failure and nine minor passes; count severe f
 A high average can hide a rare unacceptable outcome. The decision rule should state whether a severe failure blocks release regardless of the aggregate rate.
 
 ```python
-severity=['minor']*9+['severe']; passed=[True]*9+[False]
-assert sum(passed)/len(passed)==.9
-assert sum(s=='severe' and not p for s,p in zip(severity,passed))==1
+severity = ["minor"] * 9 + ["severe"]
+passed = [True] * 9 + [False]
+assert sum(passed) / len(passed) == 0.9
+assert sum(s == "severe" and not p for s, p in zip(severity, passed)) == 1
 ```
 
 **Expected:** 90percent passes and 1 severe failure.
@@ -85,8 +91,17 @@ The question is: Create a model card naming the three unique units and untested 
 Explicit limitations constrain how the results may be used. Declaring a missing guarantee is more informative than an unqualified claim that the model was checked.
 
 ```python
-card={'evaluation_units':3,'intended_use':'synthetic teaching','untested':['future population','private training data'],'privacy_guarantee':False}
-assert card['evaluation_units']==3 and 'future population' in card['untested'] and card['privacy_guarantee'] is False
+card = {
+    "evaluation_units": 3,
+    "intended_use": "synthetic teaching",
+    "untested": ["future population", "private training data"],
+    "privacy_guarantee": False,
+}
+assert (
+    card["evaluation_units"] == 3
+    and "future population" in card["untested"]
+    and card["privacy_guarantee"] is False
+)
 ```
 
 **Expected:** card includes count3 and an untested future-population condition.
@@ -100,8 +115,11 @@ The question is: Compute a rate only when its group has observations.
 No observations and zero observed failures are different states. Mapping both to zero would make an untested group look perfectly reliable.
 
 ```python
-def rate(errors,count): return None if count==0 else errors/count
-assert rate(0,0) is None and rate(0,1)==0
+def rate(errors, count):
+    return None if count == 0 else errors / count
+
+
+assert rate(0, 0) is None and rate(0, 1) == 0
 ```
 
 **Expected:** empty group producesNone, not0.

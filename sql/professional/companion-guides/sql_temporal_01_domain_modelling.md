@@ -112,20 +112,12 @@ These worked excerpts come from `sql/professional/lessons/sql_temporal_01_domain
 
 ```sql
 CREATE TABLE pro_temporal_lab.customer_terms (
-    term_version_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    customer_key text NOT NULL,
-    valid_period daterange NOT NULL CHECK (
-        NOT isempty(valid_period)
-        AND lower_inc(valid_period)
-        AND NOT upper_inc(valid_period)
-    ),
-    system_period tstzrange NOT NULL CHECK (
-        NOT isempty(system_period)
-        AND lower_inc(system_period)
-        AND NOT upper_inc(system_period)
-    ),
-    monthly_rate numeric(10, 2) NOT NULL CHECK (monthly_rate >= 0),
-    recorded_reason text NOT NULL CHECK (btrim(recorded_reason) <> '')
+  term_version_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  customer_key text NOT NULL,
+  valid_period daterange NOT NULL CHECK (NOT isempty(valid_period) AND lower_inc(valid_period) AND NOT upper_inc(valid_period)),
+  system_period tstzrange NOT NULL CHECK (NOT isempty(system_period) AND lower_inc(system_period) AND NOT upper_inc(system_period)),
+  monthly_rate numeric(10, 2) NOT NULL CHECK (monthly_rate >= 0),
+  recorded_reason text NOT NULL CHECK (btrim(recorded_reason) <> '')
 );
 ```
 
@@ -136,20 +128,8 @@ CREATE TABLE pro_temporal_lab.customer_terms (
 ### Example 2
 
 ```sql
-INSERT INTO pro_temporal_lab.customer_terms (
-    customer_key,
-    valid_period,
-    system_period,
-    monthly_rate,
-    recorded_reason
-)
-VALUES (
-    'CUS-100',
-    daterange(DATE '2026-01-01', DATE '2026-04-01', '[)'),
-    tstzrange(TIMESTAMPTZ '2026-03-01 00:00:00+00', NULL, '[)'),
-    10.00,
-    'initial import'
-);
+INSERT INTO pro_temporal_lab.customer_terms (customer_key, valid_period, system_period, monthly_rate, recorded_reason)
+  VALUES ('CUS-100', daterange(DATE '2026-01-01', DATE '2026-04-01', '[)'), tstzrange(TIMESTAMPTZ '2026-03-01 00:00:00+00', NULL, '[)'), 10.00, 'initial import');
 ```
 
 **How to read it:** Example 2 changes rows inside the lesson's declared transaction. The command tag reports affected rows, but a follow-up query must prove the intended before/after invariant.

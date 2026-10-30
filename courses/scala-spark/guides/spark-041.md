@@ -70,36 +70,63 @@ The complete source creates the owned local session described above, then constr
 import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
-import java.nio.file.{Files,Path,Paths,StandardOpenOption,StandardCopyOption}
+import java.nio.file.{Files, Path, Paths, StandardOpenOption, StandardCopyOption}
 import java.nio.charset.StandardCharsets
 import java.util.UUID
 import scala.jdk.CollectionConverters._
-import org.apache.spark.sql.streaming.{StreamingQuery,Trigger}
+import org.apache.spark.sql.streaming.{StreamingQuery, Trigger}
 import scala.collection.mutable.ArrayBuffer
 
-require(spark.version == "4.0.1","Prepared Spark4.0.1 required")
-spark.conf.set("spark.sql.streaming.stopTimeout","5000")
-ownedRoot=Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(),"spark-041-")
-val input=ownedRoot.resolve("input");val oldCheckpoint=ownedRoot.resolve("baseline-checkpoint");val oldOutput=ownedRoot.resolve("baseline-output")
-publishFile(ownedRoot,input,"batch-01.json",Seq("""{"id":1,"cents":100}""","""{"id":2,"cents":200}"""))
-val golden=spark.createDataFrame(spark.sparkContext.parallelize(Seq(Row(1L,100L),Row(1L,100L),Row(2L,null),Row(3L,0L))),eventSchema)
+require(spark.version == "4.0.1", "Prepared Spark4.0.1 required")
+spark.conf.set("spark.sql.streaming.stopTimeout", "5000")
+ownedRoot = Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(), "spark-041-")
+val input = ownedRoot.resolve("input");
+val oldCheckpoint = ownedRoot.resolve("baseline-checkpoint");
+val oldOutput = ownedRoot.resolve("baseline-output")
+publishFile(
+  ownedRoot,
+  input,
+  "batch-01.json",
+  Seq("""{"id":1,"cents":100}""", """{"id":2,"cents":200}""")
+)
+val golden = spark.createDataFrame(
+  spark.sparkContext.parallelize(Seq(Row(1L, 100L), Row(1L, 100L), Row(2L, null), Row(3L, 0L))),
+  eventSchema
+)
 ```
 
 ```python
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 from pathlib import Path
 import tempfile
 import shutil
 import json
 import uuid
 
-if spark.version!="4.0.1":raise ValueError("Prepared Spark4.0.1 required")
-spark.conf.set("spark.sql.streaming.stopTimeout","5000")
-owned_root=Path(tempfile.mkdtemp(prefix="spark-041-",dir=Path.cwd()))
-input_path=owned_root/"input";old_checkpoint=owned_root/"baseline-checkpoint";old_output=owned_root/"baseline-output"
-publish_file(owned_root,input_path,"batch-01.json",['{"id":1,"cents":100}','{"id":2,"cents":200}'])
-golden=spark.createDataFrame([(1,100),(1,100),(2,None),(3,0)],EVENT_SCHEMA)
+if spark.version != "4.0.1":
+    raise ValueError("Prepared Spark4.0.1 required")
+spark.conf.set("spark.sql.streaming.stopTimeout", "5000")
+owned_root = Path(tempfile.mkdtemp(prefix="spark-041-", dir=Path.cwd()))
+input_path = owned_root / "input"
+old_checkpoint = owned_root / "baseline-checkpoint"
+old_output = owned_root / "baseline-output"
+publish_file(
+    owned_root, input_path, "batch-01.json", ['{"id":1,"cents":100}', '{"id":2,"cents":200}']
+)
+golden = spark.createDataFrame([(1, 100), (1, 100), (2, None), (3, 0)], EVENT_SCHEMA)
 ```
 
 ## Worked example / walkthrough
@@ -107,14 +134,15 @@ golden=spark.createDataFrame([(1,100),(1,100),(2,None),(3,0)],EVENT_SCHEMA)
 ### Worked example 1
 
 ```scala
-val keys=Seq("id")
-val changed=Seq("id","cents")
-assert(keys!=changed)
+val keys = Seq("id")
+val changed = Seq("id", "cents")
+assert(keys != changed)
 ```
 
 ```python
-keys=["id"];changed=["id","cents"]
-assert keys!=changed
+keys = ["id"]
+changed = ["id", "cents"]
+assert keys != changed
 ```
 
 The state-key change is visible before any query launch. This pure comparison motivates a separate recovery namespace;it does not claim to inspect or rewrite Spark checkpoint internals.
@@ -122,13 +150,16 @@ The state-key change is visible before any query launch. This pure comparison mo
 ### Worked example 2
 
 ```scala
-val sameInstant=spark.sql("SELECT CAST(to_timestamp('2026-10-23T12:00:00-07:00') AS STRING)").first().getString(0)
-assert(sameInstant=="2026-10-23 19:00:00")
+val sameInstant =
+  spark.sql("SELECT CAST(to_timestamp('2026-10-23T12:00:00-07:00') AS STRING)").first().getString(0)
+assert(sameInstant == "2026-10-23 19:00:00")
 ```
 
 ```python
-same_instant=spark.sql("SELECT CAST(to_timestamp('2026-10-23T12:00:00-07:00') AS STRING)").first()[0]
-assert same_instant=="2026-10-23 19:00:00"
+same_instant = spark.sql(
+    "SELECT CAST(to_timestamp('2026-10-23T12:00:00-07:00') AS STRING)"
+).first()[0]
+assert same_instant == "2026-10-23 19:00:00"
 ```
 
 The actual SQL expression checks the instant under the UTC session. Preserving displayed local clock text instead would change meaning and fail the golden expectation.

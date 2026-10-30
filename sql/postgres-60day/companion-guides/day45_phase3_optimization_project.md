@@ -98,13 +98,19 @@ These worked excerpts come from `sql/postgres-60day/day45_phase3_optimization_pr
 
 ```sql
 EXPLAIN ANALYZE
-SELECT c.country, SUM(oi.quantity)
-FROM customers c
-JOIN orders o ON o.customer_id = c.customer_id
-JOIN order_items oi ON oi.order_id = o.order_id
-WHERE date_trunc('day', o.order_date) >= date_trunc('day', now() - interval '180 days')
-GROUP BY c.country
-ORDER BY 2 DESC;
+SELECT
+  c.country,
+  SUM(oi.quantity)
+FROM
+  customers c
+  JOIN orders o ON o.customer_id = c.customer_id
+  JOIN order_items oi ON oi.order_id = o.order_id
+WHERE
+  date_trunc('day', o.order_date) >= date_trunc('day', now() - interval '180 days')
+GROUP BY
+  c.country
+ORDER BY
+  2 DESC;
 ```
 
 **How to read it:** Example 1 returns plan rows rather than business rows. The node tree is evidence about one execution strategy; it does not replace a correctness check on the underlying query.
@@ -114,7 +120,7 @@ ORDER BY 2 DESC;
 ### Example 2
 
 ```sql
-CREATE INDEX IF NOT EXISTS idx_orders_order_date_only ON orders(order_date);
+CREATE INDEX IF NOT EXISTS idx_orders_order_date_only ON orders (order_date);
 ```
 
 **How to read it:** Example 2 is data definition language (DDL). `psql` prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.

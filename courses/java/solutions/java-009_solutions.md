@@ -24,7 +24,9 @@ Leaving the block triggers close even without an explicit call in the body. Owne
 
 ```java
 List<String> events = new ArrayList<>();
-try (Probe resource = new Probe("A", events, false)) { events.add("body"); }
+try (Probe resource = new Probe("A", events, false)) {
+  events.add("body");
+}
 assert events.equals(List.of("body", "closeA"));
 ```
 
@@ -40,7 +42,9 @@ Later resources often depend on earlier ones, so reverse closure is deliberate. 
 
 ```java
 events.clear();
-try (Probe a = new Probe("A", events, false); Probe b = new Probe("B", events, false)) { events.add("body"); }
+try (Probe a = new Probe("A", events, false); Probe b = new Probe("B", events, false)) {
+  events.add("body");
+}
 assert events.equals(List.of("body", "closeB", "closeA"));
 ```
 
@@ -55,9 +59,13 @@ Task: Throw IllegalStateException in the body and inspect events after catching 
 Exceptional control flow does not skip resource closure. A manually placed close after the body statement would never execute in this case.
 
 ```java
-events.clear(); boolean bodyFailed = false;
-try (Probe a = new Probe("A", events, false)) { throw new IllegalStateException("body"); }
-catch (IllegalStateException expected) { bodyFailed = true; }
+events.clear();
+boolean bodyFailed = false;
+try (Probe a = new Probe("A", events, false)) {
+  throw new IllegalStateException("body");
+} catch (IllegalStateException expected) {
+  bodyFailed = true;
+}
 assert bodyFailed && events.equals(List.of("closeA"));
 ```
 
@@ -73,11 +81,12 @@ The primary failure is not lost. Suppressed exceptions retain cleanup diagnostic
 
 ```java
 events.clear();
-try (Probe a = new Probe("A", events, true)) { throw new IllegalStateException("body"); }
-catch (IllegalStateException expected) {
-    assert expected.getMessage().equals("body");
-    assert expected.getSuppressed().length == 1;
-    assert expected.getSuppressed()[0].getMessage().equals("closeA");
+try (Probe a = new Probe("A", events, true)) {
+  throw new IllegalStateException("body");
+} catch (IllegalStateException expected) {
+  assert expected.getMessage().equals("body");
+  assert expected.getSuppressed().length == 1;
+  assert expected.getSuppressed()[0].getMessage().equals("closeA");
 }
 ```
 
@@ -93,8 +102,9 @@ When there is no body exception, a close failure becomes the primary failure. Re
 
 ```java
 boolean closeFailed = false;
-try (Probe a = new Probe("A", events, true)) { }
-catch (java.io.IOException expected) { closeFailed = expected.getMessage().equals("closeA"); }
+try (Probe a = new Probe("A", events, true)) {} catch (java.io.IOException expected) {
+  closeFailed = expected.getMessage().equals("closeA");
+}
 assert closeFailed;
 ```
 

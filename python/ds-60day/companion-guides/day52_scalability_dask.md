@@ -47,11 +47,13 @@ import pandas as pd
 
 # Original deterministic synthetic fixture, deliberately small enough for RAM.
 rng = np.random.default_rng(52)
-source = pd.DataFrame({
-    "name": rng.choice(["north", "south", "west"], size=2000),
-    "x": rng.normal(size=2000),
-    "y": rng.normal(size=2000),
-})
+source = pd.DataFrame(
+    {
+        "name": rng.choice(["north", "south", "west"], size=2000),
+        "x": rng.normal(size=2000),
+        "y": rng.normal(size=2000),
+    }
+)
 df = dd.from_pandas(source, npartitions=4)
 # Constructing this graph does not execute the grouped reduction.
 agg = df.groupby("name")["x"].mean()
@@ -142,16 +144,11 @@ rather than something to overlook.
 
 ```python
 chunks = [[1.0, 2.0, 3.0], [100.0]]
-states = [
-    {"sum": sum(chunk), "count": len(chunk)}
-    for chunk in chunks
-]
+states = [{"sum": sum(chunk), "count": len(chunk)} for chunk in chunks]
 total_sum = sum(state["sum"] for state in states)
 total_count = sum(state["count"] for state in states)
 correct_mean = total_sum / total_count
-wrong_mean_of_means = sum(
-    state["sum"] / state["count"] for state in states
-) / len(states)
+wrong_mean_of_means = sum(state["sum"] / state["count"] for state in states) / len(states)
 print({"correct": correct_mean, "wrong": wrong_mean_of_means})
 assert correct_mean == 26.5 and wrong_mean_of_means != correct_mean
 ```
@@ -170,10 +167,12 @@ from dask import delayed
 
 calls = []
 
+
 @delayed
 def record(value):
     calls.append(value)
     return value * 2
+
 
 planned = record(21)
 print({"before_compute_calls": list(calls), "planned_type": type(planned).__name__})

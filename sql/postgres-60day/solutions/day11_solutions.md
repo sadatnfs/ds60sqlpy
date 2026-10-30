@@ -82,15 +82,20 @@ executable companion when you want a self-contained check.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT o.order_id,
-       o.total_amount,
-       CASE
-         WHEN o.total_amount >= 500 THEN 'large'
-         WHEN o.total_amount >= 100 THEN 'medium'
-         ELSE 'small'
-       END AS order_size
-FROM orders AS o
-ORDER BY o.order_id;
+SELECT
+  o.order_id,
+  o.total_amount,
+  CASE WHEN o.total_amount >= 500 THEN
+    'large'
+  WHEN o.total_amount >= 100 THEN
+    'medium'
+  ELSE
+    'small'
+  END AS order_size
+FROM
+  orders AS o
+ORDER BY
+  o.order_id;
 ```
 
 **Expected shape:** One row per order with exactly one size label.
@@ -122,11 +127,13 @@ cardinality contract.
 - `FILTER (WHERE ...)`: limits one aggregate without removing rows needed by neighboring aggregates.
 
 ```sql
-SELECT COUNT(*) FILTER (WHERE o.status IN ('paid', 'shipped', 'delivered')) AS paid_like,
-       COUNT(*) FILTER (WHERE o.status = 'placed') AS open_orders,
-       COUNT(*) FILTER (WHERE o.status = 'returned') AS returned_orders,
-       COUNT(*) AS all_orders
-FROM orders AS o;
+SELECT
+  COUNT(*) FILTER (WHERE o.status IN ('paid', 'shipped', 'delivered')) AS paid_like,
+  COUNT(*) FILTER (WHERE o.status = 'placed') AS open_orders,
+  COUNT(*) FILTER (WHERE o.status = 'returned') AS returned_orders,
+  COUNT(*) AS all_orders
+FROM
+  orders AS o;
 ```
 
 **Expected shape:** One summary row.
@@ -159,15 +166,20 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT c.customer_id,
-       c.segment,
-       CASE
-         WHEN c.segment IS NULL THEN 'missing'
-         WHEN c.segment IN ('gold', 'platinum') THEN 'premium'
-         ELSE 'core'
-       END AS segment_group
-FROM customers AS c
-ORDER BY c.customer_id;
+SELECT
+  c.customer_id,
+  c.segment,
+  CASE WHEN c.segment IS NULL THEN
+    'missing'
+  WHEN c.segment IN ('gold', 'platinum') THEN
+    'premium'
+  ELSE
+    'core'
+  END AS segment_group
+FROM
+  customers AS c
+ORDER BY
+  c.customer_id;
 ```
 
 **Expected shape:** One row per customer with an explicit segment label.
@@ -201,14 +213,21 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT amount,
-       CASE
-         WHEN amount >= 500 THEN 'high'
-         WHEN amount >= 100 THEN 'medium'
-         ELSE 'low'
-       END AS corrected_label
-FROM (VALUES (50::numeric), (100::numeric), (500::numeric)) AS sample(amount)
-ORDER BY amount;
+SELECT
+  amount,
+  CASE WHEN amount >= 500 THEN
+    'high'
+  WHEN amount >= 100 THEN
+    'medium'
+  ELSE
+    'low'
+  END AS corrected_label
+FROM (
+  VALUES (50::numeric),
+    (100::numeric),
+    (500::numeric)) AS sample (amount)
+ORDER BY
+  amount;
 ```
 
 **Expected shape:** A value of 500 is labeled high.
@@ -242,14 +261,21 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT value,
-       CASE
-         WHEN value IS NULL THEN 'missing'
-         WHEN value = 0 THEN 'zero'
-         ELSE 'nonzero'
-       END AS value_state
-FROM (VALUES (NULL::integer), (0), (2)) AS sample(value)
-ORDER BY value NULLS FIRST;
+SELECT
+  value,
+  CASE WHEN value IS NULL THEN
+    'missing'
+  WHEN value = 0 THEN
+    'zero'
+  ELSE
+    'nonzero'
+  END AS value_state
+FROM (
+  VALUES (NULL::integer),
+    (0),
+    (2)) AS sample (value)
+ORDER BY
+  value NULLS FIRST;
 ```
 
 **Expected shape:** Three rows with text labels.
@@ -283,18 +309,27 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT p.method,
-       CASE p.method
-         WHEN 'card' THEN 'Card'
-         WHEN 'paypal' THEN 'PayPal'
-         WHEN 'bank' THEN 'Bank transfer'
-         WHEN 'credit' THEN 'Store credit'
-         ELSE 'Other'
-       END AS method_label,
-       COUNT(*) AS payment_count
-FROM payments AS p
-GROUP BY p.method
-ORDER BY p.method;
+SELECT
+  p.method,
+  CASE p.method
+  WHEN 'card' THEN
+    'Card'
+  WHEN 'paypal' THEN
+    'PayPal'
+  WHEN 'bank' THEN
+    'Bank transfer'
+  WHEN 'credit' THEN
+    'Store credit'
+  ELSE
+    'Other'
+  END AS method_label,
+  COUNT(*) AS payment_count
+FROM
+  payments AS p
+GROUP BY
+  p.method
+ORDER BY
+  p.method;
 ```
 
 **Expected shape:** One row per payment method and display label.

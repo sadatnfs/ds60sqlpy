@@ -83,13 +83,19 @@ executable companion when you want a self-contained check.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT o.customer_id
-FROM orders AS o
+SELECT
+  o.customer_id
+FROM
+  orders AS o
 UNION
-SELECT e.customer_id
-FROM events AS e
-WHERE e.event_type = 'support'
-ORDER BY customer_id;
+SELECT
+  e.customer_id
+FROM
+  events AS e
+WHERE
+  e.event_type = 'support'
+ORDER BY
+  customer_id;
 ```
 
 **Expected shape:** One distinct customer ID per qualifying customer.
@@ -123,13 +129,19 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT o.customer_id
-FROM orders AS o
+SELECT
+  o.customer_id
+FROM
+  orders AS o
 INTERSECT
-SELECT e.customer_id
-FROM events AS e
-WHERE e.event_type = 'support'
-ORDER BY customer_id;
+SELECT
+  e.customer_id
+FROM
+  events AS e
+WHERE
+  e.event_type = 'support'
+ORDER BY
+  customer_id;
 ```
 
 **Expected shape:** One distinct customer ID in both sets.
@@ -162,12 +174,17 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT c.customer_id
-FROM customers AS c
+SELECT
+  c.customer_id
+FROM
+  customers AS c
 EXCEPT
-SELECT o.customer_id
-FROM orders AS o
-ORDER BY customer_id;
+SELECT
+  o.customer_id
+FROM
+  orders AS o
+ORDER BY
+  customer_id;
 ```
 
 **Expected shape:** One row per customer absent from orders.
@@ -203,30 +220,47 @@ cardinality contract.
 
 ```sql
 WITH combined_all AS (
-  SELECT o.status
-  FROM orders AS o
-  WHERE o.status IN ('paid', 'shipped')
+  SELECT
+    o.status
+  FROM
+    orders AS o
+  WHERE
+    o.status IN ('paid', 'shipped')
   UNION ALL
-  SELECT o.status
-  FROM orders AS o
-  WHERE o.status IN ('shipped', 'delivered')
-), combined_distinct AS (
-  SELECT o.status
-  FROM orders AS o
-  WHERE o.status IN ('paid', 'shipped')
+  SELECT
+    o.status
+  FROM
+    orders AS o
+  WHERE
+    o.status IN ('shipped', 'delivered')
+),
+combined_distinct AS (
+  SELECT
+    o.status
+  FROM
+    orders AS o
+  WHERE
+    o.status IN ('paid', 'shipped')
   UNION
-  SELECT o.status
-  FROM orders AS o
-  WHERE o.status IN ('shipped', 'delivered')
-)
-SELECT 'UNION ALL' AS operation,
-       COUNT(*) AS row_count
-FROM combined_all
+  SELECT
+    o.status
+  FROM
+    orders AS o
+  WHERE
+    o.status IN ('shipped', 'delivered'))
+SELECT
+  'UNION ALL' AS operation,
+  COUNT(*) AS row_count
+FROM
+  combined_all
 UNION ALL
-SELECT 'UNION' AS operation,
-       COUNT(*) AS row_count
-FROM combined_distinct
-ORDER BY operation;
+SELECT
+  'UNION' AS operation,
+  COUNT(*) AS row_count
+FROM
+  combined_distinct
+ORDER BY
+  operation;
 ```
 
 **Expected shape:** Two labeled summary rows showing all-count >= distinct-count.
@@ -259,14 +293,19 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT 'order_revenue'::text AS measure,
-       SUM(o.total_amount)::numeric AS amount
-FROM orders AS o
+SELECT
+  'order_revenue'::text AS measure,
+  SUM(o.total_amount)::numeric AS amount
+FROM
+  orders AS o
 UNION ALL
-SELECT 'expense'::text AS measure,
-       SUM(e.amount)::numeric AS amount
-FROM expenses AS e
-ORDER BY measure;
+SELECT
+  'expense'::text AS measure,
+  SUM(e.amount)::numeric AS amount
+FROM
+  expenses AS e
+ORDER BY
+  measure;
 ```
 
 **Expected shape:** Rows identify revenue and expense measures with compatible types.
@@ -302,27 +341,55 @@ cardinality contract.
 
 ```sql
 WITH ordering_customers AS (
-  SELECT DISTINCT o.customer_id
-  FROM orders AS o
-), support_customers AS (
-  SELECT DISTINCT e.customer_id
-  FROM events AS e
-  WHERE e.event_type = 'support'
-), only_orders AS (
-  SELECT customer_id FROM ordering_customers
+  SELECT DISTINCT
+    o.customer_id
+  FROM
+    orders AS o
+),
+support_customers AS (
+  SELECT DISTINCT
+    e.customer_id
+  FROM
+    events AS e
+  WHERE
+    e.event_type = 'support'
+),
+only_orders AS (
+  SELECT
+    customer_id
+  FROM
+    ordering_customers
   EXCEPT
-  SELECT customer_id FROM support_customers
-), only_support AS (
-  SELECT customer_id FROM support_customers
+  SELECT
+    customer_id
+  FROM
+    support_customers
+),
+only_support AS (
+  SELECT
+    customer_id
+  FROM
+    support_customers
   EXCEPT
-  SELECT customer_id FROM ordering_customers
+  SELECT
+    customer_id
+  FROM
+    ordering_customers
 )
-SELECT customer_id, 'orders_only' AS source
-FROM only_orders
+SELECT
+  customer_id,
+  'orders_only' AS source
+FROM
+  only_orders
 UNION ALL
-SELECT customer_id, 'support_only' AS source
-FROM only_support
-ORDER BY customer_id, source;
+SELECT
+  customer_id,
+  'support_only' AS source
+FROM
+  only_support
+ORDER BY
+  customer_id,
+  source;
 ```
 
 **Expected shape:** Customers present in exactly one of the two source sets.

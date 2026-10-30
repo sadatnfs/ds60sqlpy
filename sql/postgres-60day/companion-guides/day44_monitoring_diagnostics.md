@@ -96,10 +96,21 @@ These worked excerpts come from `sql/postgres-60day/day44_monitoring_diagnostics
 ### Example 1
 
 ```sql
-SELECT pid, usename, datname, state, query_start, NOW() - query_start AS running_for, left(query, 120) AS query
-FROM pg_stat_activity
-WHERE state <> 'idle'
-ORDER BY running_for DESC
+SELECT
+  pid,
+  usename,
+  datname,
+  state,
+  query_start,
+  NOW() - query_start AS running_for,
+  left (query,
+    120) AS query
+FROM
+  pg_stat_activity
+WHERE
+  state <> 'idle'
+ORDER BY
+  running_for DESC
 LIMIT 20;
 ```
 
@@ -111,13 +122,19 @@ LIMIT 20;
 
 ```sql
 EXPLAIN ANALYZE
-SELECT p.category, SUM(oi.quantity) AS qty
-FROM order_items oi
-JOIN products p ON p.product_id = oi.product_id
-JOIN orders o ON o.order_id = oi.order_id
-WHERE o.order_date >= now() - interval '180 days'
-GROUP BY p.category
-ORDER BY qty DESC;
+SELECT
+  p.category,
+  SUM(oi.quantity) AS qty
+FROM
+  order_items oi
+  JOIN products p ON p.product_id = oi.product_id
+  JOIN orders o ON o.order_id = oi.order_id
+WHERE
+  o.order_date >= now() - interval '180 days'
+GROUP BY
+  p.category
+ORDER BY
+  qty DESC;
 ```
 
 **How to read it:** Example 2 returns plan rows rather than business rows. The node tree is evidence about one execution strategy; it does not replace a correctness check on the underlying query.

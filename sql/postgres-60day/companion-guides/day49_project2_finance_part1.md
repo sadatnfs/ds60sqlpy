@@ -97,12 +97,21 @@ These worked excerpts come from `sql/postgres-60day/day49_project2_finance_part1
 
 ```sql
 WITH monthly AS (
-  SELECT date_trunc('month', o.order_date)::date AS month,
-         SUM(o.total_amount) AS revenue
-  FROM orders o
-  GROUP BY 1
+  SELECT
+    date_trunc('month', o.order_date)::date AS month,
+    SUM(o.total_amount) AS revenue
+  FROM
+    orders o
+  GROUP BY
+    1
 )
-SELECT * FROM monthly ORDER BY month DESC LIMIT 24;
+SELECT
+  *
+FROM
+  monthly
+ORDER BY
+  month DESC
+LIMIT 24;
 ```
 
 **How to read it:** Example 1: Start with `orders` in `FROM`/`JOIN`; let `GROUP BY` collapse rows to its grouping keys. The final `SELECT` displays `*`. `ORDER BY` determines presentation order and the final `LIMIT 24` caps displayed rows. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
@@ -113,18 +122,23 @@ SELECT * FROM monthly ORDER BY month DESC LIMIT 24;
 
 ```sql
 WITH monthly AS (
-  SELECT date_trunc('month', o.order_date)::date AS month,
-         SUM(o.total_amount) AS revenue
-  FROM orders o
-  GROUP BY 1
+  SELECT
+    date_trunc('month', o.order_date)::date AS month,
+    SUM(o.total_amount) AS revenue
+  FROM
+    orders o
+  GROUP BY
+    1
 )
-SELECT m.month,
-       m.revenue,
-       LAG(m.revenue, 12) OVER (ORDER BY m.month) AS prev_year,
-       ROUND((m.revenue - COALESCE(LAG(m.revenue,12) OVER (ORDER BY m.month),0))
-             / NULLIF(LAG(m.revenue,12) OVER (ORDER BY m.month),0), 4) AS yoy_growth
-FROM monthly m
-ORDER BY m.month DESC
+SELECT
+  m.month,
+  m.revenue,
+  LAG(m.revenue, 12) OVER (ORDER BY m.month) AS prev_year,
+  ROUND((m.revenue - COALESCE(LAG(m.revenue, 12) OVER (ORDER BY m.month), 0)) / NULLIF (LAG(m.revenue, 12) OVER (ORDER BY m.month), 0), 4) AS yoy_growth
+FROM
+  monthly m
+ORDER BY
+  m.month DESC
 LIMIT 36;
 ```
 

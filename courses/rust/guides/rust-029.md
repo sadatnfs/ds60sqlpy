@@ -43,8 +43,6 @@ Read the operations in dependency order. Record which values exist before each l
 The rejected value remains visible in the error instead of disappearing silently.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         use std::sync::mpsc::{sync_channel, TrySendError};
@@ -65,12 +63,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 Producer lifetime and channel completion are explicitly connected.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let (send, receive) = std::sync::mpsc::sync_channel(2);
-        let worker = std::thread::spawn(move || { send.send(2).unwrap(); send.send(3).unwrap(); });
+        let worker = std::thread::spawn(move || {
+            send.send(2).unwrap();
+            send.send(3).unwrap();
+        });
         let total: i32 = receive.iter().sum();
         worker.join().unwrap();
         assert_eq!(total, 5);

@@ -23,7 +23,11 @@ Task: Keep even values from 1,2,3,4 and sum their squares.
 The pipeline preserves the order of conceptual operations: selection happens before squaring and reduction. The result is a scalar rather than a modified source list.
 
 ```java
-int total = List.of(1,2,3,4).stream().filter(value -> value % 2 == 0).mapToInt(value -> value * value).sum();
+int total = List.of(1, 2, 3, 4)
+  .stream()
+  .filter(value -> value % 2 == 0)
+  .mapToInt(value -> value * value)
+  .sum();
 assert total == 20;
 ```
 
@@ -39,9 +43,14 @@ The counter is a teaching probe, not a recommended business side effect. toList 
 
 ```java
 var calls = new java.util.concurrent.atomic.AtomicInteger();
-var pipeline = List.of(1,2,3).stream().map(value -> { calls.incrementAndGet(); return value * 2; });
+var pipeline = List.of(1, 2, 3)
+  .stream()
+  .map(value -> {
+    calls.incrementAndGet();
+    return value * 2;
+  });
 assert calls.get() == 0;
-assert pipeline.toList().equals(List.of(2,4,6)) && calls.get() == 3;
+assert pipeline.toList().equals(List.of(2, 4, 6)) && calls.get() == 3;
 ```
 
 **Expected:** counter0 before terminal and3 after.
@@ -55,8 +64,15 @@ Task: Count red,blue,red withgroupingBy and counting.
 The collector owns accumulation rather than relying on shared external mutation. The map ordering is unspecified unless a specific ordered map supplier is chosen.
 
 ```java
-Map<String,Long> counts = List.of("red","blue","red").stream().collect(java.util.stream.Collectors.groupingBy(value -> value, java.util.stream.Collectors.counting()));
-assert counts.equals(Map.of("red",2L,"blue",1L));
+Map<String, Long> counts = List.of("red", "blue", "red")
+  .stream()
+  .collect(
+    java.util.stream.Collectors.groupingBy(
+      value -> value,
+      java.util.stream.Collectors.counting()
+    )
+  );
+assert counts.equals(Map.of("red", 2L, "blue", 1L));
 ```
 
 **Expected:** red2L,blue1L.
@@ -70,9 +86,14 @@ Task: Consume a stream once,then attempt another terminal operation.
 A stream represents one traversal. Create a new stream from the source when another computation is required.
 
 ```java
-var once = List.of(1,2).stream(); assert once.count() == 2;
+var once = List.of(1, 2).stream();
+assert once.count() == 2;
 boolean reused = false;
-try { once.toList(); } catch(IllegalStateException expected) { reused = true; }
+try {
+  once.toList();
+} catch (IllegalStateException expected) {
+  reused = true;
+}
 assert reused;
 ```
 
@@ -87,8 +108,8 @@ Task: Compare sum reduction with identity0 against a deliberately wrong identity
 An identity is not an arbitrary initial offset when parallel partitions may each receive it. The neutral value for addition is 0.
 
 ```java
-int correct = List.of(1,2,3).stream().reduce(0,Integer::sum);
-int wrong = List.of(1,2,3).stream().reduce(10,Integer::sum);
+int correct = List.of(1, 2, 3).stream().reduce(0, Integer::sum);
+int wrong = List.of(1, 2, 3).stream().reduce(10, Integer::sum);
 assert correct == 6 && wrong == 16;
 ```
 
@@ -103,8 +124,8 @@ Task: Compare(10-3)-2 with10-(3-2),then use an associative sum for a parallel fi
 Subtraction changes under regrouping, so it is unsuitable as a general parallel reduction operator. Correctness must come before any performance experiment.
 
 ```java
-assert (10-3)-2 == 5 && 10-(3-2) == 9;
-assert java.util.stream.IntStream.rangeClosed(1,100).parallel().sum() == 5050;
+assert (10 - 3) - 2 == 5 && 10 - (3 - 2) == 9;
+assert java.util.stream.IntStream.rangeClosed(1, 100).parallel().sum() == 5050;
 ```
 
 **Expected:** 5 versus 9; parallel sum 5050.

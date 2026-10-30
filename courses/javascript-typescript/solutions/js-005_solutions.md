@@ -28,7 +28,7 @@ The pipeline returns new arrays while retaining the original numeric fixture. Ob
 
 ```javascript
 const original = [1, 2, 3, 4];
-const result = original.map(value => value * 2).filter(value => value > 4);
+const result = original.map((value) => value * 2).filter((value) => value > 4);
 assert.deepEqual(result, [6, 8]);
 assert.deepEqual(original, [1, 2, 3, 4]);
 ```
@@ -44,8 +44,14 @@ Task: Sum an empty array and 1, 2, 3 using initial 0.
 The identity defines the empty case. Omitting it would make an empty array throw and change the callback's initial state.
 
 ```javascript
-assert.equal([].reduce((sum, value) => sum + value, 0), 0);
-assert.equal([1, 2, 3].reduce((sum, value) => sum + value, 0), 6);
+assert.equal(
+  [].reduce((sum, value) => sum + value, 0),
+  0,
+);
+assert.equal(
+  [1, 2, 3].reduce((sum, value) => sum + value, 0),
+  6,
+);
 ```
 
 **Expected:** 0 and 6.
@@ -60,7 +66,10 @@ Default sort compares string representations. A valid array of numbers does not 
 
 ```javascript
 assert.deepEqual([10, 2, 1].sort(), [1, 10, 2]);
-assert.deepEqual([10, 2, 1].sort((a, b) => a - b), [1, 2, 10]);
+assert.deepEqual(
+  [10, 2, 1].sort((a, b) => a - b),
+  [1, 2, 10],
+);
 ```
 
 **Expected:** default 1, 10, 2; numeric 1, 2, 10.
@@ -110,7 +119,7 @@ This copy is sufficient for the fixture's flat record. Deeper mutable fields wou
 
 ```javascript
 const original = [{ value: 1 }];
-const copy = original.map(row => ({ ...row }));
+const copy = original.map((row) => ({ ...row }));
 copy[0].value = 9;
 assert.equal(original[0].value, 1);
 assert.equal(copy[0].value, 9);

@@ -43,10 +43,10 @@ Finally, a finite fixture suite is evidence rather than a proof for every possib
 ### Worked example 1
 
 ```scala
-val values = Seq(1L,1L,2L)
-assert(values.toSet == Seq(1L,2L).toSet)
-assert(values.sorted != Seq(1L,2L).sorted)
-assert(values.sorted == Seq(2L,1L,1L).sorted)
+val values = Seq(1L, 1L, 2L)
+assert(values.toSet == Seq(1L, 2L).toSet)
+assert(values.sorted != Seq(1L, 2L).sorted)
+assert(values.sorted == Seq(2L, 1L, 1L).sorted)
 println("Set equality loses a repeated occurrence")
 ```
 

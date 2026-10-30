@@ -53,10 +53,14 @@ The question is: Use rows A1, A3, B10 and the admittedgroup_mean request.
 The output grain is one row per group. Counts remain beside means so a one-record group does not look as well supported as a larger group.
 
 ```python
-rows=[{'id':'a1','group':'A','value':1.},{'id':'a2','group':'A','value':3.},{'id':'b1','group':'B','value':10.}]
-request={'operation':'group_mean','group_by':'group','value':'value'}
-result=dispatch(request,rows)
-assert result==[{'group':'A','count':2,'mean':2.},{'group':'B','count':1,'mean':10.}]
+rows = [
+    {"id": "a1", "group": "A", "value": 1.0},
+    {"id": "a2", "group": "A", "value": 3.0},
+    {"id": "b1", "group": "B", "value": 10.0},
+]
+request = {"operation": "group_mean", "group_by": "group", "value": "value"}
+result = dispatch(request, rows)
+assert result == [{"group": "A", "count": 2, "mean": 2.0}, {"group": "B", "count": 1, "mean": 10.0}]
 ```
 
 **Expected:** A count 2 mean 2; B count 1 mean 10.
@@ -70,10 +74,16 @@ The question is: Submitoperationrun_sql or an extra query field.
 The dispatcher never interprets arbitrary text as code or SQL. A production SQL adapter would need a separate reviewed query template and target boundary.
 
 ```python
-for proposal in [{'operation':'run_sql','group_by':'group','value':'value'},{**request,'query':'DROP TABLE anything'}]:
-    try: dispatch(proposal,rows)
-    except ValueError: pass
-    else: raise AssertionError('unbounded operation accepted')
+for proposal in [
+    {"operation": "run_sql", "group_by": "group", "value": "value"},
+    {**request, "query": "DROP TABLE anything"},
+]:
+    try:
+        dispatch(proposal, rows)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("unbounded operation accepted")
 ```
 
 **Expected:** ValueError before any computation.
@@ -87,15 +97,19 @@ The question is: Replace one value with True, NaN or None, then check large fini
 Silently dropping or coercing these values would change the denominator or meaning. A different missingness policy must be explicitly designed and reported.
 
 ```python
-for bad in [True,float('nan'),None]:
-    changed=[dict(r) for r in rows]; changed[0]['value']=bad
-    try: dispatch(request,changed)
-    except (TypeError,ValueError): pass
-    else: raise AssertionError('invalid numeric value accepted')
-huge=[{'id':'h1','group':'A','value':1e308},{'id':'h2','group':'A','value':1e308}]
-assert dispatch(request,huge)==[{'group':'A','count':2,'mean':1e308}]
-huge[1]['value']=-1e308
-assert dispatch(request,huge)[0]['mean']==0.0
+for bad in [True, float("nan"), None]:
+    changed = [dict(r) for r in rows]
+    changed[0]["value"] = bad
+    try:
+        dispatch(request, changed)
+    except (TypeError, ValueError):
+        pass
+    else:
+        raise AssertionError("invalid numeric value accepted")
+huge = [{"id": "h1", "group": "A", "value": 1e308}, {"id": "h2", "group": "A", "value": 1e308}]
+assert dispatch(request, huge) == [{"group": "A", "count": 2, "mean": 1e308}]
+huge[1]["value"] = -1e308
+assert dispatch(request, huge)[0]["mean"] == 0.0
 ```
 
 **Expected:** invalid rows are rejected; equal1e308 values have finite mean1e308 and opposite values have mean0.
@@ -109,11 +123,14 @@ The question is: Duplicatea1, then supply21 unique rows.
 Repeated records can bias aggregates, and unbounded inputs can exceed a tool budget. Both checks occur before the grouped calculation.
 
 ```python
-too_many=[{'id':str(i),'group':'A','value':1.} for i in range(21)]
-for bad_rows in [rows+[dict(rows[0])],too_many]:
-    try: dispatch(request,bad_rows)
-    except ValueError: pass
-    else: raise AssertionError('identity or budget ignored')
+too_many = [{"id": str(i), "group": "A", "value": 1.0} for i in range(21)]
+for bad_rows in [rows + [dict(rows[0])], too_many]:
+    try:
+        dispatch(request, bad_rows)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("identity or budget ignored")
 ```
 
 **Expected:** duplicate identity and row-limit violations rejected.
@@ -127,8 +144,8 @@ The question is: Check a proposed sentence saying groupAmean2 against the result
 The explanation stage should consume the computed artifact as its numerical source. A fluent but different number is an output-validation failure.
 
 ```python
-lookup={r['group']:r for r in result}
-assert lookup['A']['mean']==2 and lookup['A']['mean']!=20
+lookup = {r["group"]: r for r in result}
+assert lookup["A"]["mean"] == 2 and lookup["A"]["mean"] != 20
 ```
 
 **Expected:** 2accepted; 20mismatch.
@@ -142,8 +159,12 @@ The question is: Attach a descriptive result to a claim that group caused the di
 An LLM can help explain what additional design evidence is needed, but it cannot convert an observational group difference into a causal effect by wording alone.
 
 ```python
-report={'group_means':result,'random_assignment_verified':False,'causal_effect_established':False}
-assert report['group_means'] and not report['causal_effect_established']
+report = {
+    "group_means": result,
+    "random_assignment_verified": False,
+    "causal_effect_established": False,
+}
+assert report["group_means"] and not report["causal_effect_established"]
 ```
 
 **Expected:** descriptive statistic available; causal claim not established.

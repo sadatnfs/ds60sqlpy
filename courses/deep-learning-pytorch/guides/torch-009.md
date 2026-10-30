@@ -80,8 +80,9 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-ids=list(range(1,7)); batches=[ids[i:i+2] for i in range(0,len(ids),2)]
-assert batches==[[1,2],[3,4],[5,6]]
+ids = list(range(1, 7))
+batches = [ids[i : i + 2] for i in range(0, len(ids), 2)]
+assert batches == [[1, 2], [3, 4], [5, 6]]
 ```
 
 **Expected:** three batches[[1, 2], [3, 4], [5, 6]].
@@ -91,8 +92,8 @@ assert batches==[[1,2],[3,4],[5,6]]
 Dropping the last singleton would change the effective training set. Record that choice explicitly when fixed batch shapes are required.
 
 ```python
-short=[list(range(5))[i:i+2] for i in range(0,5,2)]
-assert [len(batch) for batch in short]==[2,2,1]
+short = [list(range(5))[i : i + 2] for i in range(0, 5, 2)]
+assert [len(batch) for batch in short] == [2, 2, 1]
 ```
 
 **Expected:** batch sizes 2, 2, 1.
@@ -102,10 +103,18 @@ assert [len(batch) for batch in short]==[2,2,1]
 Each derivative is evaluated at the latest weight. Clearing the gradient prevents earlier batches from being counted again accidentally.
 
 ```python
-x=torch.arange(1,7,dtype=torch.float64); y=2*x; w=nn.Parameter(torch.tensor(0.,dtype=torch.float64)); optimizer=torch.optim.SGD([w],lr=.01); history=[]
-for start in range(0,6,2):
-    optimizer.zero_grad(set_to_none=True); loss=((w*x[start:start+2]-y[start:start+2])**2).mean(); loss.backward(); optimizer.step(); history.append(w.item())
-assert len(history)==3 and np.isfinite(history).all() and len(set(history))==3
+x = torch.arange(1, 7, dtype=torch.float64)
+y = 2 * x
+w = nn.Parameter(torch.tensor(0.0, dtype=torch.float64))
+optimizer = torch.optim.SGD([w], lr=0.01)
+history = []
+for start in range(0, 6, 2):
+    optimizer.zero_grad(set_to_none=True)
+    loss = ((w * x[start : start + 2] - y[start : start + 2]) ** 2).mean()
+    loss.backward()
+    optimizer.step()
+    history.append(w.item())
+assert len(history) == 3 and np.isfinite(history).all() and len(set(history)) == 3
 ```
 
 **Expected:** three finite distinct weights.

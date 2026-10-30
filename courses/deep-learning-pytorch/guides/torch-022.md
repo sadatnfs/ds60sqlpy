@@ -86,15 +86,32 @@ import numpy as np
 import torch
 from torch import nn
 from torch.nn import functional as F
-def attention(q,k,v,allowed):
-    if any(value.ndim!=2 for value in (q,k,v)) or q.shape[0]==0 or q.shape[1]==0: raise ValueError('nonempty matrices required')
-    if k.shape!=q.shape or v.shape[0]!=q.shape[0] or allowed.shape!=(q.shape[0],q.shape[0]): raise ValueError('shape mismatch')
-    if allowed.dtype!=torch.bool: raise TypeError('boolean allowed mask required')
-    if not bool(allowed.any(-1).all()) or not all(bool(torch.isfinite(value).all()) for value in (q,k,v)): raise ValueError('legal finite attention rows required')
-    return F.scaled_dot_product_attention(q,k,v,attn_mask=allowed,dropout_p=0.)
-q=torch.zeros((3,2),dtype=torch.float64); v=torch.tensor([[2.,0.],[0.,2.],[6.,6.]],dtype=torch.float64); allowed=torch.ones((3,3),dtype=torch.bool).tril()
-out=attention(q,q,v,allowed)
-torch.testing.assert_close(out,torch.tensor([[2.,0.],[1.,1.],[8/3,8/3]],dtype=torch.float64),atol=1e-12,rtol=0)
+
+
+def attention(q, k, v, allowed):
+    if any(value.ndim != 2 for value in (q, k, v)) or q.shape[0] == 0 or q.shape[1] == 0:
+        raise ValueError("nonempty matrices required")
+    if k.shape != q.shape or v.shape[0] != q.shape[0] or allowed.shape != (q.shape[0], q.shape[0]):
+        raise ValueError("shape mismatch")
+    if allowed.dtype != torch.bool:
+        raise TypeError("boolean allowed mask required")
+    if not bool(allowed.any(-1).all()) or not all(
+        bool(torch.isfinite(value).all()) for value in (q, k, v)
+    ):
+        raise ValueError("legal finite attention rows required")
+    return F.scaled_dot_product_attention(q, k, v, attn_mask=allowed, dropout_p=0.0)
+
+
+q = torch.zeros((3, 2), dtype=torch.float64)
+v = torch.tensor([[2.0, 0.0], [0.0, 2.0], [6.0, 6.0]], dtype=torch.float64)
+allowed = torch.ones((3, 3), dtype=torch.bool).tril()
+out = attention(q, q, v, allowed)
+torch.testing.assert_close(
+    out,
+    torch.tensor([[2.0, 0.0], [1.0, 1.0], [8 / 3, 8 / 3]], dtype=torch.float64),
+    atol=1e-12,
+    rtol=0,
+)
 ```
 
 **Expected:** outputs 2, 0; 1, 1; \(\frac{8}{3}\), \(\frac{8}{3}\).
@@ -104,9 +121,13 @@ torch.testing.assert_close(out,torch.tensor([[2.,0.],[1.,1.],[8/3,8/3]],dtype=to
 The causal boundary is verified through behavior. A zeroed future weight plot would not detect every wrong normalization or upstream leak.
 
 ```python
-future=v.clone(); future[2]=torch.tensor([100.,200.]); changed=attention(q,q,future,allowed)
-torch.testing.assert_close(changed[:2],out[:2],atol=1e-12,rtol=0)
-torch.testing.assert_close(changed[2],torch.tensor([34.,202/3],dtype=torch.float64),atol=1e-12,rtol=0)
+future = v.clone()
+future[2] = torch.tensor([100.0, 200.0])
+changed = attention(q, q, future, allowed)
+torch.testing.assert_close(changed[:2], out[:2], atol=1e-12, rtol=0)
+torch.testing.assert_close(
+    changed[2], torch.tensor([34.0, 202 / 3], dtype=torch.float64), atol=1e-12, rtol=0
+)
 ```
 
 **Expected:** first two rows unchanged; last 34, \(\frac{202}{3}\).
@@ -116,8 +137,15 @@ torch.testing.assert_close(changed[2],torch.tensor([34.,202/3],dtype=torch.float
 Nonuniform scores exercise query-key arithmetic and scaling. The checker rebuilds the computation on the shorter inputs.
 
 ```python
-non=torch.tensor([[1.,0.],[0.,1.],[1.,1.]],dtype=torch.float64); full=attention(non,non,v,allowed)
-for cut in range(1,4): torch.testing.assert_close(attention(non[:cut],non[:cut],v[:cut],allowed[:cut,:cut]),full[:cut],atol=1e-12,rtol=0)
+non = torch.tensor([[1.0, 0.0], [0.0, 1.0], [1.0, 1.0]], dtype=torch.float64)
+full = attention(non, non, v, allowed)
+for cut in range(1, 4):
+    torch.testing.assert_close(
+        attention(non[:cut], non[:cut], v[:cut], allowed[:cut, :cut]),
+        full[:cut],
+        atol=1e-12,
+        rtol=0,
+    )
 ```
 
 **Expected:** all prefix outputs match within 1e-12.

@@ -152,12 +152,21 @@ Run these in the complete learner file so the temporary fixture and transaction 
 ### Example 1: Equal summaries conceal changed identities
 
 ```sql
-SELECT 'source' AS origin, count(*) AS row_count, sum(amount) AS amount_total
-FROM quality_source
+SELECT
+  'source' AS origin,
+  count(*) AS row_count,
+  sum(amount) AS amount_total
+FROM
+  quality_source
 UNION ALL
-SELECT 'target', count(*), sum(amount)
-FROM quality_target
-ORDER BY origin;
+SELECT
+  'target',
+  count(*),
+  sum(amount)
+FROM
+  quality_target
+ORDER BY
+  origin;
 ```
 
 Each branch collapses four invoice rows into one summary row. Both branches report 4 and 230. The source includes invoice 4, the target includes invoice 5, and invoice 2 has changed. The matching grand totals are real but insufficient. No claim about individual invoice equality follows from this summary. Keep this control because it catches other failures, then add more discriminating evidence.
@@ -168,16 +177,33 @@ Each branch collapses four invoice rows into one summary row. Both branches repo
 
 ```sql
 WITH lines AS (
-  SELECT order_id, sum(amount) AS line_total FROM quality_lines GROUP BY order_id
-), attempts AS (
-  SELECT order_id, sum(amount) AS attempted_total FROM quality_attempts GROUP BY order_id
+  SELECT
+    order_id,
+    sum(amount) AS line_total
+  FROM
+    quality_lines
+  GROUP BY
+    order_id
+),
+attempts AS (
+  SELECT
+    order_id,
+    sum(amount) AS attempted_total
+  FROM
+    quality_attempts
+  GROUP BY
+    order_id
 )
-SELECT o.order_id, COALESCE(l.line_total,0) AS line_total,
-       COALESCE(a.attempted_total,0) AS attempted_total
-FROM quality_orders AS o
-LEFT JOIN lines AS l ON l.order_id=o.order_id
-LEFT JOIN attempts AS a ON a.order_id=o.order_id
-ORDER BY o.order_id;
+SELECT
+  o.order_id,
+  COALESCE(l.line_total, 0) AS line_total,
+  COALESCE(a.attempted_total, 0) AS attempted_total
+FROM
+  quality_orders AS o
+  LEFT JOIN lines AS l ON l.order_id = o.order_id
+  LEFT JOIN attempts AS a ON a.order_id = o.order_id
+ORDER BY
+  o.order_id;
 ```
 
 The CTEs each reduce a child collection to one row per order_id before they meet. Their LEFT joins therefore preserve the three parent identities. An order without children receives zero under this lesson's explicit empty-child policy. Attempted payment total is not revenue: a retry is a separate attempt. Here the source amounts are NOT inferred from one another, so the two metrics remain independently meaningful.

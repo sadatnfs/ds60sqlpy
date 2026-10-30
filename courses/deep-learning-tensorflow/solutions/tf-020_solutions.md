@@ -23,9 +23,9 @@ The question is: Pool patch[[1,3],[2,4]] with a2x2 window.
 The max ignores the three smaller values, while the average uses every value equally. Equal output shapes do not mean equal retained information.
 
 ```python
-x=tf.constant([[[[1.],[3.]],[[2.],[4.]]]])
-assert float(tf.nn.max_pool2d(x,2,2,'VALID')[0,0,0,0])==4
-assert float(tf.nn.avg_pool2d(x,2,2,'VALID')[0,0,0,0])==2.5
+x = tf.constant([[[[1.0], [3.0]], [[2.0], [4.0]]]])
+assert float(tf.nn.max_pool2d(x, 2, 2, "VALID")[0, 0, 0, 0]) == 4
+assert float(tf.nn.avg_pool2d(x, 2, 2, "VALID")[0, 0, 0, 0]) == 2.5
 ```
 
 **Expected:** max4; average2.5.
@@ -39,8 +39,8 @@ The question is: Flip the patch horizontally and inspect every pixel.
 The operation reverses columns, not rows. Naming the width axis prevents a mistaken vertical transformation from silently changing a directional task.
 
 ```python
-flipped=tf.image.flip_left_right(x)
-np.testing.assert_array_equal(flipped.numpy().reshape(2,2),[[3,1],[4,2]])
+flipped = tf.image.flip_left_right(x)
+np.testing.assert_array_equal(flipped.numpy().reshape(2, 2), [[3, 1], [4, 2]])
 ```
 
 **Expected:** rows[3,1] and[4,2].
@@ -54,7 +54,7 @@ The question is: Flip twice and compare with the original image.
 A horizontal flip is its own inverse. The round trip is a strong indexing check but does not prove that the intermediate image retained the original semantic label.
 
 ```python
-np.testing.assert_array_equal(tf.image.flip_left_right(flipped).numpy(),x.numpy())
+np.testing.assert_array_equal(tf.image.flip_left_right(flipped).numpy(), x.numpy())
 ```
 
 **Expected:** all pixels restored exactly.
@@ -68,9 +68,9 @@ The question is: Change the nonmaximum pixel1 to0 and recompute both pools.
 The perturbation is invisible to max pooling. This helps explain why pooling creates robustness to some changes while also losing potentially useful detail.
 
 ```python
-altered=tf.constant([[[[0.],[3.]],[[2.],[4.]]]])
-assert float(tf.nn.max_pool2d(altered,2,2,'VALID')[0,0,0,0])==4
-assert float(tf.nn.avg_pool2d(altered,2,2,'VALID')[0,0,0,0])==2.25
+altered = tf.constant([[[[0.0], [3.0]], [[2.0], [4.0]]]])
+assert float(tf.nn.max_pool2d(altered, 2, 2, "VALID")[0, 0, 0, 0]) == 4
+assert float(tf.nn.avg_pool2d(altered, 2, 2, "VALID")[0, 0, 0, 0]) == 2.25
 ```
 
 **Expected:** max still4; average2.25.
@@ -84,9 +84,12 @@ The question is: Define evaluation as an identity transform and compare repeated
 A deterministic evaluation path makes model comparisons interpretable. Random test augmentation would need a separately specified aggregation and uncertainty policy.
 
 ```python
-def evaluate_image(value): return tf.identity(value)
-np.testing.assert_array_equal(evaluate_image(x).numpy(),x.numpy())
-np.testing.assert_array_equal(evaluate_image(x).numpy(),evaluate_image(x).numpy())
+def evaluate_image(value):
+    return tf.identity(value)
+
+
+np.testing.assert_array_equal(evaluate_image(x).numpy(), x.numpy())
+np.testing.assert_array_equal(evaluate_image(x).numpy(), evaluate_image(x).numpy())
 ```
 
 **Expected:** both evaluations equal the original patch.
@@ -100,8 +103,8 @@ The question is: Encode labels left and right and define the label change caused
 A reversible image transformation can still change the correct target. A valid training transform must either preserve the target or transform the target consistently, as this mapping demonstrates.
 
 ```python
-mirror={'left':'right','right':'left'}
-assert mirror['left']=='right' and mirror[mirror['left']]=='left'
+mirror = {"left": "right", "right": "left"}
+assert mirror["left"] == "right" and mirror[mirror["left"]] == "left"
 ```
 
 **Expected:** left maps to right; retaining left is invalid.

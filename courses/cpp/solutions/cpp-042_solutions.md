@@ -33,7 +33,8 @@ If the parallel total differs from serial, inspect slice coverage and overlap be
 ## Worked example 1
 
 ```cpp
-const std::vector<int> rows{1,2,3,4,5,6}; assert(serial_total(rows)==21);
+const std::vector<int> rows{1, 2, 3, 4, 5, 6};
+assert(serial_total(rows) == 21);
 ```
 
 Expected: The independent serial oracle is exactly 21.
@@ -41,7 +42,9 @@ Expected: The independent serial oracle is exactly 21.
 ## Worked example 2
 
 ```cpp
-a.join(); b.join(); assert(first==6 && second==15);
+a.join();
+b.join();
+assert(first == 6 && second == 15);
 ```
 
 Expected: Two disjoint partitions combine to 21 after both workers finish.

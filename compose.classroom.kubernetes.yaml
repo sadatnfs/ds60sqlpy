@@ -9,7 +9,7 @@ services:
         "stan-cpu":"http://stan-worker:8081","julia":"http://julia-worker:8081","dbt-duckdb":"http://dbt-worker:8081","k8s-kind":"http://kubernetes-worker:8081"}'
 
   kubernetes-worker:
-    image: ds60sqlpy-worker-k8s-kind:1.1.0
+    image: ds60sqlpy-worker-k8s-kind:1.2.0
     pull_policy: never
     profiles: [k8s-kind]
     build:

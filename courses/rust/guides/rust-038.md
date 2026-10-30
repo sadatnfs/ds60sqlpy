@@ -43,8 +43,6 @@ Read the operations in dependency order. Record which values exist before each l
 Optional iteration respects validity rather than exposing meaningless physical contents at null positions.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         use arrow::array::{Array, Int32Array};
@@ -65,8 +63,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 A finite-value policy is an additional analytical rule, not a synonym for Arrow validity.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         use arrow::array::{Array, Float64Array};

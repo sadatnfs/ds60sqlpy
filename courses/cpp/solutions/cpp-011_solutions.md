@@ -31,7 +31,8 @@ If the last record repeats, look for an eof-before-read loop. If a final untermi
 ## Worked example 1
 
 ```cpp
-std::istringstream input("10\n20\n"); auto lines=read_lines(input);
+std::istringstream input("10\n20\n");
+auto lines = read_lines(input);
 ```
 
 Expected: Exactly two lines, with no extra stale third line.
@@ -39,7 +40,8 @@ Expected: Exactly two lines, with no extra stale third line.
 ## Worked example 2
 
 ```cpp
-std::istringstream input("30"); auto lines=read_lines(input);
+std::istringstream input("30");
+auto lines = read_lines(input);
 ```
 
 Expected: The final line without newline is still read once.

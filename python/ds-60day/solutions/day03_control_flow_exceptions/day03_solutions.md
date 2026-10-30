@@ -54,7 +54,11 @@ for number in range(1, 31):
 
 assert len(output) == 30
 assert [output[index - 1] for index in (3, 5, 15, 16, 30)] == [
-    "Fizz", "Buzz", "FizzBuzz", "16", "FizzBuzz"
+    "Fizz",
+    "Buzz",
+    "FizzBuzz",
+    "16",
+    "FizzBuzz",
 ]
 ```
 

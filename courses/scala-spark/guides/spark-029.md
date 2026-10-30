@@ -60,21 +60,33 @@ The complete source creates the owned local session described above, then constr
 import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
-import java.nio.file.{Files,Path,Paths,StandardOpenOption,StandardCopyOption}
+import java.nio.file.{Files, Path, Paths, StandardOpenOption, StandardCopyOption}
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.util.UUID
 import scala.jdk.CollectionConverters._
 import com.fasterxml.jackson.databind.ObjectMapper
 
-ownedRoot = Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(),".ds60-spark-029-")
+ownedRoot = Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(), ".ds60-spark-029-")
 Files.createDirectory(ownedRoot.resolve("runs"))
-val source = spark.range(0L,30L,1L,2).withColumn("value",col("id")*2L)
+val source = spark.range(0L, 30L, 1L, 2).withColumn("value", col("id") * 2L)
 ```
 
 ```python
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 from pathlib import Path
 import tempfile
 import shutil
@@ -84,9 +96,9 @@ import re
 import os
 import uuid
 
-owned_root = Path(tempfile.mkdtemp(prefix=".ds60-spark-029-",dir=".")).resolve()
-(owned_root/"runs").mkdir()
-source = spark.range(0,30,1,2).withColumn("value",F.col("id")*2)
+owned_root = Path(tempfile.mkdtemp(prefix=".ds60-spark-029-", dir=".")).resolve()
+(owned_root / "runs").mkdir()
+source = spark.range(0, 30, 1, 2).withColumn("value", F.col("id") * 2)
 ```
 
 ## Worked example / walkthrough
@@ -95,13 +107,13 @@ source = spark.range(0,30,1,2).withColumn("value",F.col("id")*2)
 
 ```scala
 val ids = 0L until 30L
-assert(ids.map(_*2L).sum == 870L)
+assert(ids.map(_ * 2L).sum == 870L)
 println("Declared30-row product total=870")
 ```
 
 ```python
 ids = range(30)
-assert sum(i*2 for i in ids) == 870
+assert sum(i * 2 for i in ids) == 870
 print("Declared30-row product total=870")
 ```
 
@@ -110,14 +122,15 @@ The arithmetic oracle describes the product before any writer runs. A successful
 ### Worked example 2
 
 ```scala
-val a = receiptText("run-a","0"*64);val b = receiptText("run-b","0"*64)
+val a = receiptText("run-a", "0" * 64); val b = receiptText("run-b", "0" * 64)
 assert(mapper.readTree(a).get("data_path").asText() == "runs/run-a/data")
 assert(a != b)
 println("A publication points to one run-specific product")
 ```
 
 ```python
-a = receipt_text("run-a","0"*64);b = receipt_text("run-b","0"*64)
+a = receipt_text("run-a", "0" * 64)
+b = receipt_text("run-b", "0" * 64)
 assert json.loads(a)["data_path"] == "runs/run-a/data" and a != b
 print("A publication points to one run-specific product")
 ```

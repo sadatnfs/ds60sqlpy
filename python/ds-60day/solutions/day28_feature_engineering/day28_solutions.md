@@ -60,20 +60,24 @@ class FareBinner(BaseEstimator, TransformerMixin):
 
     def transform(self, values):
         series = pd.Series(np.asarray(values).ravel())
-        return pd.cut(
-            series,
-            bins=self.bins,
-            labels=["low", "medium", "high"],
-            include_lowest=True,
-        ).astype("string").to_numpy().reshape(-1, 1)
+        return (
+            pd.cut(
+                series,
+                bins=self.bins,
+                labels=["low", "medium", "high"],
+                include_lowest=True,
+            )
+            .astype("string")
+            .to_numpy()
+            .reshape(-1, 1)
+        )
 
     def get_feature_names_out(self, input_features=None):
         return np.asarray(["fare_band"])
 
+
 preprocessing = Pipeline([("fare_bins", FareBinner())])
-transformed = preprocessing.fit_transform(
-    [[0], [10], [25], [100], [np.nan], [-1]]
-).ravel().tolist()
+transformed = preprocessing.fit_transform([[0], [10], [25], [100], [np.nan], [-1]]).ravel().tolist()
 assert transformed[:4] == ["low", "low", "medium", "high"]
 assert pd.isna(transformed[4]) and pd.isna(transformed[5])
 fitted_binner = preprocessing.named_steps["fare_bins"]
@@ -221,9 +225,11 @@ preprocessor = ColumnTransformer(
     ]
 )
 
-train = pd.DataFrame({"age": [20.0, None, 40.0], "fare": [5.0, 10.0, 15.0], "port": ["A", "B", "A"]})
+train = pd.DataFrame(
+    {"age": [20.0, None, 40.0], "fare": [5.0, 10.0, 15.0], "port": ["A", "B", "A"]}
+)
 test = pd.DataFrame({"age": [30.0], "fare": [10.0], "port": ["NEW"]})
-preprocessor.fit(train)              # Evaluation data does not influence parameters.
+preprocessor.fit(train)  # Evaluation data does not influence parameters.
 transformed = preprocessor.transform(test)
 assert transformed.shape[0] == 1
 ```

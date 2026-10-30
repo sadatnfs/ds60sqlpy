@@ -103,10 +103,15 @@ The completed notebook keeps changing data in named parameters and keeps
 identifiers static:
 
 ```sql
-SELECT customer_id, full_name
-FROM training.customers
-WHERE country = :exercise_country
-ORDER BY customer_id
+SELECT
+  customer_id,
+  full_name
+FROM
+  training.customers
+WHERE
+  country = :exercise_country
+ORDER BY
+  customer_id
 LIMIT 10;
 ```
 

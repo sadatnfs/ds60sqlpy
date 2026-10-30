@@ -80,9 +80,15 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-truth=torch.tensor([1,1,0]); prediction=torch.tensor([1,0,0]); groups=['A','A','B']; errors=prediction!=truth
-report={group:(int(errors[torch.tensor([g==group for g in groups])].sum()),groups.count(group)) for group in ['A','B']}
-assert report=={'A':(1,2),'B':(0,1)}
+truth = torch.tensor([1, 1, 0])
+prediction = torch.tensor([1, 0, 0])
+groups = ["A", "A", "B"]
+errors = prediction != truth
+report = {
+    group: (int(errors[torch.tensor([g == group for g in groups])].sum()), groups.count(group))
+    for group in ["A", "B"]
+}
+assert report == {"A": (1, 2), "B": (0, 1)}
 ```
 
 **Expected:** A1/2errors; B0/1.
@@ -92,8 +98,8 @@ assert report=={'A':(1,2),'B':(0,1)}
 Repeated rows can bias a metric without adding independent cases. Identity validation belongs before aggregation.
 
 ```python
-ids=['a','b','c']+['c']*5
-assert len(ids)==8 and len(set(ids))==3
+ids = ["a", "b", "c"] + ["c"] * 5
+assert len(ids) == 8 and len(set(ids)) == 3
 ```
 
 **Expected:** 8rows but 3 unique IDs.
@@ -103,8 +109,10 @@ assert len(ids)==8 and len(set(ids))==3
 The last shift crosses the defined boundary. Whether that counts as a robustness failure depends on the intended label semantics.
 
 ```python
-base=torch.tensor(1.); shifts=torch.tensor([-.1,-.9,-1.1]); changed=(base+shifts>=0).long()
-assert changed.tolist()==[1,1,0]
+base = torch.tensor(1.0)
+shifts = torch.tensor([-0.1, -0.9, -1.1])
+changed = (base + shifts >= 0).long()
+assert changed.tolist() == [1, 1, 0]
 ```
 
 **Expected:** labels 1, 1, 0.

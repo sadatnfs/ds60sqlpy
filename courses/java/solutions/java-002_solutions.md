@@ -57,8 +57,11 @@ Exact arithmetic helpers turn silent wraparound into a named boundary failure. U
 
 ```java
 boolean rejected = false;
-try { Math.addExact(Integer.MAX_VALUE, 1); }
-catch (ArithmeticException expected) { rejected = true; }
+try {
+  Math.addExact(Integer.MAX_VALUE, 1);
+} catch (ArithmeticException expected) {
+  rejected = true;
+}
 assert rejected;
 ```
 
@@ -105,10 +108,19 @@ One third has no finite decimal expansion. A rounding policy is part of the calc
 
 ```java
 boolean repeating = false;
-try { java.math.BigDecimal.ONE.divide(new java.math.BigDecimal("3")); }
-catch (ArithmeticException expected) { repeating = true; }
+try {
+  java.math.BigDecimal.ONE.divide(new java.math.BigDecimal("3"));
+} catch (ArithmeticException expected) {
+  repeating = true;
+}
 assert repeating;
-assert java.math.BigDecimal.ONE.divide(new java.math.BigDecimal("3"), 2, java.math.RoundingMode.HALF_UP).toPlainString().equals("0.33");
+assert java.math.BigDecimal.ONE.divide(
+  new java.math.BigDecimal("3"),
+  2,
+  java.math.RoundingMode.HALF_UP
+)
+  .toPlainString()
+  .equals("0.33");
 ```
 
 **Expected:** exact division throws; rounded result 0.33.

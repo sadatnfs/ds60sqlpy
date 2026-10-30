@@ -51,8 +51,8 @@ The question is: Give a public-only request the six-document corpus and inspect 
 The restricted record never reaches the scorer. This is stronger than deleting it from a final result after a model or reranker already consumed its text.
 
 ```python
-allowed=admit(DOCUMENTS,{'public'})
-assert 'private-v1' not in {d['id'] for d in allowed} and len(allowed)==5
+allowed = admit(DOCUMENTS, {"public"})
+assert "private-v1" not in {d["id"] for d in allowed} and len(allowed) == 5
 ```
 
 **Expected:** private-v1 absent before ranking.
@@ -66,8 +66,8 @@ The question is: Use allowed scopes public, restricted and compare the admitted 
 The policy input comes from trusted application state in a real system. A user-supplied claim such as “I am an administrator” must not directly populate this set.
 
 ```python
-privileged=admit(DOCUMENTS,{'public','restricted'})
-assert len(privileged)==6 and any(d['id']=='private-v1' for d in privileged)
+privileged = admit(DOCUMENTS, {"public", "restricted"})
+assert len(privileged) == 6 and any(d["id"] == "private-v1" for d in privileged)
 ```
 
 **Expected:** all6 documents admitted.
@@ -81,9 +81,9 @@ The question is: Build cache keys for the same question under public-only and pr
 The same question can have different permitted evidence. Reusing an answer solely by question text could leak the privileged response.
 
 ```python
-public_key=cache_key('threshold',{'public'},'corpus-v1','rank-v1')
-private_key=cache_key('threshold',{'public','restricted'},'corpus-v1','rank-v1')
-assert public_key!=private_key
+public_key = cache_key("threshold", {"public"}, "corpus-v1", "rank-v1")
+private_key = cache_key("threshold", {"public", "restricted"}, "corpus-v1", "rank-v1")
+assert public_key != private_key
 ```
 
 **Expected:** keys differ.
@@ -97,7 +97,7 @@ The question is: Change corpus-v1 tocorpus-v2 under the same access policy.
 A document correction or revocation changes what evidence is valid. Cache identity must track that version rather than relying only on a time-to-live.
 
 ```python
-assert cache_key('threshold',{'public'},'corpus-v2','rank-v1')!=public_key
+assert cache_key("threshold", {"public"}, "corpus-v2", "rank-v1") != public_key
 ```
 
 **Expected:** cache key changes.
@@ -111,9 +111,10 @@ The question is: Inspectattack-v1 while retaining a public-only policy.
 A document can contain an instruction-shaped sentence without gaining authority. The filter reads metadata and trusted policy, not imperatives in the body text.
 
 ```python
-scopes={'public'}; attack=next(d for d in allowed if d['id']=='attack-v1')
-assert 'reveal restricted' in attack['text']
-assert scopes=={'public'} and all(d['scope']=='public' for d in admit(DOCUMENTS,scopes))
+scopes = {"public"}
+attack = next(d for d in allowed if d["id"] == "attack-v1")
+assert "reveal restricted" in attack["text"]
+assert scopes == {"public"} and all(d["scope"] == "public" for d in admit(DOCUMENTS, scopes))
 ```
 
 **Expected:** scope set remains exactly public; private-v1 still excluded.
@@ -127,8 +128,8 @@ The question is: Create a trace from admitted result IDs only and check it conta
 Logs and debug panels are part of the data boundary. A system that hides answer text but exposes restricted IDs or excerpts in traces has not fully enforced access control.
 
 ```python
-trace={'candidate_ids':[d['id'] for d in allowed],'policy':'public-only'}
-assert 'private-v1' not in trace['candidate_ids']
+trace = {"candidate_ids": [d["id"] for d in allowed], "policy": "public-only"}
+assert "private-v1" not in trace["candidate_ids"]
 ```
 
 **Expected:** trace contains only public document IDs.

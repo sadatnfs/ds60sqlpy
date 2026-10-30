@@ -198,7 +198,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 1: Round-trip explicit UTF-8</span></span>
-<span class="source-line">    <span class="syntax-comment">// WriteCafé and an emoji to an owned temporary file,then read it withUTF-8.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Write Café and an emoji to an owned temporary file,then read it with UTF-8.</span></span>
 <span class="source-line">    <span class="syntax-comment">// Expected: exact text equality.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 2: Distinguish a path from existence</span></span>
@@ -213,7 +213,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">    <span class="syntax-comment">// Exercise 4: Request atomic replacement honestly</span></span>
 <span class="source-line">    <span class="syntax-comment">// Write old and staged files,requestATOMIC_MOVE,then verify the selected outcome without</span></span>
 <span class="source-line">    <span class="syntax-comment">// claiming a fallback is atomic.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: either targetnew withstagedabsent,or explicit unsupported result retainingold.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: either targetnew with staged absent,or explicit unsupported result retaining old.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 5: Expose a lexical path escape</span></span>
 <span class="source-line">    <span class="syntax-comment">// Resolve../outside under an owned root and normalize it before checking containment.</span></span>
@@ -221,7 +221,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 6: Verify cleanup after failure</span></span>
 <span class="source-line">    <span class="syntax-comment">// Throw inside the owned temporary scope and confirm the directory is removed by the helper.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: original exception propagated;owned directory absent.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: original exception propagated; owned directory absent.</span></span>
 <span class="source-line">    System<span class="syntax-punctuation">.</span><span class="syntax-attribute">out</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">println</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement and check the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line">  <span class="syntax-punctuation">}</span></span>
 <span class="source-line"><span class="syntax-punctuation">}</span></span>

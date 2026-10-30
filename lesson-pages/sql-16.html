@@ -433,29 +433,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These worked excerpts come from <code>sql/postgres-60day/day16_window_functions_fundamentals.sql</code>. Use <strong>Whole SQL lesson (psql)</strong> in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared <code>psql</code> routes are described above.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> category_totals <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>unit_price <span class="syntax-operator">*</span> oi<span class="syntax-punctuation">.</span>quantity <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span> <span class="syntax-operator">-</span> oi<span class="syntax-punctuation">.</span>discount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue
-  <span class="syntax-keyword">FROM</span> order_items oi
-  <span class="syntax-keyword">JOIN</span> products p <span class="syntax-keyword">ON</span> p<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>product_id
-  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>category
+  <span class="syntax-keyword">SELECT</span>
+    p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>unit_price <span class="syntax-operator">*</span> oi<span class="syntax-punctuation">.</span>quantity <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span> <span class="syntax-operator">-</span> oi<span class="syntax-punctuation">.</span>discount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue
+  <span class="syntax-keyword">FROM</span>
+    order_items oi
+    <span class="syntax-keyword">JOIN</span> products p <span class="syntax-keyword">ON</span> p<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>product_id
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+    p<span class="syntax-punctuation">.</span>category
 <span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> category<span class="syntax-punctuation">,</span>
-       ROUND<span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> category_revenue<span class="syntax-punctuation">,</span>
-       ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> total_revenue<span class="syntax-punctuation">,</span>
-       ROUND<span class="syntax-punctuation">(</span>revenue <span class="syntax-operator">/</span> <span class="syntax-keyword">NULLIF</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> category_share
-<span class="syntax-keyword">FROM</span> category_totals
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> category_revenue <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">;</span></code></pre>
+<span class="syntax-keyword">SELECT</span>
+  category<span class="syntax-punctuation">,</span>
+  ROUND<span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> category_revenue<span class="syntax-punctuation">,</span>
+  ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> total_revenue<span class="syntax-punctuation">,</span>
+  ROUND<span class="syntax-punctuation">(</span>revenue <span class="syntax-operator">/</span> <span class="syntax-keyword">NULLIF</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> category_share
+<span class="syntax-keyword">FROM</span>
+  category_totals
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  category_revenue <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span>
+  category<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 1: Start with <code>order_items</code>, and <code>products</code> in <code>FROM</code>/<code>JOIN</code>; let <code>GROUP BY</code> collapse rows to its grouping keys; let each <code>OVER</code> expression calculate across related rows without collapsing them. The final <code>SELECT</code> displays <code>category</code>, <code>category_revenue</code>, <code>total_revenue</code>, and <code>category_share</code>. <code>ORDER BY</code> determines presentation order. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 1 returns one grouped row per <code>category</code> with columns <code>category</code>, <code>category_revenue</code>, <code>total_revenue</code>, and <code>category_share</code> from <code>order_items</code>, and <code>products</code>. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an <code>ORDER BY</code>, and inspect <code>NULL</code> only for columns this example can produce.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span>
-       o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
-       o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">,</span>
-       o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">,</span>
-       ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">AVG</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> avg_customer_order<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> orders_per_customer
-<span class="syntax-keyword">FROM</span> orders o
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_id
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span>
+  o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+  o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">,</span>
+  o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">,</span>
+  ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">AVG</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> avg_customer_order<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> orders_per_customer
+<span class="syntax-keyword">FROM</span>
+  orders o
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+  o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">,</span>
+  o<span class="syntax-punctuation">.</span>order_id
 <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">100</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 2: Start with <code>orders</code> in <code>FROM</code>/<code>JOIN</code>; let each <code>OVER</code> expression calculate across related rows without collapsing them. The final <code>SELECT</code> displays <code>order_id</code>, <code>customer_id</code>, <code>order_date</code>, <code>total_amount</code>, <code>avg_customer_order</code>, and <code>orders_per_customer</code>. <code>ORDER BY</code> determines presentation order and the final <code>LIMIT 100</code> caps displayed rows. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 2 returns exactly one summary row, capped at 100 rows with columns <code>order_id</code>, <code>customer_id</code>, <code>order_date</code>, <code>total_amount</code>, <code>avg_customer_order</code>, and <code>orders_per_customer</code> from <code>orders</code>. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an <code>ORDER BY</code>, and inspect <code>NULL</code> only for columns this example can produce.</p>
@@ -802,12 +814,17 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><code>PARTITION BY</code>: restarts a window calculation independently for each partition key.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span>
-       o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
-       o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">,</span>
-       ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">AVG</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> customer_average
-<span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span>
+  o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+  o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">,</span>
+  ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">AVG</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> customer_average
+<span class="syntax-keyword">FROM</span>
+  orders <span class="syntax-keyword">AS</span> o
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+  o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">,</span>
+  o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One row per order.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
@@ -831,14 +848,18 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><code>PARTITION BY</code>: restarts a window calculation independently for each partition key.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span>
-       e<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">,</span>
-       e<span class="syntax-punctuation">.</span>salary<span class="syntax-punctuation">,</span>
-       ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">AVG</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>salary<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> department_average<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">MIN</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>salary<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> department_minimum<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">MAX</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>salary<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> department_maximum
-<span class="syntax-keyword">FROM</span> employees <span class="syntax-keyword">AS</span> e
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">,</span> e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span>
+  e<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">,</span>
+  e<span class="syntax-punctuation">.</span>salary<span class="syntax-punctuation">,</span>
+  ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">AVG</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>salary<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> department_average<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">MIN</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>salary<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> department_minimum<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">MAX</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>salary<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> department_maximum
+<span class="syntax-keyword">FROM</span>
+  employees <span class="syntax-keyword">AS</span> e
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  e<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">,</span>
+  e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One row per employee.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
@@ -863,16 +884,17 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><code>PARTITION BY</code>: restarts a window calculation independently for each partition key.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span>
-       o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
-       o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">,</span>
-       ROUND<span class="syntax-punctuation">(</span>
-         o<span class="syntax-punctuation">.</span>total_amount
-           <span class="syntax-operator">/</span> <span class="syntax-keyword">NULLIF</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
-         <span class="syntax-number">4</span>
-       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> customer_revenue_share
-<span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span>
+  o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+  o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">,</span>
+  ROUND<span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount <span class="syntax-operator">/</span> <span class="syntax-keyword">NULLIF</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> customer_revenue_share
+<span class="syntax-keyword">FROM</span>
+  orders <span class="syntax-keyword">AS</span> o
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+  o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">,</span>
+  o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One row per order with shares summing near one per customer.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-3">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-3" aria-label="Link to this section">#</a></h5>
@@ -900,18 +922,34 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> grouped <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">AVG</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> average_total
-  <span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o
-  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>customer_id
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> windowed <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">AVG</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> average_total
-  <span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o
+  <span class="syntax-keyword">SELECT</span>
+    o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">AVG</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> average_total
+  <span class="syntax-keyword">FROM</span>
+    orders <span class="syntax-keyword">AS</span> o
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+    o<span class="syntax-punctuation">.</span>customer_id
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+windowed <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span>
+    o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">AVG</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> average_total
+  <span class="syntax-keyword">FROM</span>
+    orders <span class="syntax-keyword">AS</span> o
 <span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;grouped&#x27;</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">method</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">row_count</span> <span class="syntax-keyword">FROM</span> grouped
+<span class="syntax-keyword">SELECT</span>
+  <span class="syntax-string">&#x27;grouped&#x27;</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">method</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">row_count</span>
+<span class="syntax-keyword">FROM</span>
+  grouped
 <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span>
-<span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;windowed&#x27;</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">method</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">row_count</span> <span class="syntax-keyword">FROM</span> windowed
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">method</span><span class="syntax-punctuation">;</span></code></pre>
+<span class="syntax-keyword">SELECT</span>
+  <span class="syntax-string">&#x27;windowed&#x27;</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">method</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">row_count</span>
+<span class="syntax-keyword">FROM</span>
+  windowed
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  <span class="syntax-keyword">method</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> Two labeled count rows.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-4">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-4" aria-label="Link to this section">#</a></h5>
@@ -938,17 +976,25 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> scored <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span><span class="syntax-operator">*</span><span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">AVG</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> customer_average
-  <span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o
+  <span class="syntax-keyword">SELECT</span>
+    o<span class="syntax-punctuation">.</span><span class="syntax-operator">*</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">AVG</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> customer_average
+  <span class="syntax-keyword">FROM</span>
+    orders <span class="syntax-keyword">AS</span> o
 <span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> order_id<span class="syntax-punctuation">,</span>
-       customer_id<span class="syntax-punctuation">,</span>
-       total_amount<span class="syntax-punctuation">,</span>
-       ROUND<span class="syntax-punctuation">(</span>customer_average<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> customer_average
-<span class="syntax-keyword">FROM</span> scored
-<span class="syntax-keyword">WHERE</span> total_amount <span class="syntax-operator">&gt;</span> customer_average
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> customer_id<span class="syntax-punctuation">,</span> total_amount <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> order_id<span class="syntax-punctuation">;</span></code></pre>
+<span class="syntax-keyword">SELECT</span>
+  order_id<span class="syntax-punctuation">,</span>
+  customer_id<span class="syntax-punctuation">,</span>
+  total_amount<span class="syntax-punctuation">,</span>
+  ROUND<span class="syntax-punctuation">(</span>customer_average<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> customer_average
+<span class="syntax-keyword">FROM</span>
+  scored
+<span class="syntax-keyword">WHERE</span>
+  total_amount <span class="syntax-operator">&gt;</span> customer_average
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  customer_id<span class="syntax-punctuation">,</span>
+  total_amount <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span>
+  order_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> Order rows above their customer mean.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-5">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-5" aria-label="Link to this section">#</a></h5>
@@ -973,16 +1019,21 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><code>PARTITION BY</code>: restarts a window calculation independently for each partition key.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span>
-       o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> customer_order_count<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> customer_revenue<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> country_revenue
-<span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o
-<span class="syntax-keyword">JOIN</span> customers <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span>
-  <span class="syntax-keyword">ON</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>customer_id
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span>
+  o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> customer_order_count<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> customer_revenue<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> country_revenue
+<span class="syntax-keyword">FROM</span>
+  orders <span class="syntax-keyword">AS</span> o
+  <span class="syntax-keyword">JOIN</span> customers <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>customer_id
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span>
+  o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+  o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">,</span>
+  o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One row per order with customer and country totals.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-6">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-6" aria-label="Link to this section">#</a></h5>

@@ -87,7 +87,8 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-logits=torch.tensor([1000.,999.],dtype=torch.float32); naive=torch.exp(logits)
+logits = torch.tensor([1000.0, 999.0], dtype=torch.float32)
+naive = torch.exp(logits)
 assert torch.isinf(naive).all()
 ```
 
@@ -98,8 +99,8 @@ assert torch.isinf(naive).all()
 The meaningful score difference is one. The stable combined objective avoids constructing enormous raw exponential values.
 
 ```python
-stable=F.cross_entropy(logits[None,:],torch.tensor([0]))
-np.testing.assert_allclose(stable.item(),np.log1p(np.exp(-1)),atol=1e-6,rtol=0)
+stable = F.cross_entropy(logits[None, :], torch.tensor([0]))
+np.testing.assert_allclose(stable.item(), np.log1p(np.exp(-1)), atol=1e-6, rtol=0)
 ```
 
 **Expected:** loss \(\log(1+\exp(-1))\) within 1e-6.
@@ -109,7 +110,9 @@ np.testing.assert_allclose(stable.item(),np.log1p(np.exp(-1)),atol=1e-6,rtol=0)
 A common logit shift cancels from the normalizer. This property is useful for detecting wrong-axis or inconsistent-clipping implementations.
 
 ```python
-torch.testing.assert_close(torch.softmax(logits,0),torch.softmax(torch.tensor([0.,-1.]),0),atol=1e-6,rtol=0)
+torch.testing.assert_close(
+    torch.softmax(logits, 0), torch.softmax(torch.tensor([0.0, -1.0]), 0), atol=1e-6, rtol=0
+)
 ```
 
 **Expected:** probabilities match within 1e-6.

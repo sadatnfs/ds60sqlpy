@@ -76,8 +76,8 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-image=torch.tensor([[[[1.,3.],[2.,4.]]]])
-assert F.max_pool2d(image,2).item()==4 and F.avg_pool2d(image,2).item()==2.5
+image = torch.tensor([[[[1.0, 3.0], [2.0, 4.0]]]])
+assert F.max_pool2d(image, 2).item() == 4 and F.avg_pool2d(image, 2).item() == 2.5
 ```
 
 **Expected:** max 4; average 2.5.
@@ -87,8 +87,8 @@ assert F.max_pool2d(image,2).item()==4 and F.avg_pool2d(image,2).item()==2.5
 The last axis is the width under NCHW. Flipping the channel or height axis would be a different operation.
 
 ```python
-flipped=torch.flip(image,dims=(-1,))
-assert flipped[0,0].tolist()==[[3.,1.],[4.,2.]]
+flipped = torch.flip(image, dims=(-1,))
+assert flipped[0, 0].tolist() == [[3.0, 1.0], [4.0, 2.0]]
 ```
 
 **Expected:** rows 3, 1 and 4, 2.
@@ -98,7 +98,7 @@ assert flipped[0,0].tolist()==[[3.,1.],[4.,2.]]
 Reversibility is a useful indexing check, but does not prove the intermediate image has the original semantic label.
 
 ```python
-assert torch.equal(torch.flip(flipped,dims=(-1,)),image)
+assert torch.equal(torch.flip(flipped, dims=(-1,)), image)
 ```
 
 **Expected:** exact original values.

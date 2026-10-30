@@ -499,14 +499,14 @@ def tree_signature(
         children = [convert(child, depth + 1) for child in node.children]
         children = [child for child in children if child is not None]
         if grammar in {"typescript", "tsx"} and kind == "union_type":
-            members = []
+            members: list[Any] = []
             for child in children:
                 if child == ("|", b"|"):
                     continue
                 members.extend(child[1] if child[0] == "union_type" else [child])
             return members[0] if len(members) == 1 else ("union_type", tuple(members))
         if grammar == "html":
-            expanded = []
+            expanded: list[Any] = []
             for child in children:
                 expanded.extend(child[1] if child[0] == "html_void_with_tail" else [child])
             children = expanded
@@ -1229,11 +1229,67 @@ def container_json(source: str) -> Any:
     return json.loads(source, object_pairs_hook=unique)
 
 
+def web_example_slots(value: Any, path: str) -> dict[tuple[str | int, ...], str]:
+    """Only the maintained five-field web example schema admits raw program text."""
+    if path != "courses/web-development/authoring/chapters.json":
+        return {}
+    if (
+        not isinstance(value, dict)
+        or type(value.get("schema_version")) is not int
+        or value["schema_version"] != 1
+        or not isinstance(value.get("chapters"), list)
+    ):
+        raise FormatFailure("Unknown web authoring chapter schema")
+    slots: dict[tuple[str | int, ...], str] = {}
+    for chapter_index, chapter in enumerate(value["chapters"]):
+        if not isinstance(chapter, dict) or not isinstance(chapter.get("examples"), list):
+            raise FormatFailure("Web chapters require explicit example arrays")
+        for example_index, example in enumerate(chapter["examples"]):
+            if (
+                not isinstance(example, list)
+                or len(example) != 5
+                or not all(isinstance(item, str) for item in example)
+                or re.fullmatch(r"[A-Za-z0-9_+-]+", example[2]) is None
+            ):
+                raise FormatFailure(
+                    "Web examples require heading, intro, language, code and expected text"
+                )
+            slots[("chapters", chapter_index, "examples", example_index, 3)] = example[2]
+    return slots
+
+
+def format_authoring_program(
+    value: str,
+    tag: str,
+    formatter: Formatter,
+    selected: set[str],
+    *,
+    path: str,
+    list_only: bool,
+) -> tuple[str, list[dict[str, Any]]]:
+    if len(value.encode()) > MAX_SNIPPET:
+        raise FormatFailure("Authoring program exceeds its byte bound")
+    marker = "~" * max(3, max((len(m.group()) + 1 for m in re.finditer(r"~+", value)), default=3))
+    # The web renderer appends exactly one separator newline to this raw field.
+    virtual = marker + tag + "\n" + value + "\n" + marker + "\n"
+    output, records = format_document(virtual, formatter, selected, path=path, list_only=list_only)
+    if records and records[0]["status"] in {"clean", "formatted"}:
+        blocks, _ = fences(output)
+        if len(blocks) != 1 or not blocks[0].closed or not blocks[0].body.endswith("\n"):
+            raise FormatFailure("Authoring program wrapper identity changed")
+        result = blocks[0].body[:-1]
+    else:
+        result = value
+    return result, records
+
+
 def format_authoring_json(
     source: str, formatter: Formatter, selected: set[str], *, path: str, list_only: bool = False
 ) -> tuple[str, list[dict[str, Any]]]:
     original = container_json(source)
     revised = copy.deepcopy(original)
+    code_slots = web_example_slots(original, path)
+    example_rows = {trail[:-1] for trail in code_slots}
     # JSON keeps insertion order. Align every raw string token with its parsed
     # key/value role so identical text in prose and expected output stays distinct.
     tokens: list[tuple[str, tuple[str | int, ...], bool, bool]] = []
@@ -1264,27 +1320,34 @@ def format_authoring_json(
             raise FormatFailure("JSON source tokens differ from parsed authoring roles")
         _, trail, prose, is_key = tokens[position]
         position += 1
-        if not is_key and fences(value)[0]:
-            formatted, items = format_document(
-                value,
-                formatter,
-                selected,
-                path=path,
-                list_only=list_only,
-                protected=None if prose else "non-prose-or-unknown-authoring-role",
+        formatted = value
+        items: list[dict[str, Any]] = []
+        raw_program = not is_key and trail in code_slots
+        if raw_program:
+            formatted, items = format_authoring_program(
+                value, code_slots[trail], formatter, selected, path=path, list_only=list_only
             )
-            for item in items:
-                item["virtual_line"] = item["line"]
-                item["line"] = source[:index].count("\n") + 1
-                item["container"] = "json-authoring-string"
-                item["json_path"] = list(trail)
-            records.extend(items)
-            if formatted != value:
-                target = revised
-                for key in trail[:-1]:
-                    target = target[key]
-                target[trail[-1]] = formatted
-                edits.append((index, end, json.dumps(formatted, ensure_ascii=False)))
+        elif not is_key and fences(value)[0]:
+            protected = None if prose else "non-prose-or-unknown-authoring-role"
+            if trail[:-1] in example_rows:
+                protected = "web-example-heading-intro-language-or-expected"
+            formatted, items = format_document(
+                value, formatter, selected, path=path, list_only=list_only, protected=protected
+            )
+        for item in items:
+            item["virtual_line"] = item["line"]
+            item["line"] = source[:index].count("\n") + 1
+            item["container"] = "json-authoring-code" if raw_program else "json-authoring-string"
+            item["json_path"] = list(trail)
+            if raw_program:
+                item["raw_value_sha256"] = hashlib.sha256(value.encode()).hexdigest()
+        records.extend(items)
+        if formatted != value:
+            target = revised
+            for key in trail[:-1]:
+                target = target[key]
+            target[trail[-1]] = formatted
+            edits.append((index, end, json.dumps(formatted, ensure_ascii=False)))
         index = end
     if position != len(tokens):
         raise FormatFailure("JSON source has incomplete role coverage")

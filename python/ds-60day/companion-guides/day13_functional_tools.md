@@ -120,6 +120,7 @@ identify which line creates each intermediate object.
 def normalize_name(text: str) -> str:
     return " ".join(text.strip().title().split())
 
+
 raw_names = ["  ada lovelace", "GRACE   HOPPER  "]
 normalized_iter = map(normalize_name, raw_names)
 list(normalized_iter)
@@ -203,9 +204,11 @@ of them as blank-code prompts:
 from functools import lru_cache
 from itertools import chain, islice
 
+
 @lru_cache(maxsize=128)
 def expensive_label(code: int) -> str:
     return f"item-{code:04d}"
+
 
 pages = [[1, 2], [3, 4], [5]]
 first_three = list(islice(chain.from_iterable(pages), 3))

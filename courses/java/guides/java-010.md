@@ -49,19 +49,38 @@ The caller invokes the same method name while the concrete behavior differs. The
 import java.util.*;
 
 public class Main {
-    interface Pricing { int price(int amount); }
-    static void requireNonnegative(int amount) { if(amount<0) throw new IllegalArgumentException("negative amount"); }
-    record Fee(Pricing delegate,int cents) implements Pricing {
-        Fee { Objects.requireNonNull(delegate); requireNonnegative(cents); }
-        public int price(int amount) { return Math.addExact(delegate.price(amount),cents); }
-    }
-    public static void main(String[] args) throws Exception {
-        Pricing regular = amount -> { requireNonnegative(amount); return amount; };
-        Pricing half = amount -> { requireNonnegative(amount); return amount / 2; };
-        assert regular.price(100) == 100 && half.price(100) == 50;
-    }
-}
 
+  interface Pricing {
+    int price(int amount);
+  }
+
+  static void requireNonnegative(int amount) {
+    if (amount < 0) throw new IllegalArgumentException("negative amount");
+  }
+
+  record Fee(Pricing delegate, int cents) implements Pricing {
+    Fee {
+      Objects.requireNonNull(delegate);
+      requireNonnegative(cents);
+    }
+
+    public int price(int amount) {
+      return Math.addExact(delegate.price(amount), cents);
+    }
+  }
+
+  public static void main(String[] args) throws Exception {
+    Pricing regular = amount -> {
+      requireNonnegative(amount);
+      return amount;
+    };
+    Pricing half = amount -> {
+      requireNonnegative(amount);
+      return amount / 2;
+    };
+    assert regular.price(100) == 100 && half.price(100) == 50;
+  }
+}
 ```
 
 **Expected:** 100 and 50.
@@ -74,22 +93,41 @@ The wrapper delegates first and then adds its policy. It does not duplicate the 
 import java.util.*;
 
 public class Main {
-    interface Pricing { int price(int amount); }
-    static void requireNonnegative(int amount) { if(amount<0) throw new IllegalArgumentException("negative amount"); }
-    record Fee(Pricing delegate,int cents) implements Pricing {
-        Fee { Objects.requireNonNull(delegate); requireNonnegative(cents); }
-        public int price(int amount) { return Math.addExact(delegate.price(amount),cents); }
-    }
-    public static void main(String[] args) throws Exception {
-        Pricing regular = amount -> { requireNonnegative(amount); return amount; };
-        Pricing half = amount -> { requireNonnegative(amount); return amount / 2; };
-        assert regular.price(100) == 100 && half.price(100) == 50;
 
-        Pricing withFee = new Fee(half, 10);
-        assert withFee.price(100) == 60;
+  interface Pricing {
+    int price(int amount);
+  }
+
+  static void requireNonnegative(int amount) {
+    if (amount < 0) throw new IllegalArgumentException("negative amount");
+  }
+
+  record Fee(Pricing delegate, int cents) implements Pricing {
+    Fee {
+      Objects.requireNonNull(delegate);
+      requireNonnegative(cents);
     }
+
+    public int price(int amount) {
+      return Math.addExact(delegate.price(amount), cents);
+    }
+  }
+
+  public static void main(String[] args) throws Exception {
+    Pricing regular = amount -> {
+      requireNonnegative(amount);
+      return amount;
+    };
+    Pricing half = amount -> {
+      requireNonnegative(amount);
+      return amount / 2;
+    };
+    assert regular.price(100) == 100 && half.price(100) == 50;
+
+    Pricing withFee = new Fee(half, 10);
+    assert withFee.price(100) == 60;
+  }
 }
-
 ```
 
 **Expected:** price100 becomes60.

@@ -33,7 +33,7 @@ const controller = new AbortController();
 const reason = new Error('learner cancelled');
 const pending = delay(1000, 'unused', { signal: controller.signal });
 controller.abort(reason);
-await assert.rejects(pending, error => error.name === 'AbortError' && error.cause === reason);
+await assert.rejects(pending, (error) => error.name === 'AbortError' && error.cause === reason);
 ```
 
 **Expected:** AbortError with the original reason as cause.
@@ -51,7 +51,7 @@ const controller = new AbortController();
 const reason = new Error('already stopped');
 controller.abort(reason);
 const trace = [];
-await assert.rejects(cancellableValue(7, controller.signal, trace), error => error === reason);
+await assert.rejects(cancellableValue(7, controller.signal, trace), (error) => error === reason);
 assert.deepEqual(trace, []);
 ```
 
@@ -89,7 +89,7 @@ const trace = [];
 const reason = new Error('stop');
 const pending = cancellableValue(7, controller.signal, trace);
 controller.abort(reason);
-await assert.rejects(pending, error => error === reason);
+await assert.rejects(pending, (error) => error === reason);
 assert.deepEqual(trace, ['started', 'aborted', 'cleaned']);
 ```
 
@@ -109,7 +109,10 @@ const first = new Error('first');
 controller.abort(first);
 controller.abort(new Error('second'));
 assert.equal(controller.signal.reason, first);
-assert.throws(() => controller.signal.throwIfAborted(), error => error === first);
+assert.throws(
+  () => controller.signal.throwIfAborted(),
+  (error) => error === first,
+);
 ```
 
 **Expected:** the first reason remains authoritative.

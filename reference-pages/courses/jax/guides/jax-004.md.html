@@ -214,6 +214,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A function returning a new tuple makes the update explicit. The caller still owns the old value.</p>
 <p><strong>Expected:</strong> Old (0,0); new (3,1), mean 3.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-string">&quot;&quot;&quot;Small offline JAX mechanism investigation; CPU evidence only.&quot;&quot;&quot;</span>
+
 <span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
 
 <span class="syntax-keyword">import</span> math
@@ -222,13 +223,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-keyword">import</span> jax.numpy <span class="syntax-keyword">as</span> jnp
 
 
-
 <span class="syntax-comment"># Choose precision before creating arrays; the usual JAX default is 32 bit.</span>
 jax<span class="syntax-operator">.</span>config<span class="syntax-operator">.</span>update<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">jax_enable_x64</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">def</span> <span class="syntax-function">close</span><span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-10</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">1e-10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span>atol<span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span>rtol<span class="syntax-punctuation">)</span>
+
 
 <span class="syntax-keyword">def</span> <span class="syntax-function">transition</span><span class="syntax-punctuation">(</span>state<span class="syntax-punctuation">,</span> value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     total<span class="syntax-punctuation">,</span> count <span class="syntax-operator">=</span> state
@@ -241,17 +242,18 @@ jax<span class="syntax-operator">.</span>config<span class="syntax-operator">.</
         <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">no observations</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
     <span class="syntax-keyword">return</span> total <span class="syntax-operator">/</span> count
 
-initial <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>jnp<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">(</span><span class="syntax-number">0.</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> jnp<span class="syntax-operator">.</span>int64<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+
+initial <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>jnp<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">(</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> jnp<span class="syntax-operator">.</span>int64<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-comment"># Case 1: Retain old and new state</span>
-    new <span class="syntax-operator">=</span> transition<span class="syntax-punctuation">(</span>initial<span class="syntax-punctuation">,</span> <span class="syntax-number">3.</span><span class="syntax-punctuation">)</span>
-    close<span class="syntax-punctuation">(</span>initial<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.</span><span class="syntax-punctuation">)</span>
+    new <span class="syntax-operator">=</span> transition<span class="syntax-punctuation">(</span>initial<span class="syntax-punctuation">,</span> <span class="syntax-number">3.0</span><span class="syntax-punctuation">)</span>
+    close<span class="syntax-punctuation">(</span>initial<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">)</span>
     <span class="syntax-keyword">assert</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>initial<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span>
-    close<span class="syntax-punctuation">(</span>mean_of<span class="syntax-punctuation">(</span>new<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3.</span><span class="syntax-punctuation">)</span>
+    close<span class="syntax-punctuation">(</span>mean_of<span class="syntax-punctuation">(</span>new<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3.0</span><span class="syntax-punctuation">)</span>
 
-    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">jax-004</span><span class="syntax-string">&#x27;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">: 1 asserted cases passed</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">jax-004</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&quot;</span><span class="syntax-string">: 1 asserted cases passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
@@ -261,6 +263,7 @@ initial <span class="syntax-operator">=</span> <span class="syntax-punctuation">
 <p>The total/count representation preserves the observation-weighted question. Group means alone conceal the unequal sample sizes.</p>
 <p><strong>Expected:</strong> Combined mean 14/3, not the equal-group mean 6.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-string">&quot;&quot;&quot;Small offline JAX mechanism investigation; CPU evidence only.&quot;&quot;&quot;</span>
+
 <span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
 
 <span class="syntax-keyword">import</span> math
@@ -269,13 +272,13 @@ initial <span class="syntax-operator">=</span> <span class="syntax-punctuation">
 <span class="syntax-keyword">import</span> jax.numpy <span class="syntax-keyword">as</span> jnp
 
 
-
 <span class="syntax-comment"># Choose precision before creating arrays; the usual JAX default is 32 bit.</span>
 jax<span class="syntax-operator">.</span>config<span class="syntax-operator">.</span>update<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">jax_enable_x64</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">def</span> <span class="syntax-function">close</span><span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-10</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">1e-10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span>atol<span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span>rtol<span class="syntax-punctuation">)</span>
+
 
 <span class="syntax-keyword">def</span> <span class="syntax-function">transition</span><span class="syntax-punctuation">(</span>state<span class="syntax-punctuation">,</span> value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     total<span class="syntax-punctuation">,</span> count <span class="syntax-operator">=</span> state
@@ -288,16 +291,17 @@ jax<span class="syntax-operator">.</span>config<span class="syntax-operator">.</
         <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">no observations</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
     <span class="syntax-keyword">return</span> total <span class="syntax-operator">/</span> count
 
-initial <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>jnp<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">(</span><span class="syntax-number">0.</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> jnp<span class="syntax-operator">.</span>int64<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+
+initial <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>jnp<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">(</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> jnp<span class="syntax-operator">.</span>int64<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-comment"># Case 1: Counts change weighting</span>
-    combined <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>jnp<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">(</span><span class="syntax-number">4.</span> <span class="syntax-operator">+</span> <span class="syntax-number">10.</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> jnp<span class="syntax-operator">.</span>int64<span class="syntax-punctuation">(</span><span class="syntax-number">2</span> <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    combined <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>jnp<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">(</span><span class="syntax-number">4.0</span> <span class="syntax-operator">+</span> <span class="syntax-number">10.0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> jnp<span class="syntax-operator">.</span>int64<span class="syntax-punctuation">(</span><span class="syntax-number">2</span> <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
     close<span class="syntax-punctuation">(</span>mean_of<span class="syntax-punctuation">(</span>combined<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">14</span> <span class="syntax-operator">/</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
-    <span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>mean_of<span class="syntax-punctuation">(</span>combined<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6.</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>mean_of<span class="syntax-punctuation">(</span>combined<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6.0</span><span class="syntax-punctuation">)</span>
 
-    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">jax-004</span><span class="syntax-string">&#x27;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">: 1 asserted cases passed</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">jax-004</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&quot;</span><span class="syntax-string">: 1 asserted cases passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>

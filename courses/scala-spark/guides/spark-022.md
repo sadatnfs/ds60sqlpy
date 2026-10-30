@@ -59,15 +59,27 @@ import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 
-val source = spark.range(0L,20000L,1L,4).withColumn("key",col("id") % 1000L)
+val source = spark.range(0L, 20000L, 1L, 4).withColumn("key", col("id") % 1000L)
 val originalShuffle = spark.conf.get("spark.sql.shuffle.partitions")
 ```
 
 ```python
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 
-source = spark.range(0,20000,1,4).withColumn("key",F.col("id")%1000)
+source = spark.range(0, 20000, 1, 4).withColumn("key", F.col("id") % 1000)
 original_shuffle = spark.conf.get("spark.sql.shuffle.partitions")
 ```
 
@@ -98,7 +110,7 @@ println("Local partial aggregation can reduce occurrences before redistribution;
 ```
 
 ```python
-partial_upper = 4*1000
+partial_upper = 4 * 1000
 assert partial_upper == 4000 and partial_upper < 20000
 print("Local partial aggregation can reduce occurrences before redistribution;this is a model")
 ```

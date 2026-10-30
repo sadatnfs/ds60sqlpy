@@ -23,7 +23,8 @@ The question is: Use scores[2,1,0] and choose the maximum index.
 Only ranking matters to greedy selection. A common shift or positive temperature preserves this particular decision.
 
 ```python
-scores=np.array([2.,1.,0.]); assert int(np.argmax(scores))==0
+scores = np.array([2.0, 1.0, 0.0])
+assert int(np.argmax(scores)) == 0
 ```
 
 **Expected:** token0.
@@ -37,8 +38,9 @@ The question is: Compare probabilities at temperatures1 and.5 using stable softm
 Sharper probabilities make high-scoring tokens more likely without changing their order. They do not create new evidence that the selected token is correct.
 
 ```python
-p=softmax(scores); cool=softmax(scores/.5)
-assert cool[0]>p[0] and p.argmax()==cool.argmax()==0
+p = softmax(scores)
+cool = softmax(scores / 0.5)
+assert cool[0] > p[0] and p.argmax() == cool.argmax() == 0
 ```
 
 **Expected:** token0 probability increases; argmax stays0.
@@ -52,8 +54,9 @@ The question is: Sample from probabilities[.5,.3,.2] with draws .1,.6,.9.
 The intervals are[0,.5),[.5,.8),[.8,1). Supplying draws directly makes the sampling mechanism testable without relying on a platform random bit pattern.
 
 ```python
-mass=np.array([.5,.3,.2]); cumulative=np.cumsum(mass)
-assert [int(np.searchsorted(cumulative,d,side='right')) for d in [.1,.6,.9]]==[0,1,2]
+mass = np.array([0.5, 0.3, 0.2])
+cumulative = np.cumsum(mass)
+assert [int(np.searchsorted(cumulative, d, side="right")) for d in [0.1, 0.6, 0.9]] == [0, 1, 2]
 ```
 
 **Expected:** tokens0,1,2.
@@ -67,8 +70,11 @@ The question is: Apply top-k2 to scores[2,1,0] and normalize only retained candi
 Zeroing a probability after softmax without renormalizing would leave missing mass. Filtering is a policy that changes the final distribution.
 
 ```python
-allowed=np.argsort(-scores,kind='stable')[:2]; filtered=np.zeros(3); filtered[allowed]=softmax(scores[allowed])
-assert filtered[2]==0; np.testing.assert_allclose(filtered.sum(),1,atol=1e-12,rtol=0)
+allowed = np.argsort(-scores, kind="stable")[:2]
+filtered = np.zeros(3)
+filtered[allowed] = softmax(scores[allowed])
+assert filtered[2] == 0
+np.testing.assert_allclose(filtered.sum(), 1, atol=1e-12, rtol=0)
 ```
 
 **Expected:** token 2 probability0; first two sum1.
@@ -82,7 +88,7 @@ The question is: Use equal scores[1,1,0] and choose the smallest-index maximum.
 A deterministic tie rule makes repeated decisions explainable. Other valid policies exist, but an undocumented implementation detail should not determine a public contract.
 
 ```python
-assert int(np.argmax([1,1,0]))==0
+assert int(np.argmax([1, 1, 0])) == 0
 ```
 
 **Expected:** token0 under the stated rule.
@@ -97,13 +103,19 @@ A draw of one lies outside every half-open interval and can produce an out-of-ra
 
 ```python
 def validate_draw(draw):
-    if not np.isfinite(draw) or not 0<=draw<1: raise ValueError('draw in [0,1)')
+    if not np.isfinite(draw) or not 0 <= draw < 1:
+        raise ValueError("draw in [0,1)")
     return draw
-assert validate_draw(0)==0 and validate_draw(.999)==.999
-for bad in [1,-.1]:
-    try: validate_draw(bad)
-    except ValueError: pass
-    else: raise AssertionError('invalid draw')
+
+
+assert validate_draw(0) == 0 and validate_draw(0.999) == 0.999
+for bad in [1, -0.1]:
+    try:
+        validate_draw(bad)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("invalid draw")
 ```
 
 **Expected:** 0 and.999 accepted;1 and-.1 rejected.

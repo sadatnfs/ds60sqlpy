@@ -60,11 +60,13 @@ def compact_profile(frame: pd.DataFrame) -> dict[str, object]:
     }
 
 
-sample = pd.DataFrame({
-    "customer": [1, 2, 2, 3, 4],
-    "amount": [10.0, 20.0, 20.0, None, 200.0],
-    "segment": ["new", "returning", "returning", "new", "unknown"],
-})
+sample = pd.DataFrame(
+    {
+        "customer": [1, 2, 2, 3, 4],
+        "amount": [10.0, 20.0, 20.0, None, 200.0],
+        "segment": ["new", "returning", "returning", "new", "unknown"],
+    }
+)
 profile = compact_profile(sample)
 scope = {
     "question": "How does known amount differ by customer segment?",
@@ -73,14 +75,11 @@ scope = {
     "rows": len(sample),
 }
 amount_distribution = sample["amount"].describe()
-segment_summary = (
-    sample.groupby("segment", dropna=False, as_index=False)
-    .agg(
-        rows=("customer", "size"),
-        known_amounts=("amount", "count"),
-        total_amount=("amount", "sum"),
-        median_amount=("amount", "median"),
-    )
+segment_summary = sample.groupby("segment", dropna=False, as_index=False).agg(
+    rows=("customer", "size"),
+    known_amounts=("amount", "count"),
+    total_amount=("amount", "sum"),
+    median_amount=("amount", "median"),
 )
 observations = [
     {
@@ -115,51 +114,57 @@ not proof that its segment causes higher amounts.
 **Reasoning:** Trace the concrete values in this contract one step at a time: Add a data-quality register with one row per issue: evidence/count, possible analytical impact, proposed treatment, validation check, and status. Coverage: missingness, duplicates/key uniqueness, ranges, categories, and at least one dataset-specific rule. Record the named value, shape, label, or iterator position needed to establish: trace how each accepted treatment changes row count or a key measure and preserve rejected/unresolved issues as caveats. The trace exposes question-led exploratory data analysis with evidence, caveats, and quality checks directly.
 
 ```python
-quality_issues = pd.DataFrame([
-    {
-        "issue": "duplicate business key",
-        "evidence": 1,
-        "possible_impact": "double-counted amount",
-        "proposed_treatment": "remove the exact repeated row",
-        "validation": "customer key uniqueness and total reconciliation",
-        "status": "accepted",
-    },
-    {
-        "issue": "missing amount",
-        "evidence": int(sample["amount"].isna().sum()),
-        "possible_impact": "incomplete totals",
-        "proposed_treatment": "retain until source policy is known",
-        "validation": "missing count remains visible",
-        "status": "open",
-    },
-    {
-        "issue": "amount range",
-        "evidence": int(sample["amount"].gt(100).sum()),
-        "possible_impact": "extreme values dominate totals",
-        "proposed_treatment": "retain and report robust summaries",
-        "validation": "median and maximum both reported",
-        "status": "accepted",
-    },
-    {
-        "issue": "unexpected category",
-        "evidence": int(sample["segment"].eq("unknown").sum()),
-        "possible_impact": "segment comparison is incomplete",
-        "proposed_treatment": "preserve as explicit unknown",
-        "validation": "unknown remains a visible group",
-        "status": "open",
-    },
-    {
-        "issue": "customer-specific nonnegative amount rule",
-        "evidence": int(sample["amount"].lt(0).sum()),
-        "possible_impact": "negative amount would invert totals",
-        "proposed_treatment": "quarantine negatives if observed",
-        "validation": "accepted known amounts are nonnegative",
-        "status": "accepted",
-    },
-])
+quality_issues = pd.DataFrame(
+    [
+        {
+            "issue": "duplicate business key",
+            "evidence": 1,
+            "possible_impact": "double-counted amount",
+            "proposed_treatment": "remove the exact repeated row",
+            "validation": "customer key uniqueness and total reconciliation",
+            "status": "accepted",
+        },
+        {
+            "issue": "missing amount",
+            "evidence": int(sample["amount"].isna().sum()),
+            "possible_impact": "incomplete totals",
+            "proposed_treatment": "retain until source policy is known",
+            "validation": "missing count remains visible",
+            "status": "open",
+        },
+        {
+            "issue": "amount range",
+            "evidence": int(sample["amount"].gt(100).sum()),
+            "possible_impact": "extreme values dominate totals",
+            "proposed_treatment": "retain and report robust summaries",
+            "validation": "median and maximum both reported",
+            "status": "accepted",
+        },
+        {
+            "issue": "unexpected category",
+            "evidence": int(sample["segment"].eq("unknown").sum()),
+            "possible_impact": "segment comparison is incomplete",
+            "proposed_treatment": "preserve as explicit unknown",
+            "validation": "unknown remains a visible group",
+            "status": "open",
+        },
+        {
+            "issue": "customer-specific nonnegative amount rule",
+            "evidence": int(sample["amount"].lt(0).sum()),
+            "possible_impact": "negative amount would invert totals",
+            "proposed_treatment": "quarantine negatives if observed",
+            "validation": "accepted known amounts are nonnegative",
+            "status": "accepted",
+        },
+    ]
+)
 assert set(quality_issues.columns) == {
-    "issue", "evidence", "possible_impact",
-    "proposed_treatment", "validation", "status"
+    "issue",
+    "evidence",
+    "possible_impact",
+    "proposed_treatment",
+    "validation",
+    "status",
 }
 
 before_rows = len(sample)
@@ -173,9 +178,10 @@ assert treatment_impact == {
     "rows_removed": 1,
     "known_amount_removed": 20.0,
 }
-assert quality_issues.loc[
-    quality_issues["status"].eq("open"), "issue"
-].tolist() == ["missing amount", "unexpected category"]
+assert quality_issues.loc[quality_issues["status"].eq("open"), "issue"].tolist() == [
+    "missing amount",
+    "unexpected category",
+]
 ```
 
 Only the accepted exact-duplicate treatment changes data here, and its
@@ -263,9 +269,7 @@ def compact_profile(frame: pd.DataFrame) -> dict[str, object]:
     }
 
 
-sample = pd.DataFrame(
-    {"group": ["A", "A", "B"], "value": [1.0, 1.0, None], "constant": [7, 7, 7]}
-)
+sample = pd.DataFrame({"group": ["A", "A", "B"], "value": [1.0, 1.0, None], "constant": [7, 7, 7]})
 profile = compact_profile(sample)
 assert profile["shape"] == (3, 3)
 assert profile["unique_count"]["constant"] == 1

@@ -97,20 +97,28 @@ These worked excerpts come from `sql/postgres-60day/day56_project4_bi_part2.sql`
 
 ```sql
 WITH orders_m AS (
-  SELECT c.country,
-         date_trunc('month', o.order_date)::date AS month,
-         o.total_amount AS amt
-  FROM orders o
-  JOIN customers c ON c.customer_id = o.customer_id
+  SELECT
+    c.country,
+    date_trunc('month', o.order_date)::date AS month,
+    o.total_amount AS amt
+  FROM
+    orders o
+    JOIN customers c ON c.customer_id = o.customer_id
 )
-SELECT country,
-       month,
-       PERCENTILE_CONT(0.5)  WITHIN GROUP (ORDER BY amt) AS p50,
-       PERCENTILE_CONT(0.9)  WITHIN GROUP (ORDER BY amt) AS p90,
-       PERCENTILE_CONT(0.99) WITHIN GROUP (ORDER BY amt) AS p99
-FROM orders_m
-GROUP BY country, month
-ORDER BY month DESC, country
+SELECT
+  country,
+  month,
+  PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY amt) AS p50,
+  PERCENTILE_CONT(0.9) WITHIN GROUP (ORDER BY amt) AS p90,
+  PERCENTILE_CONT(0.99) WITHIN GROUP (ORDER BY amt) AS p99
+FROM
+  orders_m
+GROUP BY
+  country,
+  month
+ORDER BY
+  month DESC,
+  country
 LIMIT 200;
 ```
 
@@ -122,24 +130,42 @@ LIMIT 200;
 
 ```sql
 WITH prod_rev AS (
-  SELECT c.country,
-         p.category,
-         p.product_id,
-         p.name,
-         SUM(oi.unit_price*oi.quantity*(1-oi.discount)) AS revenue
-  FROM orders o
-  JOIN customers c  ON c.customer_id = o.customer_id
-  JOIN order_items oi ON oi.order_id = o.order_id
-  JOIN products p   ON p.product_id = oi.product_id
-  GROUP BY c.country, p.category, p.product_id, p.name
-), ranked AS (
-  SELECT *, RANK() OVER (PARTITION BY country ORDER BY revenue DESC) AS rnk_country,
-            RANK() OVER (PARTITION BY country, category ORDER BY revenue DESC) AS rnk_in_cat
-  FROM prod_rev
+  SELECT
+    c.country,
+    p.category,
+    p.product_id,
+    p.name,
+    SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS revenue
+  FROM
+    orders o
+    JOIN customers c ON c.customer_id = o.customer_id
+    JOIN order_items oi ON oi.order_id = o.order_id
+    JOIN products p ON p.product_id = oi.product_id
+  GROUP BY
+    c.country,
+    p.category,
+    p.product_id,
+    p.name
+),
+ranked AS (
+  SELECT
+    *,
+    RANK() OVER (PARTITION BY country ORDER BY revenue DESC) AS rnk_country,
+    RANK() OVER (PARTITION BY country,
+      category ORDER BY revenue DESC) AS rnk_in_cat
+  FROM
+    prod_rev
 )
-SELECT * FROM ranked
-WHERE rnk_in_cat <= 5
-ORDER BY country, category, rnk_in_cat;
+SELECT
+  *
+FROM
+  ranked
+WHERE
+  rnk_in_cat <= 5
+ORDER BY
+  country,
+  category,
+  rnk_in_cat;
 ```
 
 **How to read it:** Example 2: Start with `orders`, `customers`, `order_items`, and `products` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows; let `GROUP BY` collapse rows to its grouping keys; let each `OVER` expression calculate across related rows without collapsing them. The final `SELECT` displays `*`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.

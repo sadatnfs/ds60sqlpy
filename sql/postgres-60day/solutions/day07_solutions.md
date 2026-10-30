@@ -82,14 +82,19 @@ executable companion when you want a self-contained check.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT o.status,
-       COUNT(*) AS order_count,
-       COUNT(DISTINCT o.customer_id) AS customer_count,
-       ROUND(SUM(o.total_amount), 2) AS revenue,
-       ROUND(AVG(o.total_amount), 2) AS average_order_value
-FROM orders AS o
-GROUP BY o.status
-ORDER BY revenue DESC, o.status;
+SELECT
+  o.status,
+  COUNT(*) AS order_count,
+  COUNT(DISTINCT o.customer_id) AS customer_count,
+  ROUND(SUM(o.total_amount), 2) AS revenue,
+  ROUND(AVG(o.total_amount), 2) AS average_order_value
+FROM
+  orders AS o
+GROUP BY
+  o.status
+ORDER BY
+  revenue DESC,
+  o.status;
 ```
 
 **Expected shape:** One row per order status.
@@ -124,15 +129,21 @@ cardinality contract.
 - `LIMIT`: is applied after ordering and is meaningful only when the query first defines which rows come first.
 
 ```sql
-SELECT p.product_id,
-       p.name,
-       p.category,
-       ROUND(SUM(oi.unit_price * oi.quantity * (1 - oi.discount)), 2) AS net_revenue
-FROM products AS p
-JOIN order_items AS oi
-  ON oi.product_id = p.product_id
-GROUP BY p.product_id, p.name, p.category
-ORDER BY net_revenue DESC, p.product_id
+SELECT
+  p.product_id,
+  p.name,
+  p.category,
+  ROUND(SUM(oi.unit_price * oi.quantity * (1 - oi.discount)), 2) AS net_revenue
+FROM
+  products AS p
+  JOIN order_items AS oi ON oi.product_id = p.product_id
+GROUP BY
+  p.product_id,
+  p.name,
+  p.category
+ORDER BY
+  net_revenue DESC,
+  p.product_id
 LIMIT 20;
 ```
 
@@ -168,16 +179,22 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT c.customer_id,
-       c.full_name,
-       c.country,
-       COUNT(o.order_id) AS order_count,
-       COALESCE(ROUND(SUM(o.total_amount), 2), 0) AS stored_order_total
-FROM customers AS c
-LEFT JOIN orders AS o
-  ON o.customer_id = c.customer_id
-GROUP BY c.customer_id, c.full_name, c.country
-ORDER BY stored_order_total DESC, c.customer_id;
+SELECT
+  c.customer_id,
+  c.full_name,
+  c.country,
+  COUNT(o.order_id) AS order_count,
+  COALESCE(ROUND(SUM(o.total_amount), 2), 0) AS stored_order_total
+FROM
+  customers AS c
+  LEFT JOIN orders AS o ON o.customer_id = c.customer_id
+GROUP BY
+  c.customer_id,
+  c.full_name,
+  c.country
+ORDER BY
+  stored_order_total DESC,
+  c.customer_id;
 ```
 
 **Expected shape:** One row per customer.
@@ -214,29 +231,38 @@ cardinality contract.
 
 ```sql
 WITH item_totals AS (
-  SELECT oi.order_id,
-         SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS line_total
-  FROM order_items AS oi
-  GROUP BY oi.order_id
-), payment_totals AS (
-  SELECT p.order_id,
-         SUM(p.amount) AS paid_total
-  FROM payments AS p
-  GROUP BY p.order_id
+  SELECT
+    oi.order_id,
+    SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS line_total
+  FROM
+    order_items AS oi
+  GROUP BY
+    oi.order_id
+),
+payment_totals AS (
+  SELECT
+    p.order_id,
+    SUM(p.amount) AS paid_total
+  FROM
+    payments AS p
+  GROUP BY
+    p.order_id
 )
-SELECT o.order_id,
-       o.status,
-       ROUND(o.total_amount, 2) AS stored_total,
-       ROUND(it.line_total, 2) AS line_total,
-       ROUND(o.total_amount - it.line_total, 2) AS storage_difference,
-       ROUND(COALESCE(pt.paid_total, 0), 2) AS paid_total,
-       ROUND(o.total_amount - COALESCE(pt.paid_total, 0), 2) AS unpaid_balance
-FROM orders AS o
-JOIN item_totals AS it
-  ON it.order_id = o.order_id
-LEFT JOIN payment_totals AS pt
-  ON pt.order_id = o.order_id
-ORDER BY ABS(o.total_amount - it.line_total) DESC, o.order_id;
+SELECT
+  o.order_id,
+  o.status,
+  ROUND(o.total_amount, 2) AS stored_total,
+  ROUND(it.line_total, 2) AS line_total,
+  ROUND(o.total_amount - it.line_total, 2) AS storage_difference,
+  ROUND(COALESCE(pt.paid_total, 0), 2) AS paid_total,
+  ROUND(o.total_amount - COALESCE(pt.paid_total, 0), 2) AS unpaid_balance
+FROM
+  orders AS o
+  JOIN item_totals AS it ON it.order_id = o.order_id
+  LEFT JOIN payment_totals AS pt ON pt.order_id = o.order_id
+ORDER BY
+  ABS(o.total_amount - it.line_total) DESC,
+  o.order_id;
 ```
 
 **Expected shape:** One row per order with signed differences.
@@ -270,12 +296,16 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT date_trunc('month', o.order_date)::date AS order_month,
-       COUNT(*) AS order_count,
-       ROUND(SUM(o.total_amount), 2) AS stored_revenue
-FROM orders AS o
-GROUP BY date_trunc('month', o.order_date)
-ORDER BY order_month;
+SELECT
+  date_trunc('month', o.order_date)::date AS order_month,
+  COUNT(*) AS order_count,
+  ROUND(SUM(o.total_amount), 2) AS stored_revenue
+FROM
+  orders AS o
+GROUP BY
+  date_trunc('month', o.order_date)
+ORDER BY
+  order_month;
 ```
 
 **Expected shape:** One row per observed order month.
@@ -307,14 +337,40 @@ cardinality contract.
 - `WHERE`: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass.
 
 ```sql
-SELECT (SELECT COUNT(*) FROM customers) AS customer_rows,
-       (SELECT COUNT(*) FROM orders) AS order_rows,
-       (SELECT COUNT(*) FROM order_items) AS order_item_rows,
-       (SELECT COUNT(*) FROM payments) AS payment_rows,
-       (SELECT COUNT(*) FROM customers AS c
-        WHERE NOT EXISTS (
-          SELECT 1 FROM orders AS o WHERE o.customer_id = c.customer_id
-        )) AS customers_without_orders;
+SELECT
+  (
+    SELECT
+      COUNT(*)
+    FROM
+      customers) AS customer_rows,
+  (
+    SELECT
+      COUNT(*)
+    FROM
+      orders) AS order_rows,
+  (
+    SELECT
+      COUNT(*)
+    FROM
+      order_items) AS order_item_rows,
+  (
+    SELECT
+      COUNT(*)
+    FROM
+      payments) AS payment_rows,
+  (
+    SELECT
+      COUNT(*)
+    FROM
+      customers AS c
+    WHERE
+      NOT EXISTS (
+        SELECT
+          1
+        FROM
+          orders AS o
+        WHERE
+          o.customer_id = c.customer_id)) AS customers_without_orders;
 ```
 
 **Expected shape:** Exactly one audit row.

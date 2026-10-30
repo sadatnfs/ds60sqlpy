@@ -64,9 +64,14 @@ The question is: Use truth a0, b1, c2 with A0, 2, 2 and B 1, 2, 3 in different d
 Dictionary insertion order is not an identity join. The contrast must keep each prediction attached to its own target.
 
 ```python
-truth={'a':0.,'b':1.,'c':2.}; a={'a':0.,'b':2.,'c':2.}; b={'c':3.,'a':1.,'b':2.}; ids=sorted(truth)
-difference=torch.tensor([(a[i]-truth[i])**2-(b[i]-truth[i])**2 for i in ids],dtype=torch.float64)
-assert difference.tolist()==[-1.,0.,-1.]
+truth = {"a": 0.0, "b": 1.0, "c": 2.0}
+a = {"a": 0.0, "b": 2.0, "c": 2.0}
+b = {"c": 3.0, "a": 1.0, "b": 2.0}
+ids = sorted(truth)
+difference = torch.tensor(
+    [(a[i] - truth[i]) ** 2 - (b[i] - truth[i]) ** 2 for i in ids], dtype=torch.float64
+)
+assert difference.tolist() == [-1.0, 0.0, -1.0]
 ```
 
 **Expected:** paired squared-loss differences-1, 0, -1.
@@ -80,7 +85,7 @@ The question is: Average the three paired differences.
 The sign follows the declared A-minus-Blossorder. A negative value favors A only for this metric and assessment set.
 
 ```python
-np.testing.assert_allclose(difference.mean().item(),-2/3,atol=1e-12,rtol=0)
+np.testing.assert_allclose(difference.mean().item(), -2 / 3, atol=1e-12, rtol=0)
 ```
 
 **Expected:** mean \(\frac{-2}{3}\), favoring A on this loss fixture.
@@ -94,8 +99,15 @@ The question is: Draw 1000 three-index bootstrap samples with local Generator se
 The known range of per-record differences bounds every resampled mean. That independent bound can expose an indexing or reduction error.
 
 ```python
-generator=torch.Generator().manual_seed(7); indices=torch.randint(0,3,(1000,3),generator=generator); estimates=difference[indices].mean(1)
-assert tuple(estimates.shape)==(1000,) and torch.isfinite(estimates).all() and estimates.min()>=-1 and estimates.max()<=0
+generator = torch.Generator().manual_seed(7)
+indices = torch.randint(0, 3, (1000, 3), generator=generator)
+estimates = difference[indices].mean(1)
+assert (
+    tuple(estimates.shape) == (1000,)
+    and torch.isfinite(estimates).all()
+    and estimates.min() >= -1
+    and estimates.max() <= 0
+)
 ```
 
 **Expected:** 1000finite estimates within-1..0.
@@ -109,8 +121,8 @@ The question is: Create a new Generator with seed 7 and compare the index matrix
 Reusing an advanced generator would not replay the beginning. The generator state is part of the reproducibility record.
 
 ```python
-again=torch.randint(0,3,(1000,3),generator=torch.Generator().manual_seed(7))
-assert torch.equal(indices,again)
+again = torch.randint(0, 3, (1000, 3), generator=torch.Generator().manual_seed(7))
+assert torch.equal(indices, again)
 ```
 
 **Expected:** exact match.
@@ -124,8 +136,8 @@ The question is: Remove c from one prediction dictionary and check the keyset.
 Silently inner-joining would drop a missing prediction and change the evaluation population. Define a failure policy instead of removing hard cases.
 
 ```python
-missing={key:value for key,value in b.items() if key!='c'}
-assert set(missing)!=set(truth)
+missing = {key: value for key, value in b.items() if key != "c"}
+assert set(missing) != set(truth)
 ```
 
 **Expected:** mismatch detected before comparison.
@@ -139,9 +151,9 @@ The question is: Record configuration choice on validation and assessment on tes
 The boundary depends on the actual decision sequence, not on the dataset filename. After test-driven changes, new untouched evidence is needed.
 
 ```python
-ledger=[('choose','validation'),('assess','test')]
-assert all(partition=='validation' for action,partition in ledger if action=='choose')
-assert ('choose','test')[1]!='validation'
+ledger = [("choose", "validation"), ("assess", "test")]
+assert all(partition == "validation" for action, partition in ledger if action == "choose")
+assert ("choose", "test")[1] != "validation"
 ```
 
 **Expected:** test selection violates the declared boundary.

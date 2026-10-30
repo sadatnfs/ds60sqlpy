@@ -97,47 +97,66 @@ These worked excerpts come from `sql/postgres-60day/day55_project4_bi_part1.sql`
 
 ```sql
 WITH payment_by_method AS (
-  SELECT order_id, method, SUM(amount) AS method_amount
-  FROM payments
-  GROUP BY order_id, method
-), primary_payment_method AS (
-  SELECT order_id, method
+  SELECT
+    order_id,
+    method,
+    SUM(amount) AS method_amount
+  FROM
+    payments
+  GROUP BY
+    order_id,
+    method
+),
+primary_payment_method AS (
+  SELECT
+    order_id,
+    method
   FROM (
-    SELECT order_id,
-           method,
-           ROW_NUMBER() OVER (
-             PARTITION BY order_id
-             ORDER BY method_amount DESC, method
-           ) AS method_rank
-    FROM payment_by_method
-  ) ranked_methods
-  WHERE method_rank = 1
-), line AS (
-  SELECT c.country,
-         p.category,
-         COALESCE(pm.method, 'unpaid') AS payment_method,
-         date_trunc('month', o.order_date)::date AS month,
-         (oi.unit_price*oi.quantity*(1-oi.discount)) AS revenue,
-         oi.quantity AS qty
-  FROM orders o
-  JOIN customers c  ON c.customer_id = o.customer_id
-  JOIN order_items oi ON oi.order_id = o.order_id
-  JOIN products p   ON p.product_id = oi.product_id
-  LEFT JOIN primary_payment_method pm ON pm.order_id = o.order_id
+    SELECT
+      order_id,
+      method,
+      ROW_NUMBER() OVER (PARTITION BY order_id ORDER BY method_amount DESC,
+        method) AS method_rank
+  FROM
+    payment_by_method) ranked_methods
+  WHERE
+    method_rank = 1
+),
+line AS (
+  SELECT
+    c.country,
+    p.category,
+    COALESCE(pm.method, 'unpaid') AS payment_method,
+    date_trunc('month', o.order_date)::date AS month,
+    (oi.unit_price * oi.quantity * (1 - oi.discount)) AS revenue,
+    oi.quantity AS qty
+  FROM
+    orders o
+    JOIN customers c ON c.customer_id = o.customer_id
+    JOIN order_items oi ON oi.order_id = o.order_id
+    JOIN products p ON p.product_id = oi.product_id
+    LEFT JOIN primary_payment_method pm ON pm.order_id = o.order_id
 )
-SELECT country,
-       category,
-       payment_method,
-       month,
-       ROUND(SUM(revenue),2) AS revenue,
-       SUM(qty) AS units,
-       GROUPING(country)        AS g_country,
-       GROUPING(category)       AS g_category,
-       GROUPING(payment_method) AS g_method,
-       GROUPING(month)          AS g_month
-FROM line
-GROUP BY ROLLUP (country, category, payment_method, month)
-ORDER BY country NULLS FIRST, category NULLS FIRST, payment_method NULLS FIRST, month NULLS FIRST;
+SELECT
+  country,
+  category,
+  payment_method,
+  month,
+  ROUND(SUM(revenue), 2) AS revenue,
+  SUM(qty) AS units,
+  GROUPING (country) AS g_country,
+  GROUPING (category) AS g_category,
+  GROUPING (payment_method) AS g_method,
+  GROUPING (month) AS g_month
+FROM
+  line
+GROUP BY
+  ROLLUP (country, category, payment_method, month)
+ORDER BY
+  country NULLS FIRST,
+  category NULLS FIRST,
+  payment_method NULLS FIRST,
+  month NULLS FIRST;
 ```
 
 **How to read it:** Example 1: Start with `payments`, `orders`, `customers`, and `order_items` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows; let `GROUP BY` collapse rows to its grouping keys; let each `OVER` expression calculate across related rows without collapsing them. The final `SELECT` displays `country`, `category`, `payment_method`, `month`, `revenue`, `units`, and `g_country`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
@@ -148,20 +167,41 @@ ORDER BY country NULLS FIRST, category NULLS FIRST, payment_method NULLS FIRST, 
 
 ```sql
 WITH prod_rev AS (
-  SELECT c.country, p.category, p.product_id, p.name,
-         SUM(oi.unit_price*oi.quantity*(1-oi.discount)) AS revenue
-  FROM orders o
-  JOIN customers c  ON c.customer_id = o.customer_id
-  JOIN order_items oi ON oi.order_id = o.order_id
-  JOIN products p   ON p.product_id = oi.product_id
-  GROUP BY c.country, p.category, p.product_id, p.name
-), ranked AS (
-  SELECT *,
-         RANK() OVER (PARTITION BY country, category ORDER BY revenue DESC) AS rnk
-  FROM prod_rev
+  SELECT
+    c.country,
+    p.category,
+    p.product_id,
+    p.name,
+    SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS revenue
+  FROM
+    orders o
+    JOIN customers c ON c.customer_id = o.customer_id
+    JOIN order_items oi ON oi.order_id = o.order_id
+    JOIN products p ON p.product_id = oi.product_id
+  GROUP BY
+    c.country,
+    p.category,
+    p.product_id,
+    p.name
+),
+ranked AS (
+  SELECT
+    *,
+    RANK() OVER (PARTITION BY country,
+      category ORDER BY revenue DESC) AS rnk
+  FROM
+    prod_rev
 )
-SELECT * FROM ranked WHERE rnk <= 5
-ORDER BY country, category, rnk;
+SELECT
+  *
+FROM
+  ranked
+WHERE
+  rnk <= 5
+ORDER BY
+  country,
+  category,
+  rnk;
 ```
 
 **How to read it:** Example 2: Start with `orders`, `customers`, `order_items`, and `products` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows; let `GROUP BY` collapse rows to its grouping keys; let each `OVER` expression calculate across related rows without collapsing them. The final `SELECT` displays `*`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.

@@ -27,8 +27,12 @@ Task: Store a small byte array in a list and drop the local variable reference.
 The local reference disappearing does not remove the list's ownership path. This is a common source of unbounded cache or listener retention.
 
 ```java
-List<byte[]> retained=new ArrayList<>();byte[] payload=new byte[1024];payload[0]=7;retained.add(payload);payload=null;
-assert retained.get(0)[0]==7 && retained.get(0).length==1024;
+List<byte[]> retained = new ArrayList<>();
+byte[] payload = new byte[1024];
+payload[0] = 7;
+retained.add(payload);
+payload = null;
+assert retained.get(0)[0] == 7 && retained.get(0).length == 1024;
 ```
 
 **Expected:** list still exposes the same array contents.
@@ -42,8 +46,9 @@ Task: Keep a separate reference,clear the list,and inspect the separate referenc
 Clearing a container removes its references,but another strong reference can keep the object reachable. Reachability is a graph property.
 
 ```java
-byte[] separate=retained.get(0);retained.clear();
-assert retained.isEmpty() && separate[0]==7;
+byte[] separate = retained.get(0);
+retained.clear();
+assert retained.isEmpty() && separate[0] == 7;
 ```
 
 **Expected:** list empty;separate array still valid.
@@ -57,8 +62,9 @@ Task: Create a WeakReference to the still-strongly-referenced array.
 The reachability fence makes the intended lifetime explicit for this observation. The exercise does not assert when collection occurs after strong references disappear.
 
 ```java
-var weak=new java.lang.ref.WeakReference<>(separate);
-assert weak.get()==separate;java.lang.ref.Reference.reachabilityFence(separate);
+var weak = new java.lang.ref.WeakReference<>(separate);
+assert weak.get() == separate;
+java.lang.ref.Reference.reachabilityFence(separate);
 ```
 
 **Expected:** weakget returns the same object while strong reference exists.
@@ -72,8 +78,13 @@ Task: Create ten arrays of 128 bytes and count logical payload bytes.
 Array headers,alignment,references and container overhead are additional. Logical payload arithmetic is not a measured object-layout receipt.
 
 ```java
-List<byte[]> blocks=new ArrayList<>();for(int i=0;i<10;i++)blocks.add(new byte[128]);
-int logical=blocks.stream().mapToInt(block -> block.length).sum();assert logical==1280;
+List<byte[]> blocks = new ArrayList<>();
+for (int i = 0; i < 10; i++) blocks.add(new byte[128]);
+int logical = blocks
+  .stream()
+  .mapToInt(block -> block.length)
+  .sum();
+assert logical == 1280;
 ```
 
 **Expected:** 1280 logical bytes;no exact heap-overhead claim.
@@ -87,9 +98,10 @@ Task: Fill one array repeatedly rather than retaining every intermediate array.
 Reuse can reduce allocations when ownership permits mutation. It can also create aliasing bugs if callers expect historical snapshots,so the contract matters.
 
 ```java
-byte[] buffer=new byte[16];int identity=System.identityHashCode(buffer);
-for(int i=0;i<10;i++)Arrays.fill(buffer,(byte)i);
-assert System.identityHashCode(buffer)==identity && buffer[0]==9;
+byte[] buffer = new byte[16];
+int identity = System.identityHashCode(buffer);
+for (int i = 0; i < 10; i++) Arrays.fill(buffer, (byte) i);
+assert System.identityHashCode(buffer) == identity && buffer[0] == 9;
 ```
 
 **Expected:** same buffer identity;final value9.
@@ -103,8 +115,11 @@ Task: ReadRuntime total/free/max memory and check only valid ordering relationsh
 Counters can change between reads and include runtime behavior outside this fixture. Profiling and controlled measurement are needed for a memory diagnosis.
 
 ```java
-Runtime runtime=Runtime.getRuntime();long total=runtime.totalMemory(),free=runtime.freeMemory(),maximum=runtime.maxMemory();
-assert total>=0 && free>=0 && maximum>=total;
+Runtime runtime = Runtime.getRuntime();
+long total = runtime.totalMemory(),
+  free = runtime.freeMemory(),
+  maximum = runtime.maxMemory();
+assert total >= 0 && free >= 0 && maximum >= total;
 ```
 
 **Expected:** nonnegative counters; max at least total; no claim of exact object size.

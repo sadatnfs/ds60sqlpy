@@ -105,11 +105,22 @@ Sessionization combines multiple window stages. First calculate the prior timest
 ### Example 1
 
 ```sql
-WITH samples(event_id,tick,amount) AS (VALUES(1,1,4),(2,1,6),(3,2,3))
-SELECT event_id,
- sum(amount) OVER(ORDER BY tick,event_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS row_total,
- sum(amount) OVER(ORDER BY tick RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS peer_total
-FROM samples ORDER BY event_id;
+WITH samples (
+  event_id,
+  tick,
+  amount
+) AS (
+  VALUES (1, 1, 4),
+    (2, 1, 6),
+    (3, 2, 3))
+SELECT
+  event_id,
+  sum(amount) OVER (ORDER BY tick, event_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS row_total,
+  sum(amount) OVER (ORDER BY tick RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS peer_total
+FROM
+  samples
+ORDER BY
+  event_id;
 ```
 
 The output remains one row per event_id with row_total and peer_total. Row totals are 4,10,13 while peer totals are 10,10,13. The first frame advances one deterministic event at a time; the second includes the entire current tick peer group. The final ordering prints identities consistently without changing either frame.
@@ -117,10 +128,20 @@ The output remains one row per event_id with row_total and peer_total. Row total
 ### Example 2
 
 ```sql
-WITH samples(event_id,amount) AS (VALUES(1,3),(2,9))
-SELECT event_id,last_value(amount) OVER(ORDER BY event_id) AS default_last,
- last_value(amount) OVER(ORDER BY event_id ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS partition_last
-FROM samples ORDER BY event_id;
+WITH samples (
+  event_id,
+  amount
+) AS (
+  VALUES (1, 3),
+    (2, 9))
+SELECT
+  event_id,
+  last_value(amount) OVER (ORDER BY event_id) AS default_last,
+  last_value(amount) OVER (ORDER BY event_id ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS partition_last
+FROM
+  samples
+ORDER BY
+  event_id;
 ```
 
 One output row per event_id has default_last3 then 9, while partition_last is 9 for both. Explicit UNBOUNDED FOLLOWING makes the second frame cover the entire partition. The function name alone does not determine whether last means current prefix or complete sequence.

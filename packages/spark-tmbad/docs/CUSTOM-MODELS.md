@@ -41,9 +41,8 @@ model.objective = [](const ADVector &p, const Data &data) {
   for (std::size_t i = 0; i < data.rows.size(); ++i) {
     const double x = data.rows[i][0];
     const AD residual = data.rows[i][1] - p[0] - p[1] * x * x;
-    total += data.weights[i] *
-      (p[2] + 0.5 * log_two_pi +
-       0.5 * residual * residual * exp(-2 * p[2]));
+    total += data.weights[i] * (p[2] + 0.5 * log_two_pi +
+                                0.5 * residual * residual * exp(-2 * p[2]));
   }
   return total;
 };

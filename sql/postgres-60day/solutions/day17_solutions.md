@@ -83,15 +83,16 @@ executable companion when you want a self-contained check.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT o.order_id,
-       o.customer_id,
-       o.order_date,
-       ROW_NUMBER() OVER (
-         PARTITION BY o.customer_id
-         ORDER BY o.order_date DESC, o.order_id DESC
-       ) AS recency_number
-FROM orders AS o
-ORDER BY o.customer_id, recency_number;
+SELECT
+  o.order_id,
+  o.customer_id,
+  o.order_date,
+  ROW_NUMBER() OVER (PARTITION BY o.customer_id ORDER BY o.order_date DESC, o.order_id DESC) AS recency_number
+FROM
+  orders AS o
+ORDER BY
+  o.customer_id,
+  recency_number;
 ```
 
 **Expected shape:** One row per order with sequence starting at one per customer.
@@ -125,17 +126,18 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT p.product_id,
-       p.category,
-       p.price,
-       RANK() OVER (
-         PARTITION BY p.category ORDER BY p.price DESC
-       ) AS price_rank,
-       DENSE_RANK() OVER (
-         PARTITION BY p.category ORDER BY p.price DESC
-       ) AS dense_price_rank
-FROM products AS p
-ORDER BY p.category, p.price DESC, p.product_id;
+SELECT
+  p.product_id,
+  p.category,
+  p.price,
+  RANK() OVER (PARTITION BY p.category ORDER BY p.price DESC) AS price_rank,
+  DENSE_RANK() OVER (PARTITION BY p.category ORDER BY p.price DESC) AS dense_price_rank
+FROM
+  products AS p
+ORDER BY
+  p.category,
+  p.price DESC,
+  p.product_id;
 ```
 
 **Expected shape:** One row per product with two rank semantics.
@@ -172,20 +174,26 @@ cardinality contract.
 
 ```sql
 WITH ranked AS (
-  SELECT p.*,
-         DENSE_RANK() OVER (
-           PARTITION BY p.category ORDER BY p.price DESC
-         ) AS price_rank
-  FROM products AS p
+  SELECT
+    p.*,
+    DENSE_RANK() OVER (PARTITION BY p.category ORDER BY p.price DESC) AS price_rank
+  FROM
+    products AS p
 )
-SELECT product_id,
-       name,
-       category,
-       price,
-       price_rank
-FROM ranked
-WHERE price_rank <= 3
-ORDER BY category, price_rank, product_id;
+SELECT
+  product_id,
+  name,
+  category,
+  price,
+  price_rank
+FROM
+  ranked
+WHERE
+  price_rank <= 3
+ORDER BY
+  category,
+  price_rank,
+  product_id;
 ```
 
 **Expected shape:** At least three price levels per category where available.
@@ -219,13 +227,18 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT sample_id,
-       score,
-       ROW_NUMBER() OVER (ORDER BY score DESC, sample_id) AS row_number_value,
-       RANK() OVER (ORDER BY score DESC) AS rank_value,
-       DENSE_RANK() OVER (ORDER BY score DESC) AS dense_rank_value
-FROM (VALUES (1, 100), (2, 100), (3, 90)) AS sample(sample_id, score)
-ORDER BY sample_id;
+SELECT
+  sample_id,
+  score,
+  ROW_NUMBER() OVER (ORDER BY score DESC, sample_id) AS row_number_value,
+  RANK() OVER (ORDER BY score DESC) AS rank_value,
+  DENSE_RANK() OVER (ORDER BY score DESC) AS dense_rank_value
+FROM (
+  VALUES (1, 100),
+    (2, 100),
+    (3, 90)) AS sample (sample_id, score)
+ORDER BY
+  sample_id;
 ```
 
 **Expected shape:** Three rows showing sequences 1/2/3, 1/1/3, and 1/1/2.
@@ -262,20 +275,24 @@ cardinality contract.
 
 ```sql
 WITH numbered AS (
-  SELECT o.*,
-         ROW_NUMBER() OVER (
-           PARTITION BY o.customer_id
-           ORDER BY o.order_date DESC, o.order_id DESC
-         ) AS recency_number
-  FROM orders AS o
+  SELECT
+    o.*,
+    ROW_NUMBER() OVER (PARTITION BY o.customer_id ORDER BY o.order_date DESC,
+      o.order_id DESC) AS recency_number
+  FROM
+    orders AS o
 )
-SELECT order_id,
-       customer_id,
-       order_date,
-       total_amount
-FROM numbered
-WHERE recency_number = 1
-ORDER BY customer_id;
+SELECT
+  order_id,
+  customer_id,
+  order_date,
+  total_amount
+FROM
+  numbered
+WHERE
+  recency_number = 1
+ORDER BY
+  customer_id;
 ```
 
 **Expected shape:** At most one row per customer.
@@ -312,20 +329,26 @@ cardinality contract.
 
 ```sql
 WITH ranked AS (
-  SELECT e.*,
-         DENSE_RANK() OVER (
-           PARTITION BY e.department_id ORDER BY e.salary DESC
-         ) AS salary_rank
-  FROM employees AS e
+  SELECT
+    e.*,
+    DENSE_RANK() OVER (PARTITION BY e.department_id ORDER BY e.salary DESC) AS salary_rank
+  FROM
+    employees AS e
 )
-SELECT employee_id,
-       full_name,
-       department_id,
-       salary,
-       salary_rank
-FROM ranked
-WHERE salary_rank <= 2
-ORDER BY department_id, salary_rank, employee_id;
+SELECT
+  employee_id,
+  full_name,
+  department_id,
+  salary,
+  salary_rank
+FROM
+  ranked
+WHERE
+  salary_rank <= 2
+ORDER BY
+  department_id,
+  salary_rank,
+  employee_id;
 ```
 
 **Expected shape:** Top two salary levels per department.

@@ -25,8 +25,10 @@ Task: Start a worker that writes 42 into a shared holder, join it with a bound, 
 The join establishes the required visibility after completion. A timed sleep would not provide the same guarantee.
 
 ```java
-int[] result={0}; Thread worker=Thread.ofPlatform().start(() -> result[0]=42);
-joinBounded(worker); assert result[0]==42;
+int[] result = { 0 };
+Thread worker = Thread.ofPlatform().start(() -> result[0] = 42);
+joinBounded(worker);
+assert result[0] == 42;
 ```
 
 **Expected:** worker terminated; result 42.
@@ -40,9 +42,11 @@ Task: Assign7 before starting a worker that reads the holder.
 Actions before start happen-before actions in the started thread. The fixture does not rely on the worker noticing an unsynchronized later mutation.
 
 ```java
-int[] input={7}; var observed=new java.util.concurrent.atomic.AtomicInteger();
-Thread reader=Thread.ofPlatform().start(() -> observed.set(input[0])); joinBounded(reader);
-assert observed.get()==7;
+int[] input = { 7 };
+var observed = new java.util.concurrent.atomic.AtomicInteger();
+Thread reader = Thread.ofPlatform().start(() -> observed.set(input[0]));
+joinBounded(reader);
+assert observed.get() == 7;
 ```
 
 **Expected:** worker observes7.
@@ -56,10 +60,23 @@ Task: Make two workers read counter0,wait at a barrier,then each write its saved
 Both reads occur before either write,so both workers write1. Visibility alone cannot make the compound operation atomic.
 
 ```java
-int[] counter={0}; var barrier=new java.util.concurrent.CyclicBarrier(2); var failure=new java.util.concurrent.atomic.AtomicReference<Throwable>();
-Runnable increment=() -> { try { int saved=counter[0]; barrier.await(2,java.util.concurrent.TimeUnit.SECONDS); counter[0]=saved+1; } catch(Throwable error){failure.set(error);} };
-Thread a=Thread.ofPlatform().start(increment),b=Thread.ofPlatform().start(increment);joinBounded(a);joinBounded(b);
-assert failure.get()==null && counter[0]==1;
+int[] counter = { 0 };
+var barrier = new java.util.concurrent.CyclicBarrier(2);
+var failure = new java.util.concurrent.atomic.AtomicReference<Throwable>();
+Runnable increment = () -> {
+  try {
+    int saved = counter[0];
+    barrier.await(2, java.util.concurrent.TimeUnit.SECONDS);
+    counter[0] = saved + 1;
+  } catch (Throwable error) {
+    failure.set(error);
+  }
+};
+Thread a = Thread.ofPlatform().start(increment),
+  b = Thread.ofPlatform().start(increment);
+joinBounded(a);
+joinBounded(b);
+assert failure.get() == null && counter[0] == 1;
 ```
 
 **Expected:** final counter1 despite two increments.
@@ -73,10 +90,20 @@ Task: Write data99 before setting a volatile ready flag;read after observing tha
 The volatile flag publishes the preceding data write. The deadline makes a failed communication contract visible rather than leaving an infinite spin loop.
 
 ```java
-Publication publication=new Publication(); var seen=new java.util.concurrent.atomic.AtomicInteger(-1);
-Thread consumer=Thread.ofPlatform().start(() -> { long deadline=System.nanoTime()+2_000_000_000L; while(!publication.ready && System.nanoTime()<deadline)Thread.onSpinWait(); if(publication.ready)seen.set(publication.data); });
-Thread producer=Thread.ofPlatform().start(() -> { publication.data=99;publication.ready=true; });
-joinBounded(producer);joinBounded(consumer);assert seen.get()==99;
+Publication publication = new Publication();
+var seen = new java.util.concurrent.atomic.AtomicInteger(-1);
+Thread consumer = Thread.ofPlatform().start(() -> {
+  long deadline = System.nanoTime() + 2_000_000_000L;
+  while (!publication.ready && System.nanoTime() < deadline) Thread.onSpinWait();
+  if (publication.ready) seen.set(publication.data);
+});
+Thread producer = Thread.ofPlatform().start(() -> {
+  publication.data = 99;
+  publication.ready = true;
+});
+joinBounded(producer);
+joinBounded(consumer);
+assert seen.get() == 99;
 ```
 
 **Expected:** reader sees99 and finishes within the bound.
@@ -90,9 +117,11 @@ Task: Invoke a Runnable directly and compare its thread identity with the caller
 A Runnable describes work. It does not create concurrency until an executor or started Thread schedules it.
 
 ```java
-Thread caller=Thread.currentThread();var identity=new java.util.concurrent.atomic.AtomicReference<Thread>();
-Runnable action=() -> identity.set(Thread.currentThread()); action.run();
-assert identity.get()==caller;
+Thread caller = Thread.currentThread();
+var identity = new java.util.concurrent.atomic.AtomicReference<Thread>();
+Runnable action = () -> identity.set(Thread.currentThread());
+action.run();
+assert identity.get() == caller;
 ```
 
 **Expected:** same thread identity for directrun.
@@ -106,9 +135,22 @@ Task: Interrupt a worker waiting on a latch,restore its flag in the catch,and ve
 The worker cooperates with cancellation at a blocking point. Ignoring the exception would discard the request and could leave a larger task running unexpectedly.
 
 ```java
-var started=new java.util.concurrent.CountDownLatch(1);var waiting=new java.util.concurrent.CountDownLatch(1);var interrupted=new java.util.concurrent.atomic.AtomicBoolean();
-Thread blocked=Thread.ofPlatform().start(() -> {started.countDown();try{waiting.await();}catch(InterruptedException expected){Thread.currentThread().interrupt();interrupted.set(Thread.currentThread().isInterrupted());}});
-assert started.await(2,java.util.concurrent.TimeUnit.SECONDS);blocked.interrupt();joinBounded(blocked);assert interrupted.get();
+var started = new java.util.concurrent.CountDownLatch(1);
+var waiting = new java.util.concurrent.CountDownLatch(1);
+var interrupted = new java.util.concurrent.atomic.AtomicBoolean();
+Thread blocked = Thread.ofPlatform().start(() -> {
+  started.countDown();
+  try {
+    waiting.await();
+  } catch (InterruptedException expected) {
+    Thread.currentThread().interrupt();
+    interrupted.set(Thread.currentThread().isInterrupted());
+  }
+});
+assert started.await(2, java.util.concurrent.TimeUnit.SECONDS);
+blocked.interrupt();
+joinBounded(blocked);
+assert interrupted.get();
 ```
 
 **Expected:** interruption observed and worker terminated.

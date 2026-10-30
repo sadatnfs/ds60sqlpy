@@ -35,7 +35,7 @@ The question is: Evaluate \(x\cdot x+1\) at float32[1,2].
 The arithmetic provides a simple independent oracle. Correctness must be established before timing a graph implementation.
 
 ```python
-x = tf.constant([1., 2.], dtype=tf.float32)
+x = tf.constant([1.0, 2.0], dtype=tf.float32)
 eager = x * x + 1
 np.testing.assert_array_equal(eager.numpy(), [2, 5])
 ```
@@ -55,6 +55,7 @@ The first call constructs a graph for the input contract. Matching its output wi
 def f(value):
     return value * value + 1
 
+
 np.testing.assert_array_equal(f(x).numpy(), eager.numpy())
 first = f.experimental_get_tracing_count()
 assert first >= 1
@@ -71,7 +72,7 @@ The question is: Call with float32[3,4] and inspect trace count.
 Values change while shape and dtype remain the same. Reusing a trace demonstrates the intended separation between graph structure and tensor values.
 
 ```python
-same_signature = tf.constant([3., 4.], dtype=tf.float32)
+same_signature = tf.constant([3.0, 4.0], dtype=tf.float32)
 np.testing.assert_array_equal(f(same_signature).numpy(), [10, 17])
 assert f.experimental_get_tracing_count() == first
 ```
@@ -87,7 +88,7 @@ The question is: Call with float64[1,2] and inspect trace count and output dtype
 Dtype changes can affect kernels and arithmetic. Reporting them separately prevents an apparent performance regression from being attributed to values alone.
 
 ```python
-different_dtype = tf.constant([1., 2.], dtype=tf.float64)
+different_dtype = tf.constant([1.0, 2.0], dtype=tf.float64)
 output = f(different_dtype)
 assert output.dtype == tf.float64
 assert f.experimental_get_tracing_count() > first
@@ -133,18 +134,22 @@ An explicit signature can permit varying dimensions without retracing. It is als
 def g(value):
     return value * value + 1
 
-g(tf.constant([1., 2.], dtype=tf.float32))
+
+g(tf.constant([1.0, 2.0], dtype=tf.float32))
 count = g.experimental_get_tracing_count()
-output = g(tf.constant([1., 2., 3.], dtype=tf.float32))
+output = g(tf.constant([1.0, 2.0, 3.0], dtype=tf.float32))
 assert tuple(output.shape) == (3,)
 assert g.experimental_get_tracing_count() == count
-for incompatible in [tf.constant([[1., 2.]], dtype=tf.float32), tf.constant([1., 2.], dtype=tf.float64)]:
+for incompatible in [
+    tf.constant([[1.0, 2.0]], dtype=tf.float32),
+    tf.constant([1.0, 2.0], dtype=tf.float64),
+]:
     try:
         g(incompatible)
     except (TypeError, ValueError):
         pass
     else:
-        raise AssertionError('incompatible signature accepted')
+        raise AssertionError("incompatible signature accepted")
 ```
 
 **Expected:** One declared trace is reused for both lengths; incompatible rank or dtype is rejected.

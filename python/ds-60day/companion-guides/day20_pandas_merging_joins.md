@@ -118,10 +118,7 @@ import pandas as pd
 
 items = pd.DataFrame({"sku": ["A", "A", "B"], "qty": [1, 2, 1]})
 products = pd.DataFrame({"sku": ["A", "B"], "price": [10.0, 5.0]})
-priced = items.merge(
-    products, on="sku", how="left",
-    validate="many_to_one", indicator=True
-)
+priced = items.merge(products, on="sku", how="left", validate="many_to_one", indicator=True)
 (len(priced), priced["_merge"].value_counts().to_dict())
 ```
 
@@ -141,10 +138,7 @@ identify which line creates each intermediate object.
 
 ```python
 more_items = pd.DataFrame({"sku": ["A", "C"], "qty": [1, 1]})
-checked = more_items.merge(
-    products, on="sku", how="left",
-    validate="many_to_one", indicator=True
-)
+checked = more_items.merge(products, on="sku", how="left", validate="many_to_one", indicator=True)
 checked[["sku", "_merge"]].to_dict("records")
 ```
 

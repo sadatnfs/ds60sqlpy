@@ -43,8 +43,6 @@ Read the operations in dependency order. Record which values exist before each l
 The choice is semantic and should not depend on a compiler optimization setting.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         assert_eq!(255_u8.checked_add(1), None);
@@ -64,8 +62,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 Integer smallest units avoid accidental decimal approximation in this bounded pricing example.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let cents_per_item: u64 = 125;

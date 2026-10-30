@@ -29,8 +29,10 @@ Task: GET /sum with a=2 and b=3 and inspect status, content type and JSON.
 The checks distinguish transport completion, protocol success and representation content. An endpoint can respond successfully at one layer while violating another layer's contract.
 
 ```javascript
-await withServer(async base => {
-  const response = await fetch(new URL('/sum?a=2&b=3', base), { signal: AbortSignal.timeout(2000) });
+await withServer(async (base) => {
+  const response = await fetch(new URL('/sum?a=2&b=3', base), {
+    signal: AbortSignal.timeout(2000),
+  });
   assert.equal(response.status, 200);
   assert.match(response.headers.get('content-type'), /application\/json/u);
   assert.deepEqual(await response.json(), { total: 5 });
@@ -48,7 +50,7 @@ Task: Request an unknown route and inspect the actual response.
 fetch rejects for failures such as network errors or aborts, not simply because the server sent a 404. A client that only catches rejection may mistakenly treat a protocol error body as success data.
 
 ```javascript
-await withServer(async base => {
+await withServer(async (base) => {
   const response = await fetch(new URL('/missing', base), { signal: AbortSignal.timeout(2000) });
   assert.equal(response.status, 404);
   assert.equal(response.ok, false);
@@ -85,7 +87,7 @@ Task: Request repeated a values and a non-integer b value.
 Checking getAll length prevents an ambiguous duplicate-parameter policy. The numeric parser rejects strings that JavaScript Number might otherwise coerce in unintended ways.
 
 ```javascript
-await withServer(async base => {
+await withServer(async (base) => {
   for (const path of ['/sum?a=1&a=2&b=3', '/sum?a=1&b=hello']) {
     const response = await fetch(new URL(path, base), { signal: AbortSignal.timeout(2000) });
     assert.equal(response.status, 400);
@@ -105,8 +107,11 @@ Task: POST to the read-only sum route without a body.
 A route includes method semantics, not just its path. Explicit method rejection prevents an accidental write-looking request from being accepted as an ordinary read.
 
 ```javascript
-await withServer(async base => {
-  const response = await fetch(new URL('/sum?a=1&b=2', base), { method: 'POST', signal: AbortSignal.timeout(2000) });
+await withServer(async (base) => {
+  const response = await fetch(new URL('/sum?a=1&b=2', base), {
+    method: 'POST',
+    signal: AbortSignal.timeout(2000),
+  });
   assert.equal(response.status, 405);
   assert.equal(response.headers.get('allow'), 'GET');
   assert.deepEqual(await response.json(), { error: 'method_not_allowed' });
@@ -124,7 +129,7 @@ Task: Add one to Number.MAX_SAFE_INTEGER through the endpoint.
 Each input can be a safe integer while the result is outside the safe range. Validate derived output invariants as well as input syntax.
 
 ```javascript
-await withServer(async base => {
+await withServer(async (base) => {
   const url = new URL('/sum', base);
   url.searchParams.set('a', String(Number.MAX_SAFE_INTEGER));
   url.searchParams.set('b', '1');

@@ -49,8 +49,9 @@ The question is: Partition IDs 1..6 into batches of 2.
 The update count is the number of batches when there is one step per batch. It is neither the number of examples nor the number of epochs.
 
 ```python
-ids=list(range(1,7)); batches=[ids[i:i+2] for i in range(0,len(ids),2)]
-assert batches==[[1,2],[3,4],[5,6]]
+ids = list(range(1, 7))
+batches = [ids[i : i + 2] for i in range(0, len(ids), 2)]
+assert batches == [[1, 2], [3, 4], [5, 6]]
 ```
 
 **Expected:** three batches[[1, 2], [3, 4], [5, 6]].
@@ -64,8 +65,8 @@ The question is: Partition five IDs with batch size 2.
 Dropping the last singleton would change the effective training set. Record that choice explicitly when fixed batch shapes are required.
 
 ```python
-short=[list(range(5))[i:i+2] for i in range(0,5,2)]
-assert [len(batch) for batch in short]==[2,2,1]
+short = [list(range(5))[i : i + 2] for i in range(0, 5, 2)]
+assert [len(batch) for batch in short] == [2, 2, 1]
 ```
 
 **Expected:** batch sizes 2, 2, 1.
@@ -79,10 +80,18 @@ The question is: Train x = 1..6, y = 2x, w = 0 with batch size 2, rate 0.01, cle
 Each derivative is evaluated at the latest weight. Clearing the gradient prevents earlier batches from being counted again accidentally.
 
 ```python
-x=torch.arange(1,7,dtype=torch.float64); y=2*x; w=nn.Parameter(torch.tensor(0.,dtype=torch.float64)); optimizer=torch.optim.SGD([w],lr=.01); history=[]
-for start in range(0,6,2):
-    optimizer.zero_grad(set_to_none=True); loss=((w*x[start:start+2]-y[start:start+2])**2).mean(); loss.backward(); optimizer.step(); history.append(w.item())
-assert len(history)==3 and np.isfinite(history).all() and len(set(history))==3
+x = torch.arange(1, 7, dtype=torch.float64)
+y = 2 * x
+w = nn.Parameter(torch.tensor(0.0, dtype=torch.float64))
+optimizer = torch.optim.SGD([w], lr=0.01)
+history = []
+for start in range(0, 6, 2):
+    optimizer.zero_grad(set_to_none=True)
+    loss = ((w * x[start : start + 2] - y[start : start + 2]) ** 2).mean()
+    loss.backward()
+    optimizer.step()
+    history.append(w.item())
+assert len(history) == 3 and np.isfinite(history).all() and len(set(history)) == 3
 ```
 
 **Expected:** three finite distinct weights.
@@ -96,10 +105,12 @@ The question is: Repeat the loop without zero_grad and compare its final weight 
 The optimizer applies old derivative contributions again. This is not the same as intentional full-batch accumulation at a fixed parameter state.
 
 ```python
-bad=nn.Parameter(torch.tensor(0.,dtype=torch.float64)); bad_optimizer=torch.optim.SGD([bad],lr=.01)
-for start in range(0,6,2):
-    ((bad*x[start:start+2]-y[start:start+2])**2).mean().backward(); bad_optimizer.step()
-assert abs(bad.item()-history[-1])>1e-6
+bad = nn.Parameter(torch.tensor(0.0, dtype=torch.float64))
+bad_optimizer = torch.optim.SGD([bad], lr=0.01)
+for start in range(0, 6, 2):
+    ((bad * x[start : start + 2] - y[start : start + 2]) ** 2).mean().backward()
+    bad_optimizer.step()
+assert abs(bad.item() - history[-1]) > 1e-6
 ```
 
 **Expected:** different endpoint.
@@ -113,8 +124,10 @@ The question is: Use permutation 5, 0, 4, 1, 3, 2 for both x and y.
 A shared identity permutation preserves pairs. Independent shuffles would train on unrelated targets while retaining plausible-looking individual arrays.
 
 ```python
-order=torch.tensor([5,0,4,1,3,2]); sx=x[order]; sy=y[order]
-torch.testing.assert_close(sy,2*sx,atol=0,rtol=0)
+order = torch.tensor([5, 0, 4, 1, 3, 2])
+sx = x[order]
+sy = y[order]
+torch.testing.assert_close(sy, 2 * sx, atol=0, rtol=0)
 ```
 
 **Expected:** every shuffled target equals twice its input.
@@ -128,7 +141,7 @@ The question is: Combine mean loss 2 over 2 examples and mean loss 8 over 1 exam
 Reconstruct numerators before combining means. This denominator discipline applies to reported metrics as well as gradients.
 
 ```python
-assert (2*2+8*1)/3==4 and (2+8)/2==5
+assert (2 * 2 + 8 * 1) / 3 == 4 and (2 + 8) / 2 == 5
 ```
 
 **Expected:** epoch mean 4, not 5.

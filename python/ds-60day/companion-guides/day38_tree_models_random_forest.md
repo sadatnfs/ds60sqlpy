@@ -45,9 +45,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
 
 X, y = load_breast_cancer(return_X_y=True)
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, stratify=y, random_state=42
-)
+X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, random_state=42)
 
 for depth in [1, 2, 4, 8, None]:
     tree = DecisionTreeClassifier(max_depth=depth, random_state=42)
@@ -138,14 +136,11 @@ from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
 
 X, y = load_breast_cancer(return_X_y=True)
-X_train, X_valid, y_train, y_valid = train_test_split(
-    X, y, stratify=y, random_state=3801
-)
+X_train, X_valid, y_train, y_valid = train_test_split(X, y, stratify=y, random_state=3801)
 for depth in (1, 3, 8, None):
     tree = DecisionTreeClassifier(max_depth=depth, random_state=3801)
     tree.fit(X_train, y_train)
-    print(depth, {"train": tree.score(X_train, y_train),
-                  "valid": tree.score(X_valid, y_valid)})
+    print(depth, {"train": tree.score(X_train, y_train), "valid": tree.score(X_valid, y_valid)})
 ```
 
 **Expected observation:** Training accuracy rises with capacity; validation accuracy need not, revealing overfitting rather than a syntax error.
@@ -167,16 +162,18 @@ from sklearn.model_selection import train_test_split
 X, y = load_breast_cancer(return_X_y=True)
 rng = np.random.default_rng(3802)
 X = np.column_stack([X, rng.normal(size=X.shape[0])])
-X_train, X_valid, y_train, y_valid = train_test_split(
-    X, y, stratify=y, random_state=3802
-)
+X_train, X_valid, y_train, y_valid = train_test_split(X, y, stratify=y, random_state=3802)
 forest = RandomForestClassifier(n_estimators=80, random_state=3802, n_jobs=1)
 forest.fit(X_train, y_train)
 importance = permutation_importance(
     forest, X_valid, y_valid, n_repeats=5, random_state=3802, n_jobs=1
 )
-print({"noise_importance": importance.importances_mean[-1],
-       "best_importance": importance.importances_mean.max()})
+print(
+    {
+        "noise_importance": importance.importances_mean[-1],
+        "best_importance": importance.importances_mean.max(),
+    }
+)
 ```
 
 **Expected observation:** The random noise feature should have importance near zero, while at least one real feature matters more.

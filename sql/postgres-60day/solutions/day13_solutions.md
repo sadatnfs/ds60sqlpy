@@ -83,12 +83,17 @@ executable companion when you want a self-contained check.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT o.order_id,
-       o.order_date,
-       (o.order_date AT TIME ZONE 'UTC')::date AS utc_order_date
-FROM orders AS o
-WHERE o.order_date >= CURRENT_TIMESTAMP - INTERVAL '30 days'
-ORDER BY o.order_date DESC, o.order_id DESC;
+SELECT
+  o.order_id,
+  o.order_date,
+  (o.order_date AT TIME ZONE 'UTC')::date AS utc_order_date
+FROM
+  orders AS o
+WHERE
+  o.order_date >= CURRENT_TIMESTAMP - INTERVAL '30 days'
+ORDER BY
+  o.order_date DESC,
+  o.order_id DESC;
 ```
 
 **Expected shape:** Recent order rows in deterministic order.
@@ -122,12 +127,16 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date AS utc_month,
-       COUNT(*) AS order_count,
-       ROUND(SUM(o.total_amount), 2) AS stored_revenue
-FROM orders AS o
-GROUP BY date_trunc('month', o.order_date AT TIME ZONE 'UTC')
-ORDER BY utc_month;
+SELECT
+  date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date AS utc_month,
+  COUNT(*) AS order_count,
+  ROUND(SUM(o.total_amount), 2) AS stored_revenue
+FROM
+  orders AS o
+GROUP BY
+  date_trunc('month', o.order_date AT TIME ZONE 'UTC')
+ORDER BY
+  utc_month;
 ```
 
 **Expected shape:** One row per observed UTC month.
@@ -160,12 +169,14 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT c.customer_id,
-       c.created_at,
-       (CURRENT_TIMESTAMP AT TIME ZONE 'UTC')::date
-         - (c.created_at AT TIME ZONE 'UTC')::date AS customer_age_days
-FROM customers AS c
-ORDER BY c.customer_id;
+SELECT
+  c.customer_id,
+  c.created_at,
+  (CURRENT_TIMESTAMP AT TIME ZONE 'UTC')::date - (c.created_at AT TIME ZONE 'UTC')::date AS customer_age_days
+FROM
+  customers AS c
+ORDER BY
+  c.customer_id;
 ```
 
 **Expected shape:** One row per customer with nonnegative age days.
@@ -202,16 +213,22 @@ cardinality contract.
 
 ```sql
 WITH bounds AS (
-  SELECT date_trunc('month', CURRENT_TIMESTAMP AT TIME ZONE 'UTC') AS month_start,
-         date_trunc('month', CURRENT_TIMESTAMP AT TIME ZONE 'UTC') + INTERVAL '1 month' AS next_month_start
+  SELECT
+    date_trunc('month', CURRENT_TIMESTAMP AT TIME ZONE 'UTC') AS month_start,
+    date_trunc('month', CURRENT_TIMESTAMP AT TIME ZONE 'UTC') + INTERVAL '1 month' AS next_month_start
 )
-SELECT o.order_id,
-       o.order_date
-FROM orders AS o
-CROSS JOIN bounds AS b
-WHERE o.order_date >= b.month_start AT TIME ZONE 'UTC'
+SELECT
+  o.order_id,
+  o.order_date
+FROM
+  orders AS o
+  CROSS JOIN bounds AS b
+WHERE
+  o.order_date >= b.month_start AT TIME ZONE 'UTC'
   AND o.order_date < b.next_month_start AT TIME ZONE 'UTC'
-ORDER BY o.order_date, o.order_id;
+ORDER BY
+  o.order_date,
+  o.order_id;
 ```
 
 **Expected shape:** Orders in exactly one UTC month.
@@ -245,12 +262,16 @@ cardinality contract.
 - `LIMIT`: is applied after ordering and is meaningful only when the query first defines which rows come first.
 
 ```sql
-SELECT e.event_id,
-       e.event_time,
-       e.event_time AT TIME ZONE 'UTC' AS utc_wall_time,
-       e.event_time AT TIME ZONE 'America/Los_Angeles' AS los_angeles_wall_time
-FROM events AS e
-ORDER BY e.event_time, e.event_id
+SELECT
+  e.event_id,
+  e.event_time,
+  e.event_time AT TIME ZONE 'UTC' AS utc_wall_time,
+  e.event_time AT TIME ZONE 'America/Los_Angeles' AS los_angeles_wall_time
+FROM
+  events AS e
+ORDER BY
+  e.event_time,
+  e.event_id
 LIMIT 20;
 ```
 
@@ -290,24 +311,28 @@ cardinality contract.
 
 ```sql
 WITH calendar AS (
-  SELECT generate_series(
-           (CURRENT_TIMESTAMP AT TIME ZONE 'UTC')::date - 6,
-           (CURRENT_TIMESTAMP AT TIME ZONE 'UTC')::date,
-           INTERVAL '1 day'
-         )::date AS utc_date
-), daily_orders AS (
-  SELECT (o.order_date AT TIME ZONE 'UTC')::date AS utc_date,
-         COUNT(*) AS order_count
-  FROM orders AS o
-  WHERE o.order_date >= ((CURRENT_TIMESTAMP AT TIME ZONE 'UTC')::date - 6) AT TIME ZONE 'UTC'
-  GROUP BY (o.order_date AT TIME ZONE 'UTC')::date
+  SELECT
+    generate_series((CURRENT_TIMESTAMP AT TIME ZONE 'UTC')::date - 6, (CURRENT_TIMESTAMP AT TIME ZONE 'UTC')::date, INTERVAL '1 day')::date AS utc_date
+),
+daily_orders AS (
+  SELECT
+    (o.order_date AT TIME ZONE 'UTC')::date AS utc_date,
+    COUNT(*) AS order_count
+  FROM
+    orders AS o
+  WHERE
+    o.order_date >= ((CURRENT_TIMESTAMP AT TIME ZONE 'UTC')::date - 6) AT TIME ZONE 'UTC'
+  GROUP BY
+    (o.order_date AT TIME ZONE 'UTC')::date
 )
-SELECT c.utc_date,
-       COALESCE(d.order_count, 0) AS order_count
-FROM calendar AS c
-LEFT JOIN daily_orders AS d
-  ON d.utc_date = c.utc_date
-ORDER BY c.utc_date;
+SELECT
+  c.utc_date,
+  COALESCE(d.order_count, 0) AS order_count
+FROM
+  calendar AS c
+  LEFT JOIN daily_orders AS d ON d.utc_date = c.utc_date
+ORDER BY
+  c.utc_date;
 ```
 
 **Expected shape:** Exactly seven chronological rows.

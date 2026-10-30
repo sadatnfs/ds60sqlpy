@@ -43,8 +43,6 @@ Read the operations in dependency order. Record which values exist before each l
 Absence is a separate case, not a special numeric value.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let measured = Some(0);
@@ -64,8 +62,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 The fallback is not inserted into the collection and should not be mistaken for a valid measurement.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let values = [2, 4];

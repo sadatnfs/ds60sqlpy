@@ -101,24 +101,30 @@ These worked excerpts come from `sql/postgres-60day/day17_rank_functions.sql`. U
 
 ```sql
 WITH cust_rev AS (
-  SELECT c.customer_id,
-         c.full_name,
-         COALESCE(SUM(oi.unit_price*oi.quantity*(1-oi.discount)),0) AS revenue
-  FROM customers c
-  LEFT JOIN orders o ON o.customer_id = c.customer_id
-  LEFT JOIN order_items oi ON oi.order_id = o.order_id
-  GROUP BY c.customer_id, c.full_name
+  SELECT
+    c.customer_id,
+    c.full_name,
+    COALESCE(SUM(oi.unit_price * oi.quantity * (1 - oi.discount)), 0) AS revenue
+  FROM
+    customers c
+    LEFT JOIN orders o ON o.customer_id = c.customer_id
+    LEFT JOIN order_items oi ON oi.order_id = o.order_id
+  GROUP BY
+    c.customer_id,
+    c.full_name
 )
-SELECT customer_id,
-       full_name,
-       revenue,
-       ROW_NUMBER() OVER (
-         ORDER BY revenue DESC, customer_id
-       ) AS row_num,
-       RANK()       OVER (ORDER BY revenue DESC) AS rank_pos,
-       DENSE_RANK() OVER (ORDER BY revenue DESC) AS dense_rank_pos
-FROM cust_rev
-ORDER BY revenue DESC, customer_id
+SELECT
+  customer_id,
+  full_name,
+  revenue,
+  ROW_NUMBER() OVER (ORDER BY revenue DESC, customer_id) AS row_num,
+  RANK() OVER (ORDER BY revenue DESC) AS rank_pos,
+  DENSE_RANK() OVER (ORDER BY revenue DESC) AS dense_rank_pos
+FROM
+  cust_rev
+ORDER BY
+  revenue DESC,
+  customer_id
 LIMIT 30;
 ```
 
@@ -129,18 +135,21 @@ LIMIT 30;
 ### Example 2
 
 ```sql
-SELECT e.department_id,
-       d.name AS department,
-       e.employee_id,
-       e.full_name,
-       e.salary,
-       RANK() OVER (PARTITION BY e.department_id ORDER BY e.salary DESC) AS dept_rank
-FROM employees e
-LEFT JOIN departments d ON d.department_id = e.department_id
-ORDER BY department NULLS LAST,
-         dept_rank,
-         e.salary DESC,
-         e.employee_id
+SELECT
+  e.department_id,
+  d.name AS department,
+  e.employee_id,
+  e.full_name,
+  e.salary,
+  RANK() OVER (PARTITION BY e.department_id ORDER BY e.salary DESC) AS dept_rank
+FROM
+  employees e
+  LEFT JOIN departments d ON d.department_id = e.department_id
+ORDER BY
+  department NULLS LAST,
+  dept_rank,
+  e.salary DESC,
+  e.employee_id
 LIMIT 50;
 ```
 

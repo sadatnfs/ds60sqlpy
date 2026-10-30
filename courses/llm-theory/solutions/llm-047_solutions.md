@@ -31,12 +31,12 @@ The question is: Use experts I, 2I, -I and three token/router rows with selected
 The third token combines a negative expert with a positive expert, so routing can change the function rather than merely selecting a faster implementation of the same computation.
 
 ```python
-x=np.array([[1.,0.],[0.,1.],[1.,1.]])
-experts=np.stack([np.eye(2),2*np.eye(2),-np.eye(2)])
-logits=np.array([[np.log(3),0.,-100.],[0.,np.log(3),-100.],[-100.,0.,np.log(3)]])
-output,indices,gates=mixture(x,logits,experts,2)
-np.testing.assert_allclose(output,[[1.25,0],[0,1.75],[-.25,-.25]],atol=1e-12,rtol=0)
-np.testing.assert_allclose(gates.sum(1),1,atol=1e-12,rtol=0)
+x = np.array([[1.0, 0.0], [0.0, 1.0], [1.0, 1.0]])
+experts = np.stack([np.eye(2), 2 * np.eye(2), -np.eye(2)])
+logits = np.array([[np.log(3), 0.0, -100.0], [0.0, np.log(3), -100.0], [-100.0, 0.0, np.log(3)]])
+output, indices, gates = mixture(x, logits, experts, 2)
+np.testing.assert_allclose(output, [[1.25, 0], [0, 1.75], [-0.25, -0.25]], atol=1e-12, rtol=0)
+np.testing.assert_allclose(gates.sum(1), 1, atol=1e-12, rtol=0)
 ```
 
 **Expected:** outputs[1.25, 0], [0, 1.75], [-.25, -.25].
@@ -50,11 +50,15 @@ The question is: Route four tokens to experts 0, 0, 1, 0 with capacity 2 and uni
 The dropped token is not deleted from the sequence or loss denominator. Its residual path is explicit, and the drop count remains available for quality and load analysis.
 
 ```python
-tokens=np.array([[1.,0.],[0.,1.],[1.,1.],[2.,1.]])
-route_logits=np.array([[5.,0.],[4.,0.],[0.,4.],[3.,0.]])
-residual,dropped,assigned,accepted=capacity_route(tokens,route_logits,experts[:2],2)
-assert assigned.tolist()==[3,1] and accepted.tolist()==[2,1] and dropped.tolist()==[False,False,False,True]
-np.testing.assert_allclose(residual,[[2,0],[0,2],[3,3],[2,1]],atol=1e-12,rtol=0)
+tokens = np.array([[1.0, 0.0], [0.0, 1.0], [1.0, 1.0], [2.0, 1.0]])
+route_logits = np.array([[5.0, 0.0], [4.0, 0.0], [0.0, 4.0], [3.0, 0.0]])
+residual, dropped, assigned, accepted = capacity_route(tokens, route_logits, experts[:2], 2)
+assert (
+    assigned.tolist() == [3, 1]
+    and accepted.tolist() == [2, 1]
+    and dropped.tolist() == [False, False, False, True]
+)
+np.testing.assert_allclose(residual, [[2, 0], [0, 2], [3, 3], [2, 1]], atol=1e-12, rtol=0)
 ```
 
 **Expected:** assigned counts 3, 1; accepted 2, 1; last token drops its expert delta and keeps its input.
@@ -68,10 +72,14 @@ The question is: Use hard fractions f[.75, .25], mean router probabilities P[.7,
 The term measures a routing-related objective under the declared formula. A lower auxiliary value is not itself evidence that task loss, capacity drops or distributed utilization improved.
 
 ```python
-fractions=np.array([.75,.25]); mean_probability=np.array([.7,.3]); coefficient=.01
-loss=coefficient*2*np.dot(fractions,mean_probability)
-np.testing.assert_allclose(loss,.012,atol=1e-12,rtol=0)
-np.testing.assert_allclose(coefficient*2*np.dot([.5,.5],[.5,.5]),.01,atol=1e-12,rtol=0)
+fractions = np.array([0.75, 0.25])
+mean_probability = np.array([0.7, 0.3])
+coefficient = 0.01
+loss = coefficient * 2 * np.dot(fractions, mean_probability)
+np.testing.assert_allclose(loss, 0.012, atol=1e-12, rtol=0)
+np.testing.assert_allclose(
+    coefficient * 2 * np.dot([0.5, 0.5], [0.5, 0.5]), 0.01, atol=1e-12, rtol=0
+)
 ```
 
 **Expected:** auxiliary loss .012; balanced fixture .01.
@@ -85,9 +93,13 @@ The question is: Perturb the first logit of the first top-2 mixture row without 
 Within a fixedselectedset, the normalized gates vary smoothly. At a top-k membership boundary, the hard index choice is not differentiable in the same way. Do not interpret this local derivative as differentiating through every routing decision.
 
 ```python
-h=1e-6; plus=logits.copy(); minus=logits.copy(); plus[0,0]+=h; minus[0,0]-=h
-numeric=(mixture(x,plus,experts,2)[0][0,0]-mixture(x,minus,experts,2)[0][0,0])/(2*h)
-np.testing.assert_allclose(numeric,-3/16,atol=1e-8,rtol=0)
+h = 1e-6
+plus = logits.copy()
+minus = logits.copy()
+plus[0, 0] += h
+minus[0, 0] -= h
+numeric = (mixture(x, plus, experts, 2)[0][0, 0] - mixture(x, minus, experts, 2)[0][0, 0]) / (2 * h)
+np.testing.assert_allclose(numeric, -3 / 16, atol=1e-8, rtol=0)
 ```
 
 **Expected:** derivative of first output coordinate is \(\frac{-3}{16}\) within 1e-8.
@@ -101,9 +113,9 @@ The question is: Use 8 two-layer experts with width 64, hidden 128 and top-2 act
 Inactive expert weights still occupy memory somewhere. Active-weight arithmetic does not measure peak memory, token dispatch cost orall-to-all communication.
 
 ```python
-expert_count,width,hidden,active=8,64,128,2
-assert expert_count*2*width*hidden==131072
-assert active*2*width*hidden==32768
+expert_count, width, hidden, active = 8, 64, 128, 2
+assert expert_count * 2 * width * hidden == 131072
+assert active * 2 * width * hidden == 32768
 ```
 
 **Expected:** total 131072 expert weights; 32768 selected expert weights per token.
@@ -117,11 +129,18 @@ The question is: Reject top-k 0 and capacity 0; check equal router logits choose
 Tie and overflow policies affect reproducibility and which tokens receive expert computation. They must be explicit before comparing model quality or load statistics.
 
 ```python
-_,tied,_=mixture(np.ones((1,2)),np.zeros((1,3)),experts,2); assert tied.tolist()==[[0,1]]
-for action in [lambda:mixture(x,logits,experts,0),lambda:capacity_route(tokens,route_logits,experts[:2],0)]:
-    try: action()
-    except ValueError: pass
-    else: raise AssertionError('invalid routing policy accepted')
+_, tied, _ = mixture(np.ones((1, 2)), np.zeros((1, 3)), experts, 2)
+assert tied.tolist() == [[0, 1]]
+for action in [
+    lambda: mixture(x, logits, experts, 0),
+    lambda: capacity_route(tokens, route_logits, experts[:2], 0),
+]:
+    try:
+        action()
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("invalid routing policy accepted")
 ```
 
 **Expected:** invalid policies raise ValueError; top-2 tie indices 0, 1.

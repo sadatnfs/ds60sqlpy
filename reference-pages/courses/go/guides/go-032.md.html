@@ -239,8 +239,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>strings<span class="syntax-punctuation">.</span>Contains<span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">.</span>String<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;&amp;lt;script&amp;gt;&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;escape&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Angle brackets become escaped text.</p>
 <p>Marking untrusted input as template.HTML would bypass this boundary. Keep data as data.</p>
 <h4 id="worked-example-2-encode-a-query-value">Worked example 2: Encode a query value<a class="heading-anchor" href="#worked-example-2-encode-a-query-value" aria-label="Link to this section">#</a></h4>
@@ -278,8 +277,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>err <span class="syntax-operator">==</span> <span class="syntax-keyword">nil</span> <span class="syntax-operator">&amp;&amp;</span> decoded <span class="syntax-operator">==</span> original <span class="syntax-operator">&amp;&amp;</span> encoded <span class="syntax-operator">!=</span> original<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;query&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Decoding recovers the original string.</p>
 <p>Encoding prevents data from being interpreted as new query syntax. It does not authorize the resulting request.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>

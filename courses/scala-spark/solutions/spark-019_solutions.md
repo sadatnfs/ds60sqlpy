@@ -12,16 +12,22 @@ Reject an input unless event_id is known, positive and unique and entity is know
 
 ```scala
 def validateCandidates(events: DataFrame): Unit = {
-  val metrics = events.agg(count(lit(1)),countDistinct("event_id")).first()
-  require(metrics.getLong(0) == metrics.getLong(1),"event IDs must be known and unique")
-  require(events.filter(col("event_id") <= 0L || col("entity").isNull).count() == 0L,"known positive identities required")
+  val metrics = events.agg(count(lit(1)), countDistinct("event_id")).first()
+  require(metrics.getLong(0) == metrics.getLong(1), "event IDs must be known and unique")
+  require(
+    events.filter(col("event_id") <= 0L || col("entity").isNull).count() == 0L,
+    "known positive identities required"
+  )
 }
 ```
 
 ```python
 def validate_candidates(events):
-    total,unique = events.agg(F.count(F.lit(1)),F.countDistinct("event_id")).first()
-    if total != unique or events.filter((F.col("event_id")<=0)|F.col("entity").isNull()).count():
+    total, unique = events.agg(F.count(F.lit(1)), F.countDistinct("event_id")).first()
+    if (
+        total != unique
+        or events.filter((F.col("event_id") <= 0) | F.col("entity").isNull()).count()
+    ):
         raise ValueError("Known positive unique event IDs and known entity keys required")
 ```
 
@@ -37,15 +43,18 @@ Add candidate_rank using row_number per entity, descending event_time with NULL 
 
 ```scala
 def rankCandidates(events: DataFrame): DataFrame = {
-  val order = Window.partitionBy("entity").orderBy(col("event_time").desc_nulls_last,col("event_id").desc)
-  events.withColumn("candidate_rank",row_number().over(order))
+  val order =
+    Window.partitionBy("entity").orderBy(col("event_time").desc_nulls_last, col("event_id").desc)
+  events.withColumn("candidate_rank", row_number().over(order))
 }
 ```
 
 ```python
 def rank_candidates(events):
-    order = Window.partitionBy("entity").orderBy(F.col("event_time").desc_nulls_last(),F.col("event_id").desc())
-    return events.withColumn("candidate_rank",F.row_number().over(order))
+    order = Window.partitionBy("entity").orderBy(
+        F.col("event_time").desc_nulls_last(), F.col("event_id").desc()
+    )
+    return events.withColumn("candidate_rank", F.row_number().over(order))
 ```
 
 Window partitioning keeps entities independent, and the ordering fields express the winner policy directly. NULL-last is deliberate rather than an accidental default. Retaining every ranked candidate creates an auditable explanation of why a row won or lost; filtering immediately would make debugging incorrect tie-breaking harder.
@@ -68,7 +77,7 @@ def winners(events: DataFrame): DataFrame = {
 ```python
 def winners(events):
     validate_candidates(events)
-    return rank_candidates(events).filter(F.col("candidate_rank")==1).drop("candidate_rank")
+    return rank_candidates(events).filter(F.col("candidate_rank") == 1).drop("candidate_rank")
 ```
 
 The input gate and complete order jointly establish the selection contract. Repartition checks guard against relying on arrival order, while the literal winner list guards against a shared SQL/DataFrame policy error. This is a correctness test on eight rows. It provides no evidence that a particular partition count is faster or appropriate for a production workload.
@@ -84,14 +93,21 @@ Use dense_rank ordered only by descending event_time with NULL last, returning a
 ```scala
 def topTimeCandidates(events: DataFrame): DataFrame = {
   val order = Window.partitionBy("entity").orderBy(col("event_time").desc_nulls_last)
-  events.withColumn("time_rank",dense_rank().over(order)).filter(col("time_rank") === 1).drop("time_rank")
+  events
+    .withColumn("time_rank", dense_rank().over(order))
+    .filter(col("time_rank") === 1)
+    .drop("time_rank")
 }
 ```
 
 ```python
 def top_time_candidates(events):
     order = Window.partitionBy("entity").orderBy(F.col("event_time").desc_nulls_last())
-    return events.withColumn("time_rank",F.dense_rank().over(order)).filter(F.col("time_rank")==1).drop("time_rank")
+    return (
+        events.withColumn("time_rank", F.dense_rank().over(order))
+        .filter(F.col("time_rank") == 1)
+        .drop("time_rank")
+    )
 ```
 
 The candidate relation shows the under-specification directly. Multiple top-time rows are a fact about the input, not a probabilistic claim about how a scheduler will order them today. A repeatable accidental survivor does not strengthen the business contract. A documented tie-breaker or an explicit ambiguity rejection is needed to produce one trusted winner.
@@ -106,17 +122,38 @@ Return event_id, rows_total, peer_total. ROWS uses ascending time NULL last then
 
 ```scala
 def runningTotals(events: DataFrame): DataFrame = {
-  val rowsFrame = Window.partitionBy("entity").orderBy(col("event_time").asc_nulls_last,col("event_id")).rowsBetween(Window.unboundedPreceding,Window.currentRow)
-  val peerFrame = Window.partitionBy("entity").orderBy(col("event_time").asc_nulls_last).rangeBetween(Window.unboundedPreceding,Window.currentRow)
-  events.withColumn("rows_total",sum("amount").over(rowsFrame)).withColumn("peer_total",sum("amount").over(peerFrame)).select("event_id","rows_total","peer_total")
+  val rowsFrame = Window
+    .partitionBy("entity")
+    .orderBy(col("event_time").asc_nulls_last, col("event_id"))
+    .rowsBetween(Window.unboundedPreceding, Window.currentRow)
+  val peerFrame = Window
+    .partitionBy("entity")
+    .orderBy(col("event_time").asc_nulls_last)
+    .rangeBetween(Window.unboundedPreceding, Window.currentRow)
+  events
+    .withColumn("rows_total", sum("amount").over(rowsFrame))
+    .withColumn("peer_total", sum("amount").over(peerFrame))
+    .select("event_id", "rows_total", "peer_total")
 }
 ```
 
 ```python
 def running_totals(events):
-    rows_frame = Window.partitionBy("entity").orderBy(F.col("event_time").asc_nulls_last(),"event_id").rowsBetween(Window.unboundedPreceding,Window.currentRow)
-    peer_frame = Window.partitionBy("entity").orderBy(F.col("event_time").asc_nulls_last()).rangeBetween(Window.unboundedPreceding,Window.currentRow)
-    return events.withColumn("rows_total",F.sum("amount").over(rows_frame)).withColumn("peer_total",F.sum("amount").over(peer_frame)).select("event_id","rows_total","peer_total")
+    rows_frame = (
+        Window.partitionBy("entity")
+        .orderBy(F.col("event_time").asc_nulls_last(), "event_id")
+        .rowsBetween(Window.unboundedPreceding, Window.currentRow)
+    )
+    peer_frame = (
+        Window.partitionBy("entity")
+        .orderBy(F.col("event_time").asc_nulls_last())
+        .rangeBetween(Window.unboundedPreceding, Window.currentRow)
+    )
+    return (
+        events.withColumn("rows_total", F.sum("amount").over(rows_frame))
+        .withColumn("peer_total", F.sum("amount").over(peer_frame))
+        .select("event_id", "rows_total", "peer_total")
+    )
 ```
 
 The two frames use different membership rules. A row frame progresses through ordered occurrences, while the time-only range includes all equal-time peers together. A final event-ID display order does not alter those memberships. The missing-time event is last within entity C under the declared policy and accumulates the known-time event amount before its own.
@@ -131,15 +168,30 @@ Using ascending time NULL last then event_id, return event_id, previous_id, gap_
 
 ```scala
 def previousEvidence(events: DataFrame): DataFrame = {
-  val order = Window.partitionBy("entity").orderBy(col("event_time").asc_nulls_last,col("event_id"))
-  events.withColumn("previous_id",lag(col("event_id"),1).over(order)).withColumn("previous_time",lag(col("event_time"),1).over(order)).withColumn("gap_seconds",unix_timestamp(col("event_time"))-unix_timestamp(col("previous_time"))).select("event_id","previous_id","gap_seconds")
+  val order =
+    Window.partitionBy("entity").orderBy(col("event_time").asc_nulls_last, col("event_id"))
+  events
+    .withColumn("previous_id", lag(col("event_id"), 1).over(order))
+    .withColumn("previous_time", lag(col("event_time"), 1).over(order))
+    .withColumn(
+      "gap_seconds",
+      unix_timestamp(col("event_time")) - unix_timestamp(col("previous_time"))
+    )
+    .select("event_id", "previous_id", "gap_seconds")
 }
 ```
 
 ```python
 def previous_evidence(events):
-    order = Window.partitionBy("entity").orderBy(F.col("event_time").asc_nulls_last(),"event_id")
-    return events.withColumn("previous_id",F.lag("event_id",1).over(order)).withColumn("previous_time",F.lag("event_time",1).over(order)).withColumn("gap_seconds",F.unix_timestamp("event_time")-F.unix_timestamp("previous_time")).select("event_id","previous_id","gap_seconds")
+    order = Window.partitionBy("entity").orderBy(F.col("event_time").asc_nulls_last(), "event_id")
+    return (
+        events.withColumn("previous_id", F.lag("event_id", 1).over(order))
+        .withColumn("previous_time", F.lag("event_time", 1).over(order))
+        .withColumn(
+            "gap_seconds", F.unix_timestamp("event_time") - F.unix_timestamp("previous_time")
+        )
+        .select("event_id", "previous_id", "gap_seconds")
+    )
 ```
 
 The previous identity proves which occurrence supplied the lagged field. Zero gaps expose tied timestamps rather than pretending the ID order supplies elapsed time. EntityC shows that a known predecessor does not guarantee a known duration. Prediction features would additionally need event-time and availability-time eligibility; this reproducible lag alone does not establish a leakage-free historical feature.

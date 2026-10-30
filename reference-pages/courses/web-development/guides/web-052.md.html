@@ -209,7 +209,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-a-guarded-update">Worked example 1: A guarded update<a class="heading-anchor" href="#worked-example-1-a-guarded-update" aria-label="Link to this section">#</a></h4>
 <p>The version is part of the write condition.</p>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">UPDATE</span> plans <span class="syntax-keyword">SET</span> minutes <span class="syntax-operator">=</span> <span class="syntax-punctuation">:</span>minutes<span class="syntax-punctuation">,</span> <span class="syntax-keyword">version</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">version</span> <span class="syntax-operator">+</span> <span class="syntax-number">1</span> <span class="syntax-keyword">WHERE</span> id <span class="syntax-operator">=</span> <span class="syntax-punctuation">:</span>id <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">:</span>expected_version<span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">UPDATE</span>
+  plans
+<span class="syntax-keyword">SET</span>
+  minutes <span class="syntax-operator">=</span> <span class="syntax-punctuation">:</span>minutes<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">version</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">version</span> <span class="syntax-operator">+</span> <span class="syntax-number">1</span>
+<span class="syntax-keyword">WHERE</span>
+  id <span class="syntax-operator">=</span> <span class="syntax-punctuation">:</span>id
+  <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">:</span>expected_version<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected observation:</strong> A stale expected version updates no row.</p>
 <h4 id="worked-example-2-rollback-ownership">Worked example 2: Rollback ownership<a class="heading-anchor" href="#worked-example-2-rollback-ownership" aria-label="Link to this section">#</a></h4>
 <p>Failure prevents a partial unit from being accepted.</p>

@@ -218,9 +218,9 @@ destination node removes encapsulation and delivers inner packet</code></pre>
 <p><strong>Expected observation:</strong> Inner Pod addresses and outer transport addresses serve different layers.</p>
 <h4 id="worked-example-2-reason-about-header-budget">Worked example 2: Reason about header budget<a class="heading-anchor" href="#worked-example-2-reason-about-header-budget" aria-label="Link to this section">#</a></h4>
 <p>This arithmetic is synthetic.</p>
-<pre class="highlighted-code"><code class="language-python">underlay_mtu<span class="syntax-operator">=</span><span class="syntax-number">1500</span>
-overhead<span class="syntax-operator">=</span><span class="syntax-number">50</span>
-<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>underlay_mtu<span class="syntax-operator">-</span>overhead<span class="syntax-punctuation">)</span></code></pre>
+<pre class="highlighted-code"><code class="language-python">underlay_mtu <span class="syntax-operator">=</span> <span class="syntax-number">1500</span>
+overhead <span class="syntax-operator">=</span> <span class="syntax-number">50</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>underlay_mtu <span class="syntax-operator">-</span> overhead<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> 1450 bytes before further constraints; actual overhead depends on the implementation.</p>
 <h3 id="run-boundary-and-the-owned-host-lab">Run boundary and the owned host lab<a class="heading-anchor" href="#run-boundary-and-the-owned-host-lab" aria-label="Link to this section">#</a></h3>
 <p>The classroom saves a reading worksheet for this lesson. It does not provide the full advanced networking or controller operation in the ordinary Run adapter. The original admitted Kubernetes reference cases keep their existing contracts. A manifest being valid YAML does not mean it is admitted by that adapter, supported by your cluster, or successfully routed at runtime.</p>

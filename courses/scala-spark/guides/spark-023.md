@@ -57,20 +57,44 @@ import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 
-val facts = spark.range(0L,20000L,1L,4).withColumnRenamed("id","fact_id").withColumn("key",col("fact_id") % 20L).withColumn("amount",col("fact_id") % 7L + 1L)
-val dimension = spark.range(0L,20L,1L,2).withColumnRenamed("id","key").withColumn("factor",col("key") + 1L)
-spark.conf.set("spark.sql.autoBroadcastJoinThreshold","10485760")
-spark.conf.set("spark.sql.join.preferSortMergeJoin","true")
+val facts = spark
+  .range(0L, 20000L, 1L, 4)
+  .withColumnRenamed("id", "fact_id")
+  .withColumn("key", col("fact_id") % 20L)
+  .withColumn("amount", col("fact_id") % 7L + 1L)
+val dimension =
+  spark.range(0L, 20L, 1L, 2).withColumnRenamed("id", "key").withColumn("factor", col("key") + 1L)
+spark.conf.set("spark.sql.autoBroadcastJoinThreshold", "10485760")
+spark.conf.set("spark.sql.join.preferSortMergeJoin", "true")
 ```
 
 ```python
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 
-facts = spark.range(0,20000,1,4).withColumnRenamed("id","fact_id").withColumn("key",F.col("fact_id")%20).withColumn("amount",F.col("fact_id")%7+1)
-dimension = spark.range(0,20,1,2).withColumnRenamed("id","key").withColumn("factor",F.col("key")+1)
-spark.conf.set("spark.sql.autoBroadcastJoinThreshold","10485760")
-spark.conf.set("spark.sql.join.preferSortMergeJoin","true")
+facts = (
+    spark.range(0, 20000, 1, 4)
+    .withColumnRenamed("id", "fact_id")
+    .withColumn("key", F.col("fact_id") % 20)
+    .withColumn("amount", F.col("fact_id") % 7 + 1)
+)
+dimension = (
+    spark.range(0, 20, 1, 2).withColumnRenamed("id", "key").withColumn("factor", F.col("key") + 1)
+)
+spark.conf.set("spark.sql.autoBroadcastJoinThreshold", "10485760")
+spark.conf.set("spark.sql.join.preferSortMergeJoin", "true")
 ```
 
 ## Worked example / walkthrough
@@ -94,15 +118,15 @@ The small build relation is a measured fixture property. A unique dimension key 
 ### Worked example 2
 
 ```scala
-val total = (0L until 20000L).map(i => (i%7L+1L)*(i%20L+1L)).sum
+val total = (0L until 20000L).map(i => (i % 7L + 1L) * (i % 20L + 1L)).sum
 assert(total == 839916L)
 println("Independent weighted-total oracle=" + total)
 ```
 
 ```python
-total = sum((i%7+1)*(i%20+1) for i in range(20000))
+total = sum((i % 7 + 1) * (i % 20 + 1) for i in range(20000))
 assert total == 839916
-print("Independent weighted-total oracle=",total)
+print("Independent weighted-total oracle=", total)
 ```
 
 This bounded driver arithmetic uses the declared generation rule and does not call Spark join or aggregation. It supplies an independent measure oracle so two strategies sharing the same faulty join expression cannot pass merely by agreeing with each other.

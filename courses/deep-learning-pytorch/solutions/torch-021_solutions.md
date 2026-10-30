@@ -47,9 +47,12 @@ The question is: Use IDs 2, 3, 0 and a fixed 4 x 2 table with zero padding row.
 The mask comes from the vocabulary policy. A real token could have a zero vector, so vector magnitude is not a reliable padding detector.
 
 ```python
-table=torch.tensor([[0.,0.],[1.,0.],[2.,2.],[3.,-1.]])
-embedding=nn.Embedding.from_pretrained(table,freeze=False,padding_idx=0); ids=torch.tensor([[2,3,0]]); values=embedding(ids); mask=ids!=0
-assert tuple(values.shape)==(1,3,2) and mask.tolist()==[[True,True,False]]
+table = torch.tensor([[0.0, 0.0], [1.0, 0.0], [2.0, 2.0], [3.0, -1.0]])
+embedding = nn.Embedding.from_pretrained(table, freeze=False, padding_idx=0)
+ids = torch.tensor([[2, 3, 0]])
+values = embedding(ids)
+mask = ids != 0
+assert tuple(values.shape) == (1, 3, 2) and mask.tolist() == [[True, True, False]]
 ```
 
 **Expected:** embedding shape 1, 3, 2; mask True, True, False.
@@ -64,8 +67,8 @@ The question is: Sum embedding outputs and backpropagate.
 
 ```python
 values.sum().backward()
-assert torch.count_nonzero(embedding.weight.grad[0]).item()==0
-assert torch.count_nonzero(embedding.weight.grad[2:4]).item()>0
+assert torch.count_nonzero(embedding.weight.grad[0]).item() == 0
+assert torch.count_nonzero(embedding.weight.grad[2:4]).item() > 0
 ```
 
 **Expected:** padding row gradient zero; rows 2 and 3nonzero.
@@ -79,12 +82,16 @@ The question is: Use fixed GRU parameters.1 and length 2; compare packed run wit
 The packed sequence ends after two observations. This direct comparison establishes what the final state means without relying on a padded output index.
 
 ```python
-gru=nn.GRU(2,2,batch_first=True)
+gru = nn.GRU(2, 2, batch_first=True)
 with torch.no_grad():
-    for parameter in gru.parameters(): parameter.fill_(.1)
-packed=nn.utils.rnn.pack_padded_sequence(values.detach(),torch.tensor([2]),batch_first=True,enforce_sorted=False)
-_,packed_state=gru(packed); _,prefix_state=gru(values.detach()[:,:2])
-torch.testing.assert_close(packed_state,prefix_state,atol=1e-6,rtol=0)
+    for parameter in gru.parameters():
+        parameter.fill_(0.1)
+packed = nn.utils.rnn.pack_padded_sequence(
+    values.detach(), torch.tensor([2]), batch_first=True, enforce_sorted=False
+)
+_, packed_state = gru(packed)
+_, prefix_state = gru(values.detach()[:, :2])
+torch.testing.assert_close(packed_state, prefix_state, atol=1e-6, rtol=0)
 ```
 
 **Expected:** final states match within 1e-6.
@@ -98,8 +105,8 @@ The question is: Run GRU overall three positions including zero embedding paddin
 Zero input does not freeze are current state. Biases and hidden-to-hidden operations can continue changing it.
 
 ```python
-_,padded_state=gru(values.detach())
-assert not torch.allclose(padded_state,prefix_state,atol=1e-6,rtol=0)
+_, padded_state = gru(values.detach())
+assert not torch.allclose(padded_state, prefix_state, atol=1e-6, rtol=0)
 ```
 
 **Expected:** final state differs from the valid-prefix state.
@@ -113,8 +120,9 @@ The question is: Use losses log 2, log 2, 100with the valid mask.
 The valid count is two. Zeroing the third numerator but dividing by three would make padding artificially improve the metric.
 
 ```python
-losses=torch.tensor([[np.log(2),np.log(2),100.]],dtype=torch.float64)
-mean=losses[mask].mean(); np.testing.assert_allclose(mean.item(),np.log(2),atol=1e-12,rtol=0)
+losses = torch.tensor([[np.log(2), np.log(2), 100.0]], dtype=torch.float64)
+mean = losses[mask].mean()
+np.testing.assert_allclose(mean.item(), np.log(2), atol=1e-12, rtol=0)
 ```
 
 **Expected:** mean log 2, unchanged by the padding loss.
@@ -128,9 +136,14 @@ The question is: Attempt to pack a sequence with length 0.
 The application should detect empty records before this low-level call and choose an explicit policy. An undefined target mean must not be converted into perfect loss.
 
 ```python
-try: nn.utils.rnn.pack_padded_sequence(values.detach(),torch.tensor([0]),batch_first=True,enforce_sorted=False)
-except RuntimeError: pass
-else: raise AssertionError('zero-length packed sequence accepted')
+try:
+    nn.utils.rnn.pack_padded_sequence(
+        values.detach(), torch.tensor([0]), batch_first=True, enforce_sorted=False
+    )
+except RuntimeError:
+    pass
+else:
+    raise AssertionError("zero-length packed sequence accepted")
 ```
 
 **Expected:** RuntimeError for invalid length.

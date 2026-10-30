@@ -23,8 +23,12 @@ The question is: Use two four-token sequences and shifted labels with vocabulary
 The fixture is small enough to enumerate every target. The context length and vocabulary remain below the decoder limits.
 
 ```python
-torch.manual_seed(7); model=TinyDecoder(); ids=torch.tensor([[1,2,3,4],[2,3,4,5]]); inputs=ids[:,:-1]; targets=ids[:,1:]
-assert tuple(inputs.shape)==(2,3) and targets.numel()==6
+torch.manual_seed(7)
+model = TinyDecoder()
+ids = torch.tensor([[1, 2, 3, 4], [2, 3, 4, 5]])
+inputs = ids[:, :-1]
+targets = ids[:, 1:]
+assert tuple(inputs.shape) == (2, 3) and targets.numel() == 6
 ```
 
 **Expected:** inputs shape(2,3);6 active targets.
@@ -38,8 +42,9 @@ The question is: Calculate initial cross entropy before any optimizer step.
 The initial value is an observation for the fixed seed and implementation. It is not a promised constant across every library version.
 
 ```python
-logits,_=model(inputs); initial=F.cross_entropy(logits.reshape(-1,16),targets.reshape(-1)).item()
-assert np.isfinite(initial) and initial>0
+logits, _ = model(inputs)
+initial = F.cross_entropy(logits.reshape(-1, 16), targets.reshape(-1)).item()
+assert np.isfinite(initial) and initial > 0
 ```
 
 **Expected:** finite positive loss.
@@ -53,12 +58,22 @@ The question is: Use Adam(.01), zero gradients each step, log losses and norms, 
 The norm is captured before the optimizer mutates weights. Saving the entire short trace makes the first nonfinite or missing update visible.
 
 ```python
-opt=torch.optim.Adam(model.parameters(),lr=.01); before=model.output.weight.detach().clone(); losses=[]; norms=[]
+opt = torch.optim.Adam(model.parameters(), lr=0.01)
+before = model.output.weight.detach().clone()
+losses = []
+norms = []
 for _ in range(12):
-    opt.zero_grad(set_to_none=True); logits,_=model(inputs); loss=F.cross_entropy(logits.reshape(-1,16),targets.reshape(-1)); loss.backward()
-    norm=sum(float(p.grad.square().sum()) for p in model.parameters() if p.grad is not None)**.5
-    losses.append(loss.item()); norms.append(norm); opt.step()
-assert len(losses)==12 and np.isfinite(losses+norms).all() and max(norms)>0
+    opt.zero_grad(set_to_none=True)
+    logits, _ = model(inputs)
+    loss = F.cross_entropy(logits.reshape(-1, 16), targets.reshape(-1))
+    loss.backward()
+    norm = (
+        sum(float(p.grad.square().sum()) for p in model.parameters() if p.grad is not None) ** 0.5
+    )
+    losses.append(loss.item())
+    norms.append(norm)
+    opt.step()
+assert len(losses) == 12 and np.isfinite(losses + norms).all() and max(norms) > 0
 ```
 
 **Expected:** 12 finite losses and norms; at least one positive norm.
@@ -72,7 +87,7 @@ The question is: Compare the output projection with its detached snapshot.
 A printed training message or decreasing cached value cannot prove an update. The snapshot must own its data so it does not alias the live parameter.
 
 ```python
-assert not torch.equal(before,model.output.weight.detach())
+assert not torch.equal(before, model.output.weight.detach())
 ```
 
 **Expected:** weights differ.
@@ -86,7 +101,8 @@ The question is: Call zero_grad(set_to_none=True) after the run and inspect ever
 This confirms the intended reset policy. Accumulating gradients deliberately is possible, but requires an explicit denominator and update schedule.
 
 ```python
-opt.zero_grad(set_to_none=True); assert all(p.grad is None for p in model.parameters())
+opt.zero_grad(set_to_none=True)
+assert all(p.grad is None for p in model.parameters())
 ```
 
 **Expected:** all gradientsNone.
@@ -100,8 +116,14 @@ The question is: Create a run record with12 completed updates and the declared20
 Stopping a bounded diagnostic is not evidence of convergence. The report states what was executed and leaves held-out quality to a separate experiment.
 
 ```python
-report={'steps':12,'maximum_steps':200,'initial_loss':initial,'last_training_loss':losses[-1],'convergence_established':False}
-assert report['steps']<=report['maximum_steps'] and report['convergence_established'] is False
+report = {
+    "steps": 12,
+    "maximum_steps": 200,
+    "initial_loss": initial,
+    "last_training_loss": losses[-1],
+    "convergence_established": False,
+}
+assert report["steps"] <= report["maximum_steps"] and report["convergence_established"] is False
 ```
 
 **Expected:** stopped_at12; no convergence claim.

@@ -9,7 +9,7 @@ A second-order check is difficult to interpret if the first-order objective is w
 **Expected:** [4,9].
 
 ```python
-close(jax.grad(quadratic)(point), [4., 9.])
+close(jax.grad(quadratic)(point), [4.0, 9.0])
 ```
 
 ## Exercise 2: Reverse the transform order
@@ -29,10 +29,10 @@ This perturbs the complete gradient calculation in the exact direction under inv
 **Expected:** [3,-2] within absolute 1e-8.
 
 ```python
-v, h = jnp.array([2., -1.]), 1e-5
+v, h = jnp.array([2.0, -1.0]), 1e-5
 gradient = jax.grad(quadratic)
 finite = (gradient(point + h * v) - gradient(point - h * v)) / (2 * h)
-close(finite, [3., -2.], atol=1e-8, rtol=0.)
+close(finite, [3.0, -2.0], atol=1e-8, rtol=0.0)
 ```
 
 ## Exercise 4: Interpret directional curvature
@@ -42,8 +42,8 @@ The scalar weights a local second-order change along one direction.
 **Expected:** 8, a positive curvature in this direction.
 
 ```python
-v = jnp.array([2., -1.])
-close(jnp.vdot(v, expected_hessian @ v), 8.)
+v = jnp.array([2.0, -1.0])
+close(jnp.vdot(v, expected_hessian @ v), 8.0)
 ```
 
 ## Exercise 5: Change the evaluation point
@@ -53,7 +53,7 @@ A degree-two polynomial has a constant second derivative. A nonlinear objective 
 **Expected:** The same constant Hessian.
 
 ```python
-close(jax.hessian(quadratic)(jnp.array([-3., 7.])), expected_hessian)
+close(jax.hessian(quadratic)(jnp.array([-3.0, 7.0])), expected_hessian)
 ```
 
 ## Exercise 6: Contrast nonlinear curvature
@@ -63,9 +63,9 @@ Curvature now depends on the point, so one stored Hessian cannot describe every 
 **Expected:** 0 and 48.
 
 ```python
-second = jax.grad(jax.grad(lambda z: z ** 4))
-close(second(0.), 0.)
-close(second(2.), 48.)
+second = jax.grad(jax.grad(lambda z: z**4))
+close(second(0.0), 0.0)
+close(second(2.0), 48.0)
 ```
 
 ## Scope of this evidence

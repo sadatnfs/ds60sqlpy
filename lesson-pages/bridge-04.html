@@ -578,9 +578,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="guide--optional-live-db-step">Optional live-DB step<a class="heading-anchor" href="#guide--optional-live-db-step" aria-label="Link to this section">#</a></h4>
 <p>Use one disposable connection. Inside it, create:</p>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> bridge_jobs <span class="syntax-punctuation">(</span>
-    job_id <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">GENERATED</span> ALWAYS <span class="syntax-keyword">AS</span> <span class="syntax-keyword">IDENTITY</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span>
-    idempotency_key <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">UNIQUE</span><span class="syntax-punctuation">,</span>
-    payload <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span>
+  job_id <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">GENERATED</span> ALWAYS <span class="syntax-keyword">AS</span> <span class="syntax-keyword">IDENTITY</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span>
+  idempotency_key <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">UNIQUE</span><span class="syntax-punctuation">,</span>
+  payload <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span>
 <span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></code></pre>
 <p>Call your insert twice with the same key and verify that the second result is <code>None</code>. Then explicitly call <code>rollback()</code>. The solution targets <code>pg_temp.bridge_jobs</code>, so it cannot accidentally write a persistent table.</p>
 <p>Set the URL in the current shell only:</p>

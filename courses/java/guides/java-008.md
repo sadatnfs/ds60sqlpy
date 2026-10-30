@@ -49,19 +49,21 @@ Normalization occurs once at the boundary. Every later accessor sees the canonic
 import java.util.*;
 
 public class Main {
-    record Order(String id, List<String> items) {
-        Order {
-            Objects.requireNonNull(id, "id"); id = id.strip();
-            if (id.isEmpty()) throw new IllegalArgumentException("blank id");
-            items = List.copyOf(items);
-        }
-    }
-    public static void main(String[] args) throws Exception {
-        Order order = new Order(" A ", List.of("x"));
-        assert order.id().equals("A") && order.items().equals(List.of("x"));
-    }
-}
 
+  record Order(String id, List<String> items) {
+    Order {
+      Objects.requireNonNull(id, "id");
+      id = id.strip();
+      if (id.isEmpty()) throw new IllegalArgumentException("blank id");
+      items = List.copyOf(items);
+    }
+  }
+
+  public static void main(String[] args) throws Exception {
+    Order order = new Order(" A ", List.of("x"));
+    assert order.id().equals("A") && order.items().equals(List.of("x"));
+  }
+}
 ```
 
 **Expected:** ID A and items[x].
@@ -74,22 +76,26 @@ Without the copy, a caller could change the record observed value after construc
 import java.util.*;
 
 public class Main {
-    record Order(String id, List<String> items) {
-        Order {
-            Objects.requireNonNull(id, "id"); id = id.strip();
-            if (id.isEmpty()) throw new IllegalArgumentException("blank id");
-            items = List.copyOf(items);
-        }
-    }
-    public static void main(String[] args) throws Exception {
-        Order order = new Order(" A ", List.of("x"));
-        assert order.id().equals("A") && order.items().equals(List.of("x"));
 
-        List<String> supplied = new ArrayList<>(List.of("x")); Order copied = new Order("B", supplied); supplied.add("y");
-        assert copied.items().equals(List.of("x"));
+  record Order(String id, List<String> items) {
+    Order {
+      Objects.requireNonNull(id, "id");
+      id = id.strip();
+      if (id.isEmpty()) throw new IllegalArgumentException("blank id");
+      items = List.copyOf(items);
     }
+  }
+
+  public static void main(String[] args) throws Exception {
+    Order order = new Order(" A ", List.of("x"));
+    assert order.id().equals("A") && order.items().equals(List.of("x"));
+
+    List<String> supplied = new ArrayList<>(List.of("x"));
+    Order copied = new Order("B", supplied);
+    supplied.add("y");
+    assert copied.items().equals(List.of("x"));
+  }
 }
-
 ```
 
 **Expected:** record retains its original single item.

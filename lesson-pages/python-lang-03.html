@@ -414,10 +414,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h5 id="guide--advancing-a-stream-changes-future-observations">Advancing a stream changes future observations<a class="heading-anchor" href="#guide--advancing-a-stream-changes-future-observations" aria-label="Link to this section">#</a></h5>
 <p>Write the three values you expect in <code>pulled</code> after each assertion. The list is deliberately external to the generator so it records when work happens. <code>list(stream)</code> requests the remaining items; it does not rewind an exhausted generator. This fixture has three bounded values and no files or remote data.</p>
 <pre class="highlighted-code"><code class="language-python">pulled <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+
+
 <span class="syntax-keyword">def</span> <span class="syntax-function">measured</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
         pulled<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span>
         <span class="syntax-keyword">yield</span> value
+
 
 stream <span class="syntax-operator">=</span> measured<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">assert</span> pulled <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
@@ -432,6 +435,8 @@ stream <span class="syntax-operator">=</span> measured<span class="syntax-punctu
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> contextlib <span class="syntax-keyword">import</span> closing
 
 events <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+
+
 <span class="syntax-keyword">def</span> <span class="syntax-function">owned_letters</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     events<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">open</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
     <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
@@ -439,6 +444,7 @@ events <span class="syntax-operator">=</span> <span class="syntax-punctuation">[
         <span class="syntax-keyword">yield</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span>
     <span class="syntax-keyword">finally</span><span class="syntax-punctuation">:</span>
         events<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">close</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+
 
 <span class="syntax-keyword">with</span> closing<span class="syntax-punctuation">(</span>owned_letters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> letters<span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">assert</span> <span class="syntax-builtin">next</span><span class="syntax-punctuation">(</span>letters<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span>

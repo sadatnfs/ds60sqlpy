@@ -29,7 +29,12 @@ Task: Send two rows worth 250 and 300 cents to the CLI.
 The check uses the actual process contract, not a direct call to an internal aggregate function. Exact separation of result data and diagnostics makes the tool composable with another program.
 
 ```javascript
-const input = [{ id: 'A', quantity: 2, priceCents: 125 }, { id: 'B', quantity: 3, priceCents: 100 }].map(JSON.stringify).join('\n');
+const input = [
+  { id: 'A', quantity: 2, priceCents: 125 },
+  { id: 'B', quantity: 3, priceCents: 100 },
+]
+  .map(JSON.stringify)
+  .join('\n');
 const result = await runCli(['--sum'], input);
 assert.equal(result.status, 0, result.stderr);
 assert.deepEqual(JSON.parse(result.stdout), { rows: 2, totalCents: 550 });

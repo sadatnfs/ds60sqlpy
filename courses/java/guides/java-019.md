@@ -49,14 +49,28 @@ The queue preserves arrival order. ChoosingremoveLast instead would create a sta
 import java.util.*;
 
 public class Main {
-    record Task(int priority,int sequence,String name){}
-    static int comparisons(int[] values,int target){int count=0;for(int value:values){count++;if(value==target)break;}return count;}
-    public static void main(String[] args) throws Exception {
-        Deque<String> queue=new ArrayDeque<>(); queue.addLast("a");queue.addLast("b");queue.addLast("c");
-        assert List.of(queue.removeFirst(),queue.removeFirst(),queue.removeFirst()).equals(List.of("a","b","c"));
-    }
-}
 
+  record Task(int priority, int sequence, String name) {}
+
+  static int comparisons(int[] values, int target) {
+    int count = 0;
+    for (int value : values) {
+      count++;
+      if (value == target) break;
+    }
+    return count;
+  }
+
+  public static void main(String[] args) throws Exception {
+    Deque<String> queue = new ArrayDeque<>();
+    queue.addLast("a");
+    queue.addLast("b");
+    queue.addLast("c");
+    assert List.of(queue.removeFirst(), queue.removeFirst(), queue.removeFirst()).equals(
+      List.of("a", "b", "c")
+    );
+  }
+}
 ```
 
 **Expected:** a,b,c order.
@@ -69,17 +83,34 @@ The most recently pushed value is removed first. Stack behavior is useful for ne
 import java.util.*;
 
 public class Main {
-    record Task(int priority,int sequence,String name){}
-    static int comparisons(int[] values,int target){int count=0;for(int value:values){count++;if(value==target)break;}return count;}
-    public static void main(String[] args) throws Exception {
-        Deque<String> queue=new ArrayDeque<>(); queue.addLast("a");queue.addLast("b");queue.addLast("c");
-        assert List.of(queue.removeFirst(),queue.removeFirst(),queue.removeFirst()).equals(List.of("a","b","c"));
 
-        Deque<Integer> stack=new ArrayDeque<>();stack.push(1);stack.push(2);stack.push(3);
-        assert List.of(stack.pop(),stack.pop(),stack.pop()).equals(List.of(3,2,1));
+  record Task(int priority, int sequence, String name) {}
+
+  static int comparisons(int[] values, int target) {
+    int count = 0;
+    for (int value : values) {
+      count++;
+      if (value == target) break;
     }
-}
+    return count;
+  }
 
+  public static void main(String[] args) throws Exception {
+    Deque<String> queue = new ArrayDeque<>();
+    queue.addLast("a");
+    queue.addLast("b");
+    queue.addLast("c");
+    assert List.of(queue.removeFirst(), queue.removeFirst(), queue.removeFirst()).equals(
+      List.of("a", "b", "c")
+    );
+
+    Deque<Integer> stack = new ArrayDeque<>();
+    stack.push(1);
+    stack.push(2);
+    stack.push(3);
+    assert List.of(stack.pop(), stack.pop(), stack.pop()).equals(List.of(3, 2, 1));
+  }
+}
 ```
 
 **Expected:** 3,2,1.

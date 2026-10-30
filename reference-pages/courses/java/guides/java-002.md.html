@@ -219,13 +219,12 @@ java -ea Main</code></pre>
 
 <span class="syntax-keyword">public</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Main</span> <span class="syntax-punctuation">{</span>
 
-    <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span>
-        <span class="syntax-keyword">int</span> whole <span class="syntax-operator">=</span> <span class="syntax-number">7</span> <span class="syntax-operator">/</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span>
-        <span class="syntax-keyword">double</span> fractional <span class="syntax-operator">=</span> <span class="syntax-number">7</span> <span class="syntax-operator">/</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">;</span>
-        <span class="syntax-keyword">assert</span> whole <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">3</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> fractional <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">3.5</span><span class="syntax-punctuation">;</span>
-    <span class="syntax-punctuation">}</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+  <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">int</span> whole <span class="syntax-operator">=</span> <span class="syntax-number">7</span> <span class="syntax-operator">/</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">double</span> fractional <span class="syntax-operator">=</span> <span class="syntax-number">7</span> <span class="syntax-operator">/</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">assert</span> whole <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">3</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> fractional <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">3.5</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected:</strong> integer 3 and double 3.5.</p>
 <h4 id="example-b-widen-before-multiplication">Example B: Widen before multiplication<a class="heading-anchor" href="#example-b-widen-before-multiplication" aria-label="Link to this section">#</a></h4>
 <p>The cast affects the multiplication itself. Casting the wrappedint result to long afterward cannot recover lost information.</p>
@@ -233,18 +232,17 @@ java -ea Main</code></pre>
 
 <span class="syntax-keyword">public</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Main</span> <span class="syntax-punctuation">{</span>
 
-    <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span>
-        <span class="syntax-keyword">int</span> whole <span class="syntax-operator">=</span> <span class="syntax-number">7</span> <span class="syntax-operator">/</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span>
-        <span class="syntax-keyword">double</span> fractional <span class="syntax-operator">=</span> <span class="syntax-number">7</span> <span class="syntax-operator">/</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">;</span>
-        <span class="syntax-keyword">assert</span> whole <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">3</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> fractional <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">3.5</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">int</span> whole <span class="syntax-operator">=</span> <span class="syntax-number">7</span> <span class="syntax-operator">/</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">double</span> fractional <span class="syntax-operator">=</span> <span class="syntax-number">7</span> <span class="syntax-operator">/</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">assert</span> whole <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">3</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> fractional <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">3.5</span><span class="syntax-punctuation">;</span>
 
-        <span class="syntax-keyword">long</span> safe <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">long</span><span class="syntax-punctuation">)</span> <span class="syntax-number">50_000</span> <span class="syntax-operator">*</span> <span class="syntax-number">50_000</span><span class="syntax-punctuation">;</span>
-        <span class="syntax-keyword">int</span> wrapped <span class="syntax-operator">=</span> <span class="syntax-number">50_000</span> <span class="syntax-operator">*</span> <span class="syntax-number">50_000</span><span class="syntax-punctuation">;</span>
-        <span class="syntax-keyword">assert</span> safe <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">2_500_000_000L</span><span class="syntax-punctuation">;</span>
-        <span class="syntax-keyword">assert</span> wrapped <span class="syntax-operator">!</span><span class="syntax-operator">=</span> safe<span class="syntax-punctuation">;</span>
-    <span class="syntax-punctuation">}</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+    <span class="syntax-keyword">long</span> safe <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">long</span><span class="syntax-punctuation">)</span> <span class="syntax-number">50_000</span> <span class="syntax-operator">*</span> <span class="syntax-number">50_000</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">int</span> wrapped <span class="syntax-operator">=</span> <span class="syntax-number">50_000</span> <span class="syntax-operator">*</span> <span class="syntax-number">50_000</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">assert</span> safe <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">2_500_000_000L</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">assert</span> wrapped <span class="syntax-operator">!</span><span class="syntax-operator">=</span> safe<span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected:</strong> 2500000000L;int product differs.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
 <p>Read the source from the entry point and name each value before executing it. Identify which operations create new values, which mutate existing state and which can fail. Predict the first observable output or assertion result. For a compile-time failure, explain which source rule is violated before discussing runtime state: a program that did not compile never reached its main method. Keep normal, boundary and invalid inputs separate so each check has a clear purpose.</p>

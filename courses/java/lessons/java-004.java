@@ -3,11 +3,11 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     // Exercise 1: Call a pure calculation
-    // ImplementdoubleValue(intx) and evaluate7 and0.
-    // Expected: 14 and0.
+    // Implement doubleValue(int x) and evaluate 7 and 0.
+    // Expected: 14 and 0.
 
     // Exercise 2: Validate a precondition
-    // ImplementpositiveArea(width,height) rejecting nonpositive dimensions.
+    // Implement positiveArea(width,height) rejecting nonpositive dimensions.
     // Expected: 3by4 gives12;zero width throwsIllegalArgumentException.
 
     // Exercise 3: Observe copied primitive values
@@ -24,7 +24,7 @@ public class Main {
 
     // Exercise 6: Inspect overload selection
     // Call describe withint1 andlong1L using two overloads.
-    // Expected: int andlong respectively.
+    // Expected: int and long respectively.
     System.out.println("Implement and check the six exercises in your saved copy.");
   }
 }

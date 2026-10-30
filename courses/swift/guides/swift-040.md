@@ -45,17 +45,21 @@ Derived presentation avoids a second label field that can become stale.
 ```swift
 import Foundation
 
-struct FormState { var title: String; var completed: Bool; var buttonLabel: String { completed ? "Mark incomplete" : "Mark complete" } }
+struct FormState {
+  var title: String
+  var completed: Bool
+  var buttonLabel: String { completed ? "Mark incomplete" : "Mark complete" }
+}
 
 @main
 struct LessonMain {
-    static func main() async throws {
-        do {
-            let state = FormState(title: "Read", completed: false)
-            precondition(state.buttonLabel == "Mark complete")
-        }
-        print("swift-040: passed")
+  static func main() async throws {
+    do {
+      let state = FormState(title: "Read", completed: false)
+      precondition(state.buttonLabel == "Mark complete")
     }
+    print("swift-040: passed")
+  }
 }
 ```
 
@@ -68,19 +72,23 @@ The transition has one source of truth and independent fields remain unchanged.
 ```swift
 import Foundation
 
-struct FormState { var title: String; var completed: Bool; var buttonLabel: String { completed ? "Mark incomplete" : "Mark complete" } }
+struct FormState {
+  var title: String
+  var completed: Bool
+  var buttonLabel: String { completed ? "Mark incomplete" : "Mark complete" }
+}
 
 @main
 struct LessonMain {
-    static func main() async throws {
-        do {
-            var state = FormState(title: "Read", completed: false)
-            state.completed = true
-            precondition(state.buttonLabel == "Mark incomplete")
-            precondition(state.title == "Read")
-        }
-        print("swift-040: passed")
+  static func main() async throws {
+    do {
+      var state = FormState(title: "Read", completed: false)
+      state.completed = true
+      precondition(state.buttonLabel == "Mark incomplete")
+      precondition(state.title == "Read")
     }
+    print("swift-040: passed")
+  }
 }
 ```
 

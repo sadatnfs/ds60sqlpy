@@ -55,10 +55,7 @@ def extract_emails(text: str) -> list[str]:
     return list(dict.fromkeys(normalized))
 
 
-text = (
-    "Contact Ada@Example.com or lin@example.com; "
-    "ADA@example.com replied."
-)
+text = "Contact Ada@Example.com or lin@example.com; ADA@example.com replied."
 addresses = extract_emails(text)
 assert addresses == ["ada@example.com", "lin@example.com"]
 assert extract_emails("There is no address in this sentence.") == []
@@ -91,10 +88,7 @@ def plan_kebab_renames(folder: Path) -> list[tuple[Path, Path]]:
         (path for path in folder.iterdir() if path.is_file()),
         key=lambda path: path.name.casefold(),
     )
-    proposals = [
-        (path, path.with_name(kebab_stem(path.stem) + path.suffix))
-        for path in files
-    ]
+    proposals = [(path, path.with_name(kebab_stem(path.stem) + path.suffix)) for path in files]
     targets: dict[str, Path] = {}
     source_names = {path.name.casefold(): path for path in files}
     for source, target in proposals:
@@ -106,11 +100,7 @@ def plan_kebab_renames(folder: Path) -> list[tuple[Path, Path]]:
         if occupied is not None and occupied != source:
             raise ValueError(f"target already exists: {target.name!r}")
         targets[key] = source
-    return [
-        (source, target)
-        for source, target in proposals
-        if source.name != target.name
-    ]
+    return [(source, target) for source, target in proposals if source.name != target.name]
 
 
 with tempfile.TemporaryDirectory() as temporary:
@@ -198,9 +188,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-REPORT_PATTERN = re.compile(
-    r"sales_(?P<date>\d{4}-\d{2}-\d{2})_(?P<region>[a-z]+)\.csv"
-)
+REPORT_PATTERN = re.compile(r"sales_(?P<date>\d{4}-\d{2}-\d{2})_(?P<region>[a-z]+)\.csv")
 
 
 def parse_report_name(path: Path) -> tuple[str, str]:
@@ -212,9 +200,7 @@ def parse_report_name(path: Path) -> tuple[str, str]:
     return match.group("date"), match.group("region")
 
 
-assert parse_report_name(Path("sales_2025-07-01_west.csv")) == (
-    "2025-07-01", "west"
-)
+assert parse_report_name(Path("sales_2025-07-01_west.csv")) == ("2025-07-01", "west")
 
 bounded_tags = re.findall(r"<[^<>]*>", "<b>one</b><i>two</i>")
 assert bounded_tags == ["<b>", "</b>", "<i>", "</i>"]
@@ -228,8 +214,7 @@ def kebab_stem(stem: str) -> str:
 def plan_renames(paths: list[Path]) -> dict[Path, Path]:
     """Return a collision-free plan without touching the filesystem."""
 
-    plan = {path: path.with_name(f"{kebab_stem(path.stem)}{path.suffix.lower()}")
-            for path in paths}
+    plan = {path: path.with_name(f"{kebab_stem(path.stem)}{path.suffix.lower()}") for path in paths}
     destinations = list(plan.values())
     if len({destination.name.casefold() for destination in destinations}) != len(destinations):
         raise ValueError("rename destinations collide")

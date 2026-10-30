@@ -53,8 +53,8 @@ The question is: Use relevant IDs a, c and retrieved b, c, a.
 Both relevant documents are retrieved, but the first appears second. Recall alone would not reveal that ordering.
 
 ```python
-recall,rr=retrieval_metrics(['b','c','a'],{'a','c'})
-assert recall==1 and rr==.5
+recall, rr = retrieval_metrics(["b", "c", "a"], {"a", "c"})
+assert recall == 1 and rr == 0.5
 ```
 
 **Expected:** recall 1; reciprocal rank 0.5.
@@ -68,7 +68,7 @@ The question is: Use relevant a and retrieved b, c.
 The answer stage cannot use evidence absent from its context. This is a retrieval failure even if a language model guesses the answer from prior training.
 
 ```python
-assert retrieval_metrics(['b','c'],{'a'})==(0.,0.)
+assert retrieval_metrics(["b", "c"], {"a"}) == (0.0, 0.0)
 ```
 
 **Expected:** recall0; reciprocal rank 0.
@@ -82,8 +82,9 @@ The question is: Use an empty relevant set and a saved abstention result.
 A denominator of zero does not mean perfect recall. The correct task behavior is evaluated through an explicit answerability and abstention policy.
 
 ```python
-assert retrieval_metrics(['b'],set())==(None,0.)
-result={'question':'q-missing','answerable':False,'abstained':True}; assert not result['answerable'] and result['abstained']
+assert retrieval_metrics(["b"], set()) == (None, 0.0)
+result = {"question": "q-missing", "answerable": False, "abstained": True}
+assert not result["answerable"] and result["abstained"]
 ```
 
 **Expected:** recallNone; appropriate abstentionTrue.
@@ -97,8 +98,8 @@ The question is: Record a correct-looking answer whose cited context does not su
 A system can answer from memorized knowledge or chance while failing an evidence-grounded contract. Both outcomes should remain visible.
 
 ```python
-saved={'question':'q1','correct':True,'supported':False,'retrieval_miss':True}
-assert saved['correct'] and not saved['supported']
+saved = {"question": "q1", "correct": True, "supported": False, "retrieval_miss": True}
+assert saved["correct"] and not saved["supported"]
 ```
 
 **Expected:** correctTrue but supportedFalse.
@@ -112,8 +113,9 @@ The question is: Compare q1 observed incorrect with oracle-context correct under
 The unchanged failure onq2 shows that retrieval is not always the sole bottleneck. The control should not silently change the question or answer criteria.
 
 ```python
-observed={'q1':0,'q2':0}; oracle={'q1':1,'q2':0}
-assert oracle['q1']-observed['q1']==1 and oracle['q2']-observed['q2']==0
+observed = {"q1": 0, "q2": 0}
+oracle = {"q1": 1, "q2": 0}
+assert oracle["q1"] - observed["q1"] == 1 and oracle["q2"] - observed["q2"] == 0
 ```
 
 **Expected:** paired improvement1 for q1.
@@ -127,8 +129,10 @@ The question is: Validate one score row per question and inject a duplicateq1.
 Duplicated question rows can inflate counts and distort paired comparisons. Identity checks belong before calculating aggregate metrics.
 
 ```python
-ids=['q1','q2','q3']; assert len(ids)==len(set(ids))
-bad=ids+['q1']; assert len(bad)!=len(set(bad))
+ids = ["q1", "q2", "q3"]
+assert len(ids) == len(set(ids))
+bad = ids + ["q1"]
+assert len(bad) != len(set(bad))
 ```
 
 **Expected:** duplicate ID detected.

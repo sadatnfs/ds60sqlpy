@@ -51,8 +51,9 @@ The question is: Chunk one two three four five six seven with size 3 and overlap
 The step is two tokens, so each adjacent pair shares one token. The final full window reaches the document end without creating a duplicate tail chunk.
 
 ```python
-text='one two three four five six seven'; chunks=chunk(text,'d',1,3,1)
-assert [c['text'] for c in chunks]==['one two three','three four five','five six seven']
+text = "one two three four five six seven"
+chunks = chunk(text, "d", 1, 3, 1)
+assert [c["text"] for c in chunks] == ["one two three", "three four five", "five six seven"]
 ```
 
 **Expected:** chunks one two three, three four five and five six seven.
@@ -66,8 +67,8 @@ The question is: For every chunk, slice the original text using its start and en
 Offsets remain meaningful only relative to the exact source version. Reconstructing chunk text with join could normalize whitespace and break this equality.
 
 ```python
-assert all(text[c['start']:c['end']]==c['text'] for c in chunks)
-assert chunks[1]['start']==text.index('three')
+assert all(text[c["start"] : c["end"]] == c["text"] for c in chunks)
+assert chunks[1]["start"] == text.index("three")
 ```
 
 **Expected:** every source slice equals the stored chunk text.
@@ -81,8 +82,9 @@ The question is: Chunk alpha, two spaces, beta, a newline and gamma with size 2 
 The splitter counts token spans but retains original characters inside the chunk. Citation fidelity and tokenization are separate concerns.
 
 ```python
-odd='alpha  beta\ngamma'; pieces=chunk(odd,'odd',2,2,0)
-assert pieces[0]['text']=='alpha  beta' and pieces[1]['text']=='gamma'
+odd = "alpha  beta\ngamma"
+pieces = chunk(odd, "odd", 2, 2, 0)
+assert pieces[0]["text"] == "alpha  beta" and pieces[1]["text"] == "gamma"
 ```
 
 **Expected:** first chunk retains the double space; second chunk is gamma.
@@ -96,8 +98,8 @@ The question is: Count total stored chunk token occurrences versus original sour
 Repeated context is not independent evidence. A retrieval result returning adjacent overlapping chunks should avoid counting the shared sentence twice in answer support.
 
 ```python
-assert sum(len(c['text'].split()) for c in chunks)==9
-assert len(text.split())==7
+assert sum(len(c["text"].split()) for c in chunks) == 9
+assert len(text.split()) == 7
 ```
 
 **Expected:** 9 stored token occurrences versus7 source positions.
@@ -111,10 +113,13 @@ The question is: Try overlap equal to window size, negative overlap and size 0.
 The validation protects termination as well as semantics. A step of zero would otherwise repeat the same window forever.
 
 ```python
-for size,overlap in [(3,3),(3,-1),(0,0)]:
-    try: chunk(text,'d',1,size,overlap)
-    except ValueError: pass
-    else: raise AssertionError('invalid chunk policy')
+for size, overlap in [(3, 3), (3, -1), (0, 0)]:
+    try:
+        chunk(text, "d", 1, size, overlap)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("invalid chunk policy")
 ```
 
 **Expected:** all policies raise ValueError before iteration.
@@ -128,8 +133,9 @@ The question is: Chunk empty text and a two-token string with size 5.
 A short source should not be padded with invented text. An empty source contributes no retrievable evidence and should remain distinguishable from a valid zero-length quote.
 
 ```python
-assert chunk('','empty',1,5,1)==[]
-short=chunk('only two','short',1,5,1); assert len(short)==1 and short[0]['text']=='only two'
+assert chunk("", "empty", 1, 5, 1) == []
+short = chunk("only two", "short", 1, 5, 1)
+assert len(short) == 1 and short[0]["text"] == "only two"
 ```
 
 **Expected:** empty list for empty text; one short chunk for the two-token source.

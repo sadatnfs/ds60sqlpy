@@ -6,14 +6,17 @@ reference_glmm_fit <- function(...) {
   observed_warnings <- character()
   fit_with <- function(control) {
     withCallingHandlers(do.call(glmmTMB::glmmTMB, c(settings, list(control = control))),
-      warning = function(condition) observed_warnings <<- c(observed_warnings, conditionMessage(condition)))
+      warning = function(condition) observed_warnings <<- c(observed_warnings, conditionMessage(condition))
+    )
   }
   inspect <- function(model, method) {
     gradient <- as.numeric(model$obj$gr(model$fit$par))
-    list(method = method, parameters = unname(model$fit$par), parameter_names = names(model$fit$par),
+    list(
+      method = method, parameters = unname(model$fit$par), parameter_names = names(model$fit$par),
       objective = model$fit$objective, convergence = model$fit$convergence,
       message = model$fit$message, gradient = gradient, score_inf = max(abs(gradient)),
-      pd_hessian = model$sdr$pdHess, warnings = observed_warnings)
+      pd_hessian = model$sdr$pdHess, warnings = observed_warnings
+    )
   }
   accepted <- function(value) {
     value$convergence == 0L && isTRUE(value$pd_hessian) && all(is.finite(value$parameters)) &&
@@ -24,13 +27,19 @@ reference_glmm_fit <- function(...) {
   if (!accepted(attempts[[1]])) {
     # Rebuild the complete upstream fit using its public optimizer contract.
     # Never replace only fit$par while leaving random effects or sdreport stale.
-    model <- fit_with(glmmTMB::glmmTMBControl(optimizer = optim,
-      optArgs = list(method = "BFGS"), optCtrl = list(maxit = 1500, reltol = 1e-12)))
+    model <- fit_with(glmmTMB::glmmTMBControl(
+      optimizer = optim,
+      optArgs = list(method = "BFGS"), optCtrl = list(maxit = 1500, reltol = 1e-12)
+    ))
     attempts[[2]] <- inspect(model, "upstream optim BFGS refit")
     if (!accepted(attempts[[2]])) {
-      stop(structure(list(message = "Upstream glmmTMB refit failed the original status, curvature or score checks",
-        call = NULL, diagnostics = list(optimizer_attempts = attempts)),
-        class = c("reference_fit_error", "error", "condition")))
+      stop(structure(
+        list(
+          message = "Upstream glmmTMB refit failed the original status, curvature or score checks",
+          call = NULL, diagnostics = list(optimizer_attempts = attempts)
+        ),
+        class = c("reference_fit_error", "error", "condition")
+      ))
     }
     reference_assert(attempts[[2]]$objective <= attempts[[1]]$objective +
       1e-8 * (1 + abs(attempts[[1]]$objective)), "Upstream refit increased the objective")
@@ -292,8 +301,10 @@ reference_glmm_ar_forecast_case <- function(engine, seed) {
     forecast = prediction, future_time = future_times, future_covariates = future_x,
     future_has_response = FALSE,
     interpretation = "latent AR1 plus separate measurement noise; differs from directly observed AR1",
-    metrics = metrics, fixture = list(training = data, future_time = future_times,
+    metrics = metrics, fixture = list(
+      training = data, future_time = future_times,
       future_x = future_x, heldout_future_y = future_y,
-      truth = list(beta = c(0.8, 0.4), tau = tau, phi = phi, sigma = sigma))
+      truth = list(beta = c(0.8, 0.4), tau = tau, phi = phi, sigma = sigma)
+    )
   )
 }

@@ -83,18 +83,19 @@ executable companion when you want a self-contained check.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT o.order_id,
-       o.customer_id,
-       o.order_date,
-       FIRST_VALUE(o.order_date) OVER customer_orders AS first_order_date,
-       LAST_VALUE(o.order_date) OVER customer_orders AS last_order_date
-FROM orders AS o
-WINDOW customer_orders AS (
-  PARTITION BY o.customer_id
-  ORDER BY o.order_date, o.order_id
-  ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
-)
-ORDER BY o.customer_id, o.order_date, o.order_id;
+SELECT
+  o.order_id,
+  o.customer_id,
+  o.order_date,
+  FIRST_VALUE(o.order_date) OVER customer_orders AS first_order_date,
+  LAST_VALUE(o.order_date) OVER customer_orders AS last_order_date
+FROM
+  orders AS o
+WINDOW customer_orders AS (PARTITION BY o.customer_id ORDER BY o.order_date, o.order_id ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)
+ORDER BY
+  o.customer_id,
+  o.order_date,
+  o.order_id;
 ```
 
 **Expected shape:** One row per order with constant first/last values per customer.
@@ -128,18 +129,19 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT p.product_id,
-       p.category,
-       p.price,
-       FIRST_VALUE(p.price) OVER category_prices AS category_min_price,
-       LAST_VALUE(p.price) OVER category_prices AS category_max_price
-FROM products AS p
-WINDOW category_prices AS (
-  PARTITION BY p.category
-  ORDER BY p.price, p.product_id
-  ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
-)
-ORDER BY p.category, p.price, p.product_id;
+SELECT
+  p.product_id,
+  p.category,
+  p.price,
+  FIRST_VALUE(p.price) OVER category_prices AS category_min_price,
+  LAST_VALUE(p.price) OVER category_prices AS category_max_price
+FROM
+  products AS p
+WINDOW category_prices AS (PARTITION BY p.category ORDER BY p.price, p.product_id ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)
+ORDER BY
+  p.category,
+  p.price,
+  p.product_id;
 ```
 
 **Expected shape:** One row per product.
@@ -173,19 +175,20 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT p.payment_id,
-       p.order_id,
-       p.payment_date,
-       p.amount,
-       FIRST_VALUE(p.amount) OVER payment_sequence AS first_payment_amount,
-       LAST_VALUE(p.amount) OVER payment_sequence AS last_payment_amount
-FROM payments AS p
-WINDOW payment_sequence AS (
-  PARTITION BY p.order_id
-  ORDER BY p.payment_date, p.payment_id
-  ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
-)
-ORDER BY p.order_id, p.payment_date, p.payment_id;
+SELECT
+  p.payment_id,
+  p.order_id,
+  p.payment_date,
+  p.amount,
+  FIRST_VALUE(p.amount) OVER payment_sequence AS first_payment_amount,
+  LAST_VALUE(p.amount) OVER payment_sequence AS last_payment_amount
+FROM
+  payments AS p
+WINDOW payment_sequence AS (PARTITION BY p.order_id ORDER BY p.payment_date, p.payment_id ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)
+ORDER BY
+  p.order_id,
+  p.payment_date,
+  p.payment_id;
 ```
 
 **Expected shape:** One row per payment.
@@ -220,14 +223,16 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT value,
-       LAST_VALUE(value) OVER (ORDER BY value) AS default_last_value,
-       LAST_VALUE(value) OVER (
-         ORDER BY value
-         ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
-       ) AS partition_last_value
-FROM (VALUES (10), (20), (30)) AS sample(value)
-ORDER BY value;
+SELECT
+  value,
+  LAST_VALUE(value) OVER (ORDER BY value) AS default_last_value,
+  LAST_VALUE(value) OVER (ORDER BY value ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS partition_last_value
+FROM (
+  VALUES (10),
+    (20),
+    (30)) AS sample (value)
+ORDER BY
+  value;
 ```
 
 **Expected shape:** Three rows showing default current value and full-frame 30.
@@ -263,21 +268,22 @@ cardinality contract.
 
 ```sql
 WITH annotated AS (
-  SELECT o.customer_id,
-         FIRST_VALUE(o.order_id) OVER customer_orders AS first_order_id,
-         LAST_VALUE(o.order_id) OVER customer_orders AS last_order_id
-  FROM orders AS o
-  WINDOW customer_orders AS (
-    PARTITION BY o.customer_id
-    ORDER BY o.order_date, o.order_id
-    ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
-  )
-)
-SELECT DISTINCT customer_id,
-       first_order_id,
-       last_order_id
-FROM annotated
-ORDER BY customer_id;
+  SELECT
+    o.customer_id,
+    FIRST_VALUE(o.order_id) OVER customer_orders AS first_order_id,
+      LAST_VALUE(o.order_id) OVER customer_orders AS last_order_id
+      FROM
+        orders AS o
+WINDOW customer_orders AS (PARTITION BY o.customer_id ORDER BY o.order_date,
+  o.order_id ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING))
+SELECT DISTINCT
+  customer_id,
+  first_order_id,
+  last_order_id
+FROM
+  annotated
+ORDER BY
+  customer_id;
 ```
 
 **Expected shape:** One row per customer with orders.
@@ -311,12 +317,16 @@ cardinality contract.
 
 ```sql
 SELECT DISTINCT ON (o.customer_id)
-       o.customer_id,
-       o.order_id,
-       o.order_date,
-       o.total_amount
-FROM orders AS o
-ORDER BY o.customer_id, o.order_date DESC, o.order_id DESC;
+  o.customer_id,
+  o.order_id,
+  o.order_date,
+  o.total_amount
+FROM
+  orders AS o
+ORDER BY
+  o.customer_id,
+  o.order_date DESC,
+  o.order_id DESC;
 ```
 
 **Expected shape:** At most one latest order per customer.

@@ -59,25 +59,24 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Buffers;
 
-internal static class Program
-{
-    private static void Check(bool condition, string reason)
+internal static class Program {
+  private static void Check(bool condition, string reason) {
+    if (!condition)
+      throw new InvalidOperationException(reason);
+  }
+
+  private static async Task Main() {
     {
-        if (!condition) throw new InvalidOperationException(reason);
+      var rows = new[] { (Kind: "a", Amount: 2), (Kind: "a", Amount: 3),
+                         (Kind: "b", Amount: 4) };
+      var totals = rows.GroupBy(row => row.Kind)
+                       .ToDictionary(group => group.Key,
+                                     group => group.Sum(row => row.Amount));
+      Check(totals["a"] == 5 && totals["b"] == 4, "one total per kind");
     }
-
-    private static async Task Main()
-    {
-        {
-            var rows = new[] { (Kind: "a", Amount: 2), (Kind: "a", Amount: 3), (Kind: "b", Amount: 4) };
-            var totals = rows.GroupBy(row => row.Kind).ToDictionary(group => group.Key, group => group.Sum(row => row.Amount));
-            Check(totals["a"] == 5 && totals["b"] == 4, "one total per kind");
-        }
-        Console.WriteLine("csharp-021: passed");
-        await Task.CompletedTask;
-    }
-
-
+    Console.WriteLine("csharp-021: passed");
+    await Task.CompletedTask;
+  }
 }
 ```
 
@@ -104,26 +103,24 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Buffers;
 
-internal static class Program
-{
-    private static void Check(bool condition, string reason)
+internal static class Program {
+  private static void Check(bool condition, string reason) {
+    if (!condition)
+      throw new InvalidOperationException(reason);
+  }
+
+  private static async Task Main() {
     {
-        if (!condition) throw new InvalidOperationException(reason);
+      var left = new[] { (Key: 1, Label: "L") };
+      var right = new[] { (Key: 1, Value: "x"), (Key: 1, Value: "y") };
+      var joined = left.Join(right, item => item.Key, item => item.Key,
+                             (a, b) => a.Label + b.Value)
+                       .ToArray();
+      Check(joined.SequenceEqual(new[] { "Lx", "Ly" }), "two right matches");
     }
-
-    private static async Task Main()
-    {
-        {
-            var left = new[] { (Key: 1, Label: "L") };
-            var right = new[] { (Key: 1, Value: "x"), (Key: 1, Value: "y") };
-            var joined = left.Join(right, item => item.Key, item => item.Key, (a, b) => a.Label + b.Value).ToArray();
-            Check(joined.SequenceEqual(new[] { "Lx", "Ly" }), "two right matches");
-        }
-        Console.WriteLine("csharp-021: passed");
-        await Task.CompletedTask;
-    }
-
-
+    Console.WriteLine("csharp-021: passed");
+    await Task.CompletedTask;
+  }
 }
 ```
 

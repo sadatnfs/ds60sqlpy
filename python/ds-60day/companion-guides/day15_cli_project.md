@@ -116,11 +116,13 @@ identify which line creates each intermediate object.
 ```python
 import argparse
 
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="rowtool")
     parser.add_argument("--limit", type=int, default=10)
     parser.add_argument("names", nargs="+")
     return parser
+
 
 args = build_parser().parse_args(["--limit", "2", "Ada", "Lin", "Grace"])
 (args.limit, args.names)
@@ -145,6 +147,7 @@ def select_names(names: list[str], *, limit: int) -> list[str]:
     if limit < 0:
         raise ValueError("limit must be non-negative")
     return [name.strip().title() for name in names[:limit]]
+
 
 select_names(args.names, limit=args.limit)
 ```
@@ -211,6 +214,7 @@ This tiny parser demonstrates the interface without solving the data project:
 ```python
 import argparse
 from pathlib import Path
+
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Inspect an input path")

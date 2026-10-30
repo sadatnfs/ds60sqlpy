@@ -14,7 +14,7 @@ scale = 2.0
 
 def objective(first, second):
     prediction = x @ (w + scale * first @ second)
-    return np.mean(prediction ** 2)
+    return np.mean(prediction**2)
 
 
 prediction = x @ (w + scale * a @ b)

@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=ds60sqlpy-worker-scala-jvm:1.1.0
+ARG BASE_IMAGE=ds60sqlpy-worker-scala-jvm:1.2.0
 FROM ${BASE_IMAGE}
 USER root
 COPY install.py artifact-lock.json /tmp/preparation/

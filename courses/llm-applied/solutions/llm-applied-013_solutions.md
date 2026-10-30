@@ -58,9 +58,12 @@ The question is: Use system A errors \(q_{1}=0\), \(q_{2}=0\), \(q_{3}=1\) and B
 Pairing by IDs prevents dictionary order from changing which observations are subtracted. A negative difference favorsA because the metric is error.
 
 ```python
-a={'q1':0,'q2':0,'q3':1}; b={'q3':0,'q1':1,'q2':1}; ids=sorted(a)
-assert set(a)==set(b); difference=np.array([a[i]-b[i] for i in ids],dtype=float)
-np.testing.assert_array_equal(difference,[-1,-1,1])
+a = {"q1": 0, "q2": 0, "q3": 1}
+b = {"q3": 0, "q1": 1, "q2": 1}
+ids = sorted(a)
+assert set(a) == set(b)
+difference = np.array([a[i] - b[i] for i in ids], dtype=float)
+np.testing.assert_array_equal(difference, [-1, -1, 1])
 ```
 
 **Expected:** differences[-1, -1, 1] by sortedID.
@@ -74,8 +77,10 @@ The question is: Assignq1, q2 tofamilyF andq3 toG; compare row mean with family 
 The repeated family changes the row-weighted conclusion. This is a design choice about the evaluation population, not a numerical bug.
 
 ```python
-families=np.array(['F','F','G']); family_values=np.array([difference[families==f].mean() for f in ['F','G']])
-np.testing.assert_allclose(difference.mean(),-1/3,atol=1e-12,rtol=0); assert family_values.mean()==0
+families = np.array(["F", "F", "G"])
+family_values = np.array([difference[families == f].mean() for f in ["F", "G"]])
+np.testing.assert_allclose(difference.mean(), -1 / 3, atol=1e-12, rtol=0)
+assert family_values.mean() == 0
 ```
 
 **Expected:** row mean-1/3; family mean0.
@@ -89,9 +94,10 @@ The question is: Draw2000 bootstrap samples of the two family differences withse
 Two families produce a coarse empirical distribution. A large number of bootstrap draws does not create additional independent evidence.
 
 ```python
-indices=np.random.default_rng(17).integers(0,2,size=(2000,2)); estimates=family_values[indices].mean(1)
-assert set(np.unique(estimates))=={-1.,0.,1.}
-np.testing.assert_array_equal(indices,np.random.default_rng(17).integers(0,2,size=(2000,2)))
+indices = np.random.default_rng(17).integers(0, 2, size=(2000, 2))
+estimates = family_values[indices].mean(1)
+assert set(np.unique(estimates)) == {-1.0, 0.0, 1.0}
+np.testing.assert_array_equal(indices, np.random.default_rng(17).integers(0, 2, size=(2000, 2)))
 ```
 
 **Expected:** all estimates are-1, 0 or1; repeatable with same seed.
@@ -105,8 +111,8 @@ The question is: For10 questions, answer6 with 5 correct and abstain on4.
 A system can improve answered accuracy by refusing difficult cases. Coverage exposes that tradeoff instead of presenting a selective score as overall success.
 
 ```python
-total,answered,correct=10,6,5
-assert answered/total==.6 and correct/answered==5/6 and total-answered==4
+total, answered, correct = 10, 6, 5
+assert answered / total == 0.6 and correct / answered == 5 / 6 and total - answered == 4
 ```
 
 **Expected:** coverage.6; answered accuracy5/6; overall correct answers5.
@@ -120,8 +126,9 @@ The question is: Combine a favorable mean comparison with one access leak and ap
 An average quality improvement does not compensate for a required authorization failure. The gate should be declared before inspecting results.
 
 ```python
-mean_gain=.1; access_leaks=1
-release=mean_gain>0 and access_leaks==0
+mean_gain = 0.1
+access_leaks = 1
+release = mean_gain > 0 and access_leaks == 0
 assert not release
 ```
 
@@ -136,9 +143,9 @@ The question is: Record retriever selection on validation and final scoring on t
 Once the test influences a configuration choice, it is part of selection. A new untouched assessment is needed for a fresh final claim.
 
 ```python
-ledger=[('choose_k','validation'),('score_final','test')]
-assert all(part=='validation' for action,part in ledger if action=='choose_k')
-assert ('choose_k','test')[1]!='validation'
+ledger = [("choose_k", "validation"), ("score_final", "test")]
+assert all(part == "validation" for action, part in ledger if action == "choose_k")
+assert ("choose_k", "test")[1] != "validation"
 ```
 
 **Expected:** test-based selection rejected.

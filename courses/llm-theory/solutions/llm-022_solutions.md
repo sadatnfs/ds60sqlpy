@@ -23,9 +23,13 @@ The question is: Take two float32 Adam updates of(w-2)² fromw0.
 The checkpoint must contain nontrivial history. Saving before the first update would not distinguish a full optimizer restore from a fresh optimizer.
 
 ```python
-w=nn.Parameter(torch.tensor(0.)); opt=torch.optim.Adam([w],lr=.1)
-for _ in range(2): opt.zero_grad(set_to_none=True); (w-2).square().backward(); opt.step()
-assert w.item()>0 and opt.state[w]['step'].item()==2
+w = nn.Parameter(torch.tensor(0.0))
+opt = torch.optim.Adam([w], lr=0.1)
+for _ in range(2):
+    opt.zero_grad(set_to_none=True)
+    (w - 2).square().backward()
+    opt.step()
+assert w.item() > 0 and opt.state[w]["step"].item() == 2
 ```
 
 **Expected:** positive weight and optimizer step2.
@@ -39,9 +43,11 @@ The question is: Write the scalar weight and optimizer state into an owned tempo
 The file is created by this lesson and loaded only for this local test. Loading arbitrary untrusted serialized objects is outside the fixture.
 
 ```python
-temporary=tempfile.TemporaryDirectory(); path=Path(temporary.name)/'state.pt'
-torch.save({'weight':w.detach().clone(),'optimizer':opt.state_dict()},path)
-assert path.is_file(); saved=w.item()
+temporary = tempfile.TemporaryDirectory()
+path = Path(temporary.name) / "state.pt"
+torch.save({"weight": w.detach().clone(), "optimizer": opt.state_dict()}, path)
+assert path.is_file()
+saved = w.item()
 ```
 
 **Expected:** checkpoint file exists.
@@ -55,8 +61,11 @@ The question is: Take one more update and save the expected weight.
 The control uses the same objective and optimizer settings. A different batch or learning-rate schedule would make the comparison uninterpretable.
 
 ```python
-opt.zero_grad(set_to_none=True); (w-2).square().backward(); opt.step(); expected=w.item()
-assert opt.state[w]['step'].item()==3 and expected!=saved
+opt.zero_grad(set_to_none=True)
+(w - 2).square().backward()
+opt.step()
+expected = w.item()
+assert opt.state[w]["step"].item() == 3 and expected != saved
 ```
 
 **Expected:** step3 and changed weight.
@@ -70,7 +79,7 @@ The question is: Load the trusted checkpoint into fresh weight and Adam objects,
 The child has no live parent optimizer. Agreement therefore depends on reconstructing saved state, rather than on an accidental in-memory reference.
 
 ```python
-program=textwrap.dedent("""
+program = textwrap.dedent("""
 import torch,json,sys
 from torch import nn
 state=torch.load(sys.argv[1],map_location='cpu',weights_only=True)
@@ -79,9 +88,17 @@ opt.zero_grad(set_to_none=True); (w-2).square().backward(); opt.step()
 print(json.dumps({'weight':w.item()}))
 """)
 compile(program, "checkpoint-child", "exec")
-result=subprocess.run([sys.executable,'-c',program,str(path)],check=False,capture_output=True,text=True,timeout=60)
-if result.returncode: raise RuntimeError('child process failed: '+result.stderr)
-restored=json.loads(result.stdout.strip().splitlines()[-1]); np.testing.assert_allclose(restored['weight'],expected,atol=1e-6,rtol=0)
+result = subprocess.run(
+    [sys.executable, "-c", program, str(path)],
+    check=False,
+    capture_output=True,
+    text=True,
+    timeout=60,
+)
+if result.returncode:
+    raise RuntimeError("child process failed: " + result.stderr)
+restored = json.loads(result.stdout.strip().splitlines()[-1])
+np.testing.assert_allclose(restored["weight"], expected, atol=1e-6, rtol=0)
 ```
 
 **Expected:** child weight agrees within 1e-6.
@@ -95,8 +112,11 @@ The question is: Initialize a fresh optimizer at the saved weight and compare it
 The weight alone gives the same immediate scalar prediction but a different future training trajectory. Prediction parity and restart parity are distinct tests.
 
 ```python
-fresh_w=nn.Parameter(torch.tensor(saved)); fresh_opt=torch.optim.Adam([fresh_w],lr=.1)
-(fresh_w-2).square().backward(); fresh_opt.step(); assert abs(fresh_w.item()-expected)>1e-6
+fresh_w = nn.Parameter(torch.tensor(saved))
+fresh_opt = torch.optim.Adam([fresh_w], lr=0.1)
+(fresh_w - 2).square().backward()
+fresh_opt.step()
+assert abs(fresh_w.item() - expected) > 1e-6
 ```
 
 **Expected:** weight differs from full-state continuation.
@@ -110,8 +130,12 @@ The question is: Use Dropout(.5) in eval mode on ones and remove only the owned 
 Evaluation mode disables this stochastic layer. Cleanup is confined to the temporary fixture and never deletes learner checkpoints or progress.
 
 ```python
-drop=nn.Dropout(.5); drop.eval(); ones=torch.ones(8)
-assert torch.equal(drop(ones),ones); temporary.cleanup(); assert not path.exists()
+drop = nn.Dropout(0.5)
+drop.eval()
+ones = torch.ones(8)
+assert torch.equal(drop(ones), ones)
+temporary.cleanup()
+assert not path.exists()
 ```
 
 **Expected:** dropout returns ones; temporary path absent.

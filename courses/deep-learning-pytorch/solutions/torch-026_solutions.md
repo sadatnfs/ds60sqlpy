@@ -51,9 +51,12 @@ The question is: Create a width 2 residual with zero kernel and scale buffer 1.
 A zero branch makes the initial residual an exact identity. The branch can still receive gradients because its input is nonzero.
 
 ```python
-module=Residual(2); x=torch.tensor([[1.,2.],[3.,4.]],dtype=torch.float64)
-assert torch.equal(module(x),x)
-assert set(dict(module.named_parameters()))=={'kernel'} and set(dict(module.named_buffers()))=={'scale'}
+module = Residual(2)
+x = torch.tensor([[1.0, 2.0], [3.0, 4.0]], dtype=torch.float64)
+assert torch.equal(module(x), x)
+assert set(dict(module.named_parameters())) == {"kernel"} and set(dict(module.named_buffers())) == {
+    "scale"
+}
 ```
 
 **Expected:** output equals input; one parameter and one buffer.
@@ -67,8 +70,9 @@ The question is: Call the same module on a second batch with the same width.
 Batch length changes transient activations, not the number of learned coefficients. Stable state is necessary for optimizer and checkpoint consistency.
 
 ```python
-identity=id(module.kernel); module(torch.ones((1,2),dtype=torch.float64))
-assert id(module.kernel)==identity and sum(p.numel() for p in module.parameters())==4
+identity = id(module.kernel)
+module(torch.ones((1, 2), dtype=torch.float64))
+assert id(module.kernel) == identity and sum(p.numel() for p in module.parameters()) == 4
 ```
 
 **Expected:** same kernel object and parameter count 4.
@@ -82,8 +86,10 @@ The question is: Assign an identity kernel and scale.5.
 The buffer changes forward behavior while remaining outside the trainable parameter list. It therefore belongs in the serialized state contract.
 
 ```python
-with torch.no_grad(): module.kernel.copy_(torch.eye(2,dtype=torch.float64)); module.scale.fill_(.5)
-torch.testing.assert_close(module(x),1.5*x,atol=1e-12,rtol=0)
+with torch.no_grad():
+    module.kernel.copy_(torch.eye(2, dtype=torch.float64))
+    module.scale.fill_(0.5)
+torch.testing.assert_close(module(x), 1.5 * x, atol=1e-12, rtol=0)
 ```
 
 **Expected:** output \(1.5\cdot x\).
@@ -97,9 +103,12 @@ The question is: Pass a width 3 row to the width 2 module.
 A residual addition requires meaningful matching dimensions. Silent broadcasting would represent a different operation and should not repair the contract accidentally.
 
 ```python
-try: module(torch.ones((1,3),dtype=torch.float64))
-except ValueError: pass
-else: raise AssertionError('incompatible residual accepted')
+try:
+    module(torch.ones((1, 3), dtype=torch.float64))
+except ValueError:
+    pass
+else:
+    raise AssertionError("incompatible residual accepted")
 ```
 
 **Expected:** ValueError naming feature width.
@@ -113,8 +122,8 @@ The question is: Run grad check on Cube.apply at float64 values.2, -.7.
 The finite-difference checker is independent of the written backward formula. Double precision reduces numerical noise for the small diagnostic.
 
 ```python
-probe=torch.tensor([.2,-.7],dtype=torch.float64,requires_grad=True)
-assert torch.autograd.gradcheck(Cube.apply,(probe,),eps=1e-6,atol=1e-5,rtol=1e-3)
+probe = torch.tensor([0.2, -0.7], dtype=torch.float64, requires_grad=True)
+assert torch.autograd.gradcheck(Cube.apply, (probe,), eps=1e-6, atol=1e-5, rtol=1e-3)
 ```
 
 **Expected:** grad check True.
@@ -128,8 +137,9 @@ The question is: Differentiate the sum of 2*Cube(x) atx 2.
 The local derivative \(3\cdot {x}^{2}\) must be multiplied by the incoming derivative 2. Forgetting that factor can pass a simple standalone test but fail when the function is composed.
 
 ```python
-value=torch.tensor([2.],dtype=torch.float64,requires_grad=True); (2*Cube.apply(value)).sum().backward()
-assert value.grad.item()==24
+value = torch.tensor([2.0], dtype=torch.float64, requires_grad=True)
+(2 * Cube.apply(value)).sum().backward()
+assert value.grad.item() == 24
 ```
 
 **Expected:** gradient 24.

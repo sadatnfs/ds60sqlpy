@@ -238,8 +238,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>sum <span class="syntax-operator">==</span> <span class="syntax-number">12</span> <span class="syntax-operator">&amp;&amp;</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>items<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;sum&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The final sum is 12 and three elements were visited.</p>
 <p>The accumulator starts at the additive identity. Each iteration includes exactly one new value; double addition or a skipped element breaks the independently known total.</p>
 <h4 id="worked-example-2-handle-empty-data">Worked example 2: Handle empty data<a class="heading-anchor" href="#worked-example-2-handle-empty-data" aria-label="Link to this section">#</a></h4>
@@ -276,8 +275,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>sum <span class="syntax-operator">==</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;empty sum&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The result is 0 with no special invented element.</p>
 <p>The loop body never runs. A correct initial state makes the empty case follow from the same algorithm rather than a separate patch.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>

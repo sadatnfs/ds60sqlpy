@@ -49,8 +49,13 @@ The question is: Create a 2-by-3 float64 CPU tensor from values 0..5.
 The last axis advances by one stored element and the first by three. These metadata explain the matrix layout without relying on a printed table alone.
 
 ```python
-x=torch.arange(6,dtype=torch.float64,device='cpu').reshape(2,3)
-assert tuple(x.shape)==(2,3) and x.stride()==(3,1) and x.device.type=='cpu' and x.dtype==torch.float64
+x = torch.arange(6, dtype=torch.float64, device="cpu").reshape(2, 3)
+assert (
+    tuple(x.shape) == (2, 3)
+    and x.stride() == (3, 1)
+    and x.device.type == "cpu"
+    and x.dtype == torch.float64
+)
 ```
 
 **Expected:** shape(2, 3), stride(3, 1), CPU, float64.
@@ -64,8 +69,9 @@ The question is: Slice the first row, change its first value, and inspect the or
 Basic slicing returns a view here. A function receiving that view can mutate caller-owned data unless it copies or documents the ownership contract.
 
 ```python
-row=x[0]; row[0]=99
-assert x[0,0].item()==99
+row = x[0]
+row[0] = 99
+assert x[0, 0].item() == 99
 ```
 
 **Expected:** original x[0, 0] becomes 99.
@@ -79,8 +85,9 @@ The question is: Clone the tensor, change the clone and compare the original.
 clone copies storage and preserves a differentiable relationship when gradients are enabled. Detaching and copying are separate operations discussed later.
 
 ```python
-owned=x.clone(); owned[0,0]=-1
-assert owned[0,0].item()==-1 and x[0,0].item()==99
+owned = x.clone()
+owned[0, 0] = -1
+assert owned[0, 0].item() == -1 and x[0, 0].item() == 99
 ```
 
 **Expected:** clone starts-1; original remains 99.
@@ -94,8 +101,12 @@ The question is: Transpose x and inspect shape, strides and contiguity.
 The values can be read correctly without rearranging storage. Contiguity is a layout property, not a correctness or ownership guarantee by itself.
 
 ```python
-transposed=x.T
-assert tuple(transposed.shape)==(3,2) and transposed.stride()==(1,3) and not transposed.is_contiguous()
+transposed = x.T
+assert (
+    tuple(transposed.shape) == (3, 2)
+    and transposed.stride() == (1, 3)
+    and not transposed.is_contiguous()
+)
 assert transposed.contiguous().is_contiguous()
 ```
 
@@ -110,8 +121,9 @@ The question is: Subtract vector[1, 2, 3] from its column representation and ins
 Both shapes are legal arithmetic, but they represent different questions. Paired-record losses should validate equal target and prediction shapes.
 
 ```python
-v=torch.tensor([1.,2.,3.]); column=v[:,None]
-assert tuple((v-column).shape)==(3,3) and tuple((v-v).shape)==(3,)
+v = torch.tensor([1.0, 2.0, 3.0])
+column = v[:, None]
+assert tuple((v - column).shape) == (3, 3) and tuple((v - v).shape) == (3,)
 ```
 
 **Expected:** shape(3, 3), while equal-vector subtraction has shape(3, ).
@@ -125,9 +137,12 @@ The question is: Add tensors shaped(2, 3) and(4, ) and capture the shape failure
 Broadcasting is constrained by dimension equality or size one. A failure here is preferable to a legal but unintended expansion that silently changes the task.
 
 ```python
-try: torch.zeros((2,3))+torch.zeros(4)
-except RuntimeError: pass
-else: raise AssertionError('incompatible shapes accepted')
+try:
+    torch.zeros((2, 3)) + torch.zeros(4)
+except RuntimeError:
+    pass
+else:
+    raise AssertionError("incompatible shapes accepted")
 ```
 
 **Expected:** RuntimeError for incompatible trailing dimensions.

@@ -86,8 +86,10 @@ The missing handler becomes a compiler obligation when the union grows. The erro
 type Extended = Result | { kind: 'pending'; attempt: number };
 function negativeTypeCheck(result: Extended): string {
   switch (result.kind) {
-    case 'success': return String(result.value);
-    case 'failure': return result.message;
+    case 'success':
+      return String(result.value);
+    case 'failure':
+      return result.message;
     default:
       // @ts-expect-error pending remains possible here.
       return assertNever(result);
@@ -109,11 +111,18 @@ The predicate inspects every property it claims. A declaration of value is SomeT
 
 ```typescript
 function hasFiniteValue(value: unknown): value is { value: number } {
-  return typeof value === 'object' && value !== null && !Array.isArray(value)
-    && 'value' in value && typeof value.value === 'number' && Number.isFinite(value.value);
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    !Array.isArray(value) &&
+    'value' in value &&
+    typeof value.value === 'number' &&
+    Number.isFinite(value.value)
+  );
 }
 assert.equal(hasFiniteValue({ value: 2 }), true);
-for (const value of [null, [], { value: '2' }, { value: NaN }]) assert.equal(hasFiniteValue(value), false);
+for (const value of [null, [], { value: '2' }, { value: NaN }])
+  assert.equal(hasFiniteValue(value), false);
 ```
 
 **Expected:** valid record accepted; null, arrays and string-valued records rejected.

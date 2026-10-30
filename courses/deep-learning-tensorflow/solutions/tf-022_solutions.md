@@ -23,9 +23,10 @@ The question is: Use zero3x2 queries and keys with V[[2,0],[0,2],[6,6]].
 Each row averages exactly its legal values. The first row copies one vector, the second averages two, and the third averages three. No learned weights are needed to inspect the boundary.
 
 ```python
-q=np.zeros((3,2)); v=np.array([[2.,0.],[0.,2.],[6.,6.]])
-out=attention(q,q,v).numpy()
-np.testing.assert_allclose(out,[[2,0],[1,1],[8/3,8/3]],atol=1e-6,rtol=0)
+q = np.zeros((3, 2))
+v = np.array([[2.0, 0.0], [0.0, 2.0], [6.0, 6.0]])
+out = attention(q, q, v).numpy()
+np.testing.assert_allclose(out, [[2, 0], [1, 1], [8 / 3, 8 / 3]], atol=1e-6, rtol=0)
 ```
 
 **Expected:** outputs[[2,0],[1,1],[8/3,8/3]].
@@ -39,9 +40,11 @@ The question is: Replace only the third value with[100,200].
 A change to a future value must not influence earlier queries. This causal assertion is more informative than a visually triangular attention plot.
 
 ```python
-future=v.copy(); future[2]=[100,200]; changed=attention(q,q,future).numpy()
-np.testing.assert_allclose(changed[:2],out[:2],atol=1e-6,rtol=0)
-np.testing.assert_allclose(changed[2],[34,202/3],atol=1e-6,rtol=0)
+future = v.copy()
+future[2] = [100, 200]
+changed = attention(q, q, future).numpy()
+np.testing.assert_allclose(changed[:2], out[:2], atol=1e-6, rtol=0)
+np.testing.assert_allclose(changed[2], [34, 202 / 3], atol=1e-6, rtol=0)
 ```
 
 **Expected:** first two rows unchanged; final row[34,202/3].
@@ -55,9 +58,9 @@ The question is: For prefix lengths1,2,3 run the function anew on sliced Q,K,V.
 The prefix computation reconstructs its mask and softmax. Slicing already-computed full weights would not independently test whether future information influenced them.
 
 ```python
-for cut in range(1,4):
-    prefix=attention(q[:cut],q[:cut],v[:cut]).numpy()
-    np.testing.assert_allclose(prefix,out[:cut],atol=1e-6,rtol=0)
+for cut in range(1, 4):
+    prefix = attention(q[:cut], q[:cut], v[:cut]).numpy()
+    np.testing.assert_allclose(prefix, out[:cut], atol=1e-6, rtol=0)
 ```
 
 **Expected:** all prefix outputs match the full early rows.
@@ -71,8 +74,8 @@ The question is: Multiply uniform1/3 weights by a triangle without renormalizing
 Zeros in forbidden positions do not prove a valid probability distribution. Masking after normalization leaves insufficient mass on early rows and changes their output scale.
 
 ```python
-broken=np.ones((3,3))/3*np.tri(3)
-np.testing.assert_allclose(broken.sum(1),[1/3,2/3,1],atol=1e-12,rtol=0)
+broken = np.ones((3, 3)) / 3 * np.tri(3)
+np.testing.assert_allclose(broken.sum(1), [1 / 3, 2 / 3, 1], atol=1e-12, rtol=0)
 ```
 
 **Expected:** row sums[1/3,2/3,1].
@@ -86,9 +89,12 @@ The question is: Set Q=K[[1,0],[0,1],[1,1]] and repeat the prefix test.
 Uniform scores can hide a missing scale factor or swapped query/key operation. A nonuniform fixture adds a second independent family of behavior.
 
 ```python
-non=np.array([[1.,0.],[0.,1.],[1.,1.]])
-full=attention(non,non,v).numpy()
-for cut in range(1,4): np.testing.assert_allclose(attention(non[:cut],non[:cut],v[:cut]).numpy(),full[:cut],atol=1e-6,rtol=0)
+non = np.array([[1.0, 0.0], [0.0, 1.0], [1.0, 1.0]])
+full = attention(non, non, v).numpy()
+for cut in range(1, 4):
+    np.testing.assert_allclose(
+        attention(non[:cut], non[:cut], v[:cut]).numpy(), full[:cut], atol=1e-6, rtol=0
+    )
 ```
 
 **Expected:** prefix comparisons pass within 1e-6.
@@ -102,10 +108,13 @@ The question is: Pass an empty sequence and a value matrix with the wrong row co
 A probability distribution needs at least one legal key. Clear input failures prevent shape bugs from emerging later as unexplained NaNs or matrix multiplication errors.
 
 ```python
-for args in [(np.empty((0,2)),np.empty((0,2)),np.empty((0,2))),(q,q,v[:2])]:
-    try: attention(*args)
-    except ValueError: pass
-    else: raise AssertionError('bad shape accepted')
+for args in [(np.empty((0, 2)), np.empty((0, 2)), np.empty((0, 2))), (q, q, v[:2])]:
+    try:
+        attention(*args)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("bad shape accepted")
 ```
 
 **Expected:** both raise ValueError.

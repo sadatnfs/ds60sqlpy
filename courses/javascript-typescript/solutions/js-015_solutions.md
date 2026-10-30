@@ -62,7 +62,9 @@ Task: Declare an async test that awaits Promise resolution before checking the v
 Returning the async function Promise gives the runner ownership of its lifetime. A detached Promise would need separate handling and could escape the intended observation window.
 
 ```javascript
-const result = await runTests("test('awaited value', async () => { const value = await Promise.resolve(7); assert.equal(value, 7); });");
+const result = await runTests(
+  "test('awaited value', async () => { const value = await Promise.resolve(7); assert.equal(value, 7); });",
+);
 assert.equal(result.status, 0, result.stderr + result.stdout);
 ```
 
@@ -77,7 +79,9 @@ Task: Assert that an async operation rejects with a RangeError.
 An async function converts its thrown error into Promise rejection. assert.throws would inspect only the immediate call and therefore test the wrong channel.
 
 ```javascript
-const result = await runTests("test('async boundary', async () => { await assert.rejects(async () => { throw new RangeError('negative'); }, RangeError); });");
+const result = await runTests(
+  "test('async boundary', async () => { await assert.rejects(async () => { throw new RangeError('negative'); }, RangeError); });",
+);
 assert.equal(result.status, 0, result.stderr + result.stdout);
 ```
 
@@ -111,7 +115,9 @@ Task: Create a fresh array inside each test and mutate it in only one test.
 A fresh fixture prevents one test from making another pass or fail through leftover state. Ordering assumptions often conceal a shared-state defect rather than a product requirement.
 
 ```javascript
-const result = await runTests("test('mutate local', () => { const rows = [1]; rows.push(2); assert.deepEqual(rows, [1,2]); });\ntest('fresh local', () => { const rows = [1]; assert.deepEqual(rows, [1]); });");
+const result = await runTests(
+  "test('mutate local', () => { const rows = [1]; rows.push(2); assert.deepEqual(rows, [1,2]); });\ntest('fresh local', () => { const rows = [1]; assert.deepEqual(rows, [1]); });",
+);
 assert.equal(result.status, 0, result.stderr + result.stdout);
 assert.match(result.stdout, /# pass 2/u);
 ```

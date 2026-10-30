@@ -3,8 +3,8 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     // Exercise 1: Call through an interface
-    // UsePricing references to identity andhalf-price implementations on100 cents.
-    // Expected: 100 and50.
+    // Use Pricing references to identity and half-price implementations on 100 cents.
+    // Expected: 100 and 50.
 
     // Exercise 2: Compose a fee policy
     // Wrap the half-price policy with a10-cent fee.
@@ -12,10 +12,10 @@ public class Main {
 
     // Exercise 3: Inspect rounding semantics
     // Apply integer half-price to101 cents under truncation-toward-zero.
-    // Expected: 50 cents beforefee.
+    // Expected: 50 cents before fee.
 
     // Exercise 4: Validate every implementation
-    // Call regular,half andfee policy with-1.
+    // Call regular,half and fee policy with-1.
     // Expected: all throwIllegalArgumentException.
 
     // Exercise 5: Change a collaborator without changing caller code
@@ -23,8 +23,8 @@ public class Main {
     // Expected: results100,50,60.
 
     // Exercise 6: Reject an invalid wrapper
-    // Construct a fee wrapper with a negative fee ornull delegate.
-    // Expected: negative feeIllegalArgumentException;null delegateNullPointerException.
+    // Construct a fee wrapper with a negative fee or null delegate.
+    // Expected: negative fee IllegalArgumentException;null delegate NullPointerException.
     System.out.println("Implement and check the six exercises in your saved copy.");
   }
 }

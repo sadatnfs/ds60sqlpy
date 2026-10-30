@@ -72,34 +72,36 @@ CREATE TEMP TABLE solution_big_events (
   event_time timestamptz NOT NULL,
   customer_id int,
   payload jsonb
-) PARTITION BY RANGE (event_time);
+)
+PARTITION BY RANGE (event_time);
 
-CREATE TEMP TABLE solution_big_events_2025_01
-  PARTITION OF solution_big_events
-  FOR VALUES FROM ('2025-01-01 00:00:00+00')
-             TO ('2025-02-01 00:00:00+00');
+CREATE TEMP TABLE solution_big_events_2025_01 PARTITION OF solution_big_events
+FOR VALUES FROM ('2025-01-01 00:00:00+00') TO ('2025-02-01 00:00:00+00');
 
-CREATE TEMP TABLE solution_big_events_2025_02
-  PARTITION OF solution_big_events
-  FOR VALUES FROM ('2025-02-01 00:00:00+00')
-             TO ('2025-03-01 00:00:00+00');
+CREATE TEMP TABLE solution_big_events_2025_02 PARTITION OF solution_big_events
+FOR VALUES FROM ('2025-02-01 00:00:00+00') TO ('2025-03-01 00:00:00+00');
 
-CREATE TEMP TABLE solution_big_events_2025_03
-  PARTITION OF solution_big_events
-  FOR VALUES FROM ('2025-03-01 00:00:00+00')
-             TO ('2025-04-01 00:00:00+00');
+CREATE TEMP TABLE solution_big_events_2025_03 PARTITION OF solution_big_events
+FOR VALUES FROM ('2025-03-01 00:00:00+00') TO ('2025-04-01 00:00:00+00');
 
-INSERT INTO solution_big_events(event_time, customer_id, payload)
-SELECT timestamptz '2025-01-01 00:00:00+00'
-         + (event_no - 1) * interval '30 minutes',
-       1 + ((event_no * 29 - 1) % 500),
-       jsonb_build_object('source_row', event_no)
-FROM generate_series(1, 3000) AS g(event_no);
+INSERT INTO solution_big_events (event_time, customer_id, payload)
+SELECT
+  timestamptz '2025-01-01 00:00:00+00' + (event_no - 1) * interval '30 minutes',
+  1 + ((event_no * 29 - 1) % 500),
+  jsonb_build_object('source_row', event_no)
+FROM
+  generate_series(1, 3000) AS g (event_no);
 
-EXPLAIN (ANALYZE, VERBOSE)
-SELECT COUNT(*)
-FROM solution_big_events
-WHERE event_time >= timestamptz '2025-03-01 00:00:00+00'
+EXPLAIN (
+  ANALYZE,
+  VERBOSE
+)
+SELECT
+  COUNT(*)
+FROM
+  solution_big_events
+WHERE
+  event_time >= timestamptz '2025-03-01 00:00:00+00'
   AND event_time < timestamptz '2025-04-01 00:00:00+00';
 
 ROLLBACK;
@@ -129,47 +131,56 @@ CREATE TEMP TABLE indexed_big_events (
   event_time timestamptz NOT NULL,
   customer_id int,
   payload jsonb
-) PARTITION BY RANGE (event_time);
+)
+PARTITION BY RANGE (event_time);
 
-CREATE TEMP TABLE indexed_big_events_2025_01
-  PARTITION OF indexed_big_events
-  FOR VALUES FROM ('2025-01-01 00:00:00+00')
-             TO ('2025-02-01 00:00:00+00');
+CREATE TEMP TABLE indexed_big_events_2025_01 PARTITION OF indexed_big_events
+FOR VALUES FROM ('2025-01-01 00:00:00+00') TO ('2025-02-01 00:00:00+00');
 
-CREATE TEMP TABLE indexed_big_events_2025_02
-  PARTITION OF indexed_big_events
-  FOR VALUES FROM ('2025-02-01 00:00:00+00')
-             TO ('2025-03-01 00:00:00+00');
+CREATE TEMP TABLE indexed_big_events_2025_02 PARTITION OF indexed_big_events
+FOR VALUES FROM ('2025-02-01 00:00:00+00') TO ('2025-03-01 00:00:00+00');
 
-CREATE TEMP TABLE indexed_big_events_2025_03
-  PARTITION OF indexed_big_events
-  FOR VALUES FROM ('2025-03-01 00:00:00+00')
-             TO ('2025-04-01 00:00:00+00');
+CREATE TEMP TABLE indexed_big_events_2025_03 PARTITION OF indexed_big_events
+FOR VALUES FROM ('2025-03-01 00:00:00+00') TO ('2025-04-01 00:00:00+00');
 
-INSERT INTO indexed_big_events(event_time, customer_id, payload)
-SELECT timestamptz '2025-01-01 00:00:00+00'
-         + (event_no - 1) * interval '30 minutes',
-       1 + ((event_no * 29 - 1) % 500),
-       jsonb_build_object('source_row', event_no)
-FROM generate_series(1, 3000) AS g(event_no);
+INSERT INTO indexed_big_events (event_time, customer_id, payload)
+SELECT
+  timestamptz '2025-01-01 00:00:00+00' + (event_no - 1) * interval '30 minutes',
+  1 + ((event_no * 29 - 1) % 500),
+  jsonb_build_object('source_row', event_no)
+FROM
+  generate_series(1, 3000) AS g (event_no);
 
-EXPLAIN (ANALYZE, BUFFERS)
-SELECT event_time, customer_id
-FROM indexed_big_events
-WHERE event_time >= timestamptz '2025-03-02 00:00:00+00'
+EXPLAIN (
+  ANALYZE,
+  BUFFERS
+)
+SELECT
+  event_time,
+  customer_id
+FROM
+  indexed_big_events
+WHERE
+  event_time >= timestamptz '2025-03-02 00:00:00+00'
   AND event_time < timestamptz '2025-03-03 00:00:00+00';
 
-CREATE INDEX indexed_big_events_2025_01_time_idx
-  ON indexed_big_events_2025_01(event_time);
-CREATE INDEX indexed_big_events_2025_02_time_idx
-  ON indexed_big_events_2025_02(event_time);
-CREATE INDEX indexed_big_events_2025_03_time_idx
-  ON indexed_big_events_2025_03(event_time);
+CREATE INDEX indexed_big_events_2025_01_time_idx ON indexed_big_events_2025_01 (event_time);
 
-EXPLAIN (ANALYZE, BUFFERS)
-SELECT event_time, customer_id
-FROM indexed_big_events
-WHERE event_time >= timestamptz '2025-03-02 00:00:00+00'
+CREATE INDEX indexed_big_events_2025_02_time_idx ON indexed_big_events_2025_02 (event_time);
+
+CREATE INDEX indexed_big_events_2025_03_time_idx ON indexed_big_events_2025_03 (event_time);
+
+EXPLAIN (
+  ANALYZE,
+  BUFFERS
+)
+SELECT
+  event_time,
+  customer_id
+FROM
+  indexed_big_events
+WHERE
+  event_time >= timestamptz '2025-03-02 00:00:00+00'
   AND event_time < timestamptz '2025-03-03 00:00:00+00';
 
 ROLLBACK;

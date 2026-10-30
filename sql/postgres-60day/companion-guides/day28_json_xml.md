@@ -100,13 +100,16 @@ These worked excerpts come from `sql/postgres-60day/day28_json_xml.sql`. Use **W
 ### Example 1
 
 ```sql
-SELECT event_id,
-       event_type,
-       metadata->>'path' AS path,
-       metadata->>'device' AS device,
-       metadata->>'campaign' AS campaign
-FROM events
-ORDER BY event_id DESC
+SELECT
+  event_id,
+  event_type,
+  metadata ->> 'path' AS path,
+  metadata ->> 'device' AS device,
+  metadata ->> 'campaign' AS campaign
+FROM
+  events
+ORDER BY
+  event_id DESC
 LIMIT 50;
 ```
 
@@ -117,12 +120,18 @@ LIMIT 50;
 ### Example 2
 
 ```sql
-SELECT metadata->>'device' AS device,
-       COUNT(*) AS cnt
-FROM events
-WHERE metadata->>'campaign' IN ('spring','summer')
-GROUP BY device
-ORDER BY cnt DESC, device NULLS LAST;
+SELECT
+  metadata ->> 'device' AS device,
+  COUNT(*) AS cnt
+FROM
+  events
+WHERE
+  metadata ->> 'campaign' IN ('spring', 'summer')
+GROUP BY
+  device
+ORDER BY
+  cnt DESC,
+  device NULLS LAST;
 ```
 
 **How to read it:** Example 2: Start with `events` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows; let `GROUP BY` collapse rows to its grouping keys. The final `SELECT` displays `device`, and `cnt`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.

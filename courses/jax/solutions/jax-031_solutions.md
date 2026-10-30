@@ -22,7 +22,7 @@ The linear-in-features optimum is a separate algorithmic reference for the gradi
 
 ```python
 optimum = jnp.linalg.lstsq(train_design, train_y, rcond=None)[0]
-close(optimum, [1., 2., -.5])
+close(optimum, [1.0, 2.0, -0.5])
 ```
 
 ## Exercise 3: Replay the fixed budget
@@ -65,8 +65,8 @@ The algebraic target is known here. A real model's extrapolation outside observe
 **Expected:** Prediction 2.5 under the known synthetic rule.
 
 ```python
-oracle = jnp.array([1., 2., -.5])
-close(features(jnp.array([3.])) @ oracle, [2.5])
+oracle = jnp.array([1.0, 2.0, -0.5])
+close(features(jnp.array([3.0])) @ oracle, [2.5])
 ```
 
 ## Scope of this evidence

@@ -175,13 +175,10 @@ train_target = pd.Series([1, 1, 0, 1], dtype=float)
 prior = train_target.mean()
 stats = train_target.groupby(train_category, observed=True, dropna=True).agg(["mean", "count"])
 strength = 3.0
-smoothed = (
-    stats["mean"] * stats["count"] + prior * strength
-) / (stats["count"] + strength)
+smoothed = (stats["mean"] * stats["count"] + prior * strength) / (stats["count"] + strength)
 new_category = pd.Series(["a", "b", "unseen", None])
 encoded = new_category.map(smoothed).astype(float).fillna(prior)
-print({"prior": prior, "map": smoothed.to_dict(),
-       "encoded": encoded.tolist()})
+print({"prior": prior, "map": smoothed.to_dict(), "encoded": encoded.tolist()})
 assert encoded.iloc[2] == prior and encoded.iloc[3] == prior
 ```
 

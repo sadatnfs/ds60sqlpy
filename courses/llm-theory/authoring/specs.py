@@ -153,7 +153,7 @@ expert(
 ALiBi uses a different mechanism:it adds a distance-dependent bias directly to attention scores,typically penalizing distant allowed keys under a causal decoder. A bias is not an access mask. Future keys still need to be excluded. Different heads can use different slopes,which creates different recency preferences.
 
 A formula accepting a large position index does not prove that a trained model will use long context reliably. Training length,frequency choices,precision,attention patterns andevaluation tasks all matter. This chapter tests exact geometric identities,causal bias behavior andcache-position bookkeeping. It makes no claim that a particular RoPE scaling orALiBi configuration preserves quality outside its measured training/evaluation range.""",
-    """The RoPE helper pairs adjacent features and uses inverse frequencies base**(-2*i/d) for pair indexi. For each positionp,it applies a2Drotation byp*frequency to the corresponding query orkey pair. Head width must be positive andeven. ALiBi scores add-slope*(query_position-key_position) for legal past/current keys,then apply the causal mask before softmax. Cached keys retain the position assigned when they were created;do not rotate an already rotated key again or restart offsets for a new token.""",
+    """The RoPE helper pairs adjacent features and uses inverse frequencies base**(-2*i/d) for pair index i. For each positionp,it applies a2Drotation byp*frequency to the corresponding query orkey pair. Head width must be positive andeven. ALiBi scores add-slope*(query_position-key_position) for legal past/current keys,then apply the causal mask before softmax. Cached keys retain the position assigned when they were created;do not rotate an already rotated key again or restart offsets for a new token.""",
     [
         ("RoPE", "Rotary position embedding applied to query/key feature pairs."),
         ("Relative offset", "The difference between two token positions."),
@@ -230,7 +230,7 @@ else: raise AssertionError('odd rotary width accepted')""",
 R(\theta)=\begin{bmatrix}\cos\theta&-\sin\theta\\\sin\theta&\cos\theta\end{bmatrix}.
 \]
 
-Because R(m)^T R(n)=R(n-m),the attention numerator obeys(R(m)q)^T(R(n)k)=q^T R(n-m)k. The identity holds independently for each paired subspace. With head widthd andpair indexi,the illustrative standard frequency isomega_i=base^(-2i/d),so positionp contributes anglep*omega_i. This is a layout andfrequency contract;changing thebase orscaling positions changes the trained computation.
+Because R(m)^T R(n)=R(n-m),the attention numerator obeys(R(m)q)^T(R(n)k)=q^T R(n-m)k. The identity holds independently for each paired subspace. With head widthd andpair index i,the illustrative standard frequency isomega_i=base^(-2i/d),so positionp contributes anglep*omega_i. This is a layout andfrequency contract;changing thebase orscaling positions changes the trained computation.
 
 For a causal ALiBi head with positive slopesa,the allowed score isS_ij=q_i^T k_j/sqrt(d)-sa*(i-j) forj<=i. Future positions are excluded by the mask. With zero content scores,i=2 andsa=log2,the unnormalized masses are1/4,1/2,1,which normalize to1/7,2/7,4/7. A linear bias by itself would reward future positions wheni-j isnegative,so it cannot replace thecausal mask.""",
     """An incremental decoder passes allprefix tests at short length butdiverges after reusing a cache. The model weightshave notchanged. Inspection shows each newkeywasrotated usingposition0 instead of the accumulatedcache length. Recomputing the samekey at its correctabsolute positionrestores parity. Another commonfailure rotates storedkeys asecondtime whencombiningcache andnewtokens. Both bugs arestate/layout errors,not evidence thatRoPE itself lacks long-context capacity. Only afterthese invariants pass does a length-generalization study become interpretable.""",
@@ -268,7 +268,7 @@ A gated feed-forward network multiplies two projections. SwiGLU usesSiLU(xWg) el
     [
         ex(
             "Compare RMSNorm and LayerNorm",
-            "Normalize vector 3,4] with unit gain and epsilon 1e-8.",
+            "Normalize vector [3,4] with unit gain and epsilon 1e-8.",
             "RMSNorm mean nonzero;LayerNorm mean approximately 0.",
             """x=torch.tensor([3.,4.],dtype=torch.float64)
 rms=rms_norm(x); centered=layer_norm(x)
@@ -291,7 +291,7 @@ torch.testing.assert_close(post@torch.ones(3,dtype=torch.float64),torch.zeros(3,
         ex(
             "Calculate a SwiGLU gate derivative",
             "Use scalar g0,u2 and output SiLU(g)*u.",
-            "output0;gradient with respect to g is 1;respect to u is 0.",
+            "output0;gradient with respect to g is 1;with respect to u is 0.",
             """gate=torch.tensor(0.,dtype=torch.float64,requires_grad=True); up=torch.tensor(2.,dtype=torch.float64,requires_grad=True)
 output=F.silu(gate)*up; output.backward()
 assert output.item()==0 and gate.grad.item()==1 and up.grad.item()==0""",

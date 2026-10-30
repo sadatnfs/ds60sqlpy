@@ -83,9 +83,11 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-image=torch.arange(1,10,dtype=torch.float64).reshape(1,1,3,3); kernel=torch.tensor([[[[1.,0.],[0.,-1.]]]],dtype=torch.float64)
-out=F.conv2d(image,kernel)
-assert tuple(out.shape)==(1,1,2,2); torch.testing.assert_close(out,torch.full_like(out,-4),atol=0,rtol=0)
+image = torch.arange(1, 10, dtype=torch.float64).reshape(1, 1, 3, 3)
+kernel = torch.tensor([[[[1.0, 0.0], [0.0, -1.0]]]], dtype=torch.float64)
+out = F.conv2d(image, kernel)
+assert tuple(out.shape) == (1, 1, 2, 2)
+torch.testing.assert_close(out, torch.full_like(out, -4), atol=0, rtol=0)
 ```
 
 **Expected:** output shape 1, 1, 2, 2; all values-4.
@@ -95,8 +97,9 @@ assert tuple(out.shape)==(1,1,2,2); torch.testing.assert_close(out,torch.full_li
 An asymmetric kernel makes the convention observable. A symmetric kernel could hide an unintended rotation.
 
 ```python
-rotated=torch.flip(kernel,(-2,-1)); changed=F.conv2d(image,rotated)
-torch.testing.assert_close(changed,torch.full_like(changed,4),atol=0,rtol=0)
+rotated = torch.flip(kernel, (-2, -1))
+changed = F.conv2d(image, rotated)
+torch.testing.assert_close(changed, torch.full_like(changed, 4), atol=0, rtol=0)
 ```
 
 **Expected:** all outputs+4.
@@ -106,8 +109,9 @@ torch.testing.assert_close(changed,torch.full_like(changed,4),atol=0,rtol=0)
 Permutation changes axis meaning without inventing new values. Reshaping the element count alone would not implement a general layout translation.
 
 ```python
-nhwc=image.permute(0,2,3,1); assert tuple(nhwc.shape)==(1,3,3,1)
-assert torch.equal(nhwc.permute(0,3,1,2),image)
+nhwc = image.permute(0, 2, 3, 1)
+assert tuple(nhwc.shape) == (1, 3, 3, 1)
+assert torch.equal(nhwc.permute(0, 3, 1, 2), image)
 ```
 
 **Expected:** exact round trip; NHWC shape 1, 3, 3, 1.

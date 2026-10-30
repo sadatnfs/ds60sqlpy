@@ -72,9 +72,7 @@ is sorted even if the supplied valid Series was not sorted originally.
 
 ```python
 grid = ordered.unstack("metric")
-present = pd.Series(True, index=ordered.index, dtype=bool).unstack(
-    "metric", fill_value=False
-)
+present = pd.Series(True, index=ordered.index, dtype=bool).unstack("metric", fill_value=False)
 ```
 
 The reference begins with a validated unique coordinate relation. Unstacking

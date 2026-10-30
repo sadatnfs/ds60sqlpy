@@ -13,7 +13,14 @@ libraries, install packages, call a remote endpoint or choose compiler flags.
 It points to libraries compiled together for this exact R/TMB/Matrix/architecture.
 
 ```json
-{"schema_version":1,"model":"normal_mean","data":{"y":[1,2,4,7]},"parameters":{"mu":0,"log_sigma":0},"theta":[2.2,0.3],"random":null}
+{
+  "schema_version": 1,
+  "model": "normal_mean",
+  "data": { "y": [1, 2, 4, 7] },
+  "parameters": { "mu": 0, "log_sigma": 0 },
+  "theta": [2.2, 0.3],
+  "random": null
+}
 ```
 
 `parameters` supplies tape shapes and starts. `theta` has the exact flattened

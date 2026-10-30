@@ -181,14 +181,19 @@ rather than something to overlook.
 
 ```python
 claims = [
-    {"claim": "candidate beats baseline", "evidence": "metrics.json", "limitation": "single local dataset"},
-    {"claim": "service reloads artifact", "evidence": "smoke-test.txt", "limitation": "no load test"},
+    {
+        "claim": "candidate beats baseline",
+        "evidence": "metrics.json",
+        "limitation": "single local dataset",
+    },
+    {
+        "claim": "service reloads artifact",
+        "evidence": "smoke-test.txt",
+        "limitation": "no load test",
+    },
     {"claim": "works for every population", "evidence": None, "limitation": None},
 ]
-unsupported = [
-    item["claim"] for item in claims
-    if not item["evidence"] or not item["limitation"]
-]
+unsupported = [item["claim"] for item in claims if not item["evidence"] or not item["limitation"]]
 print({"unsupported": unsupported})
 assert unsupported == ["works for every population"]
 ```

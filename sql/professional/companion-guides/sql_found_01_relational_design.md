@@ -108,12 +108,11 @@ These worked excerpts come from `sql/professional/lessons/sql_found_01_relationa
 
 ```sql
 CREATE TABLE pro_relational_lab.members (
-    member_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    display_name text NOT NULL
-        CHECK (btrim(display_name) <> ''),
-    email text NOT NULL UNIQUE,
-    backup_contact text UNIQUE,
-    joined_on date NOT NULL DEFAULT CURRENT_DATE
+  member_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  display_name text NOT NULL CHECK (btrim(display_name) <> ''),
+  email text NOT NULL UNIQUE,
+  backup_contact text UNIQUE,
+  joined_on date NOT NULL DEFAULT CURRENT_DATE
 );
 ```
 
@@ -125,10 +124,9 @@ CREATE TABLE pro_relational_lab.members (
 
 ```sql
 CREATE TABLE pro_relational_lab.equipment_categories (
-    category_code text PRIMARY KEY,
-    display_name text NOT NULL UNIQUE,
-    standard_loan_days integer NOT NULL
-        CHECK (standard_loan_days BETWEEN 1 AND 90)
+  category_code text PRIMARY KEY,
+  display_name text NOT NULL UNIQUE,
+  standard_loan_days integer NOT NULL CHECK (standard_loan_days BETWEEN 1 AND 90)
 );
 ```
 

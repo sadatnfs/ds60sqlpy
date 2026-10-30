@@ -27,7 +27,8 @@ Task: Read `String.class` module and package names.
 The fully qualified class name,package and module are distinct identities. Apackage name alone does not establish module membership.
 
 ```java
-assert String.class.getModule().getName().equals("java.base");assert String.class.getPackageName().equals("java.lang");
+assert String.class.getModule().getName().equals("java.base");
+assert String.class.getPackageName().equals("java.lang");
 ```
 
 **Expected:** module `java.base`;package `java.lang`.
@@ -55,10 +56,14 @@ Task: Create the owned greeting/application fixture and compile both with--modul
 The compiler verifies actualrequires/exports syntax and package layout. Merely reading a module-info string would not establish a valid build.
 
 ```java
-try(ModuleFixture fixture=new ModuleFixture()) {
-    assert fixture.compile()==0;
-    assert java.nio.file.Files.isRegularFile(fixture.output.resolve("course.greeting/module-info.class"));
-    assert java.nio.file.Files.isRegularFile(fixture.output.resolve("course.app/module-info.class"));
+try (ModuleFixture fixture = new ModuleFixture()) {
+  assert fixture.compile() == 0;
+  assert java.nio.file.Files.isRegularFile(
+    fixture.output.resolve("course.greeting/module-info.class")
+  );
+  assert java.nio.file.Files.isRegularFile(
+    fixture.output.resolve("course.app/module-info.class")
+  );
 }
 ```
 
@@ -73,11 +78,19 @@ Task: Read the compiled descriptors with ModuleFinder.
 Descriptors provide structured evidence of the boundary. Apublic class without an export would not supply the same named-moduleAPI.
 
 ```java
-try(ModuleFixture fixture=new ModuleFixture()) {
-    assert fixture.compile()==0;var finder=java.lang.module.ModuleFinder.of(fixture.output);
-    var app=finder.find("course.app").orElseThrow().descriptor();var library=finder.find("course.greeting").orElseThrow().descriptor();
-    assert app.requires().stream().anyMatch(item -> item.name().equals("course.greeting"));
-    assert library.exports().stream().anyMatch(item -> item.source().equals("edu.example.greeting"));
+try (ModuleFixture fixture = new ModuleFixture()) {
+  assert fixture.compile() == 0;
+  var finder = java.lang.module.ModuleFinder.of(fixture.output);
+  var app = finder.find("course.app").orElseThrow().descriptor();
+  var library = finder.find("course.greeting").orElseThrow().descriptor();
+  assert app
+    .requires()
+    .stream()
+    .anyMatch(item -> item.name().equals("course.greeting"));
+  assert library
+    .exports()
+    .stream()
+    .anyMatch(item -> item.source().equals("edu.example.greeting"));
 }
 ```
 
@@ -92,8 +105,9 @@ Task: Launch the compiled app in a fresh childJVM with the fixed module path.
 The fresh process tests runtime module resolution in addition to compilation. It cannot rely on classes accidentally loaded in the parent process.
 
 ```java
-try(ModuleFixture fixture=new ModuleFixture()) {
-    assert fixture.compile()==0;assert fixture.run().strip().equals("Hello, modules!");
+try (ModuleFixture fixture = new ModuleFixture()) {
+  assert fixture.compile() == 0;
+  assert fixture.run().strip().equals("Hello, modules!");
 }
 ```
 
@@ -108,9 +122,12 @@ Task: Compile an app requiringcourse.missing instead ofcourse.greeting.
 The negative control proves dependency resolution is being checked. The failure is expected and does not get converted into a passing runtime result.
 
 ```java
-try(ModuleFixture fixture=new ModuleFixture()) {
-    java.nio.file.Files.writeString(fixture.source.resolve("course.app/module-info.java"),"module course.app { requires course.missing; }");
-    assert fixture.compile()!=0 && !fixture.diagnostics.isBlank();
+try (ModuleFixture fixture = new ModuleFixture()) {
+  java.nio.file.Files.writeString(
+    fixture.source.resolve("course.app/module-info.java"),
+    "module course.app { requires course.missing; }"
+  );
+  assert fixture.compile() != 0 && !fixture.diagnostics.isBlank();
 }
 ```
 

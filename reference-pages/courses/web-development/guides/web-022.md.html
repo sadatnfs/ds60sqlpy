@@ -210,12 +210,24 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="worked-example-1-explicit-ordering">Worked example 1: Explicit ordering<a class="heading-anchor" href="#worked-example-1-explicit-ordering" aria-label="Link to this section">#</a></h4>
 <p>Layer order establishes a policy before selectors compete within it.</p>
 <pre class="highlighted-code"><code class="language-css"><span class="syntax-punctuation">@</span><span class="syntax-keyword">layer</span> <span class="syntax-tag">base</span><span class="syntax-operator">,</span> <span class="syntax-tag">components</span><span class="syntax-operator">,</span> <span class="syntax-tag">utilities</span><span class="syntax-punctuation">;</span>
-<span class="syntax-punctuation">@</span><span class="syntax-keyword">layer</span> <span class="syntax-tag">base</span> <span class="syntax-punctuation">{</span> <span class="syntax-tag">p</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">color</span><span class="syntax-punctuation">:</span> <span class="syntax-number">#172033</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span> <span class="syntax-punctuation">}</span>
-<span class="syntax-punctuation">@</span><span class="syntax-keyword">layer</span> <span class="syntax-tag">components</span> <span class="syntax-punctuation">{</span> <span class="syntax-punctuation">.</span><span class="syntax-class">note</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">color</span><span class="syntax-punctuation">:</span> <span class="syntax-number">#0753a4</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span> <span class="syntax-punctuation">}</span></code></pre>
+<span class="syntax-punctuation">@</span><span class="syntax-keyword">layer</span> <span class="syntax-tag">base</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-tag">p</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">color</span><span class="syntax-punctuation">:</span> <span class="syntax-number">#172033</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">@</span><span class="syntax-keyword">layer</span> <span class="syntax-tag">components</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-punctuation">.</span><span class="syntax-class">note</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">color</span><span class="syntax-punctuation">:</span> <span class="syntax-number">#0753a4</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected observation:</strong> The component layer can override the earlier base rule.</p>
 <h4 id="worked-example-2-a-narrow-utility">Worked example 2: A narrow utility<a class="heading-anchor" href="#worked-example-2-a-narrow-utility" aria-label="Link to this section">#</a></h4>
 <p>The utility&#x27;s responsibility is explicit.</p>
-<pre class="highlighted-code"><code class="language-css"><span class="syntax-punctuation">@</span><span class="syntax-keyword">layer</span> <span class="syntax-tag">utilities</span> <span class="syntax-punctuation">{</span> <span class="syntax-punctuation">.</span><span class="syntax-class">text-muted</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">color</span><span class="syntax-punctuation">:</span> <span class="syntax-number">#475569</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span> <span class="syntax-punctuation">}</span></code></pre>
+<pre class="highlighted-code"><code class="language-css"><span class="syntax-punctuation">@</span><span class="syntax-keyword">layer</span> <span class="syntax-tag">utilities</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-punctuation">.</span><span class="syntax-class">text-muted</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">color</span><span class="syntax-punctuation">:</span> <span class="syntax-number">#475569</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected observation:</strong> The utility overrides earlier normal layered color declarations.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-predict-the-layer-winner-for-normal-declarations">Exercise 1: Predict the layer winner for normal declarations.<a class="heading-anchor" href="#exercise-1-predict-the-layer-winner-for-normal-declarations" aria-label="Link to this section">#</a></h4>

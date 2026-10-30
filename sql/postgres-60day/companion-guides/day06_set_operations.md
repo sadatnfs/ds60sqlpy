@@ -101,14 +101,30 @@ These worked excerpts come from `sql/postgres-60day/day06_set_operations.sql`. U
 
 ```sql
 WITH purchasers AS (
-  SELECT DISTINCT o.customer_id FROM orders o
-), supporters AS (
-  SELECT DISTINCT e.customer_id FROM events e WHERE e.event_type = 'support'
+  SELECT DISTINCT
+    o.customer_id
+  FROM
+    orders o
+),
+supporters AS (
+  SELECT DISTINCT
+    e.customer_id
+  FROM
+    events e
+  WHERE
+    e.event_type = 'support'
 )
-SELECT * FROM purchasers
+SELECT
+  *
+FROM
+  purchasers
 INTERSECT
-SELECT * FROM supporters
-ORDER BY customer_id;
+SELECT
+  *
+FROM
+  supporters
+ORDER BY
+  customer_id;
 ```
 
 **How to read it:** Example 1: Start with `orders`, and `events` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows. The final `SELECT` displays `*`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
@@ -119,14 +135,30 @@ ORDER BY customer_id;
 
 ```sql
 WITH browsers AS (
-  SELECT DISTINCT e.customer_id FROM events e WHERE e.event_type = 'page_view'
-), purchasers AS (
-  SELECT DISTINCT o.customer_id FROM orders o
+  SELECT DISTINCT
+    e.customer_id
+  FROM
+    events e
+  WHERE
+    e.event_type = 'page_view'
+),
+purchasers AS (
+  SELECT DISTINCT
+    o.customer_id
+  FROM
+    orders o
 )
-SELECT * FROM browsers
+SELECT
+  *
+FROM
+  browsers
 EXCEPT
-SELECT * FROM purchasers
-ORDER BY customer_id;
+SELECT
+  *
+FROM
+  purchasers
+ORDER BY
+  customer_id;
 ```
 
 **How to read it:** Example 2: Start with `events`, and `orders` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows. The final `SELECT` displays `*`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.

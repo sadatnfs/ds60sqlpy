@@ -31,7 +31,9 @@ If changing a copy changes the original, inspect whether the member is truly own
 ## Worked example 1
 
 ```cpp
-Batch a{{1,2},"A"}; Batch b=a; b.values[0]=9;
+Batch a{{1, 2}, "A"};
+Batch b = a;
+b.values[0] = 9;
 ```
 
 Expected: a remains [1, 2]; b becomes [9, 2].
@@ -39,7 +41,8 @@ Expected: a remains [1, 2]; b becomes [9, 2].
 ## Worked example 2
 
 ```cpp
-Batch b=std::move(a); a=Batch{{4},"new"};
+Batch b = std::move(a);
+a = Batch{{4}, "new"};
 ```
 
 Expected: b receives the old values; assigning a new valid value to a is safe.

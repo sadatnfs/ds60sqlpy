@@ -211,8 +211,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 courses/advanced-spark-modeling/projects/spark-tmb/workshop check</code></pre>
 <p>For different already prepared local image tags:</p>
 <pre class="highlighted-code"><code class="language-bash">DS60_TMB_BASE<span class="syntax-operator">=</span>ds60-tmb-local:dev-1.9.25 <span class="syntax-string">\</span>
-DS60_SPARK_BASE<span class="syntax-operator">=</span>ds60sqlpy-worker-spark-local-python:1.1.0 <span class="syntax-string">\</span>
-DS60_JAVA_BASE<span class="syntax-operator">=</span>ds60sqlpy-worker-java21:1.1.0 <span class="syntax-string">\</span>
+  DS60_SPARK_BASE<span class="syntax-operator">=</span>ds60sqlpy-worker-spark-local-python:1.1.0 <span class="syntax-string">\</span>
+  DS60_JAVA_BASE<span class="syntax-operator">=</span>ds60sqlpy-worker-java21:1.1.0 <span class="syntax-string">\</span>
   courses/advanced-spark-modeling/projects/spark-tmb/workshop build</code></pre>
 <p>The build combines native Java 21, Spark 4.0.1 and Python 3.12 with the exact R/TMB environment. It installs hash-pinned Python packages and builds/installs the reusable pure wheel offline with prepared setuptools. It checks the shared R library, compiles the original TMB examples, runs their R acceptance and performs a real pandas/rpy2/TMB regression fit. It then compiles the project-owned four-model registry and records source, library, registry and ABI identities. SciPy 1.15.3 supplies the shared Python driver optimizer; fitting never installs it. Build failure stops preparation. Do not copy <code>.so</code> files from another architecture or R/TMB environment.</p>
 <p>Run one case without rebuilding:</p>

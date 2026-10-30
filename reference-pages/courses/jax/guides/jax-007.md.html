@@ -214,13 +214,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>value_and_grad returns values at the original weight. The final call evaluates the changed state rather than reporting the stale first loss.</p>
 <p><strong>Expected:</strong> 56/3, -56/3, 28/15 and 56/675 respectively.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-string">&quot;&quot;&quot;Small offline JAX mechanism investigation; CPU evidence only.&quot;&quot;&quot;</span>
+
 <span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
 
 <span class="syntax-keyword">import</span> math
 <span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 <span class="syntax-keyword">import</span> jax
 <span class="syntax-keyword">import</span> jax.numpy <span class="syntax-keyword">as</span> jnp
-
 
 
 <span class="syntax-comment"># Choose precision before creating arrays; the usual JAX default is 32 bit.</span>
@@ -230,7 +230,8 @@ jax<span class="syntax-operator">.</span>config<span class="syntax-operator">.</
 <span class="syntax-keyword">def</span> <span class="syntax-function">close</span><span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-10</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">1e-10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span>atol<span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span>rtol<span class="syntax-punctuation">)</span>
 
-x <span class="syntax-operator">=</span> jnp<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+
+x <span class="syntax-operator">=</span> jnp<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
 y <span class="syntax-operator">=</span> <span class="syntax-number">2</span> <span class="syntax-operator">*</span> x
 
 
@@ -240,14 +241,14 @@ y <span class="syntax-operator">=</span> <span class="syntax-number">2</span> <s
 
 <span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-comment"># Case 1: Four quantities in one update</span>
-    value<span class="syntax-punctuation">,</span> gradient <span class="syntax-operator">=</span> jax<span class="syntax-operator">.</span>value_and_grad<span class="syntax-punctuation">(</span>loss<span class="syntax-punctuation">)</span><span class="syntax-punctuation">(</span>jnp<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">(</span><span class="syntax-number">0.</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
-    updated <span class="syntax-operator">=</span> <span class="syntax-operator">-</span><span class="syntax-number">.1</span> <span class="syntax-operator">*</span> gradient
+    value<span class="syntax-punctuation">,</span> gradient <span class="syntax-operator">=</span> jax<span class="syntax-operator">.</span>value_and_grad<span class="syntax-punctuation">(</span>loss<span class="syntax-punctuation">)</span><span class="syntax-punctuation">(</span>jnp<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">(</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    updated <span class="syntax-operator">=</span> <span class="syntax-operator">-</span><span class="syntax-number">0.1</span> <span class="syntax-operator">*</span> gradient
     close<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">,</span> <span class="syntax-number">56</span> <span class="syntax-operator">/</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
     close<span class="syntax-punctuation">(</span>gradient<span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">56</span> <span class="syntax-operator">/</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
     close<span class="syntax-punctuation">(</span>updated<span class="syntax-punctuation">,</span> <span class="syntax-number">28</span> <span class="syntax-operator">/</span> <span class="syntax-number">15</span><span class="syntax-punctuation">)</span>
     close<span class="syntax-punctuation">(</span>loss<span class="syntax-punctuation">(</span>updated<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">56</span> <span class="syntax-operator">/</span> <span class="syntax-number">675</span><span class="syntax-punctuation">)</span>
 
-    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">jax-007</span><span class="syntax-string">&#x27;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">: 1 asserted cases passed</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">jax-007</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&quot;</span><span class="syntax-string">: 1 asserted cases passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
@@ -257,13 +258,13 @@ y <span class="syntax-operator">=</span> <span class="syntax-number">2</span> <s
 <p>The stopped branch explicitly defines a different autodiff path without changing the evaluated value.</p>
 <p><strong>Expected:</strong> Both forward values 9; derivatives 6 and 0.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-string">&quot;&quot;&quot;Small offline JAX mechanism investigation; CPU evidence only.&quot;&quot;&quot;</span>
+
 <span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
 
 <span class="syntax-keyword">import</span> math
 <span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 <span class="syntax-keyword">import</span> jax
 <span class="syntax-keyword">import</span> jax.numpy <span class="syntax-keyword">as</span> jnp
-
 
 
 <span class="syntax-comment"># Choose precision before creating arrays; the usual JAX default is 32 bit.</span>
@@ -273,7 +274,8 @@ jax<span class="syntax-operator">.</span>config<span class="syntax-operator">.</
 <span class="syntax-keyword">def</span> <span class="syntax-function">close</span><span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-10</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">1e-10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span>atol<span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span>rtol<span class="syntax-punctuation">)</span>
 
-x <span class="syntax-operator">=</span> jnp<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+
+x <span class="syntax-operator">=</span> jnp<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
 y <span class="syntax-operator">=</span> <span class="syntax-number">2</span> <span class="syntax-operator">*</span> x
 
 
@@ -285,11 +287,11 @@ y <span class="syntax-operator">=</span> <span class="syntax-number">2</span> <s
     <span class="syntax-comment"># Case 1: Same forward value, different derivative</span>
     ordinary <span class="syntax-operator">=</span> <span class="syntax-keyword">lambda</span> z<span class="syntax-punctuation">:</span> z <span class="syntax-operator">*</span> z
     stopped <span class="syntax-operator">=</span> <span class="syntax-keyword">lambda</span> z<span class="syntax-punctuation">:</span> jax<span class="syntax-operator">.</span>lax<span class="syntax-operator">.</span>stop_gradient<span class="syntax-punctuation">(</span>z<span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span><span class="syntax-operator">*</span> <span class="syntax-number">2</span>
-    close<span class="syntax-punctuation">(</span>ordinary<span class="syntax-punctuation">(</span><span class="syntax-number">3.</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> stopped<span class="syntax-punctuation">(</span><span class="syntax-number">3.</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
-    close<span class="syntax-punctuation">(</span>jax<span class="syntax-operator">.</span>grad<span class="syntax-punctuation">(</span>ordinary<span class="syntax-punctuation">)</span><span class="syntax-punctuation">(</span><span class="syntax-number">3.</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6.</span><span class="syntax-punctuation">)</span>
-    close<span class="syntax-punctuation">(</span>jax<span class="syntax-operator">.</span>grad<span class="syntax-punctuation">(</span>stopped<span class="syntax-punctuation">)</span><span class="syntax-punctuation">(</span><span class="syntax-number">3.</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.</span><span class="syntax-punctuation">)</span>
+    close<span class="syntax-punctuation">(</span>ordinary<span class="syntax-punctuation">(</span><span class="syntax-number">3.0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> stopped<span class="syntax-punctuation">(</span><span class="syntax-number">3.0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    close<span class="syntax-punctuation">(</span>jax<span class="syntax-operator">.</span>grad<span class="syntax-punctuation">(</span>ordinary<span class="syntax-punctuation">)</span><span class="syntax-punctuation">(</span><span class="syntax-number">3.0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6.0</span><span class="syntax-punctuation">)</span>
+    close<span class="syntax-punctuation">(</span>jax<span class="syntax-operator">.</span>grad<span class="syntax-punctuation">(</span>stopped<span class="syntax-punctuation">)</span><span class="syntax-punctuation">(</span><span class="syntax-number">3.0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">)</span>
 
-    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">jax-007</span><span class="syntax-string">&#x27;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">: 1 asserted cases passed</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">jax-007</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&quot;</span><span class="syntax-string">: 1 asserted cases passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>

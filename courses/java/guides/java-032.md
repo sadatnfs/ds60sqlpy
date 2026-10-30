@@ -53,15 +53,28 @@ Correctness is checked independently before timing. A faster wrong computation i
 import java.util.*;
 
 public class Main {
-    static volatile long sink;
-    static long sum(int n){if(n<0||n>100000)throw new IllegalArgumentException("bounded nonnegative n required");long result=0;for(int i=1;i<=n;i++)result+=i;return result;}
-    @jdk.jfr.Name("course.Calculation") @jdk.jfr.Label("Course calculation")
-    static class Calculation extends jdk.jfr.Event {long input;long output;}
-    public static void main(String[] args) throws Exception {
-        assert sum(1000)==500_500L && sum(1000)==1000L*1001/2;
-    }
-}
 
+  static volatile long sink;
+
+  static long sum(int n) {
+    if (n < 0 || n > 100000) throw new IllegalArgumentException("bounded nonnegative n required");
+    long result = 0;
+    for (int i = 1; i <= n; i++) result += i;
+    return result;
+  }
+
+  @jdk.jfr.Name("course.Calculation")
+  @jdk.jfr.Label("Course calculation")
+  static class Calculation extends jdk.jfr.Event {
+
+    long input;
+    long output;
+  }
+
+  public static void main(String[] args) throws Exception {
+    assert sum(1000) == 500_500L && sum(1000) == (1000L * 1001) / 2;
+  }
+}
 ```
 
 **Expected:** 500500.
@@ -74,17 +87,31 @@ The sink makes the result observable. This is a teaching safeguard,not a replace
 import java.util.*;
 
 public class Main {
-    static volatile long sink;
-    static long sum(int n){if(n<0||n>100000)throw new IllegalArgumentException("bounded nonnegative n required");long result=0;for(int i=1;i<=n;i++)result+=i;return result;}
-    @jdk.jfr.Name("course.Calculation") @jdk.jfr.Label("Course calculation")
-    static class Calculation extends jdk.jfr.Event {long input;long output;}
-    public static void main(String[] args) throws Exception {
-        assert sum(1000)==500_500L && sum(1000)==1000L*1001/2;
 
-        for(int i=0;i<100;i++)sink=sum(1000);assert sink==500_500L;
-    }
+  static volatile long sink;
+
+  static long sum(int n) {
+    if (n < 0 || n > 100000) throw new IllegalArgumentException("bounded nonnegative n required");
+    long result = 0;
+    for (int i = 1; i <= n; i++) result += i;
+    return result;
+  }
+
+  @jdk.jfr.Name("course.Calculation")
+  @jdk.jfr.Label("Course calculation")
+  static class Calculation extends jdk.jfr.Event {
+
+    long input;
+    long output;
+  }
+
+  public static void main(String[] args) throws Exception {
+    assert sum(1000) == 500_500L && sum(1000) == (1000L * 1001) / 2;
+
+    for (int i = 0; i < 100; i++) sink = sum(1000);
+    assert sink == 500_500L;
+  }
 }
-
 ```
 
 **Expected:** sink500500 after warmup.

@@ -98,12 +98,22 @@ These worked excerpts come from `sql/postgres-60day/day03_inner_joins.sql`. Use 
 ### Example 1
 
 ```sql
-SELECT o.order_id, o.order_date, c.full_name, p.name AS product, oi.quantity, oi.unit_price
-FROM orders o
-JOIN customers c   ON c.customer_id = o.customer_id
-JOIN order_items oi ON oi.order_id = o.order_id
-JOIN products p    ON p.product_id = oi.product_id
-ORDER BY o.order_date DESC, o.order_id DESC, p.product_id
+SELECT
+  o.order_id,
+  o.order_date,
+  c.full_name,
+  p.name AS product,
+  oi.quantity,
+  oi.unit_price
+FROM
+  orders o
+  JOIN customers c ON c.customer_id = o.customer_id
+  JOIN order_items oi ON oi.order_id = o.order_id
+  JOIN products p ON p.product_id = oi.product_id
+ORDER BY
+  o.order_date DESC,
+  o.order_id DESC,
+  p.product_id
 LIMIT 50;
 ```
 
@@ -114,12 +124,20 @@ LIMIT 50;
 ### Example 2
 
 ```sql
-SELECT o.order_id, c.country, SUM(oi.quantity) AS total_items
-FROM orders o
-JOIN customers c ON c.customer_id = o.customer_id
-JOIN order_items oi ON oi.order_id = o.order_id
-GROUP BY o.order_id, c.country
-ORDER BY total_items DESC, o.order_id
+SELECT
+  o.order_id,
+  c.country,
+  SUM(oi.quantity) AS total_items
+FROM
+  orders o
+  JOIN customers c ON c.customer_id = o.customer_id
+  JOIN order_items oi ON oi.order_id = o.order_id
+GROUP BY
+  o.order_id,
+  c.country
+ORDER BY
+  total_items DESC,
+  o.order_id
 LIMIT 20;
 ```
 

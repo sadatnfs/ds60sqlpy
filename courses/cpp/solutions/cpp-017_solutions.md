@@ -31,7 +31,8 @@ When a bad input contributes zero to a total, inspect whether rejection was coll
 ## Worked example 1
 
 ```cpp
-auto result=positive(0); assert(std::holds_alternative<int>(result));
+auto result = positive(0);
+assert(std::holds_alternative<int>(result));
 ```
 
 Expected: Zero is a present successful integer.
@@ -39,7 +40,8 @@ Expected: Zero is a present successful integer.
 ## Worked example 2
 
 ```cpp
-auto result=positive(-1); assert(std::get<ParseError>(result).reason=="negative");
+auto result = positive(-1);
+assert(std::get<ParseError>(result).reason == "negative");
 ```
 
 Expected: The error alternative carries an inspectable reason.

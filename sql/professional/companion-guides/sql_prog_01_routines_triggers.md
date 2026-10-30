@@ -108,13 +108,12 @@ These worked excerpts come from `sql/professional/lessons/sql_prog_01_routines_t
 
 ```sql
 CREATE TABLE pro_routines_lab.work_items (
-    item_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    owner_name text NOT NULL CHECK (btrim(owner_name) <> ''),
-    title text NOT NULL CHECK (btrim(title) <> ''),
-    status text NOT NULL DEFAULT 'open'
-        CHECK (status IN ('open', 'in_progress', 'closed')),
-    created_at timestamptz NOT NULL DEFAULT clock_timestamp(),
-    updated_at timestamptz NOT NULL DEFAULT clock_timestamp()
+  item_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  owner_name text NOT NULL CHECK (btrim(owner_name) <> ''),
+  title text NOT NULL CHECK (btrim(title) <> ''),
+  status text NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'in_progress', 'closed')),
+  created_at timestamptz NOT NULL DEFAULT clock_timestamp(),
+  updated_at timestamptz NOT NULL DEFAULT clock_timestamp()
 );
 ```
 
@@ -126,12 +125,12 @@ CREATE TABLE pro_routines_lab.work_items (
 
 ```sql
 CREATE TABLE pro_routines_lab.work_item_audit (
-    audit_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    item_id bigint NOT NULL,
-    old_status text NOT NULL,
-    new_status text NOT NULL,
-    changed_by text NOT NULL,
-    changed_at timestamptz NOT NULL DEFAULT clock_timestamp()
+  audit_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  item_id bigint NOT NULL,
+  old_status text NOT NULL,
+  new_status text NOT NULL,
+  changed_by text NOT NULL,
+  changed_at timestamptz NOT NULL DEFAULT clock_timestamp()
 );
 ```
 

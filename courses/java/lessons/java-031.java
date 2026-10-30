@@ -3,29 +3,29 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     // Exercise 1: Inspect a retained annotation
-    // ReadVersion on the knownFriendly provider.
-    // Expected: version2.
+    // Read Version on the known Friendly provider.
+    // Expected: version 2.
 
     // Exercise 2: Invoke a known public method reflectively
-    // Findgreet(String) andinvoke it withAda.
+    // Findgreet(String) and invoke it with Ada.
     // Expected: Hello, Ada.
 
     // Exercise 3: Load a real local service descriptor
-    // Create the temporaryMETA-INF/services entry anddiscoverGreeting providers.
-    // Expected: oneFriendly provider withversion2 andworkinggreet.
+    // Create the temporaryMETA-INF/services entry and discover Greeting providers.
+    // Expected: oneFriendly provider with version 2 andworkinggreet.
 
     // Exercise 4: Preserve a reflected target failure
-    // Invokegreet withblanktext andinspectInvocationTargetException cause.
+    // Invokegreet with blank text and inspect InvocationTargetException cause.
     // Expected: causeIllegalArgumentException.
 
-    // Exercise 5: Reject missing class andmethod contracts
-    // Look up an absent class andan unsupportedgreet(int)signature.
-    // Expected: ClassNotFoundException andNoSuchMethodException.
+    // Exercise 5: Reject missing class and method contracts
+    // Look up an absent class and an unsupportedgreet(int)signature.
+    // Expected: ClassNotFoundException and NoSuchMethodException.
 
     // Exercise 6: Treat provider metadata as a policy input
-    // Accept provider versions1..2 andreject a hypotheticalversion3 under the currentconsumer
+    // Accept provider versions1..2 and reject a hypotheticalversion3 under the current consumer
     // contract.
-    // Expected: version2accepted;version3rejected.
+    // Expected: version 2 accepted;version 3 rejected.
     System.out.println("Implement and check the six exercises in your saved copy.");
   }
 }

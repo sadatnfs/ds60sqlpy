@@ -47,11 +47,17 @@ def apply(
             source_root = BASE.parents[2]
             if str(source_root) not in sys.path:
                 sys.path.insert(0, str(source_root))
-            from scripts.format_inline_code import canonical_markdown
+            from scripts.format_inline_code import canonical_markdown, ownership
+            from scripts.format_repo import load_policy
 
-            after = canonical_markdown(
-                after, root=source_root, path=path.relative_to(source_root).as_posix()
-            )
+            relative = path.relative_to(source_root).as_posix()
+            generated, protected = ownership(relative, load_policy(source_root))
+            if protected:
+                raise ValueError("Protected Markdown output must remain unchanged: " + relative)
+            if generated:
+                after = canonical_markdown(after, root=source_root, path=relative)
+            else:
+                print("Direct source layout remains owned by format-repo:", relative)
         path.write_text(after, encoding="utf-8")
         result[identity] = {
             "before_sha256": hashlib.sha256(before.encode()).hexdigest(),

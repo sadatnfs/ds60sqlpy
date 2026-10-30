@@ -264,8 +264,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>okA <span class="syntax-operator">&amp;&amp;</span> okB <span class="syntax-operator">&amp;&amp;</span> a <span class="syntax-operator">==</span> <span class="syntax-number">4</span> <span class="syntax-operator">&amp;&amp;</span> b <span class="syntax-operator">==</span> <span class="syntax-string">&quot;red&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;generic first&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The results are 4 and red with presence true.</p>
 <p>The algorithm needs indexing and length, not knowledge of the element representation. That makes any an honest constraint here.</p>
 <h4 id="worked-example-2-handle-a-generic-empty-value">Worked example 2: Handle a generic empty value<a class="heading-anchor" href="#worked-example-2-handle-a-generic-empty-value" aria-label="Link to this section">#</a></h4>
@@ -325,8 +324,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>v <span class="syntax-operator">==</span> <span class="syntax-number">0</span> <span class="syntax-operator">&amp;&amp;</span> <span class="syntax-punctuation">!</span>ok<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;empty generic&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The result is zero with presence false.</p>
 <p>A zero value alone cannot distinguish an empty input from a first element equal to zero. The boolean preserves that information.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>

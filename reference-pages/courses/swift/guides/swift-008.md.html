@@ -216,37 +216,33 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Readable call sites reduce accidental parameter swaps and reveal the function purpose.</p>
 <pre class="highlighted-code"><code class="language-swift"><span class="syntax-keyword">import</span> <span class="syntax-class">Foundation</span>
 
-
-
 <span class="syntax-punctuation">@</span>main
 <span class="syntax-keyword">struct</span> <span class="syntax-class">LessonMain</span> <span class="syntax-punctuation">{</span>
-    <span class="syntax-keyword">static</span> <span class="syntax-keyword">func</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">async</span> <span class="syntax-keyword">throws</span> <span class="syntax-punctuation">{</span>
-        <span class="syntax-keyword">do</span> <span class="syntax-punctuation">{</span>
-            <span class="syntax-keyword">func</span> <span class="syntax-function">area</span><span class="syntax-punctuation">(</span>width<span class="syntax-punctuation">:</span> <span class="syntax-builtin">Int</span><span class="syntax-punctuation">,</span> height<span class="syntax-punctuation">:</span> <span class="syntax-builtin">Int</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">-&gt;</span> <span class="syntax-builtin">Int</span> <span class="syntax-punctuation">{</span> width <span class="syntax-operator">*</span> height <span class="syntax-punctuation">}</span>
-            <span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>area<span class="syntax-punctuation">(</span>width<span class="syntax-punctuation">:</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> height<span class="syntax-punctuation">:</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-number">12</span><span class="syntax-punctuation">)</span>
-            <span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>area<span class="syntax-punctuation">(</span>width<span class="syntax-punctuation">:</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> height<span class="syntax-punctuation">:</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
-        <span class="syntax-punctuation">}</span>
-        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">swift-008: passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-keyword">static</span> <span class="syntax-keyword">func</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">async</span> <span class="syntax-keyword">throws</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">do</span> <span class="syntax-punctuation">{</span>
+      <span class="syntax-keyword">func</span> <span class="syntax-function">area</span><span class="syntax-punctuation">(</span>width<span class="syntax-punctuation">:</span> <span class="syntax-builtin">Int</span><span class="syntax-punctuation">,</span> height<span class="syntax-punctuation">:</span> <span class="syntax-builtin">Int</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">-&gt;</span> <span class="syntax-builtin">Int</span> <span class="syntax-punctuation">{</span> width <span class="syntax-operator">*</span> height <span class="syntax-punctuation">}</span>
+      <span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>area<span class="syntax-punctuation">(</span>width<span class="syntax-punctuation">:</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> height<span class="syntax-punctuation">:</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-number">12</span><span class="syntax-punctuation">)</span>
+      <span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>area<span class="syntax-punctuation">(</span>width<span class="syntax-punctuation">:</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> height<span class="syntax-punctuation">:</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
     <span class="syntax-punctuation">}</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">swift-008: passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Labels show which dimension each argument supplies.</p>
 <h4 id="example-b-make-mutation-explicit">Example B: Make mutation explicit<a class="heading-anchor" href="#example-b-make-mutation-explicit" aria-label="Link to this section">#</a></h4>
 <p>The ampersand makes the mutation boundary visible instead of hiding it behind a normal-looking value call.</p>
 <pre class="highlighted-code"><code class="language-swift"><span class="syntax-keyword">import</span> <span class="syntax-class">Foundation</span>
 
-
-
 <span class="syntax-punctuation">@</span>main
 <span class="syntax-keyword">struct</span> <span class="syntax-class">LessonMain</span> <span class="syntax-punctuation">{</span>
-    <span class="syntax-keyword">static</span> <span class="syntax-keyword">func</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">async</span> <span class="syntax-keyword">throws</span> <span class="syntax-punctuation">{</span>
-        <span class="syntax-keyword">do</span> <span class="syntax-punctuation">{</span>
-            <span class="syntax-keyword">func</span> <span class="syntax-function">increment</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">_</span> value<span class="syntax-punctuation">:</span> <span class="syntax-keyword">inout</span> <span class="syntax-builtin">Int</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> value <span class="syntax-operator">+=</span> <span class="syntax-number">1</span> <span class="syntax-punctuation">}</span>
-            <span class="syntax-keyword">var</span> count <span class="syntax-punctuation">=</span> <span class="syntax-number">4</span>
-            increment<span class="syntax-punctuation">(</span><span class="syntax-punctuation">&amp;</span><span class="syntax-builtin">count</span><span class="syntax-punctuation">)</span>
-            <span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">count</span> <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span>
-        <span class="syntax-punctuation">}</span>
-        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">swift-008: passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-keyword">static</span> <span class="syntax-keyword">func</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">async</span> <span class="syntax-keyword">throws</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">do</span> <span class="syntax-punctuation">{</span>
+      <span class="syntax-keyword">func</span> <span class="syntax-function">increment</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">_</span> value<span class="syntax-punctuation">:</span> <span class="syntax-keyword">inout</span> <span class="syntax-builtin">Int</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> value <span class="syntax-operator">+=</span> <span class="syntax-number">1</span> <span class="syntax-punctuation">}</span>
+      <span class="syntax-keyword">var</span> count <span class="syntax-punctuation">=</span> <span class="syntax-number">4</span>
+      increment<span class="syntax-punctuation">(</span><span class="syntax-punctuation">&amp;</span><span class="syntax-builtin">count</span><span class="syntax-punctuation">)</span>
+      <span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">count</span> <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span>
     <span class="syntax-punctuation">}</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">swift-008: passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The caller explicitly grants mutation and observes 5.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>

@@ -23,9 +23,12 @@ The question is: Use account IDs A,A,B,B,C,C,D,D with values1,3,5,7,20,22,30,32;
 The boolean mask has one position per record. Its values come from group identity, not a target-dependent ranking. Training has four values and validation has four, but equal counts are incidental to the group-isolation contract.
 
 ```python
-groups=np.array(list('AABBCCDD')); x=np.array([1.,3.,5.,7.,20.,22.,30.,32.])
-train=np.isin(groups,['A','B']); valid=~train; mean=x[train].mean()
-assert mean==4 and set(groups[valid])=={'C','D'}
+groups = np.array(list("AABBCCDD"))
+x = np.array([1.0, 3.0, 5.0, 7.0, 20.0, 22.0, 30.0, 32.0])
+train = np.isin(groups, ["A", "B"])
+valid = ~train
+mean = x[train].mean()
+assert mean == 4 and set(groups[valid]) == {"C", "D"}
 ```
 
 **Expected:** train mean4 and validation IDs C,D.
@@ -39,9 +42,10 @@ The question is: Change the last validation value to3200 and compare train-only 
 A perturbation restricted to validation cannot influence a training-only mean. This controlled counterexample detects leakage more directly than inspecting the name of a preprocessing object.
 
 ```python
-changed=x.copy(); changed[-1]=3200
-assert changed[train].mean()==mean
-assert changed.mean()!=x.mean()
+changed = x.copy()
+changed[-1] = 3200
+assert changed[train].mean() == mean
+assert changed.mean() != x.mean()
 ```
 
 **Expected:** training mean stays4; global mean changes.
@@ -55,8 +59,8 @@ The question is: Assign alternating rows to train and validation and inspect int
 A row split can look balanced while violating the intended unit. Set intersection exposes the repeated accounts; disjoint row indices alone do not prove disjoint entities.
 
 ```python
-wrong=np.arange(8)%2==0
-assert set(groups[wrong]) & set(groups[~wrong])==set('ABCD')
+wrong = np.arange(8) % 2 == 0
+assert set(groups[wrong]) & set(groups[~wrong]) == set("ABCD")
 ```
 
 **Expected:** A,B,C,D all cross the split.
@@ -70,8 +74,8 @@ The question is: Center both partitions with training mean4 and compare validati
 Only the training values are guaranteed to have centered mean zero. Forcing validation to mean zero would estimate a new statistic and erase a potentially meaningful distribution shift.
 
 ```python
-np.testing.assert_array_equal(x[valid]-mean,[16,18,26,28])
-assert (x[train]-mean).mean()==0
+np.testing.assert_array_equal(x[valid] - mean, [16, 18, 26, 28])
+assert (x[train] - mean).mean() == 0
 ```
 
 **Expected:** validation values16,18,26,28.
@@ -85,10 +89,13 @@ The question is: Hash sorted training IDs before and after calculating validatio
 The hash is a compact identity receipt, not proof of good split design. It can reveal accidental mutation after evaluation. The original IDs must still be available for review.
 
 ```python
-import hashlib,json
-ids=['a1','a2','b1','b2']; frozen=json.dumps(ids).encode(); digest=hashlib.sha256(frozen).hexdigest()
-validation_error=float(np.mean((x[valid]-mean)**2))
-assert validation_error>0 and hashlib.sha256(json.dumps(ids).encode()).hexdigest()==digest
+import hashlib, json
+
+ids = ["a1", "a2", "b1", "b2"]
+frozen = json.dumps(ids).encode()
+digest = hashlib.sha256(frozen).hexdigest()
+validation_error = float(np.mean((x[valid] - mean) ** 2))
+assert validation_error > 0 and hashlib.sha256(json.dumps(ids).encode()).hexdigest() == digest
 ```
 
 **Expected:** The selection hash is unchanged.
@@ -102,8 +109,8 @@ The question is: Add account E with value1000 only to evaluation; specify whethe
 A deployment input is transformed using the fitted state. Updating the mean online is a separate algorithm requiring an explicit policy and new evaluation; it is not a harmless formatting adjustment.
 
 ```python
-new_value=1000-mean
-assert new_value==996 and mean==4
+new_value = 1000 - mean
+assert new_value == 996 and mean == 4
 ```
 
 **Expected:** transformed value996; fitted mean remains4.

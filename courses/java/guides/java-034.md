@@ -53,18 +53,56 @@ The core arithmetic needsno repository or clock. Isolating it makes domain bound
 import java.util.*;
 
 public class Main {
-    interface Catalog {java.util.OptionalLong unitPrice(String id) throws java.io.IOException;}
-    record Quote(String item,int quantity,long totalCents,java.time.Instant created){}
-    static long total(int quantity,long unitPrice){if(quantity<=0||unitPrice<0)throw new IllegalArgumentException("positive quantity and nonnegative price required");return Math.multiplyExact((long)quantity,unitPrice);}
-    record Service(Catalog catalog,java.util.function.Supplier<java.time.Instant> clock,java.util.function.Consumer<String> audit){
-        Service{Objects.requireNonNull(catalog);Objects.requireNonNull(clock);Objects.requireNonNull(audit);}
-        Quote quote(String id,int quantity) throws java.io.IOException {if(id==null||id.isBlank()||quantity<=0)throw new IllegalArgumentException("valid item and quantity required");long price=catalog.unitPrice(id).orElseThrow(() -> new NoSuchElementException("unknown item"));long amount=total(quantity,price);Quote result=new Quote(id,quantity,amount,clock.get());audit.accept("quoted:"+id);return result;}
-    }
-    public static void main(String[] args) throws Exception {
-        assert total(3,125)==375;boolean invalid=false;try{total(0,125);}catch(IllegalArgumentException expected){invalid=true;}assert invalid;
-    }
-}
 
+  interface Catalog {
+    java.util.OptionalLong unitPrice(String id) throws java.io.IOException;
+  }
+
+  record Quote(String item, int quantity, long totalCents, java.time.Instant created) {}
+
+  static long total(int quantity, long unitPrice) {
+    if (quantity <= 0 || unitPrice < 0) throw new IllegalArgumentException(
+      "positive quantity and nonnegative price required"
+    );
+    return Math.multiplyExact((long) quantity, unitPrice);
+  }
+
+  record Service(
+    Catalog catalog,
+    java.util.function.Supplier<java.time.Instant> clock,
+    java.util.function.Consumer<String> audit
+  ) {
+    Service {
+      Objects.requireNonNull(catalog);
+      Objects.requireNonNull(clock);
+      Objects.requireNonNull(audit);
+    }
+
+    Quote quote(String id, int quantity) throws java.io.IOException {
+      if (id == null || id.isBlank() || quantity <= 0) throw new IllegalArgumentException(
+        "valid item and quantity required"
+      );
+      long price = catalog
+        .unitPrice(id)
+        .orElseThrow(() -> new NoSuchElementException("unknown item"));
+      long amount = total(quantity, price);
+      Quote result = new Quote(id, quantity, amount, clock.get());
+      audit.accept("quoted:" + id);
+      return result;
+    }
+  }
+
+  public static void main(String[] args) throws Exception {
+    assert total(3, 125) == 375;
+    boolean invalid = false;
+    try {
+      total(0, 125);
+    } catch (IllegalArgumentException expected) {
+      invalid = true;
+    }
+    assert invalid;
+  }
+}
 ```
 
 **Expected:** 375 cents; nonpositive quantity rejected.
@@ -77,23 +115,66 @@ A fixed clock removes timing nondeterminism. The audit event is a local test dou
 import java.util.*;
 
 public class Main {
-    interface Catalog {java.util.OptionalLong unitPrice(String id) throws java.io.IOException;}
-    record Quote(String item,int quantity,long totalCents,java.time.Instant created){}
-    static long total(int quantity,long unitPrice){if(quantity<=0||unitPrice<0)throw new IllegalArgumentException("positive quantity and nonnegative price required");return Math.multiplyExact((long)quantity,unitPrice);}
-    record Service(Catalog catalog,java.util.function.Supplier<java.time.Instant> clock,java.util.function.Consumer<String> audit){
-        Service{Objects.requireNonNull(catalog);Objects.requireNonNull(clock);Objects.requireNonNull(audit);}
-        Quote quote(String id,int quantity) throws java.io.IOException {if(id==null||id.isBlank()||quantity<=0)throw new IllegalArgumentException("valid item and quantity required");long price=catalog.unitPrice(id).orElseThrow(() -> new NoSuchElementException("unknown item"));long amount=total(quantity,price);Quote result=new Quote(id,quantity,amount,clock.get());audit.accept("quoted:"+id);return result;}
-    }
-    public static void main(String[] args) throws Exception {
-        assert total(3,125)==375;boolean invalid=false;try{total(0,125);}catch(IllegalArgumentException expected){invalid=true;}assert invalid;
 
-        List<String> audit=new ArrayList<>();var instant=java.time.Instant.parse("2026-01-01T00:00:00Z");
-        Catalog catalog=id -> id.equals("item-a")?java.util.OptionalLong.of(125):java.util.OptionalLong.empty();
-        Service service=new Service(catalog,() -> instant,audit::add);Quote quote=service.quote("item-a",2);
-        assert quote.totalCents()==250 && quote.created().equals(instant) && audit.equals(List.of("quoted:item-a"));
+  interface Catalog {
+    java.util.OptionalLong unitPrice(String id) throws java.io.IOException;
+  }
+
+  record Quote(String item, int quantity, long totalCents, java.time.Instant created) {}
+
+  static long total(int quantity, long unitPrice) {
+    if (quantity <= 0 || unitPrice < 0) throw new IllegalArgumentException(
+      "positive quantity and nonnegative price required"
+    );
+    return Math.multiplyExact((long) quantity, unitPrice);
+  }
+
+  record Service(
+    Catalog catalog,
+    java.util.function.Supplier<java.time.Instant> clock,
+    java.util.function.Consumer<String> audit
+  ) {
+    Service {
+      Objects.requireNonNull(catalog);
+      Objects.requireNonNull(clock);
+      Objects.requireNonNull(audit);
     }
+
+    Quote quote(String id, int quantity) throws java.io.IOException {
+      if (id == null || id.isBlank() || quantity <= 0) throw new IllegalArgumentException(
+        "valid item and quantity required"
+      );
+      long price = catalog
+        .unitPrice(id)
+        .orElseThrow(() -> new NoSuchElementException("unknown item"));
+      long amount = total(quantity, price);
+      Quote result = new Quote(id, quantity, amount, clock.get());
+      audit.accept("quoted:" + id);
+      return result;
+    }
+  }
+
+  public static void main(String[] args) throws Exception {
+    assert total(3, 125) == 375;
+    boolean invalid = false;
+    try {
+      total(0, 125);
+    } catch (IllegalArgumentException expected) {
+      invalid = true;
+    }
+    assert invalid;
+
+    List<String> audit = new ArrayList<>();
+    var instant = java.time.Instant.parse("2026-01-01T00:00:00Z");
+    Catalog catalog = id ->
+      id.equals("item-a") ? java.util.OptionalLong.of(125) : java.util.OptionalLong.empty();
+    Service service = new Service(catalog, () -> instant, audit::add);
+    Quote quote = service.quote("item-a", 2);
+    assert quote.totalCents() == 250 &&
+    quote.created().equals(instant) &&
+    audit.equals(List.of("quoted:item-a"));
+  }
 }
-
 ```
 
 **Expected:** total250,time2026-01-01T00:00:00Z,oneauditevent.

@@ -14,9 +14,9 @@ A public manifest has exactly these required top-level fields:
   "package_version": "0.1.0",
   "protocol": 1,
   "build_id": "64 lowercase hexadecimal SHA256 characters",
-  "platform": {"os": "linux", "arch": "arm64"},
-  "binary": {"path": "/absolute/path/tmbad-worker", "sha256": "64hex"},
-  "engine": {"name": "TMBad", "version": "1.9.25", "source_sha256": "64hex"},
+  "platform": { "os": "linux", "arch": "arm64" },
+  "binary": { "path": "/absolute/path/tmbad-worker", "sha256": "64hex" },
+  "engine": { "name": "TMBad", "version": "1.9.25", "source_sha256": "64hex" },
   "models": []
 }
 ```
@@ -40,15 +40,23 @@ The native owner supplies the authoritative model descriptor in `--describe`:
   "fit_kind": "rows",
   "fit_fields": ["y"],
   "parameter_names": ["mu", "log_sigma"],
-  "parameter_bounds": [[null, null], [-20, 20]],
+  "parameter_bounds": [
+    [null, null],
+    [-20, 20]
+  ],
   "marginalization": "none",
   "random_dimension": 0,
   "ordered": false,
   "max_unit_rows": 256,
   "derivative_orders": [1, 2],
   "predict": {
-    "response": {"fields": [], "columns": ["mean", "sd"], "needs_history": false,
-                 "conditioning": "fitted parameters", "uncertainty": "observation only"}
+    "response": {
+      "fields": [],
+      "columns": ["mean", "sd"],
+      "needs_history": false,
+      "conditioning": "fitted parameters",
+      "uncertainty": "observation only"
+    }
   },
   "forecast": {}
 }

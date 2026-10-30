@@ -4,21 +4,9 @@
   "cases": [
     {
       "id": "orthogonal_lasso",
-      "names": [
-        "intercept",
-        "slope",
-        "nuisance"
-      ],
-      "lower": [
-        null,
-        null,
-        null
-      ],
-      "upper": [
-        null,
-        null,
-        null
-      ],
+      "names": ["intercept", "slope", "nuisance"],
+      "lower": [null, null, null],
+      "upper": [null, null, null],
       "gaussian": {},
       "l1": {
         "slope": 2,
@@ -29,21 +17,9 @@
     },
     {
       "id": "correlated_prior_l1",
-      "names": [
-        "intercept",
-        "slope",
-        "nuisance"
-      ],
-      "lower": [
-        null,
-        null,
-        null
-      ],
-      "upper": [
-        null,
-        null,
-        null
-      ],
+      "names": ["intercept", "slope", "nuisance"],
+      "lower": [null, null, null],
+      "upper": [null, null, null],
       "gaussian": {
         "slope": {
           "mean": 0.6,
@@ -58,21 +34,9 @@
     },
     {
       "id": "fixed_nuisance",
-      "names": [
-        "intercept",
-        "slope",
-        "nuisance"
-      ],
-      "lower": [
-        null,
-        null,
-        null
-      ],
-      "upper": [
-        null,
-        null,
-        null
-      ],
+      "names": ["intercept", "slope", "nuisance"],
+      "lower": [null, null, null],
+      "upper": [null, null, null],
       "gaussian": {
         "slope": {
           "mean": -0.2,
@@ -89,15 +53,9 @@
     },
     {
       "id": "positive_box_excludes_zero",
-      "names": [
-        "coefficient"
-      ],
-      "lower": [
-        1
-      ],
-      "upper": [
-        4
-      ],
+      "names": ["coefficient"],
+      "lower": [1],
+      "upper": [4],
       "gaussian": {},
       "l1": {
         "coefficient": 2
@@ -107,15 +65,9 @@
     },
     {
       "id": "negative_upper_box",
-      "names": [
-        "coefficient"
-      ],
-      "lower": [
-        -4
-      ],
-      "upper": [
-        -1
-      ],
+      "names": ["coefficient"],
+      "lower": [-4],
+      "upper": [-1],
       "gaussian": {},
       "l1": {
         "coefficient": 1
@@ -125,18 +77,9 @@
     },
     {
       "id": "all_fixed",
-      "names": [
-        "intercept",
-        "slope"
-      ],
-      "lower": [
-        null,
-        null
-      ],
-      "upper": [
-        null,
-        null
-      ],
+      "names": ["intercept", "slope"],
+      "lower": [null, null],
+      "upper": [null, null],
       "gaussian": {
         "intercept": {
           "mean": -0.5,
@@ -154,18 +97,9 @@
     },
     {
       "id": "nonzero_gaussian_center",
-      "names": [
-        "intercept",
-        "slope"
-      ],
-      "lower": [
-        null,
-        null
-      ],
-      "upper": [
-        null,
-        null
-      ],
+      "names": ["intercept", "slope"],
+      "lower": [null, null],
+      "upper": [null, null],
       "gaussian": {
         "slope": {
           "mean": 1.4,
@@ -178,18 +112,9 @@
     },
     {
       "id": "unequal_weight_mass",
-      "names": [
-        "first",
-        "second"
-      ],
-      "lower": [
-        null,
-        null
-      ],
-      "upper": [
-        null,
-        null
-      ],
+      "names": ["first", "second"],
+      "lower": [null, null],
+      "upper": [null, null],
       "gaussian": {
         "first": {
           "mean": -0.1,
@@ -205,15 +130,9 @@
     },
     {
       "id": "exact_threshold_zero",
-      "names": [
-        "coefficient"
-      ],
-      "lower": [
-        null
-      ],
-      "upper": [
-        null
-      ],
+      "names": ["coefficient"],
+      "lower": [null],
+      "upper": [null],
       "gaussian": {},
       "l1": {
         "coefficient": 1

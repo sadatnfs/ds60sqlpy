@@ -184,6 +184,16 @@ def test_release_jobs_target_linux_containers_and_contributor_tooling() -> None:
             assert "fetch-depth: 0" in workflow
             assert "docker_release.py promote" not in workflow
             assert "docker_release.py stage" not in workflow
+        elif path.name in {"verify-native-package.yml", "verify-reference-package.yml"}:
+            assert runners == ["${{ matrix.runner }}"]
+            assert "runner: ubuntu-24.04-arm" in workflow
+            assert "runner: ubuntu-24.04" in workflow
+            assert "workflow_dispatch:" in workflow and "  push:" not in workflow
+            assert "contents: read" in workflow and "contents: write" not in workflow
+            assert "shell: bash" in workflow and "--network=none" in workflow
+            assert "docker push" not in workflow and "--push" not in workflow
+            assert "setup-qemu" not in workflow
+            assert "if: always()" in workflow
         else:
             assert runners and set(runners) == {"ubuntu-latest"}, path.name
         assert "windows-latest" not in workflow and "macos-latest" not in workflow

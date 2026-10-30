@@ -221,7 +221,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <span class="syntax-tag">matchLabels</span><span class="syntax-punctuation">:</span>
       <span class="syntax-tag">app</span><span class="syntax-punctuation">:</span> hello
   <span class="syntax-tag">policyTypes</span><span class="syntax-punctuation">:</span>
-  <span class="syntax-punctuation">-</span> Ingress
+    <span class="syntax-punctuation">-</span> Ingress
 ---
 <span class="syntax-tag">apiVersion</span><span class="syntax-punctuation">:</span> networking.k8s.io/v1
 <span class="syntax-tag">kind</span><span class="syntax-punctuation">:</span> NetworkPolicy
@@ -232,15 +232,15 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <span class="syntax-tag">matchLabels</span><span class="syntax-punctuation">:</span>
       <span class="syntax-tag">app</span><span class="syntax-punctuation">:</span> hello
   <span class="syntax-tag">policyTypes</span><span class="syntax-punctuation">:</span>
-  <span class="syntax-punctuation">-</span> Ingress
+    <span class="syntax-punctuation">-</span> Ingress
   <span class="syntax-tag">ingress</span><span class="syntax-punctuation">:</span>
-  <span class="syntax-punctuation">-</span> <span class="syntax-tag">from</span><span class="syntax-punctuation">:</span>
-    <span class="syntax-punctuation">-</span> <span class="syntax-tag">podSelector</span><span class="syntax-punctuation">:</span>
-        <span class="syntax-tag">matchLabels</span><span class="syntax-punctuation">:</span>
-          <span class="syntax-tag">role</span><span class="syntax-punctuation">:</span> lesson-client
-    <span class="syntax-tag">ports</span><span class="syntax-punctuation">:</span>
-    <span class="syntax-punctuation">-</span> <span class="syntax-tag">protocol</span><span class="syntax-punctuation">:</span> TCP
-      <span class="syntax-tag">port</span><span class="syntax-punctuation">:</span> 8080</code></pre>
+    <span class="syntax-punctuation">-</span> <span class="syntax-tag">from</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-punctuation">-</span> <span class="syntax-tag">podSelector</span><span class="syntax-punctuation">:</span>
+            <span class="syntax-tag">matchLabels</span><span class="syntax-punctuation">:</span>
+              <span class="syntax-tag">role</span><span class="syntax-punctuation">:</span> lesson-client
+      <span class="syntax-tag">ports</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-punctuation">-</span> <span class="syntax-tag">protocol</span><span class="syntax-punctuation">:</span> TCP
+          <span class="syntax-tag">port</span><span class="syntax-punctuation">:</span> 8080</code></pre>
 <p><strong>Expected:</strong> Selected hello Pods allow same-namespace lesson-client TCP8080 traffic under the combined ingress rules.</p>
 <h4 id="worked-example-2-interpret-a-traffic-matrix">Worked example 2: Interpret a traffic matrix<a class="heading-anchor" href="#worked-example-2-interpret-a-traffic-matrix" aria-label="Link to this section">#</a></h4>
 <p>Synthetic before:allowed client success, other client success. After:allowed client success, other client bounded failure. Both target the same healthy Service and exact version route.</p>

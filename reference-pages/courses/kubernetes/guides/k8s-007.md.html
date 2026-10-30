@@ -220,9 +220,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-tag">selector</span><span class="syntax-punctuation">:</span>
     <span class="syntax-tag">app</span><span class="syntax-punctuation">:</span> hello
   <span class="syntax-tag">ports</span><span class="syntax-punctuation">:</span>
-  <span class="syntax-punctuation">-</span> <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> http
-    <span class="syntax-tag">port</span><span class="syntax-punctuation">:</span> 8080
-    <span class="syntax-tag">targetPort</span><span class="syntax-punctuation">:</span> http</code></pre>
+    <span class="syntax-punctuation">-</span> <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> http
+      <span class="syntax-tag">port</span><span class="syntax-punctuation">:</span> 8080
+      <span class="syntax-tag">targetPort</span><span class="syntax-punctuation">:</span> http</code></pre>
 <p><strong>Expected:</strong> Service port8080 routes to the Pod container port named http, which the fixture declares as8080.</p>
 <h4 id="worked-example-2-deduplicate-a-dual-family-observation">Worked example 2: Deduplicate a dual-family observation<a class="heading-anchor" href="#worked-example-2-deduplicate-a-dual-family-observation" aria-label="Link to this section">#</a></h4>
 <p>Synthetic slices contain [pod-a, pod-b] and [pod-a, pod-b]. The owned Ready Pod set is {pod-a, pod-b}. Four endpoint entries represent two unique eligible Pod identities.</p>

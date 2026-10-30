@@ -124,17 +124,24 @@ Packing introduces another independence boundary. Two examples in separate batch
 The first answer token 5 is predicted at the second input position. Masking based on input positions alone would easily exclude this target by mistake.
 
 ```python
+def prepare(prompt, answer, max_length):
+    if not prompt or not answer or max_length < 2:
+        raise ValueError("prompt and answer targets required")
+    if any(type(x) is not int or x < 0 for x in prompt + answer):
+        raise ValueError("nonnegative integer token IDs required")
+    sequence = (list(prompt) + list(answer))[:max_length]
+    inputs = sequence[:-1]
+    targets = sequence[1:]
+    labels = [
+        token if position >= len(prompt) else -100 for position, token in enumerate(targets, 1)
+    ]
+    if not any(x != -100 for x in labels):
+        raise ValueError("truncation removed answer targets")
+    return inputs, labels
 
-def prepare(prompt,answer,max_length):
-    if not prompt or not answer or max_length<2: raise ValueError('prompt and answer targets required')
-    if any(type(x) is not int or x<0 for x in prompt+answer): raise ValueError('nonnegative integer token IDs required')
-    sequence=(list(prompt)+list(answer))[:max_length]
-    inputs=sequence[:-1]; targets=sequence[1:]
-    labels=[token if position>=len(prompt) else -100 for position,token in enumerate(targets,1)]
-    if not any(x!=-100 for x in labels): raise ValueError('truncation removed answer targets')
-    return inputs,labels
-inputs,labels=prepare([1,2],[5,6,3],10)
-assert inputs==[1,2,5,6] and labels==[-100,5,6,3] and sum(x!=-100 for x in labels)==3
+
+inputs, labels = prepare([1, 2], [5, 6, 3], 10)
+assert inputs == [1, 2, 5, 6] and labels == [-100, 5, 6, 3] and sum(x != -100 for x in labels) == 3
 ```
 
 **Expected:** inputs[1, 2, 5, 6]; labels[-100, 5, 6, 3]; 3 active targets.
@@ -144,8 +151,8 @@ assert inputs==[1,2,5,6] and labels==[-100,5,6,3] and sum(x!=-100 for x in label
 The model sees the prompt through its forward computation even though prompt-prediction events are excluded from the supervised objective.
 
 ```python
-other_inputs,other_labels=prepare([8,9],[5,6,3],10)
-assert other_inputs[:2]==[8,9] and other_labels==labels
+other_inputs, other_labels = prepare([8, 9], [5, 6, 3], 10)
+assert other_inputs[:2] == [8, 9] and other_labels == labels
 ```
 
 **Expected:** prompt inputs change; answer labels remain 5, 6, 3.
@@ -155,9 +162,12 @@ assert other_inputs[:2]==[8,9] and other_labels==labels
 A mean loss over no supervised events is undefined. Silently retaining such rows can make a data pipeline appear larger without providing learning signal.
 
 ```python
-try: prepare([1,2],[],10)
-except ValueError: pass
-else: raise AssertionError('empty supervised answer accepted')
+try:
+    prepare([1, 2], [], 10)
+except ValueError:
+    pass
+else:
+    raise AssertionError("empty supervised answer accepted")
 ```
 
 **Expected:** ValueError for no answer targets.

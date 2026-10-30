@@ -112,7 +112,7 @@ public class Main {
       response.body().equals("{\"group\":\"A\",\"count\":2,\"total\":30}");
     }
 
-    // Exercise 3: Report an unknown validgroup
+    // Exercise 3: Report an unknown valid group
     try (
       DataServer server = new DataServer(repository);
       var client = java.net.http.HttpClient.newHttpClient()
@@ -121,7 +121,7 @@ public class Main {
       assert response.statusCode() == 404 && response.body().contains("not_found");
     }
 
-    // Exercise 4: Reject ambiguous ormalformedqueries
+    // Exercise 4: Reject ambiguous or malformed queries
     try (
       DataServer server = new DataServer(repository);
       var client = java.net.http.HttpClient.newHttpClient()
@@ -130,7 +130,7 @@ public class Main {
       assert send(client, server.uri("/summary?group=a"), "GET").statusCode() == 400;
     }
 
-    // Exercise 5: Reject unsupportedmethods andpathlookalikes
+    // Exercise 5: Reject unsupported methods andpathlookalikes
     try (
       DataServer server = new DataServer(repository);
       var client = java.net.http.HttpClient.newHttpClient()
@@ -139,7 +139,7 @@ public class Main {
       assert send(client, server.uri("/summary-extra?group=A"), "GET").statusCode() == 404;
     }
 
-    // Exercise 6: Preserve storage andclose theownedlistener
+    // Exercise 6: Preserve storage and close the owned listener
     List<Row> before = repository.rows();
     DataServer server = new DataServer(repository);
     server.close();

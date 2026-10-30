@@ -50,13 +50,12 @@ import java.util.*;
 
 public class Main {
 
-    public static void main(String[] args) throws Exception {
-        int whole = 7 / 2;
-        double fractional = 7 / 2.0;
-        assert whole == 3 && fractional == 3.5;
-    }
+  public static void main(String[] args) throws Exception {
+    int whole = 7 / 2;
+    double fractional = 7 / 2.0;
+    assert whole == 3 && fractional == 3.5;
+  }
 }
-
 ```
 
 **Expected:** integer 3 and double 3.5.
@@ -70,18 +69,17 @@ import java.util.*;
 
 public class Main {
 
-    public static void main(String[] args) throws Exception {
-        int whole = 7 / 2;
-        double fractional = 7 / 2.0;
-        assert whole == 3 && fractional == 3.5;
+  public static void main(String[] args) throws Exception {
+    int whole = 7 / 2;
+    double fractional = 7 / 2.0;
+    assert whole == 3 && fractional == 3.5;
 
-        long safe = (long) 50_000 * 50_000;
-        int wrapped = 50_000 * 50_000;
-        assert safe == 2_500_000_000L;
-        assert wrapped != safe;
-    }
+    long safe = (long) 50_000 * 50_000;
+    int wrapped = 50_000 * 50_000;
+    assert safe == 2_500_000_000L;
+    assert wrapped != safe;
+  }
 }
-
 ```
 
 **Expected:** 2500000000L;int product differs.

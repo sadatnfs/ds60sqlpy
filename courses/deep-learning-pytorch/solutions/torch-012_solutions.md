@@ -47,9 +47,23 @@ The question is: Use rows zero, e1, e2, e3, [1, 1, 1], [2, 1, 1] and target 2 a-
 The target formula is part of the fixture definition. The learner can inspect it without relying on an opaque downloaded dataset.
 
 ```python
-x=torch.tensor([[0.,0.,0.],[1.,0.,0.],[0.,1.,0.],[0.,0.,1.],[1.,1.,1.],[2.,1.,1.]],dtype=torch.float64)
-y=x@torch.tensor([[2.],[-1.],[1.]],dtype=torch.float64); train=[0,1,2,3]; test=[4,5]
-torch.testing.assert_close(y[:,0],torch.tensor([0.,2.,-1.,1.,2.,4.],dtype=torch.float64),atol=0,rtol=0)
+x = torch.tensor(
+    [
+        [0.0, 0.0, 0.0],
+        [1.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0],
+        [0.0, 0.0, 1.0],
+        [1.0, 1.0, 1.0],
+        [2.0, 1.0, 1.0],
+    ],
+    dtype=torch.float64,
+)
+y = x @ torch.tensor([[2.0], [-1.0], [1.0]], dtype=torch.float64)
+train = [0, 1, 2, 3]
+test = [4, 5]
+torch.testing.assert_close(
+    y[:, 0], torch.tensor([0.0, 2.0, -1.0, 1.0, 2.0, 4.0], dtype=torch.float64), atol=0, rtol=0
+)
 ```
 
 **Expected:** targets 0, 2, -1, 1, 2, 4.
@@ -63,8 +77,9 @@ The question is: Fit the constant from training targets and score the two holdou
 The baseline receives the same assessment rows as the model, but its constant is fitted only on training targets.
 
 ```python
-mean=y[train].mean(); baseline=((y[test]-mean)**2).mean()
-assert mean.item()==.5 and baseline.item()==7.25
+mean = y[train].mean()
+baseline = ((y[test] - mean) ** 2).mean()
+assert mean.item() == 0.5 and baseline.item() == 7.25
 ```
 
 **Expected:** mean.5; holdout MSE 7.25.
@@ -78,15 +93,22 @@ The question is: Initialize a bias-free 3-to-1Linear layer at zero and run 100 S
 The fixed budget is decided before assessment. A successful decrease demonstrates fitting on exposed data, not generalization by itself.
 
 ```python
-model=nn.Linear(3,1,bias=False,dtype=torch.float64)
-with torch.no_grad(): model.weight.zero_()
-optimizer=torch.optim.SGD(model.parameters(),lr=.1); initial=((model(x[train])-y[train])**2).mean().item(); curve=[]
+model = nn.Linear(3, 1, bias=False, dtype=torch.float64)
+with torch.no_grad():
+    model.weight.zero_()
+optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
+initial = ((model(x[train]) - y[train]) ** 2).mean().item()
+curve = []
 for _ in range(100):
-    optimizer.zero_grad(set_to_none=True); loss=((model(x[train])-y[train])**2).mean(); curve.append(loss.item()); loss.backward(); optimizer.step()
-assert len(curve)==100 and np.isfinite(curve).all() and curve[-1]<initial
-expected_weight=torch.tensor([[2.,-1.,1.]],dtype=torch.float64)*(1-.95**100)
-torch.testing.assert_close(model.weight,expected_weight,atol=1e-12,rtol=0)
-np.testing.assert_allclose([curve[0],curve[-1]],[1.5,1.5*.95**198],atol=1e-12,rtol=0)
+    optimizer.zero_grad(set_to_none=True)
+    loss = ((model(x[train]) - y[train]) ** 2).mean()
+    curve.append(loss.item())
+    loss.backward()
+    optimizer.step()
+assert len(curve) == 100 and np.isfinite(curve).all() and curve[-1] < initial
+expected_weight = torch.tensor([[2.0, -1.0, 1.0]], dtype=torch.float64) * (1 - 0.95**100)
+torch.testing.assert_close(model.weight, expected_weight, atol=1e-12, rtol=0)
+np.testing.assert_allclose([curve[0], curve[-1]], [1.5, 1.5 * 0.95**198], atol=1e-12, rtol=0)
 ```
 
 **Expected:** 100 finite updates; training loss decreases.
@@ -101,9 +123,13 @@ The score is specific to two authored holdout rows. Do not tune the learning rat
 
 ```python
 model.eval()
-with torch.no_grad(): train_error=((model(x[train])-y[train])**2).mean().item(); test_error=((model(x[test])-y[test])**2).mean().item()
-assert np.isfinite([train_error,test_error]).all() and test_error<baseline.item()
-np.testing.assert_allclose([train_error,test_error],[1.5*.95**200,10*.95**200],atol=1e-12,rtol=0)
+with torch.no_grad():
+    train_error = ((model(x[train]) - y[train]) ** 2).mean().item()
+    test_error = ((model(x[test]) - y[test]) ** 2).mean().item()
+assert np.isfinite([train_error, test_error]).all() and test_error < baseline.item()
+np.testing.assert_allclose(
+    [train_error, test_error], [1.5 * 0.95**200, 10 * 0.95**200], atol=1e-12, rtol=0
+)
 ```
 
 **Expected:** finite errors; holdout error below 7.25on this fixture.
@@ -117,8 +143,12 @@ The question is: Calculate the scalar first update directly from NumPy without u
 The pilot protects the update mechanism independently of the feature model. A low final error could otherwise conceal a compensating implementation mistake.
 
 ```python
-pilot=np.array([1.,2.,3.]); gradient=2*np.mean((-2*pilot)*pilot); updated=-.1*gradient
-np.testing.assert_allclose([updated,np.mean((updated*pilot-2*pilot)**2)],[28/15,56/675],atol=1e-12,rtol=0)
+pilot = np.array([1.0, 2.0, 3.0])
+gradient = 2 * np.mean((-2 * pilot) * pilot)
+updated = -0.1 * gradient
+np.testing.assert_allclose(
+    [updated, np.mean((updated * pilot - 2 * pilot) ** 2)], [28 / 15, 56 / 675], atol=1e-12, rtol=0
+)
 ```
 
 **Expected:** w28/15and loss \(\frac{56}{675}\).
@@ -132,8 +162,15 @@ The question is: Record split IDs, 100 steps, errors and the two-row limitation.
 The report should let a reviewer distinguish local software evidence from statistical reliability. A small successful fixture is a beginning, not a deployment certificate.
 
 ```python
-report={'train_ids':train,'test_ids':test,'steps':100,'train_mse':train_error,'test_mse':test_error,'limit':'two synthetic holdout rows'}
-assert not set(train)&set(test) and len(report['test_ids'])==2 and report['steps']==100
+report = {
+    "train_ids": train,
+    "test_ids": test,
+    "steps": 100,
+    "train_mse": train_error,
+    "test_mse": test_error,
+    "limit": "two synthetic holdout rows",
+}
+assert not set(train) & set(test) and len(report["test_ids"]) == 2 and report["steps"] == 100
 ```
 
 **Expected:** disjoint IDs; holdout count 2; explicit limited scope.

@@ -50,12 +50,13 @@ import java.util.*;
 
 public class Main {
 
-    public static void main(String[] args) throws Exception {
-        int[] original = {1, 2, 3}; int[] copy = Arrays.copyOf(original, original.length); copy[0] = 9;
-        assert original[0] == 1 && copy[0] == 9;
-    }
+  public static void main(String[] args) throws Exception {
+    int[] original = { 1, 2, 3 };
+    int[] copy = Arrays.copyOf(original, original.length);
+    copy[0] = 9;
+    assert original[0] == 1 && copy[0] == 9;
+  }
 }
-
 ```
 
 **Expected:** original starts 1; copy starts 9.
@@ -69,16 +70,17 @@ import java.util.*;
 
 public class Main {
 
-    public static void main(String[] args) throws Exception {
-        int[] original = {1, 2, 3}; int[] copy = Arrays.copyOf(original, original.length); copy[0] = 9;
-        assert original[0] == 1 && copy[0] == 9;
+  public static void main(String[] args) throws Exception {
+    int[] original = { 1, 2, 3 };
+    int[] copy = Arrays.copyOf(original, original.length);
+    copy[0] = 9;
+    assert original[0] == 1 && copy[0] == 9;
 
-        String text = "A\ud83d\ude42";
-        assert text.length() == 3;
-        assert text.codePointCount(0, text.length()) == 2;
-    }
+    String text = "A\ud83d\ude42";
+    assert text.length() == 3;
+    assert text.codePointCount(0, text.length()) == 2;
+  }
 }
-
 ```
 
 **Expected:** length3 code units;2 code points.

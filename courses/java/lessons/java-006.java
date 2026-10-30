@@ -3,8 +3,8 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     // Exercise 1: Retain sequence multiplicity
-    // Create a mutable listred,blue,red and appendgreen.
-    // Expected: size4;red appears twice.
+    // Create a mutable list red,blue,red and append green.
+    // Expected: size 4; red appears twice.
 
     // Exercise 2: Count with a map
     // Count each color withMap.merge.
@@ -12,7 +12,7 @@ public class Main {
 
     // Exercise 3: Inspect set insertion
     // Insertred twice into a HashSet and inspect return values.
-    // Expected: firsttrue,secondfalse,size1.
+    // Expected: first true,second false,size1.
 
     // Exercise 4: Create deterministic output order
     // Sort the count-map keys before presenting them.

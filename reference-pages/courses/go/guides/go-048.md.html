@@ -260,8 +260,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>err <span class="syntax-operator">==</span> <span class="syntax-keyword">nil</span> <span class="syntax-operator">&amp;&amp;</span> s<span class="syntax-punctuation">.</span>Current <span class="syntax-operator">==</span> <span class="syntax-number">3</span> <span class="syntax-operator">&amp;&amp;</span> s<span class="syntax-punctuation">.</span>Writes <span class="syntax-operator">==</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;converge&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The count becomes 3 with one write.</p>
 <p>The mutation is justified by a current difference under a verified identity.</p>
 <h4 id="worked-example-2-repeat-without-duplicate-writes">Worked example 2: Repeat without duplicate writes<a class="heading-anchor" href="#worked-example-2-repeat-without-duplicate-writes" aria-label="Link to this section">#</a></h4>
@@ -317,8 +316,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>reconcileCap<span class="syntax-punctuation">(</span>context<span class="syntax-punctuation">.</span>Background<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">&amp;</span>s<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;u1&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-keyword">nil</span> <span class="syntax-operator">&amp;&amp;</span> s<span class="syntax-punctuation">.</span>Writes <span class="syntax-operator">==</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;idempotent&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Only the first call writes.</p>
 <p>Repeated notification is normal. Converged state should remain a no-op.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>

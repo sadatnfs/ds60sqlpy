@@ -3,15 +3,15 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     // Exercise 1: Use a FIFO queue
-    // Adda,b,c to anArrayDeque and remove from the front.
+    // Add a,b,c to an ArrayDeque and remove from the front.
     // Expected: a,b,c order.
 
     // Exercise 2: Use a LIFO stack
-    // Push1,2,3 onto aDeque andpop all values.
+    // Push1,2,3 onto a Deque and pop all values.
     // Expected: 3,2,1.
 
     // Exercise 3: Poll a priority queue
-    // Insert5,1,4,2 and repeatedlypoll.
+    // Insert5,1,4,2 and repeatedly poll.
     // Expected: 1,2,4,5.
 
     // Exercise 4: Count linear-search work
@@ -24,7 +24,7 @@ public class Main {
 
     // Exercise 6: Handle empty removal explicitly
     // CompareDeque.pollFirst withremoveFirst on an empty queue.
-    // Expected: poll returnsnull;remove throwsNoSuchElementException.
+    // Expected: poll returns null; remove throws NoSuchElementException.
     System.out.println("Implement and check the six exercises in your saved copy.");
   }
 }

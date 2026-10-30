@@ -48,7 +48,7 @@ import tempfile
 
 
 def stream_clean_csv(path: Path) -> Iterator[dict[str, str]]:
-    '''Yield normalized valid rows; skip rows missing name or status.'''
+    """Yield normalized valid rows; skip rows missing name or status."""
 
     with path.open(encoding="utf-8", newline="") as handle:
         for row in csv.DictReader(handle):
@@ -64,10 +64,7 @@ with tempfile.TemporaryDirectory() as temporary:
     folder = Path(temporary)
     source = folder / "rows.csv"
     source.write_text(
-        "name,status\n"
-        "Ada,ACTIVE\n"
-        "Lin,inactive\n"
-        "Grace,active\n",
+        "name,status\nAda,ACTIVE\nLin,inactive\nGrace,active\n",
         encoding="utf-8",
     )
     stream = stream_clean_csv(source)
@@ -108,7 +105,7 @@ def active(
     rows: Iterable[dict[str, str]],
     audit: dict[str, int],
 ) -> Iterator[dict[str, str]]:
-    '''Map row dictionaries to accepted rows; audit other outcomes.'''
+    """Map row dictionaries to accepted rows; audit other outcomes."""
 
     for row in rows:
         if not row.get("name") or not row.get("status"):
@@ -121,16 +118,14 @@ def active(
 
 
 def add_label(rows: Iterable[dict[str, str]]) -> Iterator[dict[str, str]]:
-    '''Map one accepted row to one copied row with a display label.'''
+    """Map one accepted row to one copied row with a display label."""
 
     for row in rows:
         yield {**row, "label": row["name"].title()}
 
 
-def batch(
-    rows: Iterable[dict[str, str]], size: int
-) -> Iterator[tuple[dict[str, str], ...]]:
-    '''Map a row stream to ordered tuples of at most ``size`` rows.'''
+def batch(rows: Iterable[dict[str, str]], size: int) -> Iterator[tuple[dict[str, str], ...]]:
+    """Map a row stream to ordered tuples of at most ``size`` rows."""
 
     if size <= 0:
         raise ValueError("size must be positive")
@@ -159,9 +154,7 @@ assert [[row["label"] for row in rows] for rows in result] == [
 ]
 assert audit == {"accepted": 3, "filtered": 1, "quarantined": 1}
 assert len(fixture) == sum(audit.values())
-assert [row["name"] for rows in result for row in rows] == [
-    "ada", "grace", "guido"
-]
+assert [row["name"] for rows in result for row in rows] == ["ada", "grace", "guido"]
 
 try:
     list(batch([], 0))

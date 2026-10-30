@@ -100,22 +100,19 @@ These worked excerpts come from `sql/postgres-60day/day20_first_last_value.sql`.
 ### Example 1
 
 ```sql
-SELECT o.customer_id,
-       o.order_id,
-       o.order_date,
-       o.total_amount,
-       FIRST_VALUE(o.total_amount) OVER (
-         PARTITION BY o.customer_id
-         ORDER BY o.order_date, o.order_id
-         ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
-       ) AS first_order_amount,
-       LAST_VALUE(o.total_amount) OVER (
-         PARTITION BY o.customer_id
-         ORDER BY o.order_date, o.order_id
-         ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
-       ) AS last_order_amount
-FROM orders o
-ORDER BY o.customer_id, o.order_date, o.order_id
+SELECT
+  o.customer_id,
+  o.order_id,
+  o.order_date,
+  o.total_amount,
+  FIRST_VALUE(o.total_amount) OVER (PARTITION BY o.customer_id ORDER BY o.order_date, o.order_id ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS first_order_amount,
+  LAST_VALUE(o.total_amount) OVER (PARTITION BY o.customer_id ORDER BY o.order_date, o.order_id ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS last_order_amount
+FROM
+  orders o
+ORDER BY
+  o.customer_id,
+  o.order_date,
+  o.order_id
 LIMIT 100;
 ```
 
@@ -127,20 +124,25 @@ LIMIT 100;
 
 ```sql
 WITH per_cust AS (
-  SELECT o.customer_id,
-         o.order_id,
-         o.order_date,
-         o.total_amount,
-         FIRST_VALUE(o.total_amount) OVER (
-           PARTITION BY o.customer_id
-           ORDER BY o.order_date, o.order_id
-           ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
-         ) AS first_amt
-  FROM orders o
+  SELECT
+    o.customer_id,
+    o.order_id,
+    o.order_date,
+    o.total_amount,
+    FIRST_VALUE(o.total_amount) OVER (PARTITION BY o.customer_id ORDER BY o.order_date,
+      o.order_id ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS first_amt
+  FROM
+    orders o
 )
-SELECT *, ROUND(total_amount - first_amt, 2) AS delta_from_first
-FROM per_cust
-ORDER BY customer_id, order_date, order_id
+SELECT
+  *,
+  ROUND(total_amount - first_amt, 2) AS delta_from_first
+FROM
+  per_cust
+ORDER BY
+  customer_id,
+  order_date,
+  order_id
 LIMIT 100;
 ```
 

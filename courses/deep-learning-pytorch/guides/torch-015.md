@@ -75,17 +75,31 @@ import numpy as np
 import torch
 from torch import nn
 from torch.nn import functional as F
+
+
 def collate(sequences):
-    if not sequences or any(len(sequence)==0 for sequence in sequences): raise ValueError('nonempty sequences required')
-    if any(isinstance(token,(bool,np.bool_)) or not isinstance(token,(int,np.integer)) or not 0<=int(token)<2**63 for sequence in sequences for token in sequence): raise ValueError('nonnegative int64 token IDs required')
-    lengths=torch.tensor([len(sequence) for sequence in sequences],dtype=torch.long); batch=torch.zeros((len(sequences),int(lengths.max())),dtype=torch.long)
-    for row,sequence in enumerate(sequences): batch[row,:len(sequence)]=torch.tensor(sequence)
-    return batch,lengths
-dataset=torch.utils.data.TensorDataset(torch.arange(5),torch.arange(1,6,dtype=torch.float32))
-loader=torch.utils.data.DataLoader(dataset,batch_size=2,shuffle=False,num_workers=0)
-batches=list(loader)
-assert [len(ids) for ids,values in batches]==[2,2,1]
-assert torch.cat([ids for ids,values in batches]).tolist()==[0,1,2,3,4]
+    if not sequences or any(len(sequence) == 0 for sequence in sequences):
+        raise ValueError("nonempty sequences required")
+    if any(
+        isinstance(token, (bool, np.bool_))
+        or not isinstance(token, (int, np.integer))
+        or not 0 <= int(token) < 2**63
+        for sequence in sequences
+        for token in sequence
+    ):
+        raise ValueError("nonnegative int64 token IDs required")
+    lengths = torch.tensor([len(sequence) for sequence in sequences], dtype=torch.long)
+    batch = torch.zeros((len(sequences), int(lengths.max())), dtype=torch.long)
+    for row, sequence in enumerate(sequences):
+        batch[row, : len(sequence)] = torch.tensor(sequence)
+    return batch, lengths
+
+
+dataset = torch.utils.data.TensorDataset(torch.arange(5), torch.arange(1, 6, dtype=torch.float32))
+loader = torch.utils.data.DataLoader(dataset, batch_size=2, shuffle=False, num_workers=0)
+batches = list(loader)
+assert [len(ids) for ids, values in batches] == [2, 2, 1]
+assert torch.cat([ids for ids, values in batches]).tolist() == [0, 1, 2, 3, 4]
 ```
 
 **Expected:** sizes 2, 2, 1 and IDs 0..4 exactly once.
@@ -95,8 +109,8 @@ assert torch.cat([ids for ids,values in batches]).tolist()==[0,1,2,3,4]
 The policy changes the effective epoch population. It may be useful for fixed shapes, but it must not be described as an identical traversal.
 
 ```python
-dropped=list(torch.utils.data.DataLoader(dataset,batch_size=2,drop_last=True,num_workers=0))
-assert len(dropped)==2 and torch.cat([ids for ids,values in dropped]).tolist()==[0,1,2,3]
+dropped = list(torch.utils.data.DataLoader(dataset, batch_size=2, drop_last=True, num_workers=0))
+assert len(dropped) == 2 and torch.cat([ids for ids, values in dropped]).tolist() == [0, 1, 2, 3]
 ```
 
 **Expected:** two batches; ID 4 omitted.
@@ -107,10 +121,14 @@ A new generator recreates the starting state. Reusing one already-consumed gener
 
 ```python
 def order(seed):
-    generator=torch.Generator().manual_seed(seed)
-    batches=torch.utils.data.DataLoader(dataset,batch_size=2,shuffle=True,generator=generator,num_workers=0)
-    return torch.cat([ids for ids,values in batches]).tolist()
-assert order(7)==order(7) and sorted(order(7))==list(range(5))
+    generator = torch.Generator().manual_seed(seed)
+    batches = torch.utils.data.DataLoader(
+        dataset, batch_size=2, shuffle=True, generator=generator, num_workers=0
+    )
+    return torch.cat([ids for ids, values in batches]).tolist()
+
+
+assert order(7) == order(7) and sorted(order(7)) == list(range(5))
 ```
 
 **Expected:** same permutation; all five IDs retained.

@@ -17,11 +17,13 @@ from pydantic import BaseModel
 
 app = FastAPI()
 
+
 class Payload(BaseModel):
     x: float
     y: float
 
-@app.post('/predict')
+
+@app.post("/predict")
 def predict(payload: Payload) -> dict[str, float]:
     # placeholder: sum as a toy 'model'
     return {"pred": payload.x + payload.y}
@@ -63,7 +65,7 @@ def health() -> dict[str, str]:
 # Add this before CMD. Python is already present in python:3.12-slim, so the
 # check needs no curl package and uses no shell-specific operators.
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-  CMD ["python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2).read()"]
+    CMD ["python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2).read()"]
 ```
 Explanation
 - During the start period, failed probes do not count toward the retry threshold
@@ -96,7 +98,7 @@ COPY --chown=appuser:appuser app.py .
 USER appuser
 EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-  CMD ["python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2).read()"]
+    CMD ["python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2).read()"]
 CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
 ```
 Notes

@@ -246,8 +246,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>v<span class="syntax-punctuation">.</span>Value<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;interface dispatch&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Calling Value returns 3.</p>
 <p>The concrete type satisfies the interface without declaring that relationship. The caller depends only on the method contract.</p>
 <h4 id="worked-example-2-mutate-through-a-method">Worked example 2: Mutate through a method<a class="heading-anchor" href="#worked-example-2-mutate-through-a-method" aria-label="Link to this section">#</a></h4>
@@ -290,8 +289,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>c<span class="syntax-punctuation">.</span>N <span class="syntax-operator">==</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;pointer receiver&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Its value becomes 5.</p>
 <p>The language can take the address of this addressable variable for the method call. The pointer receiver makes the mutation effective on the original value.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>

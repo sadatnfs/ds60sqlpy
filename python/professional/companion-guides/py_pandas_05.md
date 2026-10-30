@@ -111,9 +111,7 @@ independent presence mask, then establish the desired final order yourself.
 ```python
 import pandas as pd
 
-keys = pd.MultiIndex.from_tuples(
-    [("north", "flow"), ("south", "flow")], names=["site", "metric"]
-)
+keys = pd.MultiIndex.from_tuples([("north", "flow"), ("south", "flow")], names=["site", "metric"])
 left = pd.Series([10, 30], index=keys)
 right = pd.Series([20, 5], index=keys[::-1])
 by_label = left - right
@@ -134,9 +132,7 @@ does not prove the pairing was correct. Inspect at least one coordinate by hand.
 ### Worked example 2: Unknown values and absent coordinates look alike
 
 ```python
-raw = pd.DataFrame(
-    {"site": ["north", "north", "south"], "metric": ["flow", "temp", "flow"]}
-)
+raw = pd.DataFrame({"site": ["north", "north", "south"], "metric": ["flow", "temp", "flow"]})
 raw["value"] = pd.array([0, pd.NA, 7], dtype="Float64")
 observed = raw.set_index(["site", "metric"], verify_integrity=True)["value"]
 wide = observed.unstack("metric")

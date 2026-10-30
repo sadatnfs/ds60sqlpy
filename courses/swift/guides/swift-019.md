@@ -45,21 +45,24 @@ The associated type relationship survives through the generic function.
 ```swift
 import Foundation
 
-protocol Producer { associatedtype Item; func produce() -> Item }
+protocol Producer {
+  associatedtype Item
+  func produce() -> Item
+}
 struct IntegerSource: Producer { func produce() -> Int { 7 } }
 func read<P: Producer>(_ producer: P) -> P.Item { producer.produce() }
 func makeLabels() -> some Sequence<String> { ["a", "b"] }
 
 @main
 struct LessonMain {
-    static func main() async throws {
-        do {
-            let source = IntegerSource()
-            let value: Int = read(source)
-            precondition(value == 7)
-        }
-        print("swift-019: passed")
+  static func main() async throws {
+    do {
+      let source = IntegerSource()
+      let value: Int = read(source)
+      precondition(value == 7)
     }
+    print("swift-019: passed")
+  }
 }
 ```
 
@@ -72,20 +75,23 @@ The function selects one underlying result type while exposing its element relat
 ```swift
 import Foundation
 
-protocol Producer { associatedtype Item; func produce() -> Item }
+protocol Producer {
+  associatedtype Item
+  func produce() -> Item
+}
 struct IntegerSource: Producer { func produce() -> Int { 7 } }
 func read<P: Producer>(_ producer: P) -> P.Item { producer.produce() }
 func makeLabels() -> some Sequence<String> { ["a", "b"] }
 
 @main
 struct LessonMain {
-    static func main() async throws {
-        do {
-            let labels = makeLabels()
-            precondition(Array(labels) == ["a", "b"])
-        }
-        print("swift-019: passed")
+  static func main() async throws {
+    do {
+      let labels = makeLabels()
+      precondition(Array(labels) == ["a", "b"])
     }
+    print("swift-019: passed")
+  }
 }
 ```
 

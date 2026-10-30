@@ -131,7 +131,8 @@ def test_reader_renders_notebooks_and_sql_as_html_not_raw_downloads() -> None:
     literal_source = "".join(first_code) if isinstance(first_code, list) else first_code
     assert literal_source.strip() in _visible_text(python_reader)
     assert 'class="source-code language-sql"' in sql_reader
-    assert "SELECT customer_id" in _visible_text(sql_reader)
+    literal_sql = catalog.resolve(catalog.get("sql-01").lesson_path).read_text()
+    assert literal_sql.strip() in _visible_text(sql_reader)
     assert "psql -X -v ON_ERROR_STOP=1" in sql_reader
     assert "./classroom" in sql_reader
     assert "START_DOCKER_CLASSROOM.cmd" in sql_reader
@@ -413,6 +414,11 @@ def test_rendered_references_cover_recursive_local_markdown_and_sql_links() -> N
     assert reference_relative_path("README.md") in expected
     assert reference_relative_path("docs/lesson-readers.md") in expected
     assert reference_relative_path("docs/setup/windows.md") in expected
+    catalog_reference = reference_relative_path("docker/classroom-images.tsv")
+    assert catalog_reference in expected
+    assert (REPO_ROOT / "docker/classroom-images.tsv").read_text().strip() in _visible_text(
+        expected[catalog_reference]
+    )
     assert reference_relative_path("sql/professional/fixtures/migrations/cleanup.sql") in expected
     assert reference_drift(expected, repo_root=REPO_ROOT) == []
 

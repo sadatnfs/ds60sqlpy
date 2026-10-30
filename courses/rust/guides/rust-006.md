@@ -43,13 +43,13 @@ Read the operations in dependency order. Record which values exist before each l
 The loop changes only its accumulator, not the source ownership.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let values = vec![2, 4, 6];
         let mut total = 0;
-        for value in &values { total += value; }
+        for value in &values {
+            total += value;
+        }
         assert_eq!(total, 12);
         assert_eq!(values.len(), 3);
     }
@@ -65,8 +65,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 Position stops at the first matching element rather than returning the last repeated match.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let values = [3, 8, 8];

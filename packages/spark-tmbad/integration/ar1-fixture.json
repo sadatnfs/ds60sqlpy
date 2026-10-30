@@ -1,20 +1,15 @@
 {
-  "fit_fields": [
-    "time",
-    "y"
-  ],
+  "fit_fields": ["time", "y"],
   "fit_options": {
     "batch_rows": 64,
     "function_tolerance": 0.0,
-    "gradient_tolerance": 1e-05,
+    "gradient_tolerance": 1e-5,
     "max_iterations": 200,
     "max_line_search": 40
   },
   "forecast_cases": [
     {
-      "fields": [
-        "time"
-      ],
+      "fields": ["time"],
       "history_rows": [
         {
           "row_id": 0,
@@ -137,9 +132,7 @@
           "y": 1.11391067769
         }
       ],
-      "order_columns": [
-        "time"
-      ],
+      "order_columns": ["time"],
       "rows": [
         {
           "row_id": 1000,
@@ -160,13 +153,9 @@
       "target": "conditional_history"
     },
     {
-      "fields": [
-        "time"
-      ],
+      "fields": ["time"],
       "history_rows": [],
-      "order_columns": [
-        "time"
-      ],
+      "order_columns": ["time"],
       "rows": [
         {
           "row_id": 2000,
@@ -187,31 +176,15 @@
       "target": "stationary_new_series"
     }
   ],
-  "generating_parameters": [
-    0.4,
-    0.618381313574,
-    -1.0498221245
-  ],
-  "group_columns": [
-    "series"
-  ],
-  "id_columns": [
-    "row_id"
-  ],
-  "initial_parameters": [
-    0.3,
-    0.309519604203,
-    -0.69314718056
-  ],
+  "generating_parameters": [0.4, 0.618381313574, -1.0498221245],
+  "group_columns": ["series"],
+  "id_columns": ["row_id"],
+  "initial_parameters": [0.3, 0.309519604203, -0.69314718056],
   "model_id": "ar1",
-  "order_columns": [
-    "time"
-  ],
+  "order_columns": ["time"],
   "prediction_cases": [
     {
-      "fields": [
-        "lag"
-      ],
+      "fields": ["lag"],
       "history_rows": [],
       "order_columns": [],
       "rows": [

@@ -209,9 +209,7 @@ import pandas as pd
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
-train = pd.DataFrame(
-    {"city": ["SF", "NY", "SF"], "age": [20.0, 40.0, 30.0]}
-)
+train = pd.DataFrame({"city": ["SF", "NY", "SF"], "age": [20.0, 40.0, 30.0]})
 preprocessor = ColumnTransformer(
     [
         ("category", OneHotEncoder(handle_unknown="ignore"), ["city"]),

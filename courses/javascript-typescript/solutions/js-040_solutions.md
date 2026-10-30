@@ -31,8 +31,11 @@ Task: POST item A with value 2, then GET the list.
 The assertions cross the real transport boundary. A typed or pure handler result alone would not check serialization, headers, routing or socket cleanup.
 
 ```javascript
-await withService(async context => {
-  const created = await request(context, '/items', { method: 'POST', body: JSON.stringify({ id: 'A', value: 2 }) });
+await withService(async (context) => {
+  const created = await request(context, '/items', {
+    method: 'POST',
+    body: JSON.stringify({ id: 'A', value: 2 }),
+  });
   assert.equal(created.status, 201);
   assert.deepEqual(await created.json(), { id: 'A', value: 2 });
   const listed = await request(context, '/items');
@@ -52,7 +55,7 @@ Task: Send malformed JSON and a wrong-shaped object, then inspect the repository
 The failure is atomic relative to the in-memory mutation. No partial record is inserted before validation finishes.
 
 ```javascript
-await withService(async context => {
+await withService(async (context) => {
   for (const body of ['{broken', JSON.stringify({ id: 'A', value: 'wrong' })]) {
     const response = await request(context, '/items', { method: 'POST', body });
     assert.equal(response.status, 400);
@@ -73,9 +76,17 @@ Task: Create A with value 2, then try A with value 9.
 A duplicate business identifier is not an instruction to overwrite. The explicit conflict status preserves both the domain invariant and a diagnosable client outcome.
 
 ```javascript
-await withService(async context => {
-  await (await request(context, '/items', { method: 'POST', body: JSON.stringify({ id: 'A', value: 2 }) })).text();
-  const duplicate = await request(context, '/items', { method: 'POST', body: JSON.stringify({ id: 'A', value: 9 }) });
+await withService(async (context) => {
+  await (
+    await request(context, '/items', {
+      method: 'POST',
+      body: JSON.stringify({ id: 'A', value: 2 }),
+    })
+  ).text();
+  const duplicate = await request(context, '/items', {
+    method: 'POST',
+    body: JSON.stringify({ id: 'A', value: 9 }),
+  });
   assert.equal(duplicate.status, 409);
   assert.deepEqual(await duplicate.json(), { error: 'duplicate_id' });
   assert.deepEqual(await (await request(context, '/items')).json(), [{ id: 'A', value: 2 }]);
@@ -93,11 +104,17 @@ Task: Send 513 body bytes, then a text/plain payload.
 Representation size and representation format are separate boundaries. A JSON parser should not be used as a substitute for either policy.
 
 ```javascript
-await withService(async context => {
+await withService(async (context) => {
   const large = await request(context, '/items', { method: 'POST', body: 'x'.repeat(513) });
-  assert.equal(large.status, 413); await large.text();
-  const wrongType = await request(context, '/items', { method: 'POST', body: '{}', headers: { 'content-type': 'text/plain' } });
-  assert.equal(wrongType.status, 415); await wrongType.text();
+  assert.equal(large.status, 413);
+  await large.text();
+  const wrongType = await request(context, '/items', {
+    method: 'POST',
+    body: '{}',
+    headers: { 'content-type': 'text/plain' },
+  });
+  assert.equal(wrongType.status, 415);
+  await wrongType.text();
 });
 ```
 
@@ -112,11 +129,13 @@ Task: Request an absent path and DELETE on the item route.
 A method is part of endpoint semantics. Returning one generic status would remove information needed by a client or operator to diagnose the request.
 
 ```javascript
-await withService(async context => {
+await withService(async (context) => {
   const missing = await request(context, '/missing');
-  assert.equal(missing.status, 404); await missing.text();
+  assert.equal(missing.status, 404);
+  await missing.text();
   const wrongMethod = await request(context, '/items', { method: 'DELETE' });
-  assert.equal(wrongMethod.status, 405); await wrongMethod.text();
+  assert.equal(wrongMethod.status, 405);
+  await wrongMethod.text();
 });
 ```
 
@@ -132,13 +151,18 @@ The event records only selected metadata. Cleanup is observed after the helper c
 
 ```javascript
 let owned;
-await withService(async context => {
+await withService(async (context) => {
   owned = context.server;
   const response = await request(context, '/health');
   const id = response.headers.get('x-request-id');
   assert.deepEqual(await response.json(), { status: 'ready' });
   assert.equal(context.events[0].requestId, id);
-  assert.deepEqual(Object.keys(context.events[0]).sort(), ['method', 'requestId', 'route', 'status']);
+  assert.deepEqual(Object.keys(context.events[0]).sort(), [
+    'method',
+    'requestId',
+    'route',
+    'status',
+  ]);
   assert.equal(context.events[0].status, 200);
 });
 assert.equal(owned.listening, false);

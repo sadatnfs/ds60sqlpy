@@ -31,7 +31,7 @@ If at throws unexpectedly, compare the index with size, not capacity. If a sanit
 ## Worked example 1
 
 ```cpp
-assert(checked_at({2,4},1)==4);
+assert(checked_at({2, 4}, 1) == 4);
 ```
 
 Expected: Index 1 selects 4.
@@ -39,7 +39,10 @@ Expected: Index 1 selects 4.
 ## Worked example 2
 
 ```cpp
-try { checked_at({2,4},2); } catch(const std::out_of_range&) { /* expected */ }
+try {
+  checked_at({2, 4}, 2);
+} catch (const std::out_of_range &) { /* expected */
+}
 ```
 
 Expected: Checked access rejects index 2 instead of invoking unchecked access.

@@ -140,10 +140,20 @@ jobs:
           wheels=("$RUNNER_TEMP/native-install/wheels/"*.whl)
           test "${#wheels[@]}" -eq 1
           test -f "${wheels[0]}"
+          tar -czf "$REPORTS/native-installation.tar.gz" -C "$RUNNER_TEMP/native-install" .
           python "$PACKAGE/integration/run.py" --image "$IMAGE" \
             --wheel "${wheels[0]}" \
             --native-install "$RUNNER_TEMP/native-install" --output "$REPORTS/compose" --timeout 1200 \
             > "$REPORTS/compose.log" 2>&1
+      - name: Transfer the private synthetic report to the artifact uploader
+        if: always()
+        run: |
+          report="$RUNNER_TEMP/native-evidence/python-new-models.json"
+          if test -e "$report"; then
+            test ! -L "$report"
+            test -f "$report"
+            sudo chown --no-dereference "$(id -u):$(id -g)" "$report"
+          fi
       - name: Preserve source-bound success and failure evidence
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9

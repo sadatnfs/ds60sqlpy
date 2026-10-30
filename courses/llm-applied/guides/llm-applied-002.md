@@ -116,23 +116,42 @@ The denominator and unit are known before division. This calculation is determin
 
 ```python
 import re
+
+
 def validate(value):
-    if not isinstance(value,dict): raise TypeError('object required')
-    if set(value)!={'visits','purchases','assignment_unit'}: raise ValueError('exact fields required')
-    if any(type(value[k]) is not int for k in ('visits','purchases')): raise TypeError('integer counts required')
-    if not 0<=value['purchases']<=value['visits']: raise ValueError('inconsistent counts')
-    if value['assignment_unit']!='account': raise ValueError('account assignment required')
+    if not isinstance(value, dict):
+        raise TypeError("object required")
+    if set(value) != {"visits", "purchases", "assignment_unit"}:
+        raise ValueError("exact fields required")
+    if any(type(value[k]) is not int for k in ("visits", "purchases")):
+        raise TypeError("integer counts required")
+    if not 0 <= value["purchases"] <= value["visits"]:
+        raise ValueError("inconsistent counts")
+    if value["assignment_unit"] != "account":
+        raise ValueError("account assignment required")
     return dict(value)
+
+
 def rate(record):
-    if record['visits']==0: raise ValueError('positive denominator required')
-    return record['purchases']/record['visits']
+    if record["visits"] == 0:
+        raise ValueError("positive denominator required")
+    return record["purchases"] / record["visits"]
+
+
 def extract(text):
-    match=re.fullmatch(r'Visits: (\d+); Purchases: (\d+); Unit: (account)',text)
-    if match is None: raise ValueError('unsupported source grammar')
-    result=validate({'visits':int(match[1]),'purchases':int(match[2]),'assignment_unit':match[3]})
-    return result,{name:match.span(i) for i,name in enumerate(['visits','purchases','assignment_unit'],1)}
-record=validate({'visits':10,'purchases':3,'assignment_unit':'account'})
-assert rate(record)==.3
+    match = re.fullmatch(r"Visits: (\d+); Purchases: (\d+); Unit: (account)", text)
+    if match is None:
+        raise ValueError("unsupported source grammar")
+    result = validate(
+        {"visits": int(match[1]), "purchases": int(match[2]), "assignment_unit": match[3]}
+    )
+    return result, {
+        name: match.span(i) for i, name in enumerate(["visits", "purchases", "assignment_unit"], 1)
+    }
+
+
+record = validate({"visits": 10, "purchases": 3, "assignment_unit": "account"})
+assert rate(record) == 0.3
 ```
 
 **Expected:** conversion rate 0.3.
@@ -142,9 +161,12 @@ assert rate(record)==.3
 A JSON parser cannot detect this domain contradiction. The validation rule catches a semantically invalid proposal even though its keys and primitive types are correct.
 
 ```python
-try: validate({'visits':2,'purchases':3,'assignment_unit':'account'})
-except ValueError: pass
-else: raise AssertionError('impossible counts accepted')
+try:
+    validate({"visits": 2, "purchases": 3, "assignment_unit": "account"})
+except ValueError:
+    pass
+else:
+    raise AssertionError("impossible counts accepted")
 ```
 
 **Expected:** ValueError for inconsistent counts.
@@ -154,10 +176,10 @@ else: raise AssertionError('impossible counts accepted')
 Offsets refer to the original source string. Normalizing text before saving offsets without a mapping would make citations point at the wrong characters.
 
 ```python
-text='Visits: 10; Purchases: 3; Unit: account'
-parsed,spans=extract(text)
-assert parsed==record
-assert text[slice(*spans['visits'])]=='10' and text[slice(*spans['purchases'])]=='3'
+text = "Visits: 10; Purchases: 3; Unit: account"
+parsed, spans = extract(text)
+assert parsed == record
+assert text[slice(*spans["visits"])] == "10" and text[slice(*spans["purchases"])] == "3"
 ```
 
 **Expected:** values 10 and 3; each span slices the original digits.

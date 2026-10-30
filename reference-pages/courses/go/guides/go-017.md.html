@@ -238,8 +238,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>err <span class="syntax-operator">==</span> <span class="syntax-keyword">nil</span> <span class="syntax-operator">&amp;&amp;</span> n <span class="syntax-operator">==</span> <span class="syntax-number">5</span> <span class="syntax-operator">&amp;&amp;</span> out<span class="syntax-punctuation">.</span>String<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;alpha&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;copy&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Five bytes are copied and output is alpha.</p>
 <p>The consumer depends on Reader and Writer behavior rather than a particular file or socket implementation.</p>
 <h4 id="worked-example-2-require-a-full-record">Worked example 2: Require a full record<a class="heading-anchor" href="#worked-example-2-require-a-full-record" aria-label="Link to this section">#</a></h4>
@@ -274,8 +273,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>n <span class="syntax-operator">==</span> <span class="syntax-number">2</span> <span class="syntax-operator">&amp;&amp;</span> err <span class="syntax-operator">==</span> io<span class="syntax-punctuation">.</span>ErrUnexpectedEOF<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;partial record&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Two bytes arrive and ErrUnexpectedEOF is returned.</p>
 <p>Partial data is useful evidence, but it is not a complete fixed-width record. Treating any positive n as completion would accept truncation.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>

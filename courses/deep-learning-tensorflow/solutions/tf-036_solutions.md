@@ -23,9 +23,11 @@ The question is: Create a float32 two-feature model with coefficient[2,-1] and s
 A known probe connects the serialized feature order to numerical behavior. Swapping features would change the prediction even if the model file remained readable.
 
 ```python
-weights=np.array([[2.],[-1.]],dtype='float32'); schema={'features':['a','b'],'dtype':'float32','width':2}
-model=tf.keras.Sequential([tf.keras.Input(shape=(2,)),tf.keras.layers.Dense(1,use_bias=False)]); model.layers[0].set_weights([weights])
-np.testing.assert_array_equal(model(np.array([[3,4]],dtype='float32')).numpy(),[[2]])
+weights = np.array([[2.0], [-1.0]], dtype="float32")
+schema = {"features": ["a", "b"], "dtype": "float32", "width": 2}
+model = tf.keras.Sequential([tf.keras.Input(shape=(2,)), tf.keras.layers.Dense(1, use_bias=False)])
+model.layers[0].set_weights([weights])
+np.testing.assert_array_equal(model(np.array([[3, 4]], dtype="float32")).numpy(), [[2]])
 ```
 
 **Expected:** probe[3,4] predicts2.
@@ -39,9 +41,12 @@ The question is: Hash train IDs[a,b] and test IDs[c,d] using canonical JSON.
 The canonical representation avoids a digest change caused only by dictionary key order. The explicit intersection check verifies a property that a hash alone cannot establish.
 
 ```python
-import hashlib,json
-split={'train':['a','b'],'test':['c','d']}; payload=json.dumps(split,sort_keys=True,separators=(',',':')).encode(); digest=hashlib.sha256(payload).hexdigest()
-assert not set(split['train'])&set(split['test']) and len(digest)==64
+import hashlib, json
+
+split = {"train": ["a", "b"], "test": ["c", "d"]}
+payload = json.dumps(split, sort_keys=True, separators=(",", ":")).encode()
+digest = hashlib.sha256(payload).hexdigest()
+assert not set(split["train"]) & set(split["test"]) and len(digest) == 64
 ```
 
 **Expected:** disjoint IDs and a64-character SHA256.
@@ -55,8 +60,11 @@ The question is: Change one test ID and compare the resulting digest.
 This control proves the check is sensitive to the field that matters. It does not authenticate an author or replace a trusted distribution mechanism.
 
 ```python
-changed={'train':['a','b'],'test':['c','e']}; other=hashlib.sha256(json.dumps(changed,sort_keys=True,separators=(',',':')).encode()).hexdigest()
-assert other!=digest
+changed = {"train": ["a", "b"], "test": ["c", "e"]}
+other = hashlib.sha256(
+    json.dumps(changed, sort_keys=True, separators=(",", ":")).encode()
+).hexdigest()
+assert other != digest
 ```
 
 **Expected:** digest differs.
@@ -70,8 +78,8 @@ The question is: Compare an incoming three-feature schema with the frozen two-fe
 A model might accept a tensor through unintended broadcasting or fail later with a low-level error. A named schema gate explains the problem before executing the wrong interpretation.
 
 ```python
-incoming={'features':['a','b','c'],'dtype':'float32','width':3}
-assert incoming!=schema
+incoming = {"features": ["a", "b", "c"], "dtype": "float32", "width": 3}
+assert incoming != schema
 ```
 
 **Expected:** schema gate isFalse.
@@ -85,9 +93,10 @@ The question is: Evaluate required gates with an unexecuted restart proof repres
 Unknown evidence is not a pass. The lesson deliberately avoids fabricating a restart receipt and shows that even three passing checks cannot compensate for a required failed fourth check.
 
 ```python
-gates={'prediction':True,'split':True,'restart':None,'schema':True}
+gates = {"prediction": True, "split": True, "restart": None, "schema": True}
 assert not all(value is True for value in gates.values())
-gates.update(restart=True,schema=False); assert not all(value is True for value in gates.values())
+gates.update(restart=True, schema=False)
+assert not all(value is True for value in gates.values())
 ```
 
 **Expected:** both decisionsno-go.
@@ -101,8 +110,14 @@ The question is: Construct a release record with previous artifact ID, holdout c
 A release record should explain what can be restored and why a candidate was blocked. A failed capstone check is useful evidence, not an invitation to bypass the gate.
 
 ```python
-record={'candidate':'v2','previous':'v1','holdout_count':2,'decision':'go' if all(v is True for v in gates.values()) else 'no-go','limits':['synthetic fixture only']}
-assert record['decision']=='no-go' and record['previous']=='v1' and record['holdout_count']==2
+record = {
+    "candidate": "v2",
+    "previous": "v1",
+    "holdout_count": 2,
+    "decision": "go" if all(v is True for v in gates.values()) else "no-go",
+    "limits": ["synthetic fixture only"],
+}
+assert record["decision"] == "no-go" and record["previous"] == "v1" and record["holdout_count"] == 2
 ```
 
 **Expected:** decisionno-go and previous artifactv1 retained.

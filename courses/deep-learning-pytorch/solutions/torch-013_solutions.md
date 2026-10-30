@@ -45,8 +45,9 @@ The question is: Apply sigmoid to-2, 0, 2.
 The monotonic transformation preserves ranking. A score of zero is the exact midpoint, which makes threshold ties explicit.
 
 ```python
-logits=torch.tensor([-2.,0.,2.],dtype=torch.float64); probabilities=torch.sigmoid(logits)
-assert probabilities[1].item()==.5 and bool(torch.all(torch.diff(probabilities)>0))
+logits = torch.tensor([-2.0, 0.0, 2.0], dtype=torch.float64)
+probabilities = torch.sigmoid(logits)
+assert probabilities[1].item() == 0.5 and bool(torch.all(torch.diff(probabilities) > 0))
 ```
 
 **Expected:** middle probability 0.5 and strictly increasing values.
@@ -60,8 +61,10 @@ The question is: Compute positive-label BCE at zero logit.
 A fifty-fifty prediction assigns probability one-half to the observed label. Its negative logarithm is an independent reference.
 
 ```python
-loss=F.binary_cross_entropy_with_logits(torch.tensor([0.],dtype=torch.float64),torch.tensor([1.],dtype=torch.float64))
-np.testing.assert_allclose(loss.item(),np.log(2),atol=1e-12,rtol=0)
+loss = F.binary_cross_entropy_with_logits(
+    torch.tensor([0.0], dtype=torch.float64), torch.tensor([1.0], dtype=torch.float64)
+)
+np.testing.assert_allclose(loss.item(), np.log(2), atol=1e-12, rtol=0)
 ```
 
 **Expected:** loss log 2 within 1e-12.
@@ -75,8 +78,8 @@ The question is: Compare thresholds.5 and.8 with>=ties.
 The middle decision changes while the model scores remain fixed. This is a policy change, not an optimizer update.
 
 ```python
-assert (probabilities>=.5).tolist()==[False,True,True]
-assert (probabilities>=.8).tolist()==[False,False,True]
+assert (probabilities >= 0.5).tolist() == [False, True, True]
+assert (probabilities >= 0.8).tolist() == [False, False, True]
 ```
 
 **Expected:** labels False, True, True versus False, False, True.
@@ -90,8 +93,10 @@ The question is: Feed probability 0.5 as though it were a logit and compare with
 The API interprets.5 as a score favoring the positive class. It cannot infer that the caller already transformed the score.
 
 ```python
-wrong=F.binary_cross_entropy_with_logits(torch.tensor([.5],dtype=torch.float64),torch.tensor([1.],dtype=torch.float64))
-assert abs(wrong.item()-np.log(2))>.1
+wrong = F.binary_cross_entropy_with_logits(
+    torch.tensor([0.5], dtype=torch.float64), torch.tensor([1.0], dtype=torch.float64)
+)
+assert abs(wrong.item() - np.log(2)) > 0.1
 ```
 
 **Expected:** incorrect loss differs by more than.1.
@@ -105,8 +110,11 @@ The question is: Use logits 1000, -1000 with labels 1, 0.
 The combined objective avoids an unstable `log(sigmoid())` round trip. This protects arithmetic but does not validate labels or shapes.
 
 ```python
-extreme=F.binary_cross_entropy_with_logits(torch.tensor([1000.,-1000.]),torch.tensor([1.,0.]),reduction='none')
-assert torch.isfinite(extreme).all(); torch.testing.assert_close(extreme,torch.zeros(2),atol=1e-6,rtol=0)
+extreme = F.binary_cross_entropy_with_logits(
+    torch.tensor([1000.0, -1000.0]), torch.tensor([1.0, 0.0]), reduction="none"
+)
+assert torch.isfinite(extreme).all()
+torch.testing.assert_close(extreme, torch.zeros(2), atol=1e-6, rtol=0)
 ```
 
 **Expected:** finite losses approximately 0.
@@ -120,8 +128,11 @@ The question is: Use truth 0, 1, 1 and compare the two decision policies.
 A decision error count is not the same as probability loss. A different cost matrix or population can favor a different threshold.
 
 ```python
-truth=torch.tensor([False,True,True])
-assert int(((probabilities>=.5)!=truth).sum())==0 and int(((probabilities>=.8)!=truth).sum())==1
+truth = torch.tensor([False, True, True])
+assert (
+    int(((probabilities >= 0.5) != truth).sum()) == 0
+    and int(((probabilities >= 0.8) != truth).sum()) == 1
+)
 ```
 
 **Expected:** 0 errors at.5 and 1 at.8.

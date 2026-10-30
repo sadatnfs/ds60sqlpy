@@ -78,9 +78,12 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-table=torch.tensor([[0.,0.],[1.,0.],[2.,2.],[3.,-1.]])
-embedding=nn.Embedding.from_pretrained(table,freeze=False,padding_idx=0); ids=torch.tensor([[2,3,0]]); values=embedding(ids); mask=ids!=0
-assert tuple(values.shape)==(1,3,2) and mask.tolist()==[[True,True,False]]
+table = torch.tensor([[0.0, 0.0], [1.0, 0.0], [2.0, 2.0], [3.0, -1.0]])
+embedding = nn.Embedding.from_pretrained(table, freeze=False, padding_idx=0)
+ids = torch.tensor([[2, 3, 0]])
+values = embedding(ids)
+mask = ids != 0
+assert tuple(values.shape) == (1, 3, 2) and mask.tolist() == [[True, True, False]]
 ```
 
 **Expected:** embedding shape 1, 3, 2; mask True, True, False.
@@ -91,8 +94,8 @@ assert tuple(values.shape)==(1,3,2) and mask.tolist()==[[True,True,False]]
 
 ```python
 values.sum().backward()
-assert torch.count_nonzero(embedding.weight.grad[0]).item()==0
-assert torch.count_nonzero(embedding.weight.grad[2:4]).item()>0
+assert torch.count_nonzero(embedding.weight.grad[0]).item() == 0
+assert torch.count_nonzero(embedding.weight.grad[2:4]).item() > 0
 ```
 
 **Expected:** padding row gradient zero; rows 2 and 3nonzero.
@@ -102,12 +105,16 @@ assert torch.count_nonzero(embedding.weight.grad[2:4]).item()>0
 The packed sequence ends after two observations. This direct comparison establishes what the final state means without relying on a padded output index.
 
 ```python
-gru=nn.GRU(2,2,batch_first=True)
+gru = nn.GRU(2, 2, batch_first=True)
 with torch.no_grad():
-    for parameter in gru.parameters(): parameter.fill_(.1)
-packed=nn.utils.rnn.pack_padded_sequence(values.detach(),torch.tensor([2]),batch_first=True,enforce_sorted=False)
-_,packed_state=gru(packed); _,prefix_state=gru(values.detach()[:,:2])
-torch.testing.assert_close(packed_state,prefix_state,atol=1e-6,rtol=0)
+    for parameter in gru.parameters():
+        parameter.fill_(0.1)
+packed = nn.utils.rnn.pack_padded_sequence(
+    values.detach(), torch.tensor([2]), batch_first=True, enforce_sorted=False
+)
+_, packed_state = gru(packed)
+_, prefix_state = gru(values.detach()[:, :2])
+torch.testing.assert_close(packed_state, prefix_state, atol=1e-6, rtol=0)
 ```
 
 **Expected:** final states match within 1e-6.

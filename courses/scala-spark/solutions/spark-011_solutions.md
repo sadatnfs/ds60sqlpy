@@ -75,13 +75,25 @@ Return ordered IDs with a known amount at least 10 and event_id less than 4. Com
 
 ```scala
 def combinedIds(frame: DataFrame): Seq[Long] = {
-  ids(frame.filter(col("amount_cents").isNotNull && (col("amount_cents") >= lit(10L)) && (col("event_id") < lit(4L))))
+  ids(
+    frame.filter(
+      col("amount_cents").isNotNull && (col("amount_cents") >= lit(10L)) && (col("event_id") < lit(
+        4L
+      ))
+    )
+  )
 }
 ```
 
 ```python
 def combined_ids(frame):
-    return ids(frame.filter(F.col("amount_cents").isNotNull() & (F.col("amount_cents") >= F.lit(10)) & (F.col("event_id") < F.lit(4))))
+    return ids(
+        frame.filter(
+            F.col("amount_cents").isNotNull()
+            & (F.col("amount_cents") >= F.lit(10))
+            & (F.col("event_id") < F.lit(4))
+        )
+    )
 ```
 
 The condition remains one composite engine expression rather than several driver-side decisions. Parentheses make comparison boundaries explicit in Python, avoiding precedence errors. Each excluded row challenges a different part of the predicate, so the singleton result is more informative than a test containing only positive qualifying rows.
@@ -96,7 +108,7 @@ Return a DataFrame with event_id and amount_plus_one=amount_cents+1, without fil
 
 ```scala
 def projected(frame: DataFrame): DataFrame = {
-  frame.select(col("event_id"),(col("amount_cents") + lit(1L)).as("amount_plus_one"))
+  frame.select(col("event_id"), (col("amount_cents") + lit(1L)).as("amount_plus_one"))
 }
 ```
 
@@ -118,14 +130,22 @@ Register a session-local temporary view and return ordered IDs from SQL SELECT/W
 ```scala
 def sqlIds(spark: SparkSession, frame: DataFrame): Seq[Long] = {
   frame.createOrReplaceTempView("ds60_spark_011_events")
-  ids(spark.sql("SELECT event_id FROM ds60_spark_011_events WHERE amount_cents > 10 ORDER BY event_id"))
+  ids(
+    spark.sql(
+      "SELECT event_id FROM ds60_spark_011_events WHERE amount_cents > 10 ORDER BY event_id"
+    )
+  )
 }
 ```
 
 ```python
 def sql_ids(spark, frame):
     frame.createOrReplaceTempView("ds60_spark_011_events")
-    return ids(spark.sql("SELECT event_id FROM ds60_spark_011_events WHERE amount_cents > 10 ORDER BY event_id"))
+    return ids(
+        spark.sql(
+            "SELECT event_id FROM ds60_spark_011_events WHERE amount_cents > 10 ORDER BY event_id"
+        )
+    )
 ```
 
 The temporary view provides a name for the same local DataFrame plan inside this SparkSession. SQL WHERE retains only true predicate rows and ORDER BY defines deterministic output. Both implementations can share a conceptual mistake, so each is checked against independent literal identities. This exercises Spark SQL syntax without opening PostgreSQL, JDBC or another service.

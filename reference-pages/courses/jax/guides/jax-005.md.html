@@ -214,13 +214,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The random call is a deterministic function of the key; it does not mutate the key.</p>
 <p><strong>Expected:</strong> Arrays agree exactly in this pinned process.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-string">&quot;&quot;&quot;Small offline JAX mechanism investigation; CPU evidence only.&quot;&quot;&quot;</span>
+
 <span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
 
 <span class="syntax-keyword">import</span> math
 <span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 <span class="syntax-keyword">import</span> jax
 <span class="syntax-keyword">import</span> jax.numpy <span class="syntax-keyword">as</span> jnp
-
 
 
 <span class="syntax-comment"># Choose precision before creating arrays; the usual JAX default is 32 bit.</span>
@@ -230,13 +230,16 @@ jax<span class="syntax-operator">.</span>config<span class="syntax-operator">.</
 <span class="syntax-keyword">def</span> <span class="syntax-function">close</span><span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-10</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">1e-10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span>atol<span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span>rtol<span class="syntax-punctuation">)</span>
 
+
 <span class="syntax-keyword">def</span> <span class="syntax-function">draw_step</span><span class="syntax-punctuation">(</span>key<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     next_key<span class="syntax-punctuation">,</span> sample_key <span class="syntax-operator">=</span> jax<span class="syntax-operator">.</span>random<span class="syntax-operator">.</span>split<span class="syntax-punctuation">(</span>key<span class="syntax-punctuation">)</span>
     <span class="syntax-keyword">return</span> next_key<span class="syntax-punctuation">,</span> jax<span class="syntax-operator">.</span>random<span class="syntax-operator">.</span>normal<span class="syntax-punctuation">(</span>sample_key<span class="syntax-punctuation">,</span> shape<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>jnp<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">def</span> <span class="syntax-function">same_key</span><span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">,</span> right<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
-    <span class="syntax-keyword">return</span> np<span class="syntax-operator">.</span>array_equal<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>jax<span class="syntax-operator">.</span>random<span class="syntax-operator">.</span>key_data<span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>jax<span class="syntax-operator">.</span>random<span class="syntax-operator">.</span>key_data<span class="syntax-punctuation">(</span>right<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> np<span class="syntax-operator">.</span>array_equal<span class="syntax-punctuation">(</span>
+        np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>jax<span class="syntax-operator">.</span>random<span class="syntax-operator">.</span>key_data<span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>jax<span class="syntax-operator">.</span>random<span class="syntax-operator">.</span>key_data<span class="syntax-punctuation">(</span>right<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
@@ -246,7 +249,7 @@ jax<span class="syntax-operator">.</span>config<span class="syntax-operator">.</
     b <span class="syntax-operator">=</span> jax<span class="syntax-operator">.</span>random<span class="syntax-operator">.</span>normal<span class="syntax-punctuation">(</span>key<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
     <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>array_equal<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
 
-    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">jax-005</span><span class="syntax-string">&#x27;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">: 1 asserted cases passed</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">jax-005</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&quot;</span><span class="syntax-string">: 1 asserted cases passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
@@ -256,13 +259,13 @@ jax<span class="syntax-operator">.</span>config<span class="syntax-operator">.</
 <p>State progression is visible and can be stored with the computation&#x27;s other state.</p>
 <p><strong>Expected:</strong> The key changes at each transition; replay from the original key reproduces the first draw.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-string">&quot;&quot;&quot;Small offline JAX mechanism investigation; CPU evidence only.&quot;&quot;&quot;</span>
+
 <span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
 
 <span class="syntax-keyword">import</span> math
 <span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 <span class="syntax-keyword">import</span> jax
 <span class="syntax-keyword">import</span> jax.numpy <span class="syntax-keyword">as</span> jnp
-
 
 
 <span class="syntax-comment"># Choose precision before creating arrays; the usual JAX default is 32 bit.</span>
@@ -272,13 +275,16 @@ jax<span class="syntax-operator">.</span>config<span class="syntax-operator">.</
 <span class="syntax-keyword">def</span> <span class="syntax-function">close</span><span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-10</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">1e-10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span>atol<span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span>rtol<span class="syntax-punctuation">)</span>
 
+
 <span class="syntax-keyword">def</span> <span class="syntax-function">draw_step</span><span class="syntax-punctuation">(</span>key<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     next_key<span class="syntax-punctuation">,</span> sample_key <span class="syntax-operator">=</span> jax<span class="syntax-operator">.</span>random<span class="syntax-operator">.</span>split<span class="syntax-punctuation">(</span>key<span class="syntax-punctuation">)</span>
     <span class="syntax-keyword">return</span> next_key<span class="syntax-punctuation">,</span> jax<span class="syntax-operator">.</span>random<span class="syntax-operator">.</span>normal<span class="syntax-punctuation">(</span>sample_key<span class="syntax-punctuation">,</span> shape<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>jnp<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">def</span> <span class="syntax-function">same_key</span><span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">,</span> right<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
-    <span class="syntax-keyword">return</span> np<span class="syntax-operator">.</span>array_equal<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>jax<span class="syntax-operator">.</span>random<span class="syntax-operator">.</span>key_data<span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>jax<span class="syntax-operator">.</span>random<span class="syntax-operator">.</span>key_data<span class="syntax-punctuation">(</span>right<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> np<span class="syntax-operator">.</span>array_equal<span class="syntax-punctuation">(</span>
+        np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>jax<span class="syntax-operator">.</span>random<span class="syntax-operator">.</span>key_data<span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>jax<span class="syntax-operator">.</span>random<span class="syntax-operator">.</span>key_data<span class="syntax-punctuation">(</span>right<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
@@ -290,7 +296,7 @@ jax<span class="syntax-operator">.</span>config<span class="syntax-operator">.</
     <span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> same_key<span class="syntax-punctuation">(</span>next_key<span class="syntax-punctuation">,</span> last_key<span class="syntax-punctuation">)</span>
     close<span class="syntax-punctuation">(</span>draw_step<span class="syntax-punctuation">(</span>key<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> first<span class="syntax-punctuation">)</span>
 
-    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">jax-005</span><span class="syntax-string">&#x27;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">: 1 asserted cases passed</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">jax-005</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&quot;</span><span class="syntax-string">: 1 asserted cases passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>

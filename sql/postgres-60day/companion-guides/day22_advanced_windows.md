@@ -101,19 +101,30 @@ These worked excerpts come from `sql/postgres-60day/day22_advanced_windows.sql`.
 
 ```sql
 WITH prod_rev AS (
-  SELECT p.product_id,
-         p.name,
-         p.category,
-         SUM(oi.unit_price*oi.quantity*(1-oi.discount)) AS revenue
-  FROM order_items oi
-  JOIN products p ON p.product_id = oi.product_id
-  GROUP BY p.product_id, p.name, p.category
+  SELECT
+    p.product_id,
+    p.name,
+    p.category,
+    SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS revenue
+  FROM
+    order_items oi
+    JOIN products p ON p.product_id = oi.product_id
+  GROUP BY
+    p.product_id,
+    p.name,
+    p.category
 )
-SELECT *,
+SELECT
+  *,
   RANK() OVER (PARTITION BY category ORDER BY revenue DESC) AS rank_in_category,
   RANK() OVER (ORDER BY revenue DESC) AS rank_overall
-FROM prod_rev
-ORDER BY category, rank_in_category, revenue DESC, product_id
+FROM
+  prod_rev
+ORDER BY
+  category,
+  rank_in_category,
+  revenue DESC,
+  product_id
 LIMIT 100;
 ```
 
@@ -124,17 +135,20 @@ LIMIT 100;
 ### Example 2
 
 ```sql
-SELECT o.customer_id,
-       o.order_id,
-       o.total_amount,
-       AVG(o.total_amount) OVER (PARTITION BY o.customer_id) AS avg_per_customer,
-       SUM(o.total_amount) OVER () AS total_revenue_all,
-       RANK() OVER (PARTITION BY o.customer_id ORDER BY o.total_amount DESC) AS order_value_rank
-FROM orders o
-ORDER BY o.customer_id,
-         order_value_rank,
-         o.total_amount DESC,
-         o.order_id
+SELECT
+  o.customer_id,
+  o.order_id,
+  o.total_amount,
+  AVG(o.total_amount) OVER (PARTITION BY o.customer_id) AS avg_per_customer,
+  SUM(o.total_amount) OVER () AS total_revenue_all,
+  RANK() OVER (PARTITION BY o.customer_id ORDER BY o.total_amount DESC) AS order_value_rank
+FROM
+  orders o
+ORDER BY
+  o.customer_id,
+  order_value_rank,
+  o.total_amount DESC,
+  o.order_id
 LIMIT 100;
 ```
 

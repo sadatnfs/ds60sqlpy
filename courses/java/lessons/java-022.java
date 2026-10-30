@@ -3,11 +3,11 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     // Exercise 1: Retrieve a bounded result
-    // Submit a callable returning42 and get it within2seconds.
-    // Expected: result42.
+    // Submit a callable returning 42 and get it within 2 seconds.
+    // Expected: result 42.
 
     // Exercise 2: Preserve task failure identity
-    // Submit a callable throwingIllegalArgumentException and inspectFuture.get.
+    // Submit a callable throwing IllegalArgumentException and inspectFuture.get.
     // Expected: ExecutionException cause isIllegalArgumentException.
 
     // Exercise 3: Separate wait timeout from task completion
@@ -24,7 +24,7 @@ public class Main {
 
     // Exercise 6: Enforce a bounded queue
     // Use one worker and one queue slot,hold the worker,fill the queue,then submit a third task.
-    // Expected: third submission rejected;admitted tasks finish after release.
+    // Expected: third submission rejected; admitted tasks finish after release.
     System.out.println("Implement and check the six exercises in your saved copy.");
   }
 }

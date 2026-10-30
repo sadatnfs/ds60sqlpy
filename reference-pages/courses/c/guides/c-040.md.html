@@ -261,8 +261,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
   puts<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Worked example checks passed.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
   <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The output is complete and required length is 5.</p>
 <p>Caller-owned storage avoids requiring the foreign runtime to guess a deallocator.</p>
 <h4 id="worked-example-2-report-insufficient-capacity">Worked example 2: Report insufficient capacity<a class="heading-anchor" href="#worked-example-2-report-insufficient-capacity" aria-label="Link to this section">#</a></h4>
@@ -316,8 +315,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
   puts<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Worked example checks passed.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
   <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The status is too-small and required length is 5.</p>
 <p>The API reports the required payload length and preserves output on failure. The caller must reserve one more byte for termination.</p>
 <h3 id="prediction-before-execution">Prediction before execution<a class="heading-anchor" href="#prediction-before-execution" aria-label="Link to this section">#</a></h3>

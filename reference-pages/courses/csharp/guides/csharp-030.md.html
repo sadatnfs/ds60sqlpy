@@ -230,27 +230,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-keyword">using</span> System.Text.RegularExpressions<span class="syntax-punctuation">;</span>
 <span class="syntax-keyword">using</span> System.Buffers<span class="syntax-punctuation">;</span>
 
-<span class="syntax-keyword">internal</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Program</span>
-<span class="syntax-punctuation">{</span>
-    <span class="syntax-keyword">private</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">Check</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">bool</span> condition<span class="syntax-punctuation">,</span> <span class="syntax-keyword">string</span> reason<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">internal</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Program</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">private</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">Check</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">bool</span> condition<span class="syntax-punctuation">,</span> <span class="syntax-keyword">string</span> reason<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>condition<span class="syntax-punctuation">)</span>
+      <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-function">InvalidOperationException</span><span class="syntax-punctuation">(</span>reason<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
+
+  <span class="syntax-keyword">private</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">async</span> Task <span class="syntax-function">Main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
     <span class="syntax-punctuation">{</span>
-        <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>condition<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> InvalidOperationException<span class="syntax-punctuation">(</span>reason<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      <span class="syntax-keyword">using</span> var source <span class="syntax-operator">=</span> <span class="syntax-keyword">new</span> CancellationTokenSource<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      source<span class="syntax-punctuation">.</span>Cancel<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      <span class="syntax-keyword">bool</span> observed <span class="syntax-operator">=</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">;</span>
+      <span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span>
+        source<span class="syntax-punctuation">.</span>Token<span class="syntax-punctuation">.</span>ThrowIfCancellationRequested<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      <span class="syntax-punctuation">}</span> <span class="syntax-keyword">catch</span> <span class="syntax-punctuation">(</span>OperationCanceledException<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+        observed <span class="syntax-operator">=</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">;</span>
+      <span class="syntax-punctuation">}</span>
+      Check<span class="syntax-punctuation">(</span>observed<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;cooperative observation&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
     <span class="syntax-punctuation">}</span>
-
-    <span class="syntax-keyword">private</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">async</span> Task <span class="syntax-function">Main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
-    <span class="syntax-punctuation">{</span>
-        <span class="syntax-punctuation">{</span>
-            <span class="syntax-keyword">using</span> var source <span class="syntax-operator">=</span> <span class="syntax-keyword">new</span> CancellationTokenSource<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-            source<span class="syntax-punctuation">.</span>Cancel<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-            <span class="syntax-keyword">bool</span> observed <span class="syntax-operator">=</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">;</span>
-            <span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span> source<span class="syntax-punctuation">.</span>Token<span class="syntax-punctuation">.</span>ThrowIfCancellationRequested<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span> <span class="syntax-keyword">catch</span> <span class="syntax-punctuation">(</span>OperationCanceledException<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> observed <span class="syntax-operator">=</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
-            Check<span class="syntax-punctuation">(</span>observed<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;cooperative observation&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-        <span class="syntax-punctuation">}</span>
-        Console<span class="syntax-punctuation">.</span>WriteLine<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;csharp-030: passed&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-        <span class="syntax-keyword">await</span> Task<span class="syntax-punctuation">.</span>CompletedTask<span class="syntax-punctuation">;</span>
-    <span class="syntax-punctuation">}</span>
-
-
+    Console<span class="syntax-punctuation">.</span>WriteLine<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;csharp-030: passed&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">await</span> Task<span class="syntax-punctuation">.</span>CompletedTask<span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The token check acknowledges cancellation.</p>
 <h4 id="example-b-cancel-waiting-while-work-remains-live">Example B: Cancel waiting while work remains live<a class="heading-anchor" href="#example-b-cancel-waiting-while-work-remains-live" aria-label="Link to this section">#</a></h4>
@@ -271,29 +271,31 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-keyword">using</span> System.Text.RegularExpressions<span class="syntax-punctuation">;</span>
 <span class="syntax-keyword">using</span> System.Buffers<span class="syntax-punctuation">;</span>
 
-<span class="syntax-keyword">internal</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Program</span>
-<span class="syntax-punctuation">{</span>
-    <span class="syntax-keyword">private</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">Check</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">bool</span> condition<span class="syntax-punctuation">,</span> <span class="syntax-keyword">string</span> reason<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">internal</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Program</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">private</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">Check</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">bool</span> condition<span class="syntax-punctuation">,</span> <span class="syntax-keyword">string</span> reason<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>condition<span class="syntax-punctuation">)</span>
+      <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-function">InvalidOperationException</span><span class="syntax-punctuation">(</span>reason<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
+
+  <span class="syntax-keyword">private</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">async</span> Task <span class="syntax-function">Main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
     <span class="syntax-punctuation">{</span>
-        <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>condition<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> InvalidOperationException<span class="syntax-punctuation">(</span>reason<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      <span class="syntax-keyword">var</span> completion <span class="syntax-operator">=</span> <span class="syntax-keyword">new</span> TaskCompletionSource<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span><span class="syntax-punctuation">(</span>
+          TaskCreationOptions<span class="syntax-punctuation">.</span>RunContinuationsAsynchronously<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      <span class="syntax-keyword">using</span> var source <span class="syntax-operator">=</span> <span class="syntax-keyword">new</span> CancellationTokenSource<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      source<span class="syntax-punctuation">.</span>Cancel<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      <span class="syntax-keyword">bool</span> cancelled <span class="syntax-operator">=</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">;</span>
+      <span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span>
+        <span class="syntax-keyword">await</span> completion<span class="syntax-punctuation">.</span>Task<span class="syntax-punctuation">.</span>WaitAsync<span class="syntax-punctuation">(</span>source<span class="syntax-punctuation">.</span>Token<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      <span class="syntax-punctuation">}</span> <span class="syntax-keyword">catch</span> <span class="syntax-punctuation">(</span>OperationCanceledException<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+        cancelled <span class="syntax-operator">=</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">;</span>
+      <span class="syntax-punctuation">}</span>
+      Check<span class="syntax-punctuation">(</span>cancelled <span class="syntax-operator">&amp;&amp;</span> <span class="syntax-operator">!</span>completion<span class="syntax-punctuation">.</span>Task<span class="syntax-punctuation">.</span>IsCompleted<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;only the wait ended&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      completion<span class="syntax-punctuation">.</span>SetResult<span class="syntax-punctuation">(</span><span class="syntax-number">9</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      Check<span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> completion<span class="syntax-punctuation">.</span>Task <span class="syntax-operator">==</span> <span class="syntax-number">9</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;underlying result still arrives&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
     <span class="syntax-punctuation">}</span>
-
-    <span class="syntax-keyword">private</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">async</span> Task <span class="syntax-function">Main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
-    <span class="syntax-punctuation">{</span>
-        <span class="syntax-punctuation">{</span>
-            <span class="syntax-keyword">var</span> completion <span class="syntax-operator">=</span> <span class="syntax-keyword">new</span> TaskCompletionSource<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span><span class="syntax-punctuation">(</span>TaskCreationOptions<span class="syntax-punctuation">.</span>RunContinuationsAsynchronously<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-            <span class="syntax-keyword">using</span> var source <span class="syntax-operator">=</span> <span class="syntax-keyword">new</span> CancellationTokenSource<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> source<span class="syntax-punctuation">.</span>Cancel<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-            <span class="syntax-keyword">bool</span> cancelled <span class="syntax-operator">=</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">;</span>
-            <span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">await</span> completion<span class="syntax-punctuation">.</span>Task<span class="syntax-punctuation">.</span>WaitAsync<span class="syntax-punctuation">(</span>source<span class="syntax-punctuation">.</span>Token<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span> <span class="syntax-keyword">catch</span> <span class="syntax-punctuation">(</span>OperationCanceledException<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> cancelled <span class="syntax-operator">=</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
-            Check<span class="syntax-punctuation">(</span>cancelled <span class="syntax-operator">&amp;&amp;</span> <span class="syntax-operator">!</span>completion<span class="syntax-punctuation">.</span>Task<span class="syntax-punctuation">.</span>IsCompleted<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;only the wait ended&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-            completion<span class="syntax-punctuation">.</span>SetResult<span class="syntax-punctuation">(</span><span class="syntax-number">9</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-            Check<span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> completion<span class="syntax-punctuation">.</span>Task <span class="syntax-operator">==</span> <span class="syntax-number">9</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;underlying result still arrives&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-        <span class="syntax-punctuation">}</span>
-        Console<span class="syntax-punctuation">.</span>WriteLine<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;csharp-030: passed&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-        <span class="syntax-keyword">await</span> Task<span class="syntax-punctuation">.</span>CompletedTask<span class="syntax-punctuation">;</span>
-    <span class="syntax-punctuation">}</span>
-
-
+    Console<span class="syntax-punctuation">.</span>WriteLine<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;csharp-030: passed&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">await</span> Task<span class="syntax-punctuation">.</span>CompletedTask<span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The wait cancels, then the original task later completes with 9.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>

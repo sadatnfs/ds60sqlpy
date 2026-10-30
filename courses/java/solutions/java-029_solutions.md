@@ -27,9 +27,15 @@ Task: Open the fixture,inspect product metadata and count the two account rows.
 Metadata and query execution establish actualJDBCbehavior. A map pretending to be a database would not exercise driver loading,SQL parsing or transaction state.
 
 ```java
-try(java.sql.Connection connection=database()) {
-    assert connection.getMetaData().getDatabaseProductName().equals("H2") && connection.getAutoCommit();
-    try(var statement=connection.prepareStatement("SELECT COUNT(*) FROM accounts");var rows=statement.executeQuery()){assert rows.next() && rows.getInt(1)==2;}
+try (java.sql.Connection connection = database()) {
+  assert connection.getMetaData().getDatabaseProductName().equals("H2") &&
+  connection.getAutoCommit();
+  try (
+    var statement = connection.prepareStatement("SELECT COUNT(*) FROM accounts");
+    var rows = statement.executeQuery()
+  ) {
+    assert rows.next() && rows.getInt(1) == 2;
+  }
 }
 ```
 
@@ -44,9 +50,18 @@ Task: Query byname usingAlice andthenAlicequoteOR1=1-shaped text through the sam
 The driver receives the value separately from the query structure. The test uses a valid normal lookup as well as the adversarial-looking value so blanket rejection is not mistaken for correct binding.
 
 ```java
-try(java.sql.Connection connection=database();var statement=connection.prepareStatement("SELECT COUNT(*) FROM accounts WHERE name = ?")) {
-    statement.setString(1,"Alice");try(var rows=statement.executeQuery()){assert rows.next() && rows.getInt(1)==1;}
-    statement.setString(1,"Alice' OR '1'='1");try(var rows=statement.executeQuery()){assert rows.next() && rows.getInt(1)==0;}
+try (
+  java.sql.Connection connection = database();
+  var statement = connection.prepareStatement("SELECT COUNT(*) FROM accounts WHERE name = ?")
+) {
+  statement.setString(1, "Alice");
+  try (var rows = statement.executeQuery()) {
+    assert rows.next() && rows.getInt(1) == 1;
+  }
+  statement.setString(1, "Alice' OR '1'='1");
+  try (var rows = statement.executeQuery()) {
+    assert rows.next() && rows.getInt(1) == 0;
+  }
 }
 ```
 
@@ -61,10 +76,13 @@ Task: Disableauto-commit,move20cents fromaccount1to2,inspect intermediate balanc
 Both changes belong to the same transaction. The intermediate state is visible to its own connection,but rollback restores the original fixture.
 
 ```java
-try(java.sql.Connection connection=database()) {
-    connection.setAutoCommit(false);change(connection,1,-20);change(connection,2,20);
-    assert balance(connection,1)==80 && balance(connection,2)==70;connection.rollback();
-    assert balance(connection,1)==100 && balance(connection,2)==50;
+try (java.sql.Connection connection = database()) {
+  connection.setAutoCommit(false);
+  change(connection, 1, -20);
+  change(connection, 2, 20);
+  assert balance(connection, 1) == 80 && balance(connection, 2) == 70;
+  connection.rollback();
+  assert balance(connection, 1) == 100 && balance(connection, 2) == 50;
 }
 ```
 
@@ -79,9 +97,16 @@ Task: Transfer10cents,commit,and open another connection to the same owned memor
 The first connection remains open while the second reads,keeping this in-memory database alive. No global database name or ambient connection profile is used.
 
 ```java
-try(java.sql.Connection connection=database()) {
-    connection.setAutoCommit(false);change(connection,1,-10);change(connection,2,10);connection.commit();
-    try(var second=java.sql.DriverManager.getConnection(connection.getMetaData().getURL())){assert balance(second,1)==90 && balance(second,2)==60 && balance(second,1)+balance(second,2)==150;}
+try (java.sql.Connection connection = database()) {
+  connection.setAutoCommit(false);
+  change(connection, 1, -10);
+  change(connection, 2, 10);
+  connection.commit();
+  try (var second = java.sql.DriverManager.getConnection(connection.getMetaData().getURL())) {
+    assert balance(second, 1) == 90 &&
+    balance(second, 2) == 60 &&
+    balance(second, 1) + balance(second, 2) == 150;
+  }
 }
 ```
 
@@ -96,10 +121,16 @@ Task: Attempt tosubtract200frombalance100,catch the SQL integrity error,and roll
 The database enforces its own invariant even if application validation is missing. The transaction must be resolved explicitly after the failure rather than reused in an unknown state.
 
 ```java
-try(java.sql.Connection connection=database()) {
-    connection.setAutoCommit(false);boolean constraint=false;
-    try{change(connection,1,-200);}catch(java.sql.SQLException expected){constraint=expected.getSQLState()!=null && expected.getSQLState().startsWith("23");connection.rollback();}
-    assert constraint && balance(connection,1)==100;
+try (java.sql.Connection connection = database()) {
+  connection.setAutoCommit(false);
+  boolean constraint = false;
+  try {
+    change(connection, 1, -200);
+  } catch (java.sql.SQLException expected) {
+    constraint = expected.getSQLState() != null && expected.getSQLState().startsWith("23");
+    connection.rollback();
+  }
+  assert constraint && balance(connection, 1) == 100;
 }
 ```
 
@@ -114,9 +145,17 @@ Task: Use twoH2connections atREAD_COMMITTED;updateaccount1 without commit,read f
 This is an actual two-session observation for the preparedH2engine. Other engines or isolation levels can have different snapshot and locking behavior,so retain the database/version context.
 
 ```java
-try(java.sql.Connection first=database();var second=java.sql.DriverManager.getConnection(first.getMetaData().getURL())) {
-    first.setTransactionIsolation(java.sql.Connection.TRANSACTION_READ_COMMITTED);second.setTransactionIsolation(java.sql.Connection.TRANSACTION_READ_COMMITTED);first.setAutoCommit(false);
-    change(first,1,-5);assert balance(second,1)==100;first.commit();assert balance(second,1)==95;
+try (
+  java.sql.Connection first = database();
+  var second = java.sql.DriverManager.getConnection(first.getMetaData().getURL())
+) {
+  first.setTransactionIsolation(java.sql.Connection.TRANSACTION_READ_COMMITTED);
+  second.setTransactionIsolation(java.sql.Connection.TRANSACTION_READ_COMMITTED);
+  first.setAutoCommit(false);
+  change(first, 1, -5);
+  assert balance(second, 1) == 100;
+  first.commit();
+  assert balance(second, 1) == 95;
 }
 ```
 

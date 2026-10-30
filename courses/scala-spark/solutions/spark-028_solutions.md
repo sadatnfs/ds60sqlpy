@@ -12,13 +12,23 @@ Add reason using missing fact identity, negative known amount, then accepted pre
 
 ```scala
 def classifyFacts(raw: DataFrame): DataFrame = {
-  raw.withColumn("reason",when(col("fact_id").isNull,"missing_identity").when(col("amount") < 0L,"negative_amount").otherwise("accepted"))
+  raw.withColumn(
+    "reason",
+    when(col("fact_id").isNull, "missing_identity")
+      .when(col("amount") < 0L, "negative_amount")
+      .otherwise("accepted")
+  )
 }
 ```
 
 ```python
 def classify_facts(raw):
-    return raw.withColumn("reason",F.when(F.col("fact_id").isNull(),"missing_identity").when(F.col("amount")<0,"negative_amount").otherwise("accepted"))
+    return raw.withColumn(
+        "reason",
+        F.when(F.col("fact_id").isNull(), "missing_identity")
+        .when(F.col("amount") < 0, "negative_amount")
+        .otherwise("accepted"),
+    )
 ```
 
 The row-preserving ledger makes rejected records visible instead of dropping them inside a later join or filter. Its precedence produces one interpretable reason per source occurrence. Known-amount counts remain separate from accepted row counts, so allowingNULL measurements cannot silently be presented as complete observed revenue.
@@ -33,16 +43,19 @@ Keep approved dimension rows, require at most 100 rows and known unique keys, th
 
 ```scala
 def reviewDimension(raw: DataFrame): DataFrame = {
-  val reviewed = raw.filter(col("approved")).select("key","factor")
+  val reviewed = raw.filter(col("approved")).select("key", "factor")
   val rows = reviewed.limit(101).count()
-  require(rows <= 100L && reviewed.agg(countDistinct("key")).first().getLong(0) == rows,"Approved keys must be known,unique and bounded")
+  require(
+    rows <= 100L && reviewed.agg(countDistinct("key")).first().getLong(0) == rows,
+    "Approved keys must be known,unique and bounded"
+  )
   reviewed
 }
 ```
 
 ```python
 def review_dimension(raw):
-    reviewed = raw.filter(F.col("approved")).select("key","factor")
+    reviewed = raw.filter(F.col("approved")).select("key", "factor")
     rows = reviewed.limit(101).count()
     if rows > 100 or reviewed.agg(F.countDistinct("key")).first()[0] != rows:
         raise ValueError("Approved keys must be known,unique and bounded")
@@ -61,13 +74,17 @@ Build the ordinary equality join over accepted facts and reviewed dimension, pro
 
 ```scala
 def baselineProduct(facts: DataFrame, dimension: DataFrame): DataFrame = {
-  facts.join(dimension,Seq("key"),"inner").select("source_id","fact_id","key","amount","factor")
+  facts
+    .join(dimension, Seq("key"), "inner")
+    .select("source_id", "fact_id", "key", "amount", "factor")
 }
 ```
 
 ```python
 def baseline_product(facts, dimension):
-    return facts.join(dimension,on="key",how="inner").select("source_id","fact_id","key","amount","factor")
+    return facts.join(dimension, on="key", how="inner").select(
+        "source_id", "fact_id", "key", "amount", "factor"
+    )
 ```
 
 The per-key oracle checks more than the grand total. It detects a wrong factor mapping or shifted group population that could be obscured by compensating totals. Known counts expose the NULL measurement population, and the full accepted-identity count verifies one product row per accepted fact under the reviewed dimension contract.
@@ -82,13 +99,17 @@ Broadcast the reviewed dimension for the same equality join and projection. Pres
 
 ```scala
 def broadcastProduct(facts: DataFrame, dimension: DataFrame): DataFrame = {
-  facts.join(broadcast(dimension),Seq("key"),"inner").select("source_id","fact_id","key","amount","factor")
+  facts
+    .join(broadcast(dimension), Seq("key"), "inner")
+    .select("source_id", "fact_id", "key", "amount", "factor")
 }
 ```
 
 ```python
 def broadcast_product(facts, dimension):
-    return facts.join(F.broadcast(dimension),on="key",how="inner").select("source_id","fact_id","key","amount","factor")
+    return facts.join(F.broadcast(dimension), on="key", how="inner").select(
+        "source_id", "fact_id", "key", "amount", "factor"
+    )
 ```
 
 The candidate changes physical execution while retaining the same selected inputs, join condition and output fields. The symmetric bag comparison avoids a large driver collect and protects duplicate-sensitive identity semantics. A successful plan marker is meaningful only after these correctness checks; it does not certify safe memory use for an arbitrary larger dimension.
@@ -102,14 +123,24 @@ Return version, master, AQE and automatic broadcast threshold as named fields. A
 **Expected:** Spark 4.0.1, local[2], AQEfalse, threshold-1; key 0 frequency 1600 and others 100. Both runs expose actual nonempty exchange observations. No peak-memory or throughput value is invented.
 
 ```scala
-def configurationReceipt(spark: SparkSession): Map[String,String] = {
-  Map("version"->spark.version,"master"->spark.sparkContext.master,"aqe"->spark.conf.get("spark.sql.adaptive.enabled"),"automatic_broadcast"->spark.conf.get("spark.sql.autoBroadcastJoinThreshold"))
+def configurationReceipt(spark: SparkSession): Map[String, String] = {
+  Map(
+    "version" -> spark.version,
+    "master" -> spark.sparkContext.master,
+    "aqe" -> spark.conf.get("spark.sql.adaptive.enabled"),
+    "automatic_broadcast" -> spark.conf.get("spark.sql.autoBroadcastJoinThreshold")
+  )
 }
 ```
 
 ```python
 def configuration_receipt(spark):
-    return {"version":spark.version,"master":spark.sparkContext.master,"aqe":spark.conf.get("spark.sql.adaptive.enabled"),"automatic_broadcast":spark.conf.get("spark.sql.autoBroadcastJoinThreshold")}
+    return {
+        "version": spark.version,
+        "master": spark.sparkContext.master,
+        "aqe": spark.conf.get("spark.sql.adaptive.enabled"),
+        "automatic_broadcast": spark.conf.get("spark.sql.autoBroadcastJoinThreshold"),
+    }
 ```
 
 The packet makes configuration, skew, logical results and measured operator counters separately inspectable. The exchange maps belong to summary queries that actually ran; they are not counters read from an unexecuted fresh plan. The report deliberately leaves unmeasured peak memory and production throughput unspecified instead of filling them with guesses or local timing folklore.
@@ -124,15 +155,17 @@ Choose baseline or broadcast using an explicit Boolean switch over the same acce
 
 ```scala
 def chooseProduct(facts: DataFrame, dimension: DataFrame, useBroadcast: Boolean): DataFrame = {
-  if(useBroadcast) broadcastProduct(facts,dimension) else baselineProduct(facts,dimension)
+  if (useBroadcast) broadcastProduct(facts, dimension) else baselineProduct(facts, dimension)
 }
 ```
 
 ```python
 def choose_product(facts, dimension, use_broadcast):
-    if not isinstance(use_broadcast,bool):
+    if not isinstance(use_broadcast, bool):
         raise ValueError("Explicit Boolean strategy switch required")
-    return broadcast_product(facts,dimension) if use_broadcast else baseline_product(facts,dimension)
+    return (
+        broadcast_product(facts, dimension) if use_broadcast else baseline_product(facts, dimension)
+    )
 ```
 
 The rollback boundary is deliberately narrower than the business-data contract. It restores a known correct strategy while retaining acceptance and approved-dimension decisions. This makes an optimization reversible without reintroducing the data-quality defects that originally prevented trustworthy metrics. Production rollout would add representative resource and reliability qualification beyond this local capstone.

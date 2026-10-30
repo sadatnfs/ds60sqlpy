@@ -29,7 +29,12 @@ Task: Search a graph with two equal-length routes from A to D.
 Both two-edge routes are shortest. The implementation chooses the first discovered route rather than claiming the answer is mathematically unique.
 
 ```typescript
-const graph: Graph = new Map([['A', ['B', 'C']], ['B', ['D']], ['C', ['D']], ['D', []]]);
+const graph: Graph = new Map([
+  ['A', ['B', 'C']],
+  ['B', ['D']],
+  ['C', ['D']],
+  ['D', []],
+]);
 assert.deepEqual(shortestPath(graph, 'A', 'D'), ['A', 'B', 'D']);
 ```
 
@@ -59,7 +64,11 @@ Task: Search A to C through A-B-A cycles and check source-to-source.
 Marking on enqueue prevents repeated insertion through the cycle. The source begins discovered at distance zero.
 
 ```typescript
-const graph: Graph = new Map([['A', ['B']], ['B', ['A', 'C']], ['C', ['B']]]);
+const graph: Graph = new Map([
+  ['A', ['B']],
+  ['B', ['A', 'C']],
+  ['C', ['B']],
+]);
 assert.deepEqual(shortestPath(graph, 'A', 'C'), ['A', 'B', 'C']);
 assert.deepEqual(shortestPath(graph, 'A', 'A'), ['A']);
 ```
@@ -75,7 +84,17 @@ Task: Search a disconnected target, then supply a missing neighbor.
 No path is a valid answer for a well-formed graph. Missing vertices violate the input contract and are rejected even if source equals target.
 
 ```typescript
-assert.equal(shortestPath(new Map([['A', []], ['B', []]]), 'A', 'B'), undefined);
+assert.equal(
+  shortestPath(
+    new Map([
+      ['A', []],
+      ['B', []],
+    ]),
+    'A',
+    'B',
+  ),
+  undefined,
+);
 assert.throws(() => shortestPath(new Map([['A', ['missing']]]), 'A', 'A'), RangeError);
 ```
 

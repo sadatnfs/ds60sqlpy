@@ -433,23 +433,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These worked excerpts come from <code>sql/postgres-60day/day05_cross_self_joins.sql</code>. Use <strong>Whole SQL lesson (psql)</strong> in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared <code>psql</code> routes are described above.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> cats <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span> category <span class="syntax-keyword">FROM</span> products
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> ctries <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span> country <span class="syntax-keyword">FROM</span> customers
+  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span>
+    category
+  <span class="syntax-keyword">FROM</span>
+    products
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+ctries <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span>
+    country
+  <span class="syntax-keyword">FROM</span>
+    customers
 <span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> cats<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span> ctries<span class="syntax-punctuation">.</span>country
-<span class="syntax-keyword">FROM</span> cats <span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> ctries
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">;</span></code></pre>
+<span class="syntax-keyword">SELECT</span>
+  cats<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span>
+  ctries<span class="syntax-punctuation">.</span>country
+<span class="syntax-keyword">FROM</span>
+  cats
+  <span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> ctries
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  <span class="syntax-number">1</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-number">2</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 1: Start with <code>products</code>, and <code>customers</code> in <code>FROM</code>/<code>JOIN</code>. The final <code>SELECT</code> displays <code>category</code>, and <code>country</code>. <code>ORDER BY</code> determines presentation order. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 1 returns one row per <code>category</code>, and <code>country</code> with columns <code>category</code>, and <code>country</code> from <code>products</code>, and <code>customers</code>. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an <code>ORDER BY</code>, and inspect <code>NULL</code> only for columns this example can produce.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span> e<span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">AS</span> employee<span class="syntax-punctuation">,</span> m<span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">AS</span> manager
-<span class="syntax-keyword">FROM</span> employees e
-<span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> employees m <span class="syntax-keyword">ON</span> m<span class="syntax-punctuation">.</span>employee_id <span class="syntax-operator">=</span> e<span class="syntax-punctuation">.</span>manager_id
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> manager NULLS <span class="syntax-keyword">FIRST</span><span class="syntax-punctuation">,</span>
-         m<span class="syntax-punctuation">.</span>employee_id NULLS <span class="syntax-keyword">FIRST</span><span class="syntax-punctuation">,</span>
-         employee<span class="syntax-punctuation">,</span>
-         e<span class="syntax-punctuation">.</span>employee_id
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span>
+  e<span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">AS</span> employee<span class="syntax-punctuation">,</span>
+  m<span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">AS</span> manager
+<span class="syntax-keyword">FROM</span>
+  employees e
+  <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> employees m <span class="syntax-keyword">ON</span> m<span class="syntax-punctuation">.</span>employee_id <span class="syntax-operator">=</span> e<span class="syntax-punctuation">.</span>manager_id
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  manager NULLS <span class="syntax-keyword">FIRST</span><span class="syntax-punctuation">,</span>
+  m<span class="syntax-punctuation">.</span>employee_id NULLS <span class="syntax-keyword">FIRST</span><span class="syntax-punctuation">,</span>
+  employee<span class="syntax-punctuation">,</span>
+  e<span class="syntax-punctuation">.</span>employee_id
 <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">50</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 2: Start with <code>employees</code> in <code>FROM</code>/<code>JOIN</code>. The final <code>SELECT</code> displays <code>employee_id</code>, <code>employee</code>, and <code>manager</code>. <code>ORDER BY</code> determines presentation order and the final <code>LIMIT 50</code> caps displayed rows. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 2 returns one row per <code>employee_id</code>, capped at 50 rows with columns <code>employee_id</code>, <code>employee</code>, and <code>manager</code> from <code>employees</code>. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an <code>ORDER BY</code>, and inspect <code>NULL</code> only for columns this example can produce.</p>
@@ -754,14 +772,16 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><code>JOIN ... ON</code>: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span>
-       e<span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">AS</span> employee_name<span class="syntax-punctuation">,</span>
-       m<span class="syntax-punctuation">.</span>employee_id <span class="syntax-keyword">AS</span> manager_id<span class="syntax-punctuation">,</span>
-       m<span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">AS</span> manager_name
-<span class="syntax-keyword">FROM</span> employees <span class="syntax-keyword">AS</span> e
-<span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> employees <span class="syntax-keyword">AS</span> m
-  <span class="syntax-keyword">ON</span> m<span class="syntax-punctuation">.</span>employee_id <span class="syntax-operator">=</span> e<span class="syntax-punctuation">.</span>manager_id
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span>
+  e<span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">AS</span> employee_name<span class="syntax-punctuation">,</span>
+  m<span class="syntax-punctuation">.</span>employee_id <span class="syntax-keyword">AS</span> manager_id<span class="syntax-punctuation">,</span>
+  m<span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">AS</span> manager_name
+<span class="syntax-keyword">FROM</span>
+  employees <span class="syntax-keyword">AS</span> e
+  <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> employees <span class="syntax-keyword">AS</span> m <span class="syntax-keyword">ON</span> m<span class="syntax-punctuation">.</span>employee_id <span class="syntax-operator">=</span> e<span class="syntax-punctuation">.</span>manager_id
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One row per employee.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
@@ -785,13 +805,16 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><code>WHERE</code>: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span>
-       e<span class="syntax-punctuation">.</span>full_name
-<span class="syntax-keyword">FROM</span> employees <span class="syntax-keyword">AS</span> e
-<span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> employees <span class="syntax-keyword">AS</span> report
-  <span class="syntax-keyword">ON</span> report<span class="syntax-punctuation">.</span>manager_id <span class="syntax-operator">=</span> e<span class="syntax-punctuation">.</span>employee_id
-<span class="syntax-keyword">WHERE</span> report<span class="syntax-punctuation">.</span>employee_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span>
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span>
+  e<span class="syntax-punctuation">.</span>full_name
+<span class="syntax-keyword">FROM</span>
+  employees <span class="syntax-keyword">AS</span> e
+  <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> employees <span class="syntax-keyword">AS</span> report <span class="syntax-keyword">ON</span> report<span class="syntax-punctuation">.</span>manager_id <span class="syntax-operator">=</span> e<span class="syntax-punctuation">.</span>employee_id
+<span class="syntax-keyword">WHERE</span>
+  report<span class="syntax-punctuation">.</span>employee_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One row per leaf employee.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
@@ -817,20 +840,24 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> months <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> generate_series<span class="syntax-punctuation">(</span>
-           date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_DATE</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;5 months&#x27;</span><span class="syntax-punctuation">,</span>
-           date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_DATE</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
-           <span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;1 month&#x27;</span>
-         <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> month_start
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> categories <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span> e<span class="syntax-punctuation">.</span>category
-  <span class="syntax-keyword">FROM</span> expenses <span class="syntax-keyword">AS</span> e
+  <span class="syntax-keyword">SELECT</span>
+    generate_series<span class="syntax-punctuation">(</span>date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_DATE</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;5 months&#x27;</span><span class="syntax-punctuation">,</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_DATE</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;1 month&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> month_start
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+categories <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span>
+    e<span class="syntax-punctuation">.</span>category
+  <span class="syntax-keyword">FROM</span>
+    expenses <span class="syntax-keyword">AS</span> e
 <span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span>
-       m<span class="syntax-punctuation">.</span>month_start
-<span class="syntax-keyword">FROM</span> categories <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span>
-<span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> months <span class="syntax-keyword">AS</span> m
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span> m<span class="syntax-punctuation">.</span>month_start<span class="syntax-punctuation">;</span></code></pre>
+<span class="syntax-keyword">SELECT</span>
+  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span>
+  m<span class="syntax-punctuation">.</span>month_start
+<span class="syntax-keyword">FROM</span>
+  categories <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span>
+  <span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> months <span class="syntax-keyword">AS</span> m
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span>
+  m<span class="syntax-punctuation">.</span>month_start<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> Six rows per distinct expense category.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-3">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-3" aria-label="Link to this section">#</a></h5>
@@ -854,11 +881,14 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><code>JOIN ... ON</code>: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</li>
 </ul>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> months <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> generate_series<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">12</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> month_number
+  <span class="syntax-keyword">SELECT</span>
+    generate_series<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">12</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> month_number
 <span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> department_month_combinations
-<span class="syntax-keyword">FROM</span> departments <span class="syntax-keyword">AS</span> d
-<span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> months <span class="syntax-keyword">AS</span> m<span class="syntax-punctuation">;</span></code></pre>
+<span class="syntax-keyword">SELECT</span>
+  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> department_month_combinations
+<span class="syntax-keyword">FROM</span>
+  departments <span class="syntax-keyword">AS</span> d
+  <span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> months <span class="syntax-keyword">AS</span> m<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One row containing 72.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-4">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-4" aria-label="Link to this section">#</a></h5>
@@ -881,16 +911,18 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><code>JOIN ... ON</code>: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> left_employee<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">,</span>
-       left_employee<span class="syntax-punctuation">.</span>employee_id <span class="syntax-keyword">AS</span> first_employee_id<span class="syntax-punctuation">,</span>
-       right_employee<span class="syntax-punctuation">.</span>employee_id <span class="syntax-keyword">AS</span> second_employee_id
-<span class="syntax-keyword">FROM</span> employees <span class="syntax-keyword">AS</span> left_employee
-<span class="syntax-keyword">JOIN</span> employees <span class="syntax-keyword">AS</span> right_employee
-  <span class="syntax-keyword">ON</span> right_employee<span class="syntax-punctuation">.</span>department_id <span class="syntax-operator">=</span> left_employee<span class="syntax-punctuation">.</span>department_id
- <span class="syntax-keyword">AND</span> left_employee<span class="syntax-punctuation">.</span>employee_id <span class="syntax-operator">&lt;</span> right_employee<span class="syntax-punctuation">.</span>employee_id
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> left_employee<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">,</span>
-         left_employee<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span>
-         right_employee<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  left_employee<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">,</span>
+  left_employee<span class="syntax-punctuation">.</span>employee_id <span class="syntax-keyword">AS</span> first_employee_id<span class="syntax-punctuation">,</span>
+  right_employee<span class="syntax-punctuation">.</span>employee_id <span class="syntax-keyword">AS</span> second_employee_id
+<span class="syntax-keyword">FROM</span>
+  employees <span class="syntax-keyword">AS</span> left_employee
+  <span class="syntax-keyword">JOIN</span> employees <span class="syntax-keyword">AS</span> right_employee <span class="syntax-keyword">ON</span> right_employee<span class="syntax-punctuation">.</span>department_id <span class="syntax-operator">=</span> left_employee<span class="syntax-punctuation">.</span>department_id
+    <span class="syntax-keyword">AND</span> left_employee<span class="syntax-punctuation">.</span>employee_id <span class="syntax-operator">&lt;</span> right_employee<span class="syntax-punctuation">.</span>employee_id
+  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+    left_employee<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">,</span>
+    left_employee<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span>
+    right_employee<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One row per unordered same-department pair.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-5">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-5" aria-label="Link to this section">#</a></h5>
@@ -913,16 +945,17 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><code>JOIN ... ON</code>: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span>
-       e<span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">AS</span> employee_name<span class="syntax-punctuation">,</span>
-       manager<span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">AS</span> manager_name<span class="syntax-punctuation">,</span>
-       grandmanager<span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">AS</span> grandmanager_name
-<span class="syntax-keyword">FROM</span> employees <span class="syntax-keyword">AS</span> e
-<span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> employees <span class="syntax-keyword">AS</span> manager
-  <span class="syntax-keyword">ON</span> manager<span class="syntax-punctuation">.</span>employee_id <span class="syntax-operator">=</span> e<span class="syntax-punctuation">.</span>manager_id
-<span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> employees <span class="syntax-keyword">AS</span> grandmanager
-  <span class="syntax-keyword">ON</span> grandmanager<span class="syntax-punctuation">.</span>employee_id <span class="syntax-operator">=</span> manager<span class="syntax-punctuation">.</span>manager_id
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span>
+  e<span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">AS</span> employee_name<span class="syntax-punctuation">,</span>
+  manager<span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">AS</span> manager_name<span class="syntax-punctuation">,</span>
+  grandmanager<span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">AS</span> grandmanager_name
+<span class="syntax-keyword">FROM</span>
+  employees <span class="syntax-keyword">AS</span> e
+  <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> employees <span class="syntax-keyword">AS</span> manager <span class="syntax-keyword">ON</span> manager<span class="syntax-punctuation">.</span>employee_id <span class="syntax-operator">=</span> e<span class="syntax-punctuation">.</span>manager_id
+  <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> employees <span class="syntax-keyword">AS</span> grandmanager <span class="syntax-keyword">ON</span> grandmanager<span class="syntax-punctuation">.</span>employee_id <span class="syntax-operator">=</span> manager<span class="syntax-punctuation">.</span>manager_id
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One row per employee with up to two ancestor columns.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-6">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-6" aria-label="Link to this section">#</a></h5>

@@ -108,8 +108,8 @@ These worked excerpts come from `sql/professional/lessons/sql_test_01_contracts_
 
 ```sql
 CREATE TABLE pro_contract_test_lab.schema_migrations (
-    migration_id integer PRIMARY KEY,
-    migration_name text NOT NULL UNIQUE
+  migration_id integer PRIMARY KEY,
+  migration_name text NOT NULL UNIQUE
 );
 ```
 
@@ -121,9 +121,9 @@ CREATE TABLE pro_contract_test_lab.schema_migrations (
 
 ```sql
 CREATE TABLE pro_contract_test_lab.customers (
-    customer_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    customer_key text NOT NULL UNIQUE,
-    display_name text NOT NULL CHECK (btrim(display_name) <> '')
+  customer_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  customer_key text NOT NULL UNIQUE,
+  display_name text NOT NULL CHECK (btrim(display_name) <> '')
 );
 ```
 

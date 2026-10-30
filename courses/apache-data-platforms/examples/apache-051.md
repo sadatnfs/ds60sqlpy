@@ -14,8 +14,14 @@ order IDs 3 then 1; its unindexed filter must fail with a filtering diagnostic.
 The read checks identity and values, so a coincidental sum cannot hide a missing row.
 
 ```sql
-SELECT order_id, amount FROM ds60_orders.by_customer
-WHERE customer_id = 'alpha' AND day_bucket = '2026-01-01';
+SELECT
+  order_id,
+  amount
+FROM
+  ds60_orders.by_customer
+WHERE
+  customer_id = 'alpha'
+  AND day_bucket = '2026-01-01';
 ```
 
 This SQL illustrates the actual query contract. Use the prepared client rather

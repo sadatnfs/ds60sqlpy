@@ -41,10 +41,13 @@ The question is: Use residuals[1, -1, 2] against zero targets.
 The sum and mean differ only by the known count 3 here. Neither value can be interpreted without its denominator and squared-unit label.
 
 ```python
-residual=torch.tensor([1.,-1.,2.],dtype=torch.float64); zero=torch.zeros_like(residual)
-assert F.mse_loss(residual,zero,reduction='sum').item()==6
-assert F.mse_loss(residual,zero,reduction='mean').item()==2
-torch.testing.assert_close(F.mse_loss(residual,zero,reduction='none'),torch.tensor([1.,1.,4.],dtype=torch.float64))
+residual = torch.tensor([1.0, -1.0, 2.0], dtype=torch.float64)
+zero = torch.zeros_like(residual)
+assert F.mse_loss(residual, zero, reduction="sum").item() == 6
+assert F.mse_loss(residual, zero, reduction="mean").item() == 2
+torch.testing.assert_close(
+    F.mse_loss(residual, zero, reduction="none"), torch.tensor([1.0, 1.0, 4.0], dtype=torch.float64)
+)
 ```
 
 **Expected:** squared entries 1, 1, 4; sum 6; mean 2.
@@ -58,9 +61,9 @@ The question is: Repeat every residual twice and compare reductions.
 Duplicating observations does not create new information, but it changes a sum objective. This matters when comparing updates across batch sizes.
 
 ```python
-duplicated=residual.repeat(2)
-assert F.mse_loss(duplicated,torch.zeros_like(duplicated),reduction='sum').item()==12
-assert F.mse_loss(duplicated,torch.zeros_like(duplicated),reduction='mean').item()==2
+duplicated = residual.repeat(2)
+assert F.mse_loss(duplicated, torch.zeros_like(duplicated), reduction="sum").item() == 12
+assert F.mse_loss(duplicated, torch.zeros_like(duplicated), reduction="mean").item() == 2
 ```
 
 **Expected:** sum 12; mean 2.
@@ -74,9 +77,11 @@ The question is: Differentiate sum and mean squared loss for a fresh 3-entry ten
 The reduction scales every derivative by the same factor. A learning-rate comparison that ignores this can mistake an objective change for optimizer behavior.
 
 ```python
-a=residual.clone().requires_grad_(); gsum=torch.autograd.grad((a*a).sum(),a)[0]
-b=residual.clone().requires_grad_(); gmean=torch.autograd.grad((b*b).mean(),b)[0]
-torch.testing.assert_close(gsum,3*gmean,atol=1e-12,rtol=0)
+a = residual.clone().requires_grad_()
+gsum = torch.autograd.grad((a * a).sum(), a)[0]
+b = residual.clone().requires_grad_()
+gmean = torch.autograd.grad((b * b).mean(), b)[0]
+torch.testing.assert_close(gsum, 3 * gmean, atol=1e-12, rtol=0)
 ```
 
 **Expected:** sum gradient equals 3 times mean gradient.
@@ -90,8 +95,8 @@ The question is: Use a2x2 residual matrix of ones and mean reduction.
 The framework does not know whether columns are features, tasks or repeated observations. The author must define whether averaging over all entries matches the intended objective.
 
 ```python
-matrix=torch.ones((2,2),dtype=torch.float64)
-assert F.mse_loss(matrix,torch.zeros_like(matrix)).item()==1 and matrix.numel()==4
+matrix = torch.ones((2, 2), dtype=torch.float64)
+assert F.mse_loss(matrix, torch.zeros_like(matrix)).item() == 1 and matrix.numel() == 4
 ```
 
 **Expected:** loss 1 and 4 participating elements.
@@ -105,9 +110,10 @@ The question is: Use losses[1, 4, 100] with mask True, True, False.
 Excluded targets must not remain in the denominator. Appending more masked entries should leave the result unchanged.
 
 ```python
-losses=torch.tensor([1.,4.,100.]); mask=torch.tensor([True,True,False])
-valid=losses[mask].sum()/mask.sum()
-assert valid.item()==2.5 and valid.item()!=5/3
+losses = torch.tensor([1.0, 4.0, 100.0])
+mask = torch.tensor([True, True, False])
+valid = losses[mask].sum() / mask.sum()
+assert valid.item() == 2.5 and valid.item() != 5 / 3
 ```
 
 **Expected:** valid mean 2.5, not \(\frac{5}{3}\).
@@ -121,8 +127,8 @@ The question is: Compare mean absolute residual and mean squared residual for[1,
 The two measures have different units and emphasize large errors differently. Reporting one does not prove the other was optimized.
 
 ```python
-np.testing.assert_allclose(residual.abs().mean().item(),4/3,atol=1e-12,rtol=0)
-assert residual.square().mean().item()==2
+np.testing.assert_allclose(residual.abs().mean().item(), 4 / 3, atol=1e-12, rtol=0)
+assert residual.square().mean().item() == 2
 ```
 
 **Expected:** MAE \(\frac{4}{3}\); MSE 2.

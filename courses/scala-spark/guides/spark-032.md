@@ -60,41 +60,75 @@ The complete source creates the owned local session described above, then constr
 import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
-import org.apache.spark.sql.streaming.{StreamingQuery,StreamingQueryProgress,Trigger}
-import java.nio.file.{Files,Path,Paths,StandardOpenOption,StandardCopyOption}
+import org.apache.spark.sql.streaming.{StreamingQuery, StreamingQueryProgress, Trigger}
+import java.nio.file.{Files, Path, Paths, StandardOpenOption, StandardCopyOption}
 import java.nio.charset.StandardCharsets
 import java.time.Instant
 import scala.jdk.CollectionConverters._
 
-spark.conf.set("spark.sql.streaming.stopTimeout","10000")
-ownedRoot = Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(),".ds60-spark-032-")
-Files.createDirectory(ownedRoot.resolve("input"));Files.createDirectory(ownedRoot.resolve("staging"))
+spark.conf.set("spark.sql.streaming.stopTimeout", "10000")
+ownedRoot = Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(), ".ds60-spark-032-")
+Files.createDirectory(ownedRoot.resolve("input"));
+Files.createDirectory(ownedRoot.resolve("staging"))
 val batches = Seq(
- Seq("""{"id":1,"team":"A","amount":10,"event_time":"2024-01-01T00:01:00Z"}""","""{"id":2,"team":"A","amount":20,"event_time":"2024-01-01T00:04:00Z"}"""),
- Seq("""{"id":3,"team":"A","amount":5,"event_time":"2024-01-01T00:03:00Z"}""","""{"id":4,"team":"A","amount":30,"event_time":"2024-01-01T00:12:00Z"}"""),
- Seq("""{"id":5,"team":"A","amount":999,"event_time":"2024-01-01T00:02:00Z"}""","""{"id":6,"team":"B","amount":7,"event_time":"2024-01-01T00:13:00Z"}"""),
- Seq("""{"id":7,"team":"__advance__","amount":0,"event_time":"2024-01-01T00:30:00Z"}"""))
+  Seq(
+    """{"id":1,"team":"A","amount":10,"event_time":"2024-01-01T00:01:00Z"}""",
+    """{"id":2,"team":"A","amount":20,"event_time":"2024-01-01T00:04:00Z"}"""
+  ),
+  Seq(
+    """{"id":3,"team":"A","amount":5,"event_time":"2024-01-01T00:03:00Z"}""",
+    """{"id":4,"team":"A","amount":30,"event_time":"2024-01-01T00:12:00Z"}"""
+  ),
+  Seq(
+    """{"id":5,"team":"A","amount":999,"event_time":"2024-01-01T00:02:00Z"}""",
+    """{"id":6,"team":"B","amount":7,"event_time":"2024-01-01T00:13:00Z"}"""
+  ),
+  Seq("""{"id":7,"team":"__advance__","amount":0,"event_time":"2024-01-01T00:30:00Z"}""")
+)
 ```
 
 ```python
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 from pathlib import Path
-from datetime import datetime,timedelta
+from datetime import datetime, timedelta
 import tempfile
 import shutil
 import os
 import uuid
 from pyspark.errors import AnalysisException
 
-spark.conf.set("spark.sql.streaming.stopTimeout","10000")
-owned_root = Path(tempfile.mkdtemp(prefix=".ds60-spark-032-",dir=".")).resolve()
-(owned_root/"input").mkdir();(owned_root/"staging").mkdir()
+spark.conf.set("spark.sql.streaming.stopTimeout", "10000")
+owned_root = Path(tempfile.mkdtemp(prefix=".ds60-spark-032-", dir=".")).resolve()
+(owned_root / "input").mkdir()
+(owned_root / "staging").mkdir()
 batches = [
- ['{"id":1,"team":"A","amount":10,"event_time":"2024-01-01T00:01:00Z"}','{"id":2,"team":"A","amount":20,"event_time":"2024-01-01T00:04:00Z"}'],
- ['{"id":3,"team":"A","amount":5,"event_time":"2024-01-01T00:03:00Z"}','{"id":4,"team":"A","amount":30,"event_time":"2024-01-01T00:12:00Z"}'],
- ['{"id":5,"team":"A","amount":999,"event_time":"2024-01-01T00:02:00Z"}','{"id":6,"team":"B","amount":7,"event_time":"2024-01-01T00:13:00Z"}'],
- ['{"id":7,"team":"__advance__","amount":0,"event_time":"2024-01-01T00:30:00Z"}']]
+    [
+        '{"id":1,"team":"A","amount":10,"event_time":"2024-01-01T00:01:00Z"}',
+        '{"id":2,"team":"A","amount":20,"event_time":"2024-01-01T00:04:00Z"}',
+    ],
+    [
+        '{"id":3,"team":"A","amount":5,"event_time":"2024-01-01T00:03:00Z"}',
+        '{"id":4,"team":"A","amount":30,"event_time":"2024-01-01T00:12:00Z"}',
+    ],
+    [
+        '{"id":5,"team":"A","amount":999,"event_time":"2024-01-01T00:02:00Z"}',
+        '{"id":6,"team":"B","amount":7,"event_time":"2024-01-01T00:13:00Z"}',
+    ],
+    ['{"id":7,"team":"__advance__","amount":0,"event_time":"2024-01-01T00:30:00Z"}'],
+]
 ```
 
 ## Worked example / walkthrough
@@ -102,14 +136,14 @@ batches = [
 ### Worked example 1
 
 ```scala
-val firstWindow = Seq((1,10L),(2,20L),(3,5L))
+val firstWindow = Seq((1, 10L), (2, 20L), (3, 5L))
 assert(firstWindow.map(_._2).sum == 35L)
 println("Retained out-of-order event contributes to35,not30")
 ```
 
 ```python
-first_window = [(1,10),(2,20),(3,5)]
-assert sum(amount for _,amount in first_window) == 35
+first_window = [(1, 10), (2, 20), (3, 5)]
+assert sum(amount for _, amount in first_window) == 35
 print("Retained out-of-order event contributes to35,not30")
 ```
 
@@ -125,7 +159,7 @@ println("Five-minute delay is event-time arithmetic;actual watermark still needs
 
 ```python
 latest = datetime.fromisoformat("2024-01-01T00:30:00+00:00")
-assert latest-timedelta(minutes=5) == datetime.fromisoformat("2024-01-01T00:25:00+00:00")
+assert latest - timedelta(minutes=5) == datetime.fromisoformat("2024-01-01T00:25:00+00:00")
 print("Five-minute delay is event-time arithmetic;actual watermark still needs a receipt")
 ```
 

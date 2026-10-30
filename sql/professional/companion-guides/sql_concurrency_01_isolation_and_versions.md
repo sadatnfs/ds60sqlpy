@@ -154,11 +154,23 @@ Run these in the complete learner file so the temporary fixture and transaction 
 
 ```sql
 SAVEPOINT worked_success;
-UPDATE concurrency_stock
-SET available=available-2,version=version+1
-WHERE sku='A' AND version=1 AND available>=2
-RETURNING sku,available,version;
+
+UPDATE
+  concurrency_stock
+SET
+  available = available - 2,
+  version = version + 1
+WHERE
+  sku = 'A'
+  AND version = 1
+  AND available >= 2
+RETURNING
+  sku,
+  available,
+  version;
+
 ROLLBACK TO SAVEPOINT worked_success;
+
 RELEASE SAVEPOINT worked_success;
 ```
 
@@ -169,11 +181,28 @@ The returned row is A with stock 3 and version 2. The savepoint is a local exper
 ### Example 2: A stale expectation does not write
 
 ```sql
-UPDATE concurrency_stock
-SET available=available-1,version=version+1
-WHERE sku='A' AND version=99 AND available>=1
-RETURNING sku,available,version;
-SELECT sku,available,version FROM concurrency_stock WHERE sku='A';
+UPDATE
+  concurrency_stock
+SET
+  available = available - 1,
+  version = version + 1
+WHERE
+  sku = 'A'
+  AND version = 99
+  AND available >= 1
+RETURNING
+  sku,
+  available,
+  version;
+
+SELECT
+  sku,
+  available,
+  version
+FROM
+  concurrency_stock
+WHERE
+  sku = 'A';
 ```
 
 No row matches version 99, so PostgreSQL reports UPDATE 0 and RETURNING contains no rows. The following SELECT proves the stock and version stayed unchanged. An application that reports success merely because the statement raised no exception would mislead the user. Do not immediately remove the version condition to make the update succeed; that deletes the protection instead of handling the conflict.
@@ -270,7 +299,15 @@ In A, establish a view and leave the transaction open:
 ```sql
 BEGIN ISOLATION LEVEL READ COMMITTED;
 SET LOCAL statement_timeout = '10s';
-SELECT sku,available,version FROM sql_concurrency_live.stock WHERE sku='A';
+
+SELECT
+  sku,
+  available,
+  version
+FROM
+  sql_concurrency_live.stock
+WHERE
+  sku = 'A';
 ```
 
 Expect `(A,5,1)`. In B, make and commit one guarded write:
@@ -278,11 +315,23 @@ Expect `(A,5,1)`. In B, make and commit one guarded write:
 ```sql
 BEGIN;
 SET LOCAL lock_timeout = '2s';
+
 SET LOCAL statement_timeout = '10s';
-UPDATE sql_concurrency_live.stock
-SET available=available-1,version=version+1
-WHERE sku='A' AND version=1 AND available>=1
-RETURNING sku,available,version;
+
+UPDATE
+  sql_concurrency_live.stock
+SET
+  available = available - 1,
+  version = version + 1
+WHERE
+  sku = 'A'
+  AND version = 1
+  AND available >= 1
+RETURNING
+  sku,
+  available,
+  version;
+
 COMMIT;
 ```
 
@@ -295,7 +344,13 @@ For a contrasting run, reset only the fixture row in B using the following
 statement when both previous transactions have ended:
 
 ```sql
-UPDATE sql_concurrency_live.stock SET available=5,version=1 WHERE sku='A';
+UPDATE
+  sql_concurrency_live.stock
+SET
+  available = 5,
+  version = 1
+WHERE
+  sku = 'A';
 ```
 
 This reset is fixture preparation only. It deliberately resets the version

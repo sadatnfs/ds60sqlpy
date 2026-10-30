@@ -437,23 +437,26 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These worked excerpts come from <code>sql/professional/lessons/sql_found_02_versioned_migrations.sql</code>. Use <strong>Whole SQL lesson (psql)</strong> in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared <code>psql</code> routes are described above.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
-    sm<span class="syntax-punctuation">.</span>migration_id<span class="syntax-punctuation">,</span>
-    sm<span class="syntax-punctuation">.</span>migration_name<span class="syntax-punctuation">,</span>
-    sm<span class="syntax-punctuation">.</span>content_tag
-<span class="syntax-keyword">FROM</span> pro_migration_lab<span class="syntax-punctuation">.</span>schema_migrations <span class="syntax-keyword">AS</span> sm
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> sm<span class="syntax-punctuation">.</span>migration_id<span class="syntax-punctuation">;</span></code></pre>
+  sm<span class="syntax-punctuation">.</span>migration_id<span class="syntax-punctuation">,</span>
+  sm<span class="syntax-punctuation">.</span>migration_name<span class="syntax-punctuation">,</span>
+  sm<span class="syntax-punctuation">.</span>content_tag
+<span class="syntax-keyword">FROM</span>
+  pro_migration_lab<span class="syntax-punctuation">.</span>schema_migrations <span class="syntax-keyword">AS</span> sm
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  sm<span class="syntax-punctuation">.</span>migration_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 1: Start with <code>pro_migration_lab.schema_migrations</code> in <code>FROM</code>/<code>JOIN</code>. The final <code>SELECT</code> displays <code>migration_id</code>, <code>migration_name</code>, and <code>content_tag</code>. <code>ORDER BY</code> determines presentation order. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 1 returns one row per <code>migration_id</code> with columns <code>migration_id</code>, <code>migration_name</code>, and <code>content_tag</code> from <code>pro_migration_lab.schema_migrations</code>. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an <code>ORDER BY</code>, and inspect <code>NULL</code> only for columns this example can produce.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
-    sr<span class="syntax-punctuation">.</span>request_key<span class="syntax-punctuation">,</span>
-    sr<span class="syntax-punctuation">.</span>urgency_label <span class="syntax-keyword">AS</span> legacy_storage<span class="syntax-punctuation">,</span>
-    sr<span class="syntax-punctuation">.</span>priority_code <span class="syntax-keyword">AS</span> new_storage<span class="syntax-punctuation">,</span>
-    api<span class="syntax-punctuation">.</span>priority_code <span class="syntax-keyword">AS</span> stable_api_value
-<span class="syntax-keyword">FROM</span> pro_migration_lab<span class="syntax-punctuation">.</span>service_requests <span class="syntax-keyword">AS</span> sr
-<span class="syntax-keyword">JOIN</span> pro_migration_lab<span class="syntax-punctuation">.</span>service_requests_api <span class="syntax-keyword">AS</span> api
-  <span class="syntax-keyword">ON</span> api<span class="syntax-punctuation">.</span>request_id <span class="syntax-operator">=</span> sr<span class="syntax-punctuation">.</span>request_id
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> sr<span class="syntax-punctuation">.</span>request_key<span class="syntax-punctuation">;</span></code></pre>
+  sr<span class="syntax-punctuation">.</span>request_key<span class="syntax-punctuation">,</span>
+  sr<span class="syntax-punctuation">.</span>urgency_label <span class="syntax-keyword">AS</span> legacy_storage<span class="syntax-punctuation">,</span>
+  sr<span class="syntax-punctuation">.</span>priority_code <span class="syntax-keyword">AS</span> new_storage<span class="syntax-punctuation">,</span>
+  api<span class="syntax-punctuation">.</span>priority_code <span class="syntax-keyword">AS</span> stable_api_value
+<span class="syntax-keyword">FROM</span>
+  pro_migration_lab<span class="syntax-punctuation">.</span>service_requests <span class="syntax-keyword">AS</span> sr
+  <span class="syntax-keyword">JOIN</span> pro_migration_lab<span class="syntax-punctuation">.</span>service_requests_api <span class="syntax-keyword">AS</span> api <span class="syntax-keyword">ON</span> api<span class="syntax-punctuation">.</span>request_id <span class="syntax-operator">=</span> sr<span class="syntax-punctuation">.</span>request_id
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  sr<span class="syntax-punctuation">.</span>request_key<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 2: Start with <code>pro_migration_lab.service_requests</code>, and <code>pro_migration_lab.service_requests_api</code> in <code>FROM</code>/<code>JOIN</code>. The final <code>SELECT</code> displays <code>request_key</code>, <code>legacy_storage</code>, <code>new_storage</code>, and <code>stable_api_value</code>. <code>ORDER BY</code> determines presentation order. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 2 returns one row per <code>request_key</code> with columns <code>request_key</code>, <code>legacy_storage</code>, <code>new_storage</code>, and <code>stable_api_value</code> from <code>pro_migration_lab.service_requests</code>, and <code>pro_migration_lab.service_requests_api</code>. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an <code>ORDER BY</code>, and inspect <code>NULL</code> only for columns this example can produce.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -772,12 +775,15 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <h4 id="solution-1--exercise-1-deterministic-manifest">Exercise 1: Deterministic manifest<a class="heading-anchor" href="#solution-1--exercise-1-deterministic-manifest" aria-label="Link to this section">#</a></h4>
 <p>The manifest must order by version explicitly:</p>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
-    sm<span class="syntax-punctuation">.</span>migration_id<span class="syntax-punctuation">,</span>
-    sm<span class="syntax-punctuation">.</span>migration_name<span class="syntax-punctuation">,</span>
-    sm<span class="syntax-punctuation">.</span>content_tag
-<span class="syntax-keyword">FROM</span> pro_migration_lab<span class="syntax-punctuation">.</span>schema_migrations <span class="syntax-keyword">AS</span> sm
-<span class="syntax-keyword">WHERE</span> sm<span class="syntax-punctuation">.</span>migration_id <span class="syntax-keyword">BETWEEN</span> <span class="syntax-number">1</span> <span class="syntax-keyword">AND</span> <span class="syntax-number">5</span>
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> sm<span class="syntax-punctuation">.</span>migration_id<span class="syntax-punctuation">;</span></code></pre>
+  sm<span class="syntax-punctuation">.</span>migration_id<span class="syntax-punctuation">,</span>
+  sm<span class="syntax-punctuation">.</span>migration_name<span class="syntax-punctuation">,</span>
+  sm<span class="syntax-punctuation">.</span>content_tag
+<span class="syntax-keyword">FROM</span>
+  pro_migration_lab<span class="syntax-punctuation">.</span>schema_migrations <span class="syntax-keyword">AS</span> sm
+<span class="syntax-keyword">WHERE</span>
+  sm<span class="syntax-punctuation">.</span>migration_id <span class="syntax-keyword">BETWEEN</span> <span class="syntax-number">1</span> <span class="syntax-keyword">AND</span> <span class="syntax-number">5</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  sm<span class="syntax-punctuation">.</span>migration_id<span class="syntax-punctuation">;</span></code></pre>
 <p>The solution also compares <code>array_agg(... ORDER BY migration_id)</code> with <code>ARRAY[1,2,3,4,5]</code>. A row count of five is insufficient because versions <code>1,2,3,4,9</code> also have a count of five.</p>
 <p>The fixture&#x27;s <code>content_tag</code> is educational metadata, not a cryptographic file checksum. A production runner should calculate a checksum from migration bytes, store it on first application, and fail if the same applied version later has different bytes.</p>
 <h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>

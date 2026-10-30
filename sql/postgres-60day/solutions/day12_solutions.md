@@ -81,12 +81,15 @@ executable companion when you want a self-contained check.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT c.customer_id,
-       c.full_name AS original_name,
-       btrim(c.full_name) AS trimmed_name,
-       lower(c.email) AS normalized_email
-FROM customers AS c
-ORDER BY c.customer_id;
+SELECT
+  c.customer_id,
+  c.full_name AS original_name,
+  btrim(c.full_name) AS trimmed_name,
+  lower(c.email) AS normalized_email
+FROM
+  customers AS c
+ORDER BY
+  c.customer_id;
 ```
 
 **Expected shape:** One row per customer.
@@ -120,14 +123,20 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT CASE
-         WHEN c.email IS NULL THEN '(missing)'
-         ELSE lower(split_part(c.email, '@', 2))
-       END AS email_domain,
-       COUNT(*) AS customer_count
-FROM customers AS c
-GROUP BY email_domain
-ORDER BY customer_count DESC, email_domain;
+SELECT
+  CASE WHEN c.email IS NULL THEN
+    '(missing)'
+  ELSE
+    lower(split_part(c.email, '@', 2))
+  END AS email_domain,
+  COUNT(*) AS customer_count
+FROM
+  customers AS c
+GROUP BY
+  email_domain
+ORDER BY
+  customer_count DESC,
+  email_domain;
 ```
 
 **Expected shape:** One row per domain label.
@@ -161,14 +170,18 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT d.department_id,
-       d.name AS department_name,
-       string_agg(e.full_name, ', ' ORDER BY e.full_name, e.employee_id) AS employees
-FROM departments AS d
-LEFT JOIN employees AS e
-  ON e.department_id = d.department_id
-GROUP BY d.department_id, d.name
-ORDER BY d.department_id;
+SELECT
+  d.department_id,
+  d.name AS department_name,
+  string_agg(e.full_name, ', ' ORDER BY e.full_name, e.employee_id) AS employees
+FROM
+  departments AS d
+  LEFT JOIN employees AS e ON e.department_id = d.department_id
+GROUP BY
+  d.department_id,
+  d.name
+ORDER BY
+  d.department_id;
 ```
 
 **Expected shape:** One row per department.
@@ -200,13 +213,13 @@ cardinality contract.
 - `FROM`: establishes the starting relation and therefore the initial row grain.
 
 ```sql
-SELECT source_text,
-       btrim(regexp_replace(source_text, '[[:space:]]+', ' ', 'g')) AS normalized_text
-FROM (VALUES
-  ('  Data   Tools  '),
-  (E'one\ttwo'),
-  (E'line1\nline2')
-) AS sample(source_text);
+SELECT
+  source_text,
+  btrim(regexp_replace(source_text, '[[:space:]]+', ' ', 'g')) AS normalized_text
+FROM (
+  VALUES ('  Data   Tools  '),
+    (E'one\ttwo'),
+    (E'line1\nline2')) AS sample (source_text);
 ```
 
 **Expected shape:** Three input/output rows.
@@ -240,12 +253,16 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT c.customer_id,
-       c.full_name
-FROM customers AS c
-WHERE c.full_name LIKE '%\%%' ESCAPE '\'
-   OR c.full_name LIKE '%\_%' ESCAPE '\'
-ORDER BY c.customer_id;
+SELECT
+  c.customer_id,
+  c.full_name
+FROM
+  customers AS c
+WHERE
+  c.full_name LIKE '%\%%' ESCAPE '\'
+  OR c.full_name LIKE '%\_%' ESCAPE '\'
+ORDER BY
+  c.customer_id;
 ```
 
 **Expected shape:** Rows only when the literal character occurs.
@@ -279,15 +296,18 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT c.customer_id,
-       c.full_name,
-       CASE
-         WHEN c.full_name ~ '^Customer [0-9]+$'
-           THEN substring(c.full_name FROM '([0-9]+)$')::integer
-         ELSE NULL
-       END AS parsed_customer_number
-FROM customers AS c
-ORDER BY c.customer_id;
+SELECT
+  c.customer_id,
+  c.full_name,
+  CASE WHEN c.full_name ~ '^Customer [0-9]+$' THEN
+    substring(c.full_name FROM '([0-9]+)$')::integer
+  ELSE
+    NULL
+  END AS parsed_customer_number
+FROM
+  customers AS c
+ORDER BY
+  c.customer_id;
 ```
 
 **Expected shape:** One row per customer with a numeric suffix.

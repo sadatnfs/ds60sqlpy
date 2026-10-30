@@ -64,9 +64,17 @@ The question is: Use sequences[1, 2, 5, 3] and[1, 4, 6, 3], masking the first sh
 The first answer token is still supervised. The mask excludes predicting the prompt continuation, not the role of the prompt as conditioning context.
 
 ```python
-torch.manual_seed(23); model=TinyDecoder(); sequences=torch.tensor([[1,2,5,3],[1,4,6,3]])
-inputs=sequences[:,:-1]; labels=sequences[:,1:].clone(); labels[:,0]=-100
-assert tuple(inputs.shape)==(2,3) and labels.tolist()==[[-100,5,3],[-100,6,3]] and int((labels!=-100).sum())==4
+torch.manual_seed(23)
+model = TinyDecoder()
+sequences = torch.tensor([[1, 2, 5, 3], [1, 4, 6, 3]])
+inputs = sequences[:, :-1]
+labels = sequences[:, 1:].clone()
+labels[:, 0] = -100
+assert (
+    tuple(inputs.shape) == (2, 3)
+    and labels.tolist() == [[-100, 5, 3], [-100, 6, 3]]
+    and int((labels != -100).sum()) == 4
+)
 ```
 
 **Expected:** inputs shape(2, 3); labels[[-100, 5, 3], [-100, 6, 3]]; 4 active targets.
@@ -80,11 +88,18 @@ The question is: Calculate initial training loss and a held-out prompt loss befo
 The held-out baseline is recorded before fitting, but it is not used to choose the update count. The fixed count defines the experiment in advance.
 
 ```python
-held=torch.tensor([[7,2,5,3]]); held_labels=held[:,1:].clone(); held_labels[:,0]=-100
+held = torch.tensor([[7, 2, 5, 3]])
+held_labels = held[:, 1:].clone()
+held_labels[:, 0] = -100
 with torch.no_grad():
-    initial_train=objective(model,inputs,labels).item(); initial_held=objective(model,held[:,:-1],held_labels).item()
-count=sum(p.numel() for p in model.parameters() if p.requires_grad)
-assert np.isfinite([initial_train,initial_held]).all() and 0<count<50000 and all(p.requires_grad for p in model.parameters())
+    initial_train = objective(model, inputs, labels).item()
+    initial_held = objective(model, held[:, :-1], held_labels).item()
+count = sum(p.numel() for p in model.parameters() if p.requires_grad)
+assert (
+    np.isfinite([initial_train, initial_held]).all()
+    and 0 < count < 50000
+    and all(p.requires_grad for p in model.parameters())
+)
 ```
 
 **Expected:** both losses finite; all model parameters trainable; count below50000.
@@ -98,11 +113,17 @@ The question is: Run20 Adam updates atlearningrate.01, clearing gradients each t
 Checking an embedding parameter demonstrates that the update reaches more than the final output layer. A loss curve alone could be misleading if it came from a different object or cached tensor.
 
 ```python
-before=model.token.weight.detach().clone(); opt=torch.optim.Adam(model.parameters(),lr=.01); curve=[]
+before = model.token.weight.detach().clone()
+opt = torch.optim.Adam(model.parameters(), lr=0.01)
+curve = []
 for _ in range(20):
-    opt.zero_grad(set_to_none=True); loss=objective(model,inputs,labels); curve.append(loss.item()); loss.backward(); opt.step()
-assert len(curve)==20 and np.isfinite(curve).all() and curve[-1]<curve[0]
-assert not torch.equal(before,model.token.weight.detach())
+    opt.zero_grad(set_to_none=True)
+    loss = objective(model, inputs, labels)
+    curve.append(loss.item())
+    loss.backward()
+    opt.step()
+assert len(curve) == 20 and np.isfinite(curve).all() and curve[-1] < curve[0]
+assert not torch.equal(before, model.token.weight.detach())
 ```
 
 **Expected:** 20 finite losses; training loss decreases; an embedding parameter changes.
@@ -116,8 +137,12 @@ The question is: Differentiate cross entropy with respect to fresh zero logits u
 The loss mask affects optimization, not merely the displayed average. This independent probe isolates target participation from the model architecture.
 
 ```python
-probe=torch.zeros((2,3,16),requires_grad=True); F.cross_entropy(probe.reshape(-1,16),labels.reshape(-1),ignore_index=-100).backward()
-assert torch.count_nonzero(probe.grad[:,0]).item()==0 and torch.count_nonzero(probe.grad[:,1:]).item()>0
+probe = torch.zeros((2, 3, 16), requires_grad=True)
+F.cross_entropy(probe.reshape(-1, 16), labels.reshape(-1), ignore_index=-100).backward()
+assert (
+    torch.count_nonzero(probe.grad[:, 0]).item() == 0
+    and torch.count_nonzero(probe.grad[:, 1:]).item() > 0
+)
 ```
 
 **Expected:** ignored prompt positions have zero gradient; answer positions do not.
@@ -131,11 +156,12 @@ The question is: After the declared20 updates, evaluate the held-out sequence wi
 A held-out score may improve or worsen. The lesson reports the observation rather than requiring a favorable result that could encourage test-driven tuning.
 
 ```python
-model.eval(); saved=model.output.weight.detach().clone()
+model.eval()
+saved = model.output.weight.detach().clone()
 with torch.no_grad():
-    final_held=objective(model,held[:,:-1],held_labels).item()
-    final_train=objective(model,inputs,labels).item()
-assert np.isfinite(final_held) and torch.equal(saved,model.output.weight.detach())
+    final_held = objective(model, held[:, :-1], held_labels).item()
+    final_train = objective(model, inputs, labels).item()
+assert np.isfinite(final_held) and torch.equal(saved, model.output.weight.detach())
 ```
 
 **Expected:** finite held-out loss and unchanged weights during evaluation; no promised improvement.
@@ -149,9 +175,24 @@ The question is: Record update count, active training targets, train/heldout los
 A real adaptation report should also include data/model hashes, environment and retained baseline tasks. The tiny receipt illustrates those evidence categories without overstating its task.
 
 ```python
-receipt={'updates':20,'active_training_targets':4,'initial_train':initial_train,'final_train':final_train,'initial_held':initial_held,'final_held':final_held,'scope':'literal token task, not a pretrained subject assistant'}
-assert receipt['updates']==20 and receipt['active_training_targets']==4 and 'not a pretrained' in receipt['scope']
-with torch.no_grad(): np.testing.assert_allclose(receipt['final_train'],objective(model,inputs,labels).item(),atol=1e-12,rtol=0)
+receipt = {
+    "updates": 20,
+    "active_training_targets": 4,
+    "initial_train": initial_train,
+    "final_train": final_train,
+    "initial_held": initial_held,
+    "final_held": final_held,
+    "scope": "literal token task, not a pretrained subject assistant",
+}
+assert (
+    receipt["updates"] == 20
+    and receipt["active_training_targets"] == 4
+    and "not a pretrained" in receipt["scope"]
+)
+with torch.no_grad():
+    np.testing.assert_allclose(
+        receipt["final_train"], objective(model, inputs, labels).item(), atol=1e-12, rtol=0
+    )
 ```
 
 **Expected:** receipt says 20 updates, 4 active training targets and no natural-language competence claim.

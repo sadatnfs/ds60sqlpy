@@ -76,8 +76,9 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-logits=torch.tensor([-2.,0.,2.],dtype=torch.float64); probabilities=torch.sigmoid(logits)
-assert probabilities[1].item()==.5 and bool(torch.all(torch.diff(probabilities)>0))
+logits = torch.tensor([-2.0, 0.0, 2.0], dtype=torch.float64)
+probabilities = torch.sigmoid(logits)
+assert probabilities[1].item() == 0.5 and bool(torch.all(torch.diff(probabilities) > 0))
 ```
 
 **Expected:** middle probability 0.5 and strictly increasing values.
@@ -87,8 +88,10 @@ assert probabilities[1].item()==.5 and bool(torch.all(torch.diff(probabilities)>
 A fifty-fifty prediction assigns probability one-half to the observed label. Its negative logarithm is an independent reference.
 
 ```python
-loss=F.binary_cross_entropy_with_logits(torch.tensor([0.],dtype=torch.float64),torch.tensor([1.],dtype=torch.float64))
-np.testing.assert_allclose(loss.item(),np.log(2),atol=1e-12,rtol=0)
+loss = F.binary_cross_entropy_with_logits(
+    torch.tensor([0.0], dtype=torch.float64), torch.tensor([1.0], dtype=torch.float64)
+)
+np.testing.assert_allclose(loss.item(), np.log(2), atol=1e-12, rtol=0)
 ```
 
 **Expected:** loss log 2 within 1e-12.
@@ -98,8 +101,8 @@ np.testing.assert_allclose(loss.item(),np.log(2),atol=1e-12,rtol=0)
 The middle decision changes while the model scores remain fixed. This is a policy change, not an optimizer update.
 
 ```python
-assert (probabilities>=.5).tolist()==[False,True,True]
-assert (probabilities>=.8).tolist()==[False,False,True]
+assert (probabilities >= 0.5).tolist() == [False, True, True]
+assert (probabilities >= 0.8).tolist() == [False, False, True]
 ```
 
 **Expected:** labels False, True, True versus False, False, True.

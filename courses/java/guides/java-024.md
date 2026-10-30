@@ -54,12 +54,13 @@ import java.util.*;
 
 public class Main {
 
-    public static void main(String[] args) throws Exception {
-        var virtual=new java.util.concurrent.atomic.AtomicBoolean();Thread task=Thread.ofVirtual().start(() -> virtual.set(Thread.currentThread().isVirtual()));task.join(2000);
-        assert !task.isAlive() && virtual.get();
-    }
+  public static void main(String[] args) throws Exception {
+    var virtual = new java.util.concurrent.atomic.AtomicBoolean();
+    Thread task = Thread.ofVirtual().start(() -> virtual.set(Thread.currentThread().isVirtual()));
+    task.join(2000);
+    assert !task.isAlive() && virtual.get();
+  }
 }
-
 ```
 
 **Expected:** true and terminated.
@@ -73,18 +74,24 @@ import java.util.*;
 
 public class Main {
 
-    public static void main(String[] args) throws Exception {
-        var virtual=new java.util.concurrent.atomic.AtomicBoolean();Thread task=Thread.ofVirtual().start(() -> virtual.set(Thread.currentThread().isVirtual()));task.join(2000);
-        assert !task.isAlive() && virtual.get();
+  public static void main(String[] args) throws Exception {
+    var virtual = new java.util.concurrent.atomic.AtomicBoolean();
+    Thread task = Thread.ofVirtual().start(() -> virtual.set(Thread.currentThread().isVirtual()));
+    task.join(2000);
+    assert !task.isAlive() && virtual.get();
 
-        try(var executor=java.util.concurrent.Executors.newVirtualThreadPerTaskExecutor()) {
-            List<java.util.concurrent.Future<Integer>> futures=new ArrayList<>();for(int value=1;value<=4;value++){int input=value;futures.add(executor.submit(() -> input*input));}
-            List<Integer> results=new ArrayList<>();for(var future:futures)results.add(future.get(2,java.util.concurrent.TimeUnit.SECONDS));
-            assert results.equals(List.of(1,4,9,16));
-        }
+    try (var executor = java.util.concurrent.Executors.newVirtualThreadPerTaskExecutor()) {
+      List<java.util.concurrent.Future<Integer>> futures = new ArrayList<>();
+      for (int value = 1; value <= 4; value++) {
+        int input = value;
+        futures.add(executor.submit(() -> input * input));
+      }
+      List<Integer> results = new ArrayList<>();
+      for (var future : futures) results.add(future.get(2, java.util.concurrent.TimeUnit.SECONDS));
+      assert results.equals(List.of(1, 4, 9, 16));
     }
+  }
 }
-
 ```
 
 **Expected:** 1,4,9,16.

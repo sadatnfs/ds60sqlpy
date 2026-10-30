@@ -250,5 +250,5 @@ public class Main {
         p["verification"] = s["exercises"][0]["expected"] + " " + s["exercises"][-1]["expected"]
     inventory["lessons"].sort(key=lambda e: e["id"])
     (base / "lessons.json").write_text(json.dumps(inventory, indent=2) + "\n")
-    (base / "track.json").write_text(json.dumps(plan, indent=2) + "\n")
+    (base / "track.json").write_text(json.dumps(plan, indent=2, ensure_ascii=False) + "\n")
     print("Authored Java lessons:", len(SPECS))

@@ -21,14 +21,14 @@ unchanged B has no changed-row output.
 
 ```sql
 MERGE INTO w17_practice_stock AS t
-USING w17_practice_feed AS s ON t.sku = s.sku
-WHEN MATCHED AND s.source_version > t.source_version THEN
-  UPDATE SET quantity = s.quantity, source_version = s.source_version
-WHEN NOT MATCHED BY SOURCE THEN DELETE
-WHEN NOT MATCHED BY TARGET THEN
-  INSERT (sku, quantity, source_version)
-  VALUES (s.sku, s.quantity, s.source_version)
-RETURNING merge_action() AS action, t.sku, t.quantity, t.source_version;
+  USING w17_practice_feed AS s ON t.sku = s.sku
+  WHEN MATCHED AND s.source_version > t.source_version THEN
+    UPDATE SET quantity = s.quantity, source_version = s.source_version
+  WHEN NOT MATCHED BY SOURCE THEN
+    DELETE
+  WHEN NOT MATCHED BY TARGET THEN
+    INSERT (sku, quantity, source_version) VALUES (s.sku, s.quantity, s.source_version) RETURNING
+  merge_action () AS action, t.sku, t.quantity, t.source_version;
 ```
 
 `USING` supplies the producer population, `ON` relates business identities and
@@ -53,13 +53,11 @@ the version condition determines whether an existing row can change.
 
 ```sql
 MERGE INTO w17_practice_stock AS t
-USING (VALUES ('A',12,2),('C',1,1)) AS s(sku,quantity,source_version)
-ON t.sku = s.sku
-WHEN MATCHED AND s.source_version > t.source_version THEN
-  UPDATE SET quantity = s.quantity, source_version = s.source_version
-WHEN NOT MATCHED THEN
-  INSERT (sku,quantity,source_version)
-  VALUES (s.sku,s.quantity,s.source_version);
+  USING ( VALUES ('A', 12, 2), ('C', 1, 1)) AS s (sku, quantity, source_version) ON t.sku = s.sku
+  WHEN MATCHED AND s.source_version > t.source_version THEN
+    UPDATE SET quantity = s.quantity, source_version = s.source_version
+  WHEN NOT MATCHED THEN
+    INSERT (sku, quantity, source_version) VALUES (s.sku, s.quantity, s.source_version);
 ```
 
 The target now has A twelve/version two, B three/version one, C one/version one
@@ -85,17 +83,25 @@ unique version ordering first.
 
 ```sql
 WITH ranked AS (
-  SELECT sku,quantity,source_version,
-         row_number() OVER (
-           PARTITION BY sku ORDER BY source_version DESC
-         ) AS position
-  FROM (VALUES ('A',12,2),('A',14,3),('C',1,1))
-       AS feed(sku,quantity,source_version)
-)
-SELECT sku,quantity,source_version
-FROM ranked
-WHERE position = 1
-ORDER BY sku;
+  SELECT
+    sku,
+    quantity,
+    source_version,
+    row_number() OVER (PARTITION BY sku ORDER BY source_version DESC) AS position
+  FROM (
+    VALUES ('A', 12, 2),
+      ('A', 14, 3),
+      ('C', 1, 1)) AS feed (sku, quantity, source_version))
+SELECT
+  sku,
+  quantity,
+  source_version
+FROM
+  ranked
+WHERE
+  position = 1
+ORDER BY
+  sku;
 ```
 
 The selected source is A fourteen/version three and C one/version one. The full
@@ -120,13 +126,19 @@ contains the proposed values, while alias `t` refers to the existing target.
 The version comparison is applied to the update action.
 
 ```sql
-INSERT INTO w17_practice_stock AS t(sku,quantity,source_version)
-VALUES ('A',14,3),('B',999,1),('D',4,1)
-ON CONFLICT (sku) DO UPDATE
-SET quantity = excluded.quantity,
+INSERT INTO w17_practice_stock AS t (sku, quantity, source_version)
+VALUES
+  ('A', 14, 3),
+  ('B', 999, 1),
+  ('D', 4, 1)
+ON CONFLICT (sku)
+  DO UPDATE SET
+    quantity = excluded.quantity,
     source_version = excluded.source_version
-WHERE excluded.source_version > t.source_version
-RETURNING sku,quantity,source_version;
+  WHERE
+    excluded.source_version > t.source_version
+  RETURNING
+    sku, quantity, source_version;
 ```
 
 A advances and D is inserted. B's equal version means its proposed 999 is not
@@ -175,9 +187,13 @@ deletion. It raises the specific `incomplete-snapshot` condition inside a
 controlled subtransaction and verifies that the original A/B/Z rows remain.
 
 ```sql
-SELECT count(*) AS supplied_rows, 3 AS declared_rows
-FROM w17_practice_feed
-WHERE sku IN ('A','C');
+SELECT
+  count(*) AS supplied_rows,
+  3 AS declared_rows
+FROM
+  w17_practice_feed
+WHERE
+  sku IN ('A', 'C');
 ```
 
 Supplying the complete three-row feed afterward satisfies the same count gate.

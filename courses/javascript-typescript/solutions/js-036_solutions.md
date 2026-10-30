@@ -31,8 +31,11 @@ Task: Create a package with exports pointing at index.mjs and import its version
 The import uses normal package-name resolution from the temporary main module. It does not bypass the exports map with an absolute file URL.
 
 ```javascript
-await withPackage(async directory => {
-  const result = runImport(directory, 'import { version } from \'course-fixture\'; console.log(version);');
+await withPackage(async (directory) => {
+  const result = runImport(
+    directory,
+    'import { version } from \'course-fixture\'; console.log(version);',
+  );
   assert.equal(result.status, 0, result.stderr);
   assert.equal(result.stdout.trim(), '1');
 });
@@ -49,8 +52,11 @@ Task: Import twice from course-fixture/math.
 A public subpath is part of the package interface. Its name can remain stable even if the internal file layout later changes.
 
 ```javascript
-await withPackage(async directory => {
-  const result = runImport(directory, 'import { twice } from \'course-fixture/math\'; console.log(twice(3));');
+await withPackage(async (directory) => {
+  const result = runImport(
+    directory,
+    'import { twice } from \'course-fixture/math\'; console.log(twice(3));',
+  );
   assert.equal(result.status, 0, result.stderr);
   assert.equal(result.stdout.trim(), '6');
 });
@@ -67,7 +73,7 @@ Task: Attempt a package-name import of private.mjs even though the file exists.
 The loader enforces the declared package interface. A consumer depending on internal paths would otherwise make ordinary package refactoring a compatibility hazard.
 
 ```javascript
-await withPackage(async directory => {
+await withPackage(async (directory) => {
   const result = runImport(directory, 'import \'course-fixture/private.mjs\';');
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /ERR_PACKAGE_PATH_NOT_EXPORTED/u);
@@ -85,8 +91,10 @@ Task: Read the fixture engine declaration requiring Node99, then import its entr
 Package-manager policy may warn or reject based on configuration, but this demonstrates the actual Node loader boundary. A declared requirement is not runtime qualification.
 
 ```javascript
-await withPackage(async directory => {
-  const manifest = JSON.parse(await readFile(join(directory, 'node_modules/course-fixture/package.json'), 'utf8'));
+await withPackage(async (directory) => {
+  const manifest = JSON.parse(
+    await readFile(join(directory, 'node_modules/course-fixture/package.json'), 'utf8'),
+  );
   assert.equal(manifest.engines.node, '>=99');
   assert.ok(Number(process.versions.node.split('.')[0]) < 99);
   assert.equal(runImport(directory, 'import \'course-fixture\';').status, 0);
@@ -104,7 +112,7 @@ Task: Hash the public source, change only that owned file, and compare hashes.
 The digest identifies bytes, so even a valid replacement implementation changes artifact identity. It does not tell whether version 1 or version 2 has better behavior.
 
 ```javascript
-await withPackage(async directory => {
+await withPackage(async (directory) => {
   const path = join(directory, 'node_modules/course-fixture/index.mjs');
   const before = digest(await readFile(path));
   await writeFile(path, 'export const version = 2;');
@@ -125,8 +133,11 @@ Task: Import the arithmetic subpath and assert both a normal and a boundary inpu
 An exported name existing is weaker than its behavior matching the consumer contract. Boundary tests help detect a breaking semantic change that leaves the interface shape untouched.
 
 ```javascript
-await withPackage(async directory => {
-  const result = runImport(directory, 'import { strict as assert } from \'node:assert\'; import { twice } from \'course-fixture/math\'; assert.equal(twice(0), 0); assert.equal(twice(-2), -4);');
+await withPackage(async (directory) => {
+  const result = runImport(
+    directory,
+    'import { strict as assert } from \'node:assert\'; import { twice } from \'course-fixture/math\'; assert.equal(twice(0), 0); assert.equal(twice(-2), -4);',
+  );
   assert.equal(result.status, 0, result.stderr);
 });
 ```

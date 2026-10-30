@@ -251,8 +251,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>acquire<span class="syntax-punctuation">(</span><span class="syntax-operator">&amp;</span>l<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;a&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&amp;&amp;</span> l<span class="syntax-punctuation">.</span>Holder <span class="syntax-operator">==</span> <span class="syntax-string">&quot;a&quot;</span> <span class="syntax-operator">&amp;&amp;</span> l<span class="syntax-punctuation">.</span>Expires <span class="syntax-operator">==</span> <span class="syntax-number">15</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;acquire&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Holder becomes a and expiry 15.</p>
 <p>This local policy model does not implement distributed atomicity. A real update must be protected by the API concurrency contract.</p>
 <h4 id="worked-example-2-reject-a-competing-candidate">Worked example 2: Reject a competing candidate<a class="heading-anchor" href="#worked-example-2-reject-a-competing-candidate" aria-label="Link to this section">#</a></h4>
@@ -299,8 +298,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span><span class="syntax-punctuation">!</span>acquire<span class="syntax-punctuation">(</span><span class="syntax-operator">&amp;</span>l<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;b&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">12</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&amp;&amp;</span> l<span class="syntax-punctuation">.</span>Holder <span class="syntax-operator">==</span> <span class="syntax-string">&quot;a&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;contender&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The request fails and a remains holder.</p>
 <p>The contender waits while the current claim remains valid under this model.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>

@@ -267,8 +267,10 @@ oneStepPredict(
   obj,
   observation.name = NULL,
   data.term.indicator = NULL,
-  method = c("oneStepGaussianOffMode", "fullGaussian", "oneStepGeneric",
-    "oneStepGaussian", "cdf"),
+  method = c(
+    "oneStepGaussianOffMode", "fullGaussian", "oneStepGeneric",
+    "oneStepGaussian", "cdf"
+  ),
   subset = NULL,
   conditional = NULL,
   discrete = NULL,
@@ -535,7 +537,7 @@ tmbprofile(
   h = 1e-04,
   ytol = 2,
   ystep = 0.1,
-  maxit = ceiling(5 * ytol/ystep),
+  maxit = ceiling(5 * ytol / ystep),
   parm.range = c(-Inf, Inf),
   slice = FALSE,
   adaptive = TRUE,

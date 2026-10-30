@@ -33,13 +33,13 @@ Build an ordinary inner equality join on key, projecting fact_id, key, amount, f
 
 ```scala
 def ordinaryJoin(facts: DataFrame, dimension: DataFrame): DataFrame = {
-  facts.join(dimension,Seq("key"),"inner").select("fact_id","key","amount","factor")
+  facts.join(dimension, Seq("key"), "inner").select("fact_id", "key", "amount", "factor")
 }
 ```
 
 ```python
 def ordinary_join(facts, dimension):
-    return facts.join(dimension,on="key",how="inner").select("fact_id","key","amount","factor")
+    return facts.join(dimension, on="key", how="inner").select("fact_id", "key", "amount", "factor")
 ```
 
 The projected grain remains one fact because the dimension is unique and covers every fact key. The physical strategy is observed rather than inferred solely from the dimension count. A future optimizer or statistics change may alter the automatic operator while preserving the same correct relation, which is why the semantic metrics are checked independently.
@@ -54,15 +54,15 @@ Set automatic broadcast threshold to-1, build a fresh ordinary join and record i
 
 ```scala
 def withoutAutomaticBroadcast(facts: DataFrame, dimension: DataFrame): DataFrame = {
-  facts.sparkSession.conf.set("spark.sql.autoBroadcastJoinThreshold","-1")
-  ordinaryJoin(facts,dimension)
+  facts.sparkSession.conf.set("spark.sql.autoBroadcastJoinThreshold", "-1")
+  ordinaryJoin(facts, dimension)
 }
 ```
 
 ```python
 def without_automatic_broadcast(facts, dimension):
-    facts.sparkSession.conf.set("spark.sql.autoBroadcastJoinThreshold","-1")
-    return ordinary_join(facts,dimension)
+    facts.sparkSession.conf.set("spark.sql.autoBroadcastJoinThreshold", "-1")
+    return ordinary_join(facts, dimension)
 ```
 
 A fresh query is built after the configuration change so the observation belongs to the intended controlled setup. Disabling automatic broadcast does not make the query incorrect; it changes the physical strategy space. AQE is kept off here because adaptive strategy conversion would introduce another decision mechanism covered in the next lesson.
@@ -77,13 +77,15 @@ Apply broadcast to the dimension for an inner equality join while automatic thre
 
 ```scala
 def hintedJoin(facts: DataFrame, dimension: DataFrame): DataFrame = {
-  facts.join(broadcast(dimension),Seq("key"),"inner").select("fact_id","key","amount","factor")
+  facts.join(broadcast(dimension), Seq("key"), "inner").select("fact_id", "key", "amount", "factor")
 }
 ```
 
 ```python
 def hinted_join(facts, dimension):
-    return facts.join(F.broadcast(dimension),on="key",how="inner").select("fact_id","key","amount","factor")
+    return facts.join(F.broadcast(dimension), on="key", how="inner").select(
+        "fact_id", "key", "amount", "factor"
+    )
 ```
 
 The supported inner equijoin honors the requested broadcast strategy despite the automatic threshold being disabled. Duplicate-sensitive reconciliation verifies the entire projected relation without a large driver collect. A hint remains a physical request: if the dimension duplicated a key, the join would still multiply facts, and broadcasting would only execute that incorrect enrichment grain differently.
@@ -98,13 +100,17 @@ Request a broadcast dimension in a full outer equality join and inspect the chos
 
 ```scala
 def unsupportedHint(facts: DataFrame, dimension: DataFrame): DataFrame = {
-  facts.join(broadcast(dimension),Seq("key"),"full_outer").select("fact_id","key","amount","factor")
+  facts
+    .join(broadcast(dimension), Seq("key"), "full_outer")
+    .select("fact_id", "key", "amount", "factor")
 }
 ```
 
 ```python
 def unsupported_hint(facts, dimension):
-    return facts.join(F.broadcast(dimension),on="key",how="full_outer").select("fact_id","key","amount","factor")
+    return facts.join(F.broadcast(dimension), on="key", how="full_outer").select(
+        "fact_id", "key", "amount", "factor"
+    )
 ```
 
 A physical hash strategy that cannot represent the required outer semantics must be replaced by another valid strategy. The query result remains correct. Its equality with the inner result is a fixture-specific coverage fact: adding any unmatched key would invalidate that equivalence. The example teaches eligibility and evidence, not a recommendation to rewrite outer joins as inner joins.
@@ -119,12 +125,17 @@ Reject streaming inputs, more than 100 rows, missing/duplicate keys, or an estim
 
 ```scala
 def boundedBroadcast(dimension: DataFrame): DataFrame = {
-  require(!dimension.isStreaming,"Streaming input is not a bounded build table")
+  require(!dimension.isStreaming, "Streaming input is not a bounded build table")
   val rows = dimension.limit(101).count()
-  require(rows <= 100L,"Broadcast row budget exceeded")
-  require(dimension.select("key").distinct().count() == rows && dimension.filter(col("key").isNull).count() == 0L,"Build keys must be unique and known")
+  require(rows <= 100L, "Broadcast row budget exceeded")
+  require(
+    dimension.select("key").distinct().count() == rows && dimension
+      .filter(col("key").isNull)
+      .count() == 0L,
+    "Build keys must be unique and known"
+  )
   val estimate = estimatedBytes(dimension)
-  require(estimate > 0 && estimate <= BigInt(1048576),"Broadcast estimate outside declared budget")
+  require(estimate > 0 && estimate <= BigInt(1048576), "Broadcast estimate outside declared budget")
   broadcast(dimension)
 }
 ```
@@ -136,7 +147,10 @@ def bounded_broadcast(dimension):
     rows = dimension.limit(101).count()
     if rows > 100:
         raise ValueError("Broadcast row budget exceeded")
-    if dimension.select("key").distinct().count() != rows or dimension.filter(F.col("key").isNull()).count():
+    if (
+        dimension.select("key").distinct().count() != rows
+        or dimension.filter(F.col("key").isNull()).count()
+    ):
         raise ValueError("Build keys must be unique and known")
     if not 0 < estimated_bytes(dimension) <= 1048576:
         raise ValueError("Broadcast estimate outside declared budget")

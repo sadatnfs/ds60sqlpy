@@ -68,10 +68,12 @@ pytestmark = pytest.mark.skipif(
     reason="set DS60_DEMO_BASE_URL only while the local demo server is running",
 )
 
+
 def test_health():
     response = requests.get(f"{BASE_URL}/health", timeout=5)
     assert response.status_code == 200
     assert response.json().get("status") == "ok"
+
 
 def test_predict():
     response = requests.post(

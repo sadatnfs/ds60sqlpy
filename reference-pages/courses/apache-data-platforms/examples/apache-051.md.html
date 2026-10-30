@@ -199,8 +199,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 bash run.sh start
 bash run.sh check</code></pre>
 <p>Inspect <code>client.py</code> beside the commands: its customer/day partition query returns order IDs 3 then 1; its unindexed filter must fail with a filtering diagnostic. The read checks identity and values, so a coincidental sum cannot hide a missing row.</p>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> order_id<span class="syntax-punctuation">,</span> amount <span class="syntax-keyword">FROM</span> ds60_orders<span class="syntax-punctuation">.</span>by_customer
-<span class="syntax-keyword">WHERE</span> customer_id <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;alpha&#x27;</span> <span class="syntax-keyword">AND</span> day_bucket <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;2026-01-01&#x27;</span><span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  order_id<span class="syntax-punctuation">,</span>
+  amount
+<span class="syntax-keyword">FROM</span>
+  ds60_orders<span class="syntax-punctuation">.</span>by_customer
+<span class="syntax-keyword">WHERE</span>
+  customer_id <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;alpha&#x27;</span>
+  <span class="syntax-keyword">AND</span> day_bucket <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;2026-01-01&#x27;</span><span class="syntax-punctuation">;</span></code></pre>
 <p>This SQL illustrates the actual query contract. Use the prepared client rather than redirecting it to an external cluster. A cross-day question requires bounded partition fanout or a separate table designed for that access pattern.</p></article>
   </main>
 </body>

@@ -111,9 +111,9 @@ These worked excerpts come from `sql/professional/lessons/sql_ops_02_backup_rest
 
 ```sql
 CREATE TABLE pro_recovery_lab.source_accounts (
-    account_id bigint PRIMARY KEY,
-    account_key text NOT NULL UNIQUE,
-    display_name text NOT NULL
+  account_id bigint PRIMARY KEY,
+  account_key text NOT NULL UNIQUE,
+  display_name text NOT NULL
 );
 ```
 
@@ -125,12 +125,11 @@ CREATE TABLE pro_recovery_lab.source_accounts (
 
 ```sql
 CREATE TABLE pro_recovery_lab.source_entries (
-    entry_id bigint PRIMARY KEY,
-    account_id bigint NOT NULL
-        REFERENCES pro_recovery_lab.source_accounts (account_id),
-    amount numeric(12, 2) NOT NULL,
-    occurred_at timestamptz NOT NULL,
-    note text NOT NULL
+  entry_id bigint PRIMARY KEY,
+  account_id bigint NOT NULL REFERENCES pro_recovery_lab.source_accounts (account_id),
+  amount numeric(12, 2) NOT NULL,
+  occurred_at timestamptz NOT NULL,
+  note text NOT NULL
 );
 ```
 

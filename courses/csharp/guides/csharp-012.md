@@ -59,27 +59,34 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Buffers;
 
-internal static class Program
-{
-    private static void Check(bool condition, string reason)
-    {
-        if (!condition) throw new InvalidOperationException(reason);
-    }
+internal static class Program {
+  private static void Check(bool condition, string reason) {
+    if (!condition)
+      throw new InvalidOperationException(reason);
+  }
 
-    private static async Task Main()
+  private static async Task Main() {
     {
-        {
-            var first = new Point(2, 3);
-            var second = first;
-            second.X = 9;
-            Check(first.X == 2 && second.X == 9, "struct copy");
-        }
-        Console.WriteLine("csharp-012: passed");
-        await Task.CompletedTask;
+      var first = new Point(2, 3);
+      var second = first;
+      second.X = 9;
+      Check(first.X == 2 && second.X == 9, "struct copy");
     }
+    Console.WriteLine("csharp-012: passed");
+    await Task.CompletedTask;
+  }
 
-    public struct Point { public int X; public int Y; public Point(int x, int y) { X = x; Y = y; } }
-    public sealed class Counter { public int Value { get; set; } }
+  public struct Point {
+    public int X;
+    public int Y;
+    public Point(int x, int y) {
+      X = x;
+      Y = y;
+    }
+  }
+  public sealed class Counter {
+    public int Value { get; set; }
+  }
 }
 ```
 
@@ -106,28 +113,35 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Buffers;
 
-internal static class Program
-{
-    private static void Check(bool condition, string reason)
-    {
-        if (!condition) throw new InvalidOperationException(reason);
-    }
+internal static class Program {
+  private static void Check(bool condition, string reason) {
+    if (!condition)
+      throw new InvalidOperationException(reason);
+  }
 
-    private static async Task Main()
+  private static async Task Main() {
     {
-        {
-            var first = new Counter();
-            var second = first;
-            second.Value++;
-            Check(first.Value == 1, "shared mutation");
-            Check(ReferenceEquals(first, second), "same object");
-        }
-        Console.WriteLine("csharp-012: passed");
-        await Task.CompletedTask;
+      var first = new Counter();
+      var second = first;
+      second.Value++;
+      Check(first.Value == 1, "shared mutation");
+      Check(ReferenceEquals(first, second), "same object");
     }
+    Console.WriteLine("csharp-012: passed");
+    await Task.CompletedTask;
+  }
 
-    public struct Point { public int X; public int Y; public Point(int x, int y) { X = x; Y = y; } }
-    public sealed class Counter { public int Value { get; set; } }
+  public struct Point {
+    public int X;
+    public int Y;
+    public Point(int x, int y) {
+      X = x;
+      Y = y;
+    }
+  }
+  public sealed class Counter {
+    public int Value { get; set; }
+  }
 }
 ```
 

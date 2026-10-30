@@ -58,31 +58,72 @@ Metadata and query execution establish actualJDBCbehavior. A map pretending to b
 import java.util.*;
 
 public class Main {
-    static final java.util.concurrent.atomic.AtomicInteger DATABASE_IDS=new java.util.concurrent.atomic.AtomicInteger();
-    static java.sql.Connection database() throws java.sql.SQLException {
-        java.sql.Connection connection;
-        try{connection=java.sql.DriverManager.getConnection("jdbc:h2:mem:ds60_java29_"+DATABASE_IDS.incrementAndGet());}
-        catch(java.sql.SQLException error){throw new java.sql.SQLException("Prepared H2 2.5.252 JDBC driver required on the classpath",error);}
-        try(var statement=connection.createStatement()){
-            statement.execute("CREATE TABLE accounts(id INTEGER PRIMARY KEY,name VARCHAR(40) NOT NULL,balance INTEGER NOT NULL CHECK(balance>=0))");
-            statement.executeUpdate("INSERT INTO accounts VALUES(1,'Alice',100),(2,'Bob',50)");
-        }catch(java.sql.SQLException error){connection.close();throw error;}
-        return connection;
-    }
-    static int balance(java.sql.Connection connection,int id) throws java.sql.SQLException {
-        try(var statement=connection.prepareStatement("SELECT balance FROM accounts WHERE id=?")){statement.setInt(1,id);try(var rows=statement.executeQuery()){if(!rows.next())throw new java.sql.SQLException("unknown account");return rows.getInt(1);}}
-    }
-    static void change(java.sql.Connection connection,int id,int delta) throws java.sql.SQLException {
-        try(var statement=connection.prepareStatement("UPDATE accounts SET balance=balance+? WHERE id=?")){statement.setInt(1,delta);statement.setInt(2,id);if(statement.executeUpdate()!=1)throw new java.sql.SQLException("expected one account update");}
-    }
-    public static void main(String[] args) throws Exception {
-        try(java.sql.Connection connection=database()) {
-            assert connection.getMetaData().getDatabaseProductName().equals("H2") && connection.getAutoCommit();
-            try(var statement=connection.prepareStatement("SELECT COUNT(*) FROM accounts");var rows=statement.executeQuery()){assert rows.next() && rows.getInt(1)==2;}
-        }
-    }
-}
 
+  static final java.util.concurrent.atomic.AtomicInteger DATABASE_IDS =
+    new java.util.concurrent.atomic.AtomicInteger();
+
+  static java.sql.Connection database() throws java.sql.SQLException {
+    java.sql.Connection connection;
+    try {
+      connection = java.sql.DriverManager.getConnection(
+        "jdbc:h2:mem:ds60_java29_" + DATABASE_IDS.incrementAndGet()
+      );
+    } catch (java.sql.SQLException error) {
+      throw new java.sql.SQLException(
+        "Prepared H2 2.5.252 JDBC driver required on the classpath",
+        error
+      );
+    }
+    try (var statement = connection.createStatement()) {
+      statement.execute(
+        "CREATE TABLE accounts(id INTEGER PRIMARY KEY,name VARCHAR(40) NOT NULL,balance INTEGER NOT NULL CHECK(balance>=0))"
+      );
+      statement.executeUpdate("INSERT INTO accounts VALUES(1,'Alice',100),(2,'Bob',50)");
+    } catch (java.sql.SQLException error) {
+      connection.close();
+      throw error;
+    }
+    return connection;
+  }
+
+  static int balance(java.sql.Connection connection, int id) throws java.sql.SQLException {
+    try (var statement = connection.prepareStatement("SELECT balance FROM accounts WHERE id=?")) {
+      statement.setInt(1, id);
+      try (var rows = statement.executeQuery()) {
+        if (!rows.next()) throw new java.sql.SQLException("unknown account");
+        return rows.getInt(1);
+      }
+    }
+  }
+
+  static void change(java.sql.Connection connection, int id, int delta)
+    throws java.sql.SQLException {
+    try (
+      var statement = connection.prepareStatement(
+        "UPDATE accounts SET balance=balance+? WHERE id=?"
+      )
+    ) {
+      statement.setInt(1, delta);
+      statement.setInt(2, id);
+      if (statement.executeUpdate() != 1) throw new java.sql.SQLException(
+        "expected one account update"
+      );
+    }
+  }
+
+  public static void main(String[] args) throws Exception {
+    try (java.sql.Connection connection = database()) {
+      assert connection.getMetaData().getDatabaseProductName().equals("H2") &&
+      connection.getAutoCommit();
+      try (
+        var statement = connection.prepareStatement("SELECT COUNT(*) FROM accounts");
+        var rows = statement.executeQuery()
+      ) {
+        assert rows.next() && rows.getInt(1) == 2;
+      }
+    }
+  }
+}
 ```
 
 **Expected:** database product H2; 2 rows; auto-commit initially true.
@@ -95,36 +136,86 @@ The driver receives the value separately from the query structure. The test uses
 import java.util.*;
 
 public class Main {
-    static final java.util.concurrent.atomic.AtomicInteger DATABASE_IDS=new java.util.concurrent.atomic.AtomicInteger();
-    static java.sql.Connection database() throws java.sql.SQLException {
-        java.sql.Connection connection;
-        try{connection=java.sql.DriverManager.getConnection("jdbc:h2:mem:ds60_java29_"+DATABASE_IDS.incrementAndGet());}
-        catch(java.sql.SQLException error){throw new java.sql.SQLException("Prepared H2 2.5.252 JDBC driver required on the classpath",error);}
-        try(var statement=connection.createStatement()){
-            statement.execute("CREATE TABLE accounts(id INTEGER PRIMARY KEY,name VARCHAR(40) NOT NULL,balance INTEGER NOT NULL CHECK(balance>=0))");
-            statement.executeUpdate("INSERT INTO accounts VALUES(1,'Alice',100),(2,'Bob',50)");
-        }catch(java.sql.SQLException error){connection.close();throw error;}
-        return connection;
-    }
-    static int balance(java.sql.Connection connection,int id) throws java.sql.SQLException {
-        try(var statement=connection.prepareStatement("SELECT balance FROM accounts WHERE id=?")){statement.setInt(1,id);try(var rows=statement.executeQuery()){if(!rows.next())throw new java.sql.SQLException("unknown account");return rows.getInt(1);}}
-    }
-    static void change(java.sql.Connection connection,int id,int delta) throws java.sql.SQLException {
-        try(var statement=connection.prepareStatement("UPDATE accounts SET balance=balance+? WHERE id=?")){statement.setInt(1,delta);statement.setInt(2,id);if(statement.executeUpdate()!=1)throw new java.sql.SQLException("expected one account update");}
-    }
-    public static void main(String[] args) throws Exception {
-        try(java.sql.Connection connection=database()) {
-            assert connection.getMetaData().getDatabaseProductName().equals("H2") && connection.getAutoCommit();
-            try(var statement=connection.prepareStatement("SELECT COUNT(*) FROM accounts");var rows=statement.executeQuery()){assert rows.next() && rows.getInt(1)==2;}
-        }
 
-        try(java.sql.Connection connection=database();var statement=connection.prepareStatement("SELECT COUNT(*) FROM accounts WHERE name = ?")) {
-            statement.setString(1,"Alice");try(var rows=statement.executeQuery()){assert rows.next() && rows.getInt(1)==1;}
-            statement.setString(1,"Alice' OR '1'='1");try(var rows=statement.executeQuery()){assert rows.next() && rows.getInt(1)==0;}
-        }
+  static final java.util.concurrent.atomic.AtomicInteger DATABASE_IDS =
+    new java.util.concurrent.atomic.AtomicInteger();
+
+  static java.sql.Connection database() throws java.sql.SQLException {
+    java.sql.Connection connection;
+    try {
+      connection = java.sql.DriverManager.getConnection(
+        "jdbc:h2:mem:ds60_java29_" + DATABASE_IDS.incrementAndGet()
+      );
+    } catch (java.sql.SQLException error) {
+      throw new java.sql.SQLException(
+        "Prepared H2 2.5.252 JDBC driver required on the classpath",
+        error
+      );
     }
+    try (var statement = connection.createStatement()) {
+      statement.execute(
+        "CREATE TABLE accounts(id INTEGER PRIMARY KEY,name VARCHAR(40) NOT NULL,balance INTEGER NOT NULL CHECK(balance>=0))"
+      );
+      statement.executeUpdate("INSERT INTO accounts VALUES(1,'Alice',100),(2,'Bob',50)");
+    } catch (java.sql.SQLException error) {
+      connection.close();
+      throw error;
+    }
+    return connection;
+  }
+
+  static int balance(java.sql.Connection connection, int id) throws java.sql.SQLException {
+    try (var statement = connection.prepareStatement("SELECT balance FROM accounts WHERE id=?")) {
+      statement.setInt(1, id);
+      try (var rows = statement.executeQuery()) {
+        if (!rows.next()) throw new java.sql.SQLException("unknown account");
+        return rows.getInt(1);
+      }
+    }
+  }
+
+  static void change(java.sql.Connection connection, int id, int delta)
+    throws java.sql.SQLException {
+    try (
+      var statement = connection.prepareStatement(
+        "UPDATE accounts SET balance=balance+? WHERE id=?"
+      )
+    ) {
+      statement.setInt(1, delta);
+      statement.setInt(2, id);
+      if (statement.executeUpdate() != 1) throw new java.sql.SQLException(
+        "expected one account update"
+      );
+    }
+  }
+
+  public static void main(String[] args) throws Exception {
+    try (java.sql.Connection connection = database()) {
+      assert connection.getMetaData().getDatabaseProductName().equals("H2") &&
+      connection.getAutoCommit();
+      try (
+        var statement = connection.prepareStatement("SELECT COUNT(*) FROM accounts");
+        var rows = statement.executeQuery()
+      ) {
+        assert rows.next() && rows.getInt(1) == 2;
+      }
+    }
+
+    try (
+      java.sql.Connection connection = database();
+      var statement = connection.prepareStatement("SELECT COUNT(*) FROM accounts WHERE name = ?")
+    ) {
+      statement.setString(1, "Alice");
+      try (var rows = statement.executeQuery()) {
+        assert rows.next() && rows.getInt(1) == 1;
+      }
+      statement.setString(1, "Alice' OR '1'='1");
+      try (var rows = statement.executeQuery()) {
+        assert rows.next() && rows.getInt(1) == 0;
+      }
+    }
+  }
 }
-
 ```
 
 **Expected:** Alice matches 1 row;the injection-shaped value matches0.

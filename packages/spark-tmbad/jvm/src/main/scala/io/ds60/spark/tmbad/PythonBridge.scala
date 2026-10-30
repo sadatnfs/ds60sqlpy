@@ -101,8 +101,13 @@ object PythonBridge {
   }
 
   private def sharedBindingOutput(
-      history: Option[DataFrame], future: DataFrame, loaded: PredictionBinding,
-      artifact: PreparedArtifact, optionsJson: String, forecast: Boolean, conditional: Boolean
+      history: Option[DataFrame],
+      future: DataFrame,
+      loaded: PredictionBinding,
+      artifact: PreparedArtifact,
+      optionsJson: String,
+      forecast: Boolean,
+      conditional: Boolean
   ): DataFrame = {
     val options = PredictionOptions.parse(optionsJson, loaded, forecast, conditional)
     val distributed = ArtifactFiles.prepare(future.sparkSession.sparkContext, artifact, getClass)
@@ -112,9 +117,10 @@ object PythonBridge {
         "History and future must belong to the same SparkContext"
       )
     )
-    val output = if (!forecast && !conditional && loaded.model.fitKind == "rows")
-      Prediction.rows(future, loaded, distributed, options)
-    else Prediction.joined(history, future, loaded, None, distributed, options, forecast)
+    val output =
+      if (!forecast && !conditional && loaded.model.fitKind == "rows")
+        Prediction.rows(future, loaded, distributed, options)
+      else Prediction.joined(history, future, loaded, None, distributed, options, forecast)
     if (loaded.declared.nonEmpty) ParameterDocument.annotate(output, loaded, options, forecast)
     else output
   }
@@ -172,8 +178,11 @@ object PythonBridge {
     )
 
   def evaluateShared(
-      frame: DataFrame, specJson: String, artifactJson: String,
-      parametersJson: String, optionsJson: String
+      frame: DataFrame,
+      specJson: String,
+      artifactJson: String,
+      parametersJson: String,
+      optionsJson: String
   ): String = {
     require(frame != null, "Evaluation requires a Spark DataFrame")
     val artifact = PreparedArtifact.parse(artifactJson)
@@ -184,10 +193,23 @@ object PythonBridge {
     val parameters = Json.numbers(supplied.get("parameters"), 64, "evaluation parameters")
     model.validateTheta(parameters)
     val rawOptions = Json.read(optionsJson)
-    Json.fields(rawOptions, Set.empty, Set("reduction", "l2_strength", "regularization", "fixed_parameters",
-      "batch_rows", "task_timeout_seconds", "max_partitions"))
+    Json.fields(
+      rawOptions,
+      Set.empty,
+      Set(
+        "reduction",
+        "l2_strength",
+        "regularization",
+        "fixed_parameters",
+        "batch_rows",
+        "task_timeout_seconds",
+        "max_partitions"
+      )
+    )
     val preparedOptions = Json.obj()
-    rawOptions.fields().forEachRemaining(field => preparedOptions.set[JsonNode](field.getKey, field.getValue))
+    rawOptions
+      .fields()
+      .forEachRemaining(field => preparedOptions.set[JsonNode](field.getKey, field.getValue))
     Json.putNumbers(preparedOptions, "initial_parameters", parameters)
     val options = FitOptions.parse(Json.write(preparedOptions), model)
     val settings = options.extension.getOrElse(FitTarget.resolve(preparedOptions, model, options))
@@ -196,14 +218,23 @@ object PythonBridge {
     val objective = SharedObjective.open(frame, spec, model, distributed, options)
     try {
       val raw = objective.evaluateRaw(parameters)
-      val evaluated = settings.evaluate(raw, parameters, NamedRegularization.Scaling(settings.reduction, raw.weight))
+      val evaluated = settings.evaluate(
+        raw,
+        parameters,
+        NamedRegularization.Scaling(settings.reduction, raw.weight)
+      )
       EvaluationDocument.create(model, artifact, parameters, options, settings, evaluated)
     } finally objective.close()
   }
 
   private def parameterOutput(
-      history: Option[DataFrame], future: DataFrame, parameterSetJson: String,
-      artifactJson: String, optionsJson: String, forecast: Boolean, conditional: Boolean
+      history: Option[DataFrame],
+      future: DataFrame,
+      parameterSetJson: String,
+      artifactJson: String,
+      optionsJson: String,
+      forecast: Boolean,
+      conditional: Boolean
   ): DataFrame = {
     require(future != null, "Declared-parameter prediction requires a target DataFrame")
     val artifact = PreparedArtifact.parse(artifactJson)
@@ -211,19 +242,57 @@ object PythonBridge {
     sharedBindingOutput(history, future, binding, artifact, optionsJson, forecast, conditional)
   }
 
-  def predictAtParameters(frame: DataFrame, parameterSetJson: String,
-                          artifactJson: String, optionsJson: String): DataFrame =
-    parameterOutput(None, frame, parameterSetJson, artifactJson, optionsJson, forecast = false, conditional = false)
+  def predictAtParameters(
+      frame: DataFrame,
+      parameterSetJson: String,
+      artifactJson: String,
+      optionsJson: String
+  ): DataFrame =
+    parameterOutput(
+      None,
+      frame,
+      parameterSetJson,
+      artifactJson,
+      optionsJson,
+      forecast = false,
+      conditional = false
+    )
 
-  def predictConditionalAtParameters(history: DataFrame, targets: DataFrame, parameterSetJson: String,
-                                     artifactJson: String, optionsJson: String): DataFrame = {
+  def predictConditionalAtParameters(
+      history: DataFrame,
+      targets: DataFrame,
+      parameterSetJson: String,
+      artifactJson: String,
+      optionsJson: String
+  ): DataFrame = {
     require(history != null, "Conditional declared-parameter prediction requires history")
-    parameterOutput(Some(history), targets, parameterSetJson, artifactJson, optionsJson, forecast = false, conditional = true)
+    parameterOutput(
+      Some(history),
+      targets,
+      parameterSetJson,
+      artifactJson,
+      optionsJson,
+      forecast = false,
+      conditional = true
+    )
   }
 
-  def forecastAtParameters(history: DataFrame, future: DataFrame, parameterSetJson: String,
-                           artifactJson: String, optionsJson: String): DataFrame =
-    parameterOutput(Option(history), future, parameterSetJson, artifactJson, optionsJson, forecast = true, conditional = false)
+  def forecastAtParameters(
+      history: DataFrame,
+      future: DataFrame,
+      parameterSetJson: String,
+      artifactJson: String,
+      optionsJson: String
+  ): DataFrame =
+    parameterOutput(
+      Option(history),
+      future,
+      parameterSetJson,
+      artifactJson,
+      optionsJson,
+      forecast = true,
+      conditional = false
+    )
 
   private def independentOutput(
       history: Option[DataFrame],

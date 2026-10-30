@@ -5,6 +5,7 @@ import NamedRegularization.{Plan, RawEvaluation, Reduction, Scaling, SmoothEvalu
 
 /** Bounded monotone proximal gradient with exact selected L1 and equality/box constraints. */
 object ProximalGradient {
+
   /** Integration may translate ONLY the existing reviewed native DomainFailure into this type. */
   final class ReviewedDomainFailure(message: String) extends IllegalArgumentException(message)
 
@@ -23,14 +24,22 @@ object ProximalGradient {
     require(maxIterations >= 1 && maxIterations <= 1000, "Invalid iteration budget")
     require(maxEvaluations >= 1 && maxEvaluations <= 10000, "Invalid evaluation budget")
     require(kktTolerance.isFinite && kktTolerance > 0.0, "Invalid summed-target KKT tolerance")
-    require(initialStep.isFinite && initialStep > 0.0 && maximumStep.isFinite &&
-      maximumStep >= initialStep && minimumStep.isFinite && minimumStep > 0.0 &&
-      minimumStep <= initialStep, "Invalid proximal step limits")
-    require(backtrackFactor.isFinite && backtrackFactor > 0.0 && backtrackFactor < 1.0 &&
-      stepGrowth.isFinite && stepGrowth >= 1.0, "Invalid proximal step adaptation")
+    require(
+      initialStep.isFinite && initialStep > 0.0 && maximumStep.isFinite &&
+        maximumStep >= initialStep && minimumStep.isFinite && minimumStep > 0.0 &&
+        minimumStep <= initialStep,
+      "Invalid proximal step limits"
+    )
+    require(
+      backtrackFactor.isFinite && backtrackFactor > 0.0 && backtrackFactor < 1.0 &&
+        stepGrowth.isFinite && stepGrowth >= 1.0,
+      "Invalid proximal step adaptation"
+    )
     require(maximumBacktracks >= 1 && maximumBacktracks <= 100, "Invalid backtracking bound")
-    require(relativeStepTolerance.isFinite && relativeStepTolerance > 0.0,
-      "Invalid coordinatewise relative step tolerance")
+    require(
+      relativeStepTolerance.isFinite && relativeStepTolerance > 0.0,
+      "Invalid coordinatewise relative step tolerance"
+    )
   }
   final case class Iteration(
       iteration: Int,
@@ -83,7 +92,10 @@ object ProximalGradient {
   }
   private def relativeStep(before: Vector[Double], after: Vector[Double], plan: Plan): Double = {
     val values = plan.domain.freeIndices.map { i =>
-      math.abs(after(i) - before(i)) / math.max(1.0, math.max(math.abs(before(i)), math.abs(after(i))))
+      math.abs(after(i) - before(i)) / math.max(
+        1.0,
+        math.max(math.abs(before(i)), math.abs(after(i)))
+      )
     }
     if (values.isEmpty) 0.0 else norm(values)
   }
@@ -124,7 +136,9 @@ object ProximalGradient {
     while (!finished) {
       val residual = norm(plan.rawKkt(point, current.rawGradient))
       if (residual <= settings.kktTolerance) {
-        status = if (plan.domain.freeIndices.isEmpty) "all_parameters_fixed" else "summed_target_kkt_tolerance"
+        status =
+          if (plan.domain.freeIndices.isEmpty) "all_parameters_fixed"
+          else "summed_target_kkt_tolerance"
         converged = true
         finished = true
       } else if (iteration >= settings.maxIterations) {
@@ -138,10 +152,13 @@ object ProximalGradient {
         var backtracks = 0
         var accepted: Option[(Vector[Double], SmoothEvaluation, Double)] = None
         var stalled = false
-        while (accepted.isEmpty && !stalled && backtracks < settings.maximumBacktracks &&
-               trialStep >= settings.minimumStep && calls < settings.maxEvaluations) {
+        while (
+          accepted.isEmpty && !stalled && backtracks < settings.maximumBacktracks &&
+          trialStep >= settings.minimumStep && calls < settings.maxEvaluations
+        ) {
           plan.proximal(point, current.gradient, trialStep, current.scaling) match {
-            case None => () // Unrepresentable trial arithmetic shrinks the step without a native call.
+            case None =>
+              () // Unrepresentable trial arithmetic shrinks the step without a native call.
             case Some(candidate) =>
               val relative = relativeStep(point, candidate, plan)
               if (relative == 0.0) stalled = true
@@ -180,9 +197,10 @@ object ProximalGradient {
         }
         accepted match {
           case None =>
-            status = if (stalled) "step_stalled_without_kkt"
-                     else if (calls >= settings.maxEvaluations) "maximum_evaluations"
-                     else "proximal_backtracking_failed"
+            status =
+              if (stalled) "step_stalled_without_kkt"
+              else if (calls >= settings.maxEvaluations) "maximum_evaluations"
+              else "proximal_backtracking_failed"
             finished = true
           case Some((next, proposed, composite)) =>
             val relative = relativeStep(point, next, plan)
@@ -191,8 +209,16 @@ object ProximalGradient {
             total = composite
             iteration += 1
             val residual = norm(plan.rawKkt(point, current.rawGradient))
-            trace += Iteration(iteration, total, residual,
-              residual / current.scaling.denominator, relative, trialStep, backtracks, calls)
+            trace += Iteration(
+              iteration,
+              total,
+              residual,
+              residual / current.scaling.denominator,
+              relative,
+              trialStep,
+              backtracks,
+              calls
+            )
             if (relative <= settings.relativeStepTolerance && residual > settings.kktTolerance) {
               status = "step_stalled_without_kkt"
               finished = true
@@ -202,10 +228,24 @@ object ProximalGradient {
       }
     }
     val residual = norm(plan.rawKkt(point, current.rawGradient))
-    Result(point, current, plan.rawL1Value(point), total, converged, status,
-      iteration, calls, rejected, residual, residual / current.scaling.denominator,
+    Result(
+      point,
+      current,
+      plan.rawL1Value(point),
+      total,
+      converged,
+      status,
+      iteration,
+      calls,
+      rejected,
+      residual,
+      residual / current.scaling.denominator,
       plan.domain.freeIndices.size,
-      point.indices.filter(i => point(i) == plan.domain.lower(i) || point(i) == plan.domain.upper(i)).toVector,
-      trace.toVector, plan.digest)
+      point.indices
+        .filter(i => point(i) == plan.domain.lower(i) || point(i) == plan.domain.upper(i))
+        .toVector,
+      trace.toVector,
+      plan.digest
+    )
   }
 }

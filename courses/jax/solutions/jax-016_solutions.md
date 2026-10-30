@@ -21,8 +21,8 @@ The Bernoulli mask is all true and the scale is one.
 **Expected:** Output equals input.
 
 ```python
-validate_keep(1.)
-close(dropout(values, key, training=True, keep=1.), values)
+validate_keep(1.0)
+close(dropout(values, key, training=True, keep=1.0), values)
 ```
 
 ## Exercise 3: Reject zero keep probability
@@ -33,11 +33,11 @@ Division by zero is not a usable all-dropped training policy under this contract
 
 ```python
 try:
-    validate_keep(0.)
+    validate_keep(0.0)
 except ValueError:
     pass
 else:
-    raise AssertionError('zero keep accepted')
+    raise AssertionError("zero keep accepted")
 ```
 
 ## Exercise 4: Differentiate with a fixed mask
@@ -58,8 +58,8 @@ These are a small configuration set rather than per-element changing data.
 **Expected:** Deterministic identity output.
 
 ```python
-compiled = jax.jit(dropout, static_argnames=('training', 'keep'))
-close(compiled(values, key, training=False, keep=.5), values)
+compiled = jax.jit(dropout, static_argnames=("training", "keep"))
+close(compiled(values, key, training=False, keep=0.5), values)
 ```
 
 ## Exercise 6: Inspect a larger sample without a universal claim
@@ -71,8 +71,8 @@ The interval follows the output support. The expectation one is established alge
 ```python
 result = dropout(jnp.ones(4096), key, training=True)
 mean = float(result.mean())
-assert 0. <= mean <= 2.
-assert bool(jnp.all((result == 0.) | (result == 2.)))
+assert 0.0 <= mean <= 2.0
+assert bool(jnp.all((result == 0.0) | (result == 2.0)))
 ```
 
 ## Scope of this evidence

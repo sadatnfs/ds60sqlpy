@@ -117,6 +117,7 @@ identify which line creates each intermediate object.
 def subtotal(prices: list[float]) -> float:
     return sum(prices)
 
+
 assert subtotal([2.5, 3.0]) == 5.5
 assert subtotal([]) == 0
 "two subtotal contracts passed"
@@ -140,9 +141,9 @@ identify which line creates each intermediate object.
 def is_valid_percentage(value: float) -> bool:
     return 0 <= value <= 100
 
+
 cases = [(0, True), (100, True), (-0.1, False), (100.1, False)]
-results = [(value, is_valid_percentage(value) == expected)
-           for value, expected in cases]
+results = [(value, is_valid_percentage(value) == expected) for value, expected in cases]
 results
 ```
 
@@ -201,15 +202,18 @@ Tests do not prove the absence of every bug; they preserve selected contracts.
 ```python
 import pytest
 
+
 def normalize_age(raw: str) -> int:
     age = int(raw)
     if age < 0:
         raise ValueError("age must be non-negative")
     return age
 
+
 @pytest.mark.parametrize(("raw", "expected"), [("0", 0), ("42", 42)])
 def test_normalize_age(raw: str, expected: int) -> None:
     assert normalize_age(raw) == expected
+
 
 def test_normalize_age_rejects_negative() -> None:
     with pytest.raises(ValueError, match="non-negative"):

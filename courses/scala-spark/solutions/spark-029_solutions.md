@@ -12,23 +12,46 @@ Require ordered fieldsid, value with bigint types, exactly 30 known unique IDs 0
 
 ```scala
 def productDigest(frame: DataFrame): String = {
-  require(frame.schema.fields.toSeq.map(f => (f.name,f.dataType.simpleString)) == Seq(("id","bigint"),("value","bigint")),"Product schema mismatch")
-  val metrics = frame.agg(count(lit(1)),countDistinct("id"),min("id"),max("id"),sum("value")).first()
-  require(metrics.toSeq == Seq(30L,30L,0L,29L,870L),"Product population mismatch")
-  require(frame.filter(col("id").isNull || col("value").isNull || col("value") =!= col("id")*2L).count() == 0L,"Product value mismatch")
+  require(
+    frame.schema.fields.toSeq
+      .map(f => (f.name, f.dataType.simpleString)) == Seq(("id", "bigint"), ("value", "bigint")),
+    "Product schema mismatch"
+  )
+  val metrics =
+    frame.agg(count(lit(1)), countDistinct("id"), min("id"), max("id"), sum("value")).first()
+  require(metrics.toSeq == Seq(30L, 30L, 0L, 29L, 870L), "Product population mismatch")
+  require(
+    frame
+      .filter(col("id").isNull || col("value").isNull || col("value") =!= col("id") * 2L)
+      .count() == 0L,
+    "Product value mismatch"
+  )
   val canonical = frame.orderBy("id").toJSON.collect().mkString("\n")
-  MessageDigest.getInstance("SHA-256").digest(canonical.getBytes(StandardCharsets.UTF_8)).map(b => f"${b & 0xff}%02x").mkString
+  MessageDigest
+    .getInstance("SHA-256")
+    .digest(canonical.getBytes(StandardCharsets.UTF_8))
+    .map(b => f"${b & 0xff}%02x")
+    .mkString
 }
 ```
 
 ```python
 def product_digest(frame):
-    if [(f.name,f.dataType.simpleString()) for f in frame.schema.fields] != [("id","bigint"),("value","bigint")]:
+    if [(f.name, f.dataType.simpleString()) for f in frame.schema.fields] != [
+        ("id", "bigint"),
+        ("value", "bigint"),
+    ]:
         raise ValueError("Product schema mismatch")
-    metrics = tuple(frame.agg(F.count(F.lit(1)),F.countDistinct("id"),F.min("id"),F.max("id"),F.sum("value")).first())
-    if metrics != (30,30,0,29,870):
+    metrics = tuple(
+        frame.agg(
+            F.count(F.lit(1)), F.countDistinct("id"), F.min("id"), F.max("id"), F.sum("value")
+        ).first()
+    )
+    if metrics != (30, 30, 0, 29, 870):
         raise ValueError("Product population mismatch")
-    if frame.filter(F.col("id").isNull()|F.col("value").isNull()|(F.col("value")!=F.col("id")*2)).count():
+    if frame.filter(
+        F.col("id").isNull() | F.col("value").isNull() | (F.col("value") != F.col("id") * 2)
+    ).count():
         raise ValueError("Product value mismatch")
     canonical = "\n".join(frame.orderBy("id").toJSON().collect())
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
@@ -49,17 +72,28 @@ def stageRun(spark: SparkSession, root: Path, runId: String, source: DataFrame):
   checkRunId(runId)
   val digest = productDigest(source)
   val run = root.resolve("runs").resolve(runId)
-  if(Files.exists(run)) {
-   val existing = validateStaged(spark,root,runId)
-   require(mapper.readTree(existing).get("sha256").asText() == digest,"Run identity has different content")
-   existing
+  if (Files.exists(run)) {
+    val existing = validateStaged(spark, root, runId)
+    require(
+      mapper.readTree(existing).get("sha256").asText() == digest,
+      "Run identity has different content"
+    )
+    existing
   } else {
-   Files.createDirectory(run)
-   source.write.mode("errorifexists").parquet(run.resolve("data").toString)
-   require(productDigest(spark.read.parquet(run.resolve("data").toString)) == digest,"Staging readback mismatch")
-   val text = receiptText(runId,digest)
-   Files.writeString(run.resolve("receipt.json"),text,StandardCharsets.UTF_8,StandardOpenOption.CREATE_NEW)
-   text
+    Files.createDirectory(run)
+    source.write.mode("errorifexists").parquet(run.resolve("data").toString)
+    require(
+      productDigest(spark.read.parquet(run.resolve("data").toString)) == digest,
+      "Staging readback mismatch"
+    )
+    val text = receiptText(runId, digest)
+    Files.writeString(
+      run.resolve("receipt.json"),
+      text,
+      StandardCharsets.UTF_8,
+      StandardOpenOption.CREATE_NEW
+    )
+    text
   }
 }
 ```
@@ -68,18 +102,18 @@ def stageRun(spark: SparkSession, root: Path, runId: String, source: DataFrame):
 def stage_run(spark, root, run_id, source):
     check_run_id(run_id)
     digest = product_digest(source)
-    run = root/"runs"/run_id
+    run = root / "runs" / run_id
     if run.exists():
-        existing = validate_staged(spark,root,run_id)
+        existing = validate_staged(spark, root, run_id)
         if json.loads(existing)["sha256"] != digest:
             raise ValueError("Run identity has different content")
         return existing
     run.mkdir()
-    source.write.mode("errorifexists").parquet(str(run/"data"))
-    if product_digest(spark.read.parquet(str(run/"data"))) != digest:
+    source.write.mode("errorifexists").parquet(str(run / "data"))
+    if product_digest(spark.read.parquet(str(run / "data"))) != digest:
         raise ValueError("Staging readback mismatch")
-    text = receipt_text(run_id,digest)
-    with (run/"receipt.json").open("x",encoding="utf-8") as handle:
+    text = receipt_text(run_id, digest)
+    with (run / "receipt.json").open("x", encoding="utf-8") as handle:
         handle.write(text)
     return text
 ```
@@ -98,11 +132,22 @@ Read a run receipt and require its run_id, data_path, row_count, schema and dige
 def validateStaged(spark: SparkSession, root: Path, runId: String): String = {
   checkRunId(runId)
   val run = root.resolve("runs").resolve(runId)
-  val text = Files.readString(run.resolve("receipt.json"),StandardCharsets.UTF_8)
+  val text = Files.readString(run.resolve("receipt.json"), StandardCharsets.UTF_8)
   val node = mapper.readTree(text)
-  require(node.path("run_id").asText() == runId && node.path("data_path").asText() == "runs/"+runId+"/data","Receipt identity/path mismatch")
-  require(node.path("row_count").asInt() == 30 && node.path("schema").asText() == schemaText,"Receipt schema/count mismatch")
-  require(node.path("sha256").asText() == productDigest(spark.read.parquet(run.resolve("data").toString)),"Receipt content mismatch")
+  require(
+    node
+      .path("run_id")
+      .asText() == runId && node.path("data_path").asText() == "runs/" + runId + "/data",
+    "Receipt identity/path mismatch"
+  )
+  require(
+    node.path("row_count").asInt() == 30 && node.path("schema").asText() == schemaText,
+    "Receipt schema/count mismatch"
+  )
+  require(
+    node.path("sha256").asText() == productDigest(spark.read.parquet(run.resolve("data").toString)),
+    "Receipt content mismatch"
+  )
   text
 }
 ```
@@ -110,14 +155,14 @@ def validateStaged(spark: SparkSession, root: Path, runId: String): String = {
 ```python
 def validate_staged(spark, root, run_id):
     check_run_id(run_id)
-    run = root/"runs"/run_id
-    text = (run/"receipt.json").read_text(encoding="utf-8")
+    run = root / "runs" / run_id
+    text = (run / "receipt.json").read_text(encoding="utf-8")
     node = json.loads(text)
-    if node.get("run_id") != run_id or node.get("data_path") != "runs/"+run_id+"/data":
+    if node.get("run_id") != run_id or node.get("data_path") != "runs/" + run_id + "/data":
         raise ValueError("Receipt identity/path mismatch")
     if node.get("row_count") != 30 or node.get("schema") != SCHEMA_TEXT:
         raise ValueError("Receipt schema/count mismatch")
-    if node.get("sha256") != product_digest(spark.read.parquet(str(run/"data"))):
+    if node.get("sha256") != product_digest(spark.read.parquet(str(run / "data"))):
         raise ValueError("Receipt content mismatch")
     return text
 ```
@@ -134,26 +179,31 @@ Validate the staged receipt, write it to a fresh temporary manifest beside curre
 
 ```scala
 def publishRun(spark: SparkSession, root: Path, runId: String, failBeforeReplace: Boolean): Unit = {
-  val text = validateStaged(spark,root,runId)
-  val pending = root.resolve("manifest-pending-"+UUID.randomUUID().toString+".json")
+  val text = validateStaged(spark, root, runId)
+  val pending = root.resolve("manifest-pending-" + UUID.randomUUID().toString + ".json")
   try {
-   Files.writeString(pending,text,StandardCharsets.UTF_8,StandardOpenOption.CREATE_NEW)
-   if(failBeforeReplace) throw new IllegalStateException("injected_before_publication")
-   Files.move(pending,root.resolve("current.json"),StandardCopyOption.ATOMIC_MOVE,StandardCopyOption.REPLACE_EXISTING)
+    Files.writeString(pending, text, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW)
+    if (failBeforeReplace) throw new IllegalStateException("injected_before_publication")
+    Files.move(
+      pending,
+      root.resolve("current.json"),
+      StandardCopyOption.ATOMIC_MOVE,
+      StandardCopyOption.REPLACE_EXISTING
+    )
   } finally Files.deleteIfExists(pending)
 }
 ```
 
 ```python
 def publish_run(spark, root, run_id, fail_before_replace=False):
-    text = validate_staged(spark,root,run_id)
-    pending = root/("manifest-pending-"+uuid.uuid4().hex+".json")
+    text = validate_staged(spark, root, run_id)
+    pending = root / ("manifest-pending-" + uuid.uuid4().hex + ".json")
     try:
-        with pending.open("x",encoding="utf-8") as handle:
+        with pending.open("x", encoding="utf-8") as handle:
             handle.write(text)
         if fail_before_replace:
             raise RuntimeError("injected_before_publication")
-        os.replace(pending,root/"current.json")
+        os.replace(pending, root / "current.json")
     finally:
         pending.unlink(missing_ok=True)
 ```
@@ -170,24 +220,24 @@ Read the current manifest, validate its selected run and return that product. St
 
 ```scala
 def readPublished(spark: SparkSession, root: Path): DataFrame = {
-  val current = Files.readString(root.resolve("current.json"),StandardCharsets.UTF_8)
+  val current = Files.readString(root.resolve("current.json"), StandardCharsets.UTF_8)
   val node = mapper.readTree(current)
   val runId = node.path("run_id").asText()
-  val validated = validateStaged(spark,root,runId)
-  require(mapper.readTree(validated) == node,"Published manifest differs from validated receipt")
+  val validated = validateStaged(spark, root, runId)
+  require(mapper.readTree(validated) == node, "Published manifest differs from validated receipt")
   spark.read.parquet(root.resolve("runs").resolve(runId).resolve("data").toString)
 }
 ```
 
 ```python
 def read_published(spark, root):
-    current = (root/"current.json").read_text(encoding="utf-8")
+    current = (root / "current.json").read_text(encoding="utf-8")
     node = json.loads(current)
     run_id = node.get("run_id")
-    validated = validate_staged(spark,root,run_id)
+    validated = validate_staged(spark, root, run_id)
     if json.loads(validated) != node:
         raise ValueError("Published manifest differs from validated receipt")
-    return spark.read.parquet(str(root/"runs"/run_id/"data"))
+    return spark.read.parquet(str(root / "runs" / run_id / "data"))
 ```
 
 The failure leaves a valid but unreferenced staging product. A manifest-based reader ignores it and continues to use the prior selected run. The unchanged manifest bytes and independently revalidated digest prove the precise boundary tested: an interruption before replacement did not publish partial or additional logical rows.
@@ -202,17 +252,17 @@ Compose stage, validate/publish and readback for a repeated run ID. Retryrun-a w
 
 ```scala
 def retryProduct(spark: SparkSession, root: Path, runId: String, source: DataFrame): String = {
-  stageRun(spark,root,runId,source)
-  publishRun(spark,root,runId,false)
-  productDigest(readPublished(spark,root))
+  stageRun(spark, root, runId, source)
+  publishRun(spark, root, runId, false)
+  productDigest(readPublished(spark, root))
 }
 ```
 
 ```python
 def retry_product(spark, root, run_id, source):
-    stage_run(spark,root,run_id,source)
-    publish_run(spark,root,run_id)
-    return product_digest(read_published(spark,root))
+    stage_run(spark, root, run_id, source)
+    publish_run(spark, root, run_id)
+    return product_digest(read_published(spark, root))
 ```
 
 Canonical content identity is stable across physical repartitioning, so the retry can reuse the existing run. Data-file count proves the valid retry did not append another 30-row product. The invalid source is rejected by the product contract before it can replace the current pointer. This is a bounded single-writer local protocol, with its tested failure boundary stated explicitly.

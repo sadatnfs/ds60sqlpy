@@ -85,7 +85,8 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-w=torch.tensor([1.,-2.]); assert w.abs().sum().item()==3 and w.square().sum().item()==5
+w = torch.tensor([1.0, -2.0])
+assert w.abs().sum().item() == 3 and w.square().sum().item() == 5
 ```
 
 **Expected:** \(L_{1}=3\); squared \(L_{2}=5\).
@@ -95,8 +96,10 @@ w=torch.tensor([1.,-2.]); assert w.abs().sum().item()==3 and w.square().sum().it
 The local inference behavior is deterministic. Other pipeline components can still be random, so a full model needs its own evaluation contract.
 
 ```python
-drop=nn.Dropout(.5); drop.eval(); x=torch.ones((4,8))
-assert torch.equal(drop(x),x) and torch.equal(drop(x),x)
+drop = nn.Dropout(0.5)
+drop.eval()
+x = torch.ones((4, 8))
+assert torch.equal(drop(x), x) and torch.equal(drop(x), x)
 ```
 
 **Expected:** both outputs exactly ones.
@@ -106,8 +109,9 @@ assert torch.equal(drop(x),x) and torch.equal(drop(x),x)
 The test does not require a particular mask or count of zeros. Such a pattern would overfit the random implementation rather than the Dropout contract.
 
 ```python
-drop.train(); sampled=drop(x)
-assert tuple(sampled.shape)==(4,8) and set(sampled.unique().tolist())<={0.,2.}
+drop.train()
+sampled = drop(x)
+assert tuple(sampled.shape) == (4, 8) and set(sampled.unique().tolist()) <= {0.0, 2.0}
 ```
 
 **Expected:** shape(4, 8); only 0 or2.

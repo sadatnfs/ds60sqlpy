@@ -24,8 +24,8 @@ The << operator inserts text into the stream. The semicolon ends the statement a
 #include <iostream>
 
 int main() {
-    std::cout << "hello, learner\n";
-    return 0;
+  std::cout << "hello, learner\n";
+  return 0;
 }
 ```
 
@@ -37,7 +37,10 @@ Normal text and a failure status can coexist. This example is a deliberate failu
 
 ```cpp
 #include <iostream>
-int main() { std::cerr << "fixture rejected\n"; return 2; }
+int main() {
+  std::cerr << "fixture rejected\n";
+  return 2;
+}
 ```
 
 **Expected:** stderr fixture rejected plus newline; exit2, intentionally.

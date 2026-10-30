@@ -29,7 +29,7 @@ Task: Write one line containing an emoji, then compare text length and byte leng
 The emoji occupies four UTF-8 bytes and two UTF-16 code units. Neither byte count nor JavaScript string length is a universal count of user-perceived characters.
 
 ```javascript
-await withDirectory(async directory => {
+await withDirectory(async (directory) => {
   const path = join(directory, 'message.txt');
   const text = 'A😀B\n';
   await writeFile(path, text, { encoding: 'utf8', flag: 'wx' });
@@ -50,7 +50,7 @@ Task: Stream two lines with a two-byte highWaterMark and decode using readline.
 The stream decoder retains incomplete UTF-8 sequences, while readline retains incomplete lines. Chunk size is not a record size or a guarantee about the bytes held by every layer.
 
 ```javascript
-await withDirectory(async directory => {
+await withDirectory(async (directory) => {
   const path = join(directory, 'lines.txt');
   await writeFile(path, 'A😀B\r\nsecond\n', 'utf8');
   assert.deepEqual(await readLines(path), ['A😀B', 'second']);
@@ -68,10 +68,13 @@ Task: Create a file exclusively twice and inspect its unchanged content.
 Checking existence before writing introduces a race. Exclusive creation combines the check and creation at the filesystem operation boundary.
 
 ```javascript
-await withDirectory(async directory => {
+await withDirectory(async (directory) => {
   const path = join(directory, 'owned.txt');
   await writeFile(path, 'first', { flag: 'wx' });
-  await assert.rejects(writeFile(path, 'second', { flag: 'wx' }), error => error.code === 'EEXIST');
+  await assert.rejects(
+    writeFile(path, 'second', { flag: 'wx' }),
+    (error) => error.code === 'EEXIST',
+  );
   assert.equal(await readFile(path, 'utf8'), 'first');
 });
 ```
@@ -87,8 +90,11 @@ Task: Read a path known not to exist in the fresh directory.
 A missing file can have an intentional application policy, but a catch-all empty result would also hide permission and I/O errors. Match the specific failure you intend to handle.
 
 ```javascript
-await withDirectory(async directory => {
-  await assert.rejects(readFile(join(directory, 'missing.txt')), error => error.code === 'ENOENT');
+await withDirectory(async (directory) => {
+  await assert.rejects(
+    readFile(join(directory, 'missing.txt')),
+    (error) => error.code === 'ENOENT',
+  );
 });
 ```
 
@@ -120,7 +126,7 @@ Task: Stream an empty file with the same decoder and line interface.
 The absence of bytes means no records. Adding a fabricated empty line would change aggregation counts and confuse empty input with one empty record.
 
 ```javascript
-await withDirectory(async directory => {
+await withDirectory(async (directory) => {
   const path = join(directory, 'empty.txt');
   await writeFile(path, '');
   assert.deepEqual(await readLines(path), []);

@@ -50,12 +50,15 @@ import java.util.*;
 
 public class Main {
 
-    public static void main(String[] args) throws Exception {
-        int total = List.of(1,2,3,4).stream().filter(value -> value % 2 == 0).mapToInt(value -> value * value).sum();
-        assert total == 20;
-    }
+  public static void main(String[] args) throws Exception {
+    int total = List.of(1, 2, 3, 4)
+      .stream()
+      .filter(value -> value % 2 == 0)
+      .mapToInt(value -> value * value)
+      .sum();
+    assert total == 20;
+  }
 }
-
 ```
 
 **Expected:** 20.
@@ -69,17 +72,25 @@ import java.util.*;
 
 public class Main {
 
-    public static void main(String[] args) throws Exception {
-        int total = List.of(1,2,3,4).stream().filter(value -> value % 2 == 0).mapToInt(value -> value * value).sum();
-        assert total == 20;
+  public static void main(String[] args) throws Exception {
+    int total = List.of(1, 2, 3, 4)
+      .stream()
+      .filter(value -> value % 2 == 0)
+      .mapToInt(value -> value * value)
+      .sum();
+    assert total == 20;
 
-        var calls = new java.util.concurrent.atomic.AtomicInteger();
-        var pipeline = List.of(1,2,3).stream().map(value -> { calls.incrementAndGet(); return value * 2; });
-        assert calls.get() == 0;
-        assert pipeline.toList().equals(List.of(2,4,6)) && calls.get() == 3;
-    }
+    var calls = new java.util.concurrent.atomic.AtomicInteger();
+    var pipeline = List.of(1, 2, 3)
+      .stream()
+      .map(value -> {
+        calls.incrementAndGet();
+        return value * 2;
+      });
+    assert calls.get() == 0;
+    assert pipeline.toList().equals(List.of(2, 4, 6)) && calls.get() == 3;
+  }
 }
-
 ```
 
 **Expected:** counter0 before terminal and3 after.

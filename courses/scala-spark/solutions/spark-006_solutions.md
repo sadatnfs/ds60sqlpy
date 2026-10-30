@@ -37,9 +37,10 @@ def eventId(event: Event): String = {
 The common trait field provides identity without inspecting a monetary field or converting a whole object to text. Equal payment values remain separate because their IDs differ. Constructor validation prevents a blank identity from entering this valid-object domain. External raw records need an explicit validation result rather than relying on this exception boundary as a data-quality ledger.
 
 ```scala
-val events: Seq[Event] = Seq(Paid("p1",100L),Paid("p2",100L),Voided("v1","duplicate"),Refunded("r1",25L))
-assert(events.map(eventId) == Seq("p1","p2","v1","r1"))
-expectIllegalArgument(Paid("",100L))
+val events: Seq[Event] =
+  Seq(Paid("p1", 100L), Paid("p2", 100L), Voided("v1", "duplicate"), Refunded("r1", 25L))
+assert(events.map(eventId) == Seq("p1", "p2", "v1", "r1"))
+expectIllegalArgument(Paid("", 100L))
 ```
 
 ### Exercise 2: Match every defined state
@@ -51,8 +52,8 @@ Return paid, voided or refunded through an exhaustive pattern match. Include Ref
 ```scala
 def kind(event: Event): String = {
   event match {
-    case Paid(_, _) => "paid"
-    case Voided(_, _) => "voided"
+    case Paid(_, _)     => "paid"
+    case Voided(_, _)   => "voided"
     case Refunded(_, _) => "refunded"
   }
 }
@@ -61,8 +62,8 @@ def kind(event: Event): String = {
 The cases represent domain alternatives rather than arbitrary strings. An explicit branch for every state makes a future model extension visible to review and tests. A wildcard default can hide that extension by assigning a misleading existing category. The zero-payment assertion separates state classification from numerical truthiness: amount zero does not make a Paid event a void.
 
 ```scala
-assert(events.map(kind) == Seq("paid","paid","voided","refunded"))
-assert(kind(Paid("zero",0L)) == "paid")
+assert(events.map(kind) == Seq("paid", "paid", "voided", "refunded"))
+assert(kind(Paid("zero", 0L)) == "paid")
 ```
 
 ### Exercise 3: Separate magnitude from signed contribution
@@ -74,8 +75,8 @@ Return positive cents for Paid, negative cents for Refunded, and zero for Voided
 ```scala
 def signedCents(event: Event): Long = {
   event match {
-    case Paid(_, amount) => amount
-    case Voided(_, _) => 0L
+    case Paid(_, amount)     => amount
+    case Voided(_, _)        => 0L
     case Refunded(_, amount) => -amount
   }
 }
@@ -84,9 +85,9 @@ def signedCents(event: Event): Long = {
 The stored magnitude and the reporting sign are different concepts. Keeping refund cents nonnegative simplifies constructor validation while the match defines its negative contribution. The bounded domain makes negation safe from the Long.MinValue corner. A void still contributes an event count even though its signed amount is zero, so net value alone cannot describe the ledger.
 
 ```scala
-assert(events.map(signedCents) == Seq(100L,100L,0L,-25L))
-assert(signedCents(Refunded("r0",0L)) == 0L && kind(Refunded("r0",0L)) == "refunded")
-expectIllegalArgument(Paid("bad",-1L))
+assert(events.map(signedCents) == Seq(100L, 100L, 0L, -25L))
+assert(signedCents(Refunded("r0", 0L)) == 0L && kind(Refunded("r0", 0L)) == "refunded")
+expectIllegalArgument(Paid("bad", -1L))
 ```
 
 ### Exercise 4: Create a validated replacement value
@@ -104,10 +105,10 @@ def revisePaid(event: Paid, newCents: Long): Paid = {
 copy constructs a replacement record rather than mutating the existing object. Named fields make the revised attribute explicit, and the case-class constructor rechecks its invariants. Preserving identity does not mean both versions should be counted as separate events. A versioned ledger needs a version key or an explicit replacement policy, which the final uniqueness audit deliberately does not invent.
 
 ```scala
-val original = Paid("p1",100L)
-val revised = revisePaid(original,125L)
-assert(original.cents == 100L && revised == Paid("p1",125L) && revised.id == original.id)
-expectIllegalArgument(revisePaid(original,1000001L))
+val original = Paid("p1", 100L)
+val revised = revisePaid(original, 125L)
+assert(original.cents == 100L && revised == Paid("p1", 125L) && revised.id == original.id)
+expectIllegalArgument(revisePaid(original, 1000001L))
 ```
 
 ### Exercise 5: Reduce signed events without dropping zero states
@@ -118,7 +119,7 @@ Compute the checked Long sum of signedCents for every event. Empty input returns
 
 ```scala
 def netTotal(events: Seq[Event]): Long = {
-  events.foldLeft(0L)((total,event) => Math.addExact(total,signedCents(event)))
+  events.foldLeft(0L)((total, event) => Math.addExact(total, signedCents(event)))
 }
 ```
 
@@ -126,7 +127,7 @@ Every event is processed through the signed domain rule before accumulation. Thi
 
 ```scala
 assert(netTotal(events) == 175L && netTotal(Seq.empty) == 0L)
-val zeroStates: Seq[Event] = Seq(Paid("z",0L),Voided("v","reason"))
+val zeroStates: Seq[Event] = Seq(Paid("z", 0L), Voided("v", "reason"))
 assert(netTotal(zeroStates) == 0L && zeroStates.size == 2)
 ```
 
@@ -140,11 +141,12 @@ Reject repeated event IDs, then return IDs in source order, net total, and count
 def audit(events: Seq[Event]): (Seq[String], Long, Map[String, Long]) = {
   val identities = events.map(eventId)
   require(identities.distinct.size == identities.size, "event IDs must be unique")
-  val counts = events.foldLeft(Map("paid" -> 0L,"voided" -> 0L,"refunded" -> 0L)) { (current,event) =>
-    val state = kind(event)
-    current.updated(state,current(state) + 1L)
+  val counts = events.foldLeft(Map("paid" -> 0L, "voided" -> 0L, "refunded" -> 0L)) {
+    (current, event) =>
+      val state = kind(event)
+      current.updated(state, current(state) + 1L)
   }
-  (identities,netTotal(events),counts)
+  (identities, netTotal(events), counts)
 }
 ```
 
@@ -152,9 +154,11 @@ Uniqueness is checked on the actual event identity rather than on amount or the 
 
 ```scala
 val report = audit(events)
-assert(report._1 == Seq("p1","p2","v1","r1") && report._2 == 175L)
-assert(report._3 == Map("paid" -> 2L,"voided" -> 1L,"refunded" -> 1L) && report._3.values.sum == 4L)
-expectIllegalArgument(audit(Seq(Paid("same",10L),Paid("same",10L))))
+assert(report._1 == Seq("p1", "p2", "v1", "r1") && report._2 == 175L)
+assert(
+  report._3 == Map("paid" -> 2L, "voided" -> 1L, "refunded" -> 1L) && report._3.values.sum == 4L
+)
+expectIllegalArgument(audit(Seq(Paid("same", 10L), Paid("same", 10L))))
 ```
 
 ## Evidence and scope

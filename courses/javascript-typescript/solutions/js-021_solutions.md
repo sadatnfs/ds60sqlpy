@@ -29,7 +29,9 @@ Task: Pass a wider named object with id and count to a function requiring only i
 Structural acceptance is useful for small interfaces, but does not strip extra fields. Treating an accepted type as an exact serialization schema can leak fields that still exist at runtime.
 
 ```typescript
-function label(value: { id: string }): string { return value.id; }
+function label(value: { id: string }): string {
+  return value.id;
+}
 const wider = { id: 'A', count: 2 };
 assert.equal(label(wider), 'A');
 assert.equal(wider.count, 2);
@@ -74,7 +76,9 @@ The optional field forces the caller to account for undefined. Nullish fallback 
 
 ```typescript
 type Options = { count?: number };
-function count(options: Options): number { return options.count ?? 10; }
+function count(options: Options): number {
+  return options.count ?? 10;
+}
 assert.equal(count({}), 10);
 assert.equal(count({ count: 0 }), 0);
 ```
@@ -128,7 +132,7 @@ A read-only consumer can compute a new value without requiring mutation rights. 
 
 ```typescript
 const values: readonly number[] = [1, 2];
-const doubled = values.map(value => value * 2);
+const doubled = values.map((value) => value * 2);
 assert.deepEqual(doubled, [2, 4]);
 assert.deepEqual(values, [1, 2]);
 function negativeTypeCheck(): void {

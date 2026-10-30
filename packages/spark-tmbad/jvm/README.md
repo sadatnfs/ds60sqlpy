@@ -48,10 +48,12 @@ import io.ds60.spark.tmbad.PythonBridge
 import java.nio.file.{Files, Path}
 
 val artifact = Files.readString(Path.of("/prepared/artifact.json"))
-val observations = spark.sql("""
+val observations = spark
+  .sql("""
   SELECT * FROM VALUES (0L,1D),(1L,3D),(2L,5D),(3L,7D)
   AS observations(id,y)
-""").repartition(3)
+""")
+  .repartition(3)
 val specification = """{
   "model_id":"normal", "columns":{"y":"y"},
   "id_columns":["id"], "group_columns":[], "order_columns":[],
@@ -63,8 +65,8 @@ val fitting = """{
 }"""
 val modelJson = PythonBridge.fitShared(observations, specification, artifact, fitting)
 val future = spark.sql("SELECT * FROM VALUES (10L),(11L) AS future(id)")
-val prediction = PythonBridge.predict(future, modelJson, artifact,
-  """{"target":"response","columns":{}}""")
+val prediction =
+  PythonBridge.predict(future, modelJson, artifact, """{"target":"response","columns":{}}""")
 prediction.show()
 ```
 

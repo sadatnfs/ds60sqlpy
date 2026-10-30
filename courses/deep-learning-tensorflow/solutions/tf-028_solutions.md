@@ -23,8 +23,10 @@ The question is: Take two Adam steps on(w-2)² fromw0 and inspect iterations.
 A checkpoint made before any updates would not test restoration of nonzero moment estimates. Two steps create state that a fresh optimizer does not possess.
 
 ```python
-w,opt=make_state(); step(w,opt); step(w,opt)
-assert int(opt.iterations)==2 and float(w)>0
+w, opt = make_state()
+step(w, opt)
+step(w, opt)
+assert int(opt.iterations) == 2 and float(w) > 0
 ```
 
 **Expected:** iteration count2 and positive weight.
@@ -38,9 +40,11 @@ The question is: Save a checkpoint containingw and Adam into a TemporaryDirector
 The returned prefix includes a save counter. Keep the exact prefix rather than guessing a filename. Temporary ownership confines the example to disposable local files.
 
 ```python
-temporary=tempfile.TemporaryDirectory(); folder=Path(temporary.name)
-checkpoint=tf.train.Checkpoint(weight=w,optimizer=opt); prefix=checkpoint.save(str(folder/'state'))
-assert Path(prefix+'.index').is_file()
+temporary = tempfile.TemporaryDirectory()
+folder = Path(temporary.name)
+checkpoint = tf.train.Checkpoint(weight=w, optimizer=opt)
+prefix = checkpoint.save(str(folder / "state"))
+assert Path(prefix + ".index").is_file()
 ```
 
 **Expected:** checkpoint index exists; no course source file is written.
@@ -54,8 +58,10 @@ The question is: Snapshot the saved weight and take one further step without res
 The control defines the next-step behavior before the restart comparison. It uses the same target, rate and optimizer configuration as the child process.
 
 ```python
-saved=float(w); step(w,opt); expected=float(w)
-assert int(opt.iterations)==3 and expected!=saved
+saved = float(w)
+step(w, opt)
+expected = float(w)
+assert int(opt.iterations) == 3 and expected != saved
 ```
 
 **Expected:** iteration count3; weight changes.
@@ -69,7 +75,7 @@ The question is: Launch the existing interpreter with fresh variable/Adam object
 A subprocess has no access to the parent live optimizer objects. Successful parity therefore tests reconstruction from disk. The strict restore check detects omitted variables rather than silently accepting partial state.
 
 ```python
-program=textwrap.dedent("""
+program = textwrap.dedent("""
 import json,sys,tensorflow as tf
 w=tf.Variable(0.,dtype=tf.float32); opt=tf.keras.optimizers.Adam(.1); opt.build([w])
 c=tf.train.Checkpoint(weight=w,optimizer=opt); c.restore(sys.argv[1]).assert_consumed()
@@ -78,10 +84,14 @@ opt.apply_gradients([(tape.gradient(loss,w),w)])
 print(json.dumps({'weight':float(w),'iterations':int(opt.iterations)}))
 """)
 compile(program, "checkpoint-child", "exec")
-result=subprocess.run([sys.executable,'-c',program,prefix],check=False,capture_output=True,text=True,timeout=60)
-if result.returncode: raise RuntimeError('child process failed: '+result.stderr)
-restored=json.loads(result.stdout.strip().splitlines()[-1])
-np.testing.assert_allclose(restored['weight'],expected,atol=1e-6,rtol=0); assert restored['iterations']==3
+result = subprocess.run(
+    [sys.executable, "-c", program, prefix], check=False, capture_output=True, text=True, timeout=60
+)
+if result.returncode:
+    raise RuntimeError("child process failed: " + result.stderr)
+restored = json.loads(result.stdout.strip().splitlines()[-1])
+np.testing.assert_allclose(restored["weight"], expected, atol=1e-6, rtol=0)
+assert restored["iterations"] == 3
 ```
 
 **Expected:** child weight matches control within 1e-6; child iterations3.
@@ -95,8 +105,10 @@ The question is: Set a fresh Adam variable to the saved weight without restoring
 The reset update counter and moments change Adam update even though the initial weight matches. This is why a model prediction parity does not establish training-resumption parity.
 
 ```python
-weights_only,fresh=make_state(); weights_only.assign(saved); step(weights_only,fresh)
-assert abs(float(weights_only)-expected)>1e-6 and int(fresh.iterations)==1
+weights_only, fresh = make_state()
+weights_only.assign(saved)
+step(weights_only, fresh)
+assert abs(float(weights_only) - expected) > 1e-6 and int(fresh.iterations) == 1
 ```
 
 **Expected:** next weight differs from the full-state control by more than1e-6.
@@ -110,7 +122,8 @@ The question is: Remove the owned temporary checkpoint directory and verify it n
 Cleanup affects only the directory created by this lesson. A real learner checkpoint should be stored deliberately under learner-owned artifacts and should never be removed by a course update.
 
 ```python
-temporary.cleanup(); assert not folder.exists()
+temporary.cleanup()
+assert not folder.exists()
 ```
 
 **Expected:** temporary checkpoint directory absent.

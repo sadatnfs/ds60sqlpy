@@ -216,38 +216,42 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Explicit finish prevents the consumer from waiting forever after the last value.</p>
 <pre class="highlighted-code"><code class="language-swift"><span class="syntax-keyword">import</span> <span class="syntax-class">Foundation</span>
 
-
-
 <span class="syntax-punctuation">@</span>main
 <span class="syntax-keyword">struct</span> <span class="syntax-class">LessonMain</span> <span class="syntax-punctuation">{</span>
-    <span class="syntax-keyword">static</span> <span class="syntax-keyword">func</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">async</span> <span class="syntax-keyword">throws</span> <span class="syntax-punctuation">{</span>
-        <span class="syntax-keyword">do</span> <span class="syntax-punctuation">{</span>
-            <span class="syntax-keyword">let</span> stream <span class="syntax-punctuation">=</span> AsyncStream<span class="syntax-punctuation">&lt;</span><span class="syntax-builtin">Int</span><span class="syntax-punctuation">&gt;</span> <span class="syntax-punctuation">{</span> continuation <span class="syntax-keyword">in</span> continuation<span class="syntax-punctuation">.</span>yield<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> continuation<span class="syntax-punctuation">.</span>yield<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> continuation<span class="syntax-punctuation">.</span>finish<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">}</span>
-            <span class="syntax-keyword">var</span> total <span class="syntax-punctuation">=</span> <span class="syntax-number">0</span>
-            <span class="syntax-keyword">for</span> <span class="syntax-keyword">await</span> value <span class="syntax-keyword">in</span> stream <span class="syntax-punctuation">{</span> total <span class="syntax-operator">+=</span> value <span class="syntax-punctuation">}</span>
-            <span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>total <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span>
-        <span class="syntax-punctuation">}</span>
-        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">swift-034: passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-keyword">static</span> <span class="syntax-keyword">func</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">async</span> <span class="syntax-keyword">throws</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">do</span> <span class="syntax-punctuation">{</span>
+      <span class="syntax-keyword">let</span> stream <span class="syntax-punctuation">=</span> AsyncStream<span class="syntax-punctuation">&lt;</span><span class="syntax-builtin">Int</span><span class="syntax-punctuation">&gt;</span> <span class="syntax-punctuation">{</span> continuation <span class="syntax-keyword">in</span>
+        continuation<span class="syntax-punctuation">.</span>yield<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
+        continuation<span class="syntax-punctuation">.</span>yield<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+        continuation<span class="syntax-punctuation">.</span>finish<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+      <span class="syntax-punctuation">}</span>
+      <span class="syntax-keyword">var</span> total <span class="syntax-punctuation">=</span> <span class="syntax-number">0</span>
+      <span class="syntax-keyword">for</span> <span class="syntax-keyword">await</span> value <span class="syntax-keyword">in</span> stream <span class="syntax-punctuation">{</span> total <span class="syntax-operator">+=</span> value <span class="syntax-punctuation">}</span>
+      <span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>total <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span>
     <span class="syntax-punctuation">}</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">swift-034: passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The finite stream totals 5 and terminates.</p>
 <h4 id="example-b-make-drop-behavior-observable">Example B: Make drop behavior observable<a class="heading-anchor" href="#example-b-make-drop-behavior-observable" aria-label="Link to this section">#</a></h4>
 <p>Because production finishes before consumption starts here, the buffer outcome is deterministic.</p>
 <pre class="highlighted-code"><code class="language-swift"><span class="syntax-keyword">import</span> <span class="syntax-class">Foundation</span>
 
-
-
 <span class="syntax-punctuation">@</span>main
 <span class="syntax-keyword">struct</span> <span class="syntax-class">LessonMain</span> <span class="syntax-punctuation">{</span>
-    <span class="syntax-keyword">static</span> <span class="syntax-keyword">func</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">async</span> <span class="syntax-keyword">throws</span> <span class="syntax-punctuation">{</span>
-        <span class="syntax-keyword">do</span> <span class="syntax-punctuation">{</span>
-            <span class="syntax-keyword">let</span> stream <span class="syntax-punctuation">=</span> AsyncStream<span class="syntax-punctuation">&lt;</span><span class="syntax-builtin">Int</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">(</span>bufferingPolicy<span class="syntax-punctuation">:</span> <span class="syntax-punctuation">.</span>bufferingNewest<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> continuation <span class="syntax-keyword">in</span> continuation<span class="syntax-punctuation">.</span>yield<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> continuation<span class="syntax-punctuation">.</span>yield<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> continuation<span class="syntax-punctuation">.</span>finish<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">}</span>
-            <span class="syntax-keyword">var</span> values<span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-builtin">Int</span><span class="syntax-punctuation">]</span> <span class="syntax-punctuation">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
-            <span class="syntax-keyword">for</span> <span class="syntax-keyword">await</span> value <span class="syntax-keyword">in</span> stream <span class="syntax-punctuation">{</span> values<span class="syntax-punctuation">.</span>append<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">}</span>
-            <span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>values <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
-        <span class="syntax-punctuation">}</span>
-        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">swift-034: passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-keyword">static</span> <span class="syntax-keyword">func</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">async</span> <span class="syntax-keyword">throws</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">do</span> <span class="syntax-punctuation">{</span>
+      <span class="syntax-keyword">let</span> stream <span class="syntax-punctuation">=</span> AsyncStream<span class="syntax-punctuation">&lt;</span><span class="syntax-builtin">Int</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">(</span>bufferingPolicy<span class="syntax-punctuation">:</span> <span class="syntax-punctuation">.</span>bufferingNewest<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> continuation <span class="syntax-keyword">in</span>
+        continuation<span class="syntax-punctuation">.</span>yield<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+        continuation<span class="syntax-punctuation">.</span>yield<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
+        continuation<span class="syntax-punctuation">.</span>finish<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+      <span class="syntax-punctuation">}</span>
+      <span class="syntax-keyword">var</span> values<span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-builtin">Int</span><span class="syntax-punctuation">]</span> <span class="syntax-punctuation">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+      <span class="syntax-keyword">for</span> <span class="syntax-keyword">await</span> value <span class="syntax-keyword">in</span> stream <span class="syntax-punctuation">{</span> values<span class="syntax-punctuation">.</span>append<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">}</span>
+      <span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>values <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
     <span class="syntax-punctuation">}</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">swift-034: passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The newest-one policy retains 2 and drops the older buffered value.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>

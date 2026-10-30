@@ -7,10 +7,21 @@ import NamedRegularization.{Domain, Fixed, Gaussian, L1, RawEvaluation}
 
 object RegularizationOracleFixtures {
   final case class Quadratic(
-      id: String, names: Vector[String], matrix: Vector[Vector[Double]], linear: Vector[Double],
-      lower: Vector[Double], upper: Vector[Double], initial: Vector[Double],
-      gaussian: Vector[Gaussian], l1: Vector[L1], fixed: Vector[Fixed], weight: Double,
-      expected: Vector[Double], expectedDigest: String, expectedComposite: Double) {
+      id: String,
+      names: Vector[String],
+      matrix: Vector[Vector[Double]],
+      linear: Vector[Double],
+      lower: Vector[Double],
+      upper: Vector[Double],
+      initial: Vector[Double],
+      gaussian: Vector[Gaussian],
+      l1: Vector[L1],
+      fixed: Vector[Fixed],
+      weight: Double,
+      expected: Vector[Double],
+      expectedDigest: String,
+      expectedComposite: Double
+  ) {
     def domain: Domain = Domain(names, lower, upper)
     def evaluate(theta: Vector[Double]): RawEvaluation = {
       val product = matrix.map(row => row.indices.map(i => row(i) * theta(i)).sum)
@@ -33,7 +44,8 @@ object RegularizationOracleFixtures {
       20.0,
       Vector(2.0, 0.7, 0.0),
       "7b504218e327eb57885aa9b47ed1764ca2724123dd2341cdd00a9cae45c78bc3",
-      -44.9),
+      -44.9
+    ),
     Quadratic(
       "correlated_prior_l1",
       Vector("intercept", "slope", "nuisance"),
@@ -48,7 +60,8 @@ object RegularizationOracleFixtures {
       7.0,
       Vector(1.8842105263157896, 0.4631578947368421, 0.0),
       "9bbedd9934d48e44c35523a70bea206ba46c142fca4cf99e1bf962920c4e6f15",
-      -7.5771087412858265),
+      -7.5771087412858265
+    ),
     Quadratic(
       "fixed_nuisance",
       Vector("intercept", "slope", "nuisance"),
@@ -63,7 +76,8 @@ object RegularizationOracleFixtures {
       11.0,
       Vector(1.195744680851064, -0.08936170212765958, 0.8),
       "735d59cc78df0ff84e3ea99e0405d7b67966c98d683ebbe361a1e3d2164f6b5c",
-      -4.876559978296219),
+      -4.876559978296219
+    ),
     Quadratic(
       "positive_box_excludes_zero",
       Vector("coefficient"),
@@ -78,7 +92,8 @@ object RegularizationOracleFixtures {
       5.0,
       Vector(1.0),
       "ef5f5ec7bced2ec155cfe46fc46a825a367654eeb05c8989231db9c3e377db24",
-      5.5),
+      5.5
+    ),
     Quadratic(
       "negative_upper_box",
       Vector("coefficient"),
@@ -93,7 +108,8 @@ object RegularizationOracleFixtures {
       5.0,
       Vector(-1.0),
       "f62558f0670ce92da22362ae501458c4768cbeb7dcad825697dba8405355594f",
-      4.5),
+      4.5
+    ),
     Quadratic(
       "all_fixed",
       Vector("intercept", "slope"),
@@ -108,7 +124,8 @@ object RegularizationOracleFixtures {
       9.0,
       Vector(2.0, 3.0),
       "777feb3a82bec6464b06b70c16b088e5ccce62d755f741a2e589fa9294a46246",
-      -22.051342510578277),
+      -22.051342510578277
+    ),
     Quadratic(
       "nonzero_gaussian_center",
       Vector("intercept", "slope"),
@@ -123,7 +140,8 @@ object RegularizationOracleFixtures {
       8.0,
       Vector(0.7636363636363637, 0.20909090909090908),
       "e9856d6ce3893e327ab3b8b96e103ffd8c9a3c7f6f96e54583b0fc5a4c3ac0df",
-      1.0659960252342542),
+      1.0659960252342542
+    ),
     Quadratic(
       "unequal_weight_mass",
       Vector("first", "second"),
@@ -138,7 +156,8 @@ object RegularizationOracleFixtures {
       200.0,
       Vector(0.9625, 1.65),
       "9d19a1f31b45ff3713eb4ce8ebca977c3fe6860e781c2c0a0e99289a23438598",
-      -1.5706375646323596),
+      -1.5706375646323596
+    ),
     Quadratic(
       "exact_threshold_zero",
       Vector("coefficient"),
@@ -153,6 +172,7 @@ object RegularizationOracleFixtures {
       3.0,
       Vector(0.0),
       "0dcdc5f18c7d9c5e5e91e3e00beabdaa84e4a5b95215bb43b79ba750d70116b4",
-      0.0)
+      0.0
+    )
   )
 }

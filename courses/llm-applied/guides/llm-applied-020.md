@@ -122,9 +122,12 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-queries=torch.eye(2); documents=torch.eye(2); labels=torch.tensor([0,1]); projection=nn.Parameter(torch.zeros((2,2)))
-scores=(queries@projection)@documents.T
-assert tuple(scores.shape)==(2,2) and labels.tolist()==[0,1]
+queries = torch.eye(2)
+documents = torch.eye(2)
+labels = torch.tensor([0, 1])
+projection = nn.Parameter(torch.zeros((2, 2)))
+scores = (queries @ projection) @ documents.T
+assert tuple(scores.shape) == (2, 2) and labels.tolist() == [0, 1]
 ```
 
 **Expected:** score shape(2, 2); one positive per query.
@@ -134,11 +137,18 @@ assert tuple(scores.shape)==(2,2) and labels.tolist()==[0,1]
 The projection actually changes through gradients. The resulting training ranking is a mechanics check, not evidence of transfer to unseen language.
 
 ```python
-opt=torch.optim.SGD([projection],lr=.5); initial=F.cross_entropy(scores,labels).item()
+opt = torch.optim.SGD([projection], lr=0.5)
+initial = F.cross_entropy(scores, labels).item()
 for _ in range(30):
-    opt.zero_grad(set_to_none=True); scores=(queries@projection)@documents.T; loss=F.cross_entropy(scores,labels); loss.backward(); opt.step()
-final_scores=(queries@projection)@documents.T
-assert F.cross_entropy(final_scores,labels).item()<initial and final_scores.argmax(1).tolist()==[0,1]
+    opt.zero_grad(set_to_none=True)
+    scores = (queries @ projection) @ documents.T
+    loss = F.cross_entropy(scores, labels)
+    loss.backward()
+    opt.step()
+final_scores = (queries @ projection) @ documents.T
+assert F.cross_entropy(final_scores, labels).item() < initial and final_scores.argmax(
+    1
+).tolist() == [0, 1]
 ```
 
 **Expected:** loss decreases; each query ranks its paired document first.
@@ -148,8 +158,9 @@ assert F.cross_entropy(final_scores,labels).item()<initial and final_scores.argm
 This tests one nearby feature perturbation under an authored relevance label. It is much narrower than evaluating new document families or real paraphrases.
 
 ```python
-held=torch.tensor([[.9,.1]]); held_scores=(held@projection)@documents.T
-assert held_scores.argmax(1).item()==0
+held = torch.tensor([[0.9, 0.1]])
+held_scores = (held @ projection) @ documents.T
+assert held_scores.argmax(1).item() == 0
 ```
 
 **Expected:** document 0 remains higher on this declared local perturbation.

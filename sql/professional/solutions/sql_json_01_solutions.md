@@ -18,12 +18,16 @@ preserves all parent identities and produces four rows: two actual items plus
 one null-extended placeholder for each unmatched document.
 
 ```sql
-SELECT d.document_id,
-       d.payload ? 'items' AS items_field_present,
-       jsonb_typeof(d.payload->'items') AS items_type
-FROM j17_documents AS d
-WHERE d.document_id <= 3
-ORDER BY d.document_id;
+SELECT
+  d.document_id,
+  d.payload ? 'items' AS items_field_present,
+  jsonb_typeof(d.payload -> 'items') AS items_type
+FROM
+  j17_documents AS d
+WHERE
+  d.document_id <= 3
+ORDER BY
+  d.document_id;
 ```
 
 This inspection keeps the source meaning visible. Document two has a declared
@@ -47,9 +51,17 @@ one ordinal position, text SKU, integer quantity and exact numeric unit price.
 The quantity policy defaults an empty path to one and rejects conversion errors.
 
 ```sql
-SELECT document_id,item_no,sku,qty,unit_price
-FROM j17_lines
-ORDER BY document_id,item_no;
+SELECT
+  document_id,
+  item_no,
+  sku,
+  qty,
+  unit_price
+FROM
+  j17_lines
+ORDER BY
+  document_id,
+  item_no;
 ```
 
 The four rows are document one's P/two/five and Q/one/three, followed by document
@@ -75,14 +87,14 @@ The two-item literal produces one explicitly null field and one missing field.
 A presence projection complements the typed quantity:
 
 ```sql
-SELECT j.item_no,j.qty,j.qty_present
-FROM JSON_TABLE('{"items":[{"qty":null},{}]}','$.items[*]'
-  COLUMNS (
-    item_no FOR ORDINALITY,
-    qty integer PATH '$.qty' DEFAULT 1 ON EMPTY ERROR ON ERROR,
-    qty_present boolean EXISTS PATH '$.qty'
-  )) AS j
-ORDER BY j.item_no;
+SELECT
+  j.item_no,
+  j.qty,
+  j.qty_present
+FROM
+  JSON_TABLE ('{"items":[{"qty":null},{}]}', '$.items[*]' COLUMNS (item_no FOR ORDINALITY, qty integer PATH '$.qty' DEFAULT 1 ON EMPTY ERROR ON ERROR, qty_present boolean EXISTS PATH '$.qty')) AS j
+ORDER BY
+  j.item_no;
 ```
 
 The rows are `(1,NULL,true)` and `(2,1,false)`. An existing JSON null is not an
@@ -110,14 +122,17 @@ two and three. Count the generated ordinal to measure actual items. An unknown
 quantity counts only when a real item exists.
 
 ```sql
-SELECT document_id,
-       count(item_no) AS item_count,
-       count(*) FILTER (
-         WHERE item_no IS NOT NULL AND qty IS NULL
-       ) AS unknown_qty_count
-FROM j17_outer
-GROUP BY document_id
-ORDER BY document_id;
+SELECT
+  document_id,
+  count(item_no) AS item_count,
+  count(*) FILTER (WHERE item_no IS NOT NULL
+    AND qty IS NULL) AS unknown_qty_count
+FROM
+  j17_outer
+GROUP BY
+  document_id
+ORDER BY
+  document_id;
 ```
 
 The exact triples are `(1,2,0)`, `(2,0,0)`, `(3,0,0)` and `(4,2,1)`.
@@ -172,12 +187,14 @@ The prior answer has one row per document. Join it to the original one-row
 document relation and add its single parent fee:
 
 ```sql
-SELECT d.document_id,
-       a.accepted_order_value
-         + (d.payload->>'shipping_fee')::numeric(10,2) AS accepted_total
-FROM j17_documents AS d
-JOIN answer_5 AS a ON a.document_id=d.document_id
-ORDER BY d.document_id;
+SELECT
+  d.document_id,
+  a.accepted_order_value + (d.payload ->> 'shipping_fee')::numeric(10, 2) AS accepted_total
+FROM
+  j17_documents AS d
+  JOIN answer_5 AS a ON a.document_id = d.document_id
+ORDER BY
+  d.document_id;
 ```
 
 The results are seventeen, zero, NULL and NULL. Unknown complete item values

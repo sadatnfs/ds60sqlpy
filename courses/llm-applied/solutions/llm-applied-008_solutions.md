@@ -58,8 +58,8 @@ The question is: Fuse lexical[a, b, c] and dense[b, d, a] with constant 60.
 Documentb receives ranks2 and 1, whilea receives1 and3. The difference comes from rank evidence rather than incompatible raw score scales.
 
 ```python
-ranked=rrf([['a','b','c'],['b','d','a']],60)
-assert [key for key,score in ranked][:2]==['b','a']
+ranked = rrf([["a", "b", "c"], ["b", "d", "a"]], 60)
+assert [key for key, score in ranked][:2] == ["b", "a"]
 ```
 
 **Expected:** b ranks first, a second.
@@ -73,8 +73,8 @@ The question is: Calculate the fused score ofb as1/62+1/61.
 Writing the formula independently makes off-by-one rank errors visible. Zero-based rank would change every denominator.
 
 ```python
-scores=dict(ranked)
-assert abs(scores['b']-(1/62+1/61))<1e-12
+scores = dict(ranked)
+assert abs(scores["b"] - (1 / 62 + 1 / 61)) < 1e-12
 ```
 
 **Expected:** computed b score equals that sum within1e-12.
@@ -88,7 +88,7 @@ The question is: Repeatb inside one ranking and compare with its deduplicated fo
 One retrieval list should contribute one rank per document. Otherwise a buggy candidate generator can inflate a result by emitting duplicates.
 
 ```python
-assert rrf([['a','b','b','c']],60)==rrf([['a','b','c']],60)
+assert rrf([["a", "b", "b", "c"]], 60) == rrf([["a", "b", "c"]], 60)
 ```
 
 **Expected:** fusion result unchanged.
@@ -102,9 +102,10 @@ The question is: Use candidatesa, b, c with authored relevance features0, 2, 1 a
 This deterministic feature is an inspectable stand-in for a learned reranker score. It is not described as a cross-encoder or a language model.
 
 ```python
-features={'a':0,'b':2,'c':1}; candidates=['a','b','c']
-reranked=sorted(candidates,key=lambda key:(-features[key],key))
-assert reranked==['b','c','a']
+features = {"a": 0, "b": 2, "c": 1}
+candidates = ["a", "b", "c"]
+reranked = sorted(candidates, key=lambda key: (-features[key], key))
+assert reranked == ["b", "c", "a"]
 ```
 
 **Expected:** orderb, c, a.
@@ -118,8 +119,9 @@ The question is: Declare relevant documentd but supply only candidatesa, b, c.
 A reranker can rearrange available evidence but cannot repair an upstream omission without another retrieval step. This distinction guides where to invest debugging effort.
 
 ```python
-relevant={'d'}; assert not set(candidates)&relevant
-assert 'd' not in reranked
+relevant = {"d"}
+assert not set(candidates) & relevant
+assert "d" not in reranked
 ```
 
 **Expected:** candidate recall0 and reranker cannot return d.
@@ -133,10 +135,13 @@ The question is: Use constant0 or a repeated non-string identifier and apply the
 Validation keeps the rank formula and identity space explicit. A production implementation also needs bounds on list length and candidate count.
 
 ```python
-for rankings,k,kind in [([['a']],0,ValueError),([[1]],60,TypeError)]:
-    try: rrf(rankings,k)
-    except kind: pass
-    else: raise AssertionError('invalid fusion input')
+for rankings, k, kind in [([["a"]], 0, ValueError), ([[1]], 60, TypeError)]:
+    try:
+        rrf(rankings, k)
+    except kind:
+        pass
+    else:
+        raise AssertionError("invalid fusion input")
 ```
 
 **Expected:** ValueError for nonpositive constant; TypeError for non-string ID.

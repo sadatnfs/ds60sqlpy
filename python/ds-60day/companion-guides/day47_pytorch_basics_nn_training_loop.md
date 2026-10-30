@@ -43,6 +43,7 @@ labels with dtype `torch.long`. Do not apply softmax before this loss.
 ```python
 import torch
 
+
 def train_one_epoch(
     model: torch.nn.Module,
     loader: torch.utils.data.DataLoader,
@@ -158,8 +159,7 @@ features = torch.tensor([[1.0, 0.0, -1.0], [0.5, 2.0, 1.0]])
 labels = torch.tensor([0, 1], dtype=torch.long)
 logits = model(features)
 loss = nn.CrossEntropyLoss()(logits, labels)
-print({"logit_shape": tuple(logits.shape),
-       "label_shape": tuple(labels.shape), "loss": loss.item()})
+print({"logit_shape": tuple(logits.shape), "label_shape": tuple(labels.shape), "loss": loss.item()})
 assert logits.shape == (2, 2) and loss.ndim == 0
 ```
 
@@ -184,8 +184,12 @@ train_output = layer(values)
 layer.eval()
 with torch.no_grad():
     eval_output = layer(values)
-print({"train_zeros": int((train_output == 0).sum()),
-       "eval_unchanged": bool(torch.equal(eval_output, values))})
+print(
+    {
+        "train_zeros": int((train_output == 0).sum()),
+        "eval_unchanged": bool(torch.equal(eval_output, values)),
+    }
+)
 assert torch.equal(eval_output, values)
 ```
 

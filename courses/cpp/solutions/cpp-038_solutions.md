@@ -31,7 +31,7 @@ If a checked sum computes a+b before its guard, the protection is ineffective. I
 ## Worked example 1
 
 ```cpp
-assert(!safe_add(std::numeric_limits<int>::max(),1));
+assert(!safe_add(std::numeric_limits<int>::max(), 1));
 ```
 
 Expected: The operation rejects the input before evaluating an overflowing sum.
@@ -39,7 +39,7 @@ Expected: The operation rejects the input before evaluating an overflowing sum.
 ## Worked example 2
 
 ```cpp
-assert(std::abs((0.1+0.2)-0.3)<1e-12);
+assert(std::abs((0.1 + 0.2) - 0.3) < 1e-12);
 ```
 
 Expected: The binary floating result is close within this declared absolute tolerance.

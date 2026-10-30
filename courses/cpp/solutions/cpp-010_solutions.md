@@ -31,7 +31,8 @@ If the total is too low, inspect state filtering and record counts before discar
 ## Worked example 1
 
 ```cpp
-Payment p{7,200,Status::paid}; assert(settled(p)==200);
+Payment p{7, 200, Status::paid};
+assert(settled(p) == 200);
 ```
 
 Expected: A paid record contributes 200 cents.
@@ -39,7 +40,8 @@ Expected: A paid record contributes 200 cents.
 ## Worked example 2
 
 ```cpp
-Payment p{8,200,Status::pending}; assert(settled(p)==0);
+Payment p{8, 200, Status::pending};
+assert(settled(p) == 0);
 ```
 
 Expected: Pending contributes zero to settled revenue while retaining its original amount.

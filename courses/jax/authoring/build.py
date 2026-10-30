@@ -14,7 +14,39 @@ from textwrap import indent
 from model import HEADER, Case, Unit
 
 ROOT = Path(__file__).resolve().parents[3]
+SOURCE_ROOT = ROOT
+if str(SOURCE_ROOT) not in sys.path:
+    sys.path.insert(0, str(SOURCE_ROOT))
+
+from scripts.format_inline_code import (  # noqa: E402
+    Formatter,
+    adapter_bytes,
+    canonical_markdown,
+    invoke,
+)
+
 BASE = "courses/jax"
+
+
+def inline_adapter(source: bytes, language: str, suffix: str, root: Path) -> bytes:
+    if language != "python":
+        return adapter_bytes(source, language, suffix, root)
+    return invoke(
+        [
+            sys.executable,
+            "-m",
+            "ruff",
+            "format",
+            "--no-cache",
+            "--config",
+            str(root / "pyproject.toml"),
+            "--stdin-filename",
+            "snippet.py",
+            "-",
+        ],
+        source,
+        root,
+    )
 
 
 def units() -> list[Unit]:
@@ -243,6 +275,12 @@ def artifacts() -> dict[str, str]:
         for relative in result:
             if relative.endswith(".py"):
                 result[relative] = (staging / relative).read_text(encoding="utf-8")
+    formatter = Formatter(SOURCE_ROOT, adapter=inline_adapter)
+    for relative, text in result.items():
+        if relative.endswith(".md"):
+            result[relative] = canonical_markdown(
+                text, root=SOURCE_ROOT, path=relative, formatter=formatter
+            )
     return result
 
 

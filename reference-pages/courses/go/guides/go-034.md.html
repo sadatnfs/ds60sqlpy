@@ -240,8 +240,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>runtime<span class="syntax-punctuation">.</span>GOOS <span class="syntax-operator">!=</span> <span class="syntax-string">&quot;&quot;</span> <span class="syntax-operator">&amp;&amp;</span> runtime<span class="syntax-punctuation">.</span>GOARCH <span class="syntax-operator">!=</span> <span class="syntax-string">&quot;&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;target&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Both identifiers are nonempty.</p>
 <p>The values describe this executed binary. They do not establish compatibility with another platform.</p>
 <h4 id="worked-example-2-validate-a-supported-deployment-tuple">Worked example 2: Validate a supported deployment tuple<a class="heading-anchor" href="#worked-example-2-validate-a-supported-deployment-tuple" aria-label="Link to this section">#</a></h4>
@@ -276,8 +275,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>allowed<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;linux/amd64&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">&amp;&amp;</span> allowed<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;linux/arm64&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;targets&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Both tuples are admitted.</p>
 <p>A declared target set is a configuration contract. Each image architecture still needs real build and execution evidence.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>

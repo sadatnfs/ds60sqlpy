@@ -9,7 +9,7 @@ This checks the complete output path, not only whether the mask looks triangular
 **Expected:** Earlier outputs remain identical.
 
 ```python
-changed = v.at[2].set(jnp.array([100., 200.]))
+changed = v.at[2].set(jnp.array([100.0, 200.0]))
 close(attention(q, k, changed, mask)[:2], attention(q, k, v, mask)[:2])
 ```
 
@@ -20,11 +20,14 @@ A scalar logistic calculation detects omission of the square-root scale.
 **Expected:** Weights determined by softmax([1/sqrt(2),0]).
 
 ```python
-query = jnp.array([[1., 0.]])
+query = jnp.array([[1.0, 0.0]])
 keys = jnp.eye(2)
 values = 2 * jnp.eye(2)
 probability = 1 / (1 + math.exp(-1 / math.sqrt(2)))
-close(attention(query, keys, values, jnp.ones((1, 2), dtype=bool)), [[2 * probability, 2 * (1 - probability)]])
+close(
+    attention(query, keys, values, jnp.ones((1, 2), dtype=bool)),
+    [[2 * probability, 2 * (1 - probability)]],
+)
 ```
 
 ## Exercise 3: Refuse an empty allowed set
@@ -39,7 +42,7 @@ try:
 except ValueError:
     pass
 else:
-    raise AssertionError('all-masked query admitted')
+    raise AssertionError("all-masked query admitted")
 ```
 
 ## Exercise 4: Trace value gradients

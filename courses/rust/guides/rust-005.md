@@ -43,8 +43,6 @@ Read the operations in dependency order. Record which values exist before each l
 Both branches return the same kind of value, so the result has one static type.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let count = 3;
@@ -63,11 +61,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 A tiny boundary fixture rejects an off-by-one policy error.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
-        let classify = |score| match score { 0..=59 => "retry", 60..=100 => "pass", _ => "invalid" };
+        let classify = |score| match score {
+            0..=59 => "retry",
+            60..=100 => "pass",
+            _ => "invalid",
+        };
         assert_eq!(classify(59), "retry");
         assert_eq!(classify(60), "pass");
         assert_eq!(classify(101), "invalid");

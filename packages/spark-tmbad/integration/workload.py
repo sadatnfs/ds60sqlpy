@@ -122,8 +122,10 @@ class Workload:
             }
             denominator = self.rows if reduction == "weighted_mean" else 1
             fitted = self.api.fit_shared(
-                frame, spec,
-                options=target | {
+                frame,
+                spec,
+                options=target
+                | {
                     "initial_parameters": [0.0, 0.0],
                     "max_iterations": 100,
                     "batch_rows": 1024,
@@ -151,9 +153,10 @@ class Workload:
             restored = FittedModel.load(path, runtime=self.runtime)
             future = self.spark.range(2).selectExpr("id + 200000 AS row_id")
             predictions = [
-                row.asDict() for row in restored.predict(
-                    future, options={"target": "response", "columns": {}}
-                ).orderBy("row_id").collect()
+                row.asDict()
+                for row in restored.predict(future, options={"target": "response", "columns": {}})
+                .orderBy("row_id")
+                .collect()
             ]
             if [row["row_id"] for row in predictions] != [200000, 200001]:
                 raise AssertionError("Named-target prediction lost row identities")
@@ -161,10 +164,19 @@ class Workload:
                 close([row["tmbad_mean"], row["tmbad_sd"]], [3.75, 1.0], 1e-10)
             evaluated = self.api.evaluate_shared(frame, spec, [3.75, 0.0], options=target)
             close([evaluated["loss_components"]["total_reduced"]], [document["fit"]["loss"]], 1e-10)
-            records.append({"reduction": reduction, "model": document,
-                "evaluation": evaluated, "prediction": predictions})
-        close([records[0]["model"]["fit"]["loss"] / self.rows],
-            [records[1]["model"]["fit"]["loss"]], 1e-10)
+            records.append(
+                {
+                    "reduction": reduction,
+                    "model": document,
+                    "evaluation": evaluated,
+                    "prediction": predictions,
+                }
+            )
+        close(
+            [records[0]["model"]["fit"]["loss"] / self.rows],
+            [records[1]["model"]["fit"]["loss"]],
+            1e-10,
+        )
         return records
 
     def compare_named_targets(self, baseline, recovered):
@@ -176,7 +188,10 @@ class Workload:
             close(before["model"]["parameters"], after["model"]["parameters"], 1e-12)
             if before["model"]["fit"]["data_ledger"] != after["model"]["fit"]["data_ledger"]:
                 raise AssertionError("Worker loss changed the named-target data ledger")
-            if before["model"]["target"]["target_spec_digest"] != after["model"]["target"]["target_spec_digest"]:
+            if (
+                before["model"]["target"]["target_spec_digest"]
+                != after["model"]["target"]["target_spec_digest"]
+            ):
                 raise AssertionError("Worker loss changed the named statistical target")
 
     def forecast(self):

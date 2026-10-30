@@ -96,10 +96,18 @@ These worked excerpts come from `sql/postgres-60day/day39_locks_deadlocks.sql`. 
 ### Example 1
 
 ```sql
-SELECT pid, locktype, relation::regclass, mode, granted
-FROM pg_locks
-LEFT JOIN pg_class ON pg_locks.relation = pg_class.oid
-ORDER BY granted DESC, relation;
+SELECT
+  pid,
+  locktype,
+  relation::regclass,
+  mode,
+  granted
+FROM
+  pg_locks
+  LEFT JOIN pg_class ON pg_locks.relation = pg_class.oid
+ORDER BY
+  granted DESC,
+  relation;
 ```
 
 **How to read it:** Example 1: Start with `pg_locks`, and `pg_class` in `FROM`/`JOIN`. The final `SELECT` displays `pid`, `locktype`, `regclass`, `mode`, and `granted`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
@@ -110,11 +118,22 @@ ORDER BY granted DESC, relation;
 
 ```sql
 WITH to_lock AS (
-  SELECT order_id FROM orders WHERE total_amount > 900 ORDER BY order_id LIMIT 5
+  SELECT
+    order_id
+  FROM
+    orders
+  WHERE
+    total_amount > 900
+  ORDER BY
+    order_id
+  LIMIT 5
 )
-SELECT * FROM orders o
-JOIN to_lock t ON t.order_id = o.order_id
-FOR UPDATE;
+SELECT
+  *
+FROM
+  orders o
+  JOIN to_lock t ON t.order_id = o.order_id
+  FOR UPDATE;
 ```
 
 **How to read it:** Example 2 is a data-changing CTE chain, not a displayed query result. The CTEs `to_lock` determine the affected rows before the final write to the columns written in the final `SELECT`. Read the command tag for the affected-row count, then use a separate `SELECT` to prove the lesson invariant; a successful command tag alone does not prove historical correctness.

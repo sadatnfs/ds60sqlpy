@@ -147,10 +147,15 @@ Run these in the complete learner file so the temporary fixture and transaction 
 ### Example 1: Inspect truth before filtering
 
 ```sql
-SELECT shipment_id, weight, weight > 0 AS is_positive,
-       weight IS NULL AS is_missing
-FROM start_shipments
-ORDER BY shipment_id;
+SELECT
+  shipment_id,
+  weight,
+  weight > 0 AS is_positive,
+  weight IS NULL AS is_missing
+FROM
+  start_shipments
+ORDER BY
+  shipment_id;
 ```
 
 Every output row still represents one shipment. The comparison is false for ID 1, unknown for IDs 2 and 5, and true for IDs 3 and 4. IS NULL instead produces true for IDs 2 and 5 and false elsewhere. Looking at the predicate as a column exposes information that WHERE would discard. No string comparison or implicit conversion is required.
@@ -160,9 +165,15 @@ Every output row still represents one shipment. The comparison is false for ID 1
 ### Example 2: Rank known values while preserving unknowns
 
 ```sql
-SELECT shipment_id, weight, label
-FROM start_shipments
-ORDER BY weight DESC NULLS LAST, shipment_id;
+SELECT
+  shipment_id,
+  weight,
+  label
+FROM
+  start_shipments
+ORDER BY
+  weight DESC NULLS LAST,
+  shipment_id;
 ```
 
 The result contains all five shipments. Weights 5,5,0 precede unknowns, and identity orders the tied 5s and the unknown pair. PostgreSQL has a default NULL placement, but writing the policy avoids relying on remembering it. A known zero stays ahead of unknown measurements. This presentation does not impute or update any weight.

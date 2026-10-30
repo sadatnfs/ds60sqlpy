@@ -216,6 +216,7 @@ c-1 5-5 9-11 9h-2L532 67 19 159h-2c-5 0-9-4-11-9l-5-22c-1-6 2-12 8-13z"/></svg><
 <p>The assertion compares JAX with a calculation made from the three squared residuals. It checks the mean denominator as well as the prediction rule.</p>
 <p><strong>Expected:</strong> Loss 56/3, predictions [0,0,0].</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-string">&quot;&quot;&quot;Small offline JAX mechanism investigation; CPU evidence only.&quot;&quot;&quot;</span>
+
 <span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
 
 <span class="syntax-keyword">import</span> math
@@ -224,13 +225,13 @@ c-1 5-5 9-11 9h-2L532 67 19 159h-2c-5 0-9-4-11-9l-5-22c-1-6 2-12 8-13z"/></svg><
 <span class="syntax-keyword">import</span> jax.numpy <span class="syntax-keyword">as</span> jnp
 
 
-
 <span class="syntax-comment"># Choose precision before creating arrays; the usual JAX default is 32 bit.</span>
 jax<span class="syntax-operator">.</span>config<span class="syntax-operator">.</span>update<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">jax_enable_x64</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">def</span> <span class="syntax-function">close</span><span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-10</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">1e-10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span>atol<span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span>rtol<span class="syntax-punctuation">)</span>
+
 
 <span class="syntax-keyword">def</span> <span class="syntax-function">predict</span><span class="syntax-punctuation">(</span>weight<span class="syntax-punctuation">,</span> inputs<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">return</span> weight <span class="syntax-operator">*</span> inputs
@@ -241,16 +242,17 @@ jax<span class="syntax-operator">.</span>config<span class="syntax-operator">.</
         <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">one nonempty target per input</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
     <span class="syntax-keyword">return</span> jnp<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>predict<span class="syntax-punctuation">(</span>weight<span class="syntax-punctuation">,</span> inputs<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> targets<span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span><span class="syntax-operator">*</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
 
-x <span class="syntax-operator">=</span> jnp<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+
+x <span class="syntax-operator">=</span> jnp<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
 y <span class="syntax-operator">=</span> <span class="syntax-number">2</span> <span class="syntax-operator">*</span> x
 
 
 <span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-comment"># Case 1: A hand-calculated loss</span>
-    close<span class="syntax-punctuation">(</span>predict<span class="syntax-punctuation">(</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span> x<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
-    close<span class="syntax-punctuation">(</span>mse<span class="syntax-punctuation">(</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span> x<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">56</span> <span class="syntax-operator">/</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+    close<span class="syntax-punctuation">(</span>predict<span class="syntax-punctuation">(</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> x<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    close<span class="syntax-punctuation">(</span>mse<span class="syntax-punctuation">(</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> x<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">56</span> <span class="syntax-operator">/</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
 
-    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">jax-001</span><span class="syntax-string">&#x27;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">: 1 asserted cases passed</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">jax-001</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&quot;</span><span class="syntax-string">: 1 asserted cases passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
@@ -260,6 +262,7 @@ y <span class="syntax-operator">=</span> <span class="syntax-number">2</span> <s
 <p>Broadcasting can be legal while the pairing is wrong. The guard rejects this representation before JAX has a chance to compute a misleading mean.</p>
 <p><strong>Expected:</strong> ValueError rather than an unintended 3-by-3 error matrix.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-string">&quot;&quot;&quot;Small offline JAX mechanism investigation; CPU evidence only.&quot;&quot;&quot;</span>
+
 <span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
 
 <span class="syntax-keyword">import</span> math
@@ -268,13 +271,13 @@ y <span class="syntax-operator">=</span> <span class="syntax-number">2</span> <s
 <span class="syntax-keyword">import</span> jax.numpy <span class="syntax-keyword">as</span> jnp
 
 
-
 <span class="syntax-comment"># Choose precision before creating arrays; the usual JAX default is 32 bit.</span>
 jax<span class="syntax-operator">.</span>config<span class="syntax-operator">.</span>update<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">jax_enable_x64</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">def</span> <span class="syntax-function">close</span><span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-10</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">1e-10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span>atol<span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span>rtol<span class="syntax-punctuation">)</span>
+
 
 <span class="syntax-keyword">def</span> <span class="syntax-function">predict</span><span class="syntax-punctuation">(</span>weight<span class="syntax-punctuation">,</span> inputs<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">return</span> weight <span class="syntax-operator">*</span> inputs
@@ -285,20 +288,21 @@ jax<span class="syntax-operator">.</span>config<span class="syntax-operator">.</
         <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">one nonempty target per input</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
     <span class="syntax-keyword">return</span> jnp<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>predict<span class="syntax-punctuation">(</span>weight<span class="syntax-punctuation">,</span> inputs<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> targets<span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span><span class="syntax-operator">*</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
 
-x <span class="syntax-operator">=</span> jnp<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+
+x <span class="syntax-operator">=</span> jnp<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
 y <span class="syntax-operator">=</span> <span class="syntax-number">2</span> <span class="syntax-operator">*</span> x
 
 
 <span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-comment"># Case 1: A plausible shape mistake</span>
     <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
-        mse<span class="syntax-punctuation">(</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span> x<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+        mse<span class="syntax-punctuation">(</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> x<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
     <span class="syntax-keyword">except</span> ValueError<span class="syntax-punctuation">:</span>
         <span class="syntax-keyword">pass</span>
     <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
-        <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">shape mismatch accepted</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">shape mismatch accepted</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 
-    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">jax-001</span><span class="syntax-string">&#x27;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">: 1 asserted cases passed</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">jax-001</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&quot;</span><span class="syntax-string">: 1 asserted cases passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>

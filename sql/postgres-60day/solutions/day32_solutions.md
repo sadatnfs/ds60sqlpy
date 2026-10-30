@@ -64,15 +64,21 @@ BEGIN;
 SET LOCAL search_path TO training, public;
 
 DROP INDEX IF EXISTS training.idx_products_category_solution;
-CREATE INDEX idx_products_category_solution
-  ON products(category);
 
-EXPLAIN (ANALYZE, BUFFERS)
-SELECT product_id,
-       name,
-       price
-FROM products
-WHERE category = 'Electronics';
+CREATE INDEX idx_products_category_solution ON products (category);
+
+EXPLAIN (
+  ANALYZE,
+  BUFFERS
+)
+SELECT
+  product_id,
+  name,
+  price
+FROM
+  products
+WHERE
+  category = 'Electronics';
 
 ROLLBACK;
 ```
@@ -99,25 +105,42 @@ SET LOCAL search_path TO training, public;
 
 DROP INDEX IF EXISTS training.idx_products_category_compare;
 
-EXPLAIN (ANALYZE, BUFFERS)
-SELECT product_id
-FROM products
-WHERE category = 'Electronics';
+EXPLAIN (
+  ANALYZE,
+  BUFFERS
+)
+SELECT
+  product_id
+FROM
+  products
+WHERE
+  category = 'Electronics';
 
-CREATE INDEX idx_products_category_compare
-  ON products(category);
+CREATE INDEX idx_products_category_compare ON products (category);
 
-EXPLAIN (ANALYZE, BUFFERS)
-SELECT product_id
-FROM products
-WHERE category = 'Electronics';
+EXPLAIN (
+  ANALYZE,
+  BUFFERS
+)
+SELECT
+  product_id
+FROM
+  products
+WHERE
+  category = 'Electronics';
 
 DROP INDEX idx_products_category_compare;
 
-EXPLAIN (ANALYZE, BUFFERS)
-SELECT product_id
-FROM products
-WHERE category = 'Electronics';
+EXPLAIN (
+  ANALYZE,
+  BUFFERS
+)
+SELECT
+  product_id
+FROM
+  products
+WHERE
+  category = 'Electronics';
 
 ROLLBACK;
 ```

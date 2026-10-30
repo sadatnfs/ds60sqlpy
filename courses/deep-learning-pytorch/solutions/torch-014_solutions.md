@@ -52,8 +52,9 @@ The question is: Use one row of three zero logits and target class 1.
 Every class has probability one-third. The target index identifies a category, not a numeric magnitude to regress.
 
 ```python
-logits=torch.zeros((1,3),dtype=torch.float64); target=torch.tensor([1],dtype=torch.long)
-np.testing.assert_allclose(F.cross_entropy(logits,target).item(),np.log(3),atol=1e-12,rtol=0)
+logits = torch.zeros((1, 3), dtype=torch.float64)
+target = torch.tensor([1], dtype=torch.long)
+np.testing.assert_allclose(F.cross_entropy(logits, target).item(), np.log(3), atol=1e-12, rtol=0)
 ```
 
 **Expected:** cross entropy log 3.
@@ -67,8 +68,8 @@ The question is: Apply sigmoid to the same three zero logits for a multilabel ta
 Independent probabilities need not sum to one. A softmax would force labels to compete and change the task.
 
 ```python
-independent=torch.sigmoid(logits)
-assert independent.tolist()==[[.5,.5,.5]] and independent.sum().item()==1.5
+independent = torch.sigmoid(logits)
+assert independent.tolist() == [[0.5, 0.5, 0.5]] and independent.sum().item() == 1.5
 ```
 
 **Expected:** probabilities.5, .5, .5 with sum 1.5.
@@ -82,8 +83,14 @@ The question is: Create class indices 2, 0 and binary rows[1, 0, 1], [0, 1, 0].
 The target contracts differ because the prediction events differ. Reshaping or casting without understanding those events can make a wrong task appear accepted.
 
 ```python
-classes=torch.tensor([2,0],dtype=torch.long); labels=torch.tensor([[1.,0.,1.],[0.,1.,0.]])
-assert tuple(classes.shape)==(2,) and tuple(labels.shape)==(2,3) and classes.dtype==torch.long and labels.is_floating_point()
+classes = torch.tensor([2, 0], dtype=torch.long)
+labels = torch.tensor([[1.0, 0.0, 1.0], [0.0, 1.0, 0.0]])
+assert (
+    tuple(classes.shape) == (2,)
+    and tuple(labels.shape) == (2, 3)
+    and classes.dtype == torch.long
+    and labels.is_floating_point()
+)
 ```
 
 **Expected:** shapes(2, ) and(2, 3); long versus floating.
@@ -97,8 +104,9 @@ The question is: Apply `softmax(dim=1)` to a 2-by-3 matrix.
 Normalizing over the batch axis would couple unrelated observations. Row mass is a direct axis check.
 
 ```python
-scores=torch.tensor([[2.,0.,-2.],[0.,1.,3.]])
-probs=torch.softmax(scores,dim=1); torch.testing.assert_close(probs.sum(1),torch.ones(2),atol=1e-6,rtol=0)
+scores = torch.tensor([[2.0, 0.0, -2.0], [0.0, 1.0, 3.0]])
+probs = torch.softmax(scores, dim=1)
+torch.testing.assert_close(probs.sum(1), torch.ones(2), atol=1e-6, rtol=0)
 ```
 
 **Expected:** each row sums 1.
@@ -112,8 +120,10 @@ The question is: Compute BCE over two rows and three labels of zero logits.
 There are six binary events but two records. A mean per record of summed label loss would differ by a factor of three.
 
 ```python
-per_entry=F.binary_cross_entropy_with_logits(torch.zeros_like(labels),labels,reduction='none')
-np.testing.assert_allclose([per_entry.sum().item(),per_entry.mean().item()],[6*np.log(2),np.log(2)],atol=1e-6,rtol=0)
+per_entry = F.binary_cross_entropy_with_logits(torch.zeros_like(labels), labels, reduction="none")
+np.testing.assert_allclose(
+    [per_entry.sum().item(), per_entry.mean().item()], [6 * np.log(2), np.log(2)], atol=1e-6, rtol=0
+)
 ```
 
 **Expected:** sum 6 log2; mean log 2.
@@ -127,9 +137,12 @@ The question is: Use class index 3 for a three-class row.
 Class indices are bounded by the output vocabulary. Validation at the data boundary gives a clearer diagnostic before loss calculation.
 
 ```python
-try: F.cross_entropy(torch.zeros((1,3)),torch.tensor([3]))
-except (IndexError,RuntimeError): pass
-else: raise AssertionError('unknown class accepted')
+try:
+    F.cross_entropy(torch.zeros((1, 3)), torch.tensor([3]))
+except (IndexError, RuntimeError):
+    pass
+else:
+    raise AssertionError("unknown class accepted")
 ```
 
 **Expected:** IndexError or RuntimeError identifying an invalid target.

@@ -23,9 +23,13 @@ The question is: Build two identical decoders with seed9 and copy one state into
 Independent model objects avoid shared mutation. Copying the state establishes a fair starting point for the update intervention.
 
 ```python
-torch.manual_seed(9); trained=TinyDecoder(); control=TinyDecoder(); control.load_state_dict(trained.state_dict())
-assert all(torch.equal(a,b) for a,b in zip(trained.parameters(),control.parameters()))
-x=torch.tensor([[1,2,3]]); y=torch.tensor([[2,3,4]])
+torch.manual_seed(9)
+trained = TinyDecoder()
+control = TinyDecoder()
+control.load_state_dict(trained.state_dict())
+assert all(torch.equal(a, b) for a, b in zip(trained.parameters(), control.parameters()))
+x = torch.tensor([[1, 2, 3]])
+y = torch.tensor([[2, 3, 4]])
 ```
 
 **Expected:** all parameter tensors initially equal.
@@ -39,11 +43,15 @@ The question is: Compute the same loss5 times without backward or step.
 Repeated execution is not training. The control demonstrates the difference without relying on log messages or an optimizer object merely existing.
 
 ```python
-before={k:v.clone() for k,v in control.state_dict().items()}; values=[]
+before = {k: v.clone() for k, v in control.state_dict().items()}
+values = []
 with torch.no_grad():
     for _ in range(5):
-        z,_=control(x); values.append(F.cross_entropy(z.reshape(-1,16),y.reshape(-1)).item())
-assert len(set(values))==1 and all(torch.equal(v,before[k]) for k,v in control.state_dict().items())
+        z, _ = control(x)
+        values.append(F.cross_entropy(z.reshape(-1, 16), y.reshape(-1)).item())
+assert len(set(values)) == 1 and all(
+    torch.equal(v, before[k]) for k, v in control.state_dict().items()
+)
 ```
 
 **Expected:** all losses equal; weights unchanged.
@@ -57,10 +65,16 @@ The question is: Apply30 Adam(.02) updates to the other model, using the same ba
 The comparison is local to one known batch. A loss decrease proves that this loop can adjust its prediction of exposed transitions, not that the dataset is appropriate.
 
 ```python
-opt=torch.optim.Adam(trained.parameters(),lr=.02); curve=[]
+opt = torch.optim.Adam(trained.parameters(), lr=0.02)
+curve = []
 for _ in range(30):
-    opt.zero_grad(set_to_none=True); z,_=trained(x); loss=F.cross_entropy(z.reshape(-1,16),y.reshape(-1)); curve.append(loss.item()); loss.backward(); opt.step()
-assert np.isfinite(curve).all() and curve[-1]<curve[0]
+    opt.zero_grad(set_to_none=True)
+    z, _ = trained(x)
+    loss = F.cross_entropy(z.reshape(-1, 16), y.reshape(-1))
+    curve.append(loss.item())
+    loss.backward()
+    opt.step()
+assert np.isfinite(curve).all() and curve[-1] < curve[0]
 ```
 
 **Expected:** final batch loss below its initial loss.
@@ -74,7 +88,8 @@ The question is: Inspect logits before flattening and verify vocabulary dimensio
 Cross entropy needs one score per class for each active target. Flattening before checking axes can conceal swapped time and vocabulary dimensions.
 
 ```python
-z,_=trained(x); assert tuple(z.shape)==(1,3,16)
+z, _ = trained(x)
+assert tuple(z.shape) == (1, 3, 16)
 ```
 
 **Expected:** shape(1,3,16).
@@ -88,7 +103,7 @@ The question is: Compare control state with its original snapshot after training
 This catches accidental sharing of parameter storage or an optimizer configured with the wrong model parameters.
 
 ```python
-assert all(torch.equal(v,before[k]) for k,v in control.state_dict().items())
+assert all(torch.equal(v, before[k]) for k, v in control.state_dict().items())
 ```
 
 **Expected:** every control tensor unchanged.
@@ -102,8 +117,13 @@ The question is: Write a diagnostic record naming one training sequence and zero
 A successful memorization test should trigger the next evaluation stage, not a deployment claim. If the test fails, preserve its smallest failing batch for debugging.
 
 ```python
-report={'repeated_sequences':1,'updates':30,'heldout_count':0,'generalization_established':False}
-assert report['heldout_count']==0 and not report['generalization_established']
+report = {
+    "repeated_sequences": 1,
+    "updates": 30,
+    "heldout_count": 0,
+    "generalization_established": False,
+}
+assert report["heldout_count"] == 0 and not report["generalization_established"]
 ```
 
 **Expected:** heldout_count0 and generalization_establishedFalse.

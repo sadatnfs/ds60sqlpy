@@ -442,10 +442,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="guide--worked-example-extract-a-testable-boundary">Worked example: extract a testable boundary<a class="heading-anchor" href="#guide--worked-example-extract-a-testable-boundary" aria-label="Link to this section">#</a></h4>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> dataclasses <span class="syntax-keyword">import</span> dataclass
 
+
 <span class="syntax-decorator">@dataclass</span><span class="syntax-punctuation">(</span>frozen<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">class</span> <span class="syntax-class">Metrics</span><span class="syntax-punctuation">:</span>
     rows<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span>
     positive_rate<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span>
+
 
 <span class="syntax-keyword">def</span> <span class="syntax-function">summarize_labels</span><span class="syntax-punctuation">(</span>labels<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Metrics<span class="syntax-punctuation">:</span>
     <span class="syntax-string">&quot;&quot;&quot;Return count and positive rate for nonempty binary labels.&quot;&quot;&quot;</span>
@@ -497,6 +499,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">legacy_total</span><span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">return</span> <span class="syntax-builtin">round</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">price</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">units</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> rows<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
 
+
 sample <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>
     <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">price</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">1.25</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">units</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">2</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
     <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">price</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">0.50</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">units</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">3</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
@@ -510,6 +513,7 @@ observed <span class="syntax-operator">=</span> legacy_total<span class="syntax-
 <p>This second example changes one important condition. Compare it with Example A instead of reading it as unrelated syntax.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> decimal <span class="syntax-keyword">import</span> Decimal<span class="syntax-punctuation">,</span> InvalidOperation
 
+
 <span class="syntax-keyword">def</span> <span class="syntax-function">line_total</span><span class="syntax-punctuation">(</span>price_text<span class="syntax-punctuation">,</span> units_text<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
         price <span class="syntax-operator">=</span> Decimal<span class="syntax-punctuation">(</span>price_text<span class="syntax-punctuation">)</span>
@@ -519,6 +523,7 @@ observed <span class="syntax-operator">=</span> legacy_total<span class="syntax-
     <span class="syntax-keyword">if</span> price <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span> <span class="syntax-operator">or</span> units <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span>
         <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">price and units must be nonnegative</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
     <span class="syntax-keyword">return</span> price <span class="syntax-operator">*</span> units
+
 
 <span class="syntax-keyword">assert</span> line_total<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">1.25</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">2</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> Decimal<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">2.50</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
@@ -763,17 +768,20 @@ merely ran is not evidence of mastery.</code></pre></div>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd
 <span class="syntax-keyword">from</span> src.model <span class="syntax-keyword">import</span> train_evaluate
 
+
 <span class="syntax-keyword">def</span> <span class="syntax-function">test_train_evaluate_runs</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
-    df <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>
-        <span class="syntax-punctuation">{</span>
-            <span class="syntax-string">&#x27;</span><span class="syntax-string">survived</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> i <span class="syntax-operator">%</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span>
-            <span class="syntax-string">&#x27;</span><span class="syntax-string">sex</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">female</span><span class="syntax-string">&#x27;</span> <span class="syntax-keyword">if</span> i <span class="syntax-operator">%</span> <span class="syntax-number">2</span> <span class="syntax-keyword">else</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">male</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span>
-            <span class="syntax-string">&#x27;</span><span class="syntax-string">class</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">First</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">Second</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">Third</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span>i <span class="syntax-operator">%</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
-            <span class="syntax-string">&#x27;</span><span class="syntax-string">fare</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">20.0</span> <span class="syntax-operator">+</span> i<span class="syntax-punctuation">,</span>
-            <span class="syntax-string">&#x27;</span><span class="syntax-string">age</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">18.0</span> <span class="syntax-operator">+</span> <span class="syntax-punctuation">(</span>i <span class="syntax-operator">%</span> <span class="syntax-number">30</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
-        <span class="syntax-punctuation">}</span>
-        <span class="syntax-keyword">for</span> i <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">40</span><span class="syntax-punctuation">)</span>
-    <span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    df <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">(</span>
+        <span class="syntax-punctuation">[</span>
+            <span class="syntax-punctuation">{</span>
+                <span class="syntax-string">&quot;</span><span class="syntax-string">survived</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> i <span class="syntax-operator">%</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span>
+                <span class="syntax-string">&quot;</span><span class="syntax-string">sex</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">female</span><span class="syntax-string">&quot;</span> <span class="syntax-keyword">if</span> i <span class="syntax-operator">%</span> <span class="syntax-number">2</span> <span class="syntax-keyword">else</span> <span class="syntax-string">&quot;</span><span class="syntax-string">male</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+                <span class="syntax-string">&quot;</span><span class="syntax-string">class</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">First</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Second</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Third</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span>i <span class="syntax-operator">%</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+                <span class="syntax-string">&quot;</span><span class="syntax-string">fare</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">20.0</span> <span class="syntax-operator">+</span> i<span class="syntax-punctuation">,</span>
+                <span class="syntax-string">&quot;</span><span class="syntax-string">age</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">18.0</span> <span class="syntax-operator">+</span> <span class="syntax-punctuation">(</span>i <span class="syntax-operator">%</span> <span class="syntax-number">30</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+            <span class="syntax-punctuation">}</span>
+            <span class="syntax-keyword">for</span> i <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">40</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-punctuation">]</span>
+    <span class="syntax-punctuation">)</span>
     res <span class="syntax-operator">=</span> train_evaluate<span class="syntax-punctuation">(</span>df<span class="syntax-punctuation">)</span>
     <span class="syntax-keyword">assert</span> <span class="syntax-number">0.5</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> res<span class="syntax-operator">.</span>auc <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">1.0</span></code></pre>
 <p>Run: <code>pytest -q</code></p></article>
@@ -971,21 +979,24 @@ merely ran is not evidence of mastery.</code></pre></div>
 <span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
 <span class="syntax-keyword">from</span> typing <span class="syntax-keyword">import</span> Iterable
 
+
 <span class="syntax-keyword">def</span> <span class="syntax-function">scale_minmax</span><span class="syntax-punctuation">(</span>xs<span class="syntax-punctuation">:</span> Iterable<span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
     xs <span class="syntax-operator">=</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>xs<span class="syntax-punctuation">)</span>
     mn<span class="syntax-punctuation">,</span> mx <span class="syntax-operator">=</span> <span class="syntax-builtin">min</span><span class="syntax-punctuation">(</span>xs<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">max</span><span class="syntax-punctuation">(</span>xs<span class="syntax-punctuation">)</span>
     <span class="syntax-keyword">if</span> mx <span class="syntax-operator">==</span> mn<span class="syntax-punctuation">:</span>  <span class="syntax-comment"># avoid divide by zero</span>
         <span class="syntax-keyword">return</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0.0</span> <span class="syntax-keyword">for</span> _ <span class="syntax-operator">in</span> xs<span class="syntax-punctuation">]</span>
-    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span>x<span class="syntax-operator">-</span>mn<span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-punctuation">(</span>mx<span class="syntax-operator">-</span>mn<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> x <span class="syntax-operator">in</span> xs<span class="syntax-punctuation">]</span></code></pre>
+    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span>x <span class="syntax-operator">-</span> mn<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-punctuation">(</span>mx <span class="syntax-operator">-</span> mn<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> x <span class="syntax-operator">in</span> xs<span class="syntax-punctuation">]</span></code></pre>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-comment"># tests/test_fe.py</span>
 <span class="syntax-keyword">import</span> pytest
 <span class="syntax-keyword">from</span> myproj.fe <span class="syntax-keyword">import</span> scale_minmax
 
+
 <span class="syntax-keyword">def</span> <span class="syntax-function">test_scale_happy</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
-    <span class="syntax-keyword">assert</span> scale_minmax<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">10</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">assert</span> scale_minmax<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">]</span>
+
 
 <span class="syntax-keyword">def</span> <span class="syntax-function">test_scale_constant</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
-    <span class="syntax-keyword">assert</span> scale_minmax<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">]</span></code></pre>
+    <span class="syntax-keyword">assert</span> scale_minmax<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">]</span></code></pre>
 <p>Run tests</p>
 <pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell</span>
 <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m pytest -q</code></pre>
@@ -995,18 +1006,18 @@ merely ran is not evidence of mastery.</code></pre></div>
 <p>Worked reference for Exercise 2; pre‑commit</p>
 <pre class="highlighted-code"><code class="language-yaml"><span class="syntax-comment"># .pre-commit-config.yaml</span>
 <span class="syntax-tag">repos</span><span class="syntax-punctuation">:</span>
-<span class="syntax-punctuation">-</span> <span class="syntax-tag">repo</span><span class="syntax-punctuation">:</span> local
-  <span class="syntax-tag">hooks</span><span class="syntax-punctuation">:</span>
-  <span class="syntax-punctuation">-</span> <span class="syntax-tag">id</span><span class="syntax-punctuation">:</span> ruff-check
-    <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> Ruff check
-    <span class="syntax-tag">entry</span><span class="syntax-punctuation">:</span> ruff check --fix
-    <span class="syntax-tag">language</span><span class="syntax-punctuation">:</span> system
-    <span class="syntax-tag">types</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>python<span class="syntax-punctuation">]</span>
-  <span class="syntax-punctuation">-</span> <span class="syntax-tag">id</span><span class="syntax-punctuation">:</span> ruff-format
-    <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> Ruff format
-    <span class="syntax-tag">entry</span><span class="syntax-punctuation">:</span> ruff format
-    <span class="syntax-tag">language</span><span class="syntax-punctuation">:</span> system
-    <span class="syntax-tag">types</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>python<span class="syntax-punctuation">]</span></code></pre>
+  <span class="syntax-punctuation">-</span> <span class="syntax-tag">repo</span><span class="syntax-punctuation">:</span> local
+    <span class="syntax-tag">hooks</span><span class="syntax-punctuation">:</span>
+      <span class="syntax-punctuation">-</span> <span class="syntax-tag">id</span><span class="syntax-punctuation">:</span> ruff-check
+        <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> Ruff check
+        <span class="syntax-tag">entry</span><span class="syntax-punctuation">:</span> ruff check --fix
+        <span class="syntax-tag">language</span><span class="syntax-punctuation">:</span> system
+        <span class="syntax-tag">types</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>python<span class="syntax-punctuation">]</span>
+      <span class="syntax-punctuation">-</span> <span class="syntax-tag">id</span><span class="syntax-punctuation">:</span> ruff-format
+        <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> Ruff format
+        <span class="syntax-tag">entry</span><span class="syntax-punctuation">:</span> ruff format
+        <span class="syntax-tag">language</span><span class="syntax-punctuation">:</span> system
+        <span class="syntax-tag">types</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>python<span class="syntax-punctuation">]</span></code></pre>
 <p>Core setup already installs pre-commit. Install the local hook and run it:</p>
 <pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell</span>
 <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m pre_commit install
@@ -1023,13 +1034,13 @@ merely ran is not evidence of mastery.</code></pre></div>
   <span class="syntax-tag">build</span><span class="syntax-punctuation">:</span>
     <span class="syntax-tag">runs-on</span><span class="syntax-punctuation">:</span> ubuntu-latest
     <span class="syntax-tag">steps</span><span class="syntax-punctuation">:</span>
-    <span class="syntax-punctuation">-</span> <span class="syntax-tag">uses</span><span class="syntax-punctuation">:</span> actions/checkout@v6
-    <span class="syntax-punctuation">-</span> <span class="syntax-tag">uses</span><span class="syntax-punctuation">:</span> actions/setup-python@v6
-      <span class="syntax-tag">with</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span><span class="syntax-tag"> python-version</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">3.12</span><span class="syntax-string">&#x27;</span> <span class="syntax-punctuation">}</span>
-    <span class="syntax-punctuation">-</span> <span class="syntax-tag">run</span><span class="syntax-punctuation">:</span> python -m pip install -e &quot;.[quality]&quot;
-    <span class="syntax-punctuation">-</span> <span class="syntax-tag">run</span><span class="syntax-punctuation">:</span> ruff check .
-    <span class="syntax-punctuation">-</span> <span class="syntax-tag">run</span><span class="syntax-punctuation">:</span> ruff format --check .
-    <span class="syntax-punctuation">-</span> <span class="syntax-tag">run</span><span class="syntax-punctuation">:</span> pytest -q</code></pre>
+      <span class="syntax-punctuation">-</span> <span class="syntax-tag">uses</span><span class="syntax-punctuation">:</span> actions/checkout@v6
+      <span class="syntax-punctuation">-</span> <span class="syntax-tag">uses</span><span class="syntax-punctuation">:</span> actions/setup-python@v6
+        <span class="syntax-tag">with</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span><span class="syntax-tag"> python-version</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">3.12</span><span class="syntax-string">&quot;</span> <span class="syntax-punctuation">}</span>
+      <span class="syntax-punctuation">-</span> <span class="syntax-tag">run</span><span class="syntax-punctuation">:</span> python -m pip install -e &quot;.[quality]&quot;
+      <span class="syntax-punctuation">-</span> <span class="syntax-tag">run</span><span class="syntax-punctuation">:</span> ruff check .
+      <span class="syntax-punctuation">-</span> <span class="syntax-tag">run</span><span class="syntax-punctuation">:</span> ruff format --check .
+      <span class="syntax-punctuation">-</span> <span class="syntax-tag">run</span><span class="syntax-punctuation">:</span> pytest -q</code></pre>
 <p>Notes</p>
 <ul>
 <li>Keep PRs small and focused; require reviews</li>
@@ -1220,18 +1231,18 @@ merely ran is not evidence of mastery.</code></pre></div>
 <p>Worked reference for Exercise 2 — pre‑commit</p>
 <pre class="highlighted-code"><code class="language-yaml"><span class="syntax-comment"># .pre-commit-config.yaml</span>
 <span class="syntax-tag">repos</span><span class="syntax-punctuation">:</span>
-<span class="syntax-punctuation">-</span> <span class="syntax-tag">repo</span><span class="syntax-punctuation">:</span> local
-  <span class="syntax-tag">hooks</span><span class="syntax-punctuation">:</span>
-  <span class="syntax-punctuation">-</span> <span class="syntax-tag">id</span><span class="syntax-punctuation">:</span> ruff-check
-    <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> Ruff check
-    <span class="syntax-tag">entry</span><span class="syntax-punctuation">:</span> ruff check --fix
-    <span class="syntax-tag">language</span><span class="syntax-punctuation">:</span> system
-    <span class="syntax-tag">types</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>python<span class="syntax-punctuation">]</span>
-  <span class="syntax-punctuation">-</span> <span class="syntax-tag">id</span><span class="syntax-punctuation">:</span> ruff-format
-    <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> Ruff format
-    <span class="syntax-tag">entry</span><span class="syntax-punctuation">:</span> ruff format
-    <span class="syntax-tag">language</span><span class="syntax-punctuation">:</span> system
-    <span class="syntax-tag">types</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>python<span class="syntax-punctuation">]</span></code></pre>
+  <span class="syntax-punctuation">-</span> <span class="syntax-tag">repo</span><span class="syntax-punctuation">:</span> local
+    <span class="syntax-tag">hooks</span><span class="syntax-punctuation">:</span>
+      <span class="syntax-punctuation">-</span> <span class="syntax-tag">id</span><span class="syntax-punctuation">:</span> ruff-check
+        <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> Ruff check
+        <span class="syntax-tag">entry</span><span class="syntax-punctuation">:</span> ruff check --fix
+        <span class="syntax-tag">language</span><span class="syntax-punctuation">:</span> system
+        <span class="syntax-tag">types</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>python<span class="syntax-punctuation">]</span>
+      <span class="syntax-punctuation">-</span> <span class="syntax-tag">id</span><span class="syntax-punctuation">:</span> ruff-format
+        <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> Ruff format
+        <span class="syntax-tag">entry</span><span class="syntax-punctuation">:</span> ruff format
+        <span class="syntax-tag">language</span><span class="syntax-punctuation">:</span> system
+        <span class="syntax-tag">types</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>python<span class="syntax-punctuation">]</span></code></pre>
 <p>Core setup already installs pre-commit. Install the local hook and run it:</p>
 <pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell</span>
 <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m pre_commit install
@@ -1248,13 +1259,13 @@ merely ran is not evidence of mastery.</code></pre></div>
   <span class="syntax-tag">build</span><span class="syntax-punctuation">:</span>
     <span class="syntax-tag">runs-on</span><span class="syntax-punctuation">:</span> ubuntu-latest
     <span class="syntax-tag">steps</span><span class="syntax-punctuation">:</span>
-    <span class="syntax-punctuation">-</span> <span class="syntax-tag">uses</span><span class="syntax-punctuation">:</span> actions/checkout@v6
-    <span class="syntax-punctuation">-</span> <span class="syntax-tag">uses</span><span class="syntax-punctuation">:</span> actions/setup-python@v6
-      <span class="syntax-tag">with</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span><span class="syntax-tag"> python-version</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">3.12</span><span class="syntax-string">&#x27;</span> <span class="syntax-punctuation">}</span>
-    <span class="syntax-punctuation">-</span> <span class="syntax-tag">run</span><span class="syntax-punctuation">:</span> python -m pip install -e &quot;.[quality]&quot;
-    <span class="syntax-punctuation">-</span> <span class="syntax-tag">run</span><span class="syntax-punctuation">:</span> ruff check .
-    <span class="syntax-punctuation">-</span> <span class="syntax-tag">run</span><span class="syntax-punctuation">:</span> ruff format --check .
-    <span class="syntax-punctuation">-</span> <span class="syntax-tag">run</span><span class="syntax-punctuation">:</span> pytest -q</code></pre>
+      <span class="syntax-punctuation">-</span> <span class="syntax-tag">uses</span><span class="syntax-punctuation">:</span> actions/checkout@v6
+      <span class="syntax-punctuation">-</span> <span class="syntax-tag">uses</span><span class="syntax-punctuation">:</span> actions/setup-python@v6
+        <span class="syntax-tag">with</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span><span class="syntax-tag"> python-version</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">3.12</span><span class="syntax-string">&quot;</span> <span class="syntax-punctuation">}</span>
+      <span class="syntax-punctuation">-</span> <span class="syntax-tag">run</span><span class="syntax-punctuation">:</span> python -m pip install -e &quot;.[quality]&quot;
+      <span class="syntax-punctuation">-</span> <span class="syntax-tag">run</span><span class="syntax-punctuation">:</span> ruff check .
+      <span class="syntax-punctuation">-</span> <span class="syntax-tag">run</span><span class="syntax-punctuation">:</span> ruff format --check .
+      <span class="syntax-punctuation">-</span> <span class="syntax-tag">run</span><span class="syntax-punctuation">:</span> pytest -q</code></pre>
 <p>Notes</p>
 <ul>
 <li>Keep PRs small and focused; require reviews</li>

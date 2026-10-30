@@ -178,8 +178,7 @@ normalize = Normalize(
     std=[0.229, 0.224, 0.225],
 )
 transformed = normalize(image)
-print({"shape": tuple(transformed.shape),
-       "channel_means": transformed.mean(dim=(1, 2)).tolist()})
+print({"shape": tuple(transformed.shape), "channel_means": transformed.mean(dim=(1, 2)).tolist()})
 assert transformed.shape == image.shape
 ```
 

@@ -97,13 +97,24 @@ These worked excerpts come from `sql/postgres-60day/day34_query_optimization.sql
 
 ```sql
 WITH filtered_orders AS (
-  SELECT order_id, customer_id FROM orders WHERE order_date >= now() - interval '30 days'
+  SELECT
+    order_id,
+    customer_id
+  FROM
+    orders
+  WHERE
+    order_date >= now() - interval '30 days'
 )
-SELECT c.country, COUNT(*)
-FROM filtered_orders fo
-JOIN customers c ON c.customer_id = fo.customer_id
-GROUP BY c.country
-ORDER BY COUNT(*) DESC;
+SELECT
+  c.country,
+  COUNT(*)
+FROM
+  filtered_orders fo
+  JOIN customers c ON c.customer_id = fo.customer_id
+GROUP BY
+  c.country
+ORDER BY
+  COUNT(*) DESC;
 ```
 
 **How to read it:** Example 1: Start with `orders`, and `customers` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows; let `GROUP BY` collapse rows to its grouping keys. The final `SELECT` displays `country`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
@@ -114,9 +125,13 @@ ORDER BY COUNT(*) DESC;
 
 ```sql
 EXPLAIN ANALYZE
-SELECT o.order_id, o.customer_id
-FROM orders o
-WHERE o.order_date >= now() - interval '7 days';
+SELECT
+  o.order_id,
+  o.customer_id
+FROM
+  orders o
+WHERE
+  o.order_date >= now() - interval '7 days';
 ```
 
 **How to read it:** Example 2 returns plan rows rather than business rows. The node tree is evidence about one execution strategy; it does not replace a correctness check on the underlying query.

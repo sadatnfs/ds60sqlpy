@@ -251,8 +251,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>err <span class="syntax-operator">==</span> <span class="syntax-keyword">nil</span> <span class="syntax-operator">&amp;&amp;</span> n <span class="syntax-operator">==</span> <span class="syntax-number">3</span> <span class="syntax-operator">&amp;&amp;</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>args<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;flag&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The resulting count is 3.</p>
 <p>The synthetic argument slice tests the actual parser while remaining independent of the classroom process arguments.</p>
 <h4 id="worked-example-2-retain-a-default">Worked example 2: Retain a default<a class="heading-anchor" href="#worked-example-2-retain-a-default" aria-label="Link to this section">#</a></h4>
@@ -299,8 +298,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>err <span class="syntax-operator">==</span> <span class="syntax-keyword">nil</span> <span class="syntax-operator">&amp;&amp;</span> n <span class="syntax-operator">==</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;default&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The count remains 1.</p>
 <p>A default is an intentional contract, not an accidental zero value. Changing it can alter existing workflows even when parsing code is unchanged.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>

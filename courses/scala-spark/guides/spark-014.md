@@ -51,33 +51,70 @@ import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 
-val schema = StructType(Seq(
-  StructField("source_row",LongType,false),StructField("event_id",LongType,true),
-  StructField("team",StringType,true),StructField("amount_cents",LongType,true),
-  StructField("status",StringType,true)))
+val schema = StructType(
+  Seq(
+    StructField("source_row", LongType, false),
+    StructField("event_id", LongType, true),
+    StructField("team", StringType, true),
+    StructField("amount_cents", LongType, true),
+    StructField("status", StringType, true)
+  )
+)
 val rows = Seq(
- Row(1L,1L,"A",100L,"paid"),Row(2L,2L,"A",null,"paid"),
- Row(3L,3L,"B",0L,"paid"),Row(4L,4L,null,50L,"paid"),
- Row(5L,5L,"B",150L,"void"),Row(6L,6L,"A",100L,"paid"),
- Row(7L,7L,"C",null,"paid"),Row(8L,8L,"B",25L,"paid"),
- Row(9L,9L,"E",0L,"paid"),Row(10L,10L,"D",200L,"paid"),
- Row(11L,11L,"A",10L,"mystery"),Row(12L,null,"A",5L,"paid"))
-val raw = spark.createDataFrame(spark.sparkContext.parallelize(rows,2),schema)
+  Row(1L, 1L, "A", 100L, "paid"),
+  Row(2L, 2L, "A", null, "paid"),
+  Row(3L, 3L, "B", 0L, "paid"),
+  Row(4L, 4L, null, 50L, "paid"),
+  Row(5L, 5L, "B", 150L, "void"),
+  Row(6L, 6L, "A", 100L, "paid"),
+  Row(7L, 7L, "C", null, "paid"),
+  Row(8L, 8L, "B", 25L, "paid"),
+  Row(9L, 9L, "E", 0L, "paid"),
+  Row(10L, 10L, "D", 200L, "paid"),
+  Row(11L, 11L, "A", 10L, "mystery"),
+  Row(12L, null, "A", 5L, "paid")
+)
+val raw = spark.createDataFrame(spark.sparkContext.parallelize(rows, 2), schema)
 ```
 
 ```python
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 
-schema = StructType([
-    StructField("source_row", LongType(), False),StructField("event_id", LongType(), True),
-    StructField("team", StringType(), True),StructField("amount_cents", LongType(), True),
-    StructField("status", StringType(), True),
-])
+schema = StructType(
+    [
+        StructField("source_row", LongType(), False),
+        StructField("event_id", LongType(), True),
+        StructField("team", StringType(), True),
+        StructField("amount_cents", LongType(), True),
+        StructField("status", StringType(), True),
+    ]
+)
 rows = [
-    (1,1,"A",100,"paid"),(2,2,"A",None,"paid"),(3,3,"B",0,"paid"),(4,4,None,50,"paid"),
-    (5,5,"B",150,"void"),(6,6,"A",100,"paid"),(7,7,"C",None,"paid"),(8,8,"B",25,"paid"),
-    (9,9,"E",0,"paid"),(10,10,"D",200,"paid"),(11,11,"A",10,"mystery"),(12,None,"A",5,"paid"),
+    (1, 1, "A", 100, "paid"),
+    (2, 2, "A", None, "paid"),
+    (3, 3, "B", 0, "paid"),
+    (4, 4, None, 50, "paid"),
+    (5, 5, "B", 150, "void"),
+    (6, 6, "A", 100, "paid"),
+    (7, 7, "C", None, "paid"),
+    (8, 8, "B", 25, "paid"),
+    (9, 9, "E", 0, "paid"),
+    (10, 10, "D", 200, "paid"),
+    (11, 11, "A", 10, "mystery"),
+    (12, None, "A", 5, "paid"),
 ]
 raw = spark.createDataFrame(rows, schema=schema)
 ```
@@ -105,15 +142,39 @@ The source grain is an ingestion occurrence, not yet a validated event. source_r
 ### Worked example 2
 
 ```scala
-val unknown = raw.filter(col("amount_cents").isNull).select("event_id").orderBy("event_id").collect().map(_.getLong(0)).toSeq
-val zero = raw.filter(col("amount_cents") === lit(0L)).select("event_id").orderBy("event_id").collect().map(_.getLong(0)).toSeq
-assert(unknown == Seq(2L,7L) && zero == Seq(3L,9L))
+val unknown = raw
+  .filter(col("amount_cents").isNull)
+  .select("event_id")
+  .orderBy("event_id")
+  .collect()
+  .map(_.getLong(0))
+  .toSeq
+val zero = raw
+  .filter(col("amount_cents") === lit(0L))
+  .select("event_id")
+  .orderBy("event_id")
+  .collect()
+  .map(_.getLong(0))
+  .toSeq
+assert(unknown == Seq(2L, 7L) && zero == Seq(3L, 9L))
 println("Unknown amounts and observed zeros have different identities")
 ```
 
 ```python
-unknown = [row.event_id for row in raw.filter(F.col("amount_cents").isNull()).select("event_id").orderBy("event_id").collect()]
-zero = [row.event_id for row in raw.filter(F.col("amount_cents") == F.lit(0)).select("event_id").orderBy("event_id").collect()]
+unknown = [
+    row.event_id
+    for row in raw.filter(F.col("amount_cents").isNull())
+    .select("event_id")
+    .orderBy("event_id")
+    .collect()
+]
+zero = [
+    row.event_id
+    for row in raw.filter(F.col("amount_cents") == F.lit(0))
+    .select("event_id")
+    .orderBy("event_id")
+    .collect()
+]
 assert unknown == [2, 7] and zero == [3, 9]
 print("Unknown amounts and observed zeros have different identities")
 ```

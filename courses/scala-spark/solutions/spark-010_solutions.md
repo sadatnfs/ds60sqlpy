@@ -12,7 +12,10 @@ For inputs between-1000000 and 1000000, retain even values and double them in or
 
 ```scala
 def strictPipeline(values: Seq[Int]): Seq[Int] = {
-  require(values.forall(value => value >= -1000000 && value <= 1000000), "input outside bounded domain")
+  require(
+    values.forall(value => value >= -1000000 && value <= 1000000),
+    "input outside bounded domain"
+  )
   values.filter(_ % 2 == 0).map(_ * 2)
 }
 ```
@@ -20,9 +23,9 @@ def strictPipeline(values: Seq[Int]): Seq[Int] = {
 The strict collection result is the reference data contract before laziness is introduced. The even predicate retains zero and duplicate twos, while multiplication stays safe inside the stated domain. The pipeline has no external state and can be recomputed without changing its meaning. Input preservation is checked independently from output equality.
 
 ```scala
-val raw = Seq(1,2,3,4)
-assert(strictPipeline(raw) == Seq(4,8) && raw == Seq(1,2,3,4))
-assert(strictPipeline(Seq(0,2,2)) == Seq(0,4,4) && strictPipeline(Seq.empty).isEmpty)
+val raw = Seq(1, 2, 3, 4)
+assert(strictPipeline(raw) == Seq(4, 8) && raw == Seq(1, 2, 3, 4))
+assert(strictPipeline(Seq(0, 2, 2)) == Seq(0, 4, 4) && strictPipeline(Seq.empty).isEmpty)
 expectIllegalArgument(strictPipeline(Seq(1000001)))
 ```
 
@@ -34,14 +37,19 @@ Return a lazy even-filter/double-map iterator with local trace messages filter: 
 
 ```scala
 def tracedIterator(values: Seq[Int], trace: ArrayBuffer[String]): Iterator[Int] = {
-  require(values.forall(value => value >= -1000000 && value <= 1000000), "input outside bounded domain")
-  values.iterator.filter { value =>
-    trace += s"filter:$value"
-    value % 2 == 0
-  }.map { value =>
-    trace += s"map:$value"
-    value * 2
-  }
+  require(
+    values.forall(value => value >= -1000000 && value <= 1000000),
+    "input outside bounded domain"
+  )
+  values.iterator
+    .filter { value =>
+      trace += s"filter:$value"
+      value % 2 == 0
+    }
+    .map { value =>
+      trace += s"map:$value"
+      value * 2
+    }
 }
 ```
 
@@ -49,12 +57,12 @@ The filter examines odd values without producing an output, so source work and r
 
 ```scala
 val trace = ArrayBuffer.empty[String]
-val iterator = tracedIterator(raw,trace)
+val iterator = tracedIterator(raw, trace)
 assert(trace.isEmpty)
 assert(iterator.take(1).toVector == Vector(4))
-assert(trace.toVector == Vector("filter:1","filter:2","map:2"))
+assert(trace.toVector == Vector("filter:1", "filter:2", "map:2"))
 assert(iterator.toVector == Vector(8))
-assert(trace.toVector == Vector("filter:1","filter:2","map:2","filter:3","filter:4","map:4"))
+assert(trace.toVector == Vector("filter:1", "filter:2", "map:2", "filter:3", "filter:4", "map:4"))
 ```
 
 ### Exercise 3: Expose one-shot traversal state
@@ -67,15 +75,15 @@ Consume a supplied iterator into a Vector twice and return both results. Do not 
 def consumeTwice(values: Iterator[Int]): (Vector[Int], Vector[Int]) = {
   val first = values.toVector
   val second = values.toVector
-  (first,second)
+  (first, second)
 }
 ```
 
 The iterator stores traversal progress, so consuming it changes its future behavior even if the underlying source values are immutable. This function intentionally demonstrates that state instead of hiding it with caching. The result is not a failure of Vector conversion; it is the expected one-shot contract. Callers needing repetition should request a factory or materialize a bounded result explicitly.
 
 ```scala
-assert(consumeTwice(Iterator(1,2,3)) == (Vector(1,2,3),Vector.empty[Int]))
-assert(consumeTwice(Iterator.empty) == (Vector.empty[Int],Vector.empty[Int]))
+assert(consumeTwice(Iterator(1, 2, 3)) == (Vector(1, 2, 3), Vector.empty[Int]))
+assert(consumeTwice(Iterator.empty) == (Vector.empty[Int], Vector.empty[Int]))
 ```
 
 ### Exercise 4: Provide repeatability deliberately
@@ -86,7 +94,10 @@ Return a factory creating a fresh bounded even-filter/double-map iterator on eac
 
 ```scala
 def freshFactory(values: Seq[Int]): () => Iterator[Int] = {
-  require(values.forall(value => value >= -1000000 && value <= 1000000), "input outside bounded domain")
+  require(
+    values.forall(value => value >= -1000000 && value <= 1000000),
+    "input outside bounded domain"
+  )
   () => values.iterator.filter(_ % 2 == 0).map(_ * 2)
 }
 ```
@@ -95,9 +106,9 @@ The closure captures immutable source values but constructs traversal state only
 
 ```scala
 val factory = freshFactory(raw)
-val first = factory();val second = factory()
-assert(first.toVector == Vector(4,8) && second.toVector == Vector(4,8))
-assert(raw == Seq(1,2,3,4))
+val first = factory(); val second = factory()
+assert(first.toVector == Vector(4, 8) && second.toVector == Vector(4, 8))
+assert(raw == Seq(1, 2, 3, 4))
 ```
 
 ### Exercise 5: Separate repeated delivery from logical identity
@@ -109,24 +120,34 @@ For bounded nonnegative event amounts and nonblank IDs, compute naive delivered 
 ```scala
 def retryTotals(records: Seq[(String, Long)], attempts: Int): (Long, Long) = {
   require(attempts >= 0, "attempt count must be nonnegative")
-  require(records.forall { case (id,amount) => id != null && id.trim.nonEmpty && amount >= 0L && amount <= 1000000L }, "invalid event domain")
+  require(
+    records.forall { case (id, amount) =>
+      id != null && id.trim.nonEmpty && amount >= 0L && amount <= 1000000L
+    },
+    "invalid event domain"
+  )
   val groups = records.groupBy(_._1)
-  require(groups.values.forall(rows => rows.map(_._2).distinct.size == 1), "conflicting payload for one event ID")
-  val oneAttempt = records.foldLeft(0L)((total,row) => Math.addExact(total,row._2))
-  val naive = Math.multiplyExact(oneAttempt,attempts.toLong)
-  val logical = if (attempts == 0) 0L else groups.values.foldLeft(0L)((total,rows) => Math.addExact(total,rows.head._2))
-  (naive,logical)
+  require(
+    groups.values.forall(rows => rows.map(_._2).distinct.size == 1),
+    "conflicting payload for one event ID"
+  )
+  val oneAttempt = records.foldLeft(0L)((total, row) => Math.addExact(total, row._2))
+  val naive = Math.multiplyExact(oneAttempt, attempts.toLong)
+  val logical =
+    if (attempts == 0) 0L
+    else groups.values.foldLeft(0L)((total, rows) => Math.addExact(total, rows.head._2))
+  (naive, logical)
 }
 ```
 
 The naive total includes both duplicate delivery within the input and repeated attempts. The logical total uses validated identity rather than equal amount, so different IDs with equal values would still both count. Conflicting payloads are rejected instead of letting encounter order choose a value. A real idempotent sink also needs atomic durable publication and recovery semantics; this pure comparison only demonstrates the quantities that such a sink must preserve.
 
 ```scala
-val deliveries = Seq(("a",100L),("b",50L),("a",100L))
-assert(retryTotals(deliveries,2) == (500L,150L))
-assert(retryTotals(deliveries,0) == (0L,0L))
-expectIllegalArgument(retryTotals(Seq(("a",100L),("a",101L)),1))
-expectIllegalArgument(retryTotals(deliveries,-1))
+val deliveries = Seq(("a", 100L), ("b", 50L), ("a", 100L))
+assert(retryTotals(deliveries, 2) == (500L, 150L))
+assert(retryTotals(deliveries, 0) == (0L, 0L))
+expectIllegalArgument(retryTotals(Seq(("a", 100L), ("a", 101L)), 1))
+expectIllegalArgument(retryTotals(deliveries, -1))
 ```
 
 ### Exercise 6: Consume only a declared bounded prefix
@@ -147,11 +168,11 @@ The consumer requests only a finite prefix and materializes only that bounded re
 ```scala
 var visits = 0
 val infinite = Iterator.from(1).map { value => visits += 1; value }
-assert(boundedTake(infinite,3) == Vector(1,2,3) && visits == 3)
+assert(boundedTake(infinite, 3) == Vector(1, 2, 3) && visits == 3)
 assert(infinite.next() == 4)
 val untouched = Iterator.from(1)
-assert(boundedTake(untouched,0).isEmpty && untouched.next() == 1)
-expectIllegalArgument(boundedTake(Iterator.from(1),1001))
+assert(boundedTake(untouched, 0).isEmpty && untouched.next() == 1)
+expectIllegalArgument(boundedTake(Iterator.from(1), 1001))
 ```
 
 ## Evidence and scope

@@ -96,7 +96,9 @@ These worked excerpts come from `sql/postgres-60day/day43_backup_recovery.sql`. 
 ### Example 1
 
 ```sql
-CREATE TEMP TABLE customers_stg (LIKE customers INCLUDING ALL);
+CREATE TEMP TABLE customers_stg (
+  LIKE customers INCLUDING ALL
+);
 ```
 
 **How to read it:** Example 1 is data definition language (DDL). `psql` prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.
@@ -106,9 +108,17 @@ CREATE TEMP TABLE customers_stg (LIKE customers INCLUDING ALL);
 ### Example 2
 
 ```sql
-SELECT 'customers' AS table, COUNT(*) AS base_cnt FROM customers
+SELECT
+  'customers' AS table,
+  COUNT(*) AS base_cnt
+FROM
+  customers
 UNION ALL
-SELECT 'customers_stg', COUNT(*) FROM customers_stg;
+SELECT
+  'customers_stg',
+  COUNT(*)
+FROM
+  customers_stg;
 ```
 
 **How to read it:** Example 2: Start with `customers`, and `customers_stg` in `FROM`/`JOIN`; append branches with `UNION ALL` (duplicates are retained). The final `SELECT` displays the columns written in the final `SELECT`. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.

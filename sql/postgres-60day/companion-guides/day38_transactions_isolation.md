@@ -96,7 +96,10 @@ These worked excerpts come from `sql/postgres-60day/day38_transactions_isolation
 ### Example 1
 
 ```sql
-CREATE TEMP TABLE txn_demo(id int PRIMARY KEY, qty int);
+CREATE TEMP TABLE txn_demo (
+  id int PRIMARY KEY,
+  qty int
+);
 ```
 
 **How to read it:** Example 1 is data definition language (DDL). `psql` prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.
@@ -106,7 +109,11 @@ CREATE TEMP TABLE txn_demo(id int PRIMARY KEY, qty int);
 ### Example 2
 
 ```sql
-INSERT INTO txn_demo VALUES (1, 10), (2, 20), (3, 30);
+INSERT INTO txn_demo
+VALUES
+  (1, 10),
+  (2, 20),
+  (3, 30);
 ```
 
 **How to read it:** Example 2 changes rows inside the lesson's declared transaction. The command tag reports affected rows, but a follow-up query must prove the intended before/after invariant.

@@ -546,7 +546,10 @@ minimum_total <span class="syntax-operator">=</span> <span class="syntax-number"
 <h5 id="guide--7-keep-identifiers-static">7. Keep identifiers static<a class="heading-anchor" href="#guide--7-keep-identifiers-static" aria-label="Link to this section">#</a></h5>
 <p>Parameters bind values, not grammar. A table name cannot replace a value marker:</p>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-comment">-- Not identifier binding:</span>
-<span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">:</span><span class="syntax-keyword">table_name</span><span class="syntax-punctuation">;</span></code></pre>
+<span class="syntax-keyword">SELECT</span>
+  <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">FROM</span>
+  <span class="syntax-punctuation">:</span><span class="syntax-keyword">table_name</span><span class="syntax-punctuation">;</span></code></pre>
 <p>For a notebook, prefer a static course table. In reusable Psycopg code, enforce an application allowlist and use <code>psycopg.sql.Identifier</code>. Quoting with a parameter, f-string, <code>.format()</code>, Jinja, or a homemade escape function is not a safe identifier boundary.</p>
 <h5 id="guide--8-convert-results-to-pandas">8. Convert results to pandas<a class="heading-anchor" href="#guide--8-convert-results-to-pandas" aria-label="Link to this section">#</a></h5>
 <p>With <code>autopandas=False</code>:</p>
@@ -1114,10 +1117,15 @@ solve the final transfer problem without opening solutions/.</code></pre>
 <p>The structural tests verify metadata, clean execution state, tag coverage, required concepts, named parameters, and prohibited credential/setup patterns. Only an opt-in live run can prove the local PostgreSQL and JupySQL integration.</p>
 <h4 id="solution-1--small-query-check">Small query check<a class="heading-anchor" href="#solution-1--small-query-check" aria-label="Link to this section">#</a></h4>
 <p>The completed notebook keeps changing data in named parameters and keeps identifiers static:</p>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span> full_name
-<span class="syntax-keyword">FROM</span> training<span class="syntax-punctuation">.</span>customers
-<span class="syntax-keyword">WHERE</span> country <span class="syntax-operator">=</span> <span class="syntax-punctuation">:</span>exercise_country
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> customer_id
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  customer_id<span class="syntax-punctuation">,</span>
+  full_name
+<span class="syntax-keyword">FROM</span>
+  training<span class="syntax-punctuation">.</span>customers
+<span class="syntax-keyword">WHERE</span>
+  country <span class="syntax-operator">=</span> <span class="syntax-punctuation">:</span>exercise_country
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  customer_id
 <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">10</span><span class="syntax-punctuation">;</span></code></pre>
 <p>Before running it, define <code>exercise_country</code> in a Python cell. The variable&#x27;s value must not be pasted into the SQL source or displayed as connection text.</p>
 <h4 id="solution-1--exercise-solutions">Exercise solutions<a class="heading-anchor" href="#solution-1--exercise-solutions" aria-label="Link to this section">#</a></h4>

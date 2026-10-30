@@ -132,7 +132,7 @@
           "A useful outline",
           "Topic relationships determine heading levels.",
           "html",
-          "<main><h1>Study notes</h1><section><h2>HTML</h2><p>Structure first.</p></section></main>",
+          "<main\n  ><h1>Study notes</h1><section><h2>HTML</h2><p>Structure first.</p></section></main\n>",
           "HTML is a subsection of Study notes."
         ],
         [
@@ -252,7 +252,7 @@
           "A meaningful sequence",
           "The order is part of the instructions.",
           "html",
-          "<ol><li>Write a prediction.</li><li>Run the example.</li><li>Compare evidence.</li></ol>",
+          "<ol\n  ><li>Write a prediction.</li\n  ><li>Run the example.</li\n  ><li>Compare evidence.</li></ol\n>",
           "A numbered sequence exposes three ordered steps."
         ],
         [
@@ -309,14 +309,14 @@
           "Informative image",
           "The alternative describes the information relevant to this page.",
           "html",
-          "<img src=\"local-map.svg\" alt=\"Library entrance is on the east side\" width=\"400\" height=\"240\">",
+          "<img src=\"local-map.svg\" alt=\"Library entrance is on the east side\" width=\"400\" height=\"240\" />",
           "The dimensions reserve space; the alternative conveys a useful location."
         ],
         [
           "Inline SVG labeling",
           "The named title is inside the vector image.",
           "html",
-          "<svg viewBox=\"0 0 100 30\" role=\"img\" aria-labelledby=\"label\"><title id=\"label\">Three completed lessons</title><rect width=\"60\" height=\"20\"/></svg>",
+          "<svg viewBox=\"0 0 100 30\" role=\"img\" aria-labelledby=\"label\">\n  <title id=\"label\">Three completed lessons</title>\n  <rect width=\"60\" height=\"20\" />\n</svg>",
           "A vector shape has a textual accessible name."
         ]
       ],
@@ -426,14 +426,14 @@
           "A labeled field",
           "Identifier and submitted name have separate jobs.",
           "html",
-          "<label for=\"topic\">Study topic</label><input id=\"topic\" name=\"topic\" value=\"HTML\">",
+          "<label for=\"topic\">Study topic</label><input id=\"topic\" name=\"topic\" value=\"HTML\" />",
           "Selecting the label focuses its associated input."
         ],
         [
           "Related choices",
           "A legend provides a group-level question.",
           "html",
-          "<fieldset><legend>Reminder</legend><label><input type=\"checkbox\" name=\"reminder\">Show a reminder</label></fieldset>",
+          "<fieldset\n  ><legend>Reminder</legend\n  ><label><input type=\"checkbox\" name=\"reminder\" />Show a reminder</label></fieldset\n>",
           "The checkbox has a label and a group context."
         ]
       ],
@@ -483,14 +483,14 @@
           "A bounded value",
           "The contract is visible in the label and attributes.",
           "html",
-          "<label for=\"minutes\">Minutes, 5 to 120</label><input id=\"minutes\" name=\"minutes\" type=\"number\" min=\"5\" max=\"120\" required>",
+          "<label for=\"minutes\">Minutes, 5 to 120</label\n><input id=\"minutes\" name=\"minutes\" type=\"number\" min=\"5\" max=\"120\" required />",
           "An empty value fails required; 4 fails the minimum."
         ],
         [
           "Connected help",
           "Help remains available while entering data.",
           "html",
-          "<input id=\"alias\" aria-describedby=\"alias-help\" minlength=\"3\"><p id=\"alias-help\">Use at least three characters.</p>",
+          "<input id=\"alias\" aria-describedby=\"alias-help\" minlength=\"3\" /><p id=\"alias-help\"\n  >Use at least three characters.</p\n>",
           "The input references its visible instruction."
         ]
       ],
@@ -543,14 +543,14 @@
           "A reusable rule",
           "A class describes a group of elements.",
           "css",
-          ".note { color: #17324d; padding: 1rem; }",
+          ".note {\n  color: #17324d;\n  padding: 1rem;\n}",
           "Every element with class note receives those declarations."
         ],
         [
           "Equal specificity",
           "Source order decides after the relevant priorities tie.",
           "css",
-          ".note { color: blue; }\n.note { color: darkred; }",
+          ".note {\n  color: blue;\n}\n.note {\n  color: darkred;\n}",
           "Dark red wins for matching elements in this simple unlayered example."
         ]
       ],
@@ -600,14 +600,14 @@
           "Content-box arithmetic",
           "The declared content width excludes padding and border.",
           "css",
-          ".card { width: 200px; padding: 20px; border: 2px solid; }",
+          ".card {\n  width: 200px;\n  padding: 20px;\n  border: 2px solid;\n}",
           "The border box is 244px wide."
         ],
         [
           "A predictable border box",
           "The declared width now contains the interior spacing.",
           "css",
-          ".card { box-sizing: border-box; width: 200px; padding: 20px; border: 2px solid; }",
+          ".card {\n  box-sizing: border-box;\n  width: 200px;\n  padding: 20px;\n  border: 2px solid;\n}",
           "The border box is 200px wide."
         ]
       ],
@@ -660,14 +660,14 @@
           "A reading column",
           "The column stays bounded even on a large monitor.",
           "css",
-          ".prose { max-inline-size: 65ch; font-size: 1rem; line-height: 1.6; }",
+          ".prose {\n  max-inline-size: 65ch;\n  font-size: 1rem;\n  line-height: 1.6;\n}",
           "Paragraphs have a bounded measure and relative text size."
         ],
         [
           "A bounded heading",
           "Clamp supplies a minimum, preferred fluid size and maximum.",
           "css",
-          "h1 { font-size: clamp(1.75rem, 4vw, 3rem); }",
+          "h1 {\n  font-size: clamp(1.75rem, 4vw, 3rem);\n}",
           "The heading grows with width within the given bounds."
         ]
       ],
@@ -720,7 +720,7 @@
           "Visible keyboard focus",
           "A clear outline remains distinct from the control border.",
           "css",
-          "button:focus-visible { outline: 3px solid #9c3200; outline-offset: 3px; }",
+          "button:focus-visible {\n  outline: 3px solid #9c3200;\n  outline-offset: 3px;\n}",
           "Keyboard focus has a visible indicator."
         ],
         [
@@ -787,7 +787,7 @@
           "A contained badge",
           "Only the badge is taken out of flow.",
           "css",
-          ".card { position: relative; padding: 2rem; }\n.badge { position: absolute; inset-block-start: .5rem; inset-inline-end: .5rem; }",
+          ".card {\n  position: relative;\n  padding: 2rem;\n}\n.badge {\n  position: absolute;\n  inset-block-start: 0.5rem;\n  inset-inline-end: 0.5rem;\n}",
           "The badge is positioned relative to the card."
         ]
       ],
@@ -840,14 +840,14 @@
           "Wrapping navigation",
           "Wrapping preserves reachable links when space is limited.",
           "css",
-          "nav ul { display: flex; flex-wrap: wrap; gap: .75rem; list-style: none; padding: 0; }",
+          "nav ul {\n  display: flex;\n  flex-wrap: wrap;\n  gap: 0.75rem;\n  list-style: none;\n  padding: 0;\n}",
           "Items form additional rows rather than overflowing."
         ],
         [
           "Flexible cards",
           "The basis expresses a preference rather than an inflexible width.",
           "css",
-          ".cards { display: flex; flex-wrap: wrap; gap: 1rem; }\n.card { flex: 1 1 12rem; min-inline-size: 0; }",
+          ".cards {\n  display: flex;\n  flex-wrap: wrap;\n  gap: 1rem;\n}\n.card {\n  flex: 1 1 12rem;\n  min-inline-size: 0;\n}",
           "Cards share available space and can wrap."
         ]
       ],
@@ -900,14 +900,14 @@
           "Two equal tracks",
           "The remaining width is shared after the gap.",
           "css",
-          ".grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }",
+          ".grid {\n  display: grid;\n  grid-template-columns: repeat(2, minmax(0, 1fr));\n  gap: 1rem;\n}",
           "Two tracks share the available width without an automatic min-content floor."
         ],
         [
           "Adaptive cards",
           "The preferred minimum is bounded by the available width.",
           "css",
-          ".cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); gap: 1rem; }",
+          ".cards {\n  display: grid;\n  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));\n  gap: 1rem;\n}",
           "The column count adapts to available space."
         ]
       ],
@@ -957,14 +957,14 @@
           "A small-space baseline",
           "The ordinary layout works without a query.",
           "css",
-          ".layout { display: grid; gap: 1rem; }",
+          ".layout {\n  display: grid;\n  gap: 1rem;\n}",
           "Sections stack in one column."
         ],
         [
           "An evidence-based enhancement",
           "Add a second column only when content has room.",
           "css",
-          "@media (min-width: 48rem) { .layout { grid-template-columns: 15rem minmax(0, 1fr); } }",
+          "@media (min-width: 48rem) {\n  .layout {\n    grid-template-columns: 15rem minmax(0, 1fr);\n  }\n}",
           "The wider layout gives navigation a bounded column."
         ]
       ],
@@ -1014,14 +1014,14 @@
           "Named decisions",
           "The variable names describe their roles.",
           "css",
-          ":root { --surface: #ffffff; --ink: #172033; --space: 1rem; }\n.card { background: var(--surface); color: var(--ink); padding: var(--space); }",
+          ":root {\n  --surface: #ffffff;\n  --ink: #172033;\n  --space: 1rem;\n}\n.card {\n  background: var(--surface);\n  color: var(--ink);\n  padding: var(--space);\n}",
           "One component consumes three reusable tokens."
         ],
         [
           "A scoped variation",
           "Only descendants of this component inherit the override.",
           "css",
-          ".card.featured { --surface: #e0f2fe; --space: 1.5rem; }",
+          ".card.featured {\n  --surface: #e0f2fe;\n  --space: 1.5rem;\n}",
           "The featured card changes without copying its full rule set."
         ]
       ],
@@ -1071,14 +1071,14 @@
           "A focused group",
           "The container helps the user locate the current task.",
           "css",
-          ".field:focus-within { border-color: #0753a4; }",
+          ".field:focus-within {\n  border-color: #0753a4;\n}",
           "The field group changes while its descendant is focused."
         ],
         [
           "A native checked state",
           "The checkbox remains the actual control.",
           "css",
-          "input:checked + span { font-weight: 700; }",
+          "input:checked + span {\n  font-weight: 700;\n}",
           "The adjacent label becomes bold when checked."
         ]
       ],
@@ -1131,14 +1131,14 @@
           "A restrained state transition",
           "Only the intended visual property is animated.",
           "css",
-          ".card { transition: transform 120ms ease; }\n.card:hover { transform: translateY(-2px); }",
+          ".card {\n  transition: transform 120ms ease;\n}\n.card:hover {\n  transform: translateY(-2px);\n}",
           "Pointer hover produces a small positional cue."
         ],
         [
           "Respect the preference",
           "The static state stays fully usable.",
           "css",
-          "@media (prefers-reduced-motion: reduce) { .card { transition: none; } .card:hover { transform: none; } }",
+          "@media (prefers-reduced-motion: reduce) {\n  .card {\n    transition: none;\n  }\n  .card:hover {\n    transform: none;\n  }\n}",
           "The positional motion is removed for the reduced-motion preference."
         ]
       ],
@@ -1191,14 +1191,14 @@
           "Declare the query container",
           "The wrapper supplies the size context.",
           "css",
-          ".slot { container-type: inline-size; }\n.card { display: grid; gap: 1rem; }",
+          ".slot {\n  container-type: inline-size;\n}\n.card {\n  display: grid;\n  gap: 1rem;\n}",
           "The card has a usable stacked baseline."
         ],
         [
           "Respond to local room",
           "The component's parent width matters, not the page width alone.",
           "css",
-          "@container (min-width: 28rem) { .card { grid-template-columns: 8rem minmax(0, 1fr); } }",
+          "@container (min-width: 28rem) {\n  .card {\n    grid-template-columns: 8rem minmax(0, 1fr);\n  }\n}",
           "Only cards in sufficiently wide containers switch layout."
         ]
       ],
@@ -1251,14 +1251,14 @@
           "Explicit ordering",
           "Layer order establishes a policy before selectors compete within it.",
           "css",
-          "@layer base, components, utilities;\n@layer base { p { color: #172033; } }\n@layer components { .note { color: #0753a4; } }",
+          "@layer base, components, utilities;\n@layer base {\n  p {\n    color: #172033;\n  }\n}\n@layer components {\n  .note {\n    color: #0753a4;\n  }\n}",
           "The component layer can override the earlier base rule."
         ],
         [
           "A narrow utility",
           "The utility's responsibility is explicit.",
           "css",
-          "@layer utilities { .text-muted { color: #475569; } }",
+          "@layer utilities {\n  .text-muted {\n    color: #475569;\n  }\n}",
           "The utility overrides earlier normal layered color declarations."
         ]
       ],
@@ -1311,14 +1311,14 @@
           "A useful print view",
           "Hide actions while retaining the document.",
           "css",
-          "@media print { nav, button { display: none; } body { color: black; background: white; } }",
+          "@media print {\n  nav,\n  button {\n    display: none;\n  }\n  body {\n    color: black;\n    background: white;\n  }\n}",
           "The article remains while interactive controls are removed."
         ],
         [
           "Optional layout enhancement",
           "The fallback remains a readable block layout.",
           "css",
-          ".cards { display: block; }\n@supports (display: grid) { .cards { display: grid; gap: 1rem; } }",
+          ".cards {\n  display: block;\n}\n@supports (display: grid) {\n  .cards {\n    display: grid;\n    gap: 1rem;\n  }\n}",
           "Supported environments use Grid; others keep the content."
         ]
       ],
@@ -1376,14 +1376,14 @@
           "A meaningful card",
           "The heading and link describe the same destination.",
           "html",
-          "<article><h2>HTML foundations</h2><p>Beginner. No prerequisites.</p><a href=\"#html\">Read HTML foundations</a></article>",
+          "<article\n  ><h2>HTML foundations</h2><p>Beginner. No prerequisites.</p\n  ><a href=\"#html\">Read HTML foundations</a></article\n>",
           "A reader knows the topic, entry requirement and next action."
         ],
         [
           "Adaptive collection",
           "The layout supports a changing number of topics.",
           "css",
-          ".topics { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); gap: 1rem; }",
+          ".topics {\n  display: grid;\n  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));\n  gap: 1rem;\n}",
           "Cards adapt without per-card coordinates."
         ]
       ],
@@ -1441,7 +1441,7 @@
           "A small state transition",
           "The state is numeric and independent of its label.",
           "javascript",
-          "let count = 0;\nbutton.addEventListener('click', () => { count += 1; output.textContent = String(count); });",
+          "let count = 0;\nbutton.addEventListener('click', () => {\n  count += 1;\n  output.textContent = String(count);\n});",
           "Each activation increments the stored number and updates the display."
         ]
       ],
@@ -1618,7 +1618,7 @@
           "Derived records",
           "Filtering keeps the input array available.",
           "javascript",
-          "const visible = rows.filter(row => row.minutes >= 40);",
+          "const visible = rows.filter((row) => row.minutes >= 40);",
           "Only rows meeting the declared threshold appear in the derived view."
         ],
         [
@@ -1738,7 +1738,7 @@
           "An actionable assertion",
           "Failure stops the claimed successful path.",
           "javascript",
-          "if (document.querySelectorAll('main').length !== 1) { throw new Error('Expected one main region'); }",
+          "if (document.querySelectorAll('main').length !== 1) {\n  throw new Error('Expected one main region');\n}",
           "A structural mismatch becomes an explicit failure."
         ],
         [
@@ -2388,7 +2388,7 @@
           "A project contract",
           "This is configuration for a separately prepared project, not a pad command.",
           "json",
-          "{\"autoload\":{\"psr-4\":{\"Learning\\\\\":\"src/\"}}}",
+          "{ \"autoload\": { \"psr-4\": { \"Learning\\\\\": \"src/\" } } }",
           "The convention maps a namespace prefix to the project's source directory after autoloader generation."
         ]
       ],
@@ -2934,7 +2934,7 @@
           "A guarded update",
           "The version is part of the write condition.",
           "sql",
-          "UPDATE plans SET minutes = :minutes, version = version + 1 WHERE id = :id AND version = :expected_version;",
+          "UPDATE\n  plans\nSET\n  minutes = :minutes,\n  version = version + 1\nWHERE\n  id = :id\n  AND version = :expected_version;",
           "A stale expected version updates no row."
         ],
         [
@@ -2994,7 +2994,7 @@
           "Scope a read",
           "The owner comes from trusted server identity context.",
           "sql",
-          "SELECT title FROM notes WHERE id = :id AND owner_id = :actor_id;",
+          "SELECT\n  title\nFROM\n  notes\nWHERE\n  id = :id\n  AND owner_id = :actor_id;",
           "A record belonging to another actor is not returned."
         ],
         [
@@ -3058,7 +3058,7 @@
           "A validation error",
           "A field map supports useful client feedback.",
           "json",
-          "{\"error\":{\"code\":\"invalid_plan\",\"fields\":{\"minutes\":\"Use 5 to 120 minutes.\"}}}",
+          "{ \"error\": { \"code\": \"invalid_plan\", \"fields\": { \"minutes\": \"Use 5 to 120 minutes.\" } } }",
           "The error shape is predictable and contains no stack trace."
         ]
       ],
@@ -3105,7 +3105,7 @@
           "A stable cursor predicate",
           "The id is both unique and ordered in this small model.",
           "sql",
-          "SELECT id, title FROM notes WHERE owner_id = :actor AND id > :after_id ORDER BY id ASC LIMIT :page_size;",
+          "SELECT\n  id,\n  title\nFROM\n  notes\nWHERE\n  owner_id = :actor\n  AND id > :after_id\nORDER BY\n  id ASC\nLIMIT :page_size;",
           "A scoped ordered page can continue after the last seen id."
         ],
         [
@@ -3295,7 +3295,7 @@
           "An explicit side-effect record",
           "The record expresses an intention awaiting controlled delivery.",
           "json",
-          "{\"event_id\":\"synthetic-42\",\"kind\":\"study_reminder\",\"status\":\"pending\",\"attempts\":0}",
+          "{ \"event_id\": \"synthetic-42\", \"kind\": \"study_reminder\", \"status\": \"pending\", \"attempts\": 0 }",
           "A worker can track attempts without pretending the remote effect already happened."
         ]
       ],

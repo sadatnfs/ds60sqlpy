@@ -54,12 +54,15 @@ import java.util.*;
 
 public class Main {
 
-    public static void main(String[] args) throws Exception {
-        List<byte[]> retained=new ArrayList<>();byte[] payload=new byte[1024];payload[0]=7;retained.add(payload);payload=null;
-        assert retained.get(0)[0]==7 && retained.get(0).length==1024;
-    }
+  public static void main(String[] args) throws Exception {
+    List<byte[]> retained = new ArrayList<>();
+    byte[] payload = new byte[1024];
+    payload[0] = 7;
+    retained.add(payload);
+    payload = null;
+    assert retained.get(0)[0] == 7 && retained.get(0).length == 1024;
+  }
 }
-
 ```
 
 **Expected:** list still exposes the same array contents.
@@ -73,15 +76,19 @@ import java.util.*;
 
 public class Main {
 
-    public static void main(String[] args) throws Exception {
-        List<byte[]> retained=new ArrayList<>();byte[] payload=new byte[1024];payload[0]=7;retained.add(payload);payload=null;
-        assert retained.get(0)[0]==7 && retained.get(0).length==1024;
+  public static void main(String[] args) throws Exception {
+    List<byte[]> retained = new ArrayList<>();
+    byte[] payload = new byte[1024];
+    payload[0] = 7;
+    retained.add(payload);
+    payload = null;
+    assert retained.get(0)[0] == 7 && retained.get(0).length == 1024;
 
-        byte[] separate=retained.get(0);retained.clear();
-        assert retained.isEmpty() && separate[0]==7;
-    }
+    byte[] separate = retained.get(0);
+    retained.clear();
+    assert retained.isEmpty() && separate[0] == 7;
+  }
 }
-
 ```
 
 **Expected:** list empty;separate array still valid.

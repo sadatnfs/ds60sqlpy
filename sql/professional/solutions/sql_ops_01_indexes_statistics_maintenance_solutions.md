@@ -67,10 +67,9 @@ change.
 The solution pairs its exact high-severity device-history query with:
 
 ```sql
-CREATE INDEX events_high_device_time_covering
-ON pro_ops_lab.events (device_id, occurred_at DESC)
-INCLUDE (severity, message)
-WHERE severity >= 4;
+CREATE INDEX events_high_device_time_covering ON pro_ops_lab.events (device_id, occurred_at DESC) INCLUDE (severity, message)
+WHERE
+  severity >= 4;
 ```
 
 Device equality and time order are keys. Severity/message are returned payload.

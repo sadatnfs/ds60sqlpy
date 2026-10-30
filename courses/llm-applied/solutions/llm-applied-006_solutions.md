@@ -51,8 +51,9 @@ The question is: Rank documents a=account randomization, b=visit counts and c=ac
 Only one document contains the query term. The result is a lexical match, and answer relevance still requires inspecting the actual content.
 
 ```python
-docs={'a':'account randomization','b':'visit counts','c':'account outcomes'}; scores=bm25('randomization',docs)
-assert scores[0][0]=='a' and scores[0][1]>0 and all(score==0 for _,score in scores[1:])
+docs = {"a": "account randomization", "b": "visit counts", "c": "account outcomes"}
+scores = bm25("randomization", docs)
+assert scores[0][0] == "a" and scores[0][1] > 0 and all(score == 0 for _, score in scores[1:])
 ```
 
 **Expected:** a ranks first with a positive score; the other scores are 0.
@@ -66,8 +67,9 @@ The question is: Compare IDF for a term present in1 of 3 documents with a term p
 Document frequency counts documents, not total token occurrences. A term repeated many times in one source still appears in only one document for this calculation.
 
 ```python
-rare=math.log(1+(3-1+.5)/(1+.5)); common=math.log(1+(3-2+.5)/(2+.5))
-assert rare>common>0
+rare = math.log(1 + (3 - 1 + 0.5) / (1 + 0.5))
+common = math.log(1 + (3 - 2 + 0.5) / (2 + 0.5))
+assert rare > common > 0
 ```
 
 **Expected:** the rarer term has larger IDF.
@@ -81,9 +83,10 @@ The question is: Disable length normalization with \(b=0\) and compare term freq
 The denominator grows with term frequency, creating diminishing returns. This reduces the effect of repeated terms without treating repetition as irrelevant.
 
 ```python
-k1=1.2; contribution=lambda tf:tf*(k1+1)/(tf+k1)
-a,b,c=[contribution(n) for n in [1,2,10]]
-assert a<b<c and c<10*a
+k1 = 1.2
+contribution = lambda tf: tf * (k1 + 1) / (tf + k1)
+a, b, c = [contribution(n) for n in [1, 2, 10]]
+assert a < b < c and c < 10 * a
 ```
 
 **Expected:** scores increase, but10 occurrences yield less than10 times the single-occurrence score.
@@ -97,7 +100,7 @@ The question is: Query purchase against a document containing only buy.
 Lexical ranking cannot infer a synonym absent from its token policy. Embeddings or curated query expansion can help, but need their own evaluation and may introduce false matches.
 
 ```python
-assert bm25('purchase',{'d':'buy'})==[('d',0.0)]
+assert bm25("purchase", {"d": "buy"}) == [("d", 0.0)]
 ```
 
 **Expected:** score0 despite the semantic relationship.
@@ -111,7 +114,7 @@ The question is: Query an absent word with document IDs z, a, b.
 Deterministic ties are useful for tests and reproducibility. Zero-score results still need an answerability policy instead of being automatically treated as evidence.
 
 ```python
-assert [key for key,score in bm25('missing',{'z':'x','a':'y','b':'z'})]==['a','b','z']
+assert [key for key, score in bm25("missing", {"z": "x", "a": "y", "b": "z"})] == ["a", "b", "z"]
 ```
 
 **Expected:** order a, b, z with zero scores.
@@ -125,8 +128,8 @@ The question is: Score an empty corpus and a corpus containing one empty documen
 The implementation handles no lexical evidence explicitly. It does not fabricate a relevant document or divide by an undefined average length.
 
 ```python
-assert bm25('x',{})==[]
-assert bm25('x',{'empty':''})==[('empty',0.0)]
+assert bm25("x", {}) == []
+assert bm25("x", {"empty": ""}) == [("empty", 0.0)]
 ```
 
 **Expected:** empty result for no documents; finite zero score for an empty document.

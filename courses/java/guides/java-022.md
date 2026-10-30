@@ -52,14 +52,13 @@ import java.util.*;
 
 public class Main {
 
-    public static void main(String[] args) throws Exception {
-        try(var executor=java.util.concurrent.Executors.newFixedThreadPool(2)) {
-            var future=executor.submit(() -> 42);
-            assert future.get(2,java.util.concurrent.TimeUnit.SECONDS)==42;
-        }
+  public static void main(String[] args) throws Exception {
+    try (var executor = java.util.concurrent.Executors.newFixedThreadPool(2)) {
+      var future = executor.submit(() -> 42);
+      assert future.get(2, java.util.concurrent.TimeUnit.SECONDS) == 42;
     }
+  }
 }
-
 ```
 
 **Expected:** result 42.
@@ -73,20 +72,26 @@ import java.util.*;
 
 public class Main {
 
-    public static void main(String[] args) throws Exception {
-        try(var executor=java.util.concurrent.Executors.newFixedThreadPool(2)) {
-            var future=executor.submit(() -> 42);
-            assert future.get(2,java.util.concurrent.TimeUnit.SECONDS)==42;
-        }
-
-        try(var executor=java.util.concurrent.Executors.newSingleThreadExecutor()) {
-            var failed=executor.submit(() -> {throw new IllegalArgumentException("bad fixture");});boolean observed=false;
-            try{failed.get(2,java.util.concurrent.TimeUnit.SECONDS);}catch(java.util.concurrent.ExecutionException expected){observed=expected.getCause() instanceof IllegalArgumentException;}
-            assert observed;
-        }
+  public static void main(String[] args) throws Exception {
+    try (var executor = java.util.concurrent.Executors.newFixedThreadPool(2)) {
+      var future = executor.submit(() -> 42);
+      assert future.get(2, java.util.concurrent.TimeUnit.SECONDS) == 42;
     }
-}
 
+    try (var executor = java.util.concurrent.Executors.newSingleThreadExecutor()) {
+      var failed = executor.submit(() -> {
+        throw new IllegalArgumentException("bad fixture");
+      });
+      boolean observed = false;
+      try {
+        failed.get(2, java.util.concurrent.TimeUnit.SECONDS);
+      } catch (java.util.concurrent.ExecutionException expected) {
+        observed = expected.getCause() instanceof IllegalArgumentException;
+      }
+      assert observed;
+    }
+  }
+}
 ```
 
 **Expected:** ExecutionException cause isIllegalArgumentException.

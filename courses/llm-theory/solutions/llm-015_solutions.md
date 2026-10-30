@@ -23,8 +23,10 @@ The question is: Differentiate(w-2)² atw0 in float64.
 The analytic derivative2(w-2) supplies an independent oracle. A correct loss alone would not show that the gradient graph was connected.
 
 ```python
-w=torch.tensor(0.,dtype=torch.float64,requires_grad=True); loss=(w-2)**2; loss.backward()
-assert w.grad.item()==-4 and loss.item()==4
+w = torch.tensor(0.0, dtype=torch.float64, requires_grad=True)
+loss = (w - 2) ** 2
+loss.backward()
+assert w.grad.item() == -4 and loss.item() == 4
 ```
 
 **Expected:** gradient-4 and loss4.
@@ -38,8 +40,9 @@ The question is: Use central differenceh=.001 for the same scalar function.
 Finite differences perturb the function value rather than reading autograd internals. Agreement away from a nondifferentiable point supports the derivative calculation.
 
 ```python
-h=.001; numeric=(((h-2)**2)-((-h-2)**2))/(2*h)
-np.testing.assert_allclose(numeric,-4,atol=1e-10,rtol=0)
+h = 0.001
+numeric = (((h - 2) ** 2) - ((-h - 2) ** 2)) / (2 * h)
+np.testing.assert_allclose(numeric, -4, atol=1e-10, rtol=0)
 ```
 
 **Expected:** finite difference approximately-4 within1e-10.
@@ -53,7 +56,8 @@ The question is: Call backward on a new loss without clearing the prior gradient
 PyTorch adds to existing gradients. A training loop that forgets zero_grad changes its effective update and can look unstable for reasons unrelated to model capacity.
 
 ```python
-((w-2)**2).backward(); assert w.grad.item()==-8
+((w - 2) ** 2).backward()
+assert w.grad.item() == -8
 ```
 
 **Expected:** stored gradient becomes-8.
@@ -67,7 +71,9 @@ The question is: Set the gradient to None, recompute and backpropagate once.
 Resetting before the next independent batch restores the intended one-batch derivative. Intentional accumulation needs a separate denominator and step policy.
 
 ```python
-w.grad=None; ((w-2)**2).backward(); assert w.grad.item()==-4
+w.grad = None
+((w - 2) ** 2).backward()
+assert w.grad.item() == -4
 ```
 
 **Expected:** gradient returns to-4.
@@ -81,7 +87,8 @@ The question is: Detachw and compare its value and gradient-tracking status.
 Detach preserves a numeric observation while cutting dependency. It is appropriate for logging or explicit stop-gradient designs, but not a repair for an unexplained backward error.
 
 ```python
-detached=w.detach(); assert detached.item()==0 and detached.requires_grad is False
+detached = w.detach()
+assert detached.item() == 0 and detached.requires_grad is False
 ```
 
 **Expected:** same value0; requires_gradFalse.
@@ -95,9 +102,11 @@ The question is: Lookup IDs2,0,2 in a fixed4x2 table and compare repeated rows.
 The lookup does not average repeated IDs. Both positions refer to the same parameter row, so later gradient contributions to that row can accumulate.
 
 ```python
-table=torch.tensor([[1.,0.],[0.,1.],[2.,2.],[-1.,1.]])
-embedding=nn.Embedding.from_pretrained(table,freeze=False); out=embedding(torch.tensor([2,0,2]))
-assert tuple(out.shape)==(3,2); np.testing.assert_array_equal(out.detach().numpy(),[[2,2],[1,0],[2,2]])
+table = torch.tensor([[1.0, 0.0], [0.0, 1.0], [2.0, 2.0], [-1.0, 1.0]])
+embedding = nn.Embedding.from_pretrained(table, freeze=False)
+out = embedding(torch.tensor([2, 0, 2]))
+assert tuple(out.shape) == (3, 2)
+np.testing.assert_array_equal(out.detach().numpy(), [[2, 2], [1, 0], [2, 2]])
 ```
 
 **Expected:** shape(3,2); rows0 and2 both[2,2].

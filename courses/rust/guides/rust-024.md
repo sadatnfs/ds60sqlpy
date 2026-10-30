@@ -43,12 +43,12 @@ Read the operations in dependency order. Record which values exist before each l
 Literal expectations make the test independent of the implementation expression.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let cases = [(-2, 0), (0, 0), (3, 3)];
-        for (input, expected) in cases { assert_eq!(input.max(0), expected); }
+        for (input, expected) in cases {
+            assert_eq!(input.max(0), expected);
+        }
     }
     println!("rust-024: passed");
     Ok(())
@@ -62,8 +62,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 The property alone would not necessarily distinguish every wrong constant implementation.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let wrong = |value: i32| if value <= 0 { 1 } else { value };

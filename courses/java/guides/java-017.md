@@ -49,15 +49,27 @@ The absence ofb is an expected lookup outcome. It is not represented as zero bec
 import java.util.*;
 
 public class Main {
-    static Optional<Integer> lookup(Map<String,Integer> data,String id){if(id==null||id.isBlank())throw new IllegalArgumentException("nonblank id required");return Optional.ofNullable(data.get(id));}
-    static Optional<Integer> tryParse(String text){try{return Optional.of(Integer.parseInt(text));}catch(NumberFormatException error){return Optional.empty();}}
-    public static void main(String[] args) throws Exception {
-        Map<String,Integer> data=Map.of("a",7);
-        Optional<Integer> known=Optional.ofNullable(data.get("a")); Optional<Integer> missing=Optional.ofNullable(data.get("b"));
-        assert known.orElseThrow()==7 && missing.isEmpty();
-    }
-}
 
+  static Optional<Integer> lookup(Map<String, Integer> data, String id) {
+    if (id == null || id.isBlank()) throw new IllegalArgumentException("nonblank id required");
+    return Optional.ofNullable(data.get(id));
+  }
+
+  static Optional<Integer> tryParse(String text) {
+    try {
+      return Optional.of(Integer.parseInt(text));
+    } catch (NumberFormatException error) {
+      return Optional.empty();
+    }
+  }
+
+  public static void main(String[] args) throws Exception {
+    Map<String, Integer> data = Map.of("a", 7);
+    Optional<Integer> known = Optional.ofNullable(data.get("a"));
+    Optional<Integer> missing = Optional.ofNullable(data.get("b"));
+    assert known.orElseThrow() == 7 && missing.isEmpty();
+  }
+}
 ```
 
 **Expected:** a present with 7; b empty.
@@ -70,18 +82,30 @@ The mapping function is not called for an emptyOptional. This keeps the absence 
 import java.util.*;
 
 public class Main {
-    static Optional<Integer> lookup(Map<String,Integer> data,String id){if(id==null||id.isBlank())throw new IllegalArgumentException("nonblank id required");return Optional.ofNullable(data.get(id));}
-    static Optional<Integer> tryParse(String text){try{return Optional.of(Integer.parseInt(text));}catch(NumberFormatException error){return Optional.empty();}}
-    public static void main(String[] args) throws Exception {
-        Map<String,Integer> data=Map.of("a",7);
-        Optional<Integer> known=Optional.ofNullable(data.get("a")); Optional<Integer> missing=Optional.ofNullable(data.get("b"));
-        assert known.orElseThrow()==7 && missing.isEmpty();
 
-        assert known.map(value -> value*2).orElseThrow()==14;
-        assert missing.map(value -> value*2).isEmpty();
+  static Optional<Integer> lookup(Map<String, Integer> data, String id) {
+    if (id == null || id.isBlank()) throw new IllegalArgumentException("nonblank id required");
+    return Optional.ofNullable(data.get(id));
+  }
+
+  static Optional<Integer> tryParse(String text) {
+    try {
+      return Optional.of(Integer.parseInt(text));
+    } catch (NumberFormatException error) {
+      return Optional.empty();
     }
-}
+  }
 
+  public static void main(String[] args) throws Exception {
+    Map<String, Integer> data = Map.of("a", 7);
+    Optional<Integer> known = Optional.ofNullable(data.get("a"));
+    Optional<Integer> missing = Optional.ofNullable(data.get("b"));
+    assert known.orElseThrow() == 7 && missing.isEmpty();
+
+    assert known.map(value -> value * 2).orElseThrow() == 14;
+    assert missing.map(value -> value * 2).isEmpty();
+  }
+}
 ```
 
 **Expected:** 14 and empty.

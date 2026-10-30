@@ -415,15 +415,18 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The following program uses yielding local operations. <code>sleep(0)</code> offers a cooperative scheduling opportunity without simulating a service or asserting an exact elapsed time. The enclosing synchronous entrypoint calls <code>asyncio.run</code> once to own a fresh loop. The final tuple follows the stored task list.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> asyncio
 
+
 <span class="syntax-keyword">async</span> <span class="syntax-keyword">def</span> <span class="syntax-function">ordered_demo</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">async</span> <span class="syntax-keyword">def</span> <span class="syntax-function">calculate</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
         <span class="syntax-keyword">await</span> asyncio<span class="syntax-operator">.</span>sleep<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
         <span class="syntax-keyword">return</span> value <span class="syntax-operator">*</span> <span class="syntax-number">10</span>
+
     <span class="syntax-keyword">async</span> <span class="syntax-keyword">with</span> asyncio<span class="syntax-operator">.</span>TaskGroup<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> group<span class="syntax-punctuation">:</span>
         tasks <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>group<span class="syntax-operator">.</span>create_task<span class="syntax-punctuation">(</span>calculate<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
     result <span class="syntax-operator">=</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span>task<span class="syntax-operator">.</span>result<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> task <span class="syntax-operator">in</span> tasks<span class="syntax-punctuation">)</span>
     <span class="syntax-keyword">assert</span> result <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">30</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">)</span>
     <span class="syntax-keyword">return</span> result
+
 
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Input-order results:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> asyncio<span class="syntax-operator">.</span>run<span class="syntax-punctuation">(</span>ordered_demo<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> The tuple is <code>(30, 10)</code>. It is tied to input order <code>(3, 1)</code>, not numerical sort order or a claim about which task finished first. An empty task list would produce an empty tuple. A real failure needs separate evidence; this successful demonstration alone says nothing about sibling cancellation.</p>
@@ -431,10 +434,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The worker signals readiness after its acquisition event, before waiting on an Event that this example never releases. The controller waits for that signal, asks the task to cancel, then awaits the task. This order proves the worker had entered its cleanup region. Guessing with a short sleep could race with startup on a busy machine and make a missing cleanup look intermittent.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> asyncio
 
+
 <span class="syntax-keyword">async</span> <span class="syntax-keyword">def</span> <span class="syntax-function">cancellation_demo</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     ready <span class="syntax-operator">=</span> asyncio<span class="syntax-operator">.</span>Event<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
     never <span class="syntax-operator">=</span> asyncio<span class="syntax-operator">.</span>Event<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
     events <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+
     <span class="syntax-keyword">async</span> <span class="syntax-keyword">def</span> <span class="syntax-function">worker</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
         events<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">open</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
         <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
@@ -442,6 +447,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
             <span class="syntax-keyword">await</span> never<span class="syntax-operator">.</span>wait<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
         <span class="syntax-keyword">finally</span><span class="syntax-punctuation">:</span>
             events<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">close</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+
     task <span class="syntax-operator">=</span> asyncio<span class="syntax-operator">.</span>create_task<span class="syntax-punctuation">(</span>worker<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
     <span class="syntax-keyword">await</span> ready<span class="syntax-operator">.</span>wait<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
     task<span class="syntax-operator">.</span>cancel<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
@@ -454,6 +460,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <span class="syntax-keyword">assert</span> task<span class="syntax-operator">.</span>cancelled<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
     <span class="syntax-keyword">assert</span> events <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">open</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">close</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
     <span class="syntax-keyword">return</span> events
+
 
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Awaited cancellation:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> asyncio<span class="syntax-operator">.</span>run<span class="syntax-punctuation">(</span>cancellation_demo<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> The task is cancelled and the log is <code>[&#x27;open&#x27;, &#x27;close&#x27;]</code> before the controller returns. The controller catches the expected control signal only at the ownership boundary. The worker&#x27;s <code>finally</code> records cleanup and allows cancellation to continue. Replacing the worker&#x27;s cancellation with a success value would change what the controller can observe.</p>

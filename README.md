@@ -66,12 +66,12 @@ cd ds60sqlpy
 ./classroom
 ```
 
-The published 1.1.0 images are available from `sadatnfs/ds60sqlpy`. Use the
-[exact release source](https://github.com/sadatnfs/ds60sqlpy/tree/59a0d116a1759d5d509718c52c4f3439e1986644)
-or matching starter, then replace the final startup command with
-`./classroom --all --from-hub sadatnfs --tag 1.1.0` to download its images.
-See [Docker Hub distribution](#optional-docker-hub-distribution) for acceptance
-scope, selective installation and saved versions.
+This checkout targets release 1.2.0. To use prebuilt images, first verify a
+completed full publisher and fresh-pull acceptance for that release, then use
+its matching source or starter with
+`./classroom --all --from-hub sadatnfs --tag 1.2.0`.
+See [Docker Hub distribution](#optional-docker-hub-distribution) for historical
+evidence, current availability, selective installation and saved versions.
 
 `doctor` checks the local engine and configuration without starting services.
 In local-build mode, the final command prepares PostgreSQL and the ordinary
@@ -124,12 +124,12 @@ PostgreSQL has its own volume. Stopping or replacing a container preserves
 those volumes.
 
 ```sh
-./classroom status      # Containers and the current browser address
-./classroom logs        # Recent app and database logs
-./classroom stop        # Pause this classroom and keep saved work
-./classroom             # Resume; prepare only missing images if necessary
-./classroom resume      # Resume strictly without building or pulling
-./classroom --local-build --rebuild  # Install changed local sources deliberately
+./classroom status                  # Containers and the current browser address
+./classroom logs                    # Recent app and database logs
+./classroom stop                    # Pause this classroom and keep saved work
+./classroom                         # Resume; prepare only missing images if necessary
+./classroom resume                  # Resume strictly without building or pulling
+./classroom --local-build --rebuild # Install changed local sources deliberately
 ```
 
 `resume` and `--no-build` are equivalent. They fail with an actionable message
@@ -247,34 +247,35 @@ and [textbook rendering](docs/textbook-rendering.md) for the authoring contract.
 
 ### Optional Docker Hub distribution
 
-The [1.1.0 publisher](https://github.com/sadatnfs/ds60sqlpy/actions/runs/40961726148)
+The [historical 1.1.0 publisher](https://github.com/sadatnfs/ds60sqlpy/actions/runs/40961726148)
 completed from [source `59a0d116`](https://github.com/sadatnfs/ds60sqlpy/tree/59a0d116a1759d5d509718c52c4f3439e1986644),
-publishing App and all 25 ordinary workers as combined Linux AMD64/ARM64 images.
-Its native worker/scientific gates passed. Separate App/Core fresh-pull and
-stop/resume checks passed on both architectures with saved learner state.
-The additional all-module selective-pull audit is pending; those original
-lifecycle checks did not start every worker.
+promoting App and all 25 ordinary workers as combined Linux AMD64/ARM64 images.
+Its native worker/scientific gates and App/Core fresh-pull/stop/resume checks
+passed. The later all-module audit accepted 19 native groups and retained 19
+failed groups. An authenticated metadata check on October 30 returned HTTP 404
+for the old App tag. Those records describe historical results, not current
+availability or acceptance of this later source.
 
-Use that exact source or its matching starter to install the full ordinary set:
+For a completed full 1.2.0 publication, use the matching source or starter:
 
 ```sh
-./classroom --all --from-hub sadatnfs --tag 1.1.0
+./classroom --all --from-hub sadatnfs --tag 1.2.0
 ```
 
 Ordinary startup uploads nothing. For a new Hub selection, omitting `--tag`
 resolves the app's `latest` alias to a concrete release, requires a matching
-checked-in app version, and saves that version. App tags are `:1.1.0` and
-`:latest`; distinct worker tags include `:1.1.0-worker-r-statistics` and
-`:1.1.0-worker-python-core`. Docker selects the native architecture. Tags starting
+checked-in app version, and saves that version. App tags are `:1.2.0` and
+`:latest`; distinct worker tags include `:1.2.0-worker-r-statistics` and
+`:1.2.0-worker-python-core`. Docker selects the native architecture. Tags starting
 `ci-` are publication staging candidates, not learner releases. Hub mode never
 falls back to local builds. The [complete subject/profile/image mapping](docs/dockerhub.md#subjects-runtime-profiles-and-canonical-images)
 explains which runtime serves each subject and how to select only needed workers.
 
-A later checkout still labeled 1.1.0 can include changes absent from these images.
-The separately developed native [Spark/TMBad package](packages/spark-tmbad/README.md)
-was added after this publisher's source and is not included in the 1.1.0 release.
-Use each independent package's own version, installation guide and qualification
-records; a classroom image version does not imply package acceptance.
+The independent [Spark/TMBad package](packages/spark-tmbad/README.md) was added
+after the historical 1.1.0 publisher's source. Use each independent package's
+own version, installation guide and qualification records; a classroom image
+version does not imply package acceptance. Saved learner selections retain
+their pin until an explicit update.
 
 For a partial publication, select only its available workers. For example, an
 app/Core plus JavaScript and TypeScript publication is installed with:
@@ -305,7 +306,7 @@ completed release deliberately. Later bare `./classroom resume` never builds,
 pulls or follows a moving latest tag.
 
 For a completed full release, download without starting services with
-`./classroom pull --all --from-hub YOUR_DOCKERHUB_USER --tag 1.1.0`.
+`./classroom pull --all --from-hub YOUR_DOCKERHUB_USER --tag 1.2.0`.
 For a partial release, use only its published profiles.
 For an existing project, switching image source/layout or applying an update
 requires the same command without `pull` and with `--rebuild`. In Hub mode
@@ -365,25 +366,25 @@ docker login
 Preview already built and tested images without uploading:
 
 ```sh
-./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag 1.1.0
+./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag 1.2.0
 ```
 
 After reviewing the mapping, explicitly upload:
 
 ```sh
-./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag 1.1.0 --push
+./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag 1.2.0 --push
 ```
 
 This requires the complete ordinary local set by default. It checks all
 selected images before tagging/pushing and does not build, log in, create
 another architecture or publish combined manifests. Prepare missing images
-with `./classroom build --all --local-build --tag 1.1.0`, then qualify them.
+with `./classroom build --all --local-build --tag 1.2.0`, then qualify them.
 
-Manual tags include architecture, such as `1.1.0-lab-arm64`. A matching-architecture
+Manual tags include architecture, such as `1.2.0-lab-arm64`. A matching-architecture
 learner selects that layout explicitly:
 
 ```sh
-./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 1.1.0 --architecture-tags
+./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 1.2.0 --architecture-tags
 ```
 
 An ARM64-only Mac publication does not supply AMD64 tags for a typical

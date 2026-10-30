@@ -51,9 +51,12 @@ The question is: Use queries and documents equal to the 2-by-2 identity matrix, 
 The identity fixture isolates learning the pairing. A real encoder receives text and requires a tokenizer, pooling policy and governed relevance labels.
 
 ```python
-queries=torch.eye(2); documents=torch.eye(2); labels=torch.tensor([0,1]); projection=nn.Parameter(torch.zeros((2,2)))
-scores=(queries@projection)@documents.T
-assert tuple(scores.shape)==(2,2) and labels.tolist()==[0,1]
+queries = torch.eye(2)
+documents = torch.eye(2)
+labels = torch.tensor([0, 1])
+projection = nn.Parameter(torch.zeros((2, 2)))
+scores = (queries @ projection) @ documents.T
+assert tuple(scores.shape) == (2, 2) and labels.tolist() == [0, 1]
 ```
 
 **Expected:** score shape(2, 2); one positive per query.
@@ -67,11 +70,18 @@ The question is: Run30SGD.5 updates on cross entropy against diagonal positives.
 The projection actually changes through gradients. The resulting training ranking is a mechanics check, not evidence of transfer to unseen language.
 
 ```python
-opt=torch.optim.SGD([projection],lr=.5); initial=F.cross_entropy(scores,labels).item()
+opt = torch.optim.SGD([projection], lr=0.5)
+initial = F.cross_entropy(scores, labels).item()
 for _ in range(30):
-    opt.zero_grad(set_to_none=True); scores=(queries@projection)@documents.T; loss=F.cross_entropy(scores,labels); loss.backward(); opt.step()
-final_scores=(queries@projection)@documents.T
-assert F.cross_entropy(final_scores,labels).item()<initial and final_scores.argmax(1).tolist()==[0,1]
+    opt.zero_grad(set_to_none=True)
+    scores = (queries @ projection) @ documents.T
+    loss = F.cross_entropy(scores, labels)
+    loss.backward()
+    opt.step()
+final_scores = (queries @ projection) @ documents.T
+assert F.cross_entropy(final_scores, labels).item() < initial and final_scores.argmax(
+    1
+).tolist() == [0, 1]
 ```
 
 **Expected:** loss decreases; each query ranks its paired document first.
@@ -85,8 +95,9 @@ The question is: Use held-out feature[.9, .1] and compare its two document score
 This tests one nearby feature perturbation under an authored relevance label. It is much narrower than evaluating new document families or real paraphrases.
 
 ```python
-held=torch.tensor([[.9,.1]]); held_scores=(held@projection)@documents.T
-assert held_scores.argmax(1).item()==0
+held = torch.tensor([[0.9, 0.1]])
+held_scores = (held @ projection) @ documents.T
+assert held_scores.argmax(1).item() == 0
 ```
 
 **Expected:** document0 remains higher on this declared local perturbation.
@@ -100,10 +111,20 @@ The question is: Use positive feature[1, 0], negative[0, 1] and a zero linear we
 The reranker objective compares candidates for one query. Its training data must distinguish relevance from superficial length or lexical artifacts.
 
 ```python
-weight=nn.Parameter(torch.zeros(2)); positive=torch.tensor([1.,0.]); negative=torch.tensor([0.,1.]); optimizer=torch.optim.SGD([weight],lr=.2); first=F.softplus(-(positive@weight-negative@weight)).item()
+weight = nn.Parameter(torch.zeros(2))
+positive = torch.tensor([1.0, 0.0])
+negative = torch.tensor([0.0, 1.0])
+optimizer = torch.optim.SGD([weight], lr=0.2)
+first = F.softplus(-(positive @ weight - negative @ weight)).item()
 for _ in range(20):
-    optimizer.zero_grad(set_to_none=True); objective=F.softplus(-(positive@weight-negative@weight)); objective.backward(); optimizer.step()
-assert positive@weight>negative@weight and F.softplus(-(positive@weight-negative@weight)).item()<first
+    optimizer.zero_grad(set_to_none=True)
+    objective = F.softplus(-(positive @ weight - negative @ weight))
+    objective.backward()
+    optimizer.step()
+assert (
+    positive @ weight > negative @ weight
+    and F.softplus(-(positive @ weight - negative @ weight)).item() < first
+)
 ```
 
 **Expected:** positive score exceeds negative and pairwise loss decreases.
@@ -117,8 +138,8 @@ The question is: Assign the same document ID to positive and negative roles and 
 A duplicated relevant passage can be a false negative even when filenames differ. Exact and family-level checks help prevent contradictory supervision.
 
 ```python
-pair={'positive':'doc-a','negative':'doc-a'}
-assert pair['positive']==pair['negative']
+pair = {"positive": "doc-a", "negative": "doc-a"}
+assert pair["positive"] == pair["negative"]
 ```
 
 **Expected:** identity collision detected; this check is separate from the earlier training loops.
@@ -132,8 +153,16 @@ The question is: Record that fixed vectors were used and natural-language encode
 A realistic next experiment should use pinned encoder weights, domain labels and held-out families while retaining these arithmetic and ranking checks.
 
 ```python
-receipt={'query_projection_updates':30,'reranker_updates':20,'literal_feature_fixture':True,'pretrained_semantic_encoder':False,'natural_language_quality_measured':False}
-assert receipt['query_projection_updates']==30 and not receipt['natural_language_quality_measured']
+receipt = {
+    "query_projection_updates": 30,
+    "reranker_updates": 20,
+    "literal_feature_fixture": True,
+    "pretrained_semantic_encoder": False,
+    "natural_language_quality_measured": False,
+}
+assert (
+    receipt["query_projection_updates"] == 30 and not receipt["natural_language_quality_measured"]
+)
 ```
 
 **Expected:** actual gradient updates True; pretrained_semantic_encoder False.

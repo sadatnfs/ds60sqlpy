@@ -12,7 +12,9 @@ Accept trimmed ASCII digits representing 0 through 1000000 cents. Return None fo
 
 ```scala
 def parseAmount(raw: Option[String]): Option[Long] = {
-  raw.flatMap(text => Option(text)).map(_.trim)
+  raw
+    .flatMap(text => Option(text))
+    .map(_.trim)
     .filter(_.matches("[0-9]+"))
     .flatMap(_.toLongOption)
     .filter(amount => amount >= 0L && amount <= 1000000L)
@@ -24,7 +26,11 @@ Each stage has a separate role: protect the inner null reference, normalize perm
 ```scala
 assert(parseAmount(Some("0")).contains(0L) && parseAmount(Some(" 25 ")).contains(25L))
 assert(parseAmount(None).isEmpty && parseAmount(Some("bad")).isEmpty)
-assert(Seq(null, "", "-1", "+1", "1.0", "1000001", "999999999999999999999999").forall(text => parseAmount(Some(text)).isEmpty))
+assert(
+  Seq(null, "", "-1", "+1", "1.0", "1000001", "999999999999999999999999").forall(text =>
+    parseAmount(Some(text)).isEmpty
+  )
+)
 ```
 
 ### Exercise 2: Separate absence from invalid supplied content
@@ -36,7 +42,7 @@ Return observed for a valid supplied amount, missing for None, and rejected for 
 ```scala
 def classify(raw: Option[String]): String = {
   raw match {
-    case None => "missing"
+    case None    => "missing"
     case Some(_) => if (parseAmount(raw).isDefined) "observed" else "rejected"
   }
 }
@@ -46,7 +52,7 @@ The original Option supplies provenance that the parsed Option no longer contain
 
 ```scala
 val tokens: Seq[Option[String]] = Seq(Some("0"), Some("25"), None, Some("bad"), Some(null: String))
-assert(tokens.map(classify) == Seq("observed","observed","missing","rejected","rejected"))
+assert(tokens.map(classify) == Seq("observed", "observed", "missing", "rejected", "rejected"))
 assert(parseAmount(None) == parseAmount(Some("bad")))
 ```
 
@@ -65,9 +71,9 @@ def observed(tokens: Seq[Option[String]]): Seq[Long] = {
 Each input parser contributes either one observed Long or no observed numerical value. Sequence flatMap combines those contributions while retaining order and duplicates. This numerical projection intentionally omits missing and rejected tokens, so it must be paired with the classification ledger rather than presented as the complete data product. The all-invalid case returns an empty sequence rather than a fabricated collection of zeros.
 
 ```scala
-assert(observed(tokens) == Seq(0L,25L))
-assert(observed(tokens :+ Some("25")) == Seq(0L,25L,25L))
-assert(observed(Seq(None,Some("bad"))).isEmpty)
+assert(observed(tokens) == Seq(0L, 25L))
+assert(observed(tokens :+ Some("25")) == Seq(0L, 25L, 25L))
+assert(observed(Seq(None, Some("bad"))).isEmpty)
 ```
 
 ### Exercise 4: Reconcile all input states
@@ -89,9 +95,9 @@ Initializing every category keeps the report schema stable even when a category 
 
 ```scala
 val counts = ledger(tokens)
-assert(counts == Map("observed" -> 2L,"missing" -> 1L,"rejected" -> 2L))
+assert(counts == Map("observed" -> 2L, "missing" -> 1L, "rejected" -> 2L))
 assert(counts.values.sum == tokens.size.toLong)
-assert(ledger(Seq.empty) == Map("observed" -> 0L,"missing" -> 0L,"rejected" -> 0L))
+assert(ledger(Seq.empty) == Map("observed" -> 0L, "missing" -> 0L, "rejected" -> 0L))
 ```
 
 ### Exercise 5: Keep presentation distinct from measurement

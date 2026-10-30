@@ -92,6 +92,7 @@ _SOURCE_LANGUAGES = {
     ".txt": "text",
     ".sh": "bash",
     ".csv": "csv",
+    ".tsv": "text",
     ".toml": "toml",
     ".lock": "text",
 }

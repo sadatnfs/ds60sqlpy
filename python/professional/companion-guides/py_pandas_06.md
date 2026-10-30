@@ -114,9 +114,7 @@ unsafe as an accidental normalization before comparing event instants.
 ```python
 import pandas as pd
 
-events = pd.to_datetime(
-    ["2026-11-01T01:30:00-04:00", "2026-11-01T01:30:00-05:00"], utc=True
-)
+events = pd.to_datetime(["2026-11-01T01:30:00-04:00", "2026-11-01T01:30:00-05:00"], utc=True)
 local = events.tz_convert("America/New_York")
 assert [stamp.hour for stamp in local] == [1, 1]
 assert events[1] - events[0] == pd.Timedelta(hours=1)

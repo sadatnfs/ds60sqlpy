@@ -53,20 +53,95 @@ import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 
-val factSchema = StructType(Seq(StructField("fact_id",LongType,false),StructField("key",StringType,true),StructField("amount_cents",LongType,false)))
-val dimensionSchema = StructType(Seq(StructField("dimension_row",LongType,false),StructField("key",StringType,true),StructField("label",StringType,false)))
-val facts = spark.createDataFrame(spark.sparkContext.parallelize(Seq(Row(1L,"A",10L),Row(2L,"A",20L),Row(3L,"B",30L),Row(4L,"C",40L),Row(5L,null,50L),Row(6L,"D",60L)),2),factSchema)
-val dimension = spark.createDataFrame(spark.sparkContext.parallelize(Seq(Row(101L,"A","alpha1"),Row(102L,"A","alpha2"),Row(103L,"A","alpha3"),Row(104L,"B","beta"),Row(105L,null,"unknown"),Row(106L,"E","epsilon")),2),dimensionSchema)
+val factSchema = StructType(
+  Seq(
+    StructField("fact_id", LongType, false),
+    StructField("key", StringType, true),
+    StructField("amount_cents", LongType, false)
+  )
+)
+val dimensionSchema = StructType(
+  Seq(
+    StructField("dimension_row", LongType, false),
+    StructField("key", StringType, true),
+    StructField("label", StringType, false)
+  )
+)
+val facts = spark.createDataFrame(
+  spark.sparkContext.parallelize(
+    Seq(
+      Row(1L, "A", 10L),
+      Row(2L, "A", 20L),
+      Row(3L, "B", 30L),
+      Row(4L, "C", 40L),
+      Row(5L, null, 50L),
+      Row(6L, "D", 60L)
+    ),
+    2
+  ),
+  factSchema
+)
+val dimension = spark.createDataFrame(
+  spark.sparkContext.parallelize(
+    Seq(
+      Row(101L, "A", "alpha1"),
+      Row(102L, "A", "alpha2"),
+      Row(103L, "A", "alpha3"),
+      Row(104L, "B", "beta"),
+      Row(105L, null, "unknown"),
+      Row(106L, "E", "epsilon")
+    ),
+    2
+  ),
+  dimensionSchema
+)
 ```
 
 ```python
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 
-fact_schema = StructType([StructField("fact_id",LongType(),False),StructField("key",StringType(),True),StructField("amount_cents",LongType(),False)])
-dimension_schema = StructType([StructField("dimension_row",LongType(),False),StructField("key",StringType(),True),StructField("label",StringType(),False)])
-facts = spark.createDataFrame([(1,"A",10),(2,"A",20),(3,"B",30),(4,"C",40),(5,None,50),(6,"D",60)],schema=fact_schema)
-dimension = spark.createDataFrame([(101,"A","alpha1"),(102,"A","alpha2"),(103,"A","alpha3"),(104,"B","beta"),(105,None,"unknown"),(106,"E","epsilon")],schema=dimension_schema)
+fact_schema = StructType(
+    [
+        StructField("fact_id", LongType(), False),
+        StructField("key", StringType(), True),
+        StructField("amount_cents", LongType(), False),
+    ]
+)
+dimension_schema = StructType(
+    [
+        StructField("dimension_row", LongType(), False),
+        StructField("key", StringType(), True),
+        StructField("label", StringType(), False),
+    ]
+)
+facts = spark.createDataFrame(
+    [(1, "A", 10), (2, "A", 20), (3, "B", 30), (4, "C", 40), (5, None, 50), (6, "D", 60)],
+    schema=fact_schema,
+)
+dimension = spark.createDataFrame(
+    [
+        (101, "A", "alpha1"),
+        (102, "A", "alpha2"),
+        (103, "A", "alpha3"),
+        (104, "B", "beta"),
+        (105, None, "unknown"),
+        (106, "E", "epsilon"),
+    ],
+    schema=dimension_schema,
+)
 ```
 
 ## Worked example / walkthrough
@@ -83,8 +158,8 @@ println(s"A predicts ${aFacts * aDimensions} joined pairs")
 ```python
 a_facts = facts.filter(F.col("key") == F.lit("A")).count()
 a_dimensions = dimension.filter(F.col("key") == F.lit("A")).count()
-assert (a_facts, a_dimensions, a_facts*a_dimensions) == (2,3,6)
-print("A predicts", a_facts*a_dimensions, "joined pairs")
+assert (a_facts, a_dimensions, a_facts * a_dimensions) == (2, 3, 6)
+print("A predicts", a_facts * a_dimensions, "joined pairs")
 ```
 
 The multiplication follows from every matching left occurrence pairing with every matching right occurrence. It predicts the six A rows before the join executes. A right-side duplicate is therefore a correctness consideration even if a physical join strategy handles it quickly.
@@ -92,13 +167,19 @@ The multiplication follows from every matching left occurrence pairing with ever
 ### Worked example 2
 
 ```scala
-val comparison = spark.sql("SELECT CAST(NULL AS STRING) = CAST(NULL AS STRING) AS ordinary, CAST(NULL AS STRING) <=> CAST(NULL AS STRING) AS null_safe").first()
+val comparison = spark
+  .sql(
+    "SELECT CAST(NULL AS STRING) = CAST(NULL AS STRING) AS ordinary, CAST(NULL AS STRING) <=> CAST(NULL AS STRING) AS null_safe"
+  )
+  .first()
 assert(comparison.isNullAt(0) && comparison.getBoolean(1))
 println("Ordinary equality is unknown;explicit NULL-safe equality is true")
 ```
 
 ```python
-comparison = spark.sql("SELECT CAST(NULL AS STRING) = CAST(NULL AS STRING) AS ordinary, CAST(NULL AS STRING) <=> CAST(NULL AS STRING) AS null_safe").first()
+comparison = spark.sql(
+    "SELECT CAST(NULL AS STRING) = CAST(NULL AS STRING) AS ordinary, CAST(NULL AS STRING) <=> CAST(NULL AS STRING) AS null_safe"
+).first()
 assert tuple(comparison) == (None, True)
 print("Ordinary equality is unknown;explicit NULL-safe equality is true")
 ```

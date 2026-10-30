@@ -23,8 +23,11 @@ Task: Create two equal Point records and insert one into a map.
 The lookup uses logical equality rather than reference identity. A record supplies a useful default for immutable coordinate values.
 
 ```java
-Point a=new Point(0,0), b=new Point(0,0); Map<Point,String> map=new HashMap<>(); map.put(a,"origin");
-assert a.equals(b) && a.hashCode()==b.hashCode() && map.get(b).equals("origin");
+Point a = new Point(0, 0),
+  b = new Point(0, 0);
+Map<Point, String> map = new HashMap<>();
+map.put(a, "origin");
+assert a.equals(b) && a.hashCode() == b.hashCode() && map.get(b).equals("origin");
 ```
 
 **Expected:** lookup with the other returns origin; hashes equal.
@@ -38,9 +41,11 @@ Task: Sort people(age20,idb),(age20,ida),(age18,idc) by age then ID.
 The secondary key makes equal-age ordering explicit. Without it, a presentation may depend on input order rather than the intended identity ordering.
 
 ```java
-List<Person> people=new ArrayList<>(List.of(new Person("b",20),new Person("a",20),new Person("c",18)));
+List<Person> people = new ArrayList<>(
+  List.of(new Person("b", 20), new Person("a", 20), new Person("c", 18))
+);
 people.sort(Comparator.comparingInt(Person::age).thenComparing(Person::id));
-assert people.stream().map(Person::id).toList().equals(List.of("c","a","b"));
+assert people.stream().map(Person::id).toList().equals(List.of("c", "a", "b"));
 ```
 
 **Expected:** IDs c,a,b.
@@ -54,8 +59,10 @@ Task: Insert two different people ofage20 into a TreeSet comparingage only.
 TreeSet treats comparator result 0 as equivalent for its membership rule. The comparator must reflect the uniqueness contract the caller actually wants.
 
 ```java
-Set<Person> byAge=new TreeSet<>(Comparator.comparingInt(Person::age)); byAge.add(new Person("a",20)); byAge.add(new Person("b",20));
-assert byAge.size()==1 && !new Person("a",20).equals(new Person("b",20));
+Set<Person> byAge = new TreeSet<>(Comparator.comparingInt(Person::age));
+byAge.add(new Person("a", 20));
+byAge.add(new Person("b", 20));
+assert byAge.size() == 1 && !new Person("a", 20).equals(new Person("b", 20));
 ```
 
 **Expected:** setsize1 despite unequal records.
@@ -69,8 +76,11 @@ Task: Insert a key withhash1,mutate its hash field to2,and attempt lookup with t
 The entry remains in a bucket selected by the original hash. Mutation does not notifyHashMap to relocate it, so stable key state is essential.
 
 ```java
-MutableKey key=new MutableKey(1); Map<MutableKey,String> mutable=new HashMap<>(); mutable.put(key,"value"); key.value=2;
-assert mutable.get(key)==null && mutable.size()==1;
+MutableKey key = new MutableKey(1);
+Map<MutableKey, String> mutable = new HashMap<>();
+mutable.put(key, "value");
+key.value = 2;
+assert mutable.get(key) == null && mutable.size() == 1;
 ```
 
 **Expected:** lookup fails in this fixture while mapsize remains1.
@@ -84,8 +94,8 @@ Task: CompareInteger.MIN_VALUE and 1 usingInteger.compare.
 A comparator must preserve ordering for the whole accepted range. Arithmetic subtraction can wrap and violate that contract.
 
 ```java
-assert Integer.compare(Integer.MIN_VALUE,1)<0;
-assert Integer.MIN_VALUE-1>0;
+assert Integer.compare(Integer.MIN_VALUE, 1) < 0;
+assert Integer.MIN_VALUE - 1 > 0;
 ```
 
 **Expected:** negative result;subtraction overflows positive.
@@ -99,7 +109,10 @@ Task: Give twoPoints the same formatted label but different coordinates;compare 
 A human-friendly label is not automatically a unique identifier. Using display text as a map key can merge distinct domain values.
 
 ```java
-Point left=new Point(1,2), right=new Point(2,1); String labelLeft="point",labelRight="point";
+Point left = new Point(1, 2),
+  right = new Point(2, 1);
+String labelLeft = "point",
+  labelRight = "point";
 assert labelLeft.equals(labelRight) && !left.equals(right);
 ```
 

@@ -58,9 +58,12 @@ The question is: Take two Adam updates of a zero-weight linear model onx 1, 2 an
 Saving before any updates would not test nonzero optimizer moments. Two steps create history that a fresh optimizer lacks.
 
 ```python
-torch.manual_seed(7); model,optimizer=make_state()
-for _ in range(2): step(model,optimizer,torch.zeros((2,1)))
-parameter=next(model.parameters()); assert optimizer.state[parameter]['step'].item()==2 and parameter.item()>0
+torch.manual_seed(7)
+model, optimizer = make_state()
+for _ in range(2):
+    step(model, optimizer, torch.zeros((2, 1)))
+parameter = next(model.parameters())
+assert optimizer.state[parameter]["step"].item() == 2 and parameter.item() > 0
 ```
 
 **Expected:** optimizer step 2 and positive weight.
@@ -74,9 +77,17 @@ The question is: Write model, optimizer, RNG and data_position2 into an owned te
 The state dictionary values are serialized at this point. The checkpoint is local and trusted; the example does not load arbitrary external pick led objects.
 
 ```python
-temporary=tempfile.TemporaryDirectory(); folder=Path(temporary.name); path=folder/'checkpoint.pt'
-checkpoint={'model':model.state_dict(),'optimizer':optimizer.state_dict(),'rng':torch.get_rng_state(),'data_position':2}
-torch.save(checkpoint,path); assert path.is_file() and checkpoint['data_position']==2
+temporary = tempfile.TemporaryDirectory()
+folder = Path(temporary.name)
+path = folder / "checkpoint.pt"
+checkpoint = {
+    "model": model.state_dict(),
+    "optimizer": optimizer.state_dict(),
+    "rng": torch.get_rng_state(),
+    "data_position": 2,
+}
+torch.save(checkpoint, path)
+assert path.is_file() and checkpoint["data_position"] == 2
 ```
 
 **Expected:** file exists and metadata position 2.
@@ -90,8 +101,15 @@ The question is: Draw three random values, then a small target perturbation, and
 The order of random draws is part of the continuation contract. Restoring only the seed without the consumed generator state would not reproduce this point.
 
 ```python
-probe=torch.rand(3); noise=torch.rand((2,1))*.01; step(model,optimizer,noise); expected=parameter.item()
-assert torch.isfinite(probe).all() and optimizer.state[parameter]['step'].item()==3 and np.isfinite(expected)
+probe = torch.rand(3)
+noise = torch.rand((2, 1)) * 0.01
+step(model, optimizer, noise)
+expected = parameter.item()
+assert (
+    torch.isfinite(probe).all()
+    and optimizer.state[parameter]["step"].item() == 3
+    and np.isfinite(expected)
+)
 ```
 
 **Expected:** finite weight, step 3, and saved three-value random probe.
@@ -105,7 +123,7 @@ The question is: Recreate model and Adam, restore all state, repeat the same dra
 A new process cannot accidentally reuse the parent's optimizer or generator. The check therefore exercises reconstruction from the saved artifact.
 
 ```python
-program=textwrap.dedent("""
+program = textwrap.dedent("""
 import json,sys,torch
 from torch import nn
 state=torch.load(sys.argv[1],map_location='cpu',weights_only=True)
@@ -115,12 +133,20 @@ probe=torch.rand(3); noise=torch.rand((2,1))*.01; x=torch.tensor([[1.],[2.]]); y
 optimizer.zero_grad(set_to_none=True); (model(x)-y).square().mean().backward(); optimizer.step()
 print(json.dumps({'probe':probe.tolist(),'weight':model.weight.item(),'position':state['data_position']+1}))
 """)
-compile(program,'torch-checkpoint-child','exec')
-result=subprocess.run([sys.executable,'-c',program,str(path)],capture_output=True,text=True,timeout=60,check=False)
-if result.returncode: raise RuntimeError('checkpoint child failed: '+result.stderr)
-restored=json.loads(result.stdout.strip().splitlines()[-1])
-np.testing.assert_allclose(restored['probe'],probe.tolist(),atol=0,rtol=0)
-np.testing.assert_allclose(restored['weight'],expected,atol=1e-6,rtol=0); assert restored['position']==3
+compile(program, "torch-checkpoint-child", "exec")
+result = subprocess.run(
+    [sys.executable, "-c", program, str(path)],
+    capture_output=True,
+    text=True,
+    timeout=60,
+    check=False,
+)
+if result.returncode:
+    raise RuntimeError("checkpoint child failed: " + result.stderr)
+restored = json.loads(result.stdout.strip().splitlines()[-1])
+np.testing.assert_allclose(restored["probe"], probe.tolist(), atol=0, rtol=0)
+np.testing.assert_allclose(restored["weight"], expected, atol=1e-6, rtol=0)
+assert restored["position"] == 3
 ```
 
 **Expected:** probe matches and next weight agrees within 1e-6; position 3.
@@ -134,9 +160,11 @@ The question is: Restore only the saved model into fresh Adam and take the same 
 The immediate model function matches the saved state, but Adam's moments and counter differ. Prediction parity is weaker than training-resumption parity.
 
 ```python
-state=torch.load(path,map_location='cpu',weights_only=True); weights_only,fresh_optimizer=make_state(); weights_only.load_state_dict(state['model'])
-step(weights_only,fresh_optimizer,noise)
-assert abs(weights_only.weight.item()-expected)>1e-6
+state = torch.load(path, map_location="cpu", weights_only=True)
+weights_only, fresh_optimizer = make_state()
+weights_only.load_state_dict(state["model"])
+step(weights_only, fresh_optimizer, noise)
+assert abs(weights_only.weight.item() - expected) > 1e-6
 ```
 
 **Expected:** next weight differs from full-state continuation.
@@ -150,9 +178,14 @@ The question is: Remove the owned checkpoint directory and report that the liter
 A real training system must additionally preserve sampler, worker and external-data state appropriate to its architecture. This fixture names that boundary rather than implying it was tested.
 
 ```python
-temporary.cleanup(); assert not folder.exists()
-receipt={'cpu_next_step_checked':True,'multiprocess_loader_restored':False,'distributed_restart_verified':False}
-assert receipt['cpu_next_step_checked'] and not receipt['distributed_restart_verified']
+temporary.cleanup()
+assert not folder.exists()
+receipt = {
+    "cpu_next_step_checked": True,
+    "multiprocess_loader_restored": False,
+    "distributed_restart_verified": False,
+}
+assert receipt["cpu_next_step_checked"] and not receipt["distributed_restart_verified"]
 ```
 
 **Expected:** directory absent; no distributed-loader claim.

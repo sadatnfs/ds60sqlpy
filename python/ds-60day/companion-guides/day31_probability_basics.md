@@ -168,9 +168,13 @@ healthy = population - diseased
 true_positives = diseased * sensitivity
 false_positives = healthy * (1 - specificity)
 positive_predictive_value = true_positives / (true_positives + false_positives)
-print({"true_positive": true_positives,
-       "false_positive": false_positives,
-       "P(disease|positive)": positive_predictive_value})
+print(
+    {
+        "true_positive": true_positives,
+        "false_positive": false_positives,
+        "P(disease|positive)": positive_predictive_value,
+    }
+)
 assert 0 < positive_predictive_value < sensitivity
 ```
 

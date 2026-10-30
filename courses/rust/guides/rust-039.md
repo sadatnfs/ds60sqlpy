@@ -43,8 +43,6 @@ Read the operations in dependency order. Record which values exist before each l
 Names and types are explicit rather than inferred from arbitrary array positions.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         use std::sync::Arc;
@@ -69,8 +67,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 A batch cannot invent which row a shorter column should align with.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         use std::sync::Arc;

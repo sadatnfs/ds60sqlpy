@@ -25,13 +25,15 @@ Worked reference for Exercise 1; Elbow (inertia vs K)
 Ks = range(1, 10)
 inertias = []
 for k in Ks:
-    km = KMeans(n_clusters=k, n_init='auto', random_state=42).fit(X)
+    km = KMeans(n_clusters=k, n_init="auto", random_state=42).fit(X)
     inertias.append(km.inertia_)
 
-plt.plot(list(Ks), inertias, marker='o')
-plt.xlabel('K (clusters)'); plt.ylabel('Inertia (within-cluster SSE)')
-plt.title('Elbow method')
-plt.tight_layout(); plt.show()
+plt.plot(list(Ks), inertias, marker="o")
+plt.xlabel("K (clusters)")
+plt.ylabel("Inertia (within-cluster SSE)")
+plt.title("Elbow method")
+plt.tight_layout()
+plt.show()
 ```
 Interpretation
 - Look for a knee where inertia reduction starts diminishing; that K is a candidate
@@ -43,7 +45,7 @@ Worked reference for Exercise 2; Silhouette for K in [2..6]
 ```python
 sil_scores = {}
 for k in range(2, 7):
-    km = KMeans(n_clusters=k, n_init='auto', random_state=42).fit(X)
+    km = KMeans(n_clusters=k, n_init="auto", random_state=42).fit(X)
     sil = silhouette_score(X, km.labels_)
     sil_scores[k] = sil
 sil_scores
@@ -55,11 +57,12 @@ Notes
 Optional visualization
 ```python
 k_best = max(sil_scores, key=sil_scores.get)
-km = KMeans(n_clusters=k_best, n_init='auto', random_state=42).fit(X)
+km = KMeans(n_clusters=k_best, n_init="auto", random_state=42).fit(X)
 X2 = X  # in 2D already
-plt.scatter(X2[:,0], X2[:,1], c=km.labels_, cmap='viridis', s=15)
-plt.title(f'KMeans clusters (K={k_best}, silhouette={sil_scores[k_best]:.3f})')
-plt.tight_layout(); plt.show()
+plt.scatter(X2[:, 0], X2[:, 1], c=km.labels_, cmap="viridis", s=15)
+plt.title(f"KMeans clusters (K={k_best}, silhouette={sil_scores[k_best]:.3f})")
+plt.tight_layout()
+plt.show()
 ```
 
 ---
@@ -79,7 +82,7 @@ lof = LocalOutlierFactor(n_neighbors=20, contamination=0.02)
 pred_lof = lof.fit_predict(X)
 lof_rate = (pred_lof == -1).mean()
 
-{'iso_outlier_rate': float(iso_rate), 'lof_outlier_rate': float(lof_rate)}
+{"iso_outlier_rate": float(iso_rate), "lof_outlier_rate": float(lof_rate)}
 ```
 Discussion
 - IsolationForest works well for high-dimensional data and is model-based

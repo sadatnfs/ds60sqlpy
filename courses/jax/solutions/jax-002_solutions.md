@@ -10,8 +10,8 @@ keepdims retains shape (2,1), so each row receives its own mean.
 
 ```python
 centered = table - table.mean(axis=1, keepdims=True)
-close(centered, [[-1., 0., 1.], [-1., 0., 1.]])
-close(centered.sum(axis=1), [0., 0.])
+close(centered, [[-1.0, 0.0, 1.0], [-1.0, 0.0, 1.0]])
+close(centered.sum(axis=1), [0.0, 0.0])
 ```
 
 ## Exercise 2: Broadcast feature offsets
@@ -21,7 +21,7 @@ The three offsets align with the final dimension.
 **Expected:** [[10,21,32],[13,24,35]].
 
 ```python
-close(table + jnp.array([10., 20., 30.]), [[10., 21., 32.], [13., 24., 35.]])
+close(table + jnp.array([10.0, 20.0, 30.0]), [[10.0, 21.0, 32.0], [13.0, 24.0, 35.0]])
 ```
 
 ## Exercise 3: Broadcast observation offsets
@@ -31,7 +31,7 @@ A (2,1) array repeats each offset across that row's features.
 **Expected:** [[10,11,12],[23,24,25]].
 
 ```python
-close(table + jnp.array([10., 20.])[:, None], [[10., 11., 12.], [23., 24., 25.]])
+close(table + jnp.array([10.0, 20.0])[:, None], [[10.0, 11.0, 12.0], [23.0, 24.0, 25.0]])
 ```
 
 ## Exercise 4: Accumulate an update
@@ -41,9 +41,9 @@ add expresses an increment, whereas set replaces the old value.
 **Expected:** New [6,2], original [1,2].
 
 ```python
-old = jnp.array([1., 2.])
-close(old.at[0].add(5.), [6., 2.])
-close(old, [1., 2.])
+old = jnp.array([1.0, 2.0])
+close(old.at[0].add(5.0), [6.0, 2.0])
+close(old, [1.0, 2.0])
 ```
 
 ## Exercise 5: Enforce the index boundary
@@ -54,11 +54,11 @@ The lesson refuses this request explicitly rather than relying on backend-specif
 
 ```python
 try:
-    replace_at(jnp.zeros(3), 3, 1.)
+    replace_at(jnp.zeros(3), 3, 1.0)
 except ValueError:
     pass
 else:
-    raise AssertionError('bad index accepted')
+    raise AssertionError("bad index accepted")
 ```
 
 ## Exercise 6: Transfer the axis rule
@@ -68,7 +68,7 @@ Changing both axis lengths catches implementations that accidentally relied on a
 **Expected:** Shape (3,2), all row sums zero.
 
 ```python
-other = jnp.arange(6.).reshape(3, 2)
+other = jnp.arange(6.0).reshape(3, 2)
 centered = other - other.mean(axis=1, keepdims=True)
 assert centered.shape == (3, 2)
 close(centered.sum(axis=1), jnp.zeros(3))

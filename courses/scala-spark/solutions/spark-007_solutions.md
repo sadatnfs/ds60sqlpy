@@ -26,7 +26,7 @@ Identity normalization happens before the emptiness check, so whitespace is not 
 
 ```scala
 assert(parseId(" a1 ") == Right("a1"))
-assert(Seq(null,"","  ").forall(value => parseId(value) == Left("missing_id")))
+assert(Seq(null, "", "  ").forall(value => parseId(value) == Left("missing_id")))
 ```
 
 ### Exercise 2: Reject unsupported domain states
@@ -37,7 +37,10 @@ Accept only trimmed lowercase paid or void. Return Left(unknown_status) for all 
 
 ```scala
 def parseStatus(raw: String): Either[String, String] = {
-  Option(raw).map(_.trim).filter(value => Set("paid","void").contains(value)).toRight("unknown_status")
+  Option(raw)
+    .map(_.trim)
+    .filter(value => Set("paid", "void").contains(value))
+    .toRight("unknown_status")
 }
 ```
 
@@ -45,7 +48,7 @@ The accepted domain is explicit and finite. Trimming is allowed, but case foldin
 
 ```scala
 assert(parseStatus(" paid ") == Right("paid") && parseStatus("void") == Right("void"))
-assert(Seq("mystery","PAID",null).forall(value => parseStatus(value) == Left("unknown_status")))
+assert(Seq("mystery", "PAID", null).forall(value => parseStatus(value) == Left("unknown_status")))
 ```
 
 ### Exercise 3: Preserve exact bounded cents
@@ -56,8 +59,11 @@ Accept trimmed ASCII digits representing 0 through 1000000 as a Long. Return Lef
 
 ```scala
 def parseAmount(raw: String): Either[String, Long] = {
-  Option(raw).map(_.trim).filter(_.matches("[0-9]+"))
-    .flatMap(_.toLongOption).filter(value => value >= 0L && value <= 1000000L)
+  Option(raw)
+    .map(_.trim)
+    .filter(_.matches("[0-9]+"))
+    .flatMap(_.toLongOption)
+    .filter(value => value >= 0L && value <= 1000000L)
     .toRight("invalid_amount")
 }
 ```
@@ -66,7 +72,11 @@ Lexical validation defines which textual forms are meaningful before numeric con
 
 ```scala
 assert(parseAmount("0") == Right(0L) && parseAmount("100") == Right(100L))
-assert(Seq("bad","-1","1.5","1000001","999999999999999999999",null).forall(value => parseAmount(value) == Left("invalid_amount")))
+assert(
+  Seq("bad", "-1", "1.5", "1000001", "999999999999999999999", null).forall(value =>
+    parseAmount(value) == Left("invalid_amount")
+  )
+)
 ```
 
 ### Exercise 4: Compose fields with declared error precedence
@@ -81,11 +91,12 @@ def parseRecord(raw: String): Either[String, Record] = {
   else {
     val fields = raw.split("\\|", -1)
     if (fields.length != 3) Left("malformed_record")
-    else for {
-      id <- parseId(fields(0))
-      status <- parseStatus(fields(1))
-      amount <- parseAmount(fields(2))
-    } yield Record(id,status,amount)
+    else
+      for {
+        id <- parseId(fields(0))
+        status <- parseStatus(fields(1))
+        amount <- parseAmount(fields(2))
+      } yield Record(id, status, amount)
   }
 }
 ```
@@ -93,7 +104,7 @@ def parseRecord(raw: String): Either[String, Record] = {
 The arity guard prevents an indexing exception and distinguishes malformed record structure from a field-level error. Keeping trailing empty fields lets the amount parser report the actual missing-value problem. The for comprehension establishes fail-fast precedence: ID errors come before status and amount errors. An accumulating validator would be needed to report all failures on one record; this function deliberately returns one reproducible reason.
 
 ```scala
-assert(parseRecord("a1|paid|100") == Right(Record("a1","paid",100L)))
+assert(parseRecord("a1|paid|100") == Right(Record("a1", "paid", 100L)))
 assert(parseRecord("a2|paid|") == Left("invalid_amount"))
 assert(parseRecord("|mystery|bad") == Left("missing_id"))
 assert(parseRecord("a|paid") == Left("malformed_record"))
@@ -107,11 +118,12 @@ Parse every input line and return accepted records plus rejected(position, raw, 
 
 ```scala
 def partitionRecords(lines: Seq[String]): (Seq[Record], Seq[(Int, String, String)]) = {
-  lines.zipWithIndex.foldLeft((Vector.empty[Record],Vector.empty[(Int,String,String)])) {
-    case ((accepted,rejected),(raw,position)) => parseRecord(raw) match {
-      case Right(record) => (accepted :+ record,rejected)
-      case Left(reason) => (accepted,rejected :+ ((position,raw,reason)))
-    }
+  lines.zipWithIndex.foldLeft((Vector.empty[Record], Vector.empty[(Int, String, String)])) {
+    case ((accepted, rejected), (raw, position)) =>
+      parseRecord(raw) match {
+        case Right(record) => (accepted :+ record, rejected)
+        case Left(reason)  => (accepted, rejected :+ ((position, raw, reason)))
+      }
   }
 }
 ```
@@ -119,10 +131,13 @@ def partitionRecords(lines: Seq[String]): (Seq[Record], Seq[(Int, String, String
 The fold carries accepted and rejected collections together so every source occurrence is assigned exactly one outcome. Position distinguishes repeated malformed lines even when they have no valid ID. The raw text remains available for diagnosis rather than being replaced by a sanitized value that hides the original failure. Vector append is used for predictable local accumulation; large distributed ingestion will need a separate partitioned data contract.
 
 ```scala
-val lines = Seq("a1|paid|100","a2|paid|0","a3|void|50","|paid|20","a5|paid|bad","a6|mystery|10")
+val lines =
+  Seq("a1|paid|100", "a2|paid|0", "a3|void|50", "|paid|20", "a5|paid|bad", "a6|mystery|10")
 val result = partitionRecords(lines)
-assert(result._1.map(_.id) == Seq("a1","a2","a3"))
-assert(result._2.map { case (position,_,reason) => (position,reason) } == Seq((3,"missing_id"),(4,"invalid_amount"),(5,"unknown_status")))
+assert(result._1.map(_.id) == Seq("a1", "a2", "a3"))
+assert(result._2.map { case (position, _, reason) =>
+  (position, reason)
+} == Seq((3, "missing_id"), (4, "invalid_amount"), (5, "unknown_status")))
 assert(result._1.size + result._2.size == lines.size)
 ```
 
@@ -134,8 +149,8 @@ From already accepted records, return paid-event count and checked paid cents to
 
 ```scala
 def paidTotal(records: Seq[Record]): (Long, Long) = {
-  records.filter(_.status == "paid").foldLeft((0L,0L)) { case ((count,total),record) =>
-    (count + 1L,Math.addExact(total,record.amount))
+  records.filter(_.status == "paid").foldLeft((0L, 0L)) { case ((count, total), record) =>
+    (count + 1L, Math.addExact(total, record.amount))
   }
 }
 ```
@@ -143,9 +158,9 @@ def paidTotal(records: Seq[Record]): (Long, Long) = {
 Validity and reporting eligibility are separate decisions. The void record is valid data and remains in accepted counts, while only paid records contribute to this revenue metric. The zero paid record still counts as a real paid event. Validating amount before applying the status filter prevents malformed void rows from disappearing behind a business exclusion and keeps the ingestion ledger auditable.
 
 ```scala
-assert(paidTotal(result._1) == (2L,100L))
+assert(paidTotal(result._1) == (2L, 100L))
 assert(parseRecord("a4|void|bad") == Left("invalid_amount"))
-assert(paidTotal(Seq.empty) == (0L,0L))
+assert(paidTotal(Seq.empty) == (0L, 0L))
 ```
 
 ## Evidence and scope

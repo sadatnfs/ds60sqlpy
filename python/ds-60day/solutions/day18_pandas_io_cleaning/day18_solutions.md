@@ -109,29 +109,18 @@ def clean_frame(raw: pd.DataFrame) -> pd.DataFrame:
     result.columns = [column.strip().lower() for column in result.columns]
     result["name"] = result["name"].astype("string").str.strip()
     original_quantity = result["quantity"]
-    converted_quantity = pd.to_numeric(
-        original_quantity, errors="coerce"
-    )
-    new_conversion_failure = (
-        original_quantity.notna() & converted_quantity.isna()
-    )
+    converted_quantity = pd.to_numeric(original_quantity, errors="coerce")
+    new_conversion_failure = original_quantity.notna() & converted_quantity.isna()
     prior_conversion_failure = result.get(
         "quantity_parse_failed",
         pd.Series(False, index=result.index),
     ).fillna(False)
-    result["quantity_parse_failed"] = (
-        prior_conversion_failure | new_conversion_failure
-    )
+    result["quantity_parse_failed"] = prior_conversion_failure | new_conversion_failure
     result["quantity"] = converted_quantity.astype("Int64")
-    result["event_time"] = pd.to_datetime(
-        result["event_time"], errors="coerce", utc=True
-    )
+    result["event_time"] = pd.to_datetime(result["event_time"], errors="coerce", utc=True)
     # Policy: preserve missing/conversion-failed values for review; do
     # not use broad dropna. Keep the first exact business-key record.
-    return (
-        result.drop_duplicates(["name", "event_time"], keep="first")
-        .reset_index(drop=True)
-    )
+    return result.drop_duplicates(["name", "event_time"], keep="first").reset_index(drop=True)
 
 
 raw = loaded_raw.copy(deep=True)
@@ -164,10 +153,7 @@ reloaded = pd.read_csv(destination)
 assert len(reloaded) == len(once)
 assert reloaded.columns.tolist() == once.columns.tolist()
 assert reloaded["quantity"].sum() == once["quantity"].sum()
-assert (
-    reloaded["quantity_parse_failed"].sum()
-    == once["quantity_parse_failed"].sum()
-)
+assert reloaded["quantity_parse_failed"].sum() == once["quantity_parse_failed"].sum()
 ```
 
 CSV does not preserve every pandas extension dtype, so compare the
@@ -246,14 +232,9 @@ def clean_events(source: pd.DataFrame) -> tuple[pd.DataFrame, dict[str, int]]:
     """Return a cleaned copy and counts of conversion failures."""
 
     cleaned = source.copy()
-    cleaned.columns = [str(name).strip().casefold().replace(" ", "_")
-                       for name in cleaned.columns]
-    cleaned["event_time"] = pd.to_datetime(
-        cleaned["event_time"], errors="coerce", utc=True
-    )
-    cleaned["quantity"] = pd.to_numeric(
-        cleaned["quantity"], errors="coerce"
-    ).astype("Int64")
+    cleaned.columns = [str(name).strip().casefold().replace(" ", "_") for name in cleaned.columns]
+    cleaned["event_time"] = pd.to_datetime(cleaned["event_time"], errors="coerce", utc=True)
+    cleaned["quantity"] = pd.to_numeric(cleaned["quantity"], errors="coerce").astype("Int64")
     quality = {
         "invalid_event_time": int(cleaned["event_time"].isna().sum()),
         "invalid_quantity": int(cleaned["quantity"].isna().sum()),
@@ -261,9 +242,7 @@ def clean_events(source: pd.DataFrame) -> tuple[pd.DataFrame, dict[str, int]]:
     return cleaned, quality
 
 
-raw = pd.DataFrame(
-    {" Event Time ": ["2025-01-01", "bad"], "Quantity": ["2", "many"]}
-)
+raw = pd.DataFrame({" Event Time ": ["2025-01-01", "bad"], "Quantity": ["2", "many"]})
 cleaned, quality = clean_events(raw)
 assert list(raw.columns) == [" Event Time ", "Quantity"]  # Raw input unchanged.
 assert quality == {"invalid_event_time": 1, "invalid_quantity": 1}

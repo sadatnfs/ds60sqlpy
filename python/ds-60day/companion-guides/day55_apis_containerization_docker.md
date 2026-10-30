@@ -173,8 +173,7 @@ files = [
 ]
 ignore_patterns = [".env", ".venv/*"]
 included = [
-    path for path in files
-    if not any(fnmatch(path, pattern) for pattern in ignore_patterns)
+    path for path in files if not any(fnmatch(path, pattern) for pattern in ignore_patterns)
 ]
 print(included)
 assert ".env" not in included and not any(p.startswith(".venv/") for p in included)
@@ -193,13 +192,9 @@ Example A instead of reading it as unrelated syntax.
 def probe(*, process_running, model_loaded, dependency_ready, draining):
     return {
         "healthy": process_running,
-        "ready": (
-            process_running
-            and model_loaded
-            and dependency_ready
-            and not draining
-        ),
+        "ready": (process_running and model_loaded and dependency_ready and not draining),
     }
+
 
 during_dependency_outage = probe(
     process_running=True,

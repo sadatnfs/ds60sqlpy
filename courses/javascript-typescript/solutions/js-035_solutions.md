@@ -67,7 +67,8 @@ A round-trip component check catches normalization of impossible dates. A strict
 
 ```javascript
 assert.equal(calendarDate('2024-02-29'), '2024-02-29');
-for (const text of ['2023-02-29', '01/02/2024', '2024-13-01']) assert.throws(() => calendarDate(text), RangeError);
+for (const text of ['2023-02-29', '01/02/2024', '2024-13-01'])
+  assert.throws(() => calendarDate(text), RangeError);
 ```
 
 **Expected:** only the valid strict date is accepted.
@@ -104,8 +105,8 @@ The formatter changes presentation, not the stored number. Removing punctuation 
 const value = 1234.5;
 const us = new Intl.NumberFormat('en-US').formatToParts(value);
 const de = new Intl.NumberFormat('de-DE').formatToParts(value);
-assert.equal(us.find(part => part.type === 'decimal').value, '.');
-assert.equal(de.find(part => part.type === 'decimal').value, ',');
+assert.equal(us.find((part) => part.type === 'decimal').value, '.');
+assert.equal(de.find((part) => part.type === 'decimal').value, ',');
 assert.equal(value, 1234.5);
 ```
 

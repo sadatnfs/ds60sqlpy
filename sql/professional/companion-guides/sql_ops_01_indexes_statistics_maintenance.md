@@ -111,13 +111,13 @@ These worked excerpts come from `sql/professional/lessons/sql_ops_01_indexes_sta
 
 ```sql
 CREATE TABLE pro_ops_lab.events (
-    event_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    device_id text NOT NULL,
-    occurred_at timestamptz NOT NULL,
-    severity smallint NOT NULL CHECK (severity BETWEEN 1 AND 5),
-    tags text[] NOT NULL DEFAULT ARRAY[]::text[],
-    location point NOT NULL,
-    message text NOT NULL
+  event_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  device_id text NOT NULL,
+  occurred_at timestamptz NOT NULL,
+  severity smallint NOT NULL CHECK (severity BETWEEN 1 AND 5),
+  tags text[] NOT NULL DEFAULT ARRAY[]::text[],
+  location point NOT NULL,
+  message text NOT NULL
 );
 ```
 
@@ -128,30 +128,26 @@ CREATE TABLE pro_ops_lab.events (
 ### Example 2
 
 ```sql
-INSERT INTO pro_ops_lab.events (
-    device_id,
-    occurred_at,
-    severity,
-    tags,
-    location,
-    message
-)
+INSERT INTO pro_ops_lab.events (device_id, occurred_at, severity, tags, location, message)
 SELECT
-    'device-' || lpad(((g.n % 40) + 1)::text, 3, '0'),
-    TIMESTAMPTZ '2026-01-01 00:00:00+00'
-        + g.n * INTERVAL '1 minute',
-    ((g.n % 5) + 1)::smallint,
-    CASE
-        WHEN g.n % 3 = 0 THEN ARRAY['network', 'retry']
-        WHEN g.n % 3 = 1 THEN ARRAY['storage']
-        ELSE ARRAY['application', 'latency']
-    END,
-    point((g.n % 100)::double precision, ((g.n * 7) % 100)::double precision),
-    CASE
-        WHEN g.n % 10 = 0 THEN 'Connection retry threshold reached'
-        ELSE 'Routine device observation'
-    END
-FROM generate_series(1, 6000) AS g(n);
+  'device-' || lpad(((g.n % 40) + 1)::text, 3, '0'),
+  TIMESTAMPTZ '2026-01-01 00:00:00+00' + g.n * INTERVAL '1 minute',
+  ((g.n % 5) + 1)::smallint,
+  CASE WHEN g.n % 3 = 0 THEN
+    ARRAY['network', 'retry']
+  WHEN g.n % 3 = 1 THEN
+    ARRAY['storage']
+  ELSE
+    ARRAY['application', 'latency']
+  END,
+  point((g.n % 100)::double precision, ((g.n * 7) % 100)::double precision),
+  CASE WHEN g.n % 10 = 0 THEN
+    'Connection retry threshold reached'
+  ELSE
+    'Routine device observation'
+  END
+FROM
+  generate_series(1, 6000) AS g (n);
 ```
 
 **How to read it:** Example 2 changes rows inside the lesson's declared transaction. The command tag reports affected rows, but a follow-up query must prove the intended before/after invariant.
@@ -241,12 +237,14 @@ and only in the intended database, would an administrator run:
 CREATE EXTENSION pg_stat_statements;
 
 SELECT
-    queryid,
-    calls,
-    total_exec_time,
-    rows
-FROM pg_stat_statements
-ORDER BY total_exec_time DESC
+  queryid,
+  calls,
+  total_exec_time,
+  rows
+FROM
+  pg_stat_statements
+ORDER BY
+  total_exec_time DESC
 LIMIT 20;
 ```
 

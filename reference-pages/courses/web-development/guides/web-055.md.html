@@ -209,7 +209,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-a-stable-cursor-predicate">Worked example 1: A stable cursor predicate<a class="heading-anchor" href="#worked-example-1-a-stable-cursor-predicate" aria-label="Link to this section">#</a></h4>
 <p>The id is both unique and ordered in this small model.</p>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> id<span class="syntax-punctuation">,</span> title <span class="syntax-keyword">FROM</span> notes <span class="syntax-keyword">WHERE</span> owner_id <span class="syntax-operator">=</span> <span class="syntax-punctuation">:</span>actor <span class="syntax-keyword">AND</span> id <span class="syntax-operator">&gt;</span> <span class="syntax-punctuation">:</span>after_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> id <span class="syntax-keyword">ASC</span> <span class="syntax-keyword">LIMIT</span> <span class="syntax-punctuation">:</span>page_size<span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  id<span class="syntax-punctuation">,</span>
+  title
+<span class="syntax-keyword">FROM</span>
+  notes
+<span class="syntax-keyword">WHERE</span>
+  owner_id <span class="syntax-operator">=</span> <span class="syntax-punctuation">:</span>actor
+  <span class="syntax-keyword">AND</span> id <span class="syntax-operator">&gt;</span> <span class="syntax-punctuation">:</span>after_id
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  id <span class="syntax-keyword">ASC</span>
+<span class="syntax-keyword">LIMIT</span> <span class="syntax-punctuation">:</span>page_size<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected observation:</strong> A scoped ordered page can continue after the last seen id.</p>
 <h4 id="worked-example-2-a-scoped-cache-key">Worked example 2: A scoped cache key<a class="heading-anchor" href="#worked-example-2-a-scoped-cache-key" aria-label="Link to this section">#</a></h4>
 <p>The key includes the context that changes the result.</p>

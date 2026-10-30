@@ -11,14 +11,14 @@ Run the supplied three-occurrence stream with ID deduplication and return a boun
 **Expected:** Input count 3, state rows 2 and exact committed bag 1:100,2:200.
 
 ```scala
-def capture(spark: SparkSession,input: Path,checkpoint: Path,output: Path): Observation = {
-  observe(spark,input,checkpoint,output)
+def capture(spark: SparkSession, input: Path, checkpoint: Path, output: Path): Observation = {
+  observe(spark, input, checkpoint, output)
 }
 ```
 
 ```python
-def capture(spark,input_path,checkpoint,output):
-    return observe(spark,input_path,checkpoint,output)
+def capture(spark, input_path, checkpoint, output):
+    return observe(spark, input_path, checkpoint, output)
 ```
 
 The actual query ingests three occurrences and retains two distinct IDs. Its state metric and committed output answer related but different questions. The literal values catch wrong payloads even if state/input counts look reasonable. Termination is observed through the query lifecycle, not an assumed wait duration.
@@ -39,7 +39,7 @@ def knownMetric(value: Option[Long]): Option[Long] = {
 
 ```python
 def known_metric(value):
-    return value if value is not None and value>=0 else None
+    return value if value is not None and value >= 0 else None
 ```
 
 A state-store memory metric is neither total JVM resident memory nor a cloud bill. A sink may not publish an exact output-row count through progress, so the example retains unavailable rather than making up zero. Actual output values come from the separate file readback.
@@ -53,16 +53,22 @@ Add a new ID 3:300 and restart the same compatible checkpoint.
 **Expected:** One new input row, state rows grow 2 to 3, and output gains 3:300.
 
 ```scala
-def growState(spark: SparkSession,root: Path,input: Path,checkpoint: Path,output: Path): Observation = {
-  publishFile(root,input,"batch-02.json",Seq("""{"id":3,"cents":300}"""))
-  observe(spark,input,checkpoint,output)
+def growState(
+    spark: SparkSession,
+    root: Path,
+    input: Path,
+    checkpoint: Path,
+    output: Path
+): Observation = {
+  publishFile(root, input, "batch-02.json", Seq("""{"id":3,"cents":300}"""))
+  observe(spark, input, checkpoint, output)
 }
 ```
 
 ```python
-def grow_state(spark,root,input_path,checkpoint,output):
-    publish_file(root,input_path,"batch-02.json",['{"id":3,"cents":300}'])
-    return observe(spark,input_path,checkpoint,output)
+def grow_state(spark, root, input_path, checkpoint, output):
+    publish_file(root, input_path, "batch-02.json", ['{"id":3,"cents":300}'])
+    return observe(spark, input_path, checkpoint, output)
 ```
 
 This deduplication query has no eviction policy and adds one new key, so retaining one additional state row is expected. The observation demonstrates how to connect growth to input/key policy. It does not establish a memory leak or prescribe deleting state to reduce the metric.
@@ -76,16 +82,17 @@ Run a separate AvailableNow query over an empty owned input directory.
 **Expected:** Zero admitted rows and a terminated query;state/sink metrics may be absent.
 
 ```scala
-def emptyObservation(spark: SparkSession,root: Path): Observation = {
-  val empty=Files.createDirectory(root.resolve("empty-input"))
-  observe(spark,empty,root.resolve("empty-checkpoint"),root.resolve("empty-output"))
+def emptyObservation(spark: SparkSession, root: Path): Observation = {
+  val empty = Files.createDirectory(root.resolve("empty-input"))
+  observe(spark, empty, root.resolve("empty-checkpoint"), root.resolve("empty-output"))
 }
 ```
 
 ```python
-def empty_observation(spark,root):
-    empty=root/"empty-input";empty.mkdir()
-    return observe(spark,empty,root/"empty-checkpoint",root/"empty-output")
+def empty_observation(spark, root):
+    empty = root / "empty-input"
+    empty.mkdir()
+    return observe(spark, empty, root / "empty-checkpoint", root / "empty-output")
 ```
 
 A finite empty invocation can finish successfully without producing a readable file dataset. The program therefore does not turn missing output files into an invented zero-row schema. In a running production query, zero input would require checking source discovery, upstream supply and offsets before calling it a compute bottleneck.
@@ -100,14 +107,23 @@ For the explicitly synthetic incident fixtures, choose one reversible check for 
 
 ```scala
 def nextCheck(kind: String): String = {
-  kind match { case "skew" => "inspect_partition_keys";case "state" => "inspect_watermark_and_key_growth";case "input" => "inspect_source_discovery";case _ => throw new IllegalArgumentException("Unknown incident") }
+  kind match {
+    case "skew"  => "inspect_partition_keys"; case "state" => "inspect_watermark_and_key_growth";
+    case "input" => "inspect_source_discovery";
+    case _       => throw new IllegalArgumentException("Unknown incident")
+  }
 }
 ```
 
 ```python
 def next_check(kind):
-    checks={"skew":"inspect_partition_keys","state":"inspect_watermark_and_key_growth","input":"inspect_source_discovery"}
-    if kind not in checks:raise ValueError("Unknown incident")
+    checks = {
+        "skew": "inspect_partition_keys",
+        "state": "inspect_watermark_and_key_growth",
+        "input": "inspect_source_discovery",
+    }
+    if kind not in checks:
+        raise ValueError("Unknown incident")
     return checks[kind]
 ```
 
@@ -122,15 +138,17 @@ Keep only stage_id, task_id, run_ms and input_records from a supplied task-event
 **Expected:** Exact four-field record, with fake token/password absent.
 
 ```scala
-def sanitize(event: Map[String,String]): Map[String,String] = {
-  event.filter { case (key,_) => Set("stage_id","task_id","run_ms","input_records").contains(key) }
+def sanitize(event: Map[String, String]): Map[String, String] = {
+  event.filter { case (key, _) =>
+    Set("stage_id", "task_id", "run_ms", "input_records").contains(key)
+  }
 }
 ```
 
 ```python
 def sanitize(event):
-    allowed={"stage_id","task_id","run_ms","input_records"}
-    return {key:value for key,value in event.items() if key in allowed}
+    allowed = {"stage_id", "task_id", "run_ms", "input_records"}
+    return {key: value for key, value in event.items() if key in allowed}
 ```
 
 Event logs, plans and configuration can contain paths, SQL text or application data. This small allowlist creates a reviewable sanitized task record and never prints the fake secret input. It is not a universal log-redaction system;new fields need a deliberate data-handling decision before being exported.

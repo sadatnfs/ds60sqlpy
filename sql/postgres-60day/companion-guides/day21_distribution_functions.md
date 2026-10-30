@@ -101,23 +101,28 @@ These worked excerpts come from `sql/postgres-60day/day21_distribution_functions
 
 ```sql
 WITH cust_rev AS (
-  SELECT c.customer_id,
-         COALESCE(SUM(oi.unit_price*oi.quantity*(1-oi.discount)),0) AS revenue
-  FROM customers c
-  LEFT JOIN orders o ON o.customer_id = c.customer_id
-  LEFT JOIN order_items oi ON oi.order_id = o.order_id
-  GROUP BY c.customer_id
+  SELECT
+    c.customer_id,
+    COALESCE(SUM(oi.unit_price * oi.quantity * (1 - oi.discount)), 0) AS revenue
+  FROM
+    customers c
+    LEFT JOIN orders o ON o.customer_id = c.customer_id
+    LEFT JOIN order_items oi ON oi.order_id = o.order_id
+  GROUP BY
+    c.customer_id
 )
-SELECT customer_id,
-       revenue,
-       -- NTILE must assign tied rows to physical buckets; customer_id makes
-       -- that assignment reproducible without changing PERCENT_RANK tie rules.
-       NTILE(4) OVER (
-         ORDER BY revenue DESC, customer_id
-       ) AS revenue_quartile,
-       ROUND((PERCENT_RANK() OVER (ORDER BY revenue))::numeric, 4) AS pct_rank
-FROM cust_rev
-ORDER BY revenue DESC, customer_id
+SELECT
+  customer_id,
+  revenue,
+  -- NTILE must assign tied rows to physical buckets; customer_id makes
+  -- that assignment reproducible without changing PERCENT_RANK tie rules.
+  NTILE(4) OVER (ORDER BY revenue DESC, customer_id) AS revenue_quartile,
+  ROUND((PERCENT_RANK() OVER (ORDER BY revenue))::numeric, 4) AS pct_rank
+FROM
+  cust_rev
+ORDER BY
+  revenue DESC,
+  customer_id
 LIMIT 50;
 ```
 
@@ -129,25 +134,31 @@ LIMIT 50;
 
 ```sql
 -- The same topic query shown as a plan instead of business rows.
-EXPLAIN (COSTS OFF)
-WITH cust_rev AS (
-  SELECT c.customer_id,
-         COALESCE(SUM(oi.unit_price*oi.quantity*(1-oi.discount)),0) AS revenue
-  FROM customers c
+EXPLAIN (
+  COSTS OFF
+) WITH cust_rev AS (
+  SELECT
+    c.customer_id,
+    COALESCE(SUM(oi.unit_price * oi.quantity * (1 - oi.discount)), 0) AS revenue
+  FROM
+    customers c
   LEFT JOIN orders o ON o.customer_id = c.customer_id
   LEFT JOIN order_items oi ON oi.order_id = o.order_id
-  GROUP BY c.customer_id
+GROUP BY
+  c.customer_id
 )
-SELECT customer_id,
-       revenue,
-       -- NTILE must assign tied rows to physical buckets; customer_id makes
-       -- that assignment reproducible without changing PERCENT_RANK tie rules.
-       NTILE(4) OVER (
-         ORDER BY revenue DESC, customer_id
-       ) AS revenue_quartile,
-       ROUND((PERCENT_RANK() OVER (ORDER BY revenue))::numeric, 4) AS pct_rank
-FROM cust_rev
-ORDER BY revenue DESC, customer_id
+SELECT
+  customer_id,
+  revenue,
+  -- NTILE must assign tied rows to physical buckets; customer_id makes
+  -- that assignment reproducible without changing PERCENT_RANK tie rules.
+  NTILE(4) OVER (ORDER BY revenue DESC, customer_id) AS revenue_quartile,
+    ROUND((PERCENT_RANK() OVER (ORDER BY revenue))::numeric, 4) AS pct_rank
+FROM
+  cust_rev
+ORDER BY
+  revenue DESC,
+  customer_id
 LIMIT 50;
 ```
 

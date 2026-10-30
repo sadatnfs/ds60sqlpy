@@ -237,8 +237,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>err <span class="syntax-operator">==</span> <span class="syntax-keyword">nil</span> <span class="syntax-operator">&amp;&amp;</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>v<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">2</span> <span class="syntax-operator">&amp;&amp;</span> v<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;Springfield, West&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;quoted comma&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The record contains two fields.</p>
 <p>A comma inside quotes belongs to the field. strings.Split would incorrectly create three fields.</p>
 <h4 id="worked-example-2-reject-a-ragged-row">Worked example 2: Reject a ragged row<a class="heading-anchor" href="#worked-example-2-reject-a-ragged-row" aria-label="Link to this section">#</a></h4>
@@ -273,8 +272,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>err <span class="syntax-operator">!=</span> <span class="syntax-keyword">nil</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;ragged row&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The reader reports a field-count error.</p>
 <p>Rejecting inconsistent shape prevents silent column shifts that can corrupt downstream type interpretation.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>

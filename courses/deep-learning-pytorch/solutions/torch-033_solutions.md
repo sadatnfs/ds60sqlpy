@@ -49,8 +49,9 @@ The question is: Use float32 CPU rows 1, 2 and 3, 4.
 The output has one scalar per record. The absence of gradient tracking is part of this inference-only contract.
 
 ```python
-x=torch.tensor([[1.,2.],[3.,4.]],dtype=torch.float32); result=predict(x)
-assert result.tolist()==[0.,2.] and tuple(result.shape)==(2,) and not result.requires_grad
+x = torch.tensor([[1.0, 2.0], [3.0, 4.0]], dtype=torch.float32)
+result = predict(x)
+assert result.tolist() == [0.0, 2.0] and tuple(result.shape) == (2,) and not result.requires_grad
 ```
 
 **Expected:** outputs 0, 2 with shape(2, ).
@@ -64,8 +65,8 @@ The question is: Predict each row alone and concatenate.
 A training-mode BatchNorm layer could violate this property. The test therefore checks more than output shape.
 
 ```python
-single=torch.cat([predict(x[i:i+1]) for i in range(len(x))])
-torch.testing.assert_close(single,result,atol=0,rtol=0)
+single = torch.cat([predict(x[i : i + 1]) for i in range(len(x))])
+torch.testing.assert_close(single, result, atol=0, rtol=0)
 ```
 
 **Expected:** same values as batch prediction.
@@ -79,10 +80,13 @@ The question is: Pass shapes 0 x2 and 5 x2.
 A resource bound must be checked before computation. An empty batch also has no observations to score.
 
 ```python
-for bad in [torch.empty((0,2)),torch.zeros((5,2))]:
-    try: predict(bad)
-    except ValueError as error: assert 'batch' in str(error)
-    else: raise AssertionError('invalid batch accepted')
+for bad in [torch.empty((0, 2)), torch.zeros((5, 2))]:
+    try:
+        predict(bad)
+    except ValueError as error:
+        assert "batch" in str(error)
+    else:
+        raise AssertionError("invalid batch accepted")
 ```
 
 **Expected:** ValueError naming batch limit.
@@ -96,10 +100,17 @@ The question is: Pass a vector, a3-feature matrix and an int64 matrix.
 Automatic reshaping or casting can hide which semantic interpretation the caller intended. A different API can permit conversion, but must document and test it.
 
 ```python
-for bad,kind in [(torch.tensor([1.,2.]),ValueError),(torch.zeros((2,3)),ValueError),(torch.ones((1,2),dtype=torch.int64),TypeError)]:
-    try: predict(bad)
-    except kind: pass
-    else: raise AssertionError('input contract bypassed')
+for bad, kind in [
+    (torch.tensor([1.0, 2.0]), ValueError),
+    (torch.zeros((2, 3)), ValueError),
+    (torch.ones((1, 2), dtype=torch.int64), TypeError),
+]:
+    try:
+        predict(bad)
+    except kind:
+        pass
+    else:
+        raise AssertionError("input contract bypassed")
 ```
 
 **Expected:** shape ValueErrors and dtype TypeError.
@@ -113,9 +124,12 @@ The question is: Pass aN aN feature and inspect the failure.
 A finite weight matrix cannot repair invalid input data. Rejecting the case preserves a clear failure category.
 
 ```python
-try: predict(torch.tensor([[float('nan'),1.]]))
-except ValueError as error: assert 'finite' in str(error)
-else: raise AssertionError('NaN accepted')
+try:
+    predict(torch.tensor([[float("nan"), 1.0]]))
+except ValueError as error:
+    assert "finite" in str(error)
+else:
+    raise AssertionError("NaN accepted")
 ```
 
 **Expected:** ValueError for finite-value contract.
@@ -129,8 +143,10 @@ The question is: Mutate the returned output and compare the original input.
 Ownership checks protect against shared views that let downstreamed its alter upstream data. They are independent of model accuracy.
 
 ```python
-saved=x.clone(); output=predict(x); output[0]=999
-assert torch.equal(x,saved)
+saved = x.clone()
+output = predict(x)
+output[0] = 999
+assert torch.equal(x, saved)
 ```
 
 **Expected:** input unchanged.

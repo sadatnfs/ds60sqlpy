@@ -99,10 +99,10 @@ These worked excerpts come from `sql/postgres-60day/day54_project3_dwh_part3_agg
 
 ```sql
 CREATE TABLE agg_sales_category_month (
-  year    INT NOT NULL,
-  month   INT NOT NULL,
+  year INT NOT NULL,
+  month INT NOT NULL,
   category TEXT NOT NULL,
-  revenue NUMERIC(14,2) NOT NULL,
+  revenue NUMERIC(14, 2) NOT NULL,
   PRIMARY KEY (year, month, category)
 );
 ```
@@ -115,10 +115,10 @@ CREATE TABLE agg_sales_category_month (
 
 ```sql
 CREATE TABLE agg_sales_customer_month (
-  year     INT NOT NULL,
-  month    INT NOT NULL,
+  year INT NOT NULL,
+  month INT NOT NULL,
   customer_sk INT NOT NULL,
-  revenue  NUMERIC(14,2) NOT NULL,
+  revenue NUMERIC(14, 2) NOT NULL,
   PRIMARY KEY (year, month, customer_sk)
 );
 ```

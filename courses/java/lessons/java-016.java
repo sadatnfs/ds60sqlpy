@@ -3,7 +3,7 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     // Exercise 1: Round-trip explicit UTF-8
-    // WriteCafé and an emoji to an owned temporary file,then read it withUTF-8.
+    // Write Café and an emoji to an owned temporary file,then read it with UTF-8.
     // Expected: exact text equality.
 
     // Exercise 2: Distinguish a path from existence
@@ -18,7 +18,7 @@ public class Main {
     // Exercise 4: Request atomic replacement honestly
     // Write old and staged files,requestATOMIC_MOVE,then verify the selected outcome without
     // claiming a fallback is atomic.
-    // Expected: either targetnew withstagedabsent,or explicit unsupported result retainingold.
+    // Expected: either targetnew with staged absent,or explicit unsupported result retaining old.
 
     // Exercise 5: Expose a lexical path escape
     // Resolve../outside under an owned root and normalize it before checking containment.
@@ -26,7 +26,7 @@ public class Main {
 
     // Exercise 6: Verify cleanup after failure
     // Throw inside the owned temporary scope and confirm the directory is removed by the helper.
-    // Expected: original exception propagated;owned directory absent.
+    // Expected: original exception propagated; owned directory absent.
     System.out.println("Implement and check the six exercises in your saved copy.");
   }
 }

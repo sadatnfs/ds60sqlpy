@@ -277,7 +277,9 @@ private[tmbad] object Prediction {
       template: PredictionBinding,
       artifact: PreparedArtifact
   ): RDD[(JointKey, JointRecord)] = {
-    val templateSpec = template.fittedSpec.getOrElse(throw new IllegalArgumentException("Group models require fitted provenance"))
+    val templateSpec = template.fittedSpec.getOrElse(
+      throw new IllegalArgumentException("Group models require fitted provenance")
+    )
     val names = templateSpec.groupColumns
     require(
       names.forall(models.schema.fieldNames.contains),
@@ -291,7 +293,8 @@ private[tmbad] object Prediction {
         val encoded = row.getString(names.size)
         val loaded = ModelDocument.parse(encoded, artifact)
         require(
-          loaded.model.id == template.model.id && loaded.spec.copy(json = "") == templateSpec.copy(json = ""),
+          loaded.model.id == template.model.id && loaded.spec.copy(json = "") == templateSpec
+            .copy(json = ""),
           "Independent fitted models do not share one declared model/specification"
         )
         JointKey(KeyAtom.encode(keys), 0, Vector.empty, Vector.empty) -> JointRecord(
@@ -433,7 +436,9 @@ private[tmbad] object Prediction {
             item.role match {
               case 0 =>
                 require(fitted.isEmpty, "Duplicate independent model for a group")
-                fitted = Some(PredictionBinding.fitted(ModelDocument.parse(item.model.get, artifact.artifact)))
+                fitted = Some(
+                  PredictionBinding.fitted(ModelDocument.parse(item.model.get, artifact.artifact))
+                )
               case 1 =>
                 require(
                   past.size < template.model.maxUnitRows,

@@ -448,6 +448,7 @@ values <span class="syntax-operator">=</span> <span class="syntax-punctuation">[
 
 first <span class="syntax-operator">=</span> json
 <span class="syntax-keyword">import</span> json <span class="syntax-keyword">as</span> second
+
 <span class="syntax-punctuation">(</span>first <span class="syntax-operator">is</span> second<span class="syntax-punctuation">,</span> sys<span class="syntax-operator">.</span>modules<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">json</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">is</span> first<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation</strong></p>
 <pre class="highlighted-code"><code class="language-text">`(True, True)`. Python reuses the successfully loaded module from `sys.modules`.</code></pre>
@@ -488,6 +489,7 @@ first <span class="syntax-operator">=</span> json
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-comment"># demo/formatters.py</span>
 <span class="syntax-keyword">def</span> <span class="syntax-function">title</span><span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">return</span> text<span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>title<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+
 
 <span class="syntax-comment"># demo/__main__.py</span>
 <span class="syntax-keyword">from</span> demo.formatters <span class="syntax-keyword">import</span> title

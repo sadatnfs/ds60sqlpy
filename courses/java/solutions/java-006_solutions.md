@@ -23,7 +23,8 @@ Task: Create a mutable list red,blue,red and append green.
 A list records positions and repeated observations. Removing duplicates would change the meaning if each entry represents an event.
 
 ```java
-List<String> colors = new ArrayList<>(List.of("red", "blue", "red")); colors.add("green");
+List<String> colors = new ArrayList<>(List.of("red", "blue", "red"));
+colors.add("green");
 assert colors.size() == 4 && Collections.frequency(colors, "red") == 2;
 ```
 
@@ -55,7 +56,9 @@ The boolean return indicates whether membership changed. It does not count how m
 
 ```java
 Set<String> unique = new HashSet<>();
-assert unique.add("red"); assert !unique.add("red"); assert unique.size() == 1;
+assert unique.add("red");
+assert !unique.add("red");
+assert unique.size() == 1;
 ```
 
 **Expected:** first true,second false,size1.
@@ -69,7 +72,8 @@ Task: Sort the count-map keys before presenting them.
 A HashMap may iterate consistently in one run without promising that order. Sorting makes the presentation contract independent of internal hashing layout.
 
 ```java
-List<String> keys = new ArrayList<>(counts.keySet()); Collections.sort(keys);
+List<String> keys = new ArrayList<>(counts.keySet());
+Collections.sort(keys);
 assert keys.equals(List.of("blue", "green", "red"));
 ```
 
@@ -84,7 +88,8 @@ Task: Readmissing withgetOrDefault0 and compare map size.
 A fallback value is not a stored entry. This distinction matters when zero is a legitimate observation and absence has different meaning.
 
 ```java
-int before = counts.size(); int absent = counts.getOrDefault("missing", 0);
+int before = counts.size();
+int absent = counts.getOrDefault("missing", 0);
 assert absent == 0 && counts.size() == before && !counts.containsKey("missing");
 ```
 
@@ -100,7 +105,11 @@ An unmodifiable collection prevents structural mutation through that interface. 
 
 ```java
 boolean fixed = false;
-try { List.of(1, 2).add(3); } catch (UnsupportedOperationException expected) { fixed = true; }
+try {
+  List.of(1, 2).add(3);
+} catch (UnsupportedOperationException expected) {
+  fixed = true;
+}
 assert fixed;
 ```
 

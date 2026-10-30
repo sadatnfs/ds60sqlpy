@@ -32,14 +32,14 @@ Publish the same canonical content twice under identity manual-v1 and batch 7. C
 **Expected:** First call publishes true;second returns false;exactly 2 logical rows remain.
 
 ```scala
-def publishOnce(root: Path,identity: String,batchId: Long,text: String): Boolean = {
-  publishBatch(root,identity,batchId,text,false)
+def publishOnce(root: Path, identity: String, batchId: Long, text: String): Boolean = {
+  publishBatch(root, identity, batchId, text, false)
 }
 ```
 
 ```python
-def publish_once(root,identity,batch_id,text):
-    return publish_batch(root,identity,batch_id,text,False)
+def publish_once(root, identity, batch_id, text):
+    return publish_batch(root, identity, batch_id, text, False)
 ```
 
 The local commit file contains both data and the batch identity, digest together. Its atomic rename is the visibility boundary. A repeated call with identical content is a no-op;the sink does not add a second copy. This assumes a single writer and the prepared same-filesystem rename semantics, not distributed transaction coordination or power-loss durability.
@@ -53,20 +53,27 @@ Run the actual foreachBatch query with failure after staging and before rename. 
 **Expected:** The query fails with injected_before_publication;no stream-v1 batch is visible and the attempted batch ID is 0.
 
 ```scala
-def failCallback(spark: SparkSession,input: Path,checkpoint: Path,sink: Path): Unit = {
-  var observed=false
-  try runForeach(spark,input,checkpoint,sink,"stream-v1",true) catch { case e: org.apache.spark.sql.streaming.StreamingQueryException if e.toString.contains("injected_before_publication") => observed=true }
-  require(observed,"Expected injected streaming failure")
+def failCallback(spark: SparkSession, input: Path, checkpoint: Path, sink: Path): Unit = {
+  var observed = false
+  try runForeach(spark, input, checkpoint, sink, "stream-v1", true)
+  catch {
+    case e: org.apache.spark.sql.streaming.StreamingQueryException
+        if e.toString.contains("injected_before_publication") =>
+      observed = true
+  }
+  require(observed, "Expected injected streaming failure")
 }
 ```
 
 ```python
-def fail_callback(spark,input_path,checkpoint,sink):
+def fail_callback(spark, input_path, checkpoint, sink):
     from pyspark.errors import StreamingQueryException
+
     try:
-        run_foreach(spark,input_path,checkpoint,sink,"stream-v1",True)
+        run_foreach(spark, input_path, checkpoint, sink, "stream-v1", True)
     except StreamingQueryException as error:
-        if "injected_before_publication" not in str(error):raise
+        if "injected_before_publication" not in str(error):
+            raise
     else:
         raise AssertionError("Expected injected streaming failure")
 ```
@@ -82,14 +89,14 @@ Restart the same source/checkpoint/query namespace without failure. Compare atte
 **Expected:** Batch 0 is attempted again and publishes 2 rows once. Query ID persists;run ID changes.
 
 ```scala
-def recoverCallback(spark: SparkSession,input: Path,checkpoint: Path,sink: Path): RunReceipt = {
-  runForeach(spark,input,checkpoint,sink,"stream-v1",false)
+def recoverCallback(spark: SparkSession, input: Path, checkpoint: Path, sink: Path): RunReceipt = {
+  runForeach(spark, input, checkpoint, sink, "stream-v1", false)
 }
 ```
 
 ```python
-def recover_callback(spark,input_path,checkpoint,sink):
-    return run_foreach(spark,input_path,checkpoint,sink,"stream-v1",False)
+def recover_callback(spark, input_path, checkpoint, sink):
+    return run_foreach(spark, input_path, checkpoint, sink, "stream-v1", False)
 ```
 
 The repeated batch ID is direct evidence that callback delivery can repeat. The sink key is stable across runs, so replay refers to the same logical work. A key based on runId would change after restart and defeat this protection. The application-defined namespace is also bound to its source/checkpoint/schema contract to reject accidental reuse for an unrelated query.
@@ -103,15 +110,22 @@ Append the same canonical batch text twice to a separate unsafe-demo file, then 
 **Expected:** Unsafe append has 4 row occurrences;the committed batch remains 2.
 
 ```scala
-def unsafeAppend(path: Path,text: String): Unit = {
-  Files.writeString(path,text,StandardCharsets.UTF_8,StandardOpenOption.CREATE,StandardOpenOption.APPEND)
+def unsafeAppend(path: Path, text: String): Unit = {
+  Files.writeString(
+    path,
+    text,
+    StandardCharsets.UTF_8,
+    StandardOpenOption.CREATE,
+    StandardOpenOption.APPEND
+  )
   ()
 }
 ```
 
 ```python
-def unsafe_append(path,text):
-    with path.open("a",encoding="utf-8") as handle:handle.write(text)
+def unsafe_append(path, text):
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(text)
 ```
 
 This intentionally unsafe local side effect is isolated from the real sink. Its duplicate result does not depend on a race or random timing;two deliveries visibly append two copies. The counterexample shows why a successful callback or checkpoint configuration cannot magically make a non-idempotent external operation exactly once.
@@ -125,17 +139,18 @@ Reject different content under an existing batch key, then publish a new source 
 **Expected:** The conflicting key fails without replacing its receipt. Stream batch 1 adds one row, leaving IDs 1,2,3 and total 600 across two batch files.
 
 ```scala
-def rejectCollision(root: Path,text: String): Unit = {
-  var rejected=false
-  try publishBatch(root,"manual-v1",7L,text+"9,999\n",false) catch { case _: IllegalArgumentException => rejected=true }
+def rejectCollision(root: Path, text: String): Unit = {
+  var rejected = false
+  try publishBatch(root, "manual-v1", 7L, text + "9,999\n", false)
+  catch { case _: IllegalArgumentException => rejected = true }
   require(rejected)
 }
 ```
 
 ```python
-def reject_collision(root,text):
+def reject_collision(root, text):
     try:
-        publish_batch(root,"manual-v1",7,text+"9,999\n",False)
+        publish_batch(root, "manual-v1", 7, text + "9,999\n", False)
     except ValueError:
         pass
     else:

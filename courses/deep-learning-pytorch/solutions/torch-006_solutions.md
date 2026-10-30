@@ -49,9 +49,12 @@ The question is: Use \(w=1\), \(z=2\cdot w\), \(a=z\cdot z\) and \(\mathrm{loss}
 The factors are dL/da=2(a-1)=6, da/dz=2z=4 and \(\frac{\partial z}{\partial w}=2\). Multiplying \(6\cdot 4\cdot 2\) gives 48 at the supplied point.
 
 ```python
-w=torch.tensor(1.,dtype=torch.float64,requires_grad=True); z=2*w; a=z*z; loss=(a-1)**2
-gradient=torch.autograd.grad(loss,w)[0]
-assert (z.item(),a.item(),loss.item(),gradient.item())==(2.,4.,9.,48.)
+w = torch.tensor(1.0, dtype=torch.float64, requires_grad=True)
+z = 2 * w
+a = z * z
+loss = (a - 1) ** 2
+gradient = torch.autograd.grad(loss, w)[0]
+assert (z.item(), a.item(), loss.item(), gradient.item()) == (2.0, 4.0, 9.0, 48.0)
 ```
 
 **Expected:** z2, a4, loss 9, gradient 48.
@@ -65,9 +68,10 @@ The question is: Compare the chain derivative with a central difference of the c
 The finite difference treats the entire function as a black box. It can expose an incorrect manual chain factor without reading the graph internals.
 
 ```python
-h=1e-5; f=lambda value:((2*value)**2-1)**2
-numeric=(f(1+h)-f(1-h))/(2*h)
-np.testing.assert_allclose(numeric,48,atol=1e-5,rtol=0)
+h = 1e-5
+f = lambda value: ((2 * value) ** 2 - 1) ** 2
+numeric = (f(1 + h) - f(1 - h)) / (2 * h)
+np.testing.assert_allclose(numeric, 48, atol=1e-5, rtol=0)
 ```
 
 **Expected:** approximately 48 within 1e-5.
@@ -81,10 +85,13 @@ The question is: Try an in-place add on a leaf requiring gradients outside no_gr
 The guard prevents an ambiguous modification of a value whose derivative history is being tracked. Optimizer updates use a deliberate state-update boundary instead.
 
 ```python
-leaf=torch.tensor(1.,requires_grad=True)
-try: leaf.add_(1)
-except RuntimeError: pass
-else: raise AssertionError('unsafe leaf mutation accepted')
+leaf = torch.tensor(1.0, requires_grad=True)
+try:
+    leaf.add_(1)
+except RuntimeError:
+    pass
+else:
+    raise AssertionError("unsafe leaf mutation accepted")
 ```
 
 **Expected:** RuntimeError.
@@ -98,11 +105,16 @@ The question is: Build \(\mathrm{loss}=x\cdot x\), mutate x under no_grad before
 no_grad disables recording of the mutation, but it does not make a previously saved tensor immutable or repair the old graph. Recompute after changing state.
 
 ```python
-value=torch.tensor(2.,requires_grad=True); objective=value.square()
-with torch.no_grad(): value.add_(1)
-try: objective.backward()
-except RuntimeError: pass
-else: raise AssertionError('stale saved value accepted')
+value = torch.tensor(2.0, requires_grad=True)
+objective = value.square()
+with torch.no_grad():
+    value.add_(1)
+try:
+    objective.backward()
+except RuntimeError:
+    pass
+else:
+    raise AssertionError("stale saved value accepted")
 ```
 
 **Expected:** RuntimeError from a changed saved tensor version.
@@ -116,8 +128,9 @@ The question is: Differentiate ReLU at negative, zero and positive inputs.
 PyTorch chooses zero at the kink. A symmetric finite difference at zero would produce one-half, so that point is not a valid smooth-derivative equality test.
 
 ```python
-points=torch.tensor([-1.,0.,1.],requires_grad=True); torch.relu(points).sum().backward()
-torch.testing.assert_close(points.grad,torch.tensor([0.,0.,1.]))
+points = torch.tensor([-1.0, 0.0, 1.0], requires_grad=True)
+torch.relu(points).sum().backward()
+torch.testing.assert_close(points.grad, torch.tensor([0.0, 0.0, 1.0]))
 ```
 
 **Expected:** gradients 0, 0, 1.
@@ -131,10 +144,11 @@ The question is: Update a scalar under no_grad, then build a fresh quadratic obj
 A new graph uses the new state consistently. Retaining old graphs across updates consumes memory and can create invalid-version errors.
 
 ```python
-parameter=torch.tensor(1.,dtype=torch.float64,requires_grad=True)
-with torch.no_grad(): parameter.add_(.5)
-fresh=(parameter-2)**2
-assert torch.autograd.grad(fresh,parameter)[0].item()==-1
+parameter = torch.tensor(1.0, dtype=torch.float64, requires_grad=True)
+with torch.no_grad():
+    parameter.add_(0.5)
+fresh = (parameter - 2) ** 2
+assert torch.autograd.grad(fresh, parameter)[0].item() == -1
 ```
 
 **Expected:** at new \(w=1.5\), gradient -1 for \({\left(w-2\right)}^{2}\).

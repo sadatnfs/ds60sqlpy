@@ -252,8 +252,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>multiply<span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">12</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;capture variable&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The closure uses the new factor 3.</p>
 <p>The closure refers to the variable rather than freezing its initial value. Explicitly copying a value into a new binding produces a different contract.</p>
 <h4 id="worked-example-2-create-independent-counters">Worked example 2: Create independent counters<a class="heading-anchor" href="#worked-example-2-create-independent-counters" aria-label="Link to this section">#</a></h4>
@@ -301,8 +300,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span> <span class="syntax-operator">&amp;&amp;</span> a<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">2</span> <span class="syntax-operator">&amp;&amp;</span> b<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;independent closures&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The first returns 1 then 2; the second starts at 1.</p>
 <p>Each constructor invocation creates its own captured state. Sharing a single returned closure would share that state instead.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>

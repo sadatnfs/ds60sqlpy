@@ -121,16 +121,20 @@ identify which line creates each intermediate object.
 import pandas as pd
 import pandera.pandas as pa
 
-schema = pa.DataFrameSchema({
-    "quantity": pa.Column(int, checks=pa.Check.ge(0)),
-    "price": pa.Column(float, checks=pa.Check.ge(0), coerce=True),
-    "status": pa.Column(str, checks=pa.Check.isin(["open", "closed"])),
-})
-valid = pd.DataFrame({
-    "quantity": [1, 0],
-    "price": [2.5, 0.0],
-    "status": ["open", "closed"],
-})
+schema = pa.DataFrameSchema(
+    {
+        "quantity": pa.Column(int, checks=pa.Check.ge(0)),
+        "price": pa.Column(float, checks=pa.Check.ge(0), coerce=True),
+        "status": pa.Column(str, checks=pa.Check.isin(["open", "closed"])),
+    }
+)
+valid = pd.DataFrame(
+    {
+        "quantity": [1, 0],
+        "price": [2.5, 0.0],
+        "status": ["open", "closed"],
+    }
+)
 checked = schema.validate(valid)
 checked.to_dict("records")
 ```
@@ -153,6 +157,7 @@ identify which line creates each intermediate object.
 def validated_for_output(frame: pd.DataFrame) -> pd.DataFrame:
     checked = schema.validate(frame, lazy=True)
     return checked.copy()
+
 
 output_ready = validated_for_output(valid)
 (len(output_ready), output_ready["quantity"].min())
@@ -215,6 +220,7 @@ import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
 
+
 class ReadingSchema(pa.DataFrameModel):
     sensor_id: Series[int] = pa.Field(ge=1, unique=True)
     status: Series[str] = pa.Field(isin=["ok", "warning"])
@@ -223,9 +229,8 @@ class ReadingSchema(pa.DataFrameModel):
     class Config:
         coerce = True
 
-readings = pd.DataFrame(
-    {"sensor_id": [1, 2], "status": ["ok", "warning"], "value": [2.5, 4.0]}
-)
+
+readings = pd.DataFrame({"sensor_id": [1, 2], "status": ["ok", "warning"], "value": [2.5, 4.0]})
 validated = ReadingSchema.validate(readings)
 ```
 

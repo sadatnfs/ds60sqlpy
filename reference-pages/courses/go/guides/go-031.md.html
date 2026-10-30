@@ -253,8 +253,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>v<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;msg&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;processed&quot;</span> <span class="syntax-operator">&amp;&amp;</span> v<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;count&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-builtin">float64</span><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;fields&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The record has message processed and numeric count 3.</p>
 <p>The check inspects meaning rather than serialized field order.</p>
 <h4 id="worked-example-2-retain-correlation">Worked example 2: Retain correlation<a class="heading-anchor" href="#worked-example-2-retain-correlation" aria-label="Link to this section">#</a></h4>
@@ -303,8 +302,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>v<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;request_id&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;lesson-7&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;correlation&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The ID is retained exactly.</p>
 <p>A bounded synthetic ID is sufficient. Secrets and complete payloads are inappropriate correlation fields.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>

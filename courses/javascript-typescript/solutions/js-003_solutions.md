@@ -59,7 +59,10 @@ Each element contributes exactly once. The recorded states make the invariant in
 ```javascript
 let sum = 0;
 const prefixes = [];
-for (const value of [2, 4, 6]) { sum += value; prefixes.push(sum); }
+for (const value of [2, 4, 6]) {
+  sum += value;
+  prefixes.push(sum);
+}
 assert.deepEqual(prefixes, [2, 6, 12]);
 ```
 
@@ -76,7 +79,10 @@ The additive identity already represents the empty result. No fabricated element
 ```javascript
 let sum = 0;
 let iterations = 0;
-for (const value of []) { sum += value; iterations += 1; }
+for (const value of []) {
+  sum += value;
+  iterations += 1;
+}
 assert.equal(sum, 0);
 assert.equal(iterations, 0);
 ```
@@ -95,7 +101,10 @@ Without break, a later match could overwrite the first index. The sentinel -1 di
 const values = [3, 8, 8];
 let found = -1;
 for (let index = 0; index < values.length; index += 1) {
-  if (values[index] === 8) { found = index; break; }
+  if (values[index] === 8) {
+    found = index;
+    break;
+  }
 }
 assert.equal(found, 1);
 ```

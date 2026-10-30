@@ -49,9 +49,13 @@ The question is: Evaluatef(x)=\(x\cdot x+1\) at float32[1, 2].
 A simple arithmetic oracle establishes correctness before graph capture or timing is introduced.
 
 ```python
-def function(value): return value*value+1
-x=torch.tensor([1.,2.]); eager=function(x)
-assert eager.tolist()==[2.,5.]
+def function(value):
+    return value * value + 1
+
+
+x = torch.tensor([1.0, 2.0])
+eager = function(x)
+assert eager.tolist() == [2.0, 5.0]
 ```
 
 **Expected:** output[2, 5].
@@ -65,10 +69,18 @@ The question is: Compile using a counting backend that returns graph.forward and
 This executes a captured graph through an eager backend. It deliberately avoids a claim that native optimized kernels were generated.
 
 ```python
-graphs=[]
-def backend(graph,example_inputs): graphs.append(graph); return graph.forward
-compiled=torch.compile(function,backend=backend,fullgraph=True,dynamic=False)
-torch.testing.assert_close(compiled(x),eager,atol=0,rtol=0); first=len(graphs); assert first>=1
+graphs = []
+
+
+def backend(graph, example_inputs):
+    graphs.append(graph)
+    return graph.forward
+
+
+compiled = torch.compile(function, backend=backend, fullgraph=True, dynamic=False)
+torch.testing.assert_close(compiled(x), eager, atol=0, rtol=0)
+first = len(graphs)
+assert first >= 1
 ```
 
 **Expected:** captured graph exists; output matches eager.
@@ -82,8 +94,11 @@ The question is: Call with float32[3, 4], then with float64[1, 2].
 Values can vary within a compatible signature. Dtype changes alter the operation contract and should not be hidden inside an average timing result.
 
 ```python
-assert compiled(torch.tensor([3.,4.])).tolist()==[10.,17.] and len(graphs)==first
-assert compiled(torch.tensor([1.,2.],dtype=torch.float64)).tolist()==[2.,5.] and len(graphs)>first
+assert compiled(torch.tensor([3.0, 4.0])).tolist() == [10.0, 17.0] and len(graphs) == first
+assert (
+    compiled(torch.tensor([1.0, 2.0], dtype=torch.float64)).tolist() == [2.0, 5.0]
+    and len(graphs) > first
+)
 ```
 
 **Expected:** same signature reuses capture; changed dtype adds a graph.
@@ -98,10 +113,13 @@ The interval excludes the initial capture. The tiny workload and eager backend m
 
 ```python
 import time
-compiled(x); start=time.perf_counter()
-for _ in range(20): observed=compiled(x)
-elapsed=time.perf_counter()-start
-assert observed.tolist()==[2.,5.] and elapsed>=0
+
+compiled(x)
+start = time.perf_counter()
+for _ in range(20):
+    observed = compiled(x)
+elapsed = time.perf_counter() - start
+assert observed.tolist() == [2.0, 5.0] and elapsed >= 0
 ```
 
 **Expected:** 20 correct outputs and nonnegative elapsed time.
@@ -117,8 +135,8 @@ The profiler verifies which tensor operations were observed. Its own overhead me
 ```python
 with torch.profiler.profile(activities=[torch.profiler.ProfilerActivity.CPU]) as profile:
     function(x)
-operations={event.key for event in profile.key_averages()}
-assert 'aten::mul' in operations and 'aten::add' in operations
+operations = {event.key for event in profile.key_averages()}
+assert "aten::mul" in operations and "aten::add" in operations
 ```
 
 **Expected:** aten:: mul and aten:: add appear.
@@ -132,8 +150,17 @@ The question is: Record graph capture True, optimizing native backend False and 
 A real Inductor or GPU study needs its prepared compiler/device environment, correctness checks and representative workload. This lesson isolates capture and measurement discipline.
 
 ```python
-receipt={'graph_capture_checked':True,'optimizing_native_backend':False,'gpu_benchmark':False,'warm_calls':20}
-assert receipt['graph_capture_checked'] and not receipt['optimizing_native_backend'] and not receipt['gpu_benchmark']
+receipt = {
+    "graph_capture_checked": True,
+    "optimizing_native_backend": False,
+    "gpu_benchmark": False,
+    "warm_calls": 20,
+}
+assert (
+    receipt["graph_capture_checked"]
+    and not receipt["optimizing_native_backend"]
+    and not receipt["gpu_benchmark"]
+)
 ```
 
 **Expected:** receipt does not claim universal speedup.

@@ -31,7 +31,7 @@ If template errors are long, find the first failed constraint or mismatched dedu
 ## Worked example 1
 
 ```cpp
-assert(identity_sum(2,3)==5);
+assert(identity_sum(2, 3) == 5);
 ```
 
 Expected: Deduction selects int and the result is 5.

@@ -66,23 +66,31 @@ queries, and a large-scale design note. The canonical executable checkpoint is
 SET search_path TO training, public;
 
 WITH customer_ltv AS (
-  SELECT c.customer_id,
-         c.country,
-         COALESCE(c.segment, 'standard') AS segment,
-         date_trunc('month', c.created_at)::date AS cohort_month,
-         COALESCE(SUM(o.total_amount), 0) AS ltv
-  FROM customers c
-  LEFT JOIN orders o USING (customer_id)
-  GROUP BY c.customer_id, c.country, c.segment, date_trunc('month', c.created_at)
-)
-SELECT cohort_month,
-       segment,
-       COUNT(*) AS customers,
-       ROUND(AVG(ltv), 2) AS avg_ltv,
-       ROUND(SUM(ltv), 2) AS total_ltv
-FROM customer_ltv
-GROUP BY cohort_month, segment
-ORDER BY cohort_month DESC, total_ltv DESC;
+  SELECT
+    c.customer_id,
+    c.country,
+    COALESCE(c.segment, 'standard') AS segment,
+    date_trunc('month', c.created_at)::date AS cohort_month,
+    COALESCE(SUM(o.total_amount), 0) AS ltv
+  FROM
+    customers c
+    LEFT JOIN orders o USING (customer_id)
+  GROUP BY
+    c.customer_id, c.country, c.segment, date_trunc('month', c.created_at))
+SELECT
+  cohort_month,
+  segment,
+  COUNT(*) AS customers,
+  ROUND(AVG(ltv), 2) AS avg_ltv,
+  ROUND(SUM(ltv), 2) AS total_ltv
+FROM
+  customer_ltv
+GROUP BY
+  cohort_month,
+  segment
+ORDER BY
+  cohort_month DESC,
+  total_ltv DESC;
 ```
 
 Expected grain: one row per `(cohort_month, segment)`, including customers with
@@ -94,59 +102,85 @@ zero orders.
 SET search_path TO training, public;
 
 WITH viewed_stage AS (
-  SELECT c.customer_id,
-         MIN(e.event_time) FILTER (
-           WHERE e.event_type = 'page_view'
-         ) AS viewed_at
-  FROM customers c
-  LEFT JOIN events e
-    ON e.customer_id = c.customer_id
-   AND e.event_time >= CURRENT_TIMESTAMP - interval '90 days'
-  GROUP BY c.customer_id
-), added_stage AS (
-  SELECT v.customer_id, v.viewed_at, MIN(e.event_time) AS added_at
-  FROM viewed_stage v
-  LEFT JOIN events e
-    ON e.customer_id = v.customer_id
-   AND e.event_type = 'add_to_cart'
-   AND e.event_time >= v.viewed_at
-  GROUP BY v.customer_id, v.viewed_at
-), checkout_stage AS (
-  SELECT a.customer_id, a.viewed_at, a.added_at,
-         MIN(e.event_time) AS checkout_at
-  FROM added_stage a
-  LEFT JOIN events e
-    ON e.customer_id = a.customer_id
-   AND e.event_type = 'checkout'
-   AND e.event_time >= a.added_at
-  GROUP BY a.customer_id, a.viewed_at, a.added_at
-), purchase_stage AS (
-  SELECT ch.customer_id, ch.viewed_at, ch.added_at, ch.checkout_at,
-         MIN(o.order_date) AS purchased_at
-  FROM checkout_stage ch
-  LEFT JOIN orders o
-    ON o.customer_id = ch.customer_id
-   AND o.order_date >= ch.checkout_at
-   AND o.order_date >= CURRENT_TIMESTAMP - interval '90 days'
-  GROUP BY ch.customer_id, ch.viewed_at, ch.added_at, ch.checkout_at
-), activity AS (
-  SELECT customer_id,
-         viewed_at IS NOT NULL AS viewed,
-         added_at IS NOT NULL AND added_at >= viewed_at AS added,
-         checkout_at IS NOT NULL AND checkout_at >= added_at AS checked_out,
-         purchased_at IS NOT NULL AND purchased_at >= checkout_at AS bought
-  FROM purchase_stage
+  SELECT
+    c.customer_id,
+    MIN(e.event_time) FILTER (WHERE e.event_type = 'page_view') AS viewed_at
+  FROM
+    customers c
+    LEFT JOIN events e ON e.customer_id = c.customer_id
+      AND e.event_time >= CURRENT_TIMESTAMP - interval '90 days'
+  GROUP BY
+    c.customer_id
+),
+added_stage AS (
+  SELECT
+    v.customer_id,
+    v.viewed_at,
+    MIN(e.event_time) AS added_at
+  FROM
+    viewed_stage v
+    LEFT JOIN events e ON e.customer_id = v.customer_id
+      AND e.event_type = 'add_to_cart'
+      AND e.event_time >= v.viewed_at
+  GROUP BY
+    v.customer_id,
+    v.viewed_at
+),
+checkout_stage AS (
+  SELECT
+    a.customer_id,
+    a.viewed_at,
+    a.added_at,
+    MIN(e.event_time) AS checkout_at
+  FROM
+    added_stage a
+    LEFT JOIN events e ON e.customer_id = a.customer_id
+      AND e.event_type = 'checkout'
+      AND e.event_time >= a.added_at
+  GROUP BY
+    a.customer_id,
+    a.viewed_at,
+    a.added_at
+),
+purchase_stage AS (
+  SELECT
+    ch.customer_id,
+    ch.viewed_at,
+    ch.added_at,
+    ch.checkout_at,
+    MIN(o.order_date) AS purchased_at
+  FROM
+    checkout_stage ch
+    LEFT JOIN orders o ON o.customer_id = ch.customer_id
+      AND o.order_date >= ch.checkout_at
+      AND o.order_date >= CURRENT_TIMESTAMP - interval '90 days'
+  GROUP BY
+    ch.customer_id,
+    ch.viewed_at,
+    ch.added_at,
+    ch.checkout_at
+),
+activity AS (
+  SELECT
+    customer_id,
+    viewed_at IS NOT NULL AS viewed,
+    added_at IS NOT NULL
+    AND added_at >= viewed_at AS added,
+    checkout_at IS NOT NULL
+    AND checkout_at >= added_at AS checked_out,
+    purchased_at IS NOT NULL
+    AND purchased_at >= checkout_at AS bought
+  FROM
+    purchase_stage
 )
-SELECT COUNT(*) FILTER (WHERE viewed) AS viewers,
-       COUNT(*) FILTER (WHERE added) AS adders,
-       COUNT(*) FILTER (WHERE checked_out) AS checkouts,
-       COUNT(*) FILTER (WHERE bought) AS buyers,
-       ROUND(
-         COUNT(*) FILTER (WHERE bought)::numeric
-           / NULLIF(COUNT(*) FILTER (WHERE viewed), 0),
-         4
-       ) AS viewer_to_buyer_rate
-FROM activity;
+SELECT
+  COUNT(*) FILTER (WHERE viewed) AS viewers,
+  COUNT(*) FILTER (WHERE added) AS adders,
+  COUNT(*) FILTER (WHERE checked_out) AS checkouts,
+  COUNT(*) FILTER (WHERE bought) AS buyers,
+  ROUND(COUNT(*) FILTER (WHERE bought)::numeric / NULLIF (COUNT(*) FILTER (WHERE viewed), 0), 4) AS viewer_to_buyer_rate
+FROM
+  activity;
 ```
 
 Expected shape: one row. Every later funnel population is a subset of the
@@ -166,15 +200,23 @@ despite the starter comment saying “revenue.”
 BEGIN;
 SET search_path TO training, public;
 
-CREATE INDEX idx_orders_customer_date_day59_solution
-  ON orders(customer_id, order_date) INCLUDE (total_amount);
+CREATE INDEX idx_orders_customer_date_day59_solution ON orders (customer_id, order_date) INCLUDE (total_amount);
 
-EXPLAIN (ANALYZE, BUFFERS)
-SELECT customer_id, SUM(total_amount) AS revenue
-FROM orders
-WHERE order_date >= CURRENT_TIMESTAMP - interval '180 days'
-GROUP BY customer_id
-ORDER BY revenue DESC
+EXPLAIN (
+  ANALYZE,
+  BUFFERS
+)
+SELECT
+  customer_id,
+  SUM(total_amount) AS revenue
+FROM
+  orders
+WHERE
+  order_date >= CURRENT_TIMESTAMP - interval '180 days'
+GROUP BY
+  customer_id
+ORDER BY
+  revenue DESC
 LIMIT 50;
 
 ROLLBACK;
@@ -192,23 +234,37 @@ guarantee index use.
 SET search_path TO training, public;
 
 WITH actual AS (
-  SELECT category, SUM(amount) AS actual
-  FROM expenses
-  WHERE expense_date >= date_trunc('year', CURRENT_DATE)
-  GROUP BY category
-), budget AS (
-  SELECT category, SUM(amount) AS budget
-  FROM budgets
-  WHERE period >= date_trunc('year', CURRENT_DATE)
-  GROUP BY category
+  SELECT
+    category,
+    SUM(amount) AS actual
+  FROM
+    expenses
+  WHERE
+    expense_date >= date_trunc('year', CURRENT_DATE)
+  GROUP BY
+    category
+),
+budget AS (
+  SELECT
+    category,
+    SUM(amount) AS budget
+  FROM
+    budgets
+  WHERE
+    period >= date_trunc('year', CURRENT_DATE)
+  GROUP BY
+    category
 )
-SELECT COALESCE(a.category, b.category) AS category,
-       ROUND(COALESCE(b.budget, 0), 2) AS budget,
-       ROUND(COALESCE(a.actual, 0), 2) AS actual,
-       ROUND(COALESCE(a.actual, 0) - COALESCE(b.budget, 0), 2) AS variance
-FROM actual a
-FULL OUTER JOIN budget b USING (category)
-ORDER BY category;
+SELECT
+  COALESCE(a.category, b.category) AS category,
+  ROUND(COALESCE(b.budget, 0), 2) AS budget,
+  ROUND(COALESCE(a.actual, 0), 2) AS actual,
+  ROUND(COALESCE(a.actual, 0) - COALESCE(b.budget, 0), 2) AS variance
+FROM
+  actual a
+  FULL OUTER JOIN budget b USING (category)
+ORDER BY
+  category;
 ```
 
 Expected grain: one row per category found in actuals or budget.

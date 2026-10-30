@@ -114,15 +114,14 @@ These worked excerpts come from `sql/professional/lessons/sql_sec_01_roles_privi
 ### Example 1
 
 ```sql
-SELECT COALESCE(
-    (
-        SELECT r.rolsuper OR r.rolcreaterole
-        FROM pg_catalog.pg_roles AS r
-        WHERE r.rolname = CURRENT_USER
-    ),
-    false
-) AS ds60_can_manage_roles
-;
+SELECT
+  COALESCE((
+    SELECT
+      r.rolsuper
+      OR r.rolcreaterole
+    FROM pg_catalog.pg_roles AS r
+    WHERE
+      r.rolname = CURRENT_USER), false) AS ds60_can_manage_roles;
 ```
 
 **How to read it:** Example 1: Start with `pg_catalog.pg_roles` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows. The final `SELECT` displays `rolcreaterole`. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
@@ -132,16 +131,14 @@ SELECT COALESCE(
 ### Example 2
 
 ```sql
-SELECT NOT EXISTS (
-        SELECT 1
-        FROM pg_catalog.pg_roles AS r
-        WHERE r.rolname IN (
-            'ds60_sec_owner',
-            'ds60_sec_north',
-            'ds60_sec_south'
-        )
-    ) AS ds60_role_names_available
-;
+SELECT
+  NOT EXISTS (
+    SELECT
+      1
+    FROM
+      pg_catalog.pg_roles AS r
+    WHERE
+      r.rolname IN ('ds60_sec_owner', 'ds60_sec_north', 'ds60_sec_south')) AS ds60_role_names_available;
 ```
 
 **How to read it:** Example 2: Start with `pg_catalog.pg_roles` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows. The final `SELECT` displays the columns written in the final `SELECT`. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.

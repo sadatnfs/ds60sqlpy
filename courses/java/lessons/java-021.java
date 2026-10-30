@@ -3,9 +3,9 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     // Exercise 1: Publish a result through join
-    // Start a worker that writes42 into a shared holder,join it with a bound,and inspect the
+    // Start a worker that writes 42 into a shared holder, join it with a bound, and inspect the
     // result.
-    // Expected: worker terminated;result42.
+    // Expected: worker terminated; result 42.
 
     // Exercise 2: Publish initial state through start
     // Assign7 before starting a worker that reads the holder.

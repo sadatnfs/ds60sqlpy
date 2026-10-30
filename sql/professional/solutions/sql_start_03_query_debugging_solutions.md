@@ -23,7 +23,18 @@ rather than assuming a familiar-looking query must be right.
 ## Exercise 1: Build a checkpoint
 
 ```sql
-SELECT task_id, team, status, effort FROM start_tasks WHERE team = 'Red' AND status = 'open' ORDER BY task_id;
+SELECT
+  task_id,
+  team,
+  status,
+  effort
+FROM
+  start_tasks
+WHERE
+  team = 'Red'
+  AND status = 'open'
+ORDER BY
+  task_id;
 ```
 
 The team filter leaves three candidate tasks, then the status condition removes the closed task 2. Writing both restrictions in one WHERE does not remove the value of reasoning through them separately. Both returned tasks belong to Red and remain open, and their efforts are 2 and 3. The verification checks exact task identities rather than only the row count, because two incorrect rows could satisfy a count of two. Keep intermediate predictions in your own notes. If the final list differs, inspect the first filter by itself before adding more conditions or changing the projection.
@@ -37,7 +48,15 @@ The team filter leaves three candidate tasks, then the status condition removes 
 ## Exercise 2: Repair alias scope
 
 ```sql
-SELECT task_id, effort * 2 AS doubled_effort FROM start_tasks WHERE effort * 2 >= 6 ORDER BY task_id;
+SELECT
+  task_id,
+  effort * 2 AS doubled_effort
+FROM
+  start_tasks
+WHERE
+  effort * 2 >= 6
+ORDER BY
+  task_id;
 ```
 
 Repeating the arithmetic keeps the predicate within the names available from FROM. SELECT then exposes the derived heading for presentation. The original error is a name-resolution problem, not evidence that the expression or threshold is invalid. IDs 4 and 5 sit exactly at the doubled threshold and must remain because the comparison is inclusive. The missing effort does not qualify. The assertion verifies both the identities and calculated values; fixing the error alone would be insufficient if the repair accidentally changed >= to >. A later lesson will introduce an intermediate query when repeating a longer expression becomes difficult to maintain.
@@ -51,7 +70,18 @@ Repeating the arithmetic keeps the predicate within the names available from FRO
 ## Exercise 3: Repair Boolean grouping
 
 ```sql
-SELECT task_id, team, status FROM start_tasks WHERE team = 'Red' AND (status = 'open' OR status = 'blocked') ORDER BY task_id;
+SELECT
+  task_id,
+  team,
+  status
+FROM
+  start_tasks
+WHERE
+  team = 'Red'
+  AND (status = 'open'
+    OR status = 'blocked')
+ORDER BY
+  task_id;
 ```
 
 The parentheses make the status alternatives one unit that is combined with the team requirement. Under SQL precedence the original means either a Red open task or any blocked task, so task 6 slips in despite its Blue team. This is a semantic error because PostgreSQL can parse and execute the original successfully. Use a row that differs on the team boundary as a negative control. The assertion requires precisely tasks 1 and 5; merely testing that at least one Red open task appears would fail to catch the extra Blue result. Parentheses document the question and make later edits easier to review.
@@ -65,7 +95,13 @@ The parentheses make the status alternatives one unit that is combined with the 
 ## Exercise 4: Separate spelling from meaning
 
 ```sql
-SELECT task_id, effort FROM start_tasks ORDER BY task_id;
+SELECT
+  task_id,
+  effort
+FROM
+  start_tasks
+ORDER BY
+  task_id;
 ```
 
 The table defines effort, so effrot cannot be resolved as an input column. The correct repair changes the identifier, not the data or the environment. Quoting the misspelling would still name a nonexistent column. Once repaired, no WHERE clause should be invented: the question asks for every task. The assertion checks all six IDs and the count of present measurements, so accidentally filtering unknown effort is visible. In a real psql transcript the first error provides the code and position; capture that evidence instead of summarizing the whole run as broken. Re-execute the complete file after fixing the first error so transaction state is clean.
@@ -79,7 +115,16 @@ The table defines effort, so effrot cannot be resolved as an input column. The c
 ## Exercise 5: Debug a threshold boundary
 
 ```sql
-SELECT task_id, effort FROM start_tasks WHERE status = 'open' AND effort >= 3 ORDER BY task_id;
+SELECT
+  task_id,
+  effort
+FROM
+  start_tasks
+WHERE
+  status = 'open'
+  AND effort >= 3
+ORDER BY
+  task_id;
 ```
 
 The phrase at least translates to an inclusive comparison. The fixture deliberately places two open tasks exactly at 3, so a strict comparison fails visibly. The closed task with effort 5 is excluded by status even though its effort is high enough. The missing open effort produces unknown and is excluded by the measurement comparison, without any special zero replacement. The assertion tests the exact identities and values, which catches both a threshold error and forgetting the status filter. This kind of boundary fixture is usually more informative than adding dozens of ordinary rows that all satisfy both the correct and incorrect predicates.
@@ -93,7 +138,18 @@ The phrase at least translates to an inclusive comparison. The fixture deliberat
 ## Exercise 6: Combine a small reporting contract
 
 ```sql
-SELECT task_id, team, effort FROM start_tasks WHERE status = 'open' ORDER BY effort DESC NULLS LAST, task_id LIMIT 2;
+SELECT
+  task_id,
+  team,
+  effort
+FROM
+  start_tasks
+WHERE
+  status = 'open'
+ORDER BY
+  effort DESC NULLS LAST,
+  task_id
+LIMIT 2;
 ```
 
 FROM introduces tasks, WHERE keeps only open ones, SELECT chooses three output fields, ORDER BY defines a complete ranking, and LIMIT takes the first two. The largest effort anywhere in the table belongs to closed task 2, so ranking the whole table before applying eligibility would answer the wrong question. Unknown effort is explicitly placed last. Task_id resolves the tie between tasks 4 and 5. The assertion verifies the selected identities in their final ranking order. Finish by explaining the query without reading it back word for word: one open task per row, sorted by known effort with an identity tie-breaker, capped at two.

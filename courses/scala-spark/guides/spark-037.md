@@ -70,38 +70,99 @@ The complete source creates the owned local session described above, then constr
 import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
-import java.nio.file.{Files,Path,Paths,StandardOpenOption,StandardCopyOption}
+import java.nio.file.{Files, Path, Paths, StandardOpenOption, StandardCopyOption}
 import java.nio.charset.StandardCharsets
 import java.util.UUID
 import scala.jdk.CollectionConverters._
-import org.apache.spark.sql.streaming.{StreamingQuery,Trigger}
+import org.apache.spark.sql.streaming.{StreamingQuery, Trigger}
 import scala.collection.mutable.ArrayBuffer
 
-require(spark.version == "4.0.1","Prepared Spark4.0.1 required")
-spark.conf.set("spark.sql.streaming.stopTimeout","5000")
-ownedRoot=Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(),"spark-037-")
-val restartPaths=prepareCase(ownedRoot,"restart",Seq("""{"id":1,"event_second":100,"cents":100}""","""{"id":2,"event_second":110,"cents":200}"""))
-val duplicatePaths=prepareCase(ownedRoot,"duplicates",Seq("""{"id":1,"event_second":100,"cents":100}""","""{"id":1,"event_second":100,"cents":100}"""))
-val latePaths=prepareCase(ownedRoot,"late",Seq("""{"id":1,"event_second":80,"cents":100}""","""{"id":2,"event_second":90,"cents":200}""","""{"id":3,"event_second":110,"cents":300}"""))
-val invalidPaths=prepareCase(ownedRoot,"invalid",Seq("""{"id":null,"event_second":100,"cents":100}""","""{"id":2,"event_second":100,"cents":-1}""","""{"id":3,"event_second":100,"cents":300}"""))
+require(spark.version == "4.0.1", "Prepared Spark4.0.1 required")
+spark.conf.set("spark.sql.streaming.stopTimeout", "5000")
+ownedRoot = Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(), "spark-037-")
+val restartPaths = prepareCase(
+  ownedRoot,
+  "restart",
+  Seq("""{"id":1,"event_second":100,"cents":100}""", """{"id":2,"event_second":110,"cents":200}""")
+)
+val duplicatePaths = prepareCase(
+  ownedRoot,
+  "duplicates",
+  Seq("""{"id":1,"event_second":100,"cents":100}""", """{"id":1,"event_second":100,"cents":100}""")
+)
+val latePaths = prepareCase(
+  ownedRoot,
+  "late",
+  Seq(
+    """{"id":1,"event_second":80,"cents":100}""",
+    """{"id":2,"event_second":90,"cents":200}""",
+    """{"id":3,"event_second":110,"cents":300}"""
+  )
+)
+val invalidPaths = prepareCase(
+  ownedRoot,
+  "invalid",
+  Seq(
+    """{"id":null,"event_second":100,"cents":100}""",
+    """{"id":2,"event_second":100,"cents":-1}""",
+    """{"id":3,"event_second":100,"cents":300}"""
+  )
+)
 ```
 
 ```python
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 from pathlib import Path
 import tempfile
 import shutil
 import json
 import uuid
 
-if spark.version!="4.0.1":raise ValueError("Prepared Spark4.0.1 required")
-spark.conf.set("spark.sql.streaming.stopTimeout","5000")
-owned_root=Path(tempfile.mkdtemp(prefix="spark-037-",dir=Path.cwd()))
-restart_paths=prepare_case(owned_root,'restart',['{"id":1,"event_second":100,"cents":100}', '{"id":2,"event_second":110,"cents":200}'])
-duplicate_paths=prepare_case(owned_root,'duplicates',['{"id":1,"event_second":100,"cents":100}', '{"id":1,"event_second":100,"cents":100}'])
-late_paths=prepare_case(owned_root,'late',['{"id":1,"event_second":80,"cents":100}', '{"id":2,"event_second":90,"cents":200}', '{"id":3,"event_second":110,"cents":300}'])
-invalid_paths=prepare_case(owned_root,'invalid',['{"id":null,"event_second":100,"cents":100}', '{"id":2,"event_second":100,"cents":-1}', '{"id":3,"event_second":100,"cents":300}'])
+if spark.version != "4.0.1":
+    raise ValueError("Prepared Spark4.0.1 required")
+spark.conf.set("spark.sql.streaming.stopTimeout", "5000")
+owned_root = Path(tempfile.mkdtemp(prefix="spark-037-", dir=Path.cwd()))
+restart_paths = prepare_case(
+    owned_root,
+    "restart",
+    ['{"id":1,"event_second":100,"cents":100}', '{"id":2,"event_second":110,"cents":200}'],
+)
+duplicate_paths = prepare_case(
+    owned_root,
+    "duplicates",
+    ['{"id":1,"event_second":100,"cents":100}', '{"id":1,"event_second":100,"cents":100}'],
+)
+late_paths = prepare_case(
+    owned_root,
+    "late",
+    [
+        '{"id":1,"event_second":80,"cents":100}',
+        '{"id":2,"event_second":90,"cents":200}',
+        '{"id":3,"event_second":110,"cents":300}',
+    ],
+)
+invalid_paths = prepare_case(
+    owned_root,
+    "invalid",
+    [
+        '{"id":null,"event_second":100,"cents":100}',
+        '{"id":2,"event_second":100,"cents":-1}',
+        '{"id":3,"event_second":100,"cents":300}',
+    ],
+)
 ```
 
 ## Worked example / walkthrough
@@ -109,15 +170,19 @@ invalid_paths=prepare_case(owned_root,'invalid',['{"id":null,"event_second":100,
 ### Worked example 1
 
 ```scala
-val demo=prepareCase(ownedRoot,"demo",Seq("""{"id":1,"event_second":100,"cents":100}""","""{"id":1,"event_second":100,"cents":100}"""))
-val result=runScenario(spark,demo._1,demo._2,demo._3,"duplicates")
-assert(result.inputRows==2L && bag(spark,demo._3)==Seq("1:100"))
+val demo = prepareCase(
+  ownedRoot,
+  "demo",
+  Seq("""{"id":1,"event_second":100,"cents":100}""", """{"id":1,"event_second":100,"cents":100}""")
+)
+val result = runScenario(spark, demo._1, demo._2, demo._3, "duplicates")
+assert(result.inputRows == 2L && bag(spark, demo._3) == Seq("1:100"))
 ```
 
 ```python
-demo=prepare_case(owned_root,"demo",['{"id":1,"event_second":100,"cents":100}']*2)
-result=run_scenario(spark,*demo,"duplicates")
-assert result["input_rows"]==2 and bag(spark,demo[2])==["1:100"]
+demo = prepare_case(owned_root, "demo", ['{"id":1,"event_second":100,"cents":100}'] * 2)
+result = run_scenario(spark, *demo, "duplicates")
+assert result["input_rows"] == 2 and bag(spark, demo[2]) == ["1:100"]
 ```
 
 Two source occurrences become one committed ID through a real streaming deduplication operator. The assertion checks input and output separately, and query completion comes from the API.
@@ -125,13 +190,13 @@ Two source occurrences become one committed ID through a real streaming deduplic
 ### Worked example 2
 
 ```scala
-val samples=Seq(80L,90L,110L)
-assert(samples.filter(_ >= 90L)==Seq(90L,110L))
+val samples = Seq(80L, 90L, 110L)
+assert(samples.filter(_ >= 90L) == Seq(90L, 110L))
 ```
 
 ```python
-samples=[80,90,110]
-assert [value for value in samples if value>=90]==[90,110]
+samples = [80, 90, 110]
+assert [value for value in samples if value >= 90] == [90, 110]
 ```
 
 This independent arithmetic oracle fixes the inclusive event-time policy before the actual late-case Spark query runs. It deliberately makes no engine-watermark claim.

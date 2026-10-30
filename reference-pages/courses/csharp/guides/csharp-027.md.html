@@ -230,26 +230,24 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-keyword">using</span> System.Text.RegularExpressions<span class="syntax-punctuation">;</span>
 <span class="syntax-keyword">using</span> System.Buffers<span class="syntax-punctuation">;</span>
 
-<span class="syntax-keyword">internal</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Program</span>
-<span class="syntax-punctuation">{</span>
-    <span class="syntax-keyword">private</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">Check</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">bool</span> condition<span class="syntax-punctuation">,</span> <span class="syntax-keyword">string</span> reason<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">internal</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Program</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">private</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">Check</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">bool</span> condition<span class="syntax-punctuation">,</span> <span class="syntax-keyword">string</span> reason<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>condition<span class="syntax-punctuation">)</span>
+      <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-function">InvalidOperationException</span><span class="syntax-punctuation">(</span>reason<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
+
+  <span class="syntax-keyword">private</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">async</span> Task <span class="syntax-function">Main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
     <span class="syntax-punctuation">{</span>
-        <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>condition<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> InvalidOperationException<span class="syntax-punctuation">(</span>reason<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      <span class="syntax-keyword">var</span> a <span class="syntax-operator">=</span> DateTimeOffset<span class="syntax-punctuation">.</span>Parse<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;2025-01-01T12:00:00+02:00&quot;</span><span class="syntax-punctuation">,</span>
+                                   CultureInfo<span class="syntax-punctuation">.</span>InvariantCulture<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      <span class="syntax-keyword">var</span> b <span class="syntax-operator">=</span> DateTimeOffset<span class="syntax-punctuation">.</span>Parse<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;2025-01-01T10:00:00Z&quot;</span><span class="syntax-punctuation">,</span>
+                                   CultureInfo<span class="syntax-punctuation">.</span>InvariantCulture<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      Check<span class="syntax-punctuation">(</span>a <span class="syntax-operator">==</span> b<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;same instant&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      Check<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">.</span>Offset <span class="syntax-operator">!=</span> b<span class="syntax-punctuation">.</span>Offset<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;different representations&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
     <span class="syntax-punctuation">}</span>
-
-    <span class="syntax-keyword">private</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">async</span> Task <span class="syntax-function">Main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
-    <span class="syntax-punctuation">{</span>
-        <span class="syntax-punctuation">{</span>
-            <span class="syntax-keyword">var</span> a <span class="syntax-operator">=</span> DateTimeOffset<span class="syntax-punctuation">.</span>Parse<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;2025-01-01T12:00:00+02:00&quot;</span><span class="syntax-punctuation">,</span> CultureInfo<span class="syntax-punctuation">.</span>InvariantCulture<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-            <span class="syntax-keyword">var</span> b <span class="syntax-operator">=</span> DateTimeOffset<span class="syntax-punctuation">.</span>Parse<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;2025-01-01T10:00:00Z&quot;</span><span class="syntax-punctuation">,</span> CultureInfo<span class="syntax-punctuation">.</span>InvariantCulture<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-            Check<span class="syntax-punctuation">(</span>a <span class="syntax-operator">==</span> b<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;same instant&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-            Check<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">.</span>Offset <span class="syntax-operator">!=</span> b<span class="syntax-punctuation">.</span>Offset<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;different representations&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-        <span class="syntax-punctuation">}</span>
-        Console<span class="syntax-punctuation">.</span>WriteLine<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;csharp-027: passed&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-        <span class="syntax-keyword">await</span> Task<span class="syntax-punctuation">.</span>CompletedTask<span class="syntax-punctuation">;</span>
-    <span class="syntax-punctuation">}</span>
-
-
+    Console<span class="syntax-punctuation">.</span>WriteLine<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;csharp-027: passed&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">await</span> Task<span class="syntax-punctuation">.</span>CompletedTask<span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The values denote the same instant despite different offsets.</p>
 <h4 id="example-b-measure-a-fixed-duration">Example B: Measure a fixed duration<a class="heading-anchor" href="#example-b-measure-a-fixed-duration" aria-label="Link to this section">#</a></h4>
@@ -270,27 +268,25 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-keyword">using</span> System.Text.RegularExpressions<span class="syntax-punctuation">;</span>
 <span class="syntax-keyword">using</span> System.Buffers<span class="syntax-punctuation">;</span>
 
-<span class="syntax-keyword">internal</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Program</span>
-<span class="syntax-punctuation">{</span>
-    <span class="syntax-keyword">private</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">Check</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">bool</span> condition<span class="syntax-punctuation">,</span> <span class="syntax-keyword">string</span> reason<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">internal</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Program</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">private</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">Check</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">bool</span> condition<span class="syntax-punctuation">,</span> <span class="syntax-keyword">string</span> reason<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>condition<span class="syntax-punctuation">)</span>
+      <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-function">InvalidOperationException</span><span class="syntax-punctuation">(</span>reason<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
+
+  <span class="syntax-keyword">private</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">async</span> Task <span class="syntax-function">Main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
     <span class="syntax-punctuation">{</span>
-        <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>condition<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> InvalidOperationException<span class="syntax-punctuation">(</span>reason<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      <span class="syntax-keyword">var</span> start <span class="syntax-operator">=</span> <span class="syntax-keyword">new</span> DateTimeOffset<span class="syntax-punctuation">(</span><span class="syntax-number">2025</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> TimeSpan<span class="syntax-punctuation">.</span>Zero<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      <span class="syntax-keyword">var</span> end <span class="syntax-operator">=</span> start<span class="syntax-punctuation">.</span>AddMinutes<span class="syntax-punctuation">(</span><span class="syntax-number">90</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      Check<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>end <span class="syntax-operator">-</span> start<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>TotalMinutes <span class="syntax-operator">==</span> <span class="syntax-number">90</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;elapsed duration&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      <span class="syntax-keyword">string</span> encoded <span class="syntax-operator">=</span> start<span class="syntax-punctuation">.</span>ToString<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;O&quot;</span><span class="syntax-punctuation">,</span> CultureInfo<span class="syntax-punctuation">.</span>InvariantCulture<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      Check<span class="syntax-punctuation">(</span>DateTimeOffset<span class="syntax-punctuation">.</span>Parse<span class="syntax-punctuation">(</span>encoded<span class="syntax-punctuation">,</span> CultureInfo<span class="syntax-punctuation">.</span>InvariantCulture<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span>
+                start<span class="syntax-punctuation">,</span>
+            <span class="syntax-string">&quot;round-trip format&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
     <span class="syntax-punctuation">}</span>
-
-    <span class="syntax-keyword">private</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">async</span> Task <span class="syntax-function">Main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
-    <span class="syntax-punctuation">{</span>
-        <span class="syntax-punctuation">{</span>
-            <span class="syntax-keyword">var</span> start <span class="syntax-operator">=</span> <span class="syntax-keyword">new</span> DateTimeOffset<span class="syntax-punctuation">(</span><span class="syntax-number">2025</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> TimeSpan<span class="syntax-punctuation">.</span>Zero<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-            <span class="syntax-keyword">var</span> end <span class="syntax-operator">=</span> start<span class="syntax-punctuation">.</span>AddMinutes<span class="syntax-punctuation">(</span><span class="syntax-number">90</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-            Check<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>end <span class="syntax-operator">-</span> start<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>TotalMinutes <span class="syntax-operator">==</span> <span class="syntax-number">90</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;elapsed duration&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-            <span class="syntax-keyword">string</span> encoded <span class="syntax-operator">=</span> start<span class="syntax-punctuation">.</span>ToString<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;O&quot;</span><span class="syntax-punctuation">,</span> CultureInfo<span class="syntax-punctuation">.</span>InvariantCulture<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-            Check<span class="syntax-punctuation">(</span>DateTimeOffset<span class="syntax-punctuation">.</span>Parse<span class="syntax-punctuation">(</span>encoded<span class="syntax-punctuation">,</span> CultureInfo<span class="syntax-punctuation">.</span>InvariantCulture<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> start<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;round-trip format&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-        <span class="syntax-punctuation">}</span>
-        Console<span class="syntax-punctuation">.</span>WriteLine<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;csharp-027: passed&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-        <span class="syntax-keyword">await</span> Task<span class="syntax-punctuation">.</span>CompletedTask<span class="syntax-punctuation">;</span>
-    <span class="syntax-punctuation">}</span>
-
-
+    Console<span class="syntax-punctuation">.</span>WriteLine<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;csharp-027: passed&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">await</span> Task<span class="syntax-punctuation">.</span>CompletedTask<span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The elapsed duration is 90 minutes and the timestamp round-trips.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>

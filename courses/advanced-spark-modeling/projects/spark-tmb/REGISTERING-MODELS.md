@@ -45,7 +45,7 @@ A model's source must be `models/MODEL_ID.cpp`. Model IDs and field names are re
   "source": "models/normal_mean.cpp",
   "factorization": "independent_rows",
   "response": "y",
-  "data": {"y": "real_vector"},
+  "data": { "y": "real_vector" },
   "fixed_parameters": ["mu", "log_sigma"],
   "random": null
 }

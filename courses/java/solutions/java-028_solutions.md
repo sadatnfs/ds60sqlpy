@@ -27,9 +27,20 @@ Task: Start the fixture and request `GET /health`.
 The request reaches a real localHTTPserver. A a returned String alone would not verify routing,status or resource closure.
 
 ```java
-try(LocalServer server=new LocalServer();var client=java.net.http.HttpClient.newBuilder().connectTimeout(java.time.Duration.ofSeconds(2)).build()) {
-    var response=client.send(java.net.http.HttpRequest.newBuilder(server.uri("/health")).timeout(java.time.Duration.ofSeconds(2)).GET().build(),java.net.http.HttpResponse.BodyHandlers.ofString());
-    assert response.statusCode()==200 && response.body().equals("ok");
+try (
+  LocalServer server = new LocalServer();
+  var client = java.net.http.HttpClient.newBuilder()
+    .connectTimeout(java.time.Duration.ofSeconds(2))
+    .build()
+) {
+  var response = client.send(
+    java.net.http.HttpRequest.newBuilder(server.uri("/health"))
+      .timeout(java.time.Duration.ofSeconds(2))
+      .GET()
+      .build(),
+    java.net.http.HttpResponse.BodyHandlers.ofString()
+  );
+  assert response.statusCode() == 200 && response.body().equals("ok");
 }
 ```
 
@@ -44,9 +55,22 @@ Task: ReadContent-Type on the successful response.
 Theencoding contract belongs in the response metadata as well as thebyte-writing code. Clients should not guess a platform default.
 
 ```java
-try(LocalServer server=new LocalServer();var client=java.net.http.HttpClient.newHttpClient()) {
-    var response=client.send(java.net.http.HttpRequest.newBuilder(server.uri("/health")).timeout(java.time.Duration.ofSeconds(2)).GET().build(),java.net.http.HttpResponse.BodyHandlers.ofString());
-    assert response.headers().firstValue("Content-Type").orElseThrow().equals("text/plain; charset=utf-8");
+try (
+  LocalServer server = new LocalServer();
+  var client = java.net.http.HttpClient.newHttpClient()
+) {
+  var response = client.send(
+    java.net.http.HttpRequest.newBuilder(server.uri("/health"))
+      .timeout(java.time.Duration.ofSeconds(2))
+      .GET()
+      .build(),
+    java.net.http.HttpResponse.BodyHandlers.ofString()
+  );
+  assert response
+    .headers()
+    .firstValue("Content-Type")
+    .orElseThrow()
+    .equals("text/plain; charset=utf-8");
 }
 ```
 
@@ -61,9 +85,16 @@ Task: POSTto/health underaGET-onlycontract.
 A routeexistingdoesnotmakeeverymethodvalid. Validation occursbeforeperformingdomainwork.
 
 ```java
-try(LocalServer server=new LocalServer();var client=java.net.http.HttpClient.newHttpClient()) {
-    var request=java.net.http.HttpRequest.newBuilder(server.uri("/health")).timeout(java.time.Duration.ofSeconds(2)).POST(java.net.http.HttpRequest.BodyPublishers.noBody()).build();
-    var response=client.send(request,java.net.http.HttpResponse.BodyHandlers.ofString());assert response.statusCode()==405 && response.body().equals("method not allowed");
+try (
+  LocalServer server = new LocalServer();
+  var client = java.net.http.HttpClient.newHttpClient()
+) {
+  var request = java.net.http.HttpRequest.newBuilder(server.uri("/health"))
+    .timeout(java.time.Duration.ofSeconds(2))
+    .POST(java.net.http.HttpRequest.BodyPublishers.noBody())
+    .build();
+  var response = client.send(request, java.net.http.HttpResponse.BodyHandlers.ofString());
+  assert response.statusCode() == 405 && response.body().equals("method not allowed");
 }
 ```
 
@@ -78,8 +109,18 @@ Task: GET/health-extra,which matches the context prefix but not the declared exa
 HttpServercontextmatchingisprefix-based. An exact application route needs its own path check toavoidaccidentallyacceptinglookalikes.
 
 ```java
-try(LocalServer server=new LocalServer();var client=java.net.http.HttpClient.newHttpClient()) {
-    var response=client.send(java.net.http.HttpRequest.newBuilder(server.uri("/health-extra")).timeout(java.time.Duration.ofSeconds(2)).GET().build(),java.net.http.HttpResponse.BodyHandlers.ofString());assert response.statusCode()==404;
+try (
+  LocalServer server = new LocalServer();
+  var client = java.net.http.HttpClient.newHttpClient()
+) {
+  var response = client.send(
+    java.net.http.HttpRequest.newBuilder(server.uri("/health-extra"))
+      .timeout(java.time.Duration.ofSeconds(2))
+      .GET()
+      .build(),
+    java.net.http.HttpResponse.BodyHandlers.ofString()
+  );
+  assert response.statusCode() == 404;
 }
 ```
 
@@ -94,8 +135,18 @@ Task: GETanunknownpathandinspectthecompletedresponse.
 Atransport-levelsuccessdoesnotmean the domain operation succeeded. Clientlogicshouldbranchonstatusbeforeparsingasuccessschema.
 
 ```java
-try(LocalServer server=new LocalServer();var client=java.net.http.HttpClient.newHttpClient()) {
-    var response=client.send(java.net.http.HttpRequest.newBuilder(server.uri("/missing")).timeout(java.time.Duration.ofSeconds(2)).GET().build(),java.net.http.HttpResponse.BodyHandlers.ofString());assert response.statusCode()==404;
+try (
+  LocalServer server = new LocalServer();
+  var client = java.net.http.HttpClient.newHttpClient()
+) {
+  var response = client.send(
+    java.net.http.HttpRequest.newBuilder(server.uri("/missing"))
+      .timeout(java.time.Duration.ofSeconds(2))
+      .GET()
+      .build(),
+    java.net.http.HttpResponse.BodyHandlers.ofString()
+  );
+  assert response.statusCode() == 404;
 }
 ```
 
@@ -110,7 +161,10 @@ Task: Inspect the bound host and positive ephemeral port,then close the wrapper.
 Thefixtureownsandstopsitslistener. It does not change a shared server orleaveadeploymentrunningafterthelesson.
 
 ```java
-LocalServer owned=new LocalServer();assert owned.uri("/health").getHost().equals("127.0.0.1") && owned.uri("/health").getPort()>0;owned.close();assert owned.closed;
+LocalServer owned = new LocalServer();
+assert owned.uri("/health").getHost().equals("127.0.0.1") && owned.uri("/health").getPort() > 0;
+owned.close();
+assert owned.closed;
 ```
 
 **Expected:** host 127.0.0.1;port positive; closed flag true.

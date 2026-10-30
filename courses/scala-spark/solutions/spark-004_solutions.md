@@ -119,7 +119,10 @@ Given group/amount pairs, reject blank group labels, retain nonnegative amount o
 
 ```scala
 def groupedSummary(records: Seq[(String, Long)]): Map[String, (Long, Long)] = {
-  require(records.forall { case (group, _) => group != null && group.trim.nonEmpty }, "group labels must be known")
+  require(
+    records.forall { case (group, _) => group != null && group.trim.nonEmpty },
+    "group labels must be known"
+  )
   records.filter(_._2 >= 0L).groupBy(_._1).map { case (group, rows) =>
     group -> summary(rows.map(_._2))
   }
@@ -129,10 +132,10 @@ def groupedSummary(records: Seq[(String, Long)]): Map[String, (Long, Long)] = {
 Identity validation precedes amount filtering so an invalid group label cannot disappear inside the rejected-amount branch. groupBy retains all accepted occurrences for a group, and the already tested summary contract supplies count and checked total. The two global sums reconcile grouped output with accepted input. Absence of C means no accepted C rows, not a measured zero C total.
 
 ```scala
-val grouped = groupedSummary(Seq(("A",100L),("A",100L),("B",0L),("B",25L),("C",-5L)))
-assert(grouped == Map("A" -> (2L,200L), "B" -> (2L,25L)))
+val grouped = groupedSummary(Seq(("A", 100L), ("A", 100L), ("B", 0L), ("B", 25L), ("C", -5L)))
+assert(grouped == Map("A" -> (2L, 200L), "B" -> (2L, 25L)))
 assert(grouped.values.map(_._1).sum == 4L && grouped.values.map(_._2).sum == 225L)
-expectIllegalArgument(groupedSummary(Seq(("",-5L))))
+expectIllegalArgument(groupedSummary(Seq(("", -5L))))
 ```
 
 ## Evidence and scope

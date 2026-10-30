@@ -214,13 +214,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The derivative is sigmoid(0)=0.5 and must be multiplied by the supplied tangent.</p>
 <p><strong>Expected:</strong> Value log(2), tangent 1.5.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-string">&quot;&quot;&quot;Small offline JAX mechanism investigation; CPU evidence only.&quot;&quot;&quot;</span>
+
 <span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
 
 <span class="syntax-keyword">import</span> math
 <span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 <span class="syntax-keyword">import</span> jax
 <span class="syntax-keyword">import</span> jax.numpy <span class="syntax-keyword">as</span> jnp
-
 
 
 <span class="syntax-comment"># Choose precision before creating arrays; the usual JAX default is 32 bit.</span>
@@ -230,9 +230,10 @@ jax<span class="syntax-operator">.</span>config<span class="syntax-operator">.</
 <span class="syntax-keyword">def</span> <span class="syntax-function">close</span><span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-10</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">1e-10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span>atol<span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span>rtol<span class="syntax-punctuation">)</span>
 
+
 <span class="syntax-decorator">@jax</span><span class="syntax-operator">.</span>custom_jvp
 <span class="syntax-keyword">def</span> <span class="syntax-function">stable_softplus</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
-    <span class="syntax-keyword">return</span> jnp<span class="syntax-operator">.</span>logaddexp<span class="syntax-punctuation">(</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span> value<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> jnp<span class="syntax-operator">.</span>logaddexp<span class="syntax-punctuation">(</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> value<span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-decorator">@stable_softplus</span><span class="syntax-operator">.</span>defjvp
@@ -253,16 +254,17 @@ jax<span class="syntax-operator">.</span>config<span class="syntax-operator">.</
 <span class="syntax-keyword">def</span> <span class="syntax-function">square_backward</span><span class="syntax-punctuation">(</span>saved<span class="syntax-punctuation">,</span> cotangent<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">return</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span> <span class="syntax-operator">*</span> saved <span class="syntax-operator">*</span> cotangent<span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span>
 
+
 custom_square<span class="syntax-operator">.</span>defvjp<span class="syntax-punctuation">(</span>square_forward<span class="syntax-punctuation">,</span> square_backward<span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-comment"># Case 1: A stable custom JVP</span>
-    value<span class="syntax-punctuation">,</span> tangent <span class="syntax-operator">=</span> jax<span class="syntax-operator">.</span>jvp<span class="syntax-punctuation">(</span>stable_softplus<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span>jnp<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">(</span><span class="syntax-number">0.</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span>jnp<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">(</span><span class="syntax-number">3.</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
-    close<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">,</span> math<span class="syntax-operator">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-number">2.</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    value<span class="syntax-punctuation">,</span> tangent <span class="syntax-operator">=</span> jax<span class="syntax-operator">.</span>jvp<span class="syntax-punctuation">(</span>stable_softplus<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span>jnp<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">(</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span>jnp<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">(</span><span class="syntax-number">3.0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    close<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">,</span> math<span class="syntax-operator">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
     close<span class="syntax-punctuation">(</span>tangent<span class="syntax-punctuation">,</span> <span class="syntax-number">1.5</span><span class="syntax-punctuation">)</span>
 
-    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">jax-022</span><span class="syntax-string">&#x27;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">: 1 asserted cases passed</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">jax-022</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&quot;</span><span class="syntax-string">: 1 asserted cases passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
@@ -272,13 +274,13 @@ custom_square<span class="syntax-operator">.</span>defvjp<span class="syntax-pun
 <p>The backward rule composes local sensitivity six with incoming sensitivity four.</p>
 <p><strong>Expected:</strong> 24.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-string">&quot;&quot;&quot;Small offline JAX mechanism investigation; CPU evidence only.&quot;&quot;&quot;</span>
+
 <span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
 
 <span class="syntax-keyword">import</span> math
 <span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 <span class="syntax-keyword">import</span> jax
 <span class="syntax-keyword">import</span> jax.numpy <span class="syntax-keyword">as</span> jnp
-
 
 
 <span class="syntax-comment"># Choose precision before creating arrays; the usual JAX default is 32 bit.</span>
@@ -288,9 +290,10 @@ jax<span class="syntax-operator">.</span>config<span class="syntax-operator">.</
 <span class="syntax-keyword">def</span> <span class="syntax-function">close</span><span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-10</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">1e-10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span>atol<span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span>rtol<span class="syntax-punctuation">)</span>
 
+
 <span class="syntax-decorator">@jax</span><span class="syntax-operator">.</span>custom_jvp
 <span class="syntax-keyword">def</span> <span class="syntax-function">stable_softplus</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
-    <span class="syntax-keyword">return</span> jnp<span class="syntax-operator">.</span>logaddexp<span class="syntax-punctuation">(</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span> value<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> jnp<span class="syntax-operator">.</span>logaddexp<span class="syntax-punctuation">(</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> value<span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-decorator">@stable_softplus</span><span class="syntax-operator">.</span>defjvp
@@ -311,16 +314,17 @@ jax<span class="syntax-operator">.</span>config<span class="syntax-operator">.</
 <span class="syntax-keyword">def</span> <span class="syntax-function">square_backward</span><span class="syntax-punctuation">(</span>saved<span class="syntax-punctuation">,</span> cotangent<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">return</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span> <span class="syntax-operator">*</span> saved <span class="syntax-operator">*</span> cotangent<span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span>
 
+
 custom_square<span class="syntax-operator">.</span>defvjp<span class="syntax-punctuation">(</span>square_forward<span class="syntax-punctuation">,</span> square_backward<span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-comment"># Case 1: Propagate a non-unit cotangent</span>
-    value<span class="syntax-punctuation">,</span> back <span class="syntax-operator">=</span> jax<span class="syntax-operator">.</span>vjp<span class="syntax-punctuation">(</span>custom_square<span class="syntax-punctuation">,</span> jnp<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">(</span><span class="syntax-number">3.</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
-    close<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">,</span> <span class="syntax-number">9.</span><span class="syntax-punctuation">)</span>
-    close<span class="syntax-punctuation">(</span>back<span class="syntax-punctuation">(</span>jnp<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">(</span><span class="syntax-number">4.</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-number">24.</span><span class="syntax-punctuation">)</span>
+    value<span class="syntax-punctuation">,</span> back <span class="syntax-operator">=</span> jax<span class="syntax-operator">.</span>vjp<span class="syntax-punctuation">(</span>custom_square<span class="syntax-punctuation">,</span> jnp<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">(</span><span class="syntax-number">3.0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    close<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">,</span> <span class="syntax-number">9.0</span><span class="syntax-punctuation">)</span>
+    close<span class="syntax-punctuation">(</span>back<span class="syntax-punctuation">(</span>jnp<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">(</span><span class="syntax-number">4.0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-number">24.0</span><span class="syntax-punctuation">)</span>
 
-    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">jax-022</span><span class="syntax-string">&#x27;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">: 1 asserted cases passed</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">jax-022</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&quot;</span><span class="syntax-string">: 1 asserted cases passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>

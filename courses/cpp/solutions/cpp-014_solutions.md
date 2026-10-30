@@ -33,7 +33,8 @@ When total35 passes but counts do not, inspect zero handling and rejected-row ac
 ## Worked example 1
 
 ```cpp
-for (auto raw : {"10","0","bad","-2","25"}) { /* classify once */ }
+for (auto raw : {"10", "0", "bad", "-2", "25"}) { /* classify once */
+}
 ```
 
 Expected: Three accepted, two rejected, total 35.
@@ -41,7 +42,8 @@ Expected: Three accepted, two rejected, total 35.
 ## Worked example 2
 
 ```cpp
-assert(parse_reading("0")==0); assert(!parse_reading("10x"));
+assert(parse_reading("0") == 0);
+assert(!parse_reading("10x"));
 ```
 
 Expected: Zero remains valid, while a numeric prefix with trailing junk is rejected.

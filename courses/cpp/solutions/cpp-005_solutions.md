@@ -31,7 +31,7 @@ A function-name typo or incompatible argument type is usually a compile problem.
 ## Worked example 1
 
 ```cpp
-assert(clamp_reading(12,0,10)==10);
+assert(clamp_reading(12, 0, 10) == 10);
 ```
 
 Expected: 12 is above the upper bound, so the function returns 10.
@@ -39,7 +39,10 @@ Expected: 12 is above the upper bound, so the function returns 10.
 ## Worked example 2
 
 ```cpp
-try { clamp_reading(5,10,0); } catch(const std::invalid_argument&) { /* rejected */ }
+try {
+  clamp_reading(5, 10, 0);
+} catch (const std::invalid_argument &) { /* rejected */
+}
 ```
 
 Expected: The reversed interval raises invalid_argument before computing a result.

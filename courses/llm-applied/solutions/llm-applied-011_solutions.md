@@ -53,11 +53,15 @@ The question is: Answer the conversion-definition question from the metric docum
 The answer is a controlled source extract. It demonstrates citation construction without claiming that a model inferred the definition independently.
 
 ```python
-text='Conversion rate equals purchases divided by eligible visits. Exclude test accounts.'
-document={'id':'metric-v1','version':1,'text':text}; end=text.index('.')+1
-answer=extractive_answer(document,0,end,'conversion-definition')
-assert answer['status']=='answered' and len(answer['claims'])==1
-assert text[answer['citations'][0]['start']:answer['citations'][0]['end']]==answer['claims'][0]['quote']
+text = "Conversion rate equals purchases divided by eligible visits. Exclude test accounts."
+document = {"id": "metric-v1", "version": 1, "text": text}
+end = text.index(".") + 1
+answer = extractive_answer(document, 0, end, "conversion-definition")
+assert answer["status"] == "answered" and len(answer["claims"]) == 1
+assert (
+    text[answer["citations"][0]["start"] : answer["citations"][0]["end"]]
+    == answer["claims"][0]["quote"]
+)
 ```
 
 **Expected:** status answered; one claim; citation slices the exact sentence.
@@ -71,8 +75,8 @@ The question is: Change the stored quote while leaving citation offsets unchange
 A document ID alone would still look valid. Comparing the exact source slice detects a citation that no longer matches its claimed quote.
 
 ```python
-bad={'quote':'Conversion rate is always one.'}
-assert text[0:end]!=bad['quote']
+bad = {"quote": "Conversion rate is always one."}
+assert text[0:end] != bad["quote"]
 ```
 
 **Expected:** citation integrity check returnsFalse.
@@ -86,8 +90,8 @@ The question is: Request an unsupported comet-period answer with no admitted sup
 An empty evidence set should not be converted into a confident answer from unrelated top-ranked text. The unknown result is a successful execution of the declared policy.
 
 ```python
-unknown=extractive_answer(None,0,0,'comet-period')
-assert unknown=={'status':'unknown','claims':[],'citations':[],'reason':'missing evidence'}
+unknown = extractive_answer(None, 0, 0, "comet-period")
+assert unknown == {"status": "unknown", "claims": [], "citations": [], "reason": "missing evidence"}
 ```
 
 **Expected:** status unknown; claims empty; reason missing evidence.
@@ -101,8 +105,8 @@ The question is: Cite the metric document for a claim about statistical signific
 Citation location and semantic support are different gates. A real support evaluator needs a task rubric, human labels or a validated model rather than a document-existence test.
 
 ```python
-support={'conversion-definition':{'metric-v1'},'test-account-exclusion':{'metric-v1'}}
-assert document['id']=='metric-v1' and document['id'] not in support.get('significance',set())
+support = {"conversion-definition": {"metric-v1"}, "test-account-exclusion": {"metric-v1"}}
+assert document["id"] == "metric-v1" and document["id"] not in support.get("significance", set())
 ```
 
 **Expected:** document exists but significance claim unsupported.
@@ -116,8 +120,9 @@ The question is: Compare a citation requiringversion1 with a suppliedversion2 do
 A source update can change meaning or offsets. Reusing old citations against new text can produce apparently precise but incorrect evidence links.
 
 ```python
-citation=answer['citations'][0]; newer={**document,'version':2}
-assert citation['version']!=newer['version']
+citation = answer["citations"][0]
+newer = {**document, "version": 2}
+assert citation["version"] != newer["version"]
 ```
 
 **Expected:** version mismatch blocks citation reuse.
@@ -131,9 +136,10 @@ The question is: Compute3 purchases over10 visits and attach the deterministic r
 The generated explanation must use the computed artifact rather than independently inventing a numerical answer. The formula also depends on the domain definition of eligible visits.
 
 ```python
-calculation={'purchases':3,'visits':10}; value=calculation['purchases']/calculation['visits']
-record={'computed_rate':value,'inputs':calculation,'method':'purchases / eligible visits'}
-assert record['computed_rate']==.3 and record['inputs']['visits']==10
+calculation = {"purchases": 3, "visits": 10}
+value = calculation["purchases"] / calculation["visits"]
+record = {"computed_rate": value, "inputs": calculation, "method": "purchases / eligible visits"}
+assert record["computed_rate"] == 0.3 and record["inputs"]["visits"] == 10
 ```
 
 **Expected:** rate.3 with input counts preserved.

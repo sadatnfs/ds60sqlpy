@@ -49,25 +49,35 @@ Explicit encoding avoids dependence on platform defaults. The round trip tests b
 import java.util.*;
 
 public class Main {
-    @FunctionalInterface interface FileWork { void run(java.nio.file.Path root) throws Exception; }
-    static void withTemp(FileWork work) throws Exception {
-        var root=java.nio.file.Files.createTempDirectory("ds60-java-");
-        try { work.run(root); }
-        finally {
-            try(var paths=java.nio.file.Files.walk(root)) {
-                for(var path:paths.sorted(Comparator.reverseOrder()).toList()) java.nio.file.Files.deleteIfExists(path);
-            }
-        }
-    }
-    public static void main(String[] args) throws Exception {
-        withTemp(root -> {
-            var path = root.resolve("text.txt"); String text = "Café 🙂";
-            java.nio.file.Files.writeString(path,text,java.nio.charset.StandardCharsets.UTF_8);
-            assert java.nio.file.Files.readString(path,java.nio.charset.StandardCharsets.UTF_8).equals(text);
-        });
-    }
-}
 
+  @FunctionalInterface
+  interface FileWork {
+    void run(java.nio.file.Path root) throws Exception;
+  }
+
+  static void withTemp(FileWork work) throws Exception {
+    var root = java.nio.file.Files.createTempDirectory("ds60-java-");
+    try {
+      work.run(root);
+    } finally {
+      try (var paths = java.nio.file.Files.walk(root)) {
+        for (var path : paths.sorted(Comparator.reverseOrder()).toList())
+          java.nio.file.Files.deleteIfExists(path);
+      }
+    }
+  }
+
+  public static void main(String[] args) throws Exception {
+    withTemp(root -> {
+      var path = root.resolve("text.txt");
+      String text = "Café 🙂";
+      java.nio.file.Files.writeString(path, text, java.nio.charset.StandardCharsets.UTF_8);
+      assert java.nio.file.Files.readString(path, java.nio.charset.StandardCharsets.UTF_8).equals(
+        text
+      );
+    });
+  }
+}
 ```
 
 **Expected:** exact text equality.
@@ -80,30 +90,41 @@ Constructing a Path does not create a file. Keeping those actions separate preve
 import java.util.*;
 
 public class Main {
-    @FunctionalInterface interface FileWork { void run(java.nio.file.Path root) throws Exception; }
-    static void withTemp(FileWork work) throws Exception {
-        var root=java.nio.file.Files.createTempDirectory("ds60-java-");
-        try { work.run(root); }
-        finally {
-            try(var paths=java.nio.file.Files.walk(root)) {
-                for(var path:paths.sorted(Comparator.reverseOrder()).toList()) java.nio.file.Files.deleteIfExists(path);
-            }
-        }
-    }
-    public static void main(String[] args) throws Exception {
-        withTemp(root -> {
-            var path = root.resolve("text.txt"); String text = "Café 🙂";
-            java.nio.file.Files.writeString(path,text,java.nio.charset.StandardCharsets.UTF_8);
-            assert java.nio.file.Files.readString(path,java.nio.charset.StandardCharsets.UTF_8).equals(text);
-        });
 
-        withTemp(root -> {
-            var missing = root.resolve("missing.txt");
-            assert missing.getFileName().toString().equals("missing.txt") && !java.nio.file.Files.exists(missing);
-        });
+  @FunctionalInterface
+  interface FileWork {
+    void run(java.nio.file.Path root) throws Exception;
+  }
+
+  static void withTemp(FileWork work) throws Exception {
+    var root = java.nio.file.Files.createTempDirectory("ds60-java-");
+    try {
+      work.run(root);
+    } finally {
+      try (var paths = java.nio.file.Files.walk(root)) {
+        for (var path : paths.sorted(Comparator.reverseOrder()).toList())
+          java.nio.file.Files.deleteIfExists(path);
+      }
     }
+  }
+
+  public static void main(String[] args) throws Exception {
+    withTemp(root -> {
+      var path = root.resolve("text.txt");
+      String text = "Café 🙂";
+      java.nio.file.Files.writeString(path, text, java.nio.charset.StandardCharsets.UTF_8);
+      assert java.nio.file.Files.readString(path, java.nio.charset.StandardCharsets.UTF_8).equals(
+        text
+      );
+    });
+
+    withTemp(root -> {
+      var missing = root.resolve("missing.txt");
+      assert missing.getFileName().toString().equals("missing.txt") &&
+      !java.nio.file.Files.exists(missing);
+    });
+  }
 }
-
 ```
 
 **Expected:** path object exists;filesystem entry absent.

@@ -13,6 +13,7 @@ that same environment and verify it in a cell:
 
 ```python
 import sys
+
 print(sys.executable)
 print(sys.version)
 print(2 + 3)

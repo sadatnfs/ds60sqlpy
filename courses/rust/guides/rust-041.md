@@ -43,13 +43,13 @@ Read the operations in dependency order. Record which values exist before each l
 The first row even contains a null child, demonstrating independent validity levels.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         use arrow::array::{Array, Int32Builder, ListBuilder};
         let mut builder = ListBuilder::new(Int32Builder::new());
-        builder.values().append_value(2); builder.values().append_null(); builder.append(true);
+        builder.values().append_value(2);
+        builder.values().append_null();
+        builder.append(true);
         builder.append(true);
         builder.append(false);
         let lists = builder.finish();
@@ -70,8 +70,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 A view's logical indices are interpreted relative to the sliced array rather than the original source positions.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         use arrow::array::{Array, StringArray};

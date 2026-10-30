@@ -198,15 +198,15 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 1: Use immutable value keys</span></span>
-<span class="source-line">    <span class="syntax-comment">// Create two equalPoint records and insert one into a map.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: lookup with the other returnsorigin;hashes equal.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Create two equal Point records and insert one into a map.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: lookup with the other returns origin; hashes equal.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 2: Sort with a tie-breaker</span></span>
-<span class="source-line">    <span class="syntax-comment">// Sort people(age20,idb),(age20,ida),(age18,idc) byage thenid.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Sort people(age20,idb),(age20,ida),(age18,idc) by age then ID.</span></span>
 <span class="source-line">    <span class="syntax-comment">// Expected: IDs c,a,b.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 3: Expose comparator uniqueness</span></span>
-<span class="source-line">    <span class="syntax-comment">// Insert two different people ofage20 into aTreeSet comparingage only.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Insert two different people ofage20 into a TreeSet comparingage only.</span></span>
 <span class="source-line">    <span class="syntax-comment">// Expected: setsize1 despite unequal records.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 4: Demonstrate mutable-key failure</span></span>
@@ -214,12 +214,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">    <span class="syntax-comment">// Expected: lookup fails in this fixture while mapsize remains1.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 5: Avoid comparator subtraction</span></span>
-<span class="source-line">    <span class="syntax-comment">// CompareInteger.MIN_VALUE and1 usingInteger.compare.</span></span>
+<span class="source-line">    <span class="syntax-comment">// CompareInteger.MIN_VALUE and 1 usingInteger.compare.</span></span>
 <span class="source-line">    <span class="syntax-comment">// Expected: negative result;subtraction overflows positive.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 6: Keep identity and display separate</span></span>
 <span class="source-line">    <span class="syntax-comment">// Give twoPoints the same formatted label but different coordinates;compare values.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: display labels equal;points unequal.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: display labels equal; points unequal.</span></span>
 <span class="source-line">    System<span class="syntax-punctuation">.</span><span class="syntax-attribute">out</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">println</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement and check the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line">  <span class="syntax-punctuation">}</span></span>
 <span class="source-line"><span class="syntax-punctuation">}</span></span>

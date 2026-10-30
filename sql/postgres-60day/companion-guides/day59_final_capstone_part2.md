@@ -97,32 +97,51 @@ These worked excerpts come from `sql/postgres-60day/day59_final_capstone_part2.s
 
 ```sql
 WITH order_values AS (
-  SELECT o.customer_id, o.order_id,
-         SUM(oi.unit_price*oi.quantity*(1-oi.discount)) AS order_value,
-         o.order_date
-  FROM orders o
-  JOIN order_items oi ON oi.order_id = o.order_id
-  GROUP BY o.customer_id, o.order_id, o.order_date
-), ltv AS (
-  SELECT customer_id,
-         date_trunc('month', MIN(order_date))::date AS first_order_month,
-         SUM(order_value) AS ltv
-  FROM order_values
-  GROUP BY customer_id
-), cohort AS (
-  SELECT c.customer_id,
-         date_trunc('month', c.created_at)::date AS cohort_month,
-         COALESCE(c.segment,'standard') AS segment
-  FROM customers c
+  SELECT
+    o.customer_id,
+    o.order_id,
+    SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS order_value,
+    o.order_date
+  FROM
+    orders o
+    JOIN order_items oi ON oi.order_id = o.order_id
+  GROUP BY
+    o.customer_id,
+    o.order_id,
+    o.order_date
+),
+ltv AS (
+  SELECT
+    customer_id,
+    date_trunc('month', MIN(order_date))::date AS first_order_month,
+    SUM(order_value) AS ltv
+  FROM
+    order_values
+  GROUP BY
+    customer_id
+),
+cohort AS (
+  SELECT
+    c.customer_id,
+    date_trunc('month', c.created_at)::date AS cohort_month,
+    COALESCE(c.segment, 'standard') AS segment
+  FROM
+    customers c
 )
-SELECT cohort.segment,
-       cohort.cohort_month,
-       ROUND(AVG(ltv.ltv),2) AS avg_ltv,
-       COUNT(*) AS customers
-FROM ltv
-JOIN cohort ON cohort.customer_id = ltv.customer_id
-GROUP BY cohort.segment, cohort.cohort_month
-ORDER BY cohort.cohort_month DESC, avg_ltv DESC
+SELECT
+  cohort.segment,
+  cohort.cohort_month,
+  ROUND(AVG(ltv.ltv), 2) AS avg_ltv,
+  COUNT(*) AS customers
+FROM
+  ltv
+  JOIN cohort ON cohort.customer_id = ltv.customer_id
+GROUP BY
+  cohort.segment,
+  cohort.cohort_month
+ORDER BY
+  cohort.cohort_month DESC,
+  avg_ltv DESC
 LIMIT 100;
 ```
 
@@ -134,62 +153,84 @@ LIMIT 100;
 
 ```sql
 WITH viewed_stage AS (
-  SELECT c.customer_id,
-         MIN(e.event_time) FILTER (
-           WHERE e.event_type = 'page_view'
-         ) AS viewed_at
-  FROM customers c
-  LEFT JOIN events e
-    ON e.customer_id = c.customer_id
-   AND e.event_time >= CURRENT_TIMESTAMP - interval '90 days'
-  GROUP BY c.customer_id
-), added_stage AS (
-  SELECT viewed.customer_id,
-         viewed.viewed_at,
-         MIN(event.event_time) AS added_at
-  FROM viewed_stage viewed
-  LEFT JOIN events event
-    ON event.customer_id = viewed.customer_id
-   AND event.event_type = 'add_to_cart'
-   AND event.event_time >= viewed.viewed_at
-  GROUP BY viewed.customer_id, viewed.viewed_at
-), checkout_stage AS (
-  SELECT added.customer_id,
-         added.viewed_at,
-         added.added_at,
-         MIN(event.event_time) AS checkout_at
-  FROM added_stage added
-  LEFT JOIN events event
-    ON event.customer_id = added.customer_id
-   AND event.event_type = 'checkout'
-   AND event.event_time >= added.added_at
-  GROUP BY added.customer_id, added.viewed_at, added.added_at
-), purchase_stage AS (
-  SELECT checkout.customer_id,
-         checkout.viewed_at,
-         checkout.added_at,
-         checkout.checkout_at,
-         MIN(customer_order.order_date) AS purchased_at
-  FROM checkout_stage checkout
-  LEFT JOIN orders customer_order
-    ON customer_order.customer_id = checkout.customer_id
-   AND customer_order.order_date >= checkout.checkout_at
-   AND customer_order.order_date >= CURRENT_TIMESTAMP - interval '90 days'
-  GROUP BY checkout.customer_id, checkout.viewed_at,
-           checkout.added_at, checkout.checkout_at
-), activity AS (
-  SELECT customer_id,
-         viewed_at IS NOT NULL AS viewed,
-         added_at IS NOT NULL AND added_at >= viewed_at AS added,
-         checkout_at IS NOT NULL AND checkout_at >= added_at AS checked_out,
-         purchased_at IS NOT NULL AND purchased_at >= checkout_at AS bought
-  FROM purchase_stage
+  SELECT
+    c.customer_id,
+    MIN(e.event_time) FILTER (WHERE e.event_type = 'page_view') AS viewed_at
+  FROM
+    customers c
+    LEFT JOIN events e ON e.customer_id = c.customer_id
+      AND e.event_time >= CURRENT_TIMESTAMP - interval '90 days'
+  GROUP BY
+    c.customer_id
+),
+added_stage AS (
+  SELECT
+    viewed.customer_id,
+    viewed.viewed_at,
+    MIN(event.event_time) AS added_at
+  FROM
+    viewed_stage viewed
+    LEFT JOIN events event ON event.customer_id = viewed.customer_id
+      AND event.event_type = 'add_to_cart'
+      AND event.event_time >= viewed.viewed_at
+  GROUP BY
+    viewed.customer_id,
+    viewed.viewed_at
+),
+checkout_stage AS (
+  SELECT
+    added.customer_id,
+    added.viewed_at,
+    added.added_at,
+    MIN(event.event_time) AS checkout_at
+  FROM
+    added_stage added
+    LEFT JOIN events event ON event.customer_id = added.customer_id
+      AND event.event_type = 'checkout'
+      AND event.event_time >= added.added_at
+  GROUP BY
+    added.customer_id,
+    added.viewed_at,
+    added.added_at
+),
+purchase_stage AS (
+  SELECT
+    checkout.customer_id,
+    checkout.viewed_at,
+    checkout.added_at,
+    checkout.checkout_at,
+    MIN(customer_order.order_date) AS purchased_at
+  FROM
+    checkout_stage checkout
+    LEFT JOIN orders customer_order ON customer_order.customer_id = checkout.customer_id
+      AND customer_order.order_date >= checkout.checkout_at
+      AND customer_order.order_date >= CURRENT_TIMESTAMP - interval '90 days'
+  GROUP BY
+    checkout.customer_id,
+    checkout.viewed_at,
+    checkout.added_at,
+    checkout.checkout_at
+),
+activity AS (
+  SELECT
+    customer_id,
+    viewed_at IS NOT NULL AS viewed,
+    added_at IS NOT NULL
+    AND added_at >= viewed_at AS added,
+    checkout_at IS NOT NULL
+    AND checkout_at >= added_at AS checked_out,
+    purchased_at IS NOT NULL
+    AND purchased_at >= checkout_at AS bought
+  FROM
+    purchase_stage
 )
-SELECT COUNT(*) FILTER (WHERE viewed) AS viewers,
-       COUNT(*) FILTER (WHERE added) AS adders,
-       COUNT(*) FILTER (WHERE checked_out) AS checkouts,
-       COUNT(*) FILTER (WHERE bought) AS buyers
-FROM activity;
+SELECT
+  COUNT(*) FILTER (WHERE viewed) AS viewers,
+  COUNT(*) FILTER (WHERE added) AS adders,
+  COUNT(*) FILTER (WHERE checked_out) AS checkouts,
+  COUNT(*) FILTER (WHERE bought) AS buyers
+FROM
+  activity;
 ```
 
 **How to read it:** `viewed_stage` retains one row per customer and records the

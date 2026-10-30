@@ -242,8 +242,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>v<span class="syntax-punctuation">.</span>Ready <span class="syntax-operator">&amp;&amp;</span> v<span class="syntax-punctuation">.</span>Count <span class="syntax-operator">==</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;publication&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The reader observes count 3 and ready true.</p>
 <p>The send and receive establish ordering without a timing guess.</p>
 <h4 id="worked-example-2-publish-through-closure">Worked example 2: Publish through closure<a class="heading-anchor" href="#worked-example-2-publish-through-closure" aria-label="Link to this section">#</a></h4>
@@ -283,8 +282,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>n <span class="syntax-operator">==</span> <span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;close publication&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The reader observes 7.</p>
 <p>Removing this synchronization would make the ordinary shared variable unsafe. The proof uses ordering, not elapsed time.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>

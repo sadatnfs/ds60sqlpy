@@ -87,11 +87,9 @@ The solution creates a NOLOGIN `ds60_sec_auditor`, grants schema `USAGE`, lets
 the owner's default privileges grant future table `SELECT`, and adds:
 
 ```sql
-CREATE POLICY auditor_read
-ON pro_security_lab.documents
-FOR SELECT
-TO ds60_sec_auditor
-USING (true);
+CREATE POLICY auditor_read ON pro_security_lab.documents
+  FOR SELECT TO ds60_sec_auditor
+  USING (true);
 ```
 
 The auditor sees both seeded rows because the policy deliberately spans both
@@ -113,8 +111,9 @@ this SQL lesson.
 `audit_notes` is created by `ds60_sec_owner` after:
 
 ```sql
-ALTER DEFAULT PRIVILEGES IN SCHEMA pro_security_lab
-    GRANT SELECT ON TABLES TO ds60_sec_auditor;
+ALTER DEFAULT PRIVILEGES IN SCHEMA pro_security_lab GRANT
+SELECT
+  ON TABLES TO ds60_sec_auditor;
 ```
 
 The assertion confirms auditor `SELECT` arrived automatically. If another role

@@ -68,29 +68,38 @@ BEGIN;
 SET search_path TO dwh, training, public;
 
 CREATE TEMP TABLE fact_sales_temporal_solution AS
-SELECT o.order_id,
-       oi.order_item_id,
-       dd.date_key,
-       dc.customer_sk,
-       dp.product_sk,
-       oi.quantity,
-       oi.unit_price,
-       oi.discount,
-       oi.unit_price * oi.quantity * (1 - oi.discount) AS amount
-FROM training.orders o
-JOIN training.order_items oi USING (order_id)
-JOIN dim_date dd ON dd.date_actual = o.order_date::date
-JOIN dim_customer dc
-  ON dc.customer_id = o.customer_id
- AND o.order_date::date >= dc.valid_from
- AND o.order_date::date <= COALESCE(dc.valid_to, 'infinity'::date)
-JOIN dim_product dp
-  ON dp.product_id = oi.product_id
- AND o.order_date::date >= dp.valid_from
- AND o.order_date::date <= COALESCE(dp.valid_to, 'infinity'::date);
+SELECT
+  o.order_id,
+  oi.order_item_id,
+  dd.date_key,
+  dc.customer_sk,
+  dp.product_sk,
+  oi.quantity,
+  oi.unit_price,
+  oi.discount,
+  oi.unit_price * oi.quantity * (1 - oi.discount) AS amount
+FROM
+  training.orders o
+  JOIN training.order_items oi USING (order_id)
+  JOIN dim_date dd ON dd.date_actual = o.order_date::date
+  JOIN dim_customer dc ON dc.customer_id = o.customer_id
+    AND o.order_date::date >= dc.valid_from
+    AND o.order_date::date <= COALESCE(dc.valid_to, 'infinity'::date)
+  JOIN dim_product dp ON dp.product_id = oi.product_id
+    AND o.order_date::date >= dp.valid_from
+    AND o.order_date::date <= COALESCE(dp.valid_to, 'infinity'::date);
 
-SELECT (SELECT COUNT(*) FROM fact_sales_temporal_solution) AS mapped_fact_rows,
-       (SELECT COUNT(*) FROM training.order_items) AS source_item_rows;
+SELECT
+  (
+    SELECT
+      COUNT(*)
+    FROM
+      fact_sales_temporal_solution) AS mapped_fact_rows,
+  (
+    SELECT
+      COUNT(*)
+    FROM
+      training.order_items) AS source_item_rows;
 
 ROLLBACK;
 ```
@@ -197,18 +206,24 @@ table, otherwise the deliberate segment change looks like a new change again.
 
 ```sql
 WITH desired_customer_state AS (
-  SELECT customer_id, full_name, country, segment
-  FROM staged_customer_change
+  SELECT
+    customer_id,
+    full_name,
+    country,
+    segment
+  FROM
+    staged_customer_change
 )
-SELECT COUNT(*) AS unchanged_rows_that_would_version
-FROM dim_customer current_version
-JOIN desired_customer_state desired USING (customer_id)
-WHERE current_version.is_current
-  AND (
-    current_version.full_name IS DISTINCT FROM desired.full_name
+SELECT
+  COUNT(*) AS unchanged_rows_that_would_version
+FROM
+  dim_customer current_version
+  JOIN desired_customer_state desired USING (customer_id)
+WHERE
+  current_version.is_current
+  AND (current_version.full_name IS DISTINCT FROM desired.full_name
     OR current_version.country IS DISTINCT FROM desired.country
-    OR current_version.segment IS DISTINCT FROM desired.segment
-  );
+    OR current_version.segment IS DISTINCT FROM desired.segment);
 ```
 
 ### Reasoning and verification

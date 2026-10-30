@@ -67,7 +67,9 @@ Switch to **PostgreSQL** and start with `sql-start-01`. Choose **SQL snippet**
 when the workspace offers a mode selector and enter:
 
 ```sql
-SELECT 1 AS first_result, 2 + 3 AS total;
+SELECT
+  1 AS first_result,
+  2 + 3 AS total;
 ```
 
 Expect one row with `first_result = 1` and `total = 5`. This query needs no

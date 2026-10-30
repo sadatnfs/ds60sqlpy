@@ -60,23 +60,46 @@ The complete source creates the owned local session described above, then constr
 import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
-import org.apache.spark.sql.streaming.{StreamingQuery,StreamingQueryProgress,Trigger}
-import java.nio.file.{Files,Path,Paths,StandardOpenOption,StandardCopyOption}
+import org.apache.spark.sql.streaming.{StreamingQuery, StreamingQueryProgress, Trigger}
+import java.nio.file.{Files, Path, Paths, StandardOpenOption, StandardCopyOption}
 import java.nio.charset.StandardCharsets
 import java.time.Instant
 import scala.jdk.CollectionConverters._
 
-spark.conf.set("spark.sql.streaming.stopTimeout","10000")
-spark.conf.set("spark.sql.streaming.multipleWatermarkPolicy","min")
-ownedRoot = Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(),".ds60-spark-034-")
-Seq("impressions","clicks","staging").foreach(name => Files.createDirectory(ownedRoot.resolve(name)))
-val impressionLines = Seq("""{"impression_id":"i1","key":"A","impression_time":"2024-01-01T00:00:00Z"}""","""{"impression_id":"i2","key":"B","impression_time":"2024-01-01T00:00:00Z"}""","""{"impression_id":"i3","key":"C","impression_time":"2024-01-01T00:05:00Z"}""")
-val clickLines = Seq("""{"click_id":"c1","key":"A","click_time":"2024-01-01T00:03:00Z"}""","""{"click_id":"c2","key":"C","click_time":"2024-01-01T00:10:00Z"}""","""{"click_id":"c3","key":"A","click_time":"2024-01-01T00:10:00Z"}""","""{"click_id":"c4","key":"Z","click_time":"2024-01-01T00:04:00Z"}""")
+spark.conf.set("spark.sql.streaming.stopTimeout", "10000")
+spark.conf.set("spark.sql.streaming.multipleWatermarkPolicy", "min")
+ownedRoot = Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(), ".ds60-spark-034-")
+Seq("impressions", "clicks", "staging").foreach(name =>
+  Files.createDirectory(ownedRoot.resolve(name))
+)
+val impressionLines = Seq(
+  """{"impression_id":"i1","key":"A","impression_time":"2024-01-01T00:00:00Z"}""",
+  """{"impression_id":"i2","key":"B","impression_time":"2024-01-01T00:00:00Z"}""",
+  """{"impression_id":"i3","key":"C","impression_time":"2024-01-01T00:05:00Z"}"""
+)
+val clickLines = Seq(
+  """{"click_id":"c1","key":"A","click_time":"2024-01-01T00:03:00Z"}""",
+  """{"click_id":"c2","key":"C","click_time":"2024-01-01T00:10:00Z"}""",
+  """{"click_id":"c3","key":"A","click_time":"2024-01-01T00:10:00Z"}""",
+  """{"click_id":"c4","key":"Z","click_time":"2024-01-01T00:04:00Z"}"""
+)
 ```
 
 ```python
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 from pathlib import Path
 from datetime import datetime
 import tempfile
@@ -85,12 +108,22 @@ import os
 import uuid
 from pyspark.errors import AnalysisException
 
-spark.conf.set("spark.sql.streaming.stopTimeout","10000")
-spark.conf.set("spark.sql.streaming.multipleWatermarkPolicy","min")
-owned_root = Path(tempfile.mkdtemp(prefix=".ds60-spark-034-",dir=".")).resolve()
-for name in ["impressions","clicks","staging"]: (owned_root/name).mkdir()
-impression_lines = ['{"impression_id":"i1","key":"A","impression_time":"2024-01-01T00:00:00Z"}','{"impression_id":"i2","key":"B","impression_time":"2024-01-01T00:00:00Z"}','{"impression_id":"i3","key":"C","impression_time":"2024-01-01T00:05:00Z"}']
-click_lines = ['{"click_id":"c1","key":"A","click_time":"2024-01-01T00:03:00Z"}','{"click_id":"c2","key":"C","click_time":"2024-01-01T00:10:00Z"}','{"click_id":"c3","key":"A","click_time":"2024-01-01T00:10:00Z"}','{"click_id":"c4","key":"Z","click_time":"2024-01-01T00:04:00Z"}']
+spark.conf.set("spark.sql.streaming.stopTimeout", "10000")
+spark.conf.set("spark.sql.streaming.multipleWatermarkPolicy", "min")
+owned_root = Path(tempfile.mkdtemp(prefix=".ds60-spark-034-", dir=".")).resolve()
+for name in ["impressions", "clicks", "staging"]:
+    (owned_root / name).mkdir()
+impression_lines = [
+    '{"impression_id":"i1","key":"A","impression_time":"2024-01-01T00:00:00Z"}',
+    '{"impression_id":"i2","key":"B","impression_time":"2024-01-01T00:00:00Z"}',
+    '{"impression_id":"i3","key":"C","impression_time":"2024-01-01T00:05:00Z"}',
+]
+click_lines = [
+    '{"click_id":"c1","key":"A","click_time":"2024-01-01T00:03:00Z"}',
+    '{"click_id":"c2","key":"C","click_time":"2024-01-01T00:10:00Z"}',
+    '{"click_id":"c3","key":"A","click_time":"2024-01-01T00:10:00Z"}',
+    '{"click_id":"c4","key":"Z","click_time":"2024-01-01T00:04:00Z"}',
+]
 ```
 
 ## Worked example / walkthrough
@@ -99,15 +132,15 @@ click_lines = ['{"click_id":"c1","key":"A","click_time":"2024-01-01T00:03:00Z"}'
 
 ```scala
 val impressionMinute = 0
-assert(3 >= impressionMinute && 3 < impressionMinute+10)
-assert(!(10 >= impressionMinute && 10 < impressionMinute+10))
+assert(3 >= impressionMinute && 3 < impressionMinute + 10)
+assert(!(10 >= impressionMinute && 10 < impressionMinute + 10))
 println("Minute3 matches;minute10 is outside the half-open window")
 ```
 
 ```python
 impression_minute = 0
-assert 3 >= impression_minute and 3 < impression_minute+10
-assert not (10 >= impression_minute and 10 < impression_minute+10)
+assert 3 >= impression_minute and 3 < impression_minute + 10
+assert not (10 >= impression_minute and 10 < impression_minute + 10)
 print("Minute3 matches;minute10 is outside the half-open window")
 ```
 
@@ -116,19 +149,23 @@ This independent boundary calculation distinguishes the required interval from a
 ### Worked example 2
 
 ```scala
-val impressions = Seq(("i1","A",0),("i2","B",0),("i3","C",5))
-val clicks = Seq(("c1","A",3),("c2","C",10),("c3","A",10),("c4","Z",4))
-val pairs = for(i <- impressions;c <- clicks if i._2==c._2 && c._3>=i._3 && c._3<i._3+10) yield (i._1,c._1)
-assert(pairs == Seq(("i1","c1"),("i3","c2")))
+val impressions = Seq(("i1", "A", 0), ("i2", "B", 0), ("i3", "C", 5))
+val clicks = Seq(("c1", "A", 3), ("c2", "C", 10), ("c3", "A", 10), ("c4", "Z", 4))
+val pairs =
+  for (i <- impressions; c <- clicks if i._2 == c._2 && c._3 >= i._3 && c._3 < i._3 + 10)
+    yield (i._1, c._1)
+assert(pairs == Seq(("i1", "c1"), ("i3", "c2")))
 println("Independent business pair oracle=" + pairs)
 ```
 
 ```python
-impressions = [("i1","A",0),("i2","B",0),("i3","C",5)]
-clicks = [("c1","A",3),("c2","C",10),("c3","A",10),("c4","Z",4)]
-pairs = [(i[0],c[0]) for i in impressions for c in clicks if i[1]==c[1] and i[2] <= c[2] < i[2]+10]
-assert pairs == [("i1","c1"),("i3","c2")]
-print("Independent business pair oracle=",pairs)
+impressions = [("i1", "A", 0), ("i2", "B", 0), ("i3", "C", 5)]
+clicks = [("c1", "A", 3), ("c2", "C", 10), ("c3", "A", 10), ("c4", "Z", 4)]
+pairs = [
+    (i[0], c[0]) for i in impressions for c in clicks if i[1] == c[1] and i[2] <= c[2] < i[2] + 10
+]
+assert pairs == [("i1", "c1"), ("i3", "c2")]
+print("Independent business pair oracle=", pairs)
 ```
 
 The tiny nested-loop oracle checks identity and time predicates without reusing Spark join code. It establishes the matched business pairs, but does not by itself say when a streaming outer result becomes final. That timing requires observed watermark progression.

@@ -54,8 +54,10 @@ artifact_dir = Path(__file__).resolve().parent
 model = joblib.load(artifact_dir / "model.joblib")  # load only an artifact you trust
 class_names = ["setosa", "versicolor", "virginica"]
 
+
 class IrisFeatures(BaseModel):
     features: Annotated[list[float], Field(min_length=4, max_length=4)]
+
 
 @app.post("/predict")
 def predict(payload: IrisFeatures) -> dict[str, int | str]:
@@ -167,12 +169,12 @@ rather than something to overlook.
 ```python
 from pydantic import BaseModel, Field, ValidationError
 
+
 class PredictionRequest(BaseModel):
     measurements: list[float] = Field(min_length=4, max_length=4)
 
-valid = PredictionRequest.model_validate(
-    {"measurements": [5.1, 3.5, 1.4, 0.2]}
-)
+
+valid = PredictionRequest.model_validate({"measurements": [5.1, 3.5, 1.4, 0.2]})
 print(valid.model_dump())
 try:
     PredictionRequest.model_validate({"measurements": [5.1, 3.5]})

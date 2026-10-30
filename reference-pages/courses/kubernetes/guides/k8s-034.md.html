@@ -221,9 +221,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <span class="syntax-tag">app</span><span class="syntax-punctuation">:</span> hello
     <span class="syntax-tag">release</span><span class="syntax-punctuation">:</span> stable
   <span class="syntax-tag">ports</span><span class="syntax-punctuation">:</span>
-  <span class="syntax-punctuation">-</span> <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> http
-    <span class="syntax-tag">port</span><span class="syntax-punctuation">:</span> 8080
-    <span class="syntax-tag">targetPort</span><span class="syntax-punctuation">:</span> http</code></pre>
+    <span class="syntax-punctuation">-</span> <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> http
+      <span class="syntax-tag">port</span><span class="syntax-punctuation">:</span> 8080
+      <span class="syntax-tag">targetPort</span><span class="syntax-punctuation">:</span> http</code></pre>
 <p>hello-stable has app=hello, release=stable. hello-candidate has app=hello, release=candidate.</p>
 <p><strong>Expected:</strong> Only the stable backend matches this selector, regardless of whether the candidate is Ready.</p>
 <h4 id="worked-example-2-evaluate-a-candidate-and-rollback">Worked example 2: Evaluate a candidate and rollback<a class="heading-anchor" href="#worked-example-2-evaluate-a-candidate-and-rollback" aria-label="Link to this section">#</a></h4>

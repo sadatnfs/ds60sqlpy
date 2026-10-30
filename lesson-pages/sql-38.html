@@ -432,11 +432,18 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
 <p>These worked excerpts come from <code>sql/postgres-60day/day38_transactions_isolation.sql</code>. Use <strong>Whole SQL lesson (psql)</strong> in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared <code>psql</code> routes are described above.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> txn_demo<span class="syntax-punctuation">(</span>id <span class="syntax-builtin">int</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span> qty <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> txn_demo <span class="syntax-punctuation">(</span>
+  id <span class="syntax-builtin">int</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span>
+  qty <span class="syntax-builtin">int</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 1 is data definition language (DDL). <code>psql</code> prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.</p>
 <p><strong>Expected result/shape:</strong> Example 1 must complete through <code>psql</code> with its documented command tag or notice for the lesson evidence named below. Treat an unexpected error as failure, and prove the stated catalog/behavior invariant plus cleanup.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> txn_demo <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">30</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> txn_demo
+<span class="syntax-keyword">VALUES</span>
+  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">30</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 2 changes rows inside the lesson&#x27;s declared transaction. The command tag reports affected rows, but a follow-up query must prove the intended before/after invariant.</p>
 <p><strong>Expected result/shape:</strong> Example 2 must complete through <code>psql</code> with its documented command tag or notice for <code>txn_demo</code>. Treat an unexpected error as failure, and prove the stated catalog/behavior invariant plus cleanup.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -740,16 +747,26 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
   id <span class="syntax-builtin">int</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span>
   qty <span class="syntax-builtin">int</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span>
 <span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-<span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> savepoint_demo <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+
+<span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> savepoint_demo
+  <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 
 SAVEPOINT before_change<span class="syntax-punctuation">;</span>
-<span class="syntax-keyword">UPDATE</span> savepoint_demo
-<span class="syntax-keyword">SET</span> qty <span class="syntax-operator">=</span> qty <span class="syntax-operator">+</span> <span class="syntax-number">100</span>
-<span class="syntax-keyword">WHERE</span> id <span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span>
+
+<span class="syntax-keyword">UPDATE</span>
+  savepoint_demo
+<span class="syntax-keyword">SET</span>
+  qty <span class="syntax-operator">=</span> qty <span class="syntax-operator">+</span> <span class="syntax-number">100</span>
+<span class="syntax-keyword">WHERE</span>
+  id <span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span>
+
 <span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT before_change<span class="syntax-punctuation">;</span>
 
-<span class="syntax-keyword">SELECT</span> id<span class="syntax-punctuation">,</span> qty
-<span class="syntax-keyword">FROM</span> savepoint_demo<span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">SELECT</span>
+  id<span class="syntax-punctuation">,</span>
+  qty
+<span class="syntax-keyword">FROM</span>
+  savepoint_demo<span class="syntax-punctuation">;</span>
 
 <span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></code></pre>
 <p>Expected row: <code>(1, 10)</code>.</p>

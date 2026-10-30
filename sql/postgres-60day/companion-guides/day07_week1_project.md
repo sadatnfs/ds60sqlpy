@@ -102,22 +102,41 @@ These worked excerpts come from `sql/postgres-60day/day07_week1_project.sql`. Us
 
 ```sql
 WITH recent_orders AS (
-  SELECT * FROM orders WHERE order_date >= now() - interval '90 days'
-), line AS (
-  SELECT ro.order_id, ro.customer_id, c.country, p.category,
-         (oi.unit_price * oi.quantity * (1 - oi.discount)) AS line_revenue
-  FROM recent_orders ro
+  SELECT
+    *
+  FROM
+    orders
+  WHERE
+    order_date >= now() - interval '90 days'
+),
+line AS (
+  SELECT
+    ro.order_id,
+    ro.customer_id,
+    c.country,
+    p.category,
+    (oi.unit_price * oi.quantity * (1 - oi.discount)) AS line_revenue
+FROM
+  recent_orders ro
   JOIN customers c ON c.customer_id = ro.customer_id
   JOIN order_items oi ON oi.order_id = ro.order_id
   JOIN products p ON p.product_id = oi.product_id
 )
-SELECT country, category,
-       ROUND(SUM(line_revenue),2) AS revenue,
-       COUNT(DISTINCT customer_id) AS buyers,
-       ROUND(SUM(line_revenue)/NULLIF(COUNT(DISTINCT customer_id),0),2) AS rev_per_buyer
-FROM line
-GROUP BY country, category
-ORDER BY revenue DESC, country, category
+SELECT
+  country,
+  category,
+  ROUND(SUM(line_revenue), 2) AS revenue,
+  COUNT(DISTINCT customer_id) AS buyers,
+  ROUND(SUM(line_revenue) / NULLIF (COUNT(DISTINCT customer_id), 0), 2) AS rev_per_buyer
+FROM
+  line
+GROUP BY
+  country,
+  category
+ORDER BY
+  revenue DESC,
+  country,
+  category
 LIMIT 50;
 ```
 
@@ -129,24 +148,42 @@ LIMIT 50;
 
 ```sql
 -- The same topic query shown as a plan instead of business rows.
-EXPLAIN (COSTS OFF)
-WITH recent_orders AS (
-  SELECT * FROM orders WHERE order_date >= now() - interval '90 days'
-), line AS (
-  SELECT ro.order_id, ro.customer_id, c.country, p.category,
-         (oi.unit_price * oi.quantity * (1 - oi.discount)) AS line_revenue
-  FROM recent_orders ro
-  JOIN customers c ON c.customer_id = ro.customer_id
-  JOIN order_items oi ON oi.order_id = ro.order_id
-  JOIN products p ON p.product_id = oi.product_id
+EXPLAIN (
+  COSTS OFF
+) WITH recent_orders AS (
+  SELECT
+    *
+  FROM
+    orders
+  WHERE
+    order_date >= now() - interval '90 days'), line AS (
+    SELECT
+      ro.order_id,
+      ro.customer_id,
+      c.country,
+      p.category,
+      (oi.unit_price * oi.quantity * (1 - oi.discount)) AS line_revenue
+    FROM
+      recent_orders ro
+      JOIN customers c ON c.customer_id = ro.customer_id
+      JOIN order_items oi ON oi.order_id = ro.order_id
+      JOIN products p ON p.product_id = oi.product_id
 )
-SELECT country, category,
-       ROUND(SUM(line_revenue),2) AS revenue,
-       COUNT(DISTINCT customer_id) AS buyers,
-       ROUND(SUM(line_revenue)/NULLIF(COUNT(DISTINCT customer_id),0),2) AS rev_per_buyer
-FROM line
-GROUP BY country, category
-ORDER BY revenue DESC, country, category
+  SELECT
+    country,
+    category,
+    ROUND(SUM(line_revenue), 2) AS revenue,
+  COUNT(DISTINCT customer_id) AS buyers,
+  ROUND(SUM(line_revenue) / NULLIF (COUNT(DISTINCT customer_id), 0), 2) AS rev_per_buyer
+FROM
+  line
+GROUP BY
+  country,
+  category
+ORDER BY
+  revenue DESC,
+  country,
+  category
 LIMIT 50;
 ```
 

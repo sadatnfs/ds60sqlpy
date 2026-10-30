@@ -23,8 +23,11 @@ The question is: Call a width2 residual with zero kernel on[[1,2],[3,4]].
 The zero branch contributes nothing initially. This is a useful reference behavior but does not mean the branch has no gradient or will remain zero during training.
 
 ```python
-layer=Residual(); x=tf.constant([[1.,2.],[3.,4.]]); out=layer(x)
-np.testing.assert_array_equal(out.numpy(),x.numpy()); assert len(layer.trainable_variables)==1
+layer = Residual()
+x = tf.constant([[1.0, 2.0], [3.0, 4.0]])
+out = layer(x)
+np.testing.assert_array_equal(out.numpy(), x.numpy())
+assert len(layer.trainable_variables) == 1
 ```
 
 **Expected:** output equals input; one tracked kernel.
@@ -38,8 +41,9 @@ The question is: Call the layer on another batch of the same width and compare v
 A new batch should change transient activations, not create a new model. Object identity complements a parameter count, since replacing one variable with another could preserve the count.
 
 ```python
-variable=layer.trainable_variables[0]; layer(tf.constant([[9.,8.]]))
-assert layer.trainable_variables[0] is variable and len(layer.trainable_variables)==1
+variable = layer.trainable_variables[0]
+layer(tf.constant([[9.0, 8.0]]))
+assert layer.trainable_variables[0] is variable and len(layer.trainable_variables) == 1
 ```
 
 **Expected:** same variable object and variable count1.
@@ -53,7 +57,8 @@ The question is: Set the kernel to identity and inspect the residual output.
 The branch now reproduces the input, and the residual adds the original input again. The exact doubling exposes the addition instead of relying on random weights.
 
 ```python
-layer.kernel.assign(tf.eye(2)); np.testing.assert_array_equal(layer(x).numpy(),2*x.numpy())
+layer.kernel.assign(tf.eye(2))
+np.testing.assert_array_equal(layer(x).numpy(), 2 * x.numpy())
 ```
 
 **Expected:** output2*x.
@@ -67,9 +72,12 @@ The question is: Call the built width2 layer with a width3 input.
 A residual addition cannot repair a mismatched matrix product. Supporting a new feature width requires a separately designed projection or layer instance.
 
 ```python
-try: layer(tf.ones((1,3)))
-except ValueError: pass
-else: raise AssertionError('width mismatch accepted')
+try:
+    layer(tf.ones((1, 3)))
+except ValueError:
+    pass
+else:
+    raise AssertionError("width mismatch accepted")
 ```
 
 **Expected:** ValueError naming feature width.
@@ -83,9 +91,10 @@ The question is: Differentiate the sum of output entries with respect to the ker
 Each output column sees the same sum of input features under a sum objective. The identity skip path adds no kernel derivative, while the learned branch remains connected.
 
 ```python
-with tf.GradientTape() as tape: total=tf.reduce_sum(layer(x))
-g=tape.gradient(total,layer.kernel)
-np.testing.assert_array_equal(g.numpy(),[[4,4],[6,6]])
+with tf.GradientTape() as tape:
+    total = tf.reduce_sum(layer(x))
+g = tape.gradient(total, layer.kernel)
+np.testing.assert_array_equal(g.numpy(), [[4, 4], [6, 6]])
 ```
 
 **Expected:** gradient matrix[[4,4],[6,6]].
@@ -99,8 +108,9 @@ The question is: Build a separate width3 layer and count its square kernel entri
 Parameter growth is quadratic in this dense branch width. Batch size does not contribute to the count because the same kernel is shared across observations.
 
 ```python
-other=Residual(); other(tf.ones((1,3)))
-assert other.count_params()==9 and layer.count_params()==4
+other = Residual()
+other(tf.ones((1, 3)))
+assert other.count_params() == 9 and layer.count_params() == 4
 ```
 
 **Expected:** 9 parameters; width2 layer remains4.

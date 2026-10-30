@@ -51,15 +51,52 @@ The lock covers the complete increment. Synchronizing only a read or only a writ
 import java.util.*;
 
 public class Main {
-    static final class Counter {private int value; synchronized void increment(){value++;} synchronized int value(){return value;}}
-    static void join(Thread thread) throws InterruptedException {thread.join(2500);if(thread.isAlive()){thread.interrupt();throw new AssertionError("worker did not stop");}}
-    static void runTwo(Runnable action) throws Exception {var failure=new java.util.concurrent.atomic.AtomicReference<Throwable>();Runnable checked=() -> {try{action.run();}catch(Throwable error){failure.set(error);}};Thread a=Thread.ofPlatform().start(checked),b=Thread.ofPlatform().start(checked);join(a);join(b);if(failure.get()!=null)throw new AssertionError("worker failed",failure.get());}
-    public static void main(String[] args) throws Exception {
-        Counter counter=new Counter();runTwo(() -> {for(int i=0;i<1000;i++)counter.increment();});
-        assert counter.value()==2000;
-    }
-}
 
+  static final class Counter {
+
+    private int value;
+
+    synchronized void increment() {
+      value++;
+    }
+
+    synchronized int value() {
+      return value;
+    }
+  }
+
+  static void join(Thread thread) throws InterruptedException {
+    thread.join(2500);
+    if (thread.isAlive()) {
+      thread.interrupt();
+      throw new AssertionError("worker did not stop");
+    }
+  }
+
+  static void runTwo(Runnable action) throws Exception {
+    var failure = new java.util.concurrent.atomic.AtomicReference<Throwable>();
+    Runnable checked = () -> {
+      try {
+        action.run();
+      } catch (Throwable error) {
+        failure.set(error);
+      }
+    };
+    Thread a = Thread.ofPlatform().start(checked),
+      b = Thread.ofPlatform().start(checked);
+    join(a);
+    join(b);
+    if (failure.get() != null) throw new AssertionError("worker failed", failure.get());
+  }
+
+  public static void main(String[] args) throws Exception {
+    Counter counter = new Counter();
+    runTwo(() -> {
+      for (int i = 0; i < 1000; i++) counter.increment();
+    });
+    assert counter.value() == 2000;
+  }
+}
 ```
 
 **Expected:** counter 2000.
@@ -72,18 +109,58 @@ The atomic operation matches this simple counter contract. More complex multi-fi
 import java.util.*;
 
 public class Main {
-    static final class Counter {private int value; synchronized void increment(){value++;} synchronized int value(){return value;}}
-    static void join(Thread thread) throws InterruptedException {thread.join(2500);if(thread.isAlive()){thread.interrupt();throw new AssertionError("worker did not stop");}}
-    static void runTwo(Runnable action) throws Exception {var failure=new java.util.concurrent.atomic.AtomicReference<Throwable>();Runnable checked=() -> {try{action.run();}catch(Throwable error){failure.set(error);}};Thread a=Thread.ofPlatform().start(checked),b=Thread.ofPlatform().start(checked);join(a);join(b);if(failure.get()!=null)throw new AssertionError("worker failed",failure.get());}
-    public static void main(String[] args) throws Exception {
-        Counter counter=new Counter();runTwo(() -> {for(int i=0;i<1000;i++)counter.increment();});
-        assert counter.value()==2000;
 
-        var atomic=new java.util.concurrent.atomic.AtomicInteger();runTwo(() -> {for(int i=0;i<1000;i++)atomic.incrementAndGet();});
-        assert atomic.get()==2000;
+  static final class Counter {
+
+    private int value;
+
+    synchronized void increment() {
+      value++;
     }
-}
 
+    synchronized int value() {
+      return value;
+    }
+  }
+
+  static void join(Thread thread) throws InterruptedException {
+    thread.join(2500);
+    if (thread.isAlive()) {
+      thread.interrupt();
+      throw new AssertionError("worker did not stop");
+    }
+  }
+
+  static void runTwo(Runnable action) throws Exception {
+    var failure = new java.util.concurrent.atomic.AtomicReference<Throwable>();
+    Runnable checked = () -> {
+      try {
+        action.run();
+      } catch (Throwable error) {
+        failure.set(error);
+      }
+    };
+    Thread a = Thread.ofPlatform().start(checked),
+      b = Thread.ofPlatform().start(checked);
+    join(a);
+    join(b);
+    if (failure.get() != null) throw new AssertionError("worker failed", failure.get());
+  }
+
+  public static void main(String[] args) throws Exception {
+    Counter counter = new Counter();
+    runTwo(() -> {
+      for (int i = 0; i < 1000; i++) counter.increment();
+    });
+    assert counter.value() == 2000;
+
+    var atomic = new java.util.concurrent.atomic.AtomicInteger();
+    runTwo(() -> {
+      for (int i = 0; i < 1000; i++) atomic.incrementAndGet();
+    });
+    assert atomic.get() == 2000;
+  }
+}
 ```
 
 **Expected:** value2000.

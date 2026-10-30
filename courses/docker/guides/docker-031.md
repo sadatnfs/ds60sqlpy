@@ -48,7 +48,13 @@ source checks -> unit tests -> image build -> startup -> reference execution
 This is a schema sketch, not a completed test result.
 
 ```json
-{"source_hash":"measured hash","image_id":"measured image","case":"named reference","status":"observed result","cleanup":"owned resources only"}
+{
+  "source_hash": "measured hash",
+  "image_id": "measured image",
+  "case": "named reference",
+  "status": "observed result",
+  "cleanup": "owned resources only"
+}
 ```
 
 **Expected observation:** The receipt binds a particular test to actual source and runtime identities.

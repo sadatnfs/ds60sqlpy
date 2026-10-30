@@ -37,7 +37,8 @@ For Dockerfile examples, create a file named `Dockerfile` in a scratch project. 
 This pattern is illustrative for a Python project with an actual lock procedure.
 
 ```dockerfile
-RUN --mount=type=cache,target=/root/.cache/pip python -m pip --version
+RUN --mount=type=cache,target=/root/.cache/pip \
+    python -m pip --version
 ```
 
 **Expected observation:** The cache directory is available to this step; it is not copied as normal application data.
@@ -47,7 +48,8 @@ RUN --mount=type=cache,target=/root/.cache/pip python -m pip --version
 Use only an invented demo value in a separate scratch build.
 
 ```dockerfile
-RUN --mount=type=secret,id=demo,required=true test -s /run/secrets/demo
+RUN --mount=type=secret,id=demo,required=true \
+    test -s /run/secrets/demo
 ```
 
 **Expected observation:** The build succeeds only when the named nonempty secret is supplied; the command does not reveal its content.

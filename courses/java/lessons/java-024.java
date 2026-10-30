@@ -3,7 +3,7 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     // Exercise 1: Observe virtual identity
-    // Start a virtual thread that recordsisVirtual andjoin it.
+    // Start a virtual thread that records isVirtual and join it.
     // Expected: true and terminated.
 
     // Exercise 2: Use a scoped virtual executor

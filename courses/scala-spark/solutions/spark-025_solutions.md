@@ -12,14 +12,14 @@ Repartition source by day into 2 execution partitions, write Parquet with error-
 
 ```scala
 def writeCompact(source: DataFrame, path: String): DataFrame = {
-  source.repartition(2,col("day")).write.mode("errorifexists").partitionBy("day").parquet(path)
+  source.repartition(2, col("day")).write.mode("errorifexists").partitionBy("day").parquet(path)
   source.sparkSession.read.parquet(path)
 }
 ```
 
 ```python
 def write_compact(source, path):
-    source.repartition(2,"day").write.mode("errorifexists").partitionBy("day").parquet(path)
+    source.repartition(2, "day").write.mode("errorifexists").partitionBy("day").parquet(path)
     return source.sparkSession.read.parquet(path)
 ```
 
@@ -35,13 +35,13 @@ Select only id and amount for day=even and id>=1990. Return the five ordered tup
 
 ```scala
 def filteredProduct(frame: DataFrame): DataFrame = {
-  frame.filter(col("day") === "even" && col("id") >= 1990L).select("id","amount")
+  frame.filter(col("day") === "even" && col("id") >= 1990L).select("id", "amount")
 }
 ```
 
 ```python
 def filtered_product(frame):
-    return frame.filter((F.col("day")=="even")&(F.col("id")>=1990)).select("id","amount")
+    return frame.filter((F.col("day") == "even") & (F.col("id") >= 1990)).select("id", "amount")
 ```
 
 The query combines a storage-partition value with a row-level numeric predicate but returns only the two requested fields. Its result oracle is independent of how the file reader applies those filters. Projection correctness and pruning evidence are checked separately so a narrow schema cannot conceal a wrong population.
@@ -55,18 +55,34 @@ Capture a FORMATTED plan for the selected query on the owned Parquet view. Extra
 **Expected:** ReadSchema has id and amount but not payload; PartitionFilters mentions day/even; PushedFilters includes the id lower bound.
 
 ```scala
-def scanEvidence(frame: DataFrame): Map[String,String] = {
+def scanEvidence(frame: DataFrame): Map[String, String] = {
   frame.createOrReplaceTempView("ds60_spark_025_read")
-  val text = frame.sparkSession.sql("EXPLAIN FORMATTED SELECT id,amount FROM ds60_spark_025_read WHERE day='even' AND id>=1990").collect().map(_.getString(0)).mkString("\n")
-  Seq("ReadSchema","PartitionFilters","PushedFilters").map(name => name -> text.linesIterator.filter(_.contains(name)).mkString("\n")).toMap
+  val text = frame.sparkSession
+    .sql(
+      "EXPLAIN FORMATTED SELECT id,amount FROM ds60_spark_025_read WHERE day='even' AND id>=1990"
+    )
+    .collect()
+    .map(_.getString(0))
+    .mkString("\n")
+  Seq("ReadSchema", "PartitionFilters", "PushedFilters")
+    .map(name => name -> text.linesIterator.filter(_.contains(name)).mkString("\n"))
+    .toMap
 }
 ```
 
 ```python
 def scan_evidence(frame):
     frame.createOrReplaceTempView("ds60_spark_025_read")
-    text = "\n".join(r[0] for r in frame.sparkSession.sql("EXPLAIN FORMATTED SELECT id,amount FROM ds60_spark_025_read WHERE day='even' AND id>=1990").collect())
-    return {name:"\n".join(line for line in text.splitlines() if name in line) for name in ["ReadSchema","PartitionFilters","PushedFilters"]}
+    text = "\n".join(
+        r[0]
+        for r in frame.sparkSession.sql(
+            "EXPLAIN FORMATTED SELECT id,amount FROM ds60_spark_025_read WHERE day='even' AND id>=1990"
+        ).collect()
+    )
+    return {
+        name: "\n".join(line for line in text.splitlines() if name in line)
+        for name in ["ReadSchema", "PartitionFilters", "PushedFilters"]
+    }
 ```
 
 The plan separates directory pruning from column selection and pushed row predicates. Checking each line in its own scope avoids mistaking the original relation schema for the physical scan requirement. These fields show intended reader behavior; actual row-group or byte savings depend on file statistics and runtime measurements that this exercise does not fabricate.
@@ -80,11 +96,15 @@ Write the same source after repartition 12 using the same day directory partitio
 **Expected:** Both round trips match the source bag. The many layout has more data files than compact; both byte totals are positive and below 32 MiB.
 
 ```scala
-def fileInventory(path: String): (Int,Long) = {
+def fileInventory(path: String): (Int, Long) = {
   val stream = Files.walk(Paths.get(path))
   try {
-   val files = stream.iterator().asScala.filter(p => Files.isRegularFile(p) && p.getFileName.toString.endsWith(".parquet")).toSeq
-   (files.size,files.map(p => Files.size(p)).sum)
+    val files = stream
+      .iterator()
+      .asScala
+      .filter(p => Files.isRegularFile(p) && p.getFileName.toString.endsWith(".parquet"))
+      .toSeq
+    (files.size, files.map(p => Files.size(p)).sum)
   } finally stream.close()
 }
 ```
@@ -92,7 +112,7 @@ def fileInventory(path: String): (Int,Long) = {
 ```python
 def file_inventory(path):
     files = [p for p in Path(path).rglob("*.parquet") if p.is_file()]
-    return len(files),sum(p.stat().st_size for p in files)
+    return len(files), sum(p.stat().st_size for p in files)
 ```
 
 The file counts and sizes come from the actual owned output rather than a formula based on writer partitions. Multiple tasks can write within the same directory partition. The larger file count illustrates potential metadata/opening overhead without claiming a universal timing penalty on this tiny local filesystem. Logical bag equality is still required before comparing layouts.
@@ -106,17 +126,23 @@ Return a receipt with the number of day= directories, the data-file count and th
 **Expected:** Both layouts have 2 day directories. Data-file counts are the measured inventory values. Scan partitions are positive observed values and need not equal either other count.
 
 ```scala
-def layoutReceipt(frame: DataFrame, path: String): (Int,Int,Int) = {
+def layoutReceipt(frame: DataFrame, path: String): (Int, Int, Int) = {
   val stream = Files.list(Paths.get(path))
-  val directories = try stream.iterator().asScala.count(p => Files.isDirectory(p) && p.getFileName.toString.startsWith("day=")) finally stream.close()
-  (directories,fileInventory(path)._1,frame.rdd.getNumPartitions)
+  val directories =
+    try
+      stream
+        .iterator()
+        .asScala
+        .count(p => Files.isDirectory(p) && p.getFileName.toString.startsWith("day="))
+    finally stream.close()
+  (directories, fileInventory(path)._1, frame.rdd.getNumPartitions)
 }
 ```
 
 ```python
 def layout_receipt(frame, path):
     directories = sum(p.is_dir() and p.name.startswith("day=") for p in Path(path).iterdir())
-    return directories,file_inventory(path)[0],frame.rdd.getNumPartitions()
+    return directories, file_inventory(path)[0], frame.rdd.getNumPartitions()
 ```
 
 The receipt prevents three different meanings of partitioning from collapsing into one number. Directory partitions encode day values, data files reflect writer output, and scan partitions reflect reader scheduling decisions. Their relationship can change with file sizes, open-cost estimates and runtime configuration while the logical dataset remains identical.
@@ -132,8 +158,9 @@ Attempt a second error-if-exists write to the already owned compact path. Requir
 ```scala
 def rejectExisting(source: DataFrame, path: String): Unit = {
   var rejected = false
-  try source.write.mode("errorifexists").parquet(path) catch { case _: org.apache.spark.sql.AnalysisException => rejected = true }
-  require(rejected,"Existing path unexpectedly accepted")
+  try source.write.mode("errorifexists").parquet(path)
+  catch { case _: org.apache.spark.sql.AnalysisException => rejected = true }
+  require(rejected, "Existing path unexpectedly accepted")
 }
 ```
 

@@ -11,8 +11,8 @@ Execute the projection query and return ordered(id, doubled) tuples. Compare all
 **Expected:** Nine tuples from(3,60) through(11,220), with no missing or extra identities.
 
 ```scala
-def projectionResult(spark: SparkSession, query: String): Seq[(Long,Long)] = {
-  spark.sql(query).orderBy("id").collect().toSeq.map(r => (r.getLong(0),r.getLong(1)))
+def projectionResult(spark: SparkSession, query: String): Seq[(Long, Long)] = {
+  spark.sql(query).orderBy("id").collect().toSeq.map(r => (r.getLong(0), r.getLong(1)))
 }
 ```
 
@@ -33,16 +33,16 @@ Return EXPLAIN EXTENDED text for the supplied query. Permit only EXTENDED or FOR
 
 ```scala
 def explainText(spark: SparkSession, query: String, mode: String): String = {
-  require(Set("EXTENDED","FORMATTED").contains(mode),"Unsupported evidence mode")
+  require(Set("EXTENDED", "FORMATTED").contains(mode), "Unsupported evidence mode")
   spark.sql("EXPLAIN " + mode + " " + query).collect().map(_.getString(0)).mkString("\n")
 }
 ```
 
 ```python
 def explain_text(spark, query, mode):
-    if mode not in {"EXTENDED","FORMATTED"}:
+    if mode not in {"EXTENDED", "FORMATTED"}:
         raise ValueError("Unsupported evidence mode")
-    return "\n".join(r[0] for r in spark.sql("EXPLAIN "+mode+" "+query).collect())
+    return "\n".join(r[0] for r in spark.sql("EXPLAIN " + mode + " " + query).collect())
 ```
 
 The helper captures a versioned observation of the supplied fixed query and constrains its evidence mode. Parsed, analyzed and optimized trees can differ without changing the query result. A missing relation or type error belongs at a different diagnostic layer from an unwanted physical exchange, so retaining stage labels improves the precision of a review.
@@ -77,8 +77,13 @@ Execute the grouped aggregate and capture its FORMATTED plan. Return group_id, n
 **Expected:** Groups 0,1,2 each have n3 with totals 180,210,240. The plan shows aggregation and an Exchange.
 
 ```scala
-def aggregateResult(spark: SparkSession, query: String): Seq[(Long,Long,Long)] = {
-  spark.sql(query).orderBy("group_id").collect().toSeq.map(r => (r.getLong(0),r.getLong(1),r.getLong(2)))
+def aggregateResult(spark: SparkSession, query: String): Seq[(Long, Long, Long)] = {
+  spark
+    .sql(query)
+    .orderBy("group_id")
+    .collect()
+    .toSeq
+    .map(r => (r.getLong(0), r.getLong(1), r.getLong(2)))
 }
 ```
 
@@ -99,13 +104,13 @@ Replace expression-number suffixes such as#123 with#ID and the exact owned root 
 
 ```scala
 def normalizeEvidence(plan: String, root: String): String = {
-  plan.replace(root,"<owned-root>").replaceAll("#[0-9]+","#ID")
+  plan.replace(root, "<owned-root>").replaceAll("#[0-9]+", "#ID")
 }
 ```
 
 ```python
 def normalize_evidence(plan, root):
-    return re.sub(r"#[0-9]+","#ID",plan.replace(root,"<owned-root>"))
+    return re.sub(r"#[0-9]+", "#ID", plan.replace(root, "<owned-root>"))
 ```
 
 Expression IDs and scratch paths identify this execution but are not the relational policy being taught. Removing just those fragments makes evidence easier to compare while retaining important distinctions. The normalized text is still not a universal plan contract: optimizer versions and settings can legitimately change operator structure.
@@ -119,14 +124,24 @@ Execute a nested projection/filter form of the direct query and compare its exac
 **Expected:** The nested query has the same nine tuples. Receipt shows Spark 4.0.1, ANSItrue, AQEfalse, shuffle partitions 2. Both extended plans expose an optimized stage.
 
 ```scala
-def configurationReceipt(spark: SparkSession): Map[String,String] = {
-  Map("spark_version"->spark.version,"ansi"->spark.conf.get("spark.sql.ansi.enabled"),"aqe"->spark.conf.get("spark.sql.adaptive.enabled"),"shuffle_partitions"->spark.conf.get("spark.sql.shuffle.partitions"))
+def configurationReceipt(spark: SparkSession): Map[String, String] = {
+  Map(
+    "spark_version" -> spark.version,
+    "ansi" -> spark.conf.get("spark.sql.ansi.enabled"),
+    "aqe" -> spark.conf.get("spark.sql.adaptive.enabled"),
+    "shuffle_partitions" -> spark.conf.get("spark.sql.shuffle.partitions")
+  )
 }
 ```
 
 ```python
 def configuration_receipt(spark):
-    return {"spark_version":spark.version,"ansi":spark.conf.get("spark.sql.ansi.enabled"),"aqe":spark.conf.get("spark.sql.adaptive.enabled"),"shuffle_partitions":spark.conf.get("spark.sql.shuffle.partitions")}
+    return {
+        "spark_version": spark.version,
+        "ansi": spark.conf.get("spark.sql.ansi.enabled"),
+        "aqe": spark.conf.get("spark.sql.adaptive.enabled"),
+        "shuffle_partitions": spark.conf.get("spark.sql.shuffle.partitions"),
+    }
 ```
 
 Semantic equality is established with concrete rows, and configuration is attached to the physical observation. The optimizer is allowed to simplify different source expressions into related plans, but exact text is not the acceptance rule. No action timing or task metric is measured here, so the receipt does not claim a performance improvement.

@@ -151,8 +151,12 @@ raw_labels = KMeans(n_clusters=2, n_init=10, random_state=4201).fit_predict(X)
 scaled_labels = KMeans(n_clusters=2, n_init=10, random_state=4201).fit_predict(
     StandardScaler().fit_transform(X)
 )
-print({"raw_agreement_with_x_sign": np.mean(raw_labels == (X[:, 0] > 0)),
-       "scaled_unique_labels": np.unique(scaled_labels).size})
+print(
+    {
+        "raw_agreement_with_x_sign": np.mean(raw_labels == (X[:, 0] > 0)),
+        "scaled_unique_labels": np.unique(scaled_labels).size,
+    }
+)
 ```
 
 **Expected observation:** The large-unit noise dimension can dominate raw Euclidean distance; scaling changes assignments.
@@ -175,8 +179,7 @@ X = np.vstack([ordinary, obvious])
 detector = IsolationForest(contamination=0.02, random_state=4202).fit(X)
 scores = detector.decision_function(X)
 most_unusual = np.argsort(scores)[:5]
-print({"lowest_score_indices": most_unusual.tolist(),
-       "injected_indices": [200, 201]})
+print({"lowest_score_indices": most_unusual.tolist(), "injected_indices": [200, 201]})
 assert {200, 201}.issubset(set(most_unusual))
 ```
 

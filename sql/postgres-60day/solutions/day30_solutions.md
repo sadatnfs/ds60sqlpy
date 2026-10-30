@@ -85,15 +85,21 @@ executable companion when you want a self-contained check.
 
 ```sql
 WITH cohorts AS (
-  SELECT c.customer_id,
-         date_trunc('month', c.created_at AT TIME ZONE 'UTC')::date AS cohort_month
-  FROM customers AS c
+  SELECT
+    c.customer_id,
+    date_trunc('month', c.created_at AT TIME ZONE 'UTC')::date AS cohort_month
+  FROM
+    customers AS c
 )
-SELECT cohort_month,
-       COUNT(*) AS cohort_size
-FROM cohorts
-GROUP BY cohort_month
-ORDER BY cohort_month;
+SELECT
+  cohort_month,
+  COUNT(*) AS cohort_size
+FROM
+  cohorts
+GROUP BY
+  cohort_month
+ORDER BY
+  cohort_month;
 ```
 
 **Expected shape:** One row per cohort month.
@@ -130,27 +136,40 @@ cardinality contract.
 
 ```sql
 WITH order_values AS (
-  SELECT o.order_id,
-         o.customer_id,
-         date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date AS order_month,
-         SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS order_value
-  FROM orders AS o
-  JOIN order_items AS oi ON oi.order_id = o.order_id
-  GROUP BY o.order_id, o.customer_id,
-           date_trunc('month', o.order_date AT TIME ZONE 'UTC')
-), cohorts AS (
-  SELECT c.customer_id,
-         date_trunc('month', c.created_at AT TIME ZONE 'UTC')::date AS cohort_month
-  FROM customers AS c
+  SELECT
+    o.order_id,
+    o.customer_id,
+    date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date AS order_month,
+    SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS order_value
+  FROM
+    orders AS o
+    JOIN order_items AS oi ON oi.order_id = o.order_id
+  GROUP BY
+    o.order_id,
+    o.customer_id,
+    date_trunc('month', o.order_date AT TIME ZONE 'UTC')
+),
+cohorts AS (
+  SELECT
+    c.customer_id,
+    date_trunc('month', c.created_at AT TIME ZONE 'UTC')::date AS cohort_month
+  FROM
+    customers AS c
 )
-SELECT c.cohort_month,
-       ov.order_month,
-       COUNT(DISTINCT ov.customer_id) AS active_customers,
-       ROUND(SUM(ov.order_value), 2) AS net_revenue
-FROM cohorts AS c
-JOIN order_values AS ov ON ov.customer_id = c.customer_id
-GROUP BY c.cohort_month, ov.order_month
-ORDER BY c.cohort_month, ov.order_month;
+SELECT
+  c.cohort_month,
+  ov.order_month,
+  COUNT(DISTINCT ov.customer_id) AS active_customers,
+  ROUND(SUM(ov.order_value), 2) AS net_revenue
+FROM
+  cohorts AS c
+  JOIN order_values AS ov ON ov.customer_id = c.customer_id
+GROUP BY
+  c.cohort_month,
+  ov.order_month
+ORDER BY
+  c.cohort_month,
+  ov.order_month;
 ```
 
 **Expected shape:** One row per observed cohort/order month.
@@ -188,33 +207,44 @@ cardinality contract.
 
 ```sql
 WITH cohorts AS (
-  SELECT c.customer_id,
-         date_trunc('month', c.created_at AT TIME ZONE 'UTC')::date AS cohort_month
-  FROM customers AS c
-), cohort_sizes AS (
-  SELECT cohort_month, COUNT(*) AS cohort_size
-  FROM cohorts
-  GROUP BY cohort_month
-), activity AS (
-  SELECT c.cohort_month,
-         date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date AS order_month,
-         COUNT(DISTINCT o.customer_id) AS active_customers
-  FROM cohorts AS c
-  JOIN orders AS o ON o.customer_id = c.customer_id
-  GROUP BY c.cohort_month,
-           date_trunc('month', o.order_date AT TIME ZONE 'UTC')
-)
-SELECT a.cohort_month,
-       (
-         EXTRACT(YEAR FROM age(a.order_month, a.cohort_month)) * 12
-         + EXTRACT(MONTH FROM age(a.order_month, a.cohort_month))
-       )::integer AS month_offset,
-       cs.cohort_size,
-       a.active_customers,
-       ROUND(a.active_customers::numeric / NULLIF(cs.cohort_size, 0), 4) AS retention_rate
-FROM activity AS a
-JOIN cohort_sizes AS cs USING (cohort_month)
-ORDER BY a.cohort_month, month_offset;
+  SELECT
+    c.customer_id,
+    date_trunc('month', c.created_at AT TIME ZONE 'UTC')::date AS cohort_month
+  FROM
+    customers AS c
+),
+cohort_sizes AS (
+  SELECT
+    cohort_month,
+    COUNT(*) AS cohort_size
+  FROM
+    cohorts
+  GROUP BY
+    cohort_month
+),
+activity AS (
+  SELECT
+    c.cohort_month,
+    date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date AS order_month,
+    COUNT(DISTINCT o.customer_id) AS active_customers
+  FROM
+    cohorts AS c
+    JOIN orders AS o ON o.customer_id = c.customer_id
+  GROUP BY
+    c.cohort_month,
+    date_trunc('month', o.order_date AT TIME ZONE 'UTC'))
+SELECT
+  a.cohort_month,
+  (EXTRACT(YEAR FROM age(a.order_month, a.cohort_month)) * 12 + EXTRACT(MONTH FROM age(a.order_month, a.cohort_month)))::integer AS month_offset,
+  cs.cohort_size,
+  a.active_customers,
+  ROUND(a.active_customers::numeric / NULLIF (cs.cohort_size, 0), 4) AS retention_rate
+FROM
+  activity AS a
+  JOIN cohort_sizes AS cs USING (cohort_month)
+ORDER BY
+  a.cohort_month,
+  month_offset;
 ```
 
 **Expected shape:** Observed cohort/offset rows with retention from 0 to 1.
@@ -252,46 +282,53 @@ cardinality contract.
 
 ```sql
 WITH cohorts AS (
-  SELECT c.customer_id,
-         date_trunc('month', c.created_at AT TIME ZONE 'UTC')::date AS cohort_month
-  FROM customers AS c
-), cohort_sizes AS (
-  SELECT cohort_month, COUNT(*) AS cohort_size
-  FROM cohorts
-  GROUP BY cohort_month
-), activity AS (
-  SELECT c.cohort_month,
-         (
-           EXTRACT(YEAR FROM age(
-             date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date,
-             c.cohort_month
-           )) * 12
-           + EXTRACT(MONTH FROM age(
-             date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date,
-             c.cohort_month
-           ))
-         )::integer AS month_offset,
-         COUNT(DISTINCT o.customer_id) AS active_customers
-  FROM cohorts AS c
-  JOIN orders AS o ON o.customer_id = c.customer_id
-  GROUP BY c.cohort_month,
-           date_trunc('month', o.order_date AT TIME ZONE 'UTC')
-), spine AS (
-  SELECT cs.cohort_month,
-         cs.cohort_size,
-         offset_value AS month_offset
-  FROM cohort_sizes AS cs
-  CROSS JOIN generate_series(0, 12) AS offsets(offset_value)
-)
-SELECT s.cohort_month,
-       s.month_offset,
-       s.cohort_size,
-       COALESCE(a.active_customers, 0) AS active_customers
-FROM spine AS s
-LEFT JOIN activity AS a
-  ON a.cohort_month = s.cohort_month
- AND a.month_offset = s.month_offset
-ORDER BY s.cohort_month, s.month_offset;
+  SELECT
+    c.customer_id,
+    date_trunc('month', c.created_at AT TIME ZONE 'UTC')::date AS cohort_month
+  FROM
+    customers AS c
+),
+cohort_sizes AS (
+  SELECT
+    cohort_month,
+    COUNT(*) AS cohort_size
+  FROM
+    cohorts
+  GROUP BY
+    cohort_month
+),
+activity AS (
+  SELECT
+    c.cohort_month,
+    (EXTRACT(YEAR FROM age(date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date, c.cohort_month)) * 12 + EXTRACT(MONTH FROM age(date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date, c.cohort_month)))::integer AS month_offset,
+    COUNT(DISTINCT o.customer_id) AS active_customers
+  FROM
+    cohorts AS c
+    JOIN orders AS o ON o.customer_id = c.customer_id
+  GROUP BY
+    c.cohort_month,
+    date_trunc('month', o.order_date AT TIME ZONE 'UTC')
+),
+spine AS (
+  SELECT
+    cs.cohort_month,
+    cs.cohort_size,
+    offset_value AS month_offset
+  FROM
+    cohort_sizes AS cs
+    CROSS JOIN generate_series(0, 12) AS offsets (offset_value))
+SELECT
+  s.cohort_month,
+  s.month_offset,
+  s.cohort_size,
+  COALESCE(a.active_customers, 0) AS active_customers
+FROM
+  spine AS s
+  LEFT JOIN activity AS a ON a.cohort_month = s.cohort_month
+    AND a.month_offset = s.month_offset
+  ORDER BY
+    s.cohort_month,
+    s.month_offset;
 ```
 
 **Expected shape:** Thirteen rows per cohort.
@@ -333,52 +370,62 @@ cardinality contract.
 
 ```sql
 WITH order_values AS (
-  SELECT o.order_id,
-         o.customer_id,
-         date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date AS order_month,
-         SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS order_value
-  FROM orders AS o
-  JOIN order_items AS oi ON oi.order_id = o.order_id
-  GROUP BY o.order_id, o.customer_id,
-           date_trunc('month', o.order_date AT TIME ZONE 'UTC')
-), cohorts AS (
-  SELECT c.customer_id,
-         date_trunc('month', c.created_at AT TIME ZONE 'UTC')::date AS cohort_month
-  FROM customers AS c
-), metrics AS (
-  SELECT c.cohort_month,
-         ov.order_month,
-         (
-           EXTRACT(YEAR FROM age(ov.order_month, c.cohort_month)) * 12
-           + EXTRACT(MONTH FROM age(ov.order_month, c.cohort_month))
-         )::integer AS month_offset,
-         COUNT(DISTINCT ov.customer_id) AS active_customers,
-         SUM(ov.order_value) AS revenue
-  FROM cohorts AS c
-  JOIN order_values AS ov ON ov.customer_id = c.customer_id
-  GROUP BY c.cohort_month, ov.order_month
-), per_active AS (
-  SELECT metrics.*,
-         revenue / NULLIF(active_customers, 0) AS revenue_per_active
-  FROM metrics
+  SELECT
+    o.order_id,
+    o.customer_id,
+    date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date AS order_month,
+    SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS order_value
+  FROM
+    orders AS o
+    JOIN order_items AS oi ON oi.order_id = o.order_id
+  GROUP BY
+    o.order_id,
+    o.customer_id,
+    date_trunc('month', o.order_date AT TIME ZONE 'UTC')
+),
+cohorts AS (
+  SELECT
+    c.customer_id,
+    date_trunc('month', c.created_at AT TIME ZONE 'UTC')::date AS cohort_month
+  FROM
+    customers AS c
+),
+metrics AS (
+  SELECT
+    c.cohort_month,
+    ov.order_month,
+    (EXTRACT(YEAR FROM age(ov.order_month, c.cohort_month)) * 12 + EXTRACT(MONTH FROM age(ov.order_month, c.cohort_month)))::integer AS month_offset,
+    COUNT(DISTINCT ov.customer_id) AS active_customers,
+    SUM(ov.order_value) AS revenue
+  FROM
+    cohorts AS c
+    JOIN order_values AS ov ON ov.customer_id = c.customer_id
+  GROUP BY
+    c.cohort_month,
+    ov.order_month
+),
+per_active AS (
+  SELECT
+    metrics.*,
+    revenue / NULLIF (active_customers, 0) AS revenue_per_active
+  FROM
+    metrics
 )
-SELECT cohort_month,
-       order_month,
-       month_offset,
-       active_customers,
-       ROUND(revenue, 2) AS revenue,
-       ROUND(revenue_per_active, 2) AS revenue_per_active,
-       ROUND(
-         AVG(revenue_per_active) OVER (
-           PARTITION BY cohort_month
-           ORDER BY month_offset
-           ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
-         ) * 12,
-         2
-       ) AS illustrative_annualized_clv
-FROM per_active
-WHERE month_offset BETWEEN 0 AND 12
-ORDER BY cohort_month, month_offset;
+SELECT
+  cohort_month,
+  order_month,
+  month_offset,
+  active_customers,
+  ROUND(revenue, 2) AS revenue,
+  ROUND(revenue_per_active, 2) AS revenue_per_active,
+  ROUND(AVG(revenue_per_active) OVER (PARTITION BY cohort_month ORDER BY month_offset ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) * 12, 2) AS illustrative_annualized_clv
+FROM
+  per_active
+WHERE
+  month_offset BETWEEN 0 AND 12
+ORDER BY
+  cohort_month,
+  month_offset;
 ```
 
 **Expected shape:** One row per observed cohort/month with nullable guarded measures.
@@ -416,66 +463,76 @@ cardinality contract.
 
 ```sql
 WITH order_values AS (
-  SELECT o.order_id,
-         o.customer_id,
-         date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date AS order_month,
-         SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS order_value
-  FROM orders AS o
-  JOIN order_items AS oi ON oi.order_id = o.order_id
-  GROUP BY o.order_id, o.customer_id,
-           date_trunc('month', o.order_date AT TIME ZONE 'UTC')
-), cohorts AS (
-  SELECT c.customer_id,
-         date_trunc('month', c.created_at AT TIME ZONE 'UTC')::date AS cohort_month
-  FROM customers AS c
-), cohort_sizes AS (
-  SELECT cohort_month, COUNT(*) AS cohort_size
-  FROM cohorts
-  GROUP BY cohort_month
-), metrics AS (
-  SELECT c.cohort_month,
-         ov.order_month,
-         (
-           EXTRACT(YEAR FROM age(ov.order_month, c.cohort_month)) * 12
-           + EXTRACT(MONTH FROM age(ov.order_month, c.cohort_month))
-         )::integer AS month_offset,
-         COUNT(DISTINCT ov.customer_id) AS active_customers,
-         SUM(ov.order_value) AS revenue
-  FROM cohorts AS c
-  JOIN order_values AS ov ON ov.customer_id = c.customer_id
-  GROUP BY c.cohort_month, ov.order_month
-), scoped AS (
-  SELECT m.*, cs.cohort_size
-  FROM metrics AS m
-  JOIN cohort_sizes AS cs USING (cohort_month)
-  WHERE m.month_offset BETWEEN 0 AND 12
+  SELECT
+    o.order_id,
+    o.customer_id,
+    date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date AS order_month,
+    SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS order_value
+  FROM
+    orders AS o
+    JOIN order_items AS oi ON oi.order_id = o.order_id
+  GROUP BY
+    o.order_id,
+    o.customer_id,
+    date_trunc('month', o.order_date AT TIME ZONE 'UTC')
+),
+cohorts AS (
+  SELECT
+    c.customer_id,
+    date_trunc('month', c.created_at AT TIME ZONE 'UTC')::date AS cohort_month
+  FROM
+    customers AS c
+),
+cohort_sizes AS (
+  SELECT
+    cohort_month,
+    COUNT(*) AS cohort_size
+  FROM
+    cohorts
+  GROUP BY
+    cohort_month
+),
+metrics AS (
+  SELECT
+    c.cohort_month,
+    ov.order_month,
+    (EXTRACT(YEAR FROM age(ov.order_month, c.cohort_month)) * 12 + EXTRACT(MONTH FROM age(ov.order_month, c.cohort_month)))::integer AS month_offset,
+    COUNT(DISTINCT ov.customer_id) AS active_customers,
+    SUM(ov.order_value) AS revenue
+  FROM
+    cohorts AS c
+    JOIN order_values AS ov ON ov.customer_id = c.customer_id
+  GROUP BY
+    c.cohort_month,
+    ov.order_month
+),
+scoped AS (
+  SELECT
+    m.*,
+    cs.cohort_size
+  FROM
+    metrics AS m
+    JOIN cohort_sizes AS cs USING (cohort_month)
+  WHERE
+    m.month_offset BETWEEN 0 AND 12
 )
-SELECT COUNT(*) FILTER (
-         WHERE active_customers > cohort_size
-       ) AS active_exceeds_cohort_violations,
-       ROUND(SUM(revenue), 2) AS cohort_revenue,
-       ROUND((
-         SELECT SUM(ov.order_value)
-         FROM order_values AS ov
-         JOIN cohorts AS c ON c.customer_id = ov.customer_id
-         WHERE (
-           EXTRACT(YEAR FROM age(ov.order_month, c.cohort_month)) * 12
-           + EXTRACT(MONTH FROM age(ov.order_month, c.cohort_month))
-         )::integer BETWEEN 0 AND 12
-       ), 2) AS independent_revenue,
-       ROUND(
-         SUM(revenue) - (
-           SELECT SUM(ov.order_value)
-           FROM order_values AS ov
-           JOIN cohorts AS c ON c.customer_id = ov.customer_id
-           WHERE (
-             EXTRACT(YEAR FROM age(ov.order_month, c.cohort_month)) * 12
-             + EXTRACT(MONTH FROM age(ov.order_month, c.cohort_month))
-           )::integer BETWEEN 0 AND 12
-         ),
-         2
-       ) AS revenue_difference
-FROM scoped;
+SELECT
+  COUNT(*) FILTER (WHERE active_customers > cohort_size) AS active_exceeds_cohort_violations,
+  ROUND(SUM(revenue), 2) AS cohort_revenue,
+  ROUND((
+    SELECT
+      SUM(ov.order_value)
+    FROM order_values AS ov
+    JOIN cohorts AS c ON c.customer_id = ov.customer_id
+    WHERE (EXTRACT(YEAR FROM age(ov.order_month, c.cohort_month)) * 12 + EXTRACT(MONTH FROM age(ov.order_month, c.cohort_month)))::integer BETWEEN 0 AND 12), 2) AS independent_revenue,
+  ROUND(SUM(revenue) - (
+      SELECT
+        SUM(ov.order_value)
+      FROM order_values AS ov
+      JOIN cohorts AS c ON c.customer_id = ov.customer_id
+      WHERE (EXTRACT(YEAR FROM age(ov.order_month, c.cohort_month)) * 12 + EXTRACT(MONTH FROM age(ov.order_month, c.cohort_month)))::integer BETWEEN 0 AND 12), 2) AS revenue_difference
+FROM
+  scoped;
 ```
 
 **Expected shape:** One row with zero retention violations and zero revenue difference.

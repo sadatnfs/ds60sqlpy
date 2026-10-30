@@ -55,15 +55,32 @@ import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 
-val facts = spark.range(0L,24L,1L,4).withColumn("key",col("id") % 4L).withColumn("value",col("id") * 10L)
+val facts =
+  spark.range(0L, 24L, 1L, 4).withColumn("key", col("id") % 4L).withColumn("value", col("id") * 10L)
 assert(spark.conf.get("spark.sql.adaptive.enabled") == "false")
 ```
 
 ```python
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 
-facts = spark.range(0,24,1,4).withColumn("key",F.col("id")%4).withColumn("value",F.col("id")*10)
+facts = (
+    spark.range(0, 24, 1, 4)
+    .withColumn("key", F.col("id") % 4)
+    .withColumn("value", F.col("id") * 10)
+)
 assert spark.conf.get("spark.sql.adaptive.enabled") == "false"
 ```
 

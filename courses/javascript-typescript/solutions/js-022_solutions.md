@@ -117,7 +117,7 @@ Two type parameters represent the input element and output element. The callback
 
 ```typescript
 const values = [2, 4];
-const labels: string[] = mapValues(values, value => `item:${value}`);
+const labels: string[] = mapValues(values, (value) => `item:${value}`);
 assert.deepEqual(labels, ['item:2', 'item:4']);
 assert.deepEqual(values, [2, 4]);
 ```

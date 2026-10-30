@@ -31,7 +31,7 @@ A compiler error assigning through const is useful evidence of the access contra
 ## Worked example 1
 
 ```cpp
-auto out=doubled(std::vector<int>{2,4});
+auto out = doubled(std::vector<int>{2, 4});
 ```
 
 Expected: An owned result [4, 8] survives the temporary argument.
@@ -39,7 +39,9 @@ Expected: An owned result [4, 8] survives the temporary argument.
 ## Worked example 2
 
 ```cpp
-const std::vector<int> xs{2,4}; auto ys=xs; ys[0]=99;
+const std::vector<int> xs{2, 4};
+auto ys = xs;
+ys[0] = 99;
 ```
 
 Expected: xs stays [2, 4]; ys becomes [99, 4].

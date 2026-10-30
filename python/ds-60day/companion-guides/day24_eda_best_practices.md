@@ -121,11 +121,13 @@ identify which line creates each intermediate object.
 ```python
 import pandas as pd
 
-sample = pd.DataFrame({
-    "customer_id": [1, 2, 2, 3],
-    "amount": [10.0, 12.0, 12.0, None],
-    "segment": ["new", "returning", "returning", "new"],
-})
+sample = pd.DataFrame(
+    {
+        "customer_id": [1, 2, 2, 3],
+        "amount": [10.0, 12.0, 12.0, None],
+        "segment": ["new", "returning", "returning", "new"],
+    }
+)
 profile = {
     "shape": sample.shape,
     "duplicate_rows": int(sample.duplicated().sum()),

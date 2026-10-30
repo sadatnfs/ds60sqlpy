@@ -97,28 +97,41 @@ These worked excerpts come from `sql/postgres-60day/day50_project2_finance_part2
 
 ```sql
 WITH monthly_exp AS (
-  SELECT date_trunc('month', expense_date)::date AS month,
-         category,
-         SUM(amount) AS actual
-  FROM expenses
-  GROUP BY 1,2
-), monthly_budget AS (
-  SELECT period AS month,
-         category,
-         SUM(amount) AS budget
-  FROM budgets
-  GROUP BY 1,2
+  SELECT
+    date_trunc('month', expense_date)::date AS month,
+    category,
+    SUM(amount) AS actual
+  FROM
+    expenses
+  GROUP BY
+    1,
+    2
+),
+monthly_budget AS (
+  SELECT
+    period AS month,
+    category,
+    SUM(amount) AS budget
+  FROM
+    budgets
+  GROUP BY
+    1,
+    2
 )
-SELECT coalesce(b.category, e.category) AS category,
-       coalesce(b.month, e.month) AS month,
-       COALESCE(b.budget, 0) AS budget,
-       COALESCE(e.actual, 0) AS actual,
-       ROUND(COALESCE(e.actual,0) - COALESCE(b.budget,0), 2) AS variance,
-       ROUND((COALESCE(e.actual,0) - COALESCE(b.budget,0)) / NULLIF(b.budget,0), 4) AS variance_pct
-FROM monthly_budget b
-FULL OUTER JOIN monthly_exp e
-  ON e.month = b.month AND e.category = b.category
-ORDER BY month DESC, category
+SELECT
+  coalesce(b.category, e.category) AS category,
+  coalesce(b.month, e.month) AS month,
+  COALESCE(b.budget, 0) AS budget,
+  COALESCE(e.actual, 0) AS actual,
+  ROUND(COALESCE(e.actual, 0) - COALESCE(b.budget, 0), 2) AS variance,
+  ROUND((COALESCE(e.actual, 0) - COALESCE(b.budget, 0)) / NULLIF (b.budget, 0), 4) AS variance_pct
+FROM
+  monthly_budget b
+  FULL OUTER JOIN monthly_exp e ON e.month = b.month
+  AND e.category = b.category
+ORDER BY
+  month DESC,
+  category
 LIMIT 100;
 ```
 
@@ -130,29 +143,49 @@ LIMIT 100;
 
 ```sql
 WITH monthly AS (
-  SELECT date_trunc('month', expense_date)::date AS month,
-         category,
-         SUM(amount) AS actual
-  FROM expenses
-  GROUP BY 1,2
-), bud AS (
-  SELECT period AS month, category, SUM(amount) AS budget
-  FROM budgets
-  GROUP BY 1,2
-), joined AS (
-  SELECT coalesce(b.category, m.category) AS category,
-         coalesce(b.month, m.month) AS month,
-         COALESCE(b.budget, 0) AS budget,
-         COALESCE(m.actual, 0) AS actual
-  FROM bud b FULL JOIN monthly m ON m.month = b.month AND m.category = b.category
+  SELECT
+    date_trunc('month', expense_date)::date AS month,
+    category,
+    SUM(amount) AS actual
+  FROM
+    expenses
+  GROUP BY
+    1,
+    2
+),
+bud AS (
+  SELECT
+    period AS month,
+    category,
+    SUM(amount) AS budget
+  FROM
+    budgets
+  GROUP BY
+    1,
+    2
+),
+joined AS (
+  SELECT
+    coalesce(b.category, m.category) AS category,
+    coalesce(b.month, m.month) AS month,
+    COALESCE(b.budget, 0) AS budget,
+    COALESCE(m.actual, 0) AS actual
+  FROM
+    bud b
+    FULL JOIN monthly m ON m.month = b.month
+      AND m.category = b.category
 )
-SELECT category,
-       month,
-       SUM(actual) OVER (PARTITION BY category ORDER BY month ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) AS actual_ma3,
-       SUM(budget) OVER (PARTITION BY category ORDER BY month ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) AS budget_ma3
-FROM joined
-ORDER BY month DESC, category
-LIMIT 100;
+  SELECT
+    category,
+    month,
+    SUM(actual) OVER (PARTITION BY category ORDER BY month ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) AS actual_ma3,
+    SUM(budget) OVER (PARTITION BY category ORDER BY month ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) AS budget_ma3
+  FROM
+    joined
+  ORDER BY
+    month DESC,
+    category
+  LIMIT 100;
 ```
 
 **How to read it:** Example 2: Start with `expenses`, and `budgets` in `FROM`/`JOIN`; let `GROUP BY` collapse rows to its grouping keys; let each `OVER` expression calculate across related rows without collapsing them. The final `SELECT` displays `category`, `month`, `actual_ma3`, and `budget_ma3`. `ORDER BY` determines presentation order and the final `LIMIT 100` caps displayed rows. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.

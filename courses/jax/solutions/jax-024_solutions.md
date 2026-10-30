@@ -54,7 +54,7 @@ The sum of \(X^{\mathsf T}X\) equals the sum of squared row sums.
 **Expected:** Each row has two copies of twice its row sum: [[6,6],[14,14],[22,22]].
 
 ```python
-close(jax.grad(lambda x: gram(x).sum())(values), [[6., 6.], [14., 14.], [22., 22.]])
+close(jax.grad(lambda x: gram(x).sum())(values), [[6.0, 6.0], [14.0, 14.0], [22.0, 22.0]])
 ```
 
 ## Exercise 6: Separate metadata from values

@@ -216,38 +216,38 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The branch proves presence before the wrapped integer is used.</p>
 <pre class="highlighted-code"><code class="language-swift"><span class="syntax-keyword">import</span> <span class="syntax-class">Foundation</span>
 
-
-
 <span class="syntax-punctuation">@</span>main
 <span class="syntax-keyword">struct</span> <span class="syntax-class">LessonMain</span> <span class="syntax-punctuation">{</span>
-    <span class="syntax-keyword">static</span> <span class="syntax-keyword">func</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">async</span> <span class="syntax-keyword">throws</span> <span class="syntax-punctuation">{</span>
-        <span class="syntax-keyword">do</span> <span class="syntax-punctuation">{</span>
-            <span class="syntax-keyword">let</span> measured<span class="syntax-punctuation">:</span> <span class="syntax-builtin">Int</span><span class="syntax-punctuation">?</span> <span class="syntax-punctuation">=</span> <span class="syntax-number">0</span>
-            <span class="syntax-keyword">let</span> missing<span class="syntax-punctuation">:</span> <span class="syntax-builtin">Int</span><span class="syntax-punctuation">?</span> <span class="syntax-punctuation">=</span> <span class="syntax-keyword">nil</span>
-            <span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>measured <span class="syntax-operator">!=</span> <span class="syntax-keyword">nil</span> <span class="syntax-operator">&amp;&amp;</span> missing <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-keyword">nil</span><span class="syntax-punctuation">)</span>
-            <span class="syntax-keyword">if</span> <span class="syntax-keyword">let</span> value <span class="syntax-punctuation">=</span> measured <span class="syntax-punctuation">{</span> <span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>value <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span> <span class="syntax-builtin">preconditionFailure</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">present zero</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">}</span>
-        <span class="syntax-punctuation">}</span>
-        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">swift-005: passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-keyword">static</span> <span class="syntax-keyword">func</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">async</span> <span class="syntax-keyword">throws</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">do</span> <span class="syntax-punctuation">{</span>
+      <span class="syntax-keyword">let</span> measured<span class="syntax-punctuation">:</span> <span class="syntax-builtin">Int</span><span class="syntax-punctuation">?</span> <span class="syntax-punctuation">=</span> <span class="syntax-number">0</span>
+      <span class="syntax-keyword">let</span> missing<span class="syntax-punctuation">:</span> <span class="syntax-builtin">Int</span><span class="syntax-punctuation">?</span> <span class="syntax-punctuation">=</span> <span class="syntax-keyword">nil</span>
+      <span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>measured <span class="syntax-operator">!=</span> <span class="syntax-keyword">nil</span> <span class="syntax-operator">&amp;&amp;</span> missing <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-keyword">nil</span><span class="syntax-punctuation">)</span>
+      <span class="syntax-keyword">if</span> <span class="syntax-keyword">let</span> value <span class="syntax-punctuation">=</span> measured <span class="syntax-punctuation">{</span>
+        <span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>value <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+      <span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
+        <span class="syntax-builtin">preconditionFailure</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">present zero</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+      <span class="syntax-punctuation">}</span>
     <span class="syntax-punctuation">}</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">swift-005: passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> A present zero remains distinct from nil.</p>
 <h4 id="example-b-parse-with-an-absence-policy">Example B: Parse with an absence policy<a class="heading-anchor" href="#example-b-parse-with-an-absence-policy" aria-label="Link to this section">#</a></h4>
 <p>The fallback is an explicit display sentinel in this fixture, not a valid quantity.</p>
 <pre class="highlighted-code"><code class="language-swift"><span class="syntax-keyword">import</span> <span class="syntax-class">Foundation</span>
 
-
-
 <span class="syntax-punctuation">@</span>main
 <span class="syntax-keyword">struct</span> <span class="syntax-class">LessonMain</span> <span class="syntax-punctuation">{</span>
-    <span class="syntax-keyword">static</span> <span class="syntax-keyword">func</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">async</span> <span class="syntax-keyword">throws</span> <span class="syntax-punctuation">{</span>
-        <span class="syntax-keyword">do</span> <span class="syntax-punctuation">{</span>
-            <span class="syntax-keyword">let</span> valid <span class="syntax-punctuation">=</span> <span class="syntax-builtin">Int</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">42</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
-            <span class="syntax-keyword">let</span> invalid <span class="syntax-punctuation">=</span> <span class="syntax-builtin">Int</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">forty-two</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
-            <span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>valid <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-number">42</span> <span class="syntax-operator">&amp;&amp;</span> invalid <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-keyword">nil</span><span class="syntax-punctuation">)</span>
-            <span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>invalid <span class="syntax-punctuation">?</span><span class="syntax-punctuation">?</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
-        <span class="syntax-punctuation">}</span>
-        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">swift-005: passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-keyword">static</span> <span class="syntax-keyword">func</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">async</span> <span class="syntax-keyword">throws</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">do</span> <span class="syntax-punctuation">{</span>
+      <span class="syntax-keyword">let</span> valid <span class="syntax-punctuation">=</span> <span class="syntax-builtin">Int</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">42</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+      <span class="syntax-keyword">let</span> invalid <span class="syntax-punctuation">=</span> <span class="syntax-builtin">Int</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">forty-two</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+      <span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>valid <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-number">42</span> <span class="syntax-operator">&amp;&amp;</span> invalid <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-keyword">nil</span><span class="syntax-punctuation">)</span>
+      <span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>invalid <span class="syntax-punctuation">?</span><span class="syntax-punctuation">?</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
     <span class="syntax-punctuation">}</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">swift-005: passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Parsing produces an optional and malformed text is absent.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>

@@ -174,7 +174,7 @@ label = "global"
 
 
 def local_label() -> str:
-    label = "local"          # This is a distinct local binding.
+    label = "local"  # This is a distinct local binding.
     return label
 
 

@@ -555,7 +555,6 @@ _REPAIRS.update(
         "aRoPE": "a RoPE",
         "ForALiBi": "For ALiBi",
         "everypaper": "every paper",
-        "indexi": "index i",
         "positionp": "position p",
         "a2Drotation": "a 2D rotation",
         "byp*frequency": "by p*frequency",

@@ -120,10 +120,12 @@ identify which line creates each intermediate object.
 ```python
 import pandas as pd
 
-raw = pd.DataFrame({
-    "name": [" Ada ", "Lin", "Grace"],
-    "score": ["10", "missing", "8.5"],
-})
+raw = pd.DataFrame(
+    {
+        "name": [" Ada ", "Lin", "Grace"],
+        "score": ["10", "missing", "8.5"],
+    }
+)
 clean_scores = pd.to_numeric(raw["score"], errors="coerce")
 cleaned = raw.assign(
     name=raw["name"].str.strip(),
@@ -152,6 +154,7 @@ def clean_people(frame: pd.DataFrame) -> pd.DataFrame:
     result["name"] = result["name"].str.strip()
     result["score"] = pd.to_numeric(result["score"], errors="coerce")
     return result.drop_duplicates().reset_index(drop=True)
+
 
 once = clean_people(raw)
 twice = clean_people(once)
@@ -212,15 +215,15 @@ of them as blank-code prompts:
 ```python
 import pandas as pd
 
-raw = pd.DataFrame(
-    {"amount": ["10.5", "bad", None], "city": [" SF ", "ny", "NY"]}
-)
+raw = pd.DataFrame({"amount": ["10.5", "bad", None], "city": [" SF ", "ny", "NY"]})
+
 
 def clean(frame: pd.DataFrame) -> pd.DataFrame:
     result = frame.copy()
     result["amount"] = pd.to_numeric(result["amount"], errors="coerce")
     result["city"] = result["city"].str.strip().str.upper().astype("string")
     return result
+
 
 tidy = raw.pipe(clean)
 ```

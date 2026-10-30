@@ -31,7 +31,7 @@ If the consumer hangs after processing all items, inspect whether closed partici
 ## Worked example 1
 
 ```cpp
-cv.wait(lock,[&]{return !q.empty()||closed;});
+cv.wait(lock, [&] { return !q.empty() || closed; });
 ```
 
 Expected: The consumer proceeds only when work exists or shutdown has been published.
@@ -39,7 +39,8 @@ Expected: The consumer proceeds only when work exists or shutdown has been publi
 ## Worked example 2
 
 ```cpp
-if(q.empty() && closed) break;
+if (q.empty() && closed)
+  break;
 ```
 
 Expected: A closed empty queue ends consumption; closure does not discard queued work.

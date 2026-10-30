@@ -97,26 +97,40 @@ These worked excerpts come from `sql/postgres-60day/day51_project2_finance_part3
 
 ```sql
 WITH pay_m AS (
-  SELECT date_trunc('month', payment_date)::date AS month,
-         SUM(amount) AS cash_in
-  FROM payments
-  GROUP BY 1
-), exp_m AS (
-  SELECT date_trunc('month', expense_date)::date AS month,
-         SUM(amount) AS cash_out
-  FROM expenses
-  GROUP BY 1
-), joined AS (
-  SELECT COALESCE(p.month, e.month) AS month,
-         COALESCE(p.cash_in, 0)     AS cash_in,
-         COALESCE(e.cash_out, 0)    AS cash_out
-  FROM pay_m p FULL OUTER JOIN exp_m e ON e.month = p.month
+  SELECT
+    date_trunc('month', payment_date)::date AS month,
+    SUM(amount) AS cash_in
+  FROM
+    payments
+  GROUP BY
+    1
+),
+exp_m AS (
+  SELECT
+    date_trunc('month', expense_date)::date AS month,
+    SUM(amount) AS cash_out
+  FROM
+    expenses
+  GROUP BY
+    1
+),
+joined AS (
+  SELECT
+    COALESCE(p.month, e.month) AS month,
+    COALESCE(p.cash_in, 0) AS cash_in,
+    COALESCE(e.cash_out, 0) AS cash_out
+  FROM
+    pay_m p
+    FULL OUTER JOIN exp_m e ON e.month = p.month
 )
-SELECT month,
-       ROUND(cash_in - cash_out, 2) AS net_cash_flow,
-       SUM(ROUND(cash_in - cash_out, 2)) OVER (ORDER BY month) AS cumulative_cash
-FROM joined
-ORDER BY month DESC
+SELECT
+  month,
+  ROUND(cash_in - cash_out, 2) AS net_cash_flow,
+  SUM(ROUND(cash_in - cash_out, 2)) OVER (ORDER BY month) AS cumulative_cash
+FROM
+  joined
+ORDER BY
+  month DESC
 LIMIT 36;
 ```
 
@@ -128,32 +142,52 @@ LIMIT 36;
 
 ```sql
 WITH exp AS (
-  SELECT date_trunc('month', expense_date)::date AS month,
-         category,
-         SUM(amount) AS actual
-  FROM expenses
-  GROUP BY 1,2
-), bud AS (
-  SELECT period AS month, category, SUM(amount) AS budget
-  FROM budgets
-  GROUP BY 1,2
-), j AS (
-  SELECT COALESCE(b.category, e.category) AS category,
-         COALESCE(b.month, e.month) AS month,
-         COALESCE(b.budget,0) AS budget,
-         COALESCE(e.actual,0) AS actual
-  FROM bud b FULL JOIN exp e ON e.month = b.month AND e.category = b.category
+  SELECT
+    date_trunc('month', expense_date)::date AS month,
+    category,
+    SUM(amount) AS actual
+  FROM
+    expenses
+  GROUP BY
+    1,
+    2
+),
+bud AS (
+  SELECT
+    period AS month,
+    category,
+    SUM(amount) AS budget
+  FROM
+    budgets
+  GROUP BY
+    1,
+    2
+),
+j AS (
+  SELECT
+    COALESCE(b.category, e.category) AS category,
+    COALESCE(b.month, e.month) AS month,
+    COALESCE(b.budget, 0) AS budget,
+    COALESCE(e.actual, 0) AS actual
+  FROM
+    bud b
+    FULL JOIN exp e ON e.month = b.month
+      AND e.category = b.category
 )
-SELECT category,
-       month,
-       actual,
-       budget,
-       ROUND(actual - budget, 2) AS variance,
-       SUM(actual) OVER (PARTITION BY category ORDER BY month ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) AS actual_ma3,
-       SUM(budget) OVER (PARTITION BY category ORDER BY month ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) AS budget_ma3
-FROM j
-ORDER BY month DESC, category
-LIMIT 120;
+  SELECT
+    category,
+    month,
+    actual,
+    budget,
+    ROUND(actual - budget, 2) AS variance,
+    SUM(actual) OVER (PARTITION BY category ORDER BY month ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) AS actual_ma3,
+    SUM(budget) OVER (PARTITION BY category ORDER BY month ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) AS budget_ma3
+  FROM
+    j
+  ORDER BY
+    month DESC,
+    category
+  LIMIT 120;
 ```
 
 **How to read it:** Example 2: Start with `expenses`, and `budgets` in `FROM`/`JOIN`; let `GROUP BY` collapse rows to its grouping keys; let each `OVER` expression calculate across related rows without collapsing them. The final `SELECT` displays `category`, `month`, `actual`, `budget`, `variance`, `actual_ma3`, and `budget_ma3`. `ORDER BY` determines presentation order and the final `LIMIT 120` caps displayed rows. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.

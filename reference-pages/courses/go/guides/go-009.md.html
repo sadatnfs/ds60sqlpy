@@ -245,8 +245,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>n <span class="syntax-operator">==</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;pointer mutation&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The caller value becomes 5.</p>
 <p>The helper changes the shared target, not the caller variable that stores the pointer. The mutation contract must be visible at the call site.</p>
 <h4 id="worked-example-2-return-a-live-value">Worked example 2: Return a live value<a class="heading-anchor" href="#worked-example-2-return-a-live-value" aria-label="Link to this section">#</a></h4>
@@ -287,8 +286,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span><span class="syntax-operator">*</span>p <span class="syntax-operator">==</span> <span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;returned pointer&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The returned pointer remains valid and reads 7.</p>
 <p>Go extends storage lifetime as needed. Stack-versus-heap placement is an implementation decision and should not be guessed from the lexical block alone.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>

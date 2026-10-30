@@ -243,8 +243,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>ctx<span class="syntax-punctuation">.</span>Err<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> context<span class="syntax-punctuation">.</span>Canceled<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;cancel&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Err returns context.Canceled.</p>
 <p>Cancellation is visible through Err and the closed Done channel. Repeated cancel calls are safe.</p>
 <h4 id="worked-example-2-propagate-parent-cancellation">Worked example 2: Propagate parent cancellation<a class="heading-anchor" href="#worked-example-2-propagate-parent-cancellation" aria-label="Link to this section">#</a></h4>
@@ -286,8 +285,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>parent<span class="syntax-punctuation">.</span>Err<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> context<span class="syntax-punctuation">.</span>Canceled <span class="syntax-operator">&amp;&amp;</span> child<span class="syntax-punctuation">.</span>Err<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> context<span class="syntax-punctuation">.</span>Canceled<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;tree&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Both contexts become canceled.</p>
 <p>A child cannot extend work beyond the lifetime requested by its parent.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>

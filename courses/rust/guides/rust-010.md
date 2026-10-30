@@ -43,11 +43,11 @@ Read the operations in dependency order. Record which values exist before each l
 The function receives mutation capability for the duration of the call.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
-        fn append_mark(text: &mut String) { text.push('!'); }
+        fn append_mark(text: &mut String) {
+            text.push('!');
+        }
         let mut text = String::from("ready");
         append_mark(&mut text);
         assert_eq!(text, "ready!");
@@ -64,8 +64,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 The standard library API establishes disjointness instead of relying on two potentially overlapping index borrows.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let mut values = [1, 2, 3, 4];

@@ -433,30 +433,49 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These worked excerpts come from <code>sql/postgres-60day/day46_project1_ecommerce_part1.sql</code>. Use <strong>Whole SQL lesson (psql)</strong> in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared <code>psql</code> routes are described above.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> order_values <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>unit_price<span class="syntax-operator">*</span>oi<span class="syntax-punctuation">.</span>quantity<span class="syntax-operator">*</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">-</span>oi<span class="syntax-punctuation">.</span>discount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> order_value
-  <span class="syntax-keyword">FROM</span> orders o
-  <span class="syntax-keyword">JOIN</span> order_items oi <span class="syntax-keyword">ON</span> oi<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>order_id
-  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_id
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> ltv <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span> ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>order_value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> ltv
-  <span class="syntax-keyword">FROM</span> order_values
-  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> customer_id
+  <span class="syntax-keyword">SELECT</span>
+    o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>unit_price <span class="syntax-operator">*</span> oi<span class="syntax-punctuation">.</span>quantity <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span> <span class="syntax-operator">-</span> oi<span class="syntax-punctuation">.</span>discount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> order_value
+  <span class="syntax-keyword">FROM</span>
+    orders o
+    <span class="syntax-keyword">JOIN</span> order_items oi <span class="syntax-keyword">ON</span> oi<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>order_id
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+    o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+    o<span class="syntax-punctuation">.</span>order_id
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+ltv <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span>
+    customer_id<span class="syntax-punctuation">,</span>
+    ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>order_value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> ltv
+  <span class="syntax-keyword">FROM</span>
+    order_values
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+    customer_id
 <span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>segment<span class="syntax-punctuation">,</span> l<span class="syntax-punctuation">.</span>ltv<span class="syntax-punctuation">,</span>
-       NTILE<span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> l<span class="syntax-punctuation">.</span>ltv <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> ltv_quartile
-<span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">c</span>
-<span class="syntax-keyword">JOIN</span> ltv l <span class="syntax-keyword">ON</span> l<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> l<span class="syntax-punctuation">.</span>ltv <span class="syntax-keyword">DESC</span>
+<span class="syntax-keyword">SELECT</span>
+  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>segment<span class="syntax-punctuation">,</span>
+  l<span class="syntax-punctuation">.</span>ltv<span class="syntax-punctuation">,</span>
+  NTILE<span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> l<span class="syntax-punctuation">.</span>ltv <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> ltv_quartile
+<span class="syntax-keyword">FROM</span>
+  customers <span class="syntax-keyword">c</span>
+  <span class="syntax-keyword">JOIN</span> ltv l <span class="syntax-keyword">ON</span> l<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  l<span class="syntax-punctuation">.</span>ltv <span class="syntax-keyword">DESC</span>
 <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">100</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 1: Start with <code>orders</code>, <code>order_items</code>, and <code>customers</code> in <code>FROM</code>/<code>JOIN</code>; let <code>GROUP BY</code> collapse rows to its grouping keys; let each <code>OVER</code> expression calculate across related rows without collapsing them. The final <code>SELECT</code> displays <code>customer_id</code>, <code>country</code>, <code>segment</code>, <code>ltv</code>, and <code>ltv_quartile</code>. <code>ORDER BY</code> determines presentation order and the final <code>LIMIT 100</code> caps displayed rows. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 1 returns one grouped row per <code>customer_id</code>, <code>country</code>, and <code>segment</code>, capped at 100 rows with columns <code>customer_id</code>, <code>order_value</code>, <code>ltv</code>, <code>country</code>, <code>segment</code>, and <code>ltv_quartile</code> from <code>orders</code>, <code>order_items</code>, and <code>customers</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> created_at<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> cohort_month<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> new_customers
-<span class="syntax-keyword">FROM</span> customers
-<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-number">1</span>
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> cohort_month <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> created_at<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> cohort_month<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> new_customers
+<span class="syntax-keyword">FROM</span>
+  customers
+<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+  <span class="syntax-number">1</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  cohort_month <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 2: Start with <code>customers</code> in <code>FROM</code>/<code>JOIN</code>; let <code>GROUP BY</code> collapse rows to its grouping keys. The final <code>SELECT</code> displays <code>cohort_month</code>, and <code>new_customers</code>. <code>ORDER BY</code> determines presentation order. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 2 returns one grouped row per <code>cohort_month</code> with columns <code>cohort_month</code>, and <code>new_customers</code> from <code>customers</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -732,29 +751,43 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
 <span class="syntax-keyword">WITH</span> lifetime <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> ltv
-  <span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">c</span>
-  <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">)</span>
-  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> segmented <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">CASE</span>
-           <span class="syntax-keyword">WHEN</span> ltv <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">20000</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;gold&#x27;</span>
-           <span class="syntax-keyword">WHEN</span> ltv <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">10000</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;silver&#x27;</span>
-           <span class="syntax-keyword">ELSE</span> <span class="syntax-string">&#x27;bronze&#x27;</span>
-         <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> ltv_segment
-  <span class="syntax-keyword">FROM</span> lifetime
+  <span class="syntax-keyword">SELECT</span>
+    <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> ltv
+  <span class="syntax-keyword">FROM</span>
+    customers <span class="syntax-keyword">c</span>
+    <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">)</span>
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+    <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+segmented <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span>
+    <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> ltv <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">20000</span> <span class="syntax-keyword">THEN</span>
+      <span class="syntax-string">&#x27;gold&#x27;</span>
+    <span class="syntax-keyword">WHEN</span> ltv <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">10000</span> <span class="syntax-keyword">THEN</span>
+      <span class="syntax-string">&#x27;silver&#x27;</span>
+    <span class="syntax-keyword">ELSE</span>
+      <span class="syntax-string">&#x27;bronze&#x27;</span>
+    <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> ltv_segment
+  <span class="syntax-keyword">FROM</span>
+    lifetime
 <span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> country<span class="syntax-punctuation">,</span>
-       ltv_segment<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> customers<span class="syntax-punctuation">,</span>
-       ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">AVG</span><span class="syntax-punctuation">(</span>ltv<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> avg_ltv<span class="syntax-punctuation">,</span>
-       ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>ltv<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> total_ltv
-<span class="syntax-keyword">FROM</span> segmented
-<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> country<span class="syntax-punctuation">,</span> ltv_segment
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> country<span class="syntax-punctuation">,</span> avg_ltv <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span></code></pre>
+<span class="syntax-keyword">SELECT</span>
+  country<span class="syntax-punctuation">,</span>
+  ltv_segment<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> customers<span class="syntax-punctuation">,</span>
+  ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">AVG</span><span class="syntax-punctuation">(</span>ltv<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> avg_ltv<span class="syntax-punctuation">,</span>
+  ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>ltv<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> total_ltv
+<span class="syntax-keyword">FROM</span>
+  segmented
+<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+  country<span class="syntax-punctuation">,</span>
+  ltv_segment
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  country<span class="syntax-punctuation">,</span>
+  avg_ltv <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span></code></pre>
 <p>Expected grain: one row per <code>(country, ltv_segment)</code>. The <code>LEFT JOIN</code> retains customers with no orders and assigns them zero LTV.</p>
 <h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -770,33 +803,46 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
 <span class="syntax-keyword">WITH</span> cohorts <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span>
-         date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> created_at<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> cohort_month
-  <span class="syntax-keyword">FROM</span> customers
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> monthly_customer <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span>
-         date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> order_month<span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue
-  <span class="syntax-keyword">FROM</span> orders
-  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> customer_id<span class="syntax-punctuation">,</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> order_date<span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> cohort_revenue <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>cohort_month<span class="syntax-punctuation">,</span>
-         mc<span class="syntax-punctuation">.</span>order_month<span class="syntax-punctuation">,</span>
-         <span class="syntax-punctuation">(</span>
-           <span class="syntax-keyword">EXTRACT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">year</span> <span class="syntax-keyword">FROM</span> age<span class="syntax-punctuation">(</span>mc<span class="syntax-punctuation">.</span>order_month<span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>cohort_month<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> <span class="syntax-number">12</span>
-           <span class="syntax-operator">+</span> <span class="syntax-keyword">EXTRACT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">month</span> <span class="syntax-keyword">FROM</span> age<span class="syntax-punctuation">(</span>mc<span class="syntax-punctuation">.</span>order_month<span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>cohort_month<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
-         <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">int</span> <span class="syntax-keyword">AS</span> month_offset<span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>mc<span class="syntax-punctuation">.</span>revenue<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue
-  <span class="syntax-keyword">FROM</span> cohorts <span class="syntax-keyword">c</span>
-  <span class="syntax-keyword">JOIN</span> monthly_customer mc <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">)</span>
-  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>cohort_month<span class="syntax-punctuation">,</span> mc<span class="syntax-punctuation">.</span>order_month
+  <span class="syntax-keyword">SELECT</span>
+    customer_id<span class="syntax-punctuation">,</span>
+    date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> created_at<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> cohort_month
+  <span class="syntax-keyword">FROM</span>
+    customers
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+monthly_customer <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span>
+    customer_id<span class="syntax-punctuation">,</span>
+    date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> order_month<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue
+  <span class="syntax-keyword">FROM</span>
+    orders
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+    customer_id<span class="syntax-punctuation">,</span>
+    date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> order_date<span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+cohort_revenue <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span>
+    <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>cohort_month<span class="syntax-punctuation">,</span>
+    mc<span class="syntax-punctuation">.</span>order_month<span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-keyword">EXTRACT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">year</span> <span class="syntax-keyword">FROM</span> age<span class="syntax-punctuation">(</span>mc<span class="syntax-punctuation">.</span>order_month<span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>cohort_month<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> <span class="syntax-number">12</span> <span class="syntax-operator">+</span> <span class="syntax-keyword">EXTRACT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">month</span> <span class="syntax-keyword">FROM</span> age<span class="syntax-punctuation">(</span>mc<span class="syntax-punctuation">.</span>order_month<span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>cohort_month<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">int</span> <span class="syntax-keyword">AS</span> month_offset<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>mc<span class="syntax-punctuation">.</span>revenue<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue
+  <span class="syntax-keyword">FROM</span>
+    cohorts <span class="syntax-keyword">c</span>
+    <span class="syntax-keyword">JOIN</span> monthly_customer mc <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">)</span>
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+    <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>cohort_month<span class="syntax-punctuation">,</span> mc<span class="syntax-punctuation">.</span>order_month
 <span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> cohort_month<span class="syntax-punctuation">,</span>
-       month_offset<span class="syntax-punctuation">,</span>
-       ROUND<span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue
-<span class="syntax-keyword">FROM</span> cohort_revenue
-<span class="syntax-keyword">WHERE</span> month_offset <span class="syntax-keyword">BETWEEN</span> <span class="syntax-number">0</span> <span class="syntax-keyword">AND</span> <span class="syntax-number">12</span>
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> cohort_month <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> month_offset<span class="syntax-punctuation">;</span></code></pre>
+<span class="syntax-keyword">SELECT</span>
+  cohort_month<span class="syntax-punctuation">,</span>
+  month_offset<span class="syntax-punctuation">,</span>
+  ROUND<span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue
+<span class="syntax-keyword">FROM</span>
+  cohort_revenue
+<span class="syntax-keyword">WHERE</span>
+  month_offset <span class="syntax-keyword">BETWEEN</span> <span class="syntax-number">0</span> <span class="syntax-keyword">AND</span> <span class="syntax-number">12</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  cohort_month <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span>
+  month_offset<span class="syntax-punctuation">;</span></code></pre>
 <p>Expected grain: one row per cohort and lifecycle month. A missing offset means that cohort generated no orders in that lifecycle month; it is not automatically equivalent to a stored zero.</p>
 <h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
 <ul>

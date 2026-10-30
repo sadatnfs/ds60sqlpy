@@ -31,7 +31,8 @@ If live remains1 after the scope, inspect whether ownership escaped or was relea
 ## Worked example 1
 
 ```cpp
-auto p=std::make_unique<int>(7); auto q=std::move(p);
+auto p = std::make_unique<int>(7);
+auto q = std::move(p);
 ```
 
 Expected: p is empty, q owns the integer 7.
@@ -39,7 +40,9 @@ Expected: p is empty, q owns the integer 7.
 ## Worked example 2
 
 ```cpp
-{ auto p=std::make_unique<Tracked>(live); }
+{
+  auto p = std::make_unique<Tracked>(live);
+}
 ```
 
 Expected: live rises to 1 in scope and returns to 0 at destruction.

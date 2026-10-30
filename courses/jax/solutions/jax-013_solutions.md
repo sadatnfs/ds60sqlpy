@@ -13,7 +13,7 @@ padded = jnp.zeros((6, 3))
 labels = jnp.array([0, 1, 2, -100, -100, -100])
 mask = jnp.array([True, True, True, False, False, False])
 admit(padded, labels, mask)
-close(token_mean(padded, labels, mask), math.log(3.))
+close(token_mean(padded, labels, mask), math.log(3.0))
 ```
 
 ## Exercise 2: Reject an empty objective
@@ -28,7 +28,7 @@ try:
 except ValueError:
     pass
 else:
-    raise AssertionError('empty supervision accepted')
+    raise AssertionError("empty supervision accepted")
 ```
 
 ## Exercise 3: Check target identity
@@ -38,10 +38,10 @@ A nonuniform row detects a target swap that the uniform fixture could hide.
 **Expected:** Losses log(4/3) and log(4).
 
 ```python
-scores = jnp.array([[math.log(3.), 0.]])
+scores = jnp.array([[math.log(3.0), 0.0]])
 mask = jnp.array([True])
 close(token_mean(scores, jnp.array([0]), mask), math.log(4 / 3))
-close(token_mean(scores, jnp.array([1]), mask), math.log(4.))
+close(token_mean(scores, jnp.array([1]), mask), math.log(4.0))
 ```
 
 ## Exercise 4: Keep an extreme logit finite
@@ -51,9 +51,9 @@ Stable log-softmax avoids an unnecessary exponential overflow.
 **Expected:** Finite loss near zero.
 
 ```python
-value = token_mean(jnp.array([[1000., 0., -1000.]]), jnp.array([0]), jnp.array([True]))
+value = token_mean(jnp.array([[1000.0, 0.0, -1000.0]]), jnp.array([0]), jnp.array([True]))
 assert bool(jnp.isfinite(value))
-close(value, 0.)
+close(value, 0.0)
 ```
 
 ## Exercise 5: Reject an active sentinel
@@ -68,7 +68,7 @@ try:
 except ValueError:
     pass
 else:
-    raise AssertionError('active sentinel accepted')
+    raise AssertionError("active sentinel accepted")
 ```
 
 ## Exercise 6: Compile the admitted calculation
@@ -79,7 +79,7 @@ The host admission check and pure numerical loss have distinct execution roles.
 
 ```python
 admit(logits, targets, active)
-close(jax.jit(token_mean)(logits, targets, active), math.log(3.))
+close(jax.jit(token_mean)(logits, targets, active), math.log(3.0))
 ```
 
 ## Scope of this evidence

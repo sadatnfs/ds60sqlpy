@@ -102,68 +102,79 @@ These worked excerpts come from `sql/postgres-60day/day30_phase2_project.sql`. U
 
 ```sql
 WITH orders_enriched AS (
-  SELECT o.order_id,
-         o.customer_id,
-         date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date
-           AS order_month_utc,
-         SUM(oi.unit_price*oi.quantity*(1-oi.discount)) AS order_value
-  FROM orders o
-  JOIN order_items oi ON oi.order_id = o.order_id
-  GROUP BY o.order_id,
-           o.customer_id,
-           date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date
-), cohorts AS (
-  SELECT c.customer_id,
-         date_trunc('month', c.created_at AT TIME ZONE 'UTC')::date
-           AS cohort_month_utc
-  FROM customers c
-), cohort_sizes AS (
+  SELECT
+    o.order_id,
+    o.customer_id,
+    date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date AS order_month_utc,
+    SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS order_value
+  FROM
+    orders o
+    JOIN order_items oi ON oi.order_id = o.order_id
+  GROUP BY
+    o.order_id,
+    o.customer_id,
+    date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date
+),
+cohorts AS (
+  SELECT
+    c.customer_id,
+    date_trunc('month', c.created_at AT TIME ZONE 'UTC')::date AS cohort_month_utc
+  FROM
+    customers c
+),
+cohort_sizes AS (
   -- The denominator includes customers who never place an order.
-  SELECT cohort_month_utc,
-         COUNT(*) AS original_customers
-  FROM cohorts
-  GROUP BY cohort_month_utc
-), metrics AS (
-  SELECT e.customer_id,
-         c.cohort_month_utc,
-         e.order_month_utc,
-         SUM(e.order_value) AS revenue
-  FROM orders_enriched e
-  JOIN cohorts c ON c.customer_id = e.customer_id
-  GROUP BY e.customer_id, c.cohort_month_utc, e.order_month_utc
-), cohort_agg AS (
-  SELECT cohort_month_utc,
-         order_month_utc,
-         (
-           EXTRACT(YEAR FROM age(order_month_utc, cohort_month_utc)) * 12
-           + EXTRACT(MONTH FROM age(order_month_utc, cohort_month_utc))
-         )::int AS month_offset,
-         SUM(revenue) AS cohort_revenue,
-         COUNT(DISTINCT customer_id) AS active_customers
-  FROM metrics
-  GROUP BY cohort_month_utc, order_month_utc
-)
--- This first pass contains observed activity months only. Exercise 4 creates
--- a dense offset spine so a missing month becomes an explicit zero.
-SELECT agg.cohort_month_utc,
-       agg.month_offset,
-       sizes.original_customers,
-       agg.active_customers,
-       ROUND(
-         agg.active_customers::numeric
-         / NULLIF(sizes.original_customers, 0),
-         4
-       ) AS retention_rate,
-       ROUND(agg.cohort_revenue, 2) AS revenue,
-       ROUND(
-         agg.cohort_revenue / NULLIF(agg.active_customers, 0),
-         2
-       ) AS revenue_per_active
-FROM cohort_agg AS agg
-JOIN cohort_sizes AS sizes
-  ON sizes.cohort_month_utc = agg.cohort_month_utc
-ORDER BY agg.cohort_month_utc DESC, agg.month_offset
-LIMIT 200;
+  SELECT
+    cohort_month_utc,
+    COUNT(*) AS original_customers
+  FROM
+    cohorts
+  GROUP BY
+    cohort_month_utc
+),
+metrics AS (
+  SELECT
+    e.customer_id,
+    c.cohort_month_utc,
+    e.order_month_utc,
+    SUM(e.order_value) AS revenue
+  FROM
+    orders_enriched e
+    JOIN cohorts c ON c.customer_id = e.customer_id
+  GROUP BY
+    e.customer_id,
+    c.cohort_month_utc,
+    e.order_month_utc
+),
+cohort_agg AS (
+  SELECT
+    cohort_month_utc,
+    order_month_utc,
+    (EXTRACT(YEAR FROM age(order_month_utc, cohort_month_utc)) * 12 + EXTRACT(MONTH FROM age(order_month_utc, cohort_month_utc)))::int AS month_offset,
+    SUM(revenue) AS cohort_revenue,
+    COUNT(DISTINCT customer_id) AS active_customers
+  FROM
+    metrics
+  GROUP BY
+    cohort_month_utc,
+    order_month_utc)
+  -- This first pass contains observed activity months only. Exercise 4 creates
+  -- a dense offset spine so a missing month becomes an explicit zero.
+  SELECT
+    agg.cohort_month_utc,
+    agg.month_offset,
+    sizes.original_customers,
+    agg.active_customers,
+    ROUND(agg.active_customers::numeric / NULLIF (sizes.original_customers, 0), 4) AS retention_rate,
+    ROUND(agg.cohort_revenue, 2) AS revenue,
+    ROUND(agg.cohort_revenue / NULLIF (agg.active_customers, 0), 2) AS revenue_per_active
+  FROM
+    cohort_agg AS agg
+    JOIN cohort_sizes AS sizes ON sizes.cohort_month_utc = agg.cohort_month_utc
+  ORDER BY
+    agg.cohort_month_utc DESC,
+    agg.month_offset
+  LIMIT 200;
 ```
 
 **How to read it:** Example 1: Start with `orders`, `order_items`, `customers`, and `age` in `FROM`/`JOIN`; let `GROUP BY` collapse rows to its grouping keys. The final `SELECT` displays `cohort_month_utc`, `month_offset`, `original_customers`, `active_customers`, `retention_rate`, `revenue`, and `revenue_per_active`. `ORDER BY` determines presentation order and the final `LIMIT 200` caps displayed rows. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
@@ -174,70 +185,78 @@ LIMIT 200;
 
 ```sql
 -- The same topic query shown as a plan instead of business rows.
-EXPLAIN (COSTS OFF)
-WITH orders_enriched AS (
-  SELECT o.order_id,
-         o.customer_id,
-         date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date
-           AS order_month_utc,
-         SUM(oi.unit_price*oi.quantity*(1-oi.discount)) AS order_value
-  FROM orders o
-  JOIN order_items oi ON oi.order_id = o.order_id
-  GROUP BY o.order_id,
-           o.customer_id,
-           date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date
-), cohorts AS (
-  SELECT c.customer_id,
-         date_trunc('month', c.created_at AT TIME ZONE 'UTC')::date
-           AS cohort_month_utc
-  FROM customers c
-), cohort_sizes AS (
-  -- The denominator includes customers who never place an order.
-  SELECT cohort_month_utc,
-         COUNT(*) AS original_customers
-  FROM cohorts
-  GROUP BY cohort_month_utc
-), metrics AS (
-  SELECT e.customer_id,
-         c.cohort_month_utc,
-         e.order_month_utc,
-         SUM(e.order_value) AS revenue
-  FROM orders_enriched e
-  JOIN cohorts c ON c.customer_id = e.customer_id
-  GROUP BY e.customer_id, c.cohort_month_utc, e.order_month_utc
-), cohort_agg AS (
-  SELECT cohort_month_utc,
-         order_month_utc,
-         (
-           EXTRACT(YEAR FROM age(order_month_utc, cohort_month_utc)) * 12
-           + EXTRACT(MONTH FROM age(order_month_utc, cohort_month_utc))
-         )::int AS month_offset,
-         SUM(revenue) AS cohort_revenue,
-         COUNT(DISTINCT customer_id) AS active_customers
-  FROM metrics
-  GROUP BY cohort_month_utc, order_month_utc
-)
--- This first pass contains observed activity months only. Exercise 4 creates
--- a dense offset spine so a missing month becomes an explicit zero.
-SELECT agg.cohort_month_utc,
-       agg.month_offset,
-       sizes.original_customers,
-       agg.active_customers,
-       ROUND(
-         agg.active_customers::numeric
-         / NULLIF(sizes.original_customers, 0),
-         4
-       ) AS retention_rate,
-       ROUND(agg.cohort_revenue, 2) AS revenue,
-       ROUND(
-         agg.cohort_revenue / NULLIF(agg.active_customers, 0),
-         2
-       ) AS revenue_per_active
-FROM cohort_agg AS agg
-JOIN cohort_sizes AS sizes
-  ON sizes.cohort_month_utc = agg.cohort_month_utc
-ORDER BY agg.cohort_month_utc DESC, agg.month_offset
-LIMIT 200;
+EXPLAIN (
+  COSTS OFF
+) WITH orders_enriched AS (
+  SELECT
+    o.order_id,
+    o.customer_id,
+    date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date AS order_month_utc,
+    SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS order_value
+  FROM
+    orders o
+    JOIN order_items oi ON oi.order_id = o.order_id
+  GROUP BY
+    o.order_id,
+    o.customer_id,
+    date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date),
+  cohorts AS (
+    SELECT
+      c.customer_id,
+      date_trunc('month', c.created_at AT TIME ZONE 'UTC')::date AS cohort_month_utc
+    FROM
+      customers c),
+    cohort_sizes AS (
+      -- The denominator includes customers who never place an order.
+      SELECT
+        cohort_month_utc,
+        COUNT(*) AS original_customers
+      FROM
+        cohorts
+      GROUP BY
+        cohort_month_utc),
+      metrics AS (
+        SELECT
+          e.customer_id,
+          c.cohort_month_utc,
+          e.order_month_utc,
+          SUM(e.order_value) AS revenue
+        FROM
+          orders_enriched e
+          JOIN cohorts c ON c.customer_id = e.customer_id
+        GROUP BY
+          e.customer_id,
+          c.cohort_month_utc,
+          e.order_month_utc),
+        cohort_agg AS (
+          SELECT
+            cohort_month_utc,
+            order_month_utc,
+            (EXTRACT(YEAR FROM age(order_month_utc, cohort_month_utc)) * 12 + EXTRACT(MONTH FROM age(order_month_utc, cohort_month_utc)))::int AS month_offset,
+            SUM(revenue) AS cohort_revenue,
+            COUNT(DISTINCT customer_id) AS active_customers
+          FROM
+            metrics
+          GROUP BY
+            cohort_month_utc,
+            order_month_utc)
+          -- This first pass contains observed activity months only. Exercise 4 creates
+          -- a dense offset spine so a missing month becomes an explicit zero.
+          SELECT
+            agg.cohort_month_utc,
+            agg.month_offset,
+            sizes.original_customers,
+            agg.active_customers,
+            ROUND(agg.active_customers::numeric / NULLIF (sizes.original_customers, 0), 4) AS retention_rate,
+        ROUND(agg.cohort_revenue, 2) AS revenue,
+      ROUND(agg.cohort_revenue / NULLIF (agg.active_customers, 0), 2) AS revenue_per_active
+  FROM
+    cohort_agg AS agg
+    JOIN cohort_sizes AS sizes ON sizes.cohort_month_utc = agg.cohort_month_utc
+  ORDER BY
+    agg.cohort_month_utc DESC,
+    agg.month_offset
+  LIMIT 200;
 ```
 
 **How to read it:** Example 2 is executed by `psql` as part of the complete lesson. Expected notices are evidence; an unexpected error stops the script.

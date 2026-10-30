@@ -64,18 +64,23 @@ shared-memory module being loaded at server startup. See
 ```sql
 SET search_path TO training, public;
 
-SELECT pid,
-       usename,
-       datname,
-       state,
-       clock_timestamp() - query_start AS runtime,
-       wait_event_type,
-       wait_event,
-       left(query, 160) AS query
-FROM pg_stat_activity
-WHERE state = 'active'
+SELECT
+  pid,
+  usename,
+  datname,
+  state,
+  clock_timestamp() - query_start AS runtime,
+  wait_event_type,
+  wait_event,
+  left (query,
+    160) AS query
+FROM
+  pg_stat_activity
+WHERE
+  state = 'active'
   AND pid <> pg_backend_pid()
-ORDER BY runtime DESC NULLS LAST;
+ORDER BY
+  runtime DESC NULLS LAST;
 ```
 
 Expected shape: zero or more currently active sessions, excluding the
@@ -165,9 +170,13 @@ BEGIN
 END
 $optional_pg_stat_statements$;
 
-SELECT *
-FROM top_statement_stats
-ORDER BY ranking, rank_position;
+SELECT
+  *
+FROM
+  top_statement_stats
+ORDER BY
+  ranking,
+  rank_position;
 
 ROLLBACK;
 ```

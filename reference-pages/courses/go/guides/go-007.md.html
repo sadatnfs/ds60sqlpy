@@ -235,8 +235,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">5</span> <span class="syntax-operator">&amp;&amp;</span> utf8<span class="syntax-punctuation">.</span>RuneCountInString<span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;text units&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> There are 5 bytes and 2 runes.</p>
 <p>The ASCII letter occupies one byte and this emoji occupies four. Neither count is a general grapheme-cluster algorithm.</p>
 <h4 id="worked-example-2-edit-a-copied-byte-slice">Worked example 2: Edit a copied byte slice<a class="heading-anchor" href="#worked-example-2-edit-a-copied-byte-slice" aria-label="Link to this section">#</a></h4>
@@ -269,8 +268,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>original <span class="syntax-operator">==</span> <span class="syntax-string">&quot;cat&quot;</span> <span class="syntax-operator">&amp;&amp;</span> <span class="syntax-builtin">string</span><span class="syntax-punctuation">(</span>data<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;bat&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;copy edit&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The original is cat and the new string is bat.</p>
 <p>The mutable byte slice provides an explicit editing boundary. This example uses ASCII so replacing one byte does not split a multibyte encoding.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>

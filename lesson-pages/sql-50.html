@@ -433,56 +433,89 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These worked excerpts come from <code>sql/postgres-60day/day50_project2_finance_part2.sql</code>. Use <strong>Whole SQL lesson (psql)</strong> in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared <code>psql</code> routes are described above.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> monthly_exp <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> expense_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
-         category<span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> actual
-  <span class="syntax-keyword">FROM</span> expenses
-  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span>
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> monthly_budget <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">period</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
-         category<span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> budget
-  <span class="syntax-keyword">FROM</span> budgets
-  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span>
+  <span class="syntax-keyword">SELECT</span>
+    date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> expense_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
+    category<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> actual
+  <span class="syntax-keyword">FROM</span>
+    expenses
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+    <span class="syntax-number">1</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-number">2</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+monthly_budget <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span>
+    <span class="syntax-keyword">period</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
+    category<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> budget
+  <span class="syntax-keyword">FROM</span>
+    budgets
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+    <span class="syntax-number">1</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-number">2</span>
 <span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span> e<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> category<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> e<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">.</span>budget<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> budget<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>actual<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> actual<span class="syntax-punctuation">,</span>
-       ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>actual<span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">.</span>budget<span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> variance<span class="syntax-punctuation">,</span>
-       ROUND<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>actual<span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">.</span>budget<span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-keyword">NULLIF</span><span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">.</span>budget<span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> variance_pct
-<span class="syntax-keyword">FROM</span> monthly_budget b
-<span class="syntax-keyword">FULL</span> <span class="syntax-keyword">OUTER</span> <span class="syntax-keyword">JOIN</span> monthly_exp e
-  <span class="syntax-keyword">ON</span> e<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span> <span class="syntax-operator">=</span> b<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span> <span class="syntax-keyword">AND</span> e<span class="syntax-punctuation">.</span>category <span class="syntax-operator">=</span> b<span class="syntax-punctuation">.</span>category
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">month</span> <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> category
+<span class="syntax-keyword">SELECT</span>
+  <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span> e<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> category<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> e<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">.</span>budget<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> budget<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>actual<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> actual<span class="syntax-punctuation">,</span>
+  ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>actual<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">.</span>budget<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> variance<span class="syntax-punctuation">,</span>
+  ROUND<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>actual<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">.</span>budget<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-keyword">NULLIF</span> <span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">.</span>budget<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> variance_pct
+<span class="syntax-keyword">FROM</span>
+  monthly_budget b
+  <span class="syntax-keyword">FULL</span> <span class="syntax-keyword">OUTER</span> <span class="syntax-keyword">JOIN</span> monthly_exp e <span class="syntax-keyword">ON</span> e<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span> <span class="syntax-operator">=</span> b<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span>
+  <span class="syntax-keyword">AND</span> e<span class="syntax-punctuation">.</span>category <span class="syntax-operator">=</span> b<span class="syntax-punctuation">.</span>category
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  <span class="syntax-keyword">month</span> <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span>
+  category
 <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">100</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 1: Start with <code>expenses</code>, and <code>budgets</code> in <code>FROM</code>/<code>JOIN</code>; let <code>GROUP BY</code> collapse rows to its grouping keys. The final <code>SELECT</code> displays <code>category</code>, <code>month</code>, <code>budget</code>, <code>actual</code>, <code>variance</code>, and <code>variance_pct</code>. <code>ORDER BY</code> determines presentation order and the final <code>LIMIT 100</code> caps displayed rows. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 1 returns one grouped row per <code>month</code>, and <code>category</code>, capped at 100 rows with columns <code>month</code>, <code>category</code>, <code>actual</code>, <code>budget</code>, <code>variance</code>, and <code>variance_pct</code> from <code>expenses</code>, and <code>budgets</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> monthly <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> expense_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
-         category<span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> actual
-  <span class="syntax-keyword">FROM</span> expenses
-  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span>
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> bud <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">period</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">,</span> <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> budget
-  <span class="syntax-keyword">FROM</span> budgets
-  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span>
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> joined <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span> m<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> category<span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> m<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">.</span>budget<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> budget<span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>m<span class="syntax-punctuation">.</span>actual<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> actual
-  <span class="syntax-keyword">FROM</span> bud b <span class="syntax-keyword">FULL</span> <span class="syntax-keyword">JOIN</span> monthly m <span class="syntax-keyword">ON</span> m<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span> <span class="syntax-operator">=</span> b<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span> <span class="syntax-keyword">AND</span> m<span class="syntax-punctuation">.</span>category <span class="syntax-operator">=</span> b<span class="syntax-punctuation">.</span>category
+  <span class="syntax-keyword">SELECT</span>
+    date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> expense_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
+    category<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> actual
+  <span class="syntax-keyword">FROM</span>
+    expenses
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+    <span class="syntax-number">1</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-number">2</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+bud <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span>
+    <span class="syntax-keyword">period</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
+    category<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> budget
+  <span class="syntax-keyword">FROM</span>
+    budgets
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+    <span class="syntax-number">1</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-number">2</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+joined <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span>
+    <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span> m<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> category<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> m<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">.</span>budget<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> budget<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>m<span class="syntax-punctuation">.</span>actual<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> actual
+  <span class="syntax-keyword">FROM</span>
+    bud b
+    <span class="syntax-keyword">FULL</span> <span class="syntax-keyword">JOIN</span> monthly m <span class="syntax-keyword">ON</span> m<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span> <span class="syntax-operator">=</span> b<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span>
+      <span class="syntax-keyword">AND</span> m<span class="syntax-punctuation">.</span>category <span class="syntax-operator">=</span> b<span class="syntax-punctuation">.</span>category
 <span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> category<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> category <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">month</span> <span class="syntax-keyword">ROWS</span> <span class="syntax-keyword">BETWEEN</span> <span class="syntax-number">2</span> PRECEDING <span class="syntax-keyword">AND</span> <span class="syntax-keyword">CURRENT</span> <span class="syntax-keyword">ROW</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> actual_ma3<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>budget<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> category <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">month</span> <span class="syntax-keyword">ROWS</span> <span class="syntax-keyword">BETWEEN</span> <span class="syntax-number">2</span> PRECEDING <span class="syntax-keyword">AND</span> <span class="syntax-keyword">CURRENT</span> <span class="syntax-keyword">ROW</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> budget_ma3
-<span class="syntax-keyword">FROM</span> joined
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">month</span> <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> category
-<span class="syntax-keyword">LIMIT</span> <span class="syntax-number">100</span><span class="syntax-punctuation">;</span></code></pre>
+  <span class="syntax-keyword">SELECT</span>
+    category<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> category <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">month</span> <span class="syntax-keyword">ROWS</span> <span class="syntax-keyword">BETWEEN</span> <span class="syntax-number">2</span> PRECEDING <span class="syntax-keyword">AND</span> <span class="syntax-keyword">CURRENT</span> <span class="syntax-keyword">ROW</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> actual_ma3<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>budget<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> category <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">month</span> <span class="syntax-keyword">ROWS</span> <span class="syntax-keyword">BETWEEN</span> <span class="syntax-number">2</span> PRECEDING <span class="syntax-keyword">AND</span> <span class="syntax-keyword">CURRENT</span> <span class="syntax-keyword">ROW</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> budget_ma3
+  <span class="syntax-keyword">FROM</span>
+    joined
+  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+    <span class="syntax-keyword">month</span> <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span>
+    category
+  <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">100</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 2: Start with <code>expenses</code>, and <code>budgets</code> in <code>FROM</code>/<code>JOIN</code>; let <code>GROUP BY</code> collapse rows to its grouping keys; let each <code>OVER</code> expression calculate across related rows without collapsing them. The final <code>SELECT</code> displays <code>category</code>, <code>month</code>, <code>actual_ma3</code>, and <code>budget_ma3</code>. <code>ORDER BY</code> determines presentation order and the final <code>LIMIT 100</code> caps displayed rows. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 2 returns one grouped row per <code>month</code>, and <code>category</code>, capped at 100 rows with columns <code>month</code>, <code>category</code>, <code>actual</code>, <code>budget</code>, <code>actual_ma3</code>, and <code>budget_ma3</code> from <code>expenses</code>, and <code>budgets</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -797,39 +830,57 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
 <span class="syntax-keyword">WITH</span> actual <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> expense_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
-         category<span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> actual
-  <span class="syntax-keyword">FROM</span> expenses
-  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> expense_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> category
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> budget <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">period</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">,</span> <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> budget
-  <span class="syntax-keyword">FROM</span> budgets
-  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">period</span><span class="syntax-punctuation">,</span> category
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> joined <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> category<span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">.</span>actual<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> actual<span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">.</span>budget<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> budget
-  <span class="syntax-keyword">FROM</span> actual a
-  <span class="syntax-keyword">FULL</span> <span class="syntax-keyword">OUTER</span> <span class="syntax-keyword">JOIN</span> budget b <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> compared <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span>
-         LAG<span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">,</span> <span class="syntax-number">12</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>
-           PARTITION <span class="syntax-keyword">BY</span> category <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">month</span>
-         <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> prior_year_actual
-  <span class="syntax-keyword">FROM</span> joined
+  <span class="syntax-keyword">SELECT</span>
+    date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> expense_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
+    category<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> actual
+  <span class="syntax-keyword">FROM</span>
+    expenses
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+    date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> expense_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    category
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+budget <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span>
+    <span class="syntax-keyword">period</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
+    category<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> budget
+  <span class="syntax-keyword">FROM</span>
+    budgets
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+    <span class="syntax-keyword">period</span><span class="syntax-punctuation">,</span>
+    category
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+joined <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span>
+    <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> category<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">.</span>actual<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> actual<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">.</span>budget<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> budget
+  <span class="syntax-keyword">FROM</span>
+    actual a
+    <span class="syntax-keyword">FULL</span> <span class="syntax-keyword">OUTER</span> <span class="syntax-keyword">JOIN</span> budget b <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+compared <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span>
+    <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span>
+    LAG<span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">,</span> <span class="syntax-number">12</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> category <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> prior_year_actual
+  <span class="syntax-keyword">FROM</span>
+    joined
 <span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
-       category<span class="syntax-punctuation">,</span>
-       ROUND<span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> actual<span class="syntax-punctuation">,</span>
-       ROUND<span class="syntax-punctuation">(</span>prior_year_actual<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> prior_year_actual<span class="syntax-punctuation">,</span>
-       ROUND<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>actual <span class="syntax-operator">-</span> prior_year_actual<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-keyword">NULLIF</span><span class="syntax-punctuation">(</span>prior_year_actual<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span>
-         <span class="syntax-keyword">AS</span> year_over_year_variance_pct<span class="syntax-punctuation">,</span>
-       ROUND<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>actual <span class="syntax-operator">-</span> budget<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-keyword">NULLIF</span><span class="syntax-punctuation">(</span>budget<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> budget_variance_pct<span class="syntax-punctuation">,</span>
-       actual <span class="syntax-operator">&gt;</span> budget <span class="syntax-operator">*</span> <span class="syntax-number">1</span><span class="syntax-punctuation">.</span><span class="syntax-number">15</span> <span class="syntax-keyword">AS</span> overspent_by_more_than_15_pct
-<span class="syntax-keyword">FROM</span> compared
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">month</span> <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">;</span></code></pre>
+<span class="syntax-keyword">SELECT</span>
+  <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
+  category<span class="syntax-punctuation">,</span>
+  ROUND<span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> actual<span class="syntax-punctuation">,</span>
+  ROUND<span class="syntax-punctuation">(</span>prior_year_actual<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> prior_year_actual<span class="syntax-punctuation">,</span>
+  ROUND<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>actual <span class="syntax-operator">-</span> prior_year_actual<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-keyword">NULLIF</span> <span class="syntax-punctuation">(</span>prior_year_actual<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> year_over_year_variance_pct<span class="syntax-punctuation">,</span>
+  ROUND<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>actual <span class="syntax-operator">-</span> budget<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-keyword">NULLIF</span> <span class="syntax-punctuation">(</span>budget<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> budget_variance_pct<span class="syntax-punctuation">,</span>
+  actual <span class="syntax-operator">&gt;</span> budget <span class="syntax-operator">*</span> <span class="syntax-number">1</span><span class="syntax-punctuation">.</span><span class="syntax-number">15</span> <span class="syntax-keyword">AS</span> overspent_by_more_than_15_pct
+<span class="syntax-keyword">FROM</span>
+  compared
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  <span class="syntax-keyword">month</span> <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span>
+  category<span class="syntax-punctuation">;</span></code></pre>
 <p>Expected grain: one row per month and category, including periods found on only one side of the actual/budget comparison.</p>
 <h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -845,30 +896,39 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
 <span class="syntax-keyword">WITH</span> actual <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> expense_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
-         category<span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> actual
-  <span class="syntax-keyword">FROM</span> expenses
-  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> expense_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> category
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> variance <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> b<span class="syntax-punctuation">.</span><span class="syntax-keyword">period</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
-         b<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">.</span>actual<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> b<span class="syntax-punctuation">.</span>amount <span class="syntax-keyword">AS</span> variance
-  <span class="syntax-keyword">FROM</span> budgets b
-  <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> actual a
-    <span class="syntax-keyword">ON</span> a<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span> <span class="syntax-operator">=</span> b<span class="syntax-punctuation">.</span><span class="syntax-keyword">period</span>
-   <span class="syntax-keyword">AND</span> a<span class="syntax-punctuation">.</span>category <span class="syntax-operator">=</span> b<span class="syntax-punctuation">.</span>category
+  <span class="syntax-keyword">SELECT</span>
+    date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> expense_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
+    category<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> actual
+  <span class="syntax-keyword">FROM</span>
+    expenses
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+    date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> expense_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    category
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+variance <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span>
+    b<span class="syntax-punctuation">.</span><span class="syntax-keyword">period</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
+    b<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">.</span>actual<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> b<span class="syntax-punctuation">.</span>amount <span class="syntax-keyword">AS</span> variance
+  <span class="syntax-keyword">FROM</span>
+    budgets b
+    <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> actual a <span class="syntax-keyword">ON</span> a<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span> <span class="syntax-operator">=</span> b<span class="syntax-punctuation">.</span><span class="syntax-keyword">period</span>
+      <span class="syntax-keyword">AND</span> a<span class="syntax-punctuation">.</span>category <span class="syntax-operator">=</span> b<span class="syntax-punctuation">.</span>category
 <span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
-       ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>variance<span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> category <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;COGS&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> cogs<span class="syntax-punctuation">,</span>
-       ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>variance<span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> category <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;Marketing&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> marketing<span class="syntax-punctuation">,</span>
-       ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>variance<span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> category <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;Payroll&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> payroll<span class="syntax-punctuation">,</span>
-       ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>variance<span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> category <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;Infrastructure&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
-         <span class="syntax-keyword">AS</span> infrastructure<span class="syntax-punctuation">,</span>
-       ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>variance<span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> category <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;G&amp;A&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> general_admin
-<span class="syntax-keyword">FROM</span> variance
-<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">month</span>
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">month</span> <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span></code></pre>
+  <span class="syntax-keyword">SELECT</span>
+    <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
+    ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>variance<span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> category <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;COGS&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> cogs<span class="syntax-punctuation">,</span>
+    ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>variance<span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> category <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;Marketing&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> marketing<span class="syntax-punctuation">,</span>
+    ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>variance<span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> category <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;Payroll&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> payroll<span class="syntax-punctuation">,</span>
+    ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>variance<span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> category <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;Infrastructure&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> infrastructure<span class="syntax-punctuation">,</span>
+    ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>variance<span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> category <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;G&amp;A&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> general_admin
+  <span class="syntax-keyword">FROM</span>
+    variance
+<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+  <span class="syntax-keyword">month</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  <span class="syntax-keyword">month</span> <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span></code></pre>
 <p>Expected shape: one row per budget month and one variance column per known category.</p>
 <h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -927,36 +987,57 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <p>The CASE checks missing and zero budgets before normal overspend. This prevents an absent plan from becoming an ordinary variance percentage.</p>
 <p>Aggregate both sources independently before joining them. If raw expense rows are joined to a monthly budget first, the budget is repeated once per expense:</p>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> expense_monthly <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> expense_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
-         category<span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> actual
-  <span class="syntax-keyword">FROM</span> expenses
-  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span>
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> budget_monthly <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">period</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">,</span> <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> budget
-  <span class="syntax-keyword">FROM</span> budgets
-  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span>
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> monthly <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> category<span class="syntax-punctuation">,</span>
-         e<span class="syntax-punctuation">.</span>actual<span class="syntax-punctuation">,</span>
-         b<span class="syntax-punctuation">.</span>budget
-  <span class="syntax-keyword">FROM</span> expense_monthly e
-  <span class="syntax-keyword">FULL</span> <span class="syntax-keyword">JOIN</span> budget_monthly b <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
-       category<span class="syntax-punctuation">,</span>
-       actual<span class="syntax-punctuation">,</span>
-       budget<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">CASE</span>
-         <span class="syntax-keyword">WHEN</span> budget <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;unbudgeted spend&#x27;</span>
-         <span class="syntax-keyword">WHEN</span> actual <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;budget without spend&#x27;</span>
-         <span class="syntax-keyword">WHEN</span> budget <span class="syntax-operator">=</span> <span class="syntax-number">0</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;zero budget&#x27;</span>
-         <span class="syntax-keyword">WHEN</span> actual <span class="syntax-operator">&gt;</span> budget <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;overspend&#x27;</span>
-         <span class="syntax-keyword">ELSE</span> <span class="syntax-string">&#x27;within budget&#x27;</span>
-       <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> status
-<span class="syntax-keyword">FROM</span> monthly
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">;</span></code></pre>
+  <span class="syntax-keyword">SELECT</span>
+    date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> expense_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
+    category<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> actual
+  <span class="syntax-keyword">FROM</span>
+    expenses
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+    <span class="syntax-number">1</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-number">2</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+budget_monthly <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span>
+    <span class="syntax-keyword">period</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
+    category<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> budget
+  <span class="syntax-keyword">FROM</span>
+    budgets
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+    <span class="syntax-number">1</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-number">2</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+monthly <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span>
+    <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> category<span class="syntax-punctuation">,</span>
+    e<span class="syntax-punctuation">.</span>actual<span class="syntax-punctuation">,</span>
+    b<span class="syntax-punctuation">.</span>budget
+  <span class="syntax-keyword">FROM</span>
+    expense_monthly e
+    <span class="syntax-keyword">FULL</span> <span class="syntax-keyword">JOIN</span> budget_monthly b <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span>
+  <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
+  category<span class="syntax-punctuation">,</span>
+  actual<span class="syntax-punctuation">,</span>
+  budget<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> budget <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">THEN</span>
+    <span class="syntax-string">&#x27;unbudgeted spend&#x27;</span>
+  <span class="syntax-keyword">WHEN</span> actual <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">THEN</span>
+    <span class="syntax-string">&#x27;budget without spend&#x27;</span>
+  <span class="syntax-keyword">WHEN</span> budget <span class="syntax-operator">=</span> <span class="syntax-number">0</span> <span class="syntax-keyword">THEN</span>
+    <span class="syntax-string">&#x27;zero budget&#x27;</span>
+  <span class="syntax-keyword">WHEN</span> actual <span class="syntax-operator">&gt;</span> budget <span class="syntax-keyword">THEN</span>
+    <span class="syntax-string">&#x27;overspend&#x27;</span>
+  <span class="syntax-keyword">ELSE</span>
+    <span class="syntax-string">&#x27;within budget&#x27;</span>
+  <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> status
+<span class="syntax-keyword">FROM</span>
+  monthly
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
+  category<span class="syntax-punctuation">;</span></code></pre>
 <h5 id="solution-1--reasoning-and-verification-6">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-6" aria-label="Link to this section">#</a></h5>
 <ul>
 <li><strong>Inputs/evidence:</strong> For sql-50 Exercise 6, aggregate <code>expenses</code> and <code>budgets</code> independently to (<code>month</code>, <code>category</code>) before joining.</li>

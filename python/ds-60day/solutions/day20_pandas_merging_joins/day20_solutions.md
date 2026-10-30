@@ -52,9 +52,7 @@ order_items = pd.DataFrame(
         "qty": [2, 1, 3],
     }
 )
-customers = pd.DataFrame(
-    {"cid": [10, 20, 30], "name": ["Ada", "Lin", "No Orders"]}
-)
+customers = pd.DataFrame({"cid": [10, 20, 30], "name": ["Ada", "Lin", "No Orders"]})
 
 # Grains: one product per sku, one customer per cid, and one order item
 # per order_item_id.
@@ -62,9 +60,9 @@ assert products["sku"].is_unique
 assert customers["cid"].is_unique
 assert order_items["order_item_id"].is_unique
 
-items = order_items.merge(
-    products, on="sku", how="left", validate="many_to_one"
-).assign(revenue=lambda frame: frame["qty"] * frame["price"])
+items = order_items.merge(products, on="sku", how="left", validate="many_to_one").assign(
+    revenue=lambda frame: frame["qty"] * frame["price"]
+)
 revenue = (
     items.groupby("cid", as_index=False)
     .agg(revenue=("revenue", "sum"))
@@ -84,12 +82,8 @@ assert revenue["revenue"].sum() == items["revenue"].sum()
 **Reasoning:** Implement this exact contract as written: Demonstrate a right join that preserves every row of a chosen right-side customer table, including a customer with no matching order. Expected behavior: the unmatched right row survives with missing order fields. Then: swap table order and reproduce the result with a left join. Keep the prompt's named data and constraints visible in the code, then establish this specific result: compare sorted keys and explain why left joins are often easier to read from a chosen primary table. That connects the answer to relational keys, join types, cardinality, and reconciliation.
 
 ```python
-right_joined = order_items.merge(
-    customers, on="cid", how="right", indicator=True
-)
-equivalent_left = customers.merge(
-    order_items, on="cid", how="left", indicator=True
-)
+right_joined = order_items.merge(customers, on="cid", how="right", indicator=True)
+equivalent_left = customers.merge(order_items, on="cid", how="left", indicator=True)
 right_keys = right_joined["cid"].sort_values().reset_index(drop=True)
 left_keys = equivalent_left["cid"].sort_values().reset_index(drop=True)
 pd.testing.assert_series_equal(right_keys, left_keys)
@@ -128,9 +122,7 @@ else:
     raise AssertionError("duplicated product keys must violate many_to_one")
 
 assert products["sku"].is_unique
-repaired = order_items.merge(
-    products, on="sku", how="left", validate="many_to_one"
-)
+repaired = order_items.merge(products, on="sku", how="left", validate="many_to_one")
 assert len(repaired) == len(order_items)
 ```
 
@@ -199,9 +191,7 @@ def anti_join(left: pd.DataFrame, right: pd.DataFrame, *, key: str) -> pd.DataFr
     if left[key].isna().any() or right[key].isna().any():
         raise ValueError(f"{key} must be non-null before this business-key join")
     right_keys = right[[key]].drop_duplicates()
-    marked = left.merge(
-        right_keys, on=key, how="left", validate="many_to_one", indicator=True
-    )
+    marked = left.merge(right_keys, on=key, how="left", validate="many_to_one", indicator=True)
     return marked.loc[marked["_merge"].eq("left_only"), left.columns].reset_index(drop=True)
 
 

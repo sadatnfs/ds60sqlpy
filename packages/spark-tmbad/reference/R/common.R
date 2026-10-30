@@ -138,12 +138,14 @@ reference_fit <- function(objective, lower = rep(-Inf, length(objective$par)),
     projected <- gradient
     projected[candidate$par <= lower + 1e-7 & gradient > 0] <- 0
     projected[candidate$par >= upper - 1e-7 & gradient < 0] <- 0
-    list(method = method, parameters = unname(candidate$par),
+    list(
+      method = method, parameters = unname(candidate$par),
       parameter_names = names(candidate$par), objective = candidate$objective,
       convergence = candidate$convergence, message = candidate$message,
       iterations = candidate$iterations, evaluations = unname(candidate$evaluations),
       gradient = gradient, projected_gradient = projected,
-      raw_score_inf = max(abs(gradient)), projected_score_inf = max(abs(projected)))
+      raw_score_inf = max(abs(gradient)), projected_score_inf = max(abs(projected))
+    )
   }
   attempts <- list(inspect(fit, "nlminb"))
   accepted <- function(candidate, diagnostic) {
@@ -154,19 +156,27 @@ reference_fit <- function(objective, lower = rep(-Inf, length(objective$par)),
   if (!accepted(fit, attempts[[1]])) {
     # Optimize the same bounded objective from the retained first attempt.
     # A solver status alone never substitutes for the original score check.
-    refined <- optim(fit$par, objective$fn, objective$gr, method = "L-BFGS-B",
+    refined <- optim(fit$par, objective$fn, objective$gr,
+      method = "L-BFGS-B",
       lower = lower, upper = upper,
-      control = list(maxit = 1500, factr = 1, pgtol = tolerance / 10))
+      control = list(maxit = 1500, factr = 1, pgtol = tolerance / 10)
+    )
     refined$objective <- refined$value
     refined$evaluations <- refined$counts
     attempts[[2]] <- inspect(refined, "optim L-BFGS-B refinement")
     if (!accepted(refined, attempts[[2]])) {
-      stop(structure(list(message = "TMB optimization/refinement failed the original status or score checks",
-        call = NULL, diagnostics = list(optimizer_attempts = attempts)),
-        class = c("reference_fit_error", "error", "condition")))
+      stop(structure(
+        list(
+          message = "TMB optimization/refinement failed the original status or score checks",
+          call = NULL, diagnostics = list(optimizer_attempts = attempts)
+        ),
+        class = c("reference_fit_error", "error", "condition")
+      ))
     }
-    reference_assert(refined$objective <= fit$objective + 1e-8 * (1 + abs(fit$objective)),
-      "TMB refinement increased the objective")
+    reference_assert(
+      refined$objective <= fit$objective + 1e-8 * (1 + abs(fit$objective)),
+      "TMB refinement increased the objective"
+    )
     fit <- refined
   }
   final <- attempts[[length(attempts)]]
@@ -194,12 +204,16 @@ reference_fit <- function(objective, lower = rep(-Inf, length(objective$par)),
 }
 
 reference_coefficients <- function(value) {
-  reference_assert(is.list(value) && setequal(names(value), c("cond", "zi", "disp")),
-    "Unexpected glmmTMB coefficient components")
+  reference_assert(
+    is.list(value) && setequal(names(value), c("cond", "zi", "disp")),
+    "Unexpected glmmTMB coefficient components"
+  )
   setNames(lapply(value, function(component) {
-    reference_assert(is.numeric(component) && is.null(dim(component)) && all(is.finite(component)) &&
-      (length(component) == 0L || (!is.null(names(component)) && !anyDuplicated(names(component)))),
-      "Invalid named coefficient vector")
+    reference_assert(
+      is.numeric(component) && is.null(dim(component)) && all(is.finite(component)) &&
+        (length(component) == 0L || (!is.null(names(component)) && !anyDuplicated(names(component)))),
+      "Invalid named coefficient vector"
+    )
     list(parameter_names = unname(as.list(names(component))), values = unname(as.list(component)))
   }), names(value))
 }

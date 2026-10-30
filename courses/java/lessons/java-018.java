@@ -3,8 +3,8 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     // Exercise 1: Use independent table cases
-    // Testclamp for values-2,0,3,9 underbounds0..5.
-    // Expected: outputs0,0,3,5.
+    // Test clamp for values -2,0,3,9 under bounds 0..5.
+    // Expected: outputs 0,0,3,5.
 
     // Exercise 2: Check a boundary failure
     // Callclamp withlower5,upper2 and requireIllegalArgumentException.
@@ -15,7 +15,7 @@ public class Main {
     // Expected: all21 cases satisfyidempotence.
 
     // Exercise 4: Detect a broken implementation
-    // Use a mutant that returnsupper for values belowlower and show the table rejects it.
+    // Use a mutant that returns upper for values below lower and show the table rejects it.
     // Expected: at least one mismatch.
 
     // Exercise 5: Verify the exception checker itself
@@ -25,7 +25,7 @@ public class Main {
 
     // Exercise 6: Test a fresh transfer property
     // Reverse arrays oflength0,1,3 twice using a separate copy and compare with originals.
-    // Expected: all originals restored;input arrays unchanged.
+    // Expected: all originals restored; input arrays unchanged.
     System.out.println("Implement and check the six exercises in your saved copy.");
   }
 }

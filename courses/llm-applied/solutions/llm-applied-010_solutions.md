@@ -57,8 +57,9 @@ The question is: Rewritebuy rate usingbuy->purchase while preserving the origina
 The substitution is explicitly authored. A learned rewrite would need evaluation for intent preservation and unsupported expansion.
 
 ```python
-original='buy rate'; rewritten=rewrite(original,{'buy':'purchase'})
-assert rewritten=='purchase rate' and original=='buy rate'
+original = "buy rate"
+rewritten = rewrite(original, {"buy": "purchase"})
+assert rewritten == "purchase rate" and original == "buy rate"
 ```
 
 **Expected:** rewrittenpurchase rate; original unchanged.
@@ -72,8 +73,8 @@ The question is: Record the original, rewritten query and policy version.
 A retrieval failure can originate in the rewrite rather than the ranking model. Keeping both strings makes that stage diagnosable.
 
 ```python
-trace={'original':original,'rewritten':rewritten,'policy':'synonyms-v1'}
-assert set(trace)=={'original','rewritten','policy'}
+trace = {"original": original, "rewritten": rewritten, "policy": "synonyms-v1"}
+assert set(trace) == {"original", "rewritten", "policy"}
 ```
 
 **Expected:** trace includes all three fields.
@@ -87,8 +88,8 @@ The question is: Use graphmetric->exclusions->test_accounts with a two-hop bound
 The depth counts edges from the starting evidence item. The final document is included because it is exactly two links away.
 
 ```python
-graph={'metric':['exclusions'],'exclusions':['test_accounts'],'test_accounts':[]}
-assert walk('metric',graph,2)==['metric','exclusions','test_accounts']
+graph = {"metric": ["exclusions"], "exclusions": ["test_accounts"], "test_accounts": []}
+assert walk("metric", graph, 2) == ["metric", "exclusions", "test_accounts"]
 ```
 
 **Expected:** visited metric, exclusions, test_accounts.
@@ -102,11 +103,14 @@ The question is: Run the same graph with a one-hop bound, then reject fractional
 The budget is a real behavior constraint. Returning the deeper document would mean the implementation ignored the configured stopping rule.
 
 ```python
-assert walk('metric',graph,1)==['metric','exclusions']
-for bad_budget in [1.5,True,float('nan'),-1]:
-    try: walk('metric',graph,bad_budget)
-    except ValueError: pass
-    else: raise AssertionError('invalid hop budget accepted')
+assert walk("metric", graph, 1) == ["metric", "exclusions"]
+for bad_budget in [1.5, True, float("nan"), -1]:
+    try:
+        walk("metric", graph, bad_budget)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("invalid hop budget accepted")
 ```
 
 **Expected:** test_accounts is absent; invalid budgets raise ValueError before traversal.
@@ -120,8 +124,9 @@ The question is: Addtest_accounts->metric and traverse with a larger bound.
 A visited set prevents repeated evidence from masquerading as additional support and keeps cycles from consuming unlimited work.
 
 ```python
-cyclic={**graph,'test_accounts':['metric']}; result=walk('metric',cyclic,10)
-assert result==['metric','exclusions','test_accounts'] and len(result)==len(set(result))
+cyclic = {**graph, "test_accounts": ["metric"]}
+result = walk("metric", cyclic, 10)
+assert result == ["metric", "exclusions", "test_accounts"] and len(result) == len(set(result))
 ```
 
 **Expected:** each document appears once.
@@ -135,8 +140,8 @@ The question is: Remove a restricted target from the admitted graph and ensure l
 A link is not permission to access its target. The traversal follows only nodes present in the already admitted graph.
 
 ```python
-admitted={'metric':['restricted'],'public':[]}
-assert walk('metric',admitted,3)==['metric']
+admitted = {"metric": ["restricted"], "public": []}
+assert walk("metric", admitted, 3) == ["metric"]
 ```
 
 **Expected:** restricted document never appears.

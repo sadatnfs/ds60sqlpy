@@ -80,9 +80,12 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-w=torch.tensor(1.,dtype=torch.float64,requires_grad=True); z=2*w; a=z*z; loss=(a-1)**2
-gradient=torch.autograd.grad(loss,w)[0]
-assert (z.item(),a.item(),loss.item(),gradient.item())==(2.,4.,9.,48.)
+w = torch.tensor(1.0, dtype=torch.float64, requires_grad=True)
+z = 2 * w
+a = z * z
+loss = (a - 1) ** 2
+gradient = torch.autograd.grad(loss, w)[0]
+assert (z.item(), a.item(), loss.item(), gradient.item()) == (2.0, 4.0, 9.0, 48.0)
 ```
 
 **Expected:** z2, a4, loss 9, gradient 48.
@@ -92,9 +95,10 @@ assert (z.item(),a.item(),loss.item(),gradient.item())==(2.,4.,9.,48.)
 The finite difference treats the entire function as a black box. It can expose an incorrect manual chain factor without reading the graph internals.
 
 ```python
-h=1e-5; f=lambda value:((2*value)**2-1)**2
-numeric=(f(1+h)-f(1-h))/(2*h)
-np.testing.assert_allclose(numeric,48,atol=1e-5,rtol=0)
+h = 1e-5
+f = lambda value: ((2 * value) ** 2 - 1) ** 2
+numeric = (f(1 + h) - f(1 - h)) / (2 * h)
+np.testing.assert_allclose(numeric, 48, atol=1e-5, rtol=0)
 ```
 
 **Expected:** approximately 48 within 1e-5.
@@ -104,10 +108,13 @@ np.testing.assert_allclose(numeric,48,atol=1e-5,rtol=0)
 The guard prevents an ambiguous modification of a value whose derivative history is being tracked. Optimizer updates use a deliberate state-update boundary instead.
 
 ```python
-leaf=torch.tensor(1.,requires_grad=True)
-try: leaf.add_(1)
-except RuntimeError: pass
-else: raise AssertionError('unsafe leaf mutation accepted')
+leaf = torch.tensor(1.0, requires_grad=True)
+try:
+    leaf.add_(1)
+except RuntimeError:
+    pass
+else:
+    raise AssertionError("unsafe leaf mutation accepted")
 ```
 
 **Expected:** RuntimeError.

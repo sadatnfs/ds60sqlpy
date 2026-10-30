@@ -44,6 +44,7 @@ groups?**
 ```python
 import numpy as np
 
+
 def psi(reference: np.ndarray, current: np.ndarray, bins: int = 10) -> float:
     edges = np.quantile(reference, np.linspace(0, 1, bins + 1))
     edges[0], edges[-1] = -np.inf, np.inf
@@ -51,12 +52,7 @@ def psi(reference: np.ndarray, current: np.ndarray, bins: int = 10) -> float:
     current_counts = np.histogram(current, bins=edges)[0]
     reference_rate = np.clip(reference_counts / reference_counts.sum(), 1e-6, 1)
     current_rate = np.clip(current_counts / current_counts.sum(), 1e-6, 1)
-    return float(
-        np.sum(
-            (current_rate - reference_rate)
-            * np.log(current_rate / reference_rate)
-        )
-    )
+    return float(np.sum((current_rate - reference_rate) * np.log(current_rate / reference_rate)))
 ```
 
 Quantile edges are learned from the reference and extended to infinity so
@@ -170,11 +166,13 @@ monitoring_snapshot = {
     "outcomes_available": 1_200,
     "labeled_roc_auc": 0.86,
 }
-label_coverage = (
-    monitoring_snapshot["outcomes_available"] / monitoring_snapshot["requests"]
+label_coverage = monitoring_snapshot["outcomes_available"] / monitoring_snapshot["requests"]
+print(
+    {
+        "label_coverage": label_coverage,
+        "performance_estimate": monitoring_snapshot["labeled_roc_auc"],
+    }
 )
-print({"label_coverage": label_coverage,
-       "performance_estimate": monitoring_snapshot["labeled_roc_auc"]})
 assert label_coverage == 0.12
 ```
 

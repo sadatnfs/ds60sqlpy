@@ -100,12 +100,16 @@ These worked excerpts come from `sql/postgres-60day/day14_numeric_and_casting.sq
 ### Example 1
 
 ```sql
-SELECT order_id,
-       total_amount,
-       round(total_amount, 0) AS rounded,
-       cast(total_amount AS int) AS as_int
-FROM orders
-ORDER BY total_amount DESC, order_id
+SELECT
+  order_id,
+  total_amount,
+  round(total_amount, 0) AS rounded,
+  cast(total_amount AS int) AS as_int
+FROM
+  orders
+ORDER BY
+  total_amount DESC,
+  order_id
 LIMIT 50;
 ```
 
@@ -116,13 +120,18 @@ LIMIT 50;
 ### Example 2
 
 ```sql
-SELECT p.category,
-       SUM(oi.quantity) AS qty,
-       ROUND(SUM(oi.unit_price*oi.quantity*(1-oi.discount)) / NULLIF(SUM(oi.quantity),0), 2) AS avg_price
-FROM order_items oi
-JOIN products p ON p.product_id = oi.product_id
-GROUP BY p.category
-ORDER BY avg_price DESC, p.category;
+SELECT
+  p.category,
+  SUM(oi.quantity) AS qty,
+  ROUND(SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) / NULLIF (SUM(oi.quantity), 0), 2) AS avg_price
+FROM
+  order_items oi
+  JOIN products p ON p.product_id = oi.product_id
+GROUP BY
+  p.category
+ORDER BY
+  avg_price DESC,
+  p.category;
 ```
 
 **How to read it:** Example 2: Start with `order_items`, and `products` in `FROM`/`JOIN`; let `GROUP BY` collapse rows to its grouping keys. The final `SELECT` displays `category`, `qty`, and `avg_price`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.

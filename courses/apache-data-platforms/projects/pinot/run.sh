@@ -106,7 +106,7 @@ if [[ $action == prepare ]]; then
   esac
   if [[ $requested_binary == true ]]; then
     image=ds60-apache-pinot-binary:1.5.1
-    base=${DS60_PINOT_BASE:-ds60sqlpy-worker-scala-jvm:1.1.0}
+    base=${DS60_PINOT_BASE:-ds60sqlpy-worker-scala-jvm:1.2.0}
     [[ $base =~ ^ds60sqlpy-worker-scala-jvm:[0-9]+\.[0-9]+\.[0-9]+$ ]] || exit 2
     verify_selected_image "$base"
     "$docker_cmd" build --pull=false --progress=plain --build-arg "BASE_IMAGE=$base" --tag "$image" "$project_dir/binary-image"
@@ -144,7 +144,7 @@ if [[ ! -e .env && ! -L .env ]]; then
   }
   verify_native_image
   saved_image=$image
-  image=ds60sqlpy-worker-data-platforms-python:1.1.0
+  image=ds60sqlpy-worker-data-platforms-python:1.2.0
   verify_native_image
   image=$saved_image
   owner=$(od -An -N16 -tx1 /dev/urandom | tr -d ' \n')
@@ -155,7 +155,7 @@ if [[ ! -e .env && ! -L .env ]]; then
   (
     umask 077
     printf '%s\n' "DS60_WORKSHOP_OWNER=$owner" "DS60_WORKSHOP_PROJECT=ds60-apache-pinot-${owner:0:12}" \
-      "DS60_PINOT_IMAGE=$image" "DS60_PLATFORM_IMAGE=ds60sqlpy-worker-data-platforms-python:1.1.0" >.env
+      "DS60_PINOT_IMAGE=$image" "DS60_PLATFORM_IMAGE=ds60sqlpy-worker-data-platforms-python:1.2.0" >.env
   )
 fi
 [[ -f .env && ! -L .env ]] || {

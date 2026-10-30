@@ -28,14 +28,18 @@ alphas = np.logspace(-3, 2, 10)  # 0.001..100
 ridge_scores, lasso_scores = [], []
 
 for a in alphas:
-    ridge = Pipeline([('sc', StandardScaler()), ('m', Ridge(alpha=a))])
-    lasso = Pipeline([('sc', StandardScaler()), ('m', Lasso(alpha=a, max_iter=20000))])
+    ridge = Pipeline([("sc", StandardScaler()), ("m", Ridge(alpha=a))])
+    lasso = Pipeline([("sc", StandardScaler()), ("m", Lasso(alpha=a, max_iter=20000))])
     ridge_scores.append(cross_val_score(ridge, X, y, cv=5).mean())
     lasso_scores.append(cross_val_score(lasso, X, y, cv=5).mean())
 
-plt.semilogx(alphas, ridge_scores, label='Ridge CV R2')
-plt.semilogx(alphas, lasso_scores, label='Lasso CV R2')
-plt.xlabel('alpha'); plt.ylabel('CV R2'); plt.legend(); plt.tight_layout(); plt.show()
+plt.semilogx(alphas, ridge_scores, label="Ridge CV R2")
+plt.semilogx(alphas, lasso_scores, label="Lasso CV R2")
+plt.xlabel("alpha")
+plt.ylabel("CV R2")
+plt.legend()
+plt.tight_layout()
+plt.show()
 ```
 Notes
 - Stronger alpha increases bias, reduces variance; sweet spot via CV
@@ -45,14 +49,16 @@ Notes
 
 Worked reference for Exercise 2; Coefficients and sparsity
 ```python
-best_ridge = Pipeline([('sc', StandardScaler()), ('m', Ridge(alpha=1.0))]).fit(Xtr, ytr)
-best_lasso = Pipeline([('sc', StandardScaler()), ('m', Lasso(alpha=0.01, max_iter=20000))]).fit(Xtr, ytr)
+best_ridge = Pipeline([("sc", StandardScaler()), ("m", Ridge(alpha=1.0))]).fit(Xtr, ytr)
+best_lasso = Pipeline([("sc", StandardScaler()), ("m", Lasso(alpha=0.01, max_iter=20000))]).fit(
+    Xtr, ytr
+)
 
-coef_ridge = best_ridge.named_steps['m'].coef_
-coef_lasso = best_lasso.named_steps['m'].coef_
+coef_ridge = best_ridge.named_steps["m"].coef_
+coef_lasso = best_lasso.named_steps["m"].coef_
 
 sparsity = (coef_lasso == 0).sum()
-{'ridge_coefs': coef_ridge, 'lasso_coefs': coef_lasso, 'lasso_zeros': int(sparsity)}
+{"ridge_coefs": coef_ridge, "lasso_coefs": coef_lasso, "lasso_zeros": int(sparsity)}
 ```
 Interpretation
 - Ridge shrinks but rarely zeros; Lasso promotes sparsity
@@ -62,9 +68,11 @@ Interpretation
 
 Worked reference for Exercise 3; ElasticNet
 ```python
-enet = Pipeline([('sc', StandardScaler()), ('m', ElasticNet(alpha=0.1, l1_ratio=0.5, max_iter=20000))])
+enet = Pipeline(
+    [("sc", StandardScaler()), ("m", ElasticNet(alpha=0.1, l1_ratio=0.5, max_iter=20000))]
+)
 s = cross_val_score(enet, X, y, cv=5).mean()
-{'elasticnet_cv_r2': s}
+{"elasticnet_cv_r2": s}
 ```
 Takeaways
 - Use CV to pick alpha (and l1_ratio for ElasticNet)

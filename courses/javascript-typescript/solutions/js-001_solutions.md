@@ -86,7 +86,9 @@ Task: Call an ordinary function without a receiver and inspect this.
 ES modules use strict semantics. The callsite determines this for an ordinary function; it is not automatically the global object.
 
 ```javascript
-function receiver() { return this; }
+function receiver() {
+  return this;
+}
 assert.equal(receiver(), undefined);
 ```
 

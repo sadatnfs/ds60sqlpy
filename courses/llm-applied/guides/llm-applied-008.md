@@ -125,18 +125,28 @@ Documentb receives ranks 2 and 1, whilea receives 1 and 3. The difference comes 
 
 ```python
 from collections import defaultdict
-def rrf(rankings,constant=60):
-    if constant<=0: raise ValueError('positive fusion constant required')
-    scores=defaultdict(float)
+
+
+def rrf(rankings, constant=60):
+    if constant <= 0:
+        raise ValueError("positive fusion constant required")
+    scores = defaultdict(float)
     for ranking in rankings:
-        unique=[]; seen=set()
+        unique = []
+        seen = set()
         for key in ranking:
-            if not isinstance(key,str): raise TypeError('string document ID required')
-            if key not in seen: unique.append(key); seen.add(key)
-        for position,key in enumerate(unique,1): scores[key]+=1/(constant+position)
-    return sorted(scores.items(),key=lambda row:(-row[1],row[0]))
-ranked=rrf([['a','b','c'],['b','d','a']],60)
-assert [key for key,score in ranked][:2]==['b','a']
+            if not isinstance(key, str):
+                raise TypeError("string document ID required")
+            if key not in seen:
+                unique.append(key)
+                seen.add(key)
+        for position, key in enumerate(unique, 1):
+            scores[key] += 1 / (constant + position)
+    return sorted(scores.items(), key=lambda row: (-row[1], row[0]))
+
+
+ranked = rrf([["a", "b", "c"], ["b", "d", "a"]], 60)
+assert [key for key, score in ranked][:2] == ["b", "a"]
 ```
 
 **Expected:** b ranks first, a second.
@@ -146,8 +156,8 @@ assert [key for key,score in ranked][:2]==['b','a']
 Writing the formula independently makes off-by-one rank errors visible. Zero-based rank would change every denominator.
 
 ```python
-scores=dict(ranked)
-assert abs(scores['b']-(1/62+1/61))<1e-12
+scores = dict(ranked)
+assert abs(scores["b"] - (1 / 62 + 1 / 61)) < 1e-12
 ```
 
 **Expected:** computed b score equals that sum within 1e-12.
@@ -157,7 +167,7 @@ assert abs(scores['b']-(1/62+1/61))<1e-12
 One retrieval list should contribute one rank per document. Otherwise a buggy candidate generator can inflate a result by emitting duplicates.
 
 ```python
-assert rrf([['a','b','b','c']],60)==rrf([['a','b','c']],60)
+assert rrf([["a", "b", "b", "c"]], 60) == rrf([["a", "b", "c"]], 60)
 ```
 
 **Expected:** fusion result unchanged.

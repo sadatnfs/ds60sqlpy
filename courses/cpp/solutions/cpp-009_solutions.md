@@ -17,12 +17,13 @@ The answer is `snapshot.at(0)==3`, `alias.at(0)==4` and `values.size()==2`.
 ### Exercise 2: Sum positive readings with a wide accumulator
 
 ```cpp
-long long positive_sum(const std::vector<int>& readings) {
-    long long total = 0;
-    for (const int value : readings) {
-        if (value > 0) total += value;
-    }
-    return total;
+long long positive_sum(const std::vector<int> &readings) {
+  long long total = 0;
+  for (const int value : readings) {
+    if (value > 0)
+      total += value;
+  }
+  return total;
 }
 ```
 
@@ -35,10 +36,12 @@ The const reference avoids an unnecessary input copy and prevents this function 
 ### Exercise 3: Replace only a valid position
 
 ```cpp
-bool replace_at(std::vector<int>& readings, std::size_t index, int replacement) {
-    if (index >= readings.size()) return false;
-    readings.at(index) = replacement;
-    return true;
+bool replace_at(std::vector<int> &readings, std::size_t index,
+                int replacement) {
+  if (index >= readings.size())
+    return false;
+  readings.at(index) = replacement;
+  return true;
 }
 ```
 
@@ -57,7 +60,8 @@ std::vector<int> values{4, 7, 9};
 const int snapshot = values.at(0);
 values.push_back(11);
 values.at(0) = 6;
-if (snapshot != 4 || values.size() != 4) return 1;
+if (snapshot != 4 || values.size() != 4)
+  return 1;
 ```
 
 For the current value after append-only growth, keep a position and fetch after the change:
@@ -68,7 +72,8 @@ const std::size_t first_index = 0;
 values.push_back(11);
 values.at(0) = 6;
 const int current = values.at(first_index);
-if (current != 6 || values.size() != 4) return 1;
+if (current != 6 || values.size() != 4)
+  return 1;
 ```
 
 **Expected:** the old snapshot is 4, the newly fetched current value is 6, and both variants have size 4. The original borrowed-reference proposal has no reliable output contract after a possible reallocation, so it is not executed as a test.
@@ -78,11 +83,14 @@ if (current != 6 || values.size() != 4) return 1;
 ### Exercise 5: Validate representation before conversion
 
 ```cpp
-std::optional<int> checked_read(const std::vector<int>& readings, long long index) {
-    if (!std::in_range<std::size_t>(index)) return std::nullopt;
-    const auto position = static_cast<std::size_t>(index);
-    if (position >= readings.size()) return std::nullopt;
-    return readings.at(position);
+std::optional<int> checked_read(const std::vector<int> &readings,
+                                long long index) {
+  if (!std::in_range<std::size_t>(index))
+    return std::nullopt;
+  const auto position = static_cast<std::size_t>(index);
+  if (position >= readings.size())
+    return std::nullopt;
+  return readings.at(position);
 }
 ```
 
@@ -95,12 +103,13 @@ Include `<utility>` for `std::in_range`. This tests negative or too-large values
 ### Exercise 6: Return an independently owned filtered batch
 
 ```cpp
-std::vector<int> nonnegative_copy(const std::vector<int>& readings) {
-    std::vector<int> result;
-    for (const int value : readings) {
-        if (value >= 0) result.push_back(value);
-    }
-    return result;
+std::vector<int> nonnegative_copy(const std::vector<int> &readings) {
+  std::vector<int> result;
+  for (const int value : readings) {
+    if (value >= 0)
+      result.push_back(value);
+  }
+  return result;
 }
 ```
 
@@ -119,33 +128,40 @@ Save this as `exercises.cpp` only after comparing your attempt. It matches the d
 #include <utility>
 
 namespace ds60 {
-long long positive_sum(const std::vector<int>& readings) {
-    long long total = 0;
-    for (const int value : readings) {
-        if (value > 0) total += value;
-    }
-    return total;
+long long positive_sum(const std::vector<int> &readings) {
+  long long total = 0;
+  for (const int value : readings) {
+    if (value > 0)
+      total += value;
+  }
+  return total;
 }
 
-bool replace_at(std::vector<int>& readings, std::size_t index, int replacement) {
-    if (index >= readings.size()) return false;
-    readings.at(index) = replacement;
-    return true;
+bool replace_at(std::vector<int> &readings, std::size_t index,
+                int replacement) {
+  if (index >= readings.size())
+    return false;
+  readings.at(index) = replacement;
+  return true;
 }
 
-std::optional<int> checked_read(const std::vector<int>& readings, long long index) {
-    if (!std::in_range<std::size_t>(index)) return std::nullopt;
-    const auto position = static_cast<std::size_t>(index);
-    if (position >= readings.size()) return std::nullopt;
-    return readings.at(position);
+std::optional<int> checked_read(const std::vector<int> &readings,
+                                long long index) {
+  if (!std::in_range<std::size_t>(index))
+    return std::nullopt;
+  const auto position = static_cast<std::size_t>(index);
+  if (position >= readings.size())
+    return std::nullopt;
+  return readings.at(position);
 }
 
-std::vector<int> nonnegative_copy(const std::vector<int>& readings) {
-    std::vector<int> result;
-    for (const int value : readings) {
-        if (value >= 0) result.push_back(value);
-    }
-    return result;
+std::vector<int> nonnegative_copy(const std::vector<int> &readings) {
+  std::vector<int> result;
+  for (const int value : readings) {
+    if (value >= 0)
+      result.push_back(value);
+  }
+  return result;
 }
 }
 ```

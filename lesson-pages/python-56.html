@@ -440,19 +440,23 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="guide--worked-example-small-typed-local-flow">Worked example: small, typed, local flow<a class="heading-anchor" href="#guide--worked-example-small-typed-local-flow" aria-label="Link to this section">#</a></h4>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> prefect <span class="syntax-keyword">import</span> flow<span class="syntax-punctuation">,</span> task
 
+
 <span class="syntax-decorator">@task</span>
 <span class="syntax-keyword">def</span> <span class="syntax-function">load_numbers</span><span class="syntax-punctuation">(</span>limit<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">return</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span>limit<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
 
+
 <span class="syntax-decorator">@task</span>
 <span class="syntax-keyword">def</span> <span class="syntax-function">summarize</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">rows</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">total</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span>
+
 
 <span class="syntax-decorator">@flow</span><span class="syntax-punctuation">(</span>log_prints<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">def</span> <span class="syntax-function">summary_flow</span><span class="syntax-punctuation">(</span>limit<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">=</span> <span class="syntax-number">10</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
     result <span class="syntax-operator">=</span> summarize<span class="syntax-punctuation">(</span>load_numbers<span class="syntax-punctuation">(</span>limit<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
     <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">)</span>
     <span class="syntax-keyword">return</span> result
+
 
 <span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
     summary_flow<span class="syntax-punctuation">(</span>limit<span class="syntax-operator">=</span><span class="syntax-number">10</span><span class="syntax-punctuation">)</span></code></pre>
@@ -510,11 +514,14 @@ output_path <span class="syntax-operator">=</span> <span class="syntax-string">f
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">class</span> <span class="syntax-class">TemporaryUnavailable</span><span class="syntax-punctuation">(</span>RuntimeError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">pass</span>
 
+
 <span class="syntax-keyword">class</span> <span class="syntax-class">InvalidInput</span><span class="syntax-punctuation">(</span>ValueError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">pass</span>
 
+
 <span class="syntax-keyword">def</span> <span class="syntax-function">should_retry</span><span class="syntax-punctuation">(</span>error<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">return</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>error<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span>TemporaryUnavailable<span class="syntax-punctuation">,</span> TimeoutError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+
 
 cases <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>TemporaryUnavailable<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">later</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> TimeoutError<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> InvalidInput<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">bad row</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
 decisions <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>should_retry<span class="syntax-punctuation">(</span>error<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> error <span class="syntax-operator">in</span> cases<span class="syntax-punctuation">]</span>
@@ -979,9 +986,11 @@ merely ran is not evidence of mastery.</code></pre></div>
 
 <span class="syntax-keyword">from</span> prefect <span class="syntax-keyword">import</span> flow<span class="syntax-punctuation">,</span> get_run_logger<span class="syntax-punctuation">,</span> task
 
+
 <span class="syntax-keyword">class</span> <span class="syntax-class">ExtractedData</span><span class="syntax-punctuation">(</span>TypedDict<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     run_date<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span>
     values<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">]</span>
+
 
 <span class="syntax-decorator">@task</span><span class="syntax-punctuation">(</span>retries<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> retry_delay_seconds<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">def</span> <span class="syntax-function">extract</span><span class="syntax-punctuation">(</span>run_date<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> ExtractedData<span class="syntax-punctuation">:</span>
@@ -989,9 +998,11 @@ merely ran is not evidence of mastery.</code></pre></div>
     logger<span class="syntax-operator">.</span>info<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Extracting the local sample for </span><span class="syntax-string">%s</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> run_date<span class="syntax-punctuation">)</span>
     <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">run_date</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> run_date<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">values</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span>
 
+
 <span class="syntax-decorator">@task</span>
 <span class="syntax-keyword">def</span> <span class="syntax-function">transform</span><span class="syntax-punctuation">(</span>data<span class="syntax-punctuation">:</span> ExtractedData<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> ExtractedData<span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span>data<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">values</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>data<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">values</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span>
+
 
 <span class="syntax-decorator">@task</span>
 <span class="syntax-keyword">def</span> <span class="syntax-function">load</span><span class="syntax-punctuation">(</span>data<span class="syntax-punctuation">:</span> ExtractedData<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">|</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
@@ -1002,6 +1013,7 @@ merely ran is not evidence of mastery.</code></pre></div>
         <span class="syntax-string">&quot;</span><span class="syntax-string">loaded_rows</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>data<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">values</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
     <span class="syntax-punctuation">}</span>
 
+
 <span class="syntax-decorator">@flow</span><span class="syntax-punctuation">(</span>name<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">etl-daily</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">def</span> <span class="syntax-function">etl_flow</span><span class="syntax-punctuation">(</span>run_date<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">|</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
     effective_date <span class="syntax-operator">=</span> run_date <span class="syntax-operator">or</span> date<span class="syntax-operator">.</span>today<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>isoformat<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
@@ -1009,19 +1021,25 @@ merely ran is not evidence of mastery.</code></pre></div>
     clean <span class="syntax-operator">=</span> transform<span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">)</span>
     <span class="syntax-keyword">return</span> load<span class="syntax-punctuation">(</span>clean<span class="syntax-punctuation">)</span>
 
+
 RUN_LOCAL_PREFECT_FLOW <span class="syntax-operator">=</span> <span class="syntax-keyword">False</span>
 <span class="syntax-keyword">if</span> RUN_LOCAL_PREFECT_FLOW<span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">from</span> urllib.parse <span class="syntax-keyword">import</span> urlsplit
     <span class="syntax-keyword">from</span> prefect.settings <span class="syntax-keyword">import</span> PREFECT_API_URL
 
     endpoint <span class="syntax-operator">=</span> urlsplit<span class="syntax-punctuation">(</span>PREFECT_API_URL<span class="syntax-operator">.</span>value<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> <span class="syntax-string">&quot;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
-    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>endpoint<span class="syntax-operator">.</span>scheme <span class="syntax-operator">!=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">http</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">or</span> endpoint<span class="syntax-operator">.</span>hostname <span class="syntax-operator">not</span> <span class="syntax-operator">in</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">localhost</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">127.0.0.1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span>
-            <span class="syntax-operator">or</span> endpoint<span class="syntax-operator">.</span>username <span class="syntax-operator">or</span> endpoint<span class="syntax-operator">.</span>password<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>
+        endpoint<span class="syntax-operator">.</span>scheme <span class="syntax-operator">!=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">http</span><span class="syntax-string">&quot;</span>
+        <span class="syntax-operator">or</span> endpoint<span class="syntax-operator">.</span>hostname <span class="syntax-operator">not</span> <span class="syntax-operator">in</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">localhost</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">127.0.0.1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span>
+        <span class="syntax-operator">or</span> endpoint<span class="syntax-operator">.</span>username
+        <span class="syntax-operator">or</span> endpoint<span class="syntax-operator">.</span>password
+    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
         <span class="syntax-keyword">raise</span> RuntimeError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Prepare a loopback Prefect API before running this extension</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
     <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>etl_flow<span class="syntax-punctuation">(</span>run_date<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">2026-01-15</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>This one-off run is local and deterministic. It needs no Prefect Cloud account, API key, external API, or network download after the dependency is installed.</p>
 <p>Worked reference for Exercise 2; Retries and a local failure hook</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> prefect.logging.loggers <span class="syntax-keyword">import</span> flow_run_logger
+
 
 <span class="syntax-keyword">def</span> <span class="syntax-function">log_failure</span><span class="syntax-punctuation">(</span>flow<span class="syntax-punctuation">,</span> flow_run<span class="syntax-punctuation">,</span> state<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span>
     logger <span class="syntax-operator">=</span> flow_run_logger<span class="syntax-punctuation">(</span>flow_run<span class="syntax-punctuation">,</span> flow<span class="syntax-punctuation">)</span>
@@ -1031,6 +1049,7 @@ RUN_LOCAL_PREFECT_FLOW <span class="syntax-operator">=</span> <span class="synta
         state<span class="syntax-operator">.</span>name<span class="syntax-punctuation">,</span>
         state<span class="syntax-operator">.</span>message<span class="syntax-punctuation">,</span>
     <span class="syntax-punctuation">)</span>
+
 
 <span class="syntax-decorator">@flow</span><span class="syntax-punctuation">(</span>name<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">monitored-etl</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> on_failure<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span>log_failure<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">def</span> <span class="syntax-function">monitored_etl</span><span class="syntax-punctuation">(</span>run_date<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">|</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
@@ -1049,8 +1068,12 @@ RUN_LOCAL_PREFECT_FLOW <span class="syntax-operator">=</span> <span class="synta
     <span class="syntax-keyword">from</span> prefect.settings <span class="syntax-keyword">import</span> PREFECT_API_URL
 
     endpoint <span class="syntax-operator">=</span> urlsplit<span class="syntax-punctuation">(</span>PREFECT_API_URL<span class="syntax-operator">.</span>value<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> <span class="syntax-string">&quot;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
-    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>endpoint<span class="syntax-operator">.</span>scheme <span class="syntax-operator">!=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">http</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">or</span> endpoint<span class="syntax-operator">.</span>hostname <span class="syntax-operator">not</span> <span class="syntax-operator">in</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">localhost</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">127.0.0.1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span>
-            <span class="syntax-operator">or</span> endpoint<span class="syntax-operator">.</span>username <span class="syntax-operator">or</span> endpoint<span class="syntax-operator">.</span>password<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>
+        endpoint<span class="syntax-operator">.</span>scheme <span class="syntax-operator">!=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">http</span><span class="syntax-string">&quot;</span>
+        <span class="syntax-operator">or</span> endpoint<span class="syntax-operator">.</span>hostname <span class="syntax-operator">not</span> <span class="syntax-operator">in</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">localhost</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">127.0.0.1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span>
+        <span class="syntax-operator">or</span> endpoint<span class="syntax-operator">.</span>username
+        <span class="syntax-operator">or</span> endpoint<span class="syntax-operator">.</span>password
+    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
         <span class="syntax-keyword">raise</span> RuntimeError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Prepare a loopback Prefect API before serving this extension</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
     <span class="syntax-comment"># serve() creates a deployment and then blocks while listening for work.</span>
     etl_flow<span class="syntax-operator">.</span>serve<span class="syntax-punctuation">(</span>
@@ -1058,6 +1081,7 @@ RUN_LOCAL_PREFECT_FLOW <span class="syntax-operator">=</span> <span class="synta
         cron<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">0 2 * * *</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
         pause_on_shutdown<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span>
     <span class="syntax-punctuation">)</span>
+
 
 <span class="syntax-comment"># Put the function above in etl_schedule.py, then uncomment for scheduled use:</span>
 <span class="syntax-comment"># if __name__ == &quot;__main__&quot;:</span>

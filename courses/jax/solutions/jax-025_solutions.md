@@ -14,7 +14,7 @@ try:
 except ValueError:
     pass
 else:
-    raise AssertionError('empty timing accepted')
+    raise AssertionError("empty timing accepted")
 ```
 
 ## Exercise 2: Retain the shape contract
@@ -57,7 +57,7 @@ Changing shape can change both operation count and compilation specialization, s
 **Expected:** Correct 8-by-8 result; a different workload identity.
 
 ```python
-small = jnp.arange(64., dtype=jnp.float64).reshape(8, 8) / 64.
+small = jnp.arange(64.0, dtype=jnp.float64).reshape(8, 8) / 64.0
 result, _ = completed_times(jax.jit(product), small, 1)
 close(result, np.asarray(small) @ np.asarray(small).T)
 ```
@@ -71,8 +71,8 @@ This establishes the local execution identity, not accelerator performance.
 ```python
 result = product(values)
 result.block_until_ready()
-assert jax.default_backend() == 'cpu'
-assert all(device.platform == 'cpu' for device in result.devices())
+assert jax.default_backend() == "cpu"
+assert all(device.platform == "cpu" for device in result.devices())
 ```
 
 ## Scope of this evidence

@@ -236,8 +236,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">9</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;alias&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The original first element becomes 9.</p>
 <p>Slicing constructs a view over existing storage. It does not give the new variable independent ownership of its elements.</p>
 <h4 id="worked-example-2-make-an-independent-copy">Worked example 2: Make an independent copy<a class="heading-anchor" href="#worked-example-2-make-an-independent-copy" aria-label="Link to this section">#</a></h4>
@@ -271,8 +270,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span> <span class="syntax-operator">&amp;&amp;</span> cloned<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">9</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;copy&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The original stays 1 while the copy starts 9.</p>
 <p>Appending into initially nil storage allocates enough backing storage for these nonempty values. Nested pointers would still require a deeper copy policy.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>

@@ -49,9 +49,11 @@ The question is: Build Scalar Model with weight 0 and buffer offset 0.
 The buffer is serialized and follows device/dtype conversions, but it is not an optimizer parameter. A plain attribute would not provide the same tracking contract.
 
 ```python
-model=ScalarModel()
-assert set(dict(model.named_parameters()))=={'weight'} and set(dict(model.named_buffers()))=={'offset'}
-assert set(model.state_dict())=={'weight','offset'}
+model = ScalarModel()
+assert set(dict(model.named_parameters())) == {"weight"} and set(dict(model.named_buffers())) == {
+    "offset"
+}
+assert set(model.state_dict()) == {"weight", "offset"}
 ```
 
 **Expected:** one parameter weight; one buffer offset; both in state_dict.
@@ -65,8 +67,9 @@ The question is: Runx 1, 2, 3 through the zero-weight module.
 A forward call only computes the current function. Neither parameter registration nor calling the module performs training.
 
 ```python
-x=torch.tensor([1.,2.,3.],dtype=torch.float64); y=2*x
-assert torch.equal(model(x),torch.zeros_like(x)) and model.weight.item()==0
+x = torch.tensor([1.0, 2.0, 3.0], dtype=torch.float64)
+y = 2 * x
+assert torch.equal(model(x), torch.zeros_like(x)) and model.weight.item() == 0
 ```
 
 **Expected:** three zero outputs; weight unchanged.
@@ -80,9 +83,13 @@ The question is: Use SGD with rate 0.1 and mean squared error, clearing gradient
 The optimizer consumes only the registered Parameter. The buffer influences forward but remains fixed under this update.
 
 ```python
-optimizer=torch.optim.SGD(model.parameters(),lr=.1); optimizer.zero_grad(set_to_none=True)
-loss=((model(x)-y)**2).mean(); loss.backward(); optimizer.step()
-np.testing.assert_allclose(model.weight.item(),28/15,atol=1e-12,rtol=0); assert model.offset.item()==0
+optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
+optimizer.zero_grad(set_to_none=True)
+loss = ((model(x) - y) ** 2).mean()
+loss.backward()
+optimizer.step()
+np.testing.assert_allclose(model.weight.item(), 28 / 15, atol=1e-12, rtol=0)
+assert model.offset.item() == 0
 ```
 
 **Expected:** weight \(\frac{28}{15}\); buffer still 0.
@@ -96,8 +103,8 @@ The question is: Convert the module to float32 and inspect parameter and buffer 
 Tracking gives the module a consistent state-conversion mechanism. Ad hoc tensor attributes can remain on an incompatible dtype or device.
 
 ```python
-model=model.to(dtype=torch.float32)
-assert model.weight.dtype==torch.float32 and model.offset.dtype==torch.float32
+model = model.to(dtype=torch.float32)
+assert model.weight.dtype == torch.float32 and model.offset.dtype == torch.float32
 ```
 
 **Expected:** both float32.
@@ -111,8 +118,14 @@ The question is: Create an optimizer, replace the module Parameter, and inspect 
 An optimizer list is not a live query over the module. Replacing trainable state requires an explicit optimizer reconstruction or parameter-group policy.
 
 ```python
-fresh=ScalarModel(); old=fresh.weight; stale=torch.optim.SGD(fresh.parameters(),lr=.1); fresh.weight=nn.Parameter(torch.tensor(5.,dtype=torch.float64))
-assert stale.param_groups[0]['params'][0] is old and stale.param_groups[0]['params'][0] is not fresh.weight
+fresh = ScalarModel()
+old = fresh.weight
+stale = torch.optim.SGD(fresh.parameters(), lr=0.1)
+fresh.weight = nn.Parameter(torch.tensor(5.0, dtype=torch.float64))
+assert (
+    stale.param_groups[0]["params"][0] is old
+    and stale.param_groups[0]["params"][0] is not fresh.weight
+)
 ```
 
 **Expected:** optimizer still holds old Parameter, not replacement.
@@ -126,8 +139,11 @@ The question is: Call a fresh module on batches of length 1 and 4 and compare pa
 Creating Parameters inside forward would make the model change with each batch. Persistent state belongs in a deliberate construction path.
 
 ```python
-stable=ScalarModel(); identity=id(stable.weight); stable(torch.ones(1,dtype=torch.float64)); stable(torch.ones(4,dtype=torch.float64))
-assert id(stable.weight)==identity and len(list(stable.parameters()))==1
+stable = ScalarModel()
+identity = id(stable.weight)
+stable(torch.ones(1, dtype=torch.float64))
+stable(torch.ones(4, dtype=torch.float64))
+assert id(stable.weight) == identity and len(list(stable.parameters())) == 1
 ```
 
 **Expected:** same weight object and one parameter.

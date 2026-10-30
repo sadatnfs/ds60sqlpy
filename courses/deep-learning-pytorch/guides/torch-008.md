@@ -83,8 +83,11 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-x=torch.tensor([1.,2.,3.],dtype=torch.float64); y=2*x; w=nn.Parameter(torch.tensor(0.,dtype=torch.float64))
-loss=((w*x-y)**2).mean(); np.testing.assert_allclose(loss.item(),56/3,atol=1e-12,rtol=0)
+x = torch.tensor([1.0, 2.0, 3.0], dtype=torch.float64)
+y = 2 * x
+w = nn.Parameter(torch.tensor(0.0, dtype=torch.float64))
+loss = ((w * x - y) ** 2).mean()
+np.testing.assert_allclose(loss.item(), 56 / 3, atol=1e-12, rtol=0)
 ```
 
 **Expected:** mean squared loss \(\frac{56}{3}\).
@@ -94,8 +97,9 @@ loss=((w*x-y)**2).mean(); np.testing.assert_allclose(loss.item(),56/3,atol=1e-12
 Backward computes derivatives but does not update the parameter. Separating these observations helps diagnose a missing optimizer step.
 
 ```python
-loss.backward(); np.testing.assert_allclose(w.grad.item(),-56/3,atol=1e-12,rtol=0)
-assert w.item()==0
+loss.backward()
+np.testing.assert_allclose(w.grad.item(), -56 / 3, atol=1e-12, rtol=0)
+assert w.item() == 0
 ```
 
 **Expected:** gradient-\(\frac{56}{3}\); weight still 0.
@@ -105,9 +109,10 @@ assert w.item()==0
 The optimizer consumes the stored gradient. The old loss tensor remains the before-update result, so the new loss requires another forward calculation.
 
 ```python
-optimizer=torch.optim.SGD([w],lr=.1); optimizer.step()
-np.testing.assert_allclose(w.item(),28/15,atol=1e-12,rtol=0)
-np.testing.assert_allclose(((w*x-y)**2).mean().item(),56/675,atol=1e-12,rtol=0)
+optimizer = torch.optim.SGD([w], lr=0.1)
+optimizer.step()
+np.testing.assert_allclose(w.item(), 28 / 15, atol=1e-12, rtol=0)
+np.testing.assert_allclose(((w * x - y) ** 2).mean().item(), 56 / 675, atol=1e-12, rtol=0)
 ```
 
 **Expected:** w28/15; loss \(\frac{56}{675}\).

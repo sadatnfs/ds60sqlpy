@@ -91,11 +91,14 @@ import numpy as np
 import torch
 from torch import nn
 from torch.nn import functional as F
-import tempfile,json,subprocess,sys,textwrap,hashlib
+import tempfile, json, subprocess, sys, textwrap, hashlib
 from pathlib import Path
 
-x=torch.tensor([[1.],[2.],[3.]],dtype=torch.float64); y=2*x; held=torch.tensor([[4.],[5.]],dtype=torch.float64)
-split={'train':['a','b','c'],'test':['d','e']}; assert not set(split['train'])&set(split['test']) and len(split['test'])==2
+x = torch.tensor([[1.0], [2.0], [3.0]], dtype=torch.float64)
+y = 2 * x
+held = torch.tensor([[4.0], [5.0]], dtype=torch.float64)
+split = {"train": ["a", "b", "c"], "test": ["d", "e"]}
+assert not set(split["train"]) & set(split["test"]) and len(split["test"]) == 2
 ```
 
 **Expected:** 3 training and 2 holdout records.
@@ -105,14 +108,19 @@ split={'train':['a','b','c'],'test':['d','e']}; assert not set(split['train'])&s
 The budget is not extended after seeing the holdout. The baseline predicts training mean target 4, so gives errors 16 and 36on the two test rows.
 
 ```python
-model=nn.Linear(1,1,bias=False,dtype=torch.float64)
-with torch.no_grad(): model.weight.zero_()
-optimizer=torch.optim.SGD(model.parameters(),lr=.01)
+model = nn.Linear(1, 1, bias=False, dtype=torch.float64)
+with torch.no_grad():
+    model.weight.zero_()
+optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
 for _ in range(30):
-    optimizer.zero_grad(set_to_none=True); (model(x)-y).square().mean().backward(); optimizer.step()
+    optimizer.zero_grad(set_to_none=True)
+    (model(x) - y).square().mean().backward()
+    optimizer.step()
 model.eval()
-with torch.no_grad(): expected=model(held); error=(expected-2*held).square().mean().item()
-assert torch.isfinite(model.weight).all() and error<26
+with torch.no_grad():
+    expected = model(held)
+    error = (expected - 2 * held).square().mean().item()
+assert torch.isfinite(model.weight).all() and error < 26
 ```
 
 **Expected:** finite weights; holdout error below constant training-mean baseline 26.
@@ -122,10 +130,19 @@ assert torch.isfinite(model.weight).all() and error<26
 The hash binds the manifest to the saved bytes. The feature order and dtype provide semantic information that a state dictionary alone cannot explain.
 
 ```python
-temporary=tempfile.TemporaryDirectory(); folder=Path(temporary.name); weights=folder/'weights.pt'; torch.save(model.state_dict(),weights)
-manifest={'schema':{'features':['x'],'dtype':'float64','width':1},'split':split,'weight_sha256':hashlib.sha256(weights.read_bytes()).hexdigest(),'steps':30}
-manifest_path=folder/'manifest.json'; manifest_path.write_text(json.dumps(manifest,sort_keys=True))
-assert len(manifest['weight_sha256'])==64 and manifest['schema']['width']==1
+temporary = tempfile.TemporaryDirectory()
+folder = Path(temporary.name)
+weights = folder / "weights.pt"
+torch.save(model.state_dict(), weights)
+manifest = {
+    "schema": {"features": ["x"], "dtype": "float64", "width": 1},
+    "split": split,
+    "weight_sha256": hashlib.sha256(weights.read_bytes()).hexdigest(),
+    "steps": 30,
+}
+manifest_path = folder / "manifest.json"
+manifest_path.write_text(json.dumps(manifest, sort_keys=True))
+assert len(manifest["weight_sha256"]) == 64 and manifest["schema"]["width"] == 1
 ```
 
 **Expected:** manifest has feature x, float64, width 1 and matching hash.

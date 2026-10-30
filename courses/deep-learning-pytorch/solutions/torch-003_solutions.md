@@ -47,10 +47,15 @@ The question is: UseX[[1, 2, 3], [0, 1, 0]], weight[[1, 0, -1]], bias 2.
 The first output is \(1-3+2=0\), and the second is \(0+2=2\). This calculation checks orientation and bias independently of random initialization.
 
 ```python
-layer=nn.Linear(3,1,bias=True,dtype=torch.float64)
-with torch.no_grad(): layer.weight.copy_(torch.tensor([[1.,0.,-1.]],dtype=torch.float64)); layer.bias.fill_(2.)
-x=torch.tensor([[1.,2.,3.],[0.,1.,0.]],dtype=torch.float64); out=layer(x)
-torch.testing.assert_close(out,torch.tensor([[0.],[2.]],dtype=torch.float64),atol=1e-12,rtol=0)
+layer = nn.Linear(3, 1, bias=True, dtype=torch.float64)
+with torch.no_grad():
+    layer.weight.copy_(torch.tensor([[1.0, 0.0, -1.0]], dtype=torch.float64))
+    layer.bias.fill_(2.0)
+x = torch.tensor([[1.0, 2.0, 3.0], [0.0, 1.0, 0.0]], dtype=torch.float64)
+out = layer(x)
+torch.testing.assert_close(
+    out, torch.tensor([[0.0], [2.0]], dtype=torch.float64), atol=1e-12, rtol=0
+)
 ```
 
 **Expected:** outputs[[0], [2]], shape(2, 1).
@@ -64,8 +69,8 @@ The question is: Count weight and bias scalar entries and inspect state_dict key
 There are two Parameter objects but four trainable scalar values. Parameter count and tensor count answer different questions.
 
 ```python
-assert sum(p.numel() for p in layer.parameters())==4
-assert set(layer.state_dict())=={'weight','bias'}
+assert sum(p.numel() for p in layer.parameters()) == 4
+assert set(layer.state_dict()) == {"weight", "bias"}
 ```
 
 **Expected:** 4 scalars; keys weight, bias.
@@ -79,9 +84,9 @@ The question is: Transpose the stored weight and calculate X@W+b directly.
 The transpose is a layout translation, not a change in the modeled function. A non symmetric rectangular fixture makes an accidental orientation error visible.
 
 ```python
-mathematical_w=layer.weight.T
-assert tuple(mathematical_w.shape)==(3,1)
-torch.testing.assert_close(x@mathematical_w+layer.bias,out,atol=1e-12,rtol=0)
+mathematical_w = layer.weight.T
+assert tuple(mathematical_w.shape) == (3, 1)
+torch.testing.assert_close(x @ mathematical_w + layer.bias, out, atol=1e-12, rtol=0)
 ```
 
 **Expected:** direct result equals module output.
@@ -95,10 +100,13 @@ The question is: Create a bias-free layer with the same stored weights.
 A zero-initialized bias would still be trainable. Omitting the bias removes that parameter and its gradient entirely.
 
 ```python
-no_bias=nn.Linear(3,1,bias=False,dtype=torch.float64)
-with torch.no_grad(): no_bias.weight.copy_(layer.weight)
-assert sum(p.numel() for p in no_bias.parameters())==3
-torch.testing.assert_close(no_bias(x),torch.tensor([[-2.],[0.]],dtype=torch.float64),atol=1e-12,rtol=0)
+no_bias = nn.Linear(3, 1, bias=False, dtype=torch.float64)
+with torch.no_grad():
+    no_bias.weight.copy_(layer.weight)
+assert sum(p.numel() for p in no_bias.parameters()) == 3
+torch.testing.assert_close(
+    no_bias(x), torch.tensor([[-2.0], [0.0]], dtype=torch.float64), atol=1e-12, rtol=0
+)
 ```
 
 **Expected:** 3 parameters; outputs-2 and 0.
@@ -112,9 +120,11 @@ The question is: Compare a Module holding a plain requires_grad tensor with one 
 Autograd can track a plain tensor without the module registering it. An optimizer built from model.parameters would miss that state.
 
 ```python
-plain=nn.Module(); plain.weight=torch.tensor([1.],requires_grad=True)
-proper=nn.Module(); proper.weight=nn.Parameter(torch.tensor([1.]))
-assert len(list(plain.parameters()))==0 and len(list(proper.parameters()))==1
+plain = nn.Module()
+plain.weight = torch.tensor([1.0], requires_grad=True)
+proper = nn.Module()
+proper.weight = nn.Parameter(torch.tensor([1.0]))
+assert len(list(plain.parameters())) == 0 and len(list(proper.parameters())) == 1
 ```
 
 **Expected:** plain module has 0 registered parameters; proper module has 1.
@@ -128,9 +138,12 @@ The question is: Pass a2-feature row to the 3-input layer.
 A variable batch length is allowed, but the declared feature width remains fixed. The model contract should name that distinction.
 
 ```python
-try: layer(torch.ones((1,2),dtype=torch.float64))
-except RuntimeError: pass
-else: raise AssertionError('wrong feature width accepted')
+try:
+    layer(torch.ones((1, 2), dtype=torch.float64))
+except RuntimeError:
+    pass
+else:
+    raise AssertionError("wrong feature width accepted")
 ```
 
 **Expected:** RuntimeError from incompatible matrix dimensions.

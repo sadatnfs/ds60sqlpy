@@ -49,8 +49,10 @@ The question is: Create eight records with groups A, A, B, B, C, C, D, D and val
 The dataset returns metadata beside the tensor. A value-only interface would make it harder to audit group membership and record conservation.
 
 ```python
-dataset=Accounts(); assert len(dataset)==8
-identity,group,value=dataset[0]; assert identity==0 and group=='A' and value.item()==1
+dataset = Accounts()
+assert len(dataset) == 8
+identity, group, value = dataset[0]
+assert identity == 0 and group == "A" and value.item() == 1
 ```
 
 **Expected:** length 8; item 0 has ID 0, group A, value 1.
@@ -64,9 +66,11 @@ The question is: Train on accounts A, B and holdout C, D using Subset.
 The grouping policy precedes the subset construction. Subset itself would happily accept a leaking row-level split.
 
 ```python
-train_ids=[i for i in range(len(dataset)) if dataset[i][1] in {'A','B'}]; test_ids=[i for i in range(len(dataset)) if i not in train_ids]
-train=torch.utils.data.Subset(dataset,train_ids); test=torch.utils.data.Subset(dataset,test_ids)
-assert len(train)==len(test)==4 and not {row[1] for row in train}&{row[1] for row in test}
+train_ids = [i for i in range(len(dataset)) if dataset[i][1] in {"A", "B"}]
+test_ids = [i for i in range(len(dataset)) if i not in train_ids]
+train = torch.utils.data.Subset(dataset, train_ids)
+test = torch.utils.data.Subset(dataset, test_ids)
+assert len(train) == len(test) == 4 and not {row[1] for row in train} & {row[1] for row in test}
 ```
 
 **Expected:** four records each; group intersection empty.
@@ -80,7 +84,8 @@ The question is: Calculate the mean from the four training tensors.
 The statistic is fitted state. Even without labels, it would leak assessment information if computed over the entire dataset.
 
 ```python
-mean=torch.stack([row[2] for row in train]).mean(); assert mean.item()==4
+mean = torch.stack([row[2] for row in train]).mean()
+assert mean.item() == 4
 ```
 
 **Expected:** mean 4.
@@ -94,9 +99,11 @@ The question is: Replace the final held-out value with 3200 in a copied dataset 
 This controlled perturbation directly tests the information boundary. A correct implementation is invariant to held-out-only changes during fitting.
 
 ```python
-changed=Accounts(); changed.values=changed.values.clone(); changed.values[-1]=3200
-new_mean=torch.stack([changed[i][2] for i in train_ids]).mean()
-assert new_mean.item()==4 and changed.values.mean()!=dataset.values.mean()
+changed = Accounts()
+changed.values = changed.values.clone()
+changed.values[-1] = 3200
+new_mean = torch.stack([changed[i][2] for i in train_ids]).mean()
+assert new_mean.item() == 4 and changed.values.mean() != dataset.values.mean()
 ```
 
 **Expected:** training mean unchanged 4; global mean changes.
@@ -110,8 +117,9 @@ The question is: Assign alternating indices to train/test and inspect group inte
 Balanced row counts can hide complete group leakage. The independent entity identities determine whether assessment is genuinely unseen.
 
 ```python
-left={dataset[i][1] for i in range(0,8,2)}; right={dataset[i][1] for i in range(1,8,2)}
-assert left&right==set('ABCD')
+left = {dataset[i][1] for i in range(0, 8, 2)}
+right = {dataset[i][1] for i in range(1, 8, 2)}
+assert left & right == set("ABCD")
 ```
 
 **Expected:** allA, B, C, D cross.
@@ -125,8 +133,10 @@ The question is: Center held-out values with the training mean.
 Validation values need not have zero mean after a training-fitted transform. Re-centering them independently would use new fitted state and conceal distribution shift.
 
 ```python
-centered=torch.stack([row[2] for row in test])-mean
-torch.testing.assert_close(centered,torch.tensor([16.,18.,26.,28.],dtype=torch.float64),atol=0,rtol=0)
+centered = torch.stack([row[2] for row in test]) - mean
+torch.testing.assert_close(
+    centered, torch.tensor([16.0, 18.0, 26.0, 28.0], dtype=torch.float64), atol=0, rtol=0
+)
 ```
 
 **Expected:** 16, 18, 26, 28.

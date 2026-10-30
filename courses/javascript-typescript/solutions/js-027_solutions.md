@@ -47,7 +47,10 @@ A result value is ordinary fulfilled data even when it describes a domain failur
 
 ```typescript
 let caught = 0;
-const result = await lookup('missing').catch(() => { caught += 1; return { ok: false as const, error: 'operational' as const }; });
+const result = await lookup('missing').catch(() => {
+  caught += 1;
+  return { ok: false as const, error: 'operational' as const };
+});
 assert.equal(caught, 0);
 assert.deepEqual(result, { ok: false, error: 'not_found' });
 ```
@@ -80,9 +83,14 @@ Task: Reject with a string and normalize it at a reporting boundary.
 Any JavaScript value can be a rejection reason. Assuming it always has a message property risks a second failure while reporting the first.
 
 ```typescript
-function message(error: unknown): string { return error instanceof Error ? error.message : 'unclassified failure'; }
-try { await Promise.reject('not an Error'); }
-catch (error: unknown) { assert.equal(message(error), 'unclassified failure'); }
+function message(error: unknown): string {
+  return error instanceof Error ? error.message : 'unclassified failure';
+}
+try {
+  await Promise.reject('not an Error');
+} catch (error: unknown) {
+  assert.equal(message(error), 'unclassified failure');
+}
 ```
 
 **Expected:** diagnostic unclassified failure.
@@ -96,8 +104,11 @@ Task: Summarize one fulfilled value and one rejected task.
 The status discriminant selects the outcome payload. Treating rejection data as unknown keeps the application boundary honest even when library declarations expose a broader type.
 
 ```typescript
-const outcomes = await Promise.allSettled([Promise.resolve(2), Promise.reject(new Error('offline'))]);
-const summaries = outcomes.map(outcome => {
+const outcomes = await Promise.allSettled([
+  Promise.resolve(2),
+  Promise.reject(new Error('offline')),
+]);
+const summaries = outcomes.map((outcome) => {
   if (outcome.status === 'fulfilled') return `value:${outcome.value}`;
   const reason: unknown = outcome.reason;
   return `error:${reason instanceof Error ? reason.message : 'unknown'}`;

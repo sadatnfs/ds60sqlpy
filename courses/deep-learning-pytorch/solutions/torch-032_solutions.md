@@ -49,10 +49,13 @@ The question is: Set a 2-to-1 bias-free Linear weight to[2, -1] and predict rows
 Known coefficients make a layout or persistence error visible without depending on training randomness.
 
 ```python
-model=nn.Linear(2,1,bias=False)
-with torch.no_grad(): model.weight.copy_(torch.tensor([[2.,-1.]]))
-model.eval(); x=torch.tensor([[1.,2.],[3.,4.]]); expected=model(x).detach()
-assert expected.tolist()==[[0.],[2.]]
+model = nn.Linear(2, 1, bias=False)
+with torch.no_grad():
+    model.weight.copy_(torch.tensor([[2.0, -1.0]]))
+model.eval()
+x = torch.tensor([[1.0, 2.0], [3.0, 4.0]])
+expected = model(x).detach()
+assert expected.tolist() == [[0.0], [2.0]]
 ```
 
 **Expected:** outputs 0, 2.
@@ -66,9 +69,14 @@ The question is: Save state_dict to an owned temporary file, reconstruct the arc
 The architecture is reconstructed explicitly. A compatible set of names and shapes is necessary, but the application should also retain semantic feature order and dtype metadata.
 
 ```python
-temporary=tempfile.TemporaryDirectory(); folder=Path(temporary.name); state_path=folder/'weights.pt'; torch.save(model.state_dict(),state_path)
-restored=nn.Linear(2,1,bias=False); restored.load_state_dict(torch.load(state_path,map_location='cpu',weights_only=True)); restored.eval()
-torch.testing.assert_close(restored(x),expected,atol=1e-6,rtol=0)
+temporary = tempfile.TemporaryDirectory()
+folder = Path(temporary.name)
+state_path = folder / "weights.pt"
+torch.save(model.state_dict(), state_path)
+restored = nn.Linear(2, 1, bias=False)
+restored.load_state_dict(torch.load(state_path, map_location="cpu", weights_only=True))
+restored.eval()
+torch.testing.assert_close(restored(x), expected, atol=1e-6, rtol=0)
 ```
 
 **Expected:** restored predictions match within 1e-6.
@@ -82,9 +90,12 @@ The question is: Export the fixed batch program, save it, and load its module.
 The program includes shape constraints from the example. A readable archive alone would not prove that those constraints or operations execute correctly.
 
 ```python
-program=torch.export.export(model,(x,),strict=True); export_path=folder/'model.pt2'; torch.export.save(program,export_path)
-loaded_program=torch.export.load(export_path); exported_module=loaded_program.module()
-torch.testing.assert_close(exported_module(x),expected,atol=1e-6,rtol=0)
+program = torch.export.export(model, (x,), strict=True)
+export_path = folder / "model.pt2"
+torch.export.save(program, export_path)
+loaded_program = torch.export.load(export_path)
+exported_module = loaded_program.module()
+torch.testing.assert_close(exported_module(x), expected, atol=1e-6, rtol=0)
 ```
 
 **Expected:** exported predictions match within 1e-6.
@@ -98,7 +109,7 @@ The question is: Load the state and exported program in a new interpreter and co
 The child cannot reuse parent objects. It must reconstruct each artifact'sstate and execution interface from disk.
 
 ```python
-child=textwrap.dedent("""
+child = textwrap.dedent("""
 import json,sys,torch
 from torch import nn
 x=torch.tensor([[1.,2.],[3.,4.]])
@@ -107,10 +118,19 @@ owner=torch.export.load(sys.argv[2]); exported=owner.module()
 with torch.no_grad(): result=[model(x).tolist(),exported(x).tolist()]
 print(json.dumps(result))
 """)
-compile(child,'torch-export-child','exec')
-result=subprocess.run([sys.executable,'-c',child,str(state_path),str(export_path)],capture_output=True,text=True,timeout=60,check=False)
-if result.returncode: raise RuntimeError('export child failed: '+result.stderr)
-a,b=json.loads(result.stdout.strip().splitlines()[-1]); np.testing.assert_allclose(a,expected.numpy(),atol=1e-6,rtol=0); np.testing.assert_allclose(b,expected.numpy(),atol=1e-6,rtol=0)
+compile(child, "torch-export-child", "exec")
+result = subprocess.run(
+    [sys.executable, "-c", child, str(state_path), str(export_path)],
+    capture_output=True,
+    text=True,
+    timeout=60,
+    check=False,
+)
+if result.returncode:
+    raise RuntimeError("export child failed: " + result.stderr)
+a, b = json.loads(result.stdout.strip().splitlines()[-1])
+np.testing.assert_allclose(a, expected.numpy(), atol=1e-6, rtol=0)
+np.testing.assert_allclose(b, expected.numpy(), atol=1e-6, rtol=0)
 ```
 
 **Expected:** both child predictions 0, 2.
@@ -124,12 +144,15 @@ The question is: Pass three rows to the statically exported module and compare w
 Mathematical batch flexibility does not automatically make an export contract dynamic. The pinned PyTorch 2.9.1 profile raises AssertionError with the exact guard input.size()[0] == 2 for this invalid batch. The handler recognizes that shape guard and re-raises unrelated assertions. Exception types can differ across framework versions, so the diagnostic is tied to the prepared profile.
 
 ```python
-three=torch.tensor([[0.,0.],[1.,2.],[3.,4.]])
-assert tuple(restored(three).shape)==(3,1)
-try: exported_module(three)
+three = torch.tensor([[0.0, 0.0], [1.0, 2.0], [3.0, 4.0]])
+assert tuple(restored(three).shape) == (3, 1)
+try:
+    exported_module(three)
 except AssertionError as error:
-    if 'Guard failed: input.size()[0] == 2' not in str(error): raise
-else: raise AssertionError('static export constraint not enforced')
+    if "Guard failed: input.size()[0] == 2" not in str(error):
+        raise
+else:
+    raise AssertionError("static export constraint not enforced")
 ```
 
 **Expected:** ordinary Linear accepts 3; static export rejects its batch constraint.
@@ -143,10 +166,11 @@ The question is: Export with batch Dim range 1..4, test three rows, and remove o
 Dynamic dimensions describe allowed variation, not arbitrary inputs. Feature width, dtype and finite-value policy still need their own contracts.
 
 ```python
-batch=torch.export.Dim('batch',min=1,max=4)
-dynamic=torch.export.export(model,(x,),dynamic_shapes=({0:batch},),strict=True).module()
-torch.testing.assert_close(dynamic(three),restored(three),atol=1e-6,rtol=0)
-temporary.cleanup(); assert not folder.exists()
+batch = torch.export.Dim("batch", min=1, max=4)
+dynamic = torch.export.export(model, (x,), dynamic_shapes=({0: batch},), strict=True).module()
+torch.testing.assert_close(dynamic(three), restored(three), atol=1e-6, rtol=0)
+temporary.cleanup()
+assert not folder.exists()
 ```
 
 **Expected:** three-row parity passes; temporary directory absent.

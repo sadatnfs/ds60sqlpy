@@ -210,11 +210,14 @@ object Optimizer {
               if (updated.forall(_.forall(_.isFinite))) inverse = updated
               else { inverse = identity(point.size); reset = true }
             } else { inverse = identity(point.size); reset = true }
-            val relativeStep = next.indices.filter(i => bounds.lower(i) != bounds.upper(i)).map { i =>
-              math.abs(step(i)) / math.max(1.0, math.max(math.abs(point(i)), math.abs(next(i))))
-            }
-            val fixedCoordinates = bounds.lower.indices.exists(i => bounds.lower(i) == bounds.upper(i))
-            val smallStepInFreeSpace = if (fixedCoordinates) relativeStep.forall(_ <= settings.stepTolerance)
+            val relativeStep =
+              next.indices.filter(i => bounds.lower(i) != bounds.upper(i)).map { i =>
+                math.abs(step(i)) / math.max(1.0, math.max(math.abs(point(i)), math.abs(next(i))))
+              }
+            val fixedCoordinates =
+              bounds.lower.indices.exists(i => bounds.lower(i) == bounds.upper(i))
+            val smallStepInFreeSpace =
+              if (fixedCoordinates) relativeStep.forall(_ <= settings.stepTolerance)
               else norm(step) <= settings.stepTolerance * math.max(1.0, norm(next))
             val lossChange = math.abs(current.value - proposed.value)
             val lossScale =
@@ -233,9 +236,7 @@ object Optimizer {
               calls,
               reset
             )
-            if (
-              smallStepInFreeSpace && norm(projected) > settings.gradientTolerance
-            ) {
+            if (smallStepInFreeSpace && norm(projected) > settings.gradientTolerance) {
               status = "step_stalled_without_stationarity"
               finished = true
             } else if (

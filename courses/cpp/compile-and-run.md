@@ -12,8 +12,8 @@ Do not paste Markdown fences into a source pad. A guide can contain several inde
 #include <iostream>
 
 int main() {
-    std::cout << "hello, learner\n";
-    return 0;
+  std::cout << "hello, learner\n";
+  return 0;
 }
 ```
 
@@ -60,9 +60,9 @@ g++ -std=c++20 -O0 -g -Wall -Wextra -Wconversion -Wpedantic -pthread main.cpp -o
 compile_status=$?
 printf 'compile/link status: %s\n' "$compile_status"
 if [ "$compile_status" -eq 0 ]; then
-    ./hello
-    run_status=$?
-    printf 'run status: %s\n' "$run_status"
+  ./hello
+  run_status=$?
+  printf 'run status: %s\n' "$run_status"
 fi
 ```
 
@@ -127,8 +127,8 @@ A valid program can deliberately fail its runtime contract:
 ```cpp
 #include <iostream>
 int main() {
-    std::cerr << "input rejected\n";
-    return 2;
+  std::cerr << "input rejected\n";
+  return 2;
 }
 ```
 
@@ -172,20 +172,20 @@ Stop if either creation or copy fails. The absolute `cpp_project` path identifie
 ```sh
 cpp_image=ds60sqlpy-worker-cpp20:0.4.1
 cpp_tool() {
-    cpp_entrypoint="$1"
-    shift
-    docker run --rm --pull never --network none --read-only \
-      --cap-drop ALL --security-opt no-new-privileges \
-      --pids-limit 128 --cpus 2 --memory 1g \
-      --user "$(id -u):$(id -g)" \
-      --tmpfs /tmp:rw,exec,nosuid,size=256m \
-      --mount "type=bind,source=$cpp_project,target=/project" \
-      --workdir /project --entrypoint "$cpp_entrypoint" "$cpp_image" "$@"
+  cpp_entrypoint="$1"
+  shift
+  docker run --rm --pull never --network none --read-only \
+    --cap-drop ALL --security-opt no-new-privileges \
+    --pids-limit 128 --cpus 2 --memory 1g \
+    --user "$(id -u):$(id -g)" \
+    --tmpfs /tmp:rw,exec,nosuid,size=256m \
+    --mount "type=bind,source=$cpp_project,target=/project" \
+    --workdir /project --entrypoint "$cpp_entrypoint" "$cpp_image" "$@"
 }
 cpp_tool cmake -S /project -B /project/build/debug -G Ninja -DCMAKE_BUILD_TYPE=Debug &&
-cpp_tool cmake --build /project/build/debug --parallel 2 &&
-cpp_tool ctest --test-dir /project/build/debug --output-on-failure &&
-cpp_tool cmake --install /project/build/debug --prefix /project/install
+  cpp_tool cmake --build /project/build/debug --parallel 2 &&
+  cpp_tool ctest --test-dir /project/build/debug --output-on-failure &&
+  cpp_tool cmake --install /project/build/debug --prefix /project/install
 ```
 
 Each `&&` requires the preceding phase to succeed. The final command status is available immediately as `$?`. A failure stops the chain, preserving the copied source and partial diagnostics for investigation. To capture a phase separately, run one `cpp_tool` command and inspect its status before continuing.

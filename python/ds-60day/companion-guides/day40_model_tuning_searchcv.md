@@ -172,10 +172,12 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
 X, y = load_iris(return_X_y=True)
-pipe = Pipeline([
-    ("scale", StandardScaler()),
-    ("model", LogisticRegression(max_iter=2_000)),
-])
+pipe = Pipeline(
+    [
+        ("scale", StandardScaler()),
+        ("model", LogisticRegression(max_iter=2_000)),
+    ]
+)
 search = GridSearchCV(
     pipe,
     {"model__C": [0.1, 1.0, 10.0]},

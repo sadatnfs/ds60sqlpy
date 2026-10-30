@@ -46,18 +46,23 @@ Python process; this check needs no JDK, Spark, service or package download.
 from collections import defaultdict
 
 fixture = [
-    (1, "A", 100, "paid"), (2, "A", None, "paid"),
-    (3, "B", 0, "paid"), (4, None, 50, "paid"),
-    (5, "B", 150, "void"), (6, "A", 100, "paid"),
+    (1, "A", 100, "paid"),
+    (2, "A", None, "paid"),
+    (3, "B", 0, "paid"),
+    (4, None, 50, "paid"),
+    (5, "B", 150, "void"),
+    (6, "A", 100, "paid"),
     (7, "C", None, "paid"),
 ]
 assert len({event[0] for event in fixture}) == 7
 paid_fixture = [event for event in fixture if event[3] == "paid"]
 assert [event[0] for event in paid_fixture] == [1, 2, 3, 4, 6, 7]
 
+
 def reference_metrics(events):
     observed = [event[2] for event in events if event[2] is not None]
     return (len(events), len(observed), sum(observed) if observed else None)
+
 
 def reference_summary(events):
     grouped = defaultdict(list)
@@ -66,9 +71,12 @@ def reference_summary(events):
     keys = sorted(grouped, key=lambda team: (team is None, team or ""))
     return [(team, *reference_metrics(grouped[team])) for team in keys]
 
+
 golden = [
-    ("A", 3, 2, 200), ("B", 1, 1, 0),
-    ("C", 1, 0, None), (None, 1, 1, 50),
+    ("A", 3, 2, 200),
+    ("B", 1, 1, 0),
+    ("C", 1, 0, None),
+    (None, 1, 1, 50),
 ]
 assert reference_metrics(fixture) == (7, 5, 400)
 assert reference_metrics(paid_fixture) == (6, 4, 250)
@@ -104,63 +112,82 @@ object Spark013Solution {
   type Summary = Seq[(Option[String], Long, Long, Option[Long])]
 
   def ids(df: DataFrame): Seq[Long] =
-    df.select("event_id").orderBy("event_id").collect()
-      .map(_.getLong(0)).toSeq
+    df.select("event_id")
+      .orderBy("event_id")
+      .collect()
+      .map(_.getLong(0))
+      .toSeq
 
   def metrics(df: DataFrame): (Long, Long, Option[Long]) = {
-    val row = df.agg(
-      count(lit(1)).as("rows"),
-      count(col("amount_cents")).as("valued"),
-      sum(col("amount_cents")).as("total_cents")
-    ).first()
-    (row.getLong(0), row.getLong(1),
-      if (row.isNullAt(2)) None else Some(row.getLong(2)))
+    val row = df
+      .agg(
+        count(lit(1)).as("rows"),
+        count(col("amount_cents")).as("valued"),
+        sum(col("amount_cents")).as("total_cents")
+      )
+      .first()
+    (row.getLong(0), row.getLong(1), if (row.isNullAt(2)) None else Some(row.getLong(2)))
   }
 
   def summarize(df: DataFrame): DataFrame =
-    df.groupBy("team").agg(
-      count(lit(1)).as("rows"),
-      count(col("amount_cents")).as("valued"),
-      sum(col("amount_cents")).as("total_cents")
-    )
+    df.groupBy("team")
+      .agg(
+        count(lit(1)).as("rows"),
+        count(col("amount_cents")).as("valued"),
+        sum(col("amount_cents")).as("total_cents")
+      )
 
   def canonical(df: DataFrame): Summary = {
     val expectedSchema: Seq[(String, DataType)] = Seq(
-      ("team", StringType), ("rows", LongType),
-      ("valued", LongType), ("total_cents", LongType)
+      ("team", StringType),
+      ("rows", LongType),
+      ("valued", LongType),
+      ("total_cents", LongType)
     )
     assert(df.schema.fields.map(f => (f.name, f.dataType)).toSeq == expectedSchema)
     df.orderBy(col("team").asc_nulls_last).collect().toSeq.map { row =>
-      (if (row.isNullAt(0)) None else Some(row.getString(0)),
-        row.getLong(1), row.getLong(2),
-        if (row.isNullAt(3)) None else Some(row.getLong(3)))
+      (
+        if (row.isNullAt(0)) None else Some(row.getString(0)),
+        row.getLong(1),
+        row.getLong(2),
+        if (row.isNullAt(3)) None else Some(row.getLong(3))
+      )
     }
   }
 
   def main(args: Array[String]): Unit = {
-    val spark = SparkSession.builder().appName("ds60-spark-013-solution")
+    val spark = SparkSession
+      .builder()
+      .appName("ds60-spark-013-solution")
       .master("local[2]")
       .config("spark.ui.enabled", "false")
       .config("spark.driver.host", "127.0.0.1")
       .config("spark.driver.bindAddress", "127.0.0.1")
       .config("spark.sql.shuffle.partitions", "2")
-      .config("spark.sql.session.timeZone", "UTC").getOrCreate()
+      .config("spark.sql.session.timeZone", "UTC")
+      .getOrCreate()
     try {
       require(spark.sparkContext.master == "local[2]")
-      val schema = StructType(Seq(
-        StructField("event_id", LongType, false),
-        StructField("team", StringType, true),
-        StructField("amount_cents", LongType, true),
-        StructField("status", StringType, false)
-      ))
+      val schema = StructType(
+        Seq(
+          StructField("event_id", LongType, false),
+          StructField("team", StringType, true),
+          StructField("amount_cents", LongType, true),
+          StructField("status", StringType, false)
+        )
+      )
       val rows = Seq(
-        Row(1L, "A", 100L, "paid"), Row(2L, "A", null, "paid"),
-        Row(3L, "B", 0L, "paid"), Row(4L, null, 50L, "paid"),
-        Row(5L, "B", 150L, "void"), Row(6L, "A", 100L, "paid"),
+        Row(1L, "A", 100L, "paid"),
+        Row(2L, "A", null, "paid"),
+        Row(3L, "B", 0L, "paid"),
+        Row(4L, null, 50L, "paid"),
+        Row(5L, "B", 150L, "void"),
+        Row(6L, "A", 100L, "paid"),
         Row(7L, "C", null, "paid")
       )
       val raw = spark.createDataFrame(
-        spark.sparkContext.parallelize(rows, 2), schema
+        spark.sparkContext.parallelize(rows, 2),
+        schema
       )
       val paid = raw.filter(col("status") === lit("paid"))
       val golden: Summary = Seq(
@@ -239,8 +266,7 @@ from pyspark.sql.types import LongType, StringType, StructField, StructType
 
 
 def ids(df):
-    return [row["event_id"] for row in df.select("event_id")
-            .orderBy("event_id").collect()]
+    return [row["event_id"] for row in df.select("event_id").orderBy("event_id").collect()]
 
 
 def metrics(df):
@@ -261,13 +287,13 @@ def summarize(df):
 
 
 def canonical(df):
-    assert [(field.name, field.dataType.simpleString())
-            for field in df.schema.fields] == [
-        ("team", "string"), ("rows", "bigint"),
-        ("valued", "bigint"), ("total_cents", "bigint"),
+    assert [(field.name, field.dataType.simpleString()) for field in df.schema.fields] == [
+        ("team", "string"),
+        ("rows", "bigint"),
+        ("valued", "bigint"),
+        ("total_cents", "bigint"),
     ]
-    return [tuple(row) for row in
-            df.orderBy(F.col("team").asc_nulls_last()).collect()]
+    return [tuple(row) for row in df.orderBy(F.col("team").asc_nulls_last()).collect()]
 
 
 spark = (
@@ -282,23 +308,30 @@ spark = (
 )
 try:
     assert spark.sparkContext.master == "local[2]"
-    schema = StructType([
-        StructField("event_id", LongType(), False),
-        StructField("team", StringType(), True),
-        StructField("amount_cents", LongType(), True),
-        StructField("status", StringType(), False),
-    ])
+    schema = StructType(
+        [
+            StructField("event_id", LongType(), False),
+            StructField("team", StringType(), True),
+            StructField("amount_cents", LongType(), True),
+            StructField("status", StringType(), False),
+        ]
+    )
     rows = [
-        (1, "A", 100, "paid"), (2, "A", None, "paid"),
-        (3, "B", 0, "paid"), (4, None, 50, "paid"),
-        (5, "B", 150, "void"), (6, "A", 100, "paid"),
+        (1, "A", 100, "paid"),
+        (2, "A", None, "paid"),
+        (3, "B", 0, "paid"),
+        (4, None, 50, "paid"),
+        (5, "B", 150, "void"),
+        (6, "A", 100, "paid"),
         (7, "C", None, "paid"),
     ]
     raw = spark.createDataFrame(rows, schema=schema)
     paid = raw.filter(F.col("status") == F.lit("paid"))
     golden = [
-        ("A", 3, 2, 200), ("B", 1, 1, 0),
-        ("C", 1, 0, None), (None, 1, 1, 50),
+        ("A", 3, 2, 200),
+        ("B", 1, 1, 0),
+        ("C", 1, 0, None),
+        (None, 1, 1, 50),
     ]
 
     # Exercise 1: grain and the exact paid/excluded IDs.

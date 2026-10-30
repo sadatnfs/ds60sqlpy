@@ -109,29 +109,16 @@ These worked excerpts come from `sql/professional/lessons/sql_types_01_native_ty
 
 ```sql
 CREATE TABLE pro_types_lab.documents (
-    document_id uuid PRIMARY KEY,
-    owner_email pro_types_lab.email_address NOT NULL,
-    state pro_types_lab.document_state NOT NULL DEFAULT 'draft',
-    title text NOT NULL CHECK (btrim(title) <> ''),
-    body text NOT NULL,
-    tags text[] NOT NULL DEFAULT ARRAY[]::text[],
-    availability daterange NOT NULL
-        CHECK (NOT isempty(availability)),
-    blackout_windows datemultirange NOT NULL
-        DEFAULT '{}'::datemultirange,
-    metadata jsonb NOT NULL DEFAULT '{}'::jsonb
-        CHECK (jsonb_typeof(metadata) = 'object'),
-    search_vector tsvector GENERATED ALWAYS AS (
-        setweight(
-            to_tsvector('english'::regconfig, COALESCE(title, '')),
-            'A'
-        )
-        ||
-        setweight(
-            to_tsvector('english'::regconfig, COALESCE(body, '')),
-            'B'
-        )
-    ) STORED
+  document_id uuid PRIMARY KEY,
+  owner_email pro_types_lab.email_address NOT NULL,
+  state pro_types_lab.document_state NOT NULL DEFAULT 'draft',
+  title text NOT NULL CHECK (btrim(title) <> ''),
+  body text NOT NULL,
+  tags text[] NOT NULL DEFAULT ARRAY[]::text[],
+  availability daterange NOT NULL CHECK (NOT isempty(availability)),
+  blackout_windows datemultirange NOT NULL DEFAULT '{}'::datemultirange,
+  metadata jsonb NOT NULL DEFAULT '{}'::jsonb CHECK (jsonb_typeof(metadata) = 'object'),
+  search_vector tsvector GENERATED ALWAYS AS (setweight(to_tsvector('english'::regconfig, COALESCE(title, '')), 'A') || setweight(to_tsvector('english'::regconfig, COALESCE(body, '')), 'B')) STORED
 );
 ```
 
@@ -142,56 +129,11 @@ CREATE TABLE pro_types_lab.documents (
 ### Example 2
 
 ```sql
-INSERT INTO pro_types_lab.documents (
-    document_id,
-    owner_email,
-    state,
-    title,
-    body,
-    tags,
-    availability,
-    blackout_windows,
-    metadata
-)
+INSERT INTO pro_types_lab.documents (document_id, owner_email, state, title, body, tags, availability, blackout_windows, metadata)
 VALUES
-    (
-        '00000000-0000-0000-0000-000000000101',
-        'avery@example.test',
-        'published',
-        'Safe schema migrations',
-        'Plan additive changes, backfill data, verify invariants, and contract later.',
-        ARRAY['postgresql', 'sql', 'operations'],
-        daterange(DATE '2026-01-01', DATE '2027-01-01', '[)'),
-        datemultirange(
-            daterange(DATE '2026-07-01', DATE '2026-07-08', '[)')
-        ),
-        '{"audience":["developer","operator"],"difficulty":"advanced","minutes":45}'
-    ),
-    (
-        '00000000-0000-0000-0000-000000000102',
-        'morgan@example.test',
-        'published',
-        'Analytical SQL patterns',
-        'Use windows and explicit grain for sessions, funnels, and retention.',
-        ARRAY['postgresql', 'sql', 'analytics'],
-        daterange(DATE '2026-03-01', DATE '2026-10-01', '[)'),
-        '{}'::datemultirange,
-        '{"audience":["analyst"],"difficulty":"intermediate","minutes":35}'
-    ),
-    (
-        '00000000-0000-0000-0000-000000000103',
-        'taylor@example.test',
-        'draft',
-        'Python service notes',
-        'Validate configuration and add request identifiers to structured logs.',
-        ARRAY['python', 'services'],
-        daterange(DATE '2026-05-01', DATE '2026-12-01', '[)'),
-        datemultirange(
-            daterange(DATE '2026-08-10', DATE '2026-08-12', '[)'),
-            daterange(DATE '2026-09-03', DATE '2026-09-05', '[)')
-        ),
-        '{"audience":["developer"],"difficulty":"intermediate","minutes":25}'
-    );
+  ('00000000-0000-0000-0000-000000000101', 'avery@example.test', 'published', 'Safe schema migrations', 'Plan additive changes, backfill data, verify invariants, and contract later.', ARRAY['postgresql', 'sql', 'operations'], daterange(DATE '2026-01-01', DATE '2027-01-01', '[)'), datemultirange (daterange(DATE '2026-07-01', DATE '2026-07-08', '[)')), '{"audience":["developer","operator"],"difficulty":"advanced","minutes":45}'),
+  ('00000000-0000-0000-0000-000000000102', 'morgan@example.test', 'published', 'Analytical SQL patterns', 'Use windows and explicit grain for sessions, funnels, and retention.', ARRAY['postgresql', 'sql', 'analytics'], daterange(DATE '2026-03-01', DATE '2026-10-01', '[)'), '{}'::datemultirange, '{"audience":["analyst"],"difficulty":"intermediate","minutes":35}'),
+  ('00000000-0000-0000-0000-000000000103', 'taylor@example.test', 'draft', 'Python service notes', 'Validate configuration and add request identifiers to structured logs.', ARRAY['python', 'services'], daterange(DATE '2026-05-01', DATE '2026-12-01', '[)'), datemultirange (daterange(DATE '2026-08-10', DATE '2026-08-12', '[)'), daterange(DATE '2026-09-03', DATE '2026-09-05', '[)')), '{"audience":["developer"],"difficulty":"intermediate","minutes":25}');
 ```
 
 **How to read it:** Example 2 changes rows inside the lesson's declared transaction. The command tag reports affected rows, but a follow-up query must prove the intended before/after invariant.

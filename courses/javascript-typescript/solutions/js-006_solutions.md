@@ -100,7 +100,9 @@ Freezing the container does not recursively freeze reachable objects. The mutati
 
 ```javascript
 const value = Object.freeze({ nested: { count: 1 } });
-assert.throws(() => { value.nested = {}; }, TypeError);
+assert.throws(() => {
+  value.nested = {};
+}, TypeError);
 value.nested.count = 2;
 assert.equal(value.nested.count, 2);
 ```
@@ -117,7 +119,12 @@ Property access can execute behavior. A schema validator handling untrusted obje
 
 ```javascript
 let calls = 0;
-const value = { get next() { calls += 1; return calls; } };
+const value = {
+  get next() {
+    calls += 1;
+    return calls;
+  },
+};
 assert.equal(value.next, 1);
 assert.equal(value.next, 2);
 assert.equal(calls, 2);

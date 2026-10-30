@@ -11,7 +11,7 @@ Record Spark, Scala binary and patch, JDK major and patch, Python version and op
 **Expected:** Spark 4.0.1, Scala 2.13 family, JDK 17;actual patch strings and explicit not-installed Arrow when absent.
 
 ```scala
-def versionReceipt(spark: SparkSession): Map[String,String] = {
+def versionReceipt(spark: SparkSession): Map[String, String] = {
   runtimeVersions(spark)
 }
 ```
@@ -33,14 +33,18 @@ Evaluate the supplied four-row bag plus exact decimal and timezone expressions.
 
 ```scala
 def goldenMetrics(frame: DataFrame): Seq[Long] = {
-  val r=frame.agg(count(lit(1)),count("cents"),sum("cents"),countDistinct("id")).first()
-  Seq(r.getLong(0),r.getLong(1),r.getLong(2),r.getLong(3))
+  val r = frame.agg(count(lit(1)), count("cents"), sum("cents"), countDistinct("id")).first()
+  Seq(r.getLong(0), r.getLong(1), r.getLong(2), r.getLong(3))
 }
 ```
 
 ```python
 def golden_metrics(frame):
-    return tuple(frame.agg(F.count(F.lit(1)),F.count("cents"),F.sum("cents"),F.countDistinct("id")).first())
+    return tuple(
+        frame.agg(
+            F.count(F.lit(1)), F.count("cents"), F.sum("cents"), F.countDistinct("id")
+        ).first()
+    )
 ```
 
 The fixture catches a migration that drops duplicate occurrences, replaces NULL with zero, changes exact decimals or reinterprets an instant. A successful class load or version line cannot detect those semantic regressions. The small literal expectations are independent of each implementation.
@@ -54,14 +58,15 @@ Run the baseline ID-only deduplication query, then reject a request to change it
 **Expected:** Baseline output 1:100,2:200;preflight rejects changed keys before starting a new query.
 
 ```scala
-def requireCompatible(oldKeys: Seq[String],newKeys: Seq[String]): Unit = {
-  require(oldKeys==newKeys,"State-key change requires separate checkpoint and output")
+def requireCompatible(oldKeys: Seq[String], newKeys: Seq[String]): Unit = {
+  require(oldKeys == newKeys, "State-key change requires separate checkpoint and output")
 }
 ```
 
 ```python
-def require_compatible(old_keys,new_keys):
-    if old_keys!=new_keys:raise ValueError("State-key change requires separate checkpoint and output")
+def require_compatible(old_keys, new_keys):
+    if old_keys != new_keys:
+        raise ValueError("State-key change requires separate checkpoint and output")
 ```
 
 This is an explicit application preflight refusal, not a fabricated Spark engine exception. It protects the old state before launching an incompatible query. Spark documents restrictions on changes to stateful operators and schemas;the safe rehearsal uses a separate recovery namespace rather than deleting or editing checkpoint internals.
@@ -75,16 +80,24 @@ Add a new occurrence 1:999 and run id, cents deduplication using a new checkpoin
 **Expected:** Candidate bag 1:100,1:999,2:200, which fails the baseline one-row-per-ID product gate.
 
 ```scala
-def candidateRun(spark: SparkSession,root: Path,input: Path): RunReceipt = {
-  publishFile(root,input,"batch-02.json",Seq("""{"id":1,"cents":999}"""))
-  runKeys(spark,input,root.resolve("candidate-checkpoint"),root.resolve("candidate-output"),Seq("id","cents"))
+def candidateRun(spark: SparkSession, root: Path, input: Path): RunReceipt = {
+  publishFile(root, input, "batch-02.json", Seq("""{"id":1,"cents":999}"""))
+  runKeys(
+    spark,
+    input,
+    root.resolve("candidate-checkpoint"),
+    root.resolve("candidate-output"),
+    Seq("id", "cents")
+  )
 }
 ```
 
 ```python
-def candidate_run(spark,root,input_path):
-    publish_file(root,input_path,"batch-02.json",['{"id":1,"cents":999}'])
-    return run_keys(spark,input_path,root/"candidate-checkpoint",root/"candidate-output",["id","cents"])
+def candidate_run(spark, root, input_path):
+    publish_file(root, input_path, "batch-02.json", ['{"id":1,"cents":999}'])
+    return run_keys(
+        spark, input_path, root / "candidate-checkpoint", root / "candidate-output", ["id", "cents"]
+    )
 ```
 
 The changed state key admits a second amount for the same ID. That can be a valid new product only if the business contract changes deliberately. Here it violates the existing golden population and is not promoted. A separate namespace makes the comparison reversible without claiming a checkpoint migration occurred.
@@ -98,14 +111,14 @@ Resume the original ID-only query with its original checkpoint after the candida
 **Expected:** The same baseline query ID resumes;the new occurrence of already-seen ID 1 does not add a row;baseline output stays 1:100,2:200.
 
 ```scala
-def rollback(spark: SparkSession,input: Path,checkpoint: Path,output: Path): RunReceipt = {
-  runKeys(spark,input,checkpoint,output,Seq("id"))
+def rollback(spark: SparkSession, input: Path, checkpoint: Path, output: Path): RunReceipt = {
+  runKeys(spark, input, checkpoint, output, Seq("id"))
 }
 ```
 
 ```python
-def rollback(spark,input_path,checkpoint,output):
-    return run_keys(spark,input_path,checkpoint,output,["id"])
+def rollback(spark, input_path, checkpoint, output):
+    return run_keys(spark, input_path, checkpoint, output, ["id"])
 ```
 
 The original state is available because the candidate never reused or reset it. The resumed baseline processes the source under its declared ID-only policy. This is a query-shape rollback within one actual runtime, not proof of cross-version checkpoint portability or a resolution policy for conflicting business events.
@@ -119,13 +132,18 @@ Require a qualified target profile, golden-suite pass, compatible recovery desig
 **Expected:** The supplied unqualified target or failed candidate is rejected;all four true permits a proposal in this pure decision model.
 
 ```scala
-def mayPromote(profileQualified: Boolean,goldenPassed: Boolean,recoveryReviewed: Boolean,productPassed: Boolean): Boolean = {
+def mayPromote(
+    profileQualified: Boolean,
+    goldenPassed: Boolean,
+    recoveryReviewed: Boolean,
+    productPassed: Boolean
+): Boolean = {
   profileQualified && goldenPassed && recoveryReviewed && productPassed
 }
 ```
 
 ```python
-def may_promote(profile_qualified,golden_passed,recovery_reviewed,product_passed):
+def may_promote(profile_qualified, golden_passed, recovery_reviewed, product_passed):
     return profile_qualified and golden_passed and recovery_reviewed and product_passed
 ```
 

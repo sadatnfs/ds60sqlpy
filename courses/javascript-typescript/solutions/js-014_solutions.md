@@ -31,7 +31,11 @@ The equality branch moves high leftward rather than returning an arbitrary match
 ```javascript
 const trace = [];
 assert.equal(lowerBound([1, 4, 4, 8], 4, trace), 1);
-assert.deepEqual(trace, [[0, 4, 2], [0, 2, 1], [0, 1, 0]]);
+assert.deepEqual(trace, [
+  [0, 4, 2],
+  [0, 2, 1],
+  [0, 1, 0],
+]);
 ```
 
 **Expected:** index 1; intervals shrink to the first duplicate.
@@ -96,7 +100,10 @@ Task: Build a Map keyed by id and reject repeated ids rather than silently repla
 Index construction is a data-quality boundary. An overwritten record could make later lookup appear correct while silently dropping an input row.
 
 ```javascript
-const index = uniqueIndex([{ id: 'A', value: 7 }, { id: 'B', value: 9 }]);
+const index = uniqueIndex([
+  { id: 'A', value: 7 },
+  { id: 'B', value: 9 },
+]);
 assert.equal(index.get('A').value, 7);
 assert.throws(() => uniqueIndex([{ id: 'A' }, { id: 'A' }]), /duplicate/u);
 ```

@@ -81,11 +81,15 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-w=nn.Parameter(torch.tensor(0.,dtype=torch.float64)); disconnected=((w-2)**2).detach()
+w = nn.Parameter(torch.tensor(0.0, dtype=torch.float64))
+disconnected = ((w - 2) ** 2).detach()
 assert not disconnected.requires_grad
-try: disconnected.backward()
-except RuntimeError: pass
-else: raise AssertionError('detached loss backpropagated')
+try:
+    disconnected.backward()
+except RuntimeError:
+    pass
+else:
+    raise AssertionError("detached loss backpropagated")
 ```
 
 **Expected:** detached loss `requires_grad` False; backward raises RuntimeError.
@@ -95,10 +99,18 @@ else: raise AssertionError('detached loss backpropagated')
 Comparing each state finds the first divergence. A final-value-only check can hide wrong intermediate logging or compensating errors.
 
 ```python
-x=torch.tensor([1.,2.,3.],dtype=torch.float64); y=2*x; optimizer=torch.optim.SGD([w],lr=.1); history=[]
+x = torch.tensor([1.0, 2.0, 3.0], dtype=torch.float64)
+y = 2 * x
+optimizer = torch.optim.SGD([w], lr=0.1)
+history = []
 for _ in range(2):
-    optimizer.zero_grad(set_to_none=True); loss=((w*x-y)**2).mean(); loss.backward(); assert w.grad is not None; optimizer.step(); history.append(w.item())
-np.testing.assert_allclose(history,[28/15,448/225],atol=1e-12,rtol=0)
+    optimizer.zero_grad(set_to_none=True)
+    loss = ((w * x - y) ** 2).mean()
+    loss.backward()
+    assert w.grad is not None
+    optimizer.step()
+    history.append(w.item())
+np.testing.assert_allclose(history, [28 / 15, 448 / 225], atol=1e-12, rtol=0)
 ```
 
 **Expected:** weights \(\frac{28}{15}\) then \(\frac{448}{225}\).
@@ -108,9 +120,11 @@ np.testing.assert_allclose(history,[28/15,448/225],atol=1e-12,rtol=0)
 The function returns the original norm, not the new one. The small numerical difference comes from the stabilizing epsilon in the clip coefficient.
 
 ```python
-parameter=nn.Parameter(torch.zeros(2)); parameter.grad=torch.tensor([3.,4.])
-before=torch.nn.utils.clip_grad_norm_([parameter],1.)
-assert before.item()==5; torch.testing.assert_close(parameter.grad,torch.tensor([.6,.8]),atol=1e-6,rtol=0)
+parameter = nn.Parameter(torch.zeros(2))
+parameter.grad = torch.tensor([3.0, 4.0])
+before = torch.nn.utils.clip_grad_norm_([parameter], 1.0)
+assert before.item() == 5
+torch.testing.assert_close(parameter.grad, torch.tensor([0.6, 0.8]), atol=1e-6, rtol=0)
 ```
 
 **Expected:** returned norm 5; new gradient approximately.6, .8.

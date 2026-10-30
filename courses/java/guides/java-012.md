@@ -49,16 +49,32 @@ The method needs only to readNumber values, so an extends bound accepts both int
 import java.util.*;
 
 public class Main {
-    static double sum(List<? extends Number> values){double total=0;for(Number value:values)total+=value.doubleValue();return total;}
-    static void addTwo(List<? super Integer> values){values.add(1);values.add(2);}
-    static <T> void copy(List<? extends T> source,List<? super T> target){target.addAll(source);}
-    static <T> T first(List<T> values){if(values.isEmpty())throw new NoSuchElementException("empty list");return values.get(0);}
-    public static void main(String[] args) throws Exception {
-        assert sum(List.of(1,2,3))==6.0;
-        assert sum(List.of(1.5,2.5))==4.0;
-    }
-}
 
+  static double sum(List<? extends Number> values) {
+    double total = 0;
+    for (Number value : values) total += value.doubleValue();
+    return total;
+  }
+
+  static void addTwo(List<? super Integer> values) {
+    values.add(1);
+    values.add(2);
+  }
+
+  static <T> void copy(List<? extends T> source, List<? super T> target) {
+    target.addAll(source);
+  }
+
+  static <T> T first(List<T> values) {
+    if (values.isEmpty()) throw new NoSuchElementException("empty list");
+    return values.get(0);
+  }
+
+  public static void main(String[] args) throws Exception {
+    assert sum(List.of(1, 2, 3)) == 6.0;
+    assert sum(List.of(1.5, 2.5)) == 4.0;
+  }
+}
 ```
 
 **Expected:** sums 6.0 and 4.0.
@@ -71,19 +87,36 @@ A Number list can safely receiveInteger values. Reading through thesuper-bounded
 import java.util.*;
 
 public class Main {
-    static double sum(List<? extends Number> values){double total=0;for(Number value:values)total+=value.doubleValue();return total;}
-    static void addTwo(List<? super Integer> values){values.add(1);values.add(2);}
-    static <T> void copy(List<? extends T> source,List<? super T> target){target.addAll(source);}
-    static <T> T first(List<T> values){if(values.isEmpty())throw new NoSuchElementException("empty list");return values.get(0);}
-    public static void main(String[] args) throws Exception {
-        assert sum(List.of(1,2,3))==6.0;
-        assert sum(List.of(1.5,2.5))==4.0;
 
-        List<Number> numbers=new ArrayList<>(); addTwo(numbers);
-        assert numbers.equals(List.of(1,2));
-    }
+  static double sum(List<? extends Number> values) {
+    double total = 0;
+    for (Number value : values) total += value.doubleValue();
+    return total;
+  }
+
+  static void addTwo(List<? super Integer> values) {
+    values.add(1);
+    values.add(2);
+  }
+
+  static <T> void copy(List<? extends T> source, List<? super T> target) {
+    target.addAll(source);
+  }
+
+  static <T> T first(List<T> values) {
+    if (values.isEmpty()) throw new NoSuchElementException("empty list");
+    return values.get(0);
+  }
+
+  public static void main(String[] args) throws Exception {
+    assert sum(List.of(1, 2, 3)) == 6.0;
+    assert sum(List.of(1.5, 2.5)) == 4.0;
+
+    List<Number> numbers = new ArrayList<>();
+    addTwo(numbers);
+    assert numbers.equals(List.of(1, 2));
+  }
 }
-
 ```
 
 **Expected:** listcontains1,2.

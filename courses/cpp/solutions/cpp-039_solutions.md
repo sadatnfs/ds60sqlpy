@@ -31,7 +31,10 @@ If a handle leaks on an exception path, wrap it immediately after successful cre
 ## Worked example 1
 
 ```cpp
-Analyzer* p=analyzer_create(); int value=0; analyzer_read(p,&value); analyzer_destroy(p);
+Analyzer *p = analyzer_create();
+int value = 0;
+analyzer_read(p, &value);
+analyzer_destroy(p);
 ```
 
 Expected: One successful create has exactly one matching destroy; initial value is 0.
@@ -39,7 +42,7 @@ Expected: One successful create has exactly one matching destroy; initial value 
 ## Worked example 2
 
 ```cpp
-assert(analyzer_read(nullptr,&out)==1);
+assert(analyzer_read(nullptr, &out) == 1);
 ```
 
 Expected: Null handle is rejected without dereferencing it.

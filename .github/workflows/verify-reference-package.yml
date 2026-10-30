@@ -1,0 +1,139 @@
+name: Optional R reference package
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: optional-reference-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  qualify:
+    name: Independent R reference (${{ matrix.architecture }})
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - architecture: amd64
+            machine: x86_64
+            runner: ubuntu-24.04
+          - architecture: arm64
+            machine: aarch64
+            runner: ubuntu-24.04-arm
+    env:
+      EXPECTED_MACHINE: ${{ matrix.machine }}
+      EXPECTED_ARCHITECTURE: ${{ matrix.architecture }}
+      IMAGE: ds60-reference-qualification:${{ github.sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Freeze the independently copied reference
+        run: |
+          test "$(uname -m)" = "$EXPECTED_MACHINE"
+          test "$(docker info --format '{{.OSType}}')" = linux
+          mkdir -p "$RUNNER_TEMP/reference-evidence"
+          chmod 777 "$RUNNER_TEMP/reference-evidence"
+          cp -a packages/spark-tmbad/reference "$RUNNER_TEMP/reference-project"
+          test ! -e "$RUNNER_TEMP/reference-project/.git"
+          printf '%s\n' "$GITHUB_SHA" > "$RUNNER_TEMP/reference-evidence/source-revision.txt"
+          printf 'PACKAGE=%s\n' "$RUNNER_TEMP/reference-project" >> "$GITHUB_ENV"
+          printf 'REPORTS=%s\n' "$RUNNER_TEMP/reference-evidence" >> "$GITHUB_ENV"
+      - name: Authenticate hosted base-image pulls privately
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: |
+          test -n "$DOCKERHUB_USERNAME"
+          test -n "$DOCKERHUB_TOKEN"
+          export DOCKER_CONFIG="$RUNNER_TEMP/reference-docker-config"
+          install -d -m 700 "$DOCKER_CONFIG"
+          printf '%s' "$DOCKERHUB_TOKEN" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin
+          chmod 600 "$DOCKER_CONFIG/config.json"
+          printf 'DOCKER_CONFIG=%s\n' "$DOCKER_CONFIG" >> "$GITHUB_ENV"
+      - name: Build the pinned neutral R recipe with all locked dependencies
+        run: |
+          timeout 3600 docker build --pull --progress=plain --tag "$IMAGE" "$PACKAGE" 2>&1 | tee "$REPORTS/default-build.log"
+          test "$(docker image inspect "$IMAGE" --format '{{.Architecture}}')" = "$EXPECTED_ARCHITECTURE"
+          docker image inspect "$IMAGE" > "$REPORTS/image.json"
+      - name: Preserve preparation metadata and complete compressed build logs
+        run: |
+          metadata_container="reference-metadata-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-$EXPECTED_ARCHITECTURE"
+          docker create --name "$metadata_container" --entrypoint /bin/true "$IMAGE"
+          trap 'docker rm "$metadata_container" >/dev/null 2>&1 || true' EXIT
+          docker cp "$metadata_container:/opt/reference-prepared/manifest.json" "$REPORTS/manifest.json"
+          docker cp "$metadata_container:/opt/reference-prepared/logs" "$REPORTS/build-logs"
+          docker cp "$metadata_container:/opt/reference-prepared/models/compile.json" "$REPORTS/model-compilation.json"
+          docker rm "$metadata_container"
+          trap - EXIT
+      - name: Execute every registered modeling case without network or compilation
+        run: |
+          timeout --kill-after=20s 900 docker run -i --rm --pull=never --network=none --read-only \
+            --cpus=2 --memory=4g --pids-limit=512 --cap-drop=ALL --security-opt=no-new-privileges \
+            --tmpfs /tmp:rw,exec,nosuid,nodev,size=536870912,mode=1777 \
+            --tmpfs /work:rw,exec,nosuid,nodev,size=536870912,mode=1777 \
+            --mount "type=bind,src=$REPORTS,dst=/out" --entrypoint python3 "$IMAGE" - \
+            > "$REPORTS/runtime.log" 2>&1 <<'PY'
+          import hashlib
+          import itertools
+          import json
+          from pathlib import Path
+          import sys
+          import time
+
+          source = Path('/opt/reference')
+          prepared = Path('/opt/reference-prepared')
+          sys.path.insert(0, str(source / 'python'))
+          from client import run_case
+
+          manifest_sha = hashlib.sha256((prepared / 'manifest.json').read_bytes()).hexdigest()
+          registry = json.loads((source / 'registry.json').read_text())
+          records = []
+          for case, entry in registry['cases'].items():
+              for values in itertools.product(*entry['options'].values()):
+                  options = dict(zip(entry['options'], values))
+                  name = case + ''.join('-' + value for value in values)
+                  started = time.monotonic()
+                  try:
+                      result = run_case(case, seed=1729, options=options, prepared=prepared,
+                                        output=Path('/out/cases') / name, timeout=120)
+                      assert result['prepared_manifest_sha256'] == manifest_sha
+                      record = {'case': name, 'passed': True}
+                  except Exception as error:
+                      record = {'case': name, 'passed': False, 'error_type': type(error).__name__,
+                                'message': str(error)[:1000]}
+                  record['elapsed_seconds'] = time.monotonic() - started
+                  records.append(record)
+                  Path('/out/cases.json').write_text(json.dumps(records, indent=2) + '\n')
+                  print(json.dumps(record), flush=True)
+          assert len(records) == 24
+          report = {'kind': 'optional-reference-native-case-qualification', 'cases': len(records),
+                    'passed_cases': sum(row['passed'] for row in records),
+                    'prepared_manifest_sha256': manifest_sha,
+                    'scope': 'neutral default native image and serial registered cases only; no Spark or multi-host claim',
+                    'passed': all(row['passed'] for row in records)}
+          Path('/out/RESULT.json').write_text(json.dumps(report, indent=2) + '\n')
+          raise SystemExit(0 if report['passed'] else 1)
+          PY
+      - name: Retain success and failure evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: optional-reference-${{ matrix.architecture }}-attempt-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/reference-evidence
+          if-no-files-found: error
+          retention-days: 14
+      - name: Remove only this job's private registry configuration
+        if: always()
+        run: rm -rf -- "$RUNNER_TEMP/reference-docker-config"

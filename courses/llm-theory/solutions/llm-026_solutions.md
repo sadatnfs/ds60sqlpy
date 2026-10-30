@@ -23,8 +23,10 @@ The question is: Use features[-2,0],[-1,1],[1,0],[2,1] and labels 0,0,1,1.
 The label is deliberately encoded in a coordinate. This supplies a clear positive control for the probing procedure.
 
 ```python
-features=torch.tensor([[-2.,0.],[-1.,1.],[1.,0.],[2.,1.]]); labels=torch.tensor([0,0,1,1]); prediction=(features[:,0]>0).long()
-assert torch.equal(prediction,labels)
+features = torch.tensor([[-2.0, 0.0], [-1.0, 1.0], [1.0, 0.0], [2.0, 1.0]])
+labels = torch.tensor([0, 0, 1, 1])
+prediction = (features[:, 0] > 0).long()
+assert torch.equal(prediction, labels)
 ```
 
 **Expected:** first-coordinate sign predicts all four labels.
@@ -38,8 +40,10 @@ The question is: Evaluate the same fixed threshold on new representations[-3,1],
 The threshold is fixed before opening these two rows. The result has only two held-out units and should be reported with that count.
 
 ```python
-held=torch.tensor([[-3.,1.],[3.,0.]]); truth=torch.tensor([0,1]); got=(held[:,0]>0).long()
-assert torch.equal(got,truth)
+held = torch.tensor([[-3.0, 1.0], [3.0, 0.0]])
+truth = torch.tensor([0, 1])
+got = (held[:, 0] > 0).long()
+assert torch.equal(got, truth)
 ```
 
 **Expected:** two correct held-out predictions.
@@ -53,7 +57,8 @@ The question is: Compare predictions against shuffled labels 0,1,0,1.
 The control breaks the specific association while preserving label balance. A high control score would suggest the probe or split can exploit another shortcut.
 
 ```python
-shuffled=torch.tensor([0,1,0,1]); assert int((prediction==shuffled).sum())==2
+shuffled = torch.tensor([0, 1, 0, 1])
+assert int((prediction == shuffled).sum()) == 2
 ```
 
 **Expected:** 2 of4 correct.
@@ -67,8 +72,12 @@ The question is: Clone features, compute a probe loss using a separate trainable
 A readout investigation should not alter the representation under study. Fine-tuning the encoder answers a different question about learnability.
 
 ```python
-before=features.clone(); weight=nn.Parameter(torch.tensor([[1.],[0.]])); logits=(features@weight).ravel(); loss=F.binary_cross_entropy_with_logits(logits,labels.float()); loss.backward()
-assert weight.grad is not None and features.grad is None and torch.equal(features,before)
+before = features.clone()
+weight = nn.Parameter(torch.tensor([[1.0], [0.0]]))
+logits = (features @ weight).ravel()
+loss = F.binary_cross_entropy_with_logits(logits, labels.float())
+loss.backward()
+assert weight.grad is not None and features.grad is None and torch.equal(features, before)
 ```
 
 **Expected:** probe gradient exists; features have no gradient.
@@ -82,7 +91,8 @@ The question is: Mark rows0 and 1 as versions of familyA and place them on oppos
 A probe can memorize family-specific features. Row-level disjointness does not prevent related documents from leaking across evaluation.
 
 ```python
-families=['A','A','B','C']; assert {families[0]} & {families[1]}=={'A'}
+families = ["A", "A", "B", "C"]
+assert {families[0]} & {families[1]} == {"A"}
 ```
 
 **Expected:** familyA crosses partitions.
@@ -96,8 +106,13 @@ The question is: Write a result with heldout_count2,control_accuracy.5 and causa
 Even perfect decoding does not show that the original system consulted that coordinate. The interpretation must match what the probe actually measured.
 
 ```python
-report={'heldout_count':2,'control_accuracy':.5,'decodable':True,'causal_use_established':False}
-assert report['decodable'] and not report['causal_use_established']
+report = {
+    "heldout_count": 2,
+    "control_accuracy": 0.5,
+    "decodable": True,
+    "causal_use_established": False,
+}
+assert report["decodable"] and not report["causal_use_established"]
 ```
 
 **Expected:** report distinguishes decodability from causal use.

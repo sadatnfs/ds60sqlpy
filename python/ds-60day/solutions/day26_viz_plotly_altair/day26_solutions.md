@@ -108,11 +108,14 @@ figure.write_html(destination, include_plotlyjs=True, full_html=True)
 html = destination.read_text(encoding="utf-8")
 assert "<html" in html.lower()
 assert "Value distribution" in html
-assert re.search(
-    r"<script[^>]+src=['\"]https?://",
-    html,
-    flags=re.IGNORECASE,
-) is None
+assert (
+    re.search(
+        r"<script[^>]+src=['\"]https?://",
+        html,
+        flags=re.IGNORECASE,
+    )
+    is None
+)
 payload_bytes = destination.stat().st_size
 assert payload_bytes > 100_000
 ```
@@ -204,9 +207,7 @@ def build_scatter(
     return px.scatter(frame, x=x, y=y, color=color, hover_data=bounded_hover)
 
 
-sample = pd.DataFrame(
-    {"bill": [10, 20, 30], "tip": [1, 4, 5], "meal": ["L", "D", "D"]}
-)
+sample = pd.DataFrame({"bill": [10, 20, 30], "tip": [1, 4, 5], "meal": ["L", "D", "D"]})
 figure = build_scatter(sample, x="bill", y="tip", color="meal", hover=["meal"])
 assert len(figure.data) == 2
 ```

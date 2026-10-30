@@ -703,3 +703,110 @@ def test_native_contract_gate_rejects_a_guard_that_erases_semantic_differences(
 
 def test_python_native_contract_gate_needs_no_non_python_parser(tmp_path: Path) -> None:
     assert guard_contracts.verify(tmp_path, {"python"}) == 2
+
+
+def test_web_example_raw_code_slot_preserves_all_other_values(tmp_path: Path) -> None:
+    calls = []
+
+    def json_adapter(source: bytes, language: str, suffix: str, root: Path) -> bytes:
+        assert language == "web" and suffix == ".json"
+        calls.append(source)
+        return (json.dumps(json.loads(source), indent=2) + "\n").encode()
+
+    untouched = '~~~json\n{"expected":1}\n~~~\n'
+    value: dict[str, Any] = {
+        "schema_version": 1,
+        "chapters": [
+            {
+                "examples": [
+                    [untouched, untouched, "json", '{"literal":"a  b","marks":"~~~"}', untouched]
+                ],
+                "other": "exact",
+            }
+        ],
+    }
+    source = json.dumps(value, ensure_ascii=False)
+    tool = inline.Formatter(tmp_path, json_adapter)
+    changed, records = inline.format_authoring_json(
+        source, tool, {"web"}, path="courses/web-development/authoring/chapters.json"
+    )
+    result = json.loads(changed)
+    assert result["chapters"][0]["examples"][0][:3] == value["chapters"][0]["examples"][0][:3]
+    assert result["chapters"][0]["examples"][0][4] == untouched
+    assert result["chapters"][0]["other"] == "exact"
+    code = result["chapters"][0]["examples"][0][3]
+    assert json.loads(code) == {"literal": "a  b", "marks": "~~~"}
+    assert not code.endswith("\n") and code != value["chapters"][0]["examples"][0][3]
+    assert any(
+        record["container"] == "json-authoring-code" and record["json_path"][-1] == 3
+        for record in records
+    )
+    assert all(
+        record["status"] == "preserved" for record in records if record["json_path"][-1] != 3
+    )
+    assert calls
+    repeated, _ = inline.format_authoring_json(
+        changed, tool, {"web"}, path="courses/web-development/authoring/chapters.json"
+    )
+    assert repeated == changed
+
+
+def test_raw_web_slot_does_not_admit_other_paths_or_unselected_tools(tmp_path: Path) -> None:
+    source = json.dumps(
+        {
+            "schema_version": 1,
+            "chapters": [{"examples": [["heading", "intro", "json", '{"x":1}', "expected"]]}],
+        }
+    )
+
+    def forbidden(*args: Any) -> bytes:
+        pytest.fail("Unselected or unknown raw-code slot reached a formatter")
+
+    tool = inline.Formatter(tmp_path, forbidden)
+    unknown, rows = inline.format_authoring_json(
+        source, tool, {"web"}, path="courses/other/authoring/chapters.json"
+    )
+    assert unknown == source and rows == []
+    unselected, rows = inline.format_authoring_json(
+        source, tool, {"python"}, path="courses/web-development/authoring/chapters.json"
+    )
+    assert unselected == source and rows[0]["status"] == "not-selected"
+
+
+def test_raw_web_transcript_and_malformed_schema_are_not_rewritten(tmp_path: Path) -> None:
+    source = json.dumps(
+        {
+            "schema_version": 1,
+            "chapters": [
+                {"examples": [["heading", "intro", "text", "expected   output\n", "observation"]]}
+            ],
+        }
+    )
+    changed, rows = inline.format_authoring_json(
+        source, formatter(tmp_path), {"web"}, path="courses/web-development/authoring/chapters.json"
+    )
+    assert changed == source and rows[0]["reason"] == "untyped-or-output-transcript"
+    invalid = json.dumps(
+        {"schema_version": 1, "chapters": [{"examples": [["heading", "intro", "json", "{}"]]}]}
+    )
+    with pytest.raises(inline.FormatFailure, match="five|heading, intro"):
+        inline.format_authoring_json(
+            invalid,
+            formatter(tmp_path),
+            {"web"},
+            path="courses/web-development/authoring/chapters.json",
+        )
+
+
+def test_raw_web_program_value_change_rejects_entire_json(tmp_path: Path) -> None:
+    source = json.dumps(
+        {
+            "schema_version": 1,
+            "chapters": [{"examples": [["heading", "intro", "json", '{"x":1}', "expected"]]}],
+        }
+    )
+    tool = inline.Formatter(tmp_path, lambda *args: b'{"x": 2}\n')
+    changed, records = inline.format_authoring_json(
+        source, tool, {"web"}, path="courses/web-development/authoring/chapters.json"
+    )
+    assert changed == source and records[0]["status"] == "error"

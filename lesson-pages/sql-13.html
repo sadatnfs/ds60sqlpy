@@ -432,30 +432,37 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
 <p>These worked excerpts come from <code>sql/postgres-60day/day13_date_time_functions.sql</code>. Use <strong>Whole SQL lesson (psql)</strong> in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared <code>psql</code> routes are described above.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span> full_name<span class="syntax-punctuation">,</span>
-       now<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> created_at <span class="syntax-keyword">AS</span> tenure<span class="syntax-punctuation">,</span>
-       date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> created_at <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span>
-         <span class="syntax-keyword">AS</span> cohort_month_utc
-<span class="syntax-keyword">FROM</span> customers
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> tenure <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> customer_id
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  customer_id<span class="syntax-punctuation">,</span>
+  full_name<span class="syntax-punctuation">,</span>
+  now<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> created_at <span class="syntax-keyword">AS</span> tenure<span class="syntax-punctuation">,</span>
+  date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> created_at <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> cohort_month_utc
+<span class="syntax-keyword">FROM</span>
+  customers
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  tenure <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span>
+  customer_id
 <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">50</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 1: Start with <code>customers</code> in <code>FROM</code>/<code>JOIN</code>. The final <code>SELECT</code> displays <code>customer_id</code>, <code>full_name</code>, <code>tenure</code>, and <code>cohort_month_utc</code>. <code>ORDER BY</code> determines presentation order and the final <code>LIMIT 50</code> caps displayed rows. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 1 returns one row per <code>customer_id</code>, capped at 50 rows with columns <code>customer_id</code>, <code>full_name</code>, <code>tenure</code>, and <code>cohort_month_utc</code> from <code>customers</code>. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an <code>ORDER BY</code>, and inspect <code>NULL</code> only for columns this example can produce.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> daily <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> <span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>order_date <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> d_utc<span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue
-  <span class="syntax-keyword">FROM</span> orders o
-  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> d_utc
+  <span class="syntax-keyword">SELECT</span>
+    <span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>order_date <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> d_utc<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue
+  <span class="syntax-keyword">FROM</span>
+    orders o
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+    d_utc
 <span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> d_utc<span class="syntax-punctuation">,</span>
-       revenue<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>
-         <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> d_utc
-         <span class="syntax-keyword">ROWS</span> <span class="syntax-keyword">BETWEEN</span> <span class="syntax-number">6</span> PRECEDING <span class="syntax-keyword">AND</span> <span class="syntax-keyword">CURRENT</span> <span class="syntax-keyword">ROW</span>
-       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue_7_observed_days
-<span class="syntax-keyword">FROM</span> daily
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> d_utc <span class="syntax-keyword">DESC</span>
+<span class="syntax-keyword">SELECT</span>
+  d_utc<span class="syntax-punctuation">,</span>
+  revenue<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> d_utc <span class="syntax-keyword">ROWS</span> <span class="syntax-keyword">BETWEEN</span> <span class="syntax-number">6</span> PRECEDING <span class="syntax-keyword">AND</span> <span class="syntax-keyword">CURRENT</span> <span class="syntax-keyword">ROW</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue_7_observed_days
+<span class="syntax-keyword">FROM</span>
+  daily
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  d_utc <span class="syntax-keyword">DESC</span>
 <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">30</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 2: Start with <code>orders</code> in <code>FROM</code>/<code>JOIN</code>; let <code>GROUP BY</code> collapse rows to its grouping keys; let each <code>OVER</code> expression calculate across related rows without collapsing them. The final <code>SELECT</code> displays <code>d_utc</code>, <code>revenue</code>, and <code>revenue_7_observed_days</code>. <code>ORDER BY</code> determines presentation order and the final <code>LIMIT 30</code> caps displayed rows. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 2 returns one grouped row per <code>d_utc</code>, capped at 30 rows with columns <code>d_utc</code>, <code>revenue</code>, and <code>revenue_7_observed_days</code> from <code>orders</code>. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an <code>ORDER BY</code>, and inspect <code>NULL</code> only for columns this example can produce.</p>
@@ -756,12 +763,17 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li>time normalization: makes reporting boundaries explicit; UTC is applied before deriving calendar buckets where required.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span>
-       o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">,</span>
-       <span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>order_date <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> utc_order_date
-<span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o
-<span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;30 days&#x27;</span>
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_id <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span>
+  o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">,</span>
+  <span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>order_date <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> utc_order_date
+<span class="syntax-keyword">FROM</span>
+  orders <span class="syntax-keyword">AS</span> o
+<span class="syntax-keyword">WHERE</span>
+  o<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;30 days&#x27;</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  o<span class="syntax-punctuation">.</span>order_date <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span>
+  o<span class="syntax-punctuation">.</span>order_id <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> Recent order rows in deterministic order.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
@@ -785,12 +797,16 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li>time normalization: makes reporting boundaries explicit; UTC is applied before deriving calendar buckets where required.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> utc_month<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> order_count<span class="syntax-punctuation">,</span>
-       ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> stored_revenue
-<span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o
-<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> utc_month<span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> utc_month<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> order_count<span class="syntax-punctuation">,</span>
+  ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> stored_revenue
+<span class="syntax-keyword">FROM</span>
+  orders <span class="syntax-keyword">AS</span> o
+<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+  date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  utc_month<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One row per observed UTC month.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
@@ -813,12 +829,14 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li>time normalization: makes reporting boundaries explicit; UTC is applied before deriving calendar buckets where required.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>created_at<span class="syntax-punctuation">,</span>
-       <span class="syntax-punctuation">(</span><span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span>
-         <span class="syntax-operator">-</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>created_at <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> customer_age_days
-<span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span>
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>created_at<span class="syntax-punctuation">,</span>
+  <span class="syntax-punctuation">(</span><span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-operator">-</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>created_at <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> customer_age_days
+<span class="syntax-keyword">FROM</span>
+  customers <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One row per customer with nonnegative age days.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-3">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-3" aria-label="Link to this section">#</a></h5>
@@ -845,16 +863,22 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> bounds <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> month_start<span class="syntax-punctuation">,</span>
-         date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">+</span> <span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;1 month&#x27;</span> <span class="syntax-keyword">AS</span> next_month_start
+  <span class="syntax-keyword">SELECT</span>
+    date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> month_start<span class="syntax-punctuation">,</span>
+    date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">+</span> <span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;1 month&#x27;</span> <span class="syntax-keyword">AS</span> next_month_start
 <span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span>
-       o<span class="syntax-punctuation">.</span>order_date
-<span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o
-<span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> bounds <span class="syntax-keyword">AS</span> b
-<span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> b<span class="syntax-punctuation">.</span>month_start <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span>
+<span class="syntax-keyword">SELECT</span>
+  o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span>
+  o<span class="syntax-punctuation">.</span>order_date
+<span class="syntax-keyword">FROM</span>
+  orders <span class="syntax-keyword">AS</span> o
+  <span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> bounds <span class="syntax-keyword">AS</span> b
+<span class="syntax-keyword">WHERE</span>
+  o<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> b<span class="syntax-punctuation">.</span>month_start <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span>
   <span class="syntax-keyword">AND</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&lt;</span> b<span class="syntax-punctuation">.</span>next_month_start <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span>
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">;</span></code></pre>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">,</span>
+  o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> Orders in exactly one UTC month.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-4">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-4" aria-label="Link to this section">#</a></h5>
@@ -878,12 +902,16 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 <li><code>LIMIT</code>: is applied after ordering and is meaningful only when the query first defines which rows come first.</li>
 </ul>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>event_id<span class="syntax-punctuation">,</span>
-       e<span class="syntax-punctuation">.</span>event_time<span class="syntax-punctuation">,</span>
-       e<span class="syntax-punctuation">.</span>event_time <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span> <span class="syntax-keyword">AS</span> utc_wall_time<span class="syntax-punctuation">,</span>
-       e<span class="syntax-punctuation">.</span>event_time <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;America/Los_Angeles&#x27;</span> <span class="syntax-keyword">AS</span> los_angeles_wall_time
-<span class="syntax-keyword">FROM</span> events <span class="syntax-keyword">AS</span> e
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>event_time<span class="syntax-punctuation">,</span> e<span class="syntax-punctuation">.</span>event_id
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  e<span class="syntax-punctuation">.</span>event_id<span class="syntax-punctuation">,</span>
+  e<span class="syntax-punctuation">.</span>event_time<span class="syntax-punctuation">,</span>
+  e<span class="syntax-punctuation">.</span>event_time <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span> <span class="syntax-keyword">AS</span> utc_wall_time<span class="syntax-punctuation">,</span>
+  e<span class="syntax-punctuation">.</span>event_time <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;America/Los_Angeles&#x27;</span> <span class="syntax-keyword">AS</span> los_angeles_wall_time
+<span class="syntax-keyword">FROM</span>
+  events <span class="syntax-keyword">AS</span> e
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  e<span class="syntax-punctuation">.</span>event_time<span class="syntax-punctuation">,</span>
+  e<span class="syntax-punctuation">.</span>event_id
 <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">20</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One row per sampled event with two displays of the same instant.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
@@ -913,24 +941,28 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> calendar <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> generate_series<span class="syntax-punctuation">(</span>
-           <span class="syntax-punctuation">(</span><span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-operator">-</span> <span class="syntax-number">6</span><span class="syntax-punctuation">,</span>
-           <span class="syntax-punctuation">(</span><span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span><span class="syntax-punctuation">,</span>
-           <span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;1 day&#x27;</span>
-         <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> utc_date
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> daily_orders <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> <span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>order_date <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> utc_date<span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> order_count
-  <span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o
-  <span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-operator">-</span> <span class="syntax-number">6</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span>
-  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>order_date <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span>
+  <span class="syntax-keyword">SELECT</span>
+    generate_series<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-operator">-</span> <span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;1 day&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> utc_date
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+daily_orders <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span>
+    <span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>order_date <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> utc_date<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> order_count
+  <span class="syntax-keyword">FROM</span>
+    orders <span class="syntax-keyword">AS</span> o
+  <span class="syntax-keyword">WHERE</span>
+    o<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-operator">-</span> <span class="syntax-number">6</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span>
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+    <span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>order_date <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span>
 <span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>utc_date<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>d<span class="syntax-punctuation">.</span>order_count<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> order_count
-<span class="syntax-keyword">FROM</span> calendar <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span>
-<span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> daily_orders <span class="syntax-keyword">AS</span> d
-  <span class="syntax-keyword">ON</span> d<span class="syntax-punctuation">.</span>utc_date <span class="syntax-operator">=</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>utc_date
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>utc_date<span class="syntax-punctuation">;</span></code></pre>
+<span class="syntax-keyword">SELECT</span>
+  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>utc_date<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>d<span class="syntax-punctuation">.</span>order_count<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> order_count
+<span class="syntax-keyword">FROM</span>
+  calendar <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span>
+  <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> daily_orders <span class="syntax-keyword">AS</span> d <span class="syntax-keyword">ON</span> d<span class="syntax-punctuation">.</span>utc_date <span class="syntax-operator">=</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>utc_date
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>utc_date<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> Exactly seven chronological rows.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-6">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-6" aria-label="Link to this section">#</a></h5>

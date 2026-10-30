@@ -83,10 +83,11 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-x=torch.tensor([[0.,0.],[0.,1.],[1.,0.],[1.,1.]])
-w=torch.tensor([[1.,-1.],[-1.,1.]])
-h=F.relu(x@w); output=h.sum(1)
-assert output.tolist()==[0.,1.,1.,0.]
+x = torch.tensor([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]])
+w = torch.tensor([[1.0, -1.0], [-1.0, 1.0]])
+h = F.relu(x @ w)
+output = h.sum(1)
+assert output.tolist() == [0.0, 1.0, 1.0, 0.0]
 ```
 
 **Expected:** outputs 0, 1, 1, 0.
@@ -96,7 +97,7 @@ assert output.tolist()==[0.,1.,1.,0.]
 The two columns are opposites, so a linear sum cancels. Adding more linear layers would not create the piecewise behavior needed for XOR.
 
 ```python
-assert (x@w).sum(1).tolist()==[0.,0.,0.,0.]
+assert (x @ w).sum(1).tolist() == [0.0, 0.0, 0.0, 0.0]
 ```
 
 **Expected:** all four outputs 0.
@@ -106,14 +107,16 @@ assert (x@w).sum(1).tolist()==[0.,0.,0.,0.]
 The XOR matrix is symmetric, so that fixture alone cannot detect a missing transpose. The separate asymmetric matrix makes the two orientations produce different outputs and checks the Linear storage convention independently.
 
 ```python
-layer=nn.Linear(2,2,bias=False)
-with torch.no_grad(): layer.weight.copy_(w.T)
-torch.testing.assert_close(F.relu(layer(x)),h,atol=0,rtol=0)
-asymmetric=torch.tensor([[1.,2.],[3.,4.]])
-probe=nn.Linear(2,2,bias=False)
-with torch.no_grad(): probe.weight.copy_(asymmetric.T)
-torch.testing.assert_close(probe(x),x@asymmetric,atol=0,rtol=0)
-assert not torch.equal(x@asymmetric,x@asymmetric.T)
+layer = nn.Linear(2, 2, bias=False)
+with torch.no_grad():
+    layer.weight.copy_(w.T)
+torch.testing.assert_close(F.relu(layer(x)), h, atol=0, rtol=0)
+asymmetric = torch.tensor([[1.0, 2.0], [3.0, 4.0]])
+probe = nn.Linear(2, 2, bias=False)
+with torch.no_grad():
+    probe.weight.copy_(asymmetric.T)
+torch.testing.assert_close(probe(x), x @ asymmetric, atol=0, rtol=0)
+assert not torch.equal(x @ asymmetric, x @ asymmetric.T)
 ```
 
 **Expected:** module features equal manual features; the asymmetric probe distinguishes the two orientations.

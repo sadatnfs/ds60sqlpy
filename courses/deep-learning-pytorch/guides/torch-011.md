@@ -79,13 +79,23 @@ import numpy as np
 import torch
 from torch import nn
 from torch.nn import functional as F
+
+
 class ScalarModel(nn.Module):
     def __init__(self):
-        super().__init__(); self.weight=nn.Parameter(torch.tensor(0.,dtype=torch.float64)); self.register_buffer('offset',torch.tensor(0.,dtype=torch.float64))
-    def forward(self,x): return self.weight*x+self.offset
-model=ScalarModel()
-assert set(dict(model.named_parameters()))=={'weight'} and set(dict(model.named_buffers()))=={'offset'}
-assert set(model.state_dict())=={'weight','offset'}
+        super().__init__()
+        self.weight = nn.Parameter(torch.tensor(0.0, dtype=torch.float64))
+        self.register_buffer("offset", torch.tensor(0.0, dtype=torch.float64))
+
+    def forward(self, x):
+        return self.weight * x + self.offset
+
+
+model = ScalarModel()
+assert set(dict(model.named_parameters())) == {"weight"} and set(dict(model.named_buffers())) == {
+    "offset"
+}
+assert set(model.state_dict()) == {"weight", "offset"}
 ```
 
 **Expected:** one parameter weight; one buffer offset; both in state_dict.
@@ -95,8 +105,9 @@ assert set(model.state_dict())=={'weight','offset'}
 A forward call only computes the current function. Neither parameter registration nor calling the module performs training.
 
 ```python
-x=torch.tensor([1.,2.,3.],dtype=torch.float64); y=2*x
-assert torch.equal(model(x),torch.zeros_like(x)) and model.weight.item()==0
+x = torch.tensor([1.0, 2.0, 3.0], dtype=torch.float64)
+y = 2 * x
+assert torch.equal(model(x), torch.zeros_like(x)) and model.weight.item() == 0
 ```
 
 **Expected:** three zero outputs; weight unchanged.
@@ -106,9 +117,13 @@ assert torch.equal(model(x),torch.zeros_like(x)) and model.weight.item()==0
 The optimizer consumes only the registered Parameter. The buffer influences forward but remains fixed under this update.
 
 ```python
-optimizer=torch.optim.SGD(model.parameters(),lr=.1); optimizer.zero_grad(set_to_none=True)
-loss=((model(x)-y)**2).mean(); loss.backward(); optimizer.step()
-np.testing.assert_allclose(model.weight.item(),28/15,atol=1e-12,rtol=0); assert model.offset.item()==0
+optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
+optimizer.zero_grad(set_to_none=True)
+loss = ((model(x) - y) ** 2).mean()
+loss.backward()
+optimizer.step()
+np.testing.assert_allclose(model.weight.item(), 28 / 15, atol=1e-12, rtol=0)
+assert model.offset.item() == 0
 ```
 
 **Expected:** weight \(\frac{28}{15}\); buffer still 0.

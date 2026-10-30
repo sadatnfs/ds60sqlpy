@@ -59,19 +59,96 @@ import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 
-val schema = StructType(Seq(StructField("id",LongType,false),StructField("label",StringType,true)))
-val raw = spark.createDataFrame(spark.sparkContext.parallelize(Seq(Row(1L,null),Row(2L,""),Row(3L,"   "),Row(4L,"  ALPHA  Beta "),Row(5L,"\tA\nB\r "),Row(6L,"CAFÉ"),Row(7L,"Straße"),Row(8L,"\u00a0A\u00a0"),Row(9L,"İI"),Row(10L,"🙂 OK"),Row(11L,"e\u0301"),Row(12L,"NULL")),2),schema)
-val expected = Seq((1L,None),(2L,Some("")),(3L,Some("")),(4L,Some("alpha beta")),(5L,Some("a b")),(6L,Some("cafÉ")),(7L,Some("straße")),(8L,Some("\u00a0a\u00a0")),(9L,Some("İi")),(10L,Some("🙂 ok")),(11L,Some("e\u0301")),(12L,Some("null")))
+val schema = StructType(
+  Seq(StructField("id", LongType, false), StructField("label", StringType, true))
+)
+val raw = spark.createDataFrame(
+  spark.sparkContext.parallelize(
+    Seq(
+      Row(1L, null),
+      Row(2L, ""),
+      Row(3L, "   "),
+      Row(4L, "  ALPHA  Beta "),
+      Row(5L, "\tA\nB\r "),
+      Row(6L, "CAFÉ"),
+      Row(7L, "Straße"),
+      Row(8L, "\u00a0A\u00a0"),
+      Row(9L, "İI"),
+      Row(10L, "🙂 OK"),
+      Row(11L, "e\u0301"),
+      Row(12L, "NULL")
+    ),
+    2
+  ),
+  schema
+)
+val expected = Seq(
+  (1L, None),
+  (2L, Some("")),
+  (3L, Some("")),
+  (4L, Some("alpha beta")),
+  (5L, Some("a b")),
+  (6L, Some("cafÉ")),
+  (7L, Some("straße")),
+  (8L, Some("\u00a0a\u00a0")),
+  (9L, Some("İi")),
+  (10L, Some("🙂 ok")),
+  (11L, Some("e\u0301")),
+  (12L, Some("null"))
+)
 ```
 
 ```python
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 import re
 
-schema = StructType([StructField("id",LongType(),False),StructField("label",StringType(),True)])
-raw = spark.createDataFrame([(1,None),(2,""),(3,"   "),(4,"  ALPHA  Beta "),(5,"\tA\nB\r "),(6,"CAFÉ"),(7,"Straße"),(8,"\u00a0A\u00a0"),(9,"İI"),(10,"🙂 OK"),(11,"e\u0301"),(12,"NULL")],schema=schema)
-expected = [(1,None),(2,""),(3,""),(4,"alpha beta"),(5,"a b"),(6,"cafÉ"),(7,"straße"),(8,"\u00a0a\u00a0"),(9,"İi"),(10,"🙂 ok"),(11,"e\u0301"),(12,"null")]
+schema = StructType(
+    [StructField("id", LongType(), False), StructField("label", StringType(), True)]
+)
+raw = spark.createDataFrame(
+    [
+        (1, None),
+        (2, ""),
+        (3, "   "),
+        (4, "  ALPHA  Beta "),
+        (5, "\tA\nB\r "),
+        (6, "CAFÉ"),
+        (7, "Straße"),
+        (8, "\u00a0A\u00a0"),
+        (9, "İI"),
+        (10, "🙂 OK"),
+        (11, "e\u0301"),
+        (12, "NULL"),
+    ],
+    schema=schema,
+)
+expected = [
+    (1, None),
+    (2, ""),
+    (3, ""),
+    (4, "alpha beta"),
+    (5, "a b"),
+    (6, "cafÉ"),
+    (7, "straße"),
+    (8, "\u00a0a\u00a0"),
+    (9, "İi"),
+    (10, "🙂 ok"),
+    (11, "e\u0301"),
+    (12, "null"),
+]
 ```
 
 ## Worked example / walkthrough
@@ -79,13 +156,19 @@ expected = [(1,None),(2,""),(3,""),(4,"alpha beta"),(5,"a b"),(6,"cafÉ"),(7,"st
 ### Worked example 1
 
 ```scala
-val row = spark.sql("SELECT translate('CAFÉ','ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz') AS ascii_only").first()
+val row = spark
+  .sql(
+    "SELECT translate('CAFÉ','ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz') AS ascii_only"
+  )
+  .first()
 assert(row.getString(0) == "cafÉ")
 println("ASCII mapping preserves non-ASCII É")
 ```
 
 ```python
-row = spark.sql("SELECT translate('CAFÉ','ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz') AS ascii_only").first()
+row = spark.sql(
+    "SELECT translate('CAFÉ','ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz') AS ascii_only"
+).first()
 assert row[0] == "cafÉ"
 print("ASCII mapping preserves non-ASCII É")
 ```
@@ -95,14 +178,20 @@ The result demonstrates the declared narrow case policy. Calling a general Unico
 ### Worked example 2
 
 ```scala
-val row = spark.sql("SELECT CAST(NULL AS STRING) IS NULL AS missing, '' IS NULL AS empty_missing, 'null' IS NULL AS text_missing").first()
+val row = spark
+  .sql(
+    "SELECT CAST(NULL AS STRING) IS NULL AS missing, '' IS NULL AS empty_missing, 'null' IS NULL AS text_missing"
+  )
+  .first()
 assert(row.getBoolean(0) && !row.getBoolean(1) && !row.getBoolean(2))
 println("Missing,empty and literal null text are distinct")
 ```
 
 ```python
-row = spark.sql("SELECT CAST(NULL AS STRING) IS NULL AS missing, '' IS NULL AS empty_missing, 'null' IS NULL AS text_missing").first()
-assert tuple(row) == (True,False,False)
+row = spark.sql(
+    "SELECT CAST(NULL AS STRING) IS NULL AS missing, '' IS NULL AS empty_missing, 'null' IS NULL AS text_missing"
+).first()
+assert tuple(row) == (True, False, False)
 print("Missing,empty and literal null text are distinct")
 ```
 

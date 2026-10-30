@@ -49,8 +49,9 @@ The question is: Combine means 2, 6 with counts 1, 3.
 Each mean must be multiplied by its denominator to recover a sum. Averaging means directly discards that information.
 
 ```python
-means=torch.tensor([2.,6.]); counts=torch.tensor([1.,3.])
-assert (means*counts).sum().div(counts.sum()).item()==5 and means.mean().item()==4
+means = torch.tensor([2.0, 6.0])
+counts = torch.tensor([1.0, 3.0])
+assert (means * counts).sum().div(counts.sum()).item() == 5 and means.mean().item() == 4
 ```
 
 **Expected:** global mean 5; unweighted shard mean 4.
@@ -64,8 +65,13 @@ The question is: Split gradients 2, 4, 6, 8 into one and three elements and reco
 The per-example vector is an independent oracle for the shard formula. It catches a checker that merely repeats a wrong averaging assumption.
 
 ```python
-values=torch.tensor([2.,4.,6.,8.]); parts=[values[:1],values[1:]]
-assert sum(part.sum() for part in parts).div(sum(part.numel() for part in parts)).item()==values.mean().item()==5
+values = torch.tensor([2.0, 4.0, 6.0, 8.0])
+parts = [values[:1], values[1:]]
+assert (
+    sum(part.sum() for part in parts).div(sum(part.numel() for part in parts)).item()
+    == values.mean().item()
+    == 5
+)
 ```
 
 **Expected:** global mean 5.
@@ -79,11 +85,16 @@ The question is: At \(w=0\), use \(x=(1, 2, 3, 4)\) and \(y=2x\), accumulate squ
 The weight remains fixed across both backward calls. Accumulation is intentional here, and its denominator is applied exactly once.
 
 ```python
-x=torch.arange(1,5,dtype=torch.float64); y=2*x; w=nn.Parameter(torch.tensor(0.,dtype=torch.float64))
-for start,end in [(0,1),(1,4)]: ((w*x[start:end]-y[start:end])**2).sum().backward()
+x = torch.arange(1, 5, dtype=torch.float64)
+y = 2 * x
+w = nn.Parameter(torch.tensor(0.0, dtype=torch.float64))
+for start, end in [(0, 1), (1, 4)]:
+    ((w * x[start:end] - y[start:end]) ** 2).sum().backward()
 w.grad.div_(4)
-assert w.grad.item()==-30
-oracle=torch.tensor(0.,dtype=torch.float64,requires_grad=True); full=((oracle*x-y)**2).mean(); assert torch.autograd.grad(full,oracle)[0].item()==-30
+assert w.grad.item() == -30
+oracle = torch.tensor(0.0, dtype=torch.float64, requires_grad=True)
+full = ((oracle * x - y) ** 2).mean()
+assert torch.autograd.grad(full, oracle)[0].item() == -30
 ```
 
 **Expected:** gradient-30, matching full-batch mean.
@@ -97,7 +108,8 @@ The question is: Take SGD.01 after the global gradient is formed.
 The effective batch produces one optimizer step. Learning-rate schedules and optimizer counters should follow that declared step unit.
 
 ```python
-torch.optim.SGD([w],lr=.01).step(); np.testing.assert_allclose(w.item(),.3,atol=1e-12,rtol=0)
+torch.optim.SGD([w], lr=0.01).step()
+np.testing.assert_allclose(w.item(), 0.3, atol=1e-12, rtol=0)
 ```
 
 **Expected:** new weight.3.
@@ -111,10 +123,13 @@ The question is: Reset w0and step after each shard mean instead.
 This is ordinary minibatch training. It is not an implementation of one full-batch update because the second derivative is evaluated at a new state.
 
 ```python
-other=nn.Parameter(torch.tensor(0.,dtype=torch.float64)); optimizer=torch.optim.SGD([other],lr=.01)
-for start,end in [(0,1),(1,4)]:
-    optimizer.zero_grad(set_to_none=True); ((other*x[start:end]-y[start:end])**2).mean().backward(); optimizer.step()
-assert abs(other.item()-.3)>1e-6
+other = nn.Parameter(torch.tensor(0.0, dtype=torch.float64))
+optimizer = torch.optim.SGD([other], lr=0.01)
+for start, end in [(0, 1), (1, 4)]:
+    optimizer.zero_grad(set_to_none=True)
+    ((other * x[start:end] - y[start:end]) ** 2).mean().backward()
+    optimizer.step()
+assert abs(other.item() - 0.3) > 1e-6
 ```
 
 **Expected:** endpoint differs from.3.
@@ -128,8 +143,10 @@ The question is: Combine an empty shard and the four real gradients using sums a
 A local empty shard can contribute a zero sum without computing an undefined mean. A globally empty batch must be rejected separately.
 
 ```python
-empty=torch.empty(0); numerator=empty.sum()+values.sum(); denominator=empty.numel()+values.numel()
-assert denominator==4 and numerator.div(denominator).item()==5
+empty = torch.empty(0)
+numerator = empty.sum() + values.sum()
+denominator = empty.numel() + values.numel()
+assert denominator == 4 and numerator.div(denominator).item() == 5
 ```
 
 **Expected:** empty shard contributes 0; global mean 5.

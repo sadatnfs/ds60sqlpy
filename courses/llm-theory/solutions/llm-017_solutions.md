@@ -23,8 +23,10 @@ The question is: Use IDs[2,5,7,3] and create three input-target pairs.
 The model may see the current input token but not its target at the next position. The diagonal causal mask is consistent with this shifted objective.
 
 ```python
-ids=torch.tensor([[2,5,7,3]]); inputs=ids[:,:-1]; targets=ids[:,1:]
-assert inputs.tolist()==[[2,5,7]] and targets.tolist()==[[5,7,3]]
+ids = torch.tensor([[2, 5, 7, 3]])
+inputs = ids[:, :-1]
+targets = ids[:, 1:]
+assert inputs.tolist() == [[2, 5, 7]] and targets.tolist() == [[5, 7, 3]]
 ```
 
 **Expected:** inputs2,5,7 and targets5,7,3.
@@ -38,8 +40,9 @@ The question is: Use zero logits with vocabulary8 for the three targets.
 Each target has probability one eighth. Target identity does not change the loss under this uniform distribution, which isolates the denominator calculation.
 
 ```python
-logits=torch.zeros((1,3,8)); loss=F.cross_entropy(logits.reshape(-1,8),targets.reshape(-1))
-np.testing.assert_allclose(loss.item(),np.log(8),atol=1e-6,rtol=0)
+logits = torch.zeros((1, 3, 8))
+loss = F.cross_entropy(logits.reshape(-1, 8), targets.reshape(-1))
+np.testing.assert_allclose(loss.item(), np.log(8), atol=1e-6, rtol=0)
 ```
 
 **Expected:** mean losslog8 and count3.
@@ -53,9 +56,11 @@ The question is: Add two labels-100 and corresponding zero-logit positions.
 Additional storage positions do not add evidence. This invariance is a strong test for a masked language-model objective.
 
 ```python
-padded=torch.tensor([[5,7,3,-100,-100]]); plogits=torch.zeros((1,5,8))
-new=F.cross_entropy(plogits.reshape(-1,8),padded.reshape(-1),ignore_index=-100)
-assert int((padded!=-100).sum())==3; torch.testing.assert_close(new,loss,atol=1e-6,rtol=0)
+padded = torch.tensor([[5, 7, 3, -100, -100]])
+plogits = torch.zeros((1, 5, 8))
+new = F.cross_entropy(plogits.reshape(-1, 8), padded.reshape(-1), ignore_index=-100)
+assert int((padded != -100).sum()) == 3
+torch.testing.assert_close(new, loss, atol=1e-6, rtol=0)
 ```
 
 **Expected:** mean loss unchanged; active count3.
@@ -69,9 +74,12 @@ The question is: Compute summed active loss and divide by padded length5 instead
 The wrong score appears better merely because more padding was added. It is not a model improvement.
 
 ```python
-summed=F.cross_entropy(plogits.reshape(-1,8),padded.reshape(-1),ignore_index=-100,reduction='sum')
-wrong=summed/5
-np.testing.assert_allclose(wrong.item(),3*np.log(8)/5,atol=1e-6,rtol=0); assert wrong<loss
+summed = F.cross_entropy(
+    plogits.reshape(-1, 8), padded.reshape(-1), ignore_index=-100, reduction="sum"
+)
+wrong = summed / 5
+np.testing.assert_allclose(wrong.item(), 3 * np.log(8) / 5, atol=1e-6, rtol=0)
+assert wrong < loss
 ```
 
 **Expected:** wrong loss3log8/5, below correct loss.
@@ -85,8 +93,12 @@ The question is: Differentiate summed loss and inspect gradient rows at ignored 
 Masking must affect the objective and its derivative. A post-hoc reporting adjustment would not prevent padded targets from influencing training.
 
 ```python
-v=plogits.clone().requires_grad_(); objective=F.cross_entropy(v.reshape(-1,8),padded.reshape(-1),ignore_index=-100,reduction='sum'); objective.backward()
-assert torch.count_nonzero(v.grad[:,3:]).item()==0
+v = plogits.clone().requires_grad_()
+objective = F.cross_entropy(
+    v.reshape(-1, 8), padded.reshape(-1), ignore_index=-100, reduction="sum"
+)
+objective.backward()
+assert torch.count_nonzero(v.grad[:, 3:]).item() == 0
 ```
 
 **Expected:** ignored-position gradients exactly zero.
@@ -100,11 +112,14 @@ The question is: Check active count before a mean loss on targets[-100,-100].
 A mean over no observations is undefined. Returning a perfect zero loss would let a broken batching pipeline masquerade as successful learning.
 
 ```python
-empty=torch.tensor([[-100,-100]]); active=int((empty!=-100).sum())
-assert active==0
+empty = torch.tensor([[-100, -100]])
+active = int((empty != -100).sum())
+assert active == 0
 try:
-    if active==0: raise ValueError('no active targets')
-except ValueError: pass
+    if active == 0:
+        raise ValueError("no active targets")
+except ValueError:
+    pass
 ```
 
 **Expected:** zero active count triggers an explicit failure policy.

@@ -17,7 +17,7 @@ from typing import Any
 import pytest
 
 from scripts import format_repo as formatting
-from scripts import sql_formatting
+from scripts import inline_format_contracts, sql_formatting
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -321,6 +321,15 @@ def test_full_check_passes_readonly_mode_to_generated_checks(
     empty_policy(tmp_path)
     commands: list[list[str]] = []
     checks: list[bool] = []
+    guard_calls: list[set[str]] = []
+    original = {path: path.read_bytes() for path in tmp_path.rglob("*") if path.is_file()}
+
+    def guard(root: Path, languages: set[str]) -> int:
+        assert root == tmp_path
+        guard_calls.append(languages)
+        return 1
+
+    monkeypatch.setattr(inline_format_contracts, "verify", guard)
     monkeypatch.setattr(formatting, "ROOT", tmp_path)
     monkeypatch.setattr(shutil, "which", lambda name: f"/tools/{name}")
     monkeypatch.setattr(formatting, "format_group", lambda *_args: True)
@@ -338,8 +347,35 @@ def test_full_check_passes_readonly_mode_to_generated_checks(
     monkeypatch.setattr(formatting, "run", run)
     monkeypatch.setattr(formatting, "generated_views", generated)
     assert formatting.main(["--check"]) == 0
+    assert guard_calls == [{"web"}]
     assert checks == [True]
     assert commands and all("--write" not in command for command in commands)
+
+    assert original == {path: path.read_bytes() for path in tmp_path.rglob("*") if path.is_file()}
+
+
+def test_native_guard_failure_prevents_formatting_and_generated_writes(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    empty_policy(tmp_path)
+    original = {path: path.read_bytes() for path in tmp_path.rglob("*") if path.is_file()}
+    monkeypatch.setattr(formatting, "ROOT", tmp_path)
+    monkeypatch.setattr(shutil, "which", lambda name: f"/tools/{name}")
+
+    def refused(root: Path, languages: set[str]) -> int:
+        assert root == tmp_path and languages == {"web"}
+        raise ValueError("native guard rejected source")
+
+    def forbidden(*args: Any) -> Any:
+        pytest.fail("Failed guard reached formatting or generation")
+
+    monkeypatch.setattr(inline_format_contracts, "verify", refused)
+    monkeypatch.setattr(formatting, "format_group", forbidden)
+    monkeypatch.setattr(formatting, "generated_views", forbidden)
+    monkeypatch.setattr(formatting, "run", forbidden)
+    with pytest.raises(ValueError, match="native guard rejected"):
+        formatting.main(["--check"])
+    assert original == {path: path.read_bytes() for path in tmp_path.rglob("*") if path.is_file()}
 
 
 @pytest.fixture

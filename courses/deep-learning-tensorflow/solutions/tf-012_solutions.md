@@ -23,10 +23,12 @@ The question is: Create the three-feature fixture below, assign IDs0..3 to train
 The target formula is specified before fitting. This makes the learning problem inspectable, while still requiring the optimizer to recover useful weights from only the training subset.
 
 ```python
-x=np.array([[0,0,0],[1,0,0],[0,1,0],[0,0,1],[1,1,1],[2,1,1]],dtype='float32'); y=x@np.array([[2.],[-1.],[1.]],dtype='float32')
-train=[0,1,2,3]; test=[4,5]
-assert not set(train)&set(test)
-np.testing.assert_array_equal(y[:,0],[0,2,-1,1,2,4])
+x = np.array([[0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1], [1, 1, 1], [2, 1, 1]], dtype="float32")
+y = x @ np.array([[2.0], [-1.0], [1.0]], dtype="float32")
+train = [0, 1, 2, 3]
+test = [4, 5]
+assert not set(train) & set(test)
+np.testing.assert_array_equal(y[:, 0], [0, 2, -1, 1, 2, 4])
 ```
 
 **Expected:** targets[0,2,-1,1,2,4], disjoint IDs.
@@ -40,8 +42,9 @@ The question is: Use the training mean to predict both held-out targets and comp
 Using the held-out mean would give the baseline access to assessment targets. Both the baseline and learned model must be evaluated on identical held-out IDs to support comparison.
 
 ```python
-mean=float(y[train].mean()); baseline=float(np.mean((y[test]-mean)**2))
-assert mean==.5 and baseline==7.25
+mean = float(y[train].mean())
+baseline = float(np.mean((y[test] - mean) ** 2))
+assert mean == 0.5 and baseline == 7.25
 ```
 
 **Expected:** training mean.5; holdout MSE7.25.
@@ -55,12 +58,16 @@ The question is: Initialize a three-by-one kernel at zero and make exactly100 fu
 The explicit step cap bounds the teaching run. Improvement is checked against the same initial training batch. It does not imply a universal learning-rate rule or a production acceptance threshold.
 
 ```python
-w=tf.Variable(tf.zeros((3,1))); tx=tf.constant(x[train]); ty=tf.constant(y[train]); initial=float(tf.reduce_mean(ty**2))
+w = tf.Variable(tf.zeros((3, 1)))
+tx = tf.constant(x[train])
+ty = tf.constant(y[train])
+initial = float(tf.reduce_mean(ty**2))
 for step in range(100):
-    with tf.GradientTape() as tape: loss=tf.reduce_mean((tx@w-ty)**2)
-    w.assign_sub(.1*tape.gradient(loss,w))
-train_error=float(tf.reduce_mean((tx@w-ty)**2))
-assert step+1==100 and train_error<initial and np.isfinite(w.numpy()).all()
+    with tf.GradientTape() as tape:
+        loss = tf.reduce_mean((tx @ w - ty) ** 2)
+    w.assign_sub(0.1 * tape.gradient(loss, w))
+train_error = float(tf.reduce_mean((tx @ w - ty) ** 2))
+assert step + 1 == 100 and train_error < initial and np.isfinite(w.numpy()).all()
 ```
 
 **Expected:** 100 updates; finite weights; training error below its initial value.
@@ -74,10 +81,10 @@ The question is: Compute held-out MSE after the fixed100 updates and compare it 
 Report training and held-out errors separately. The small test count is part of the result, not an inconvenient detail to suppress. Do not restart tuning after inspecting this value.
 
 ```python
-test_error=float(np.mean((x[test]@w.numpy()-y[test])**2))
-assert test_error<baseline
-report={'train_mse':train_error,'test_mse':test_error,'test_count':2,'steps':100}
-assert report['test_count']==2
+test_error = float(np.mean((x[test] @ w.numpy() - y[test]) ** 2))
+assert test_error < baseline
+report = {"train_mse": train_error, "test_mse": test_error, "test_count": 2, "steps": 100}
+assert report["test_count"] == 2
 ```
 
 **Expected:** holdout error below7.25 on the two supplied records.
@@ -91,8 +98,12 @@ The question is: Derive a one-feature pilot update from x = [1, 2, 3] and target
 A scalar diagnostic is a separate implementation check, not an alternative score for the three-feature model. Keeping both prevents an impressive-looking fit from concealing a broken update.
 
 ```python
-pilot=np.array([1.,2.,3.]); gradient=2*np.mean((-2*pilot)*pilot); updated=-.1*gradient
-np.testing.assert_allclose([updated,np.mean((updated*pilot-2*pilot)**2)],[28/15,56/675],atol=1e-12,rtol=0)
+pilot = np.array([1.0, 2.0, 3.0])
+gradient = 2 * np.mean((-2 * pilot) * pilot)
+updated = -0.1 * gradient
+np.testing.assert_allclose(
+    [updated, np.mean((updated * pilot - 2 * pilot) ** 2)], [28 / 15, 56 / 675], atol=1e-12, rtol=0
+)
 ```
 
 **Expected:** weight28/15 and loss56/675.
@@ -106,8 +117,12 @@ The question is: Construct a report containing split IDs, errors, step count and
 A reproducible experiment may still be too small for the intended decision. The correct result can be a limited demonstration with explicit next evidence, rather than an unsupported release recommendation.
 
 ```python
-report.update(train_ids=train,test_ids=test,limitation='Two synthetic holdout rows do not establish population reliability.')
-assert report['test_ids']==[4,5] and 'do not establish' in report['limitation']
+report.update(
+    train_ids=train,
+    test_ids=test,
+    limitation="Two synthetic holdout rows do not establish population reliability.",
+)
+assert report["test_ids"] == [4, 5] and "do not establish" in report["limitation"]
 ```
 
 **Expected:** report names2 holdout records and makes no population guarantee.

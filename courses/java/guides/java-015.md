@@ -50,14 +50,14 @@ import java.util.*;
 
 public class Main {
 
-    public static void main(String[] args) throws Exception {
-        var instant = java.time.Instant.parse("2024-01-01T00:00:00Z");
-        var utc = instant.atZone(java.time.ZoneId.of("UTC"));
-        var ny = instant.atZone(java.time.ZoneId.of("America/New_York"));
-        assert utc.toInstant().equals(ny.toInstant()) && ny.toLocalDate().equals(java.time.LocalDate.of(2023,12,31));
-    }
+  public static void main(String[] args) throws Exception {
+    var instant = java.time.Instant.parse("2024-01-01T00:00:00Z");
+    var utc = instant.atZone(java.time.ZoneId.of("UTC"));
+    var ny = instant.atZone(java.time.ZoneId.of("America/New_York"));
+    assert utc.toInstant().equals(ny.toInstant()) &&
+    ny.toLocalDate().equals(java.time.LocalDate.of(2023, 12, 31));
+  }
 }
-
 ```
 
 **Expected:** same instant; New York local date 2023-12-31.
@@ -71,19 +71,29 @@ import java.util.*;
 
 public class Main {
 
-    public static void main(String[] args) throws Exception {
-        var instant = java.time.Instant.parse("2024-01-01T00:00:00Z");
-        var utc = instant.atZone(java.time.ZoneId.of("UTC"));
-        var ny = instant.atZone(java.time.ZoneId.of("America/New_York"));
-        assert utc.toInstant().equals(ny.toInstant()) && ny.toLocalDate().equals(java.time.LocalDate.of(2023,12,31));
+  public static void main(String[] args) throws Exception {
+    var instant = java.time.Instant.parse("2024-01-01T00:00:00Z");
+    var utc = instant.atZone(java.time.ZoneId.of("UTC"));
+    var ny = instant.atZone(java.time.ZoneId.of("America/New_York"));
+    assert utc.toInstant().equals(ny.toInstant()) &&
+    ny.toLocalDate().equals(java.time.LocalDate.of(2023, 12, 31));
 
-        var start = java.time.ZonedDateTime.of(2024,3,9,12,0,0,0,java.time.ZoneId.of("America/New_York"));
-        var nextDay = start.plusDays(1); var next24 = start.plusHours(24);
-        assert java.time.Duration.between(start,nextDay).toHours() == 23;
-        assert nextDay.getHour() == 12 && next24.getHour() == 13;
-    }
+    var start = java.time.ZonedDateTime.of(
+      2024,
+      3,
+      9,
+      12,
+      0,
+      0,
+      0,
+      java.time.ZoneId.of("America/New_York")
+    );
+    var nextDay = start.plusDays(1);
+    var next24 = start.plusHours(24);
+    assert java.time.Duration.between(start, nextDay).toHours() == 23;
+    assert nextDay.getHour() == 12 && next24.getHour() == 13;
+  }
 }
-
 ```
 
 **Expected:** calendar next noon is23 elapsed hours later;24hours reaches13:00.

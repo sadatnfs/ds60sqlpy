@@ -213,7 +213,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="worked-example-1-inspect-the-fixture-readiness-command">Worked example 1: Inspect the fixture readiness command<a class="heading-anchor" href="#worked-example-1-inspect-the-fixture-readiness-command" aria-label="Link to this section">#</a></h4>
 <p>This is an illustrative Compose fragment.</p>
 <pre class="highlighted-code"><code class="language-yaml"><span class="syntax-tag">healthcheck</span><span class="syntax-punctuation">:</span>
-  <span class="syntax-tag">test</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">CMD</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">python</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">-c</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">import</span> <span class="syntax-string">urllib.request;</span> <span class="syntax-string">urllib.request.urlopen(&#x27;http://127.0.0.1:8080/healthz&#x27;,</span> <span class="syntax-string">timeout=2).read()</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
+  <span class="syntax-tag">test</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-punctuation">[</span>
+      <span class="syntax-string">&quot;</span><span class="syntax-string">CMD</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+      <span class="syntax-string">&quot;</span><span class="syntax-string">python</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+      <span class="syntax-string">&quot;</span><span class="syntax-string">-c</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+      <span class="syntax-string">&quot;</span><span class="syntax-string">import</span> <span class="syntax-string">urllib.request;</span> <span class="syntax-string">urllib.request.urlopen(&#x27;http://127.0.0.1:8080/healthz&#x27;,</span> <span class="syntax-string">timeout=2).read()</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">]</span>
   <span class="syntax-tag">interval</span><span class="syntax-punctuation">:</span> 5s
   <span class="syntax-tag">timeout</span><span class="syntax-punctuation">:</span> 3s
   <span class="syntax-tag">retries</span><span class="syntax-punctuation">:</span> 5

@@ -71,9 +71,7 @@ def loads(value):
 
 
 def payload(value):
-    return json.dumps(
-        value, allow_nan=False, sort_keys=True, separators=(",", ":")
-    ).encode()
+    return json.dumps(value, allow_nan=False, sort_keys=True, separators=(",", ":")).encode()
 
 
 def compare(actual, expected, tolerances, label="value"):
@@ -89,9 +87,7 @@ def compare(actual, expected, tolerances, label="value"):
         or not isinstance(actual, (int, float))
         or not math.isfinite(actual)
         or not math.isfinite(reference)
-        or not math.isclose(
-            actual, reference, rel_tol=tolerances[0], abs_tol=tolerances[1]
-        )
+        or not math.isclose(actual, reference, rel_tol=tolerances[0], abs_tol=tolerances[1])
     ):
         raise AssertionError(
             f"{label}: native={actual!r}, reference={expected!r}, limits={tolerances}"
@@ -192,9 +188,7 @@ class Native:
         if any(response.get(key) != value for key, value in expected.items()):
             raise AssertionError("Native identity/status mismatch")
         if process.returncode != (2 if expected_error else 0):
-            raise AssertionError(
-                "Native process did not finish with required exit status"
-            )
+            raise AssertionError("Native process did not finish with required exit status")
         if expected_error and response.get("error", {}).get("code") != expected_error:
             raise AssertionError("Unexpected native refusal code")
         return response
@@ -385,9 +379,7 @@ def main():
                 "build_id": native.manifest["build_id"],
                 "binary_sha256": native.manifest["binary"]["sha256"],
                 "engine": native.manifest["engine"],
-                "model_digests": {
-                    key: val["digest"] for key, val in native.models.items()
-                },
+                "model_digests": {key: val["digest"] for key, val in native.models.items()},
             }
         )
         extra = loads(args.supplement.read_bytes())
@@ -400,9 +392,7 @@ def main():
                 except Exception as error:  # noqa: BLE001 - retain every failure and exit nonzero.
                     report["failures"].append(
                         {
-                            "family": case.get(
-                                "family", "gaussian_correlated_random_slope"
-                            ),
+                            "family": case.get("family", "gaussian_correlated_random_slope"),
                             "case": case["case"],
                             "error": repr(error),
                         }
@@ -412,15 +402,11 @@ def main():
             report["domain_refusal_cases"] = refusals(native)
         except Exception as error:  # noqa: BLE001 - retain every failure and exit nonzero.
             report["failures"].append({"case": "domain_refusals", "error": repr(error)})
-        report["case_counts"] = dict(
-            Counter(item["family"] for item in report["cases"])
-        )
+        report["case_counts"] = dict(Counter(item["family"] for item in report["cases"]))
         report["status"] = "failed" if report["failures"] else "passed"
     except Exception as error:  # noqa: BLE001 - retain every failure and exit nonzero.
         report["status"] = "failed"
-        report["failures"].append(
-            {"case": "initialization_or_budget", "error": repr(error)}
-        )
+        report["failures"].append({"case": "initialization_or_budget", "error": repr(error)})
     finally:
         report["native_process_requests"] = native.calls if native else 0
         report["finished_utc"] = datetime.now(UTC).isoformat()
@@ -429,10 +415,7 @@ def main():
         )
     print(
         json.dumps(
-            {
-                key: report[key]
-                for key in ("status", "native_process_requests", "failures")
-            },
+            {key: report[key] for key in ("status", "native_process_requests", "failures")},
             indent=2,
         )
     )

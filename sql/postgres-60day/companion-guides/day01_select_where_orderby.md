@@ -109,11 +109,19 @@ These worked excerpts come from `sql/postgres-60day/day01_select_where_orderby.s
 ### Example 1
 
 ```sql
-SELECT customer_id, full_name, country, created_at
-FROM customers
-WHERE country IN ('US','CA')
--- `customer_id` makes ties on the timestamp deterministic before LIMIT.
-ORDER BY created_at DESC, customer_id DESC
+SELECT
+  customer_id,
+  full_name,
+  country,
+  created_at
+FROM
+  customers
+WHERE
+  country IN ('US', 'CA')
+  -- `customer_id` makes ties on the timestamp deterministic before LIMIT.
+ORDER BY
+  created_at DESC,
+  customer_id DESC
 LIMIT 10;
 ```
 
@@ -124,15 +132,21 @@ LIMIT 10;
 ### Example 2
 
 ```sql
-SELECT 
+SELECT
   product_id,
   name,
   price,
   cost,
-  (price - cost) AS gross_margin
-FROM products
-WHERE price > 50
-ORDER BY gross_margin DESC, price DESC, product_id
+  (price -
+    cost) AS gross_margin
+FROM
+  products
+WHERE
+  price > 50
+ORDER BY
+  gross_margin DESC,
+  price DESC,
+  product_id
 LIMIT 15;
 ```
 

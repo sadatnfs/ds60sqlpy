@@ -94,9 +94,12 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-bn=nn.BatchNorm1d(2,momentum=.5); x=torch.tensor([[1.,3.],[3.,5.]])
-bn.train(); bn(x)
-torch.testing.assert_close(bn.running_mean,torch.tensor([1.,2.]),atol=1e-6,rtol=0); assert bn.num_batches_tracked.item()==1
+bn = nn.BatchNorm1d(2, momentum=0.5)
+x = torch.tensor([[1.0, 3.0], [3.0, 5.0]])
+bn.train()
+bn(x)
+torch.testing.assert_close(bn.running_mean, torch.tensor([1.0, 2.0]), atol=1e-6, rtol=0)
+assert bn.num_batches_tracked.item() == 1
 ```
 
 **Expected:** running mean 1, 2; batch counter 1.
@@ -106,8 +109,11 @@ torch.testing.assert_close(bn.running_mean,torch.tensor([1.,2.]),atol=1e-6,rtol=
 Evaluation must not adapt to assessment batch composition. A forgotten eval call can mutate state and change predictions based on neighboring records.
 
 ```python
-before=bn.running_mean.clone(); count=bn.num_batches_tracked.clone(); bn.eval(); bn(torch.tensor([[100.,200.]]))
-assert torch.equal(before,bn.running_mean) and torch.equal(count,bn.num_batches_tracked)
+before = bn.running_mean.clone()
+count = bn.num_batches_tracked.clone()
+bn.eval()
+bn(torch.tensor([[100.0, 200.0]]))
+assert torch.equal(before, bn.running_mean) and torch.equal(count, bn.num_batches_tracked)
 ```
 
 **Expected:** running mean and batch counter unchanged.
@@ -117,8 +123,10 @@ assert torch.equal(before,bn.running_mean) and torch.equal(count,bn.num_batches_
 LayerNorm uses only the current row's features in this configuration. A sequence-wide or batch-wide reduction would fail the perturbation test.
 
 ```python
-ln=nn.LayerNorm(2); alone=ln(torch.tensor([[1.,3.]])); together=ln(torch.tensor([[1.,3.],[100.,200.]]))
-torch.testing.assert_close(alone[0],together[0],atol=1e-6,rtol=0)
+ln = nn.LayerNorm(2)
+alone = ln(torch.tensor([[1.0, 3.0]]))
+together = ln(torch.tensor([[1.0, 3.0], [100.0, 200.0]]))
+torch.testing.assert_close(alone[0], together[0], atol=1e-6, rtol=0)
 ```
 
 **Expected:** first row matches within 1e-6.

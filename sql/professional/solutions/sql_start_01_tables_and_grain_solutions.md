@@ -23,7 +23,14 @@ rather than assuming a familiar-looking query must be right.
 ## Exercise 1: Trace identities
 
 ```sql
-SELECT reading_id, station, temperature FROM start_readings ORDER BY reading_id;
+SELECT
+  reading_id,
+  station,
+  temperature
+FROM
+  start_readings
+ORDER BY
+  reading_id;
 ```
 
 The source contains six independent observations. SELECT chooses three attributes from each one, and ORDER BY uses the unique identity rather than physical insertion order. The two North rows at 18 remain separate observations. Do not add DISTINCT to make the display look shorter: that would answer a different question. A result that omits ID 4 silently loses a real observation just because its measurement is unknown. Compare each returned ID with the fixture before inspecting temperatures. The assertion checks the complete ID list, which detects both a missing observation and a repeated one.
@@ -37,7 +44,17 @@ The source contains six independent observations. SELECT chooses three attribute
 ## Exercise 2: Reveal repeated visible values
 
 ```sql
-SELECT reading_id, station, reading_day, temperature FROM start_readings WHERE reading_id <= 2 ORDER BY reading_id;
+SELECT
+  reading_id,
+  station,
+  reading_day,
+  temperature
+FROM
+  start_readings
+WHERE
+  reading_id <= 2
+ORDER BY
+  reading_id;
 ```
 
 WHERE restricts the candidate observations before projection. The output remains one row per reading_id, so the dates and identities expose two different facts even though station and temperature repeat. Deduplicating the visible measurement pair would merge two observations and destroy information. Keep identity columns visible while debugging, then hide them only when the presentation actually requires it. The check verifies both identities and their repeated measurement. It is possible for a table to have a sound primary key and for a particular projection to show duplicates; those statements describe different things.
@@ -51,7 +68,16 @@ WHERE restricts the candidate observations before projection. The output remains
 ## Exercise 3: Filter observations without losing missing values
 
 ```sql
-SELECT reading_id, station, temperature FROM start_readings WHERE station = 'South' ORDER BY reading_id;
+SELECT
+  reading_id,
+  station,
+  temperature
+FROM
+  start_readings
+WHERE
+  station = 'South'
+ORDER BY
+  reading_id;
 ```
 
 The predicate asks whether the station value equals South. It does not ask whether a measurement is present, positive, or usable. Consequently, both South observations survive: one records a known zero, and one records an unknown measurement. Adding temperature > 0 would introduce a new business requirement and remove both rows. Check returned identities before deciding that a short result is sensible. The verification counts two rows and separately checks that exactly one measurement is missing. This keeps a missing field distinct from an absent row, a difference that later outer joins also depend on.
@@ -65,7 +91,16 @@ The predicate asks whether the station value equals South. It does not ask wheth
 ## Exercise 4: Calculate without editing storage
 
 ```sql
-SELECT reading_id, temperature, temperature + 2 AS adjusted_temperature FROM start_readings WHERE reading_id IN (1,3) ORDER BY reading_id;
+SELECT
+  reading_id,
+  temperature,
+  temperature + 2 AS adjusted_temperature
+FROM
+  start_readings
+WHERE
+  reading_id IN (1, 3)
+ORDER BY
+  reading_id;
 ```
 
 SELECT evaluates the addition for each chosen observation and assigns a label to the resulting column. AS changes the displayed heading, not the table definition. IN is a short membership test for the two explicit IDs. The table values remain 18 and 0 because no UPDATE statement is present. The assertion checks the calculated sequence as well as the original fixture values. This distinguishes a successful calculation from a destructive workaround in which the learner edits the source to make the display match. Retain numeric types so addition is arithmetic, rather than building strings that merely look like numbers.
@@ -79,7 +114,16 @@ SELECT evaluates the addition for each chosen observation and assigns a label to
 ## Exercise 5: Distinguish no rows from a missing field
 
 ```sql
-SELECT reading_id, station, temperature FROM start_readings WHERE station = 'East' ORDER BY reading_id;
+SELECT
+  reading_id,
+  station,
+  temperature
+FROM
+  start_readings
+WHERE
+  station = 'East'
+ORDER BY
+  reading_id;
 ```
 
 An empty result is a successful query with no matching observations. It is different from the South observation whose temperature is missing: that observation has an identity and other fields. The database cannot infer an East observation merely because someone asks for it. Do not manufacture a row containing zero or NULL unless the reporting contract explicitly requires a complete station list. The check tests cardinality directly instead of testing a temperature value that does not exist. In psql the column headings still appear above the zero-row message, showing that the output schema exists even when the result has no rows.
@@ -93,7 +137,15 @@ An empty result is a successful query with no matching observations. It is diffe
 ## Exercise 6: Transfer grain to a new collection
 
 ```sql
-SELECT ticket_id, station, issue FROM (VALUES (11, 'North', 'battery'), (12, 'North', 'screen')) AS tickets(ticket_id, station, issue) ORDER BY ticket_id;
+SELECT
+  ticket_id,
+  station,
+  issue
+FROM (
+  VALUES (11, 'North', 'battery'),
+    (12, 'North', 'screen')) AS tickets (ticket_id, station, issue)
+ORDER BY
+  ticket_id;
 ```
 
 VALUES supplies a tiny input collection directly inside the query. The alias tickets names that collection, and its parentheses assign column names in the same order as the supplied fields. The technique makes a new example runnable without changing permanent tables. Both tickets happen at North, so station repeats while ticket_id distinguishes the facts. Reusing the earlier observation grain would be a conceptual error even though the SQL might run. The assertion verifies that the transfer retained both tickets and their common station. State the new grain aloud before checking the syntax: the identity follows the fact being modeled, not a familiar column name.

@@ -67,12 +67,8 @@ pd.testing.assert_series_equal(vectorized, reference)
 assert vectorized.index.equals(frame.index)
 
 representative = pd.concat([frame] * 500, ignore_index=True)
-rowwise_trials = repeat(
-    lambda: rowwise_ratio(representative), repeat=3, number=5
-)
-vectorized_trials = repeat(
-    lambda: vectorized_ratio(representative), repeat=3, number=5
-)
+rowwise_trials = repeat(lambda: rowwise_ratio(representative), repeat=3, number=5)
+vectorized_trials = repeat(lambda: vectorized_ratio(representative), repeat=3, number=5)
 assert len(rowwise_trials) == len(vectorized_trials) == 3
 ```
 
@@ -117,10 +113,7 @@ nearly_unique = pd.Series(
     name="customer_id",
 )
 nearly_unique_category = nearly_unique.astype("category")
-assert (
-    nearly_unique_category.memory_usage(deep=True)
-    > nearly_unique.memory_usage(deep=True)
-)
+assert nearly_unique_category.memory_usage(deep=True) > nearly_unique.memory_usage(deep=True)
 ```
 
 The low-cardinality region column stores two levels plus integer codes
@@ -199,9 +192,7 @@ def category_if_smaller(series: pd.Series) -> tuple[pd.Series, dict[str, int]]:
     return chosen, {"before": before, "after": after}
 
 
-frame = pd.DataFrame(
-    {"amount": [5.0, 20.0, 100.0, np.nan], "segment": ["A", "A", "B", "A"]}
-)
+frame = pd.DataFrame({"amount": [5.0, 20.0, 100.0, np.nan], "segment": ["A", "A", "B", "A"]})
 threshold = 10
 assert frame.query("amount > @threshold")["amount"].tolist() == [20.0, 100.0]
 

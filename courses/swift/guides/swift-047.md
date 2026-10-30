@@ -45,17 +45,15 @@ A portable core should not import a platform framework merely to format its basi
 ```swift
 import Foundation
 
-
-
 @main
 struct LessonMain {
-    static func main() async throws {
-        do {
-            func summary(completed: Int, total: Int) -> String { "\(completed)/\(total) complete" }
-            precondition(summary(completed: 2, total: 3) == "2/3 complete")
-        }
-        print("swift-047: passed")
+  static func main() async throws {
+    do {
+      func summary(completed: Int, total: Int) -> String { "\(completed)/\(total) complete" }
+      precondition(summary(completed: 2, total: 3) == "2/3 complete")
     }
+    print("swift-047: passed")
+  }
 }
 ```
 
@@ -68,18 +66,16 @@ Capability descriptions should follow actual prepared runtime evidence.
 ```swift
 import Foundation
 
-
-
 @main
 struct LessonMain {
-    static func main() async throws {
-        do {
-            let capabilities = Set(["portable-core", "foundation-files"])
-            precondition(capabilities.contains("portable-core"))
-            precondition(!capabilities.contains("swiftui-linux"))
-        }
-        print("swift-047: passed")
+  static func main() async throws {
+    do {
+      let capabilities = Set(["portable-core", "foundation-files"])
+      precondition(capabilities.contains("portable-core"))
+      precondition(!capabilities.contains("swiftui-linux"))
     }
+    print("swift-047: passed")
+  }
 }
 ```
 

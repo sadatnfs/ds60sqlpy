@@ -82,12 +82,16 @@ executable companion when you want a self-contained check.
 - `LIMIT`: is applied after ordering and is meaningful only when the query first defines which rows come first.
 
 ```sql
-SELECT o.order_id,
-       o.customer_id,
-       o.total_amount,
-       o.order_date
-FROM orders AS o
-ORDER BY o.order_date DESC, o.order_id DESC
+SELECT
+  o.order_id,
+  o.customer_id,
+  o.total_amount,
+  o.order_date
+FROM
+  orders AS o
+ORDER BY
+  o.order_date DESC,
+  o.order_id DESC
 LIMIT 20;
 ```
 
@@ -122,13 +126,18 @@ cardinality contract.
 - `LIMIT`: is applied after ordering and is meaningful only when the query first defines which rows come first.
 
 ```sql
-SELECT p.product_id,
-       p.name,
-       p.price,
-       p.created_at
-FROM products AS p
-WHERE p.created_at >= CURRENT_TIMESTAMP - INTERVAL '90 days'
-ORDER BY p.price DESC, p.product_id
+SELECT
+  p.product_id,
+  p.name,
+  p.price,
+  p.created_at
+FROM
+  products AS p
+WHERE
+  p.created_at >= CURRENT_TIMESTAMP - INTERVAL '90 days'
+ORDER BY
+  p.price DESC,
+  p.product_id
 LIMIT 10;
 ```
 
@@ -162,14 +171,19 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT c.customer_id,
-       c.full_name,
-       c.country,
-       c.created_at
-FROM customers AS c
-WHERE c.country IN ('GB', 'DE')
+SELECT
+  c.customer_id,
+  c.full_name,
+  c.country,
+  c.created_at
+FROM
+  customers AS c
+WHERE
+  c.country IN ('GB', 'DE')
   AND c.created_at >= CURRENT_TIMESTAMP - INTERVAL '1 year'
-ORDER BY c.created_at DESC, c.customer_id;
+ORDER BY
+  c.created_at DESC,
+  c.customer_id;
 ```
 
 **Expected shape:** Only GB/DE customers from the declared window.
@@ -201,10 +215,12 @@ cardinality contract.
 - `FILTER (WHERE ...)`: limits one aggregate without removing rows needed by neighboring aggregates.
 
 ```sql
-SELECT COUNT(*) FILTER (WHERE c.email IS NULL) AS missing_email_count,
-       COUNT(*) FILTER (WHERE c.email IS NOT NULL) AS present_email_count,
-       COUNT(*) AS customer_count
-FROM customers AS c;
+SELECT
+  COUNT(*) FILTER (WHERE c.email IS NULL) AS missing_email_count,
+  COUNT(*) FILTER (WHERE c.email IS NOT NULL) AS present_email_count,
+  COUNT(*) AS customer_count
+FROM
+  customers AS c;
 ```
 
 **Expected shape:** Exactly one summary row with counts whose sum equals all customers.
@@ -237,11 +253,15 @@ cardinality contract.
 - `LIMIT`: is applied after ordering and is meaningful only when the query first defines which rows come first.
 
 ```sql
-SELECT p.product_id,
-       p.name,
-       p.price
-FROM products AS p
-ORDER BY p.price DESC, p.product_id
+SELECT
+  p.product_id,
+  p.name,
+  p.price
+FROM
+  products AS p
+ORDER BY
+  p.price DESC,
+  p.product_id
 LIMIT 10;
 ```
 

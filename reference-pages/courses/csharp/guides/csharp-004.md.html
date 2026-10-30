@@ -230,26 +230,23 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-keyword">using</span> System.Text.RegularExpressions<span class="syntax-punctuation">;</span>
 <span class="syntax-keyword">using</span> System.Buffers<span class="syntax-punctuation">;</span>
 
-<span class="syntax-keyword">internal</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Program</span>
-<span class="syntax-punctuation">{</span>
-    <span class="syntax-keyword">private</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">Check</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">bool</span> condition<span class="syntax-punctuation">,</span> <span class="syntax-keyword">string</span> reason<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">internal</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Program</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">private</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">Check</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">bool</span> condition<span class="syntax-punctuation">,</span> <span class="syntax-keyword">string</span> reason<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>condition<span class="syntax-punctuation">)</span>
+      <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-function">InvalidOperationException</span><span class="syntax-punctuation">(</span>reason<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
+
+  <span class="syntax-keyword">private</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">async</span> Task <span class="syntax-function">Main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
     <span class="syntax-punctuation">{</span>
-        <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>condition<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> InvalidOperationException<span class="syntax-punctuation">(</span>reason<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      <span class="syntax-keyword">string</span> original <span class="syntax-operator">=</span> <span class="syntax-string">&quot;data&quot;</span><span class="syntax-punctuation">;</span>
+      <span class="syntax-keyword">string</span> changed <span class="syntax-operator">=</span> original<span class="syntax-punctuation">.</span>ToUpperInvariant<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      Check<span class="syntax-punctuation">(</span>original <span class="syntax-operator">==</span> <span class="syntax-string">&quot;data&quot;</span> <span class="syntax-operator">&amp;&amp;</span> changed <span class="syntax-operator">==</span> <span class="syntax-string">&quot;DATA&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;strings are unchanged&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      Check<span class="syntax-punctuation">(</span><span class="syntax-keyword">string</span><span class="syntax-punctuation">.</span>Equals<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;KEY&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;key&quot;</span><span class="syntax-punctuation">,</span> StringComparison<span class="syntax-punctuation">.</span>OrdinalIgnoreCase<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+            <span class="syntax-string">&quot;identifier comparison&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
     <span class="syntax-punctuation">}</span>
-
-    <span class="syntax-keyword">private</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">async</span> Task <span class="syntax-function">Main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
-    <span class="syntax-punctuation">{</span>
-        <span class="syntax-punctuation">{</span>
-            <span class="syntax-keyword">string</span> original <span class="syntax-operator">=</span> <span class="syntax-string">&quot;data&quot;</span><span class="syntax-punctuation">;</span>
-            <span class="syntax-keyword">string</span> changed <span class="syntax-operator">=</span> original<span class="syntax-punctuation">.</span>ToUpperInvariant<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-            Check<span class="syntax-punctuation">(</span>original <span class="syntax-operator">==</span> <span class="syntax-string">&quot;data&quot;</span> <span class="syntax-operator">&amp;&amp;</span> changed <span class="syntax-operator">==</span> <span class="syntax-string">&quot;DATA&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;strings are unchanged&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-            Check<span class="syntax-punctuation">(</span><span class="syntax-keyword">string</span><span class="syntax-punctuation">.</span>Equals<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;KEY&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;key&quot;</span><span class="syntax-punctuation">,</span> StringComparison<span class="syntax-punctuation">.</span>OrdinalIgnoreCase<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;identifier comparison&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-        <span class="syntax-punctuation">}</span>
-        Console<span class="syntax-punctuation">.</span>WriteLine<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;csharp-004: passed&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-        <span class="syntax-keyword">await</span> Task<span class="syntax-punctuation">.</span>CompletedTask<span class="syntax-punctuation">;</span>
-    <span class="syntax-punctuation">}</span>
-
-
+    Console<span class="syntax-punctuation">.</span>WriteLine<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;csharp-004: passed&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">await</span> Task<span class="syntax-punctuation">.</span>CompletedTask<span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The original remains data while the result is DATA.</p>
 <h4 id="example-b-choose-the-counting-unit">Example B: Choose the counting unit<a class="heading-anchor" href="#example-b-choose-the-counting-unit" aria-label="Link to this section">#</a></h4>
@@ -270,26 +267,22 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-keyword">using</span> System.Text.RegularExpressions<span class="syntax-punctuation">;</span>
 <span class="syntax-keyword">using</span> System.Buffers<span class="syntax-punctuation">;</span>
 
-<span class="syntax-keyword">internal</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Program</span>
-<span class="syntax-punctuation">{</span>
-    <span class="syntax-keyword">private</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">Check</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">bool</span> condition<span class="syntax-punctuation">,</span> <span class="syntax-keyword">string</span> reason<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">internal</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Program</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">private</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">Check</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">bool</span> condition<span class="syntax-punctuation">,</span> <span class="syntax-keyword">string</span> reason<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>condition<span class="syntax-punctuation">)</span>
+      <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-function">InvalidOperationException</span><span class="syntax-punctuation">(</span>reason<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
+
+  <span class="syntax-keyword">private</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">async</span> Task <span class="syntax-function">Main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
     <span class="syntax-punctuation">{</span>
-        <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>condition<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> InvalidOperationException<span class="syntax-punctuation">(</span>reason<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      <span class="syntax-keyword">string</span> symbol <span class="syntax-operator">=</span> <span class="syntax-string">&quot;😀&quot;</span><span class="syntax-punctuation">;</span>
+      Check<span class="syntax-punctuation">(</span>symbol<span class="syntax-punctuation">.</span>Length <span class="syntax-operator">==</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;UTF-16 units&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      Check<span class="syntax-punctuation">(</span>symbol<span class="syntax-punctuation">.</span>EnumerateRunes<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Count<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;Unicode scalar&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      Check<span class="syntax-punctuation">(</span>Encoding<span class="syntax-punctuation">.</span>UTF8<span class="syntax-punctuation">.</span>GetByteCount<span class="syntax-punctuation">(</span>symbol<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;UTF-8 bytes&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
     <span class="syntax-punctuation">}</span>
-
-    <span class="syntax-keyword">private</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">async</span> Task <span class="syntax-function">Main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
-    <span class="syntax-punctuation">{</span>
-        <span class="syntax-punctuation">{</span>
-            <span class="syntax-keyword">string</span> symbol <span class="syntax-operator">=</span> <span class="syntax-string">&quot;😀&quot;</span><span class="syntax-punctuation">;</span>
-            Check<span class="syntax-punctuation">(</span>symbol<span class="syntax-punctuation">.</span>Length <span class="syntax-operator">==</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;UTF-16 units&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-            Check<span class="syntax-punctuation">(</span>symbol<span class="syntax-punctuation">.</span>EnumerateRunes<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Count<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;Unicode scalar&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-            Check<span class="syntax-punctuation">(</span>Encoding<span class="syntax-punctuation">.</span>UTF8<span class="syntax-punctuation">.</span>GetByteCount<span class="syntax-punctuation">(</span>symbol<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;UTF-8 bytes&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-        <span class="syntax-punctuation">}</span>
-        Console<span class="syntax-punctuation">.</span>WriteLine<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;csharp-004: passed&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-        <span class="syntax-keyword">await</span> Task<span class="syntax-punctuation">.</span>CompletedTask<span class="syntax-punctuation">;</span>
-    <span class="syntax-punctuation">}</span>
-
-
+    Console<span class="syntax-punctuation">.</span>WriteLine<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;csharp-004: passed&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">await</span> Task<span class="syntax-punctuation">.</span>CompletedTask<span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> One scalar occupies two UTF-16 units and four UTF-8 bytes.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>

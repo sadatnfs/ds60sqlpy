@@ -198,29 +198,29 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 1: Compile a literal application</span></span>
-<span class="source-line">    <span class="syntax-comment">// Build a Hello class whose main printsbuild-ok.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: compiler exit0;Hello.class exists.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Build a Hello class whose main prints build-ok.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: compiler exit 0;Hello.class exists.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 2: Create a runnable archive</span></span>
-<span class="source-line">    <span class="syntax-comment">// Package the compiled classes withmain-classHello andfixedtimestamp.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Package the compiled classes withmain-classHello and fixed timestamp.</span></span>
 <span class="source-line">    <span class="syntax-comment">// Expected: JAR exists andcontainsHello.class.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 3: Compare two builds with fixed metadata</span></span>
-<span class="source-line">    <span class="syntax-comment">// Package the same classes twice withthe same timestamp.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Package the same classes twice with the same timestamp.</span></span>
 <span class="source-line">    <span class="syntax-comment">// Expected: archive byte hashes equal in this preparedJDK.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 4: Execute the packaged entrypoint</span></span>
-<span class="source-line">    <span class="syntax-comment">// Run theJAR in a bounded childJVM.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: stdoutbuild-ok;exit0.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Run the JAR in a bounded childJVM.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: stdoutbuild-ok;exit 0.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 5: Detect a changed source identity</span></span>
-<span class="source-line">    <span class="syntax-comment">// Hash two source strings differing in their printedmessage.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Hash two source strings differing in their printed message.</span></span>
 <span class="source-line">    <span class="syntax-comment">// Expected: differentSHA256digests.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 6: Record an explicit dependency contract</span></span>
-<span class="source-line">    <span class="syntax-comment">// Represent H2 asversion2.5.252 witha requiredverifiedhash field andreject a movingLATEST</span></span>
+<span class="source-line">    <span class="syntax-comment">// Represent H2 asversion2.5.252 witha required verified hash field and reject a movingLATEST</span></span>
 <span class="source-line">    <span class="syntax-comment">// label.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: exactversionaccepted;LATESTnot treated as a pin.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: exact version accepted; LATEST not treated as a pin.</span></span>
 <span class="source-line">    System<span class="syntax-punctuation">.</span><span class="syntax-attribute">out</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">println</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement and check the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line">  <span class="syntax-punctuation">}</span></span>
 <span class="source-line"><span class="syntax-punctuation">}</span></span>

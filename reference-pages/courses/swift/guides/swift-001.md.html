@@ -216,38 +216,34 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The check establishes a specific observation before the program claims completion.</p>
 <pre class="highlighted-code"><code class="language-swift"><span class="syntax-keyword">import</span> <span class="syntax-class">Foundation</span>
 
-
-
 <span class="syntax-punctuation">@</span>main
 <span class="syntax-keyword">struct</span> <span class="syntax-class">LessonMain</span> <span class="syntax-punctuation">{</span>
-    <span class="syntax-keyword">static</span> <span class="syntax-keyword">func</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">async</span> <span class="syntax-keyword">throws</span> <span class="syntax-punctuation">{</span>
-        <span class="syntax-keyword">do</span> <span class="syntax-punctuation">{</span>
-            <span class="syntax-keyword">let</span> greeting <span class="syntax-punctuation">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Hello, Swift</span><span class="syntax-string">&quot;</span>
-            <span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>greeting<span class="syntax-punctuation">.</span><span class="syntax-builtin">count</span> <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-number">12</span><span class="syntax-punctuation">)</span>
-            <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>greeting<span class="syntax-punctuation">)</span>
-        <span class="syntax-punctuation">}</span>
-        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">swift-001: passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-keyword">static</span> <span class="syntax-keyword">func</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">async</span> <span class="syntax-keyword">throws</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">do</span> <span class="syntax-punctuation">{</span>
+      <span class="syntax-keyword">let</span> greeting <span class="syntax-punctuation">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Hello, Swift</span><span class="syntax-string">&quot;</span>
+      <span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>greeting<span class="syntax-punctuation">.</span><span class="syntax-builtin">count</span> <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-number">12</span><span class="syntax-punctuation">)</span>
+      <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>greeting<span class="syntax-punctuation">)</span>
     <span class="syntax-punctuation">}</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">swift-001: passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Hello, Swift appears before the lesson marker.</p>
 <h4 id="example-b-compute-an-observable-result">Example B: Compute an observable result<a class="heading-anchor" href="#example-b-compute-an-observable-result" aria-label="Link to this section">#</a></h4>
 <p>The second condition rejects the plausible mistake of adding dimensions instead of multiplying them.</p>
 <pre class="highlighted-code"><code class="language-swift"><span class="syntax-keyword">import</span> <span class="syntax-class">Foundation</span>
 
-
-
 <span class="syntax-punctuation">@</span>main
 <span class="syntax-keyword">struct</span> <span class="syntax-class">LessonMain</span> <span class="syntax-punctuation">{</span>
-    <span class="syntax-keyword">static</span> <span class="syntax-keyword">func</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">async</span> <span class="syntax-keyword">throws</span> <span class="syntax-punctuation">{</span>
-        <span class="syntax-keyword">do</span> <span class="syntax-punctuation">{</span>
-            <span class="syntax-keyword">let</span> rows <span class="syntax-punctuation">=</span> <span class="syntax-number">4</span>
-            <span class="syntax-keyword">let</span> seatsPerRow <span class="syntax-punctuation">=</span> <span class="syntax-number">6</span>
-            <span class="syntax-keyword">let</span> seats <span class="syntax-punctuation">=</span> rows <span class="syntax-operator">*</span> seatsPerRow
-            <span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>seats <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-number">24</span><span class="syntax-punctuation">)</span>
-            <span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>seats <span class="syntax-operator">!=</span> rows <span class="syntax-operator">+</span> seatsPerRow<span class="syntax-punctuation">)</span>
-        <span class="syntax-punctuation">}</span>
-        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">swift-001: passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-keyword">static</span> <span class="syntax-keyword">func</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">async</span> <span class="syntax-keyword">throws</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">do</span> <span class="syntax-punctuation">{</span>
+      <span class="syntax-keyword">let</span> rows <span class="syntax-punctuation">=</span> <span class="syntax-number">4</span>
+      <span class="syntax-keyword">let</span> seatsPerRow <span class="syntax-punctuation">=</span> <span class="syntax-number">6</span>
+      <span class="syntax-keyword">let</span> seats <span class="syntax-punctuation">=</span> rows <span class="syntax-operator">*</span> seatsPerRow
+      <span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>seats <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-number">24</span><span class="syntax-punctuation">)</span>
+      <span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>seats <span class="syntax-operator">!=</span> rows <span class="syntax-operator">+</span> seatsPerRow<span class="syntax-punctuation">)</span>
     <span class="syntax-punctuation">}</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">swift-001: passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The computed seat count is 24.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>

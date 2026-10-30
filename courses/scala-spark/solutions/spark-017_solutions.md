@@ -12,14 +12,41 @@ Parse raw with the explicit payload schema and PERMISSIVE mode, then add reason 
 
 ```scala
 def parseRecords(raw: DataFrame): DataFrame = {
-  raw.withColumn("doc",from_json(col("raw"),payloadSchema,Map("mode"->"PERMISSIVE","columnNameOfCorruptRecord"->"_corrupt_record")))
-  .withColumn("reason",when(col("raw").isNull,lit("missing_payload")).when(col("doc._corrupt_record").isNotNull,lit("malformed_json")).when(col("doc.parent_id").isNull,lit("missing_parent")).otherwise(lit("accepted")))
+  raw
+    .withColumn(
+      "doc",
+      from_json(
+        col("raw"),
+        payloadSchema,
+        Map("mode" -> "PERMISSIVE", "columnNameOfCorruptRecord" -> "_corrupt_record")
+      )
+    )
+    .withColumn(
+      "reason",
+      when(col("raw").isNull, lit("missing_payload"))
+        .when(col("doc._corrupt_record").isNotNull, lit("malformed_json"))
+        .when(col("doc.parent_id").isNull, lit("missing_parent"))
+        .otherwise(lit("accepted"))
+    )
 }
 ```
 
 ```python
 def parse_records(raw):
-    return raw.withColumn("doc",F.from_json("raw",payload_schema,{"mode":"PERMISSIVE","columnNameOfCorruptRecord":"_corrupt_record"})).withColumn("reason",F.when(F.col("raw").isNull(),"missing_payload").when(F.col("doc._corrupt_record").isNotNull(),"malformed_json").when(F.col("doc.parent_id").isNull(),"missing_parent").otherwise("accepted"))
+    return raw.withColumn(
+        "doc",
+        F.from_json(
+            "raw",
+            payload_schema,
+            {"mode": "PERMISSIVE", "columnNameOfCorruptRecord": "_corrupt_record"},
+        ),
+    ).withColumn(
+        "reason",
+        F.when(F.col("raw").isNull(), "missing_payload")
+        .when(F.col("doc._corrupt_record").isNotNull(), "malformed_json")
+        .when(F.col("doc.parent_id").isNull(), "missing_parent")
+        .otherwise("accepted"),
+    )
 ```
 
 The original source identity and payload remain available for diagnosis. PERMISSIVE parsing is not treated as an acceptance decision: the domain check is separate and ordered after malformed-input evidence. This prevents a malformed record from being mislabeled merely as a missing business key and prevents a missing payload from disappearing into an ordinary null field.
@@ -34,13 +61,34 @@ For accepted records return source_id, parent_id, items, array_state, with array
 
 ```scala
 def parentLedger(parsed: DataFrame): DataFrame = {
-  parsed.filter(col("reason") === "accepted").select(col("source_id"),col("doc.parent_id").as("parent_id"),col("doc.items").as("items")).withColumn("array_state",when(col("items").isNull,"unknown").when(size(col("items")) === 0,"empty").otherwise("populated"))
+  parsed
+    .filter(col("reason") === "accepted")
+    .select(col("source_id"), col("doc.parent_id").as("parent_id"), col("doc.items").as("items"))
+    .withColumn(
+      "array_state",
+      when(col("items").isNull, "unknown")
+        .when(size(col("items")) === 0, "empty")
+        .otherwise("populated")
+    )
 }
 ```
 
 ```python
 def parent_ledger(parsed):
-    return parsed.filter(F.col("reason")=="accepted").select("source_id",F.col("doc.parent_id").alias("parent_id"),F.col("doc.items").alias("items")).withColumn("array_state",F.when(F.col("items").isNull(),"unknown").when(F.size("items")==0,"empty").otherwise("populated"))
+    return (
+        parsed.filter(F.col("reason") == "accepted")
+        .select(
+            "source_id",
+            F.col("doc.parent_id").alias("parent_id"),
+            F.col("doc.items").alias("items"),
+        )
+        .withColumn(
+            "array_state",
+            F.when(F.col("items").isNull(), "unknown")
+            .when(F.size("items") == 0, "empty")
+            .otherwise("populated"),
+        )
+    )
 ```
 
 The ledger is still one row per accepted parent record. Capturing array_state here preserves information that the outer placeholder would otherwise obscure. The array itself remains a typed value, so later generators can retain positions and nested fields without reparsing the JSON or guessing a child schema from a sample.
@@ -55,13 +103,17 @@ Use posexplode to return parent_id, position, sku, qty for actual items. Order b
 
 ```scala
 def children(parents: DataFrame): DataFrame = {
-  parents.select(col("parent_id"),posexplode(col("items")).as(Seq("position","item"))).select(col("parent_id"),col("position"),col("item.sku").as("sku"),col("item.qty").as("qty"))
+  parents
+    .select(col("parent_id"), posexplode(col("items")).as(Seq("position", "item")))
+    .select(col("parent_id"), col("position"), col("item.sku").as("sku"), col("item.qty").as("qty"))
 }
 ```
 
 ```python
 def children(parents):
-    return parents.select("parent_id",F.posexplode("items").alias("position","item")).select("parent_id","position",F.col("item.sku").alias("sku"),F.col("item.qty").alias("qty"))
+    return parents.select("parent_id", F.posexplode("items").alias("position", "item")).select(
+        "parent_id", "position", F.col("item.sku").alias("sku"), F.col("item.qty").alias("qty")
+    )
 ```
 
 The three rows represent actual array elements. Parent 40 remains an observed child even though qty is unknown. Duplicate values for parent 10 are preserved because their positions differ. The bounded literal comparison checks identities and values together; a count-only test would miss an accidental DISTINCT that later happened to be compensated by another duplicated row.
@@ -76,13 +128,33 @@ Use posexplode_outer, preserving parent_id and array_state along with position, 
 
 ```scala
 def outerChildren(parents: DataFrame): DataFrame = {
-  parents.select(col("parent_id"),col("array_state"),posexplode_outer(col("items")).as(Seq("position","item"))).select(col("parent_id"),col("array_state"),col("position"),col("item.sku").as("sku"),col("item.qty").as("qty"))
+  parents
+    .select(
+      col("parent_id"),
+      col("array_state"),
+      posexplode_outer(col("items")).as(Seq("position", "item"))
+    )
+    .select(
+      col("parent_id"),
+      col("array_state"),
+      col("position"),
+      col("item.sku").as("sku"),
+      col("item.qty").as("qty")
+    )
 }
 ```
 
 ```python
 def outer_children(parents):
-    return parents.select("parent_id","array_state",F.posexplode_outer("items").alias("position","item")).select("parent_id","array_state","position",F.col("item.sku").alias("sku"),F.col("item.qty").alias("qty"))
+    return parents.select(
+        "parent_id", "array_state", F.posexplode_outer("items").alias("position", "item")
+    ).select(
+        "parent_id",
+        "array_state",
+        "position",
+        F.col("item.sku").alias("sku"),
+        F.col("item.qty").alias("qty"),
+    )
 ```
 
 Outer generation preserves the reporting population but changes the meaning of a raw row count. The position distinguishes synthetic placeholders from actual elements; checking qty alone would incorrectly discard parent 40. Preserved array_state distinguishes known emptiness from unknown membership, allowing a downstream policy to report them separately.
@@ -97,13 +169,23 @@ Aggregate the outer relation to parent_id, array_state, child_count, known_qty_c
 
 ```scala
 def summarizeChildren(outer: DataFrame): DataFrame = {
-  outer.groupBy("parent_id","array_state").agg(count("position").as("child_count"),count("qty").as("known_qty_count"),sum("qty").as("total_qty"))
+  outer
+    .groupBy("parent_id", "array_state")
+    .agg(
+      count("position").as("child_count"),
+      count("qty").as("known_qty_count"),
+      sum("qty").as("total_qty")
+    )
 }
 ```
 
 ```python
 def summarize_children(outer):
-    return outer.groupBy("parent_id","array_state").agg(F.count("position").alias("child_count"),F.count("qty").alias("known_qty_count"),F.sum("qty").alias("total_qty"))
+    return outer.groupBy("parent_id", "array_state").agg(
+        F.count("position").alias("child_count"),
+        F.count("qty").alias("known_qty_count"),
+        F.sum("qty").alias("total_qty"),
+    )
 ```
 
 These measures answer separate questions: how many children were observed, how many quantities were known, and what their known sum is. A null total is retained when no quantity is known. An application could deliberately define an empty collection total as zero, but that rule would use array_state and must not also turn an unknown collection or all-missing quantity list into an observed zero.
@@ -117,20 +199,28 @@ For one parent with SKUs[a, b] and channels[web, shop, api], return both indepen
 **Expected:** Independent generators produce 6 pairs; zip produces(a, web),(b, shop),(NULL, api), three rows.
 
 ```scala
-def arrayRelationships(spark: SparkSession): (DataFrame,DataFrame) = {
+def arrayRelationships(spark: SparkSession): (DataFrame, DataFrame) = {
   val source = spark.sql("SELECT array('a','b') AS skus, array('web','shop','api') AS channels")
-  val cross = source.select(explode(col("skus")).as("sku"),col("channels")).select(col("sku"),explode(col("channels")).as("channel"))
-  val zipped = source.select(posexplode(arrays_zip(col("skus"),col("channels"))).as(Seq("position","pair"))).select(col("position"),col("pair.skus").as("sku"),col("pair.channels").as("channel"))
-  (cross,zipped)
+  val cross = source
+    .select(explode(col("skus")).as("sku"), col("channels"))
+    .select(col("sku"), explode(col("channels")).as("channel"))
+  val zipped = source
+    .select(posexplode(arrays_zip(col("skus"), col("channels"))).as(Seq("position", "pair")))
+    .select(col("position"), col("pair.skus").as("sku"), col("pair.channels").as("channel"))
+  (cross, zipped)
 }
 ```
 
 ```python
 def array_relationships(spark):
     source = spark.sql("SELECT array('a','b') AS skus, array('web','shop','api') AS channels")
-    cross = source.select(F.explode("skus").alias("sku"),"channels").select("sku",F.explode("channels").alias("channel"))
-    zipped = source.select(F.posexplode(F.arrays_zip("skus","channels")).alias("position","pair")).select("position",F.col("pair.skus").alias("sku"),F.col("pair.channels").alias("channel"))
-    return cross,zipped
+    cross = source.select(F.explode("skus").alias("sku"), "channels").select(
+        "sku", F.explode("channels").alias("channel")
+    )
+    zipped = source.select(
+        F.posexplode(F.arrays_zip("skus", "channels")).alias("position", "pair")
+    ).select("position", F.col("pair.skus").alias("sku"), F.col("pair.channels").alias("channel"))
+    return cross, zipped
 ```
 
 The six-row relation models every independent pairing, while the three-row relation models aligned positions. Padding preserves the third channel without inventing a SKU. Zipping is not a generic cure for explosion and multiplying arrays is not automatically a bug. The data contract must state whether positions correspond before either implementation can be called correct.

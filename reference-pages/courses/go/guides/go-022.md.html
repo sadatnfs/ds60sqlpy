@@ -252,8 +252,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>r<span class="syntax-punctuation">.</span>Code <span class="syntax-operator">==</span> <span class="syntax-number">200</span> <span class="syntax-operator">&amp;&amp;</span> r<span class="syntax-punctuation">.</span>Body<span class="syntax-punctuation">.</span>String<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;ok\n&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;health&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The status is 200 and the body is ok plus a newline.</p>
 <p>The recorder runs the handler directly. This proves the handler contract without making any network availability claim.</p>
 <h4 id="worked-example-2-reject-an-unsupported-method">Worked example 2: Reject an unsupported method<a class="heading-anchor" href="#worked-example-2-reject-an-unsupported-method" aria-label="Link to this section">#</a></h4>
@@ -302,8 +301,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>r<span class="syntax-punctuation">.</span>Code <span class="syntax-operator">==</span> <span class="syntax-number">405</span> <span class="syntax-operator">&amp;&amp;</span> r<span class="syntax-punctuation">.</span>Header<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Get<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Allow&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;GET&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;method&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The status is 405 and Allow is GET.</p>
 <p>The method boundary is explicit. Returning after the error prevents success text from being appended to an already rejected response.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>

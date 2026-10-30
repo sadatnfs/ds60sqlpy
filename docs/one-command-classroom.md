@@ -178,7 +178,7 @@ Local builds are the default. To install the current local source with visible
 build logs, use:
 
 ```sh
-./classroom --all --local-build --tag 1.1.0 --rebuild
+./classroom --all --local-build --tag 1.2.0 --rebuild
 ```
 
 ### Install a combined CI release
@@ -186,10 +186,10 @@ build logs, use:
 Use a checkout or starter ZIP matching the published version. The default Hub
 layout is the combined Linux AMD64/ARM64 release produced by the full
 `[publish-docker]` GitHub workflow for marked pushes to main. After that full
-1.1.0 workflow completes successfully, start it with:
+1.2.0 workflow completes successfully, start it with:
 
 ```sh
-./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 1.1.0
+./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 1.2.0
 ```
 
 For a new Hub selection, you may omit `--tag`. The launcher resolves the
@@ -206,9 +206,9 @@ Python Core is included automatically. `--all` requires every ordinary
 worker at the selected app version and fails if a partial release omitted
 one. A missing worker never causes a local fallback build.
 
-A completed full release uses `USER/ds60sqlpy:1.1.0` for the App and
+A completed full release uses `USER/ds60sqlpy:1.2.0` for the App and
 workers use tags such as
-`USER/ds60sqlpy:1.1.0-worker-python-core`. Docker selects the native architecture
+`USER/ds60sqlpy:1.2.0-worker-python-core`. Docker selects the native architecture
 from each index. Startup validates the resolved Linux platform and does not
 fall back to local builds. Use `--starter` instead of `--all` for a smaller
 installation. Private Hub repositories require Docker authentication.
@@ -216,7 +216,7 @@ installation. Private Hub repositories require Docker authentication.
 For a new project using a completed full release, separate downloading from startup:
 
 ```sh
-./classroom pull --all --from-hub YOUR_DOCKERHUB_USER --tag 1.1.0
+./classroom pull --all --from-hub YOUR_DOCKERHUB_USER --tag 1.2.0
 ./classroom resume
 ```
 
@@ -290,7 +290,7 @@ creating a marked release commit.
 The independent local publisher previews existing images:
 
 ```sh
-./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag 1.1.0
+./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag 1.2.0
 ```
 
 After local testing and preview review, add `--push` to upload that selection.
@@ -303,7 +303,7 @@ Local publication provides one actual architecture and does not create
 combined manifests. Consume its architecture tags explicitly:
 
 ```sh
-./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 1.1.0 --architecture-tags
+./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 1.2.0 --architecture-tags
 ```
 
 Publishing only ARM64 does not provide AMD64 images. Existing saved Hub
@@ -317,7 +317,7 @@ Keep the same project and matching checkout when switching from local images,
 changing tag layout, or applying a published release:
 
 ```sh
-./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 1.1.0 --rebuild
+./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 1.2.0 --rebuild
 ```
 
 Use the intended source release/version. For an intentional latest update,
@@ -327,7 +327,7 @@ Strict resume cannot apply a changed source/version configuration.
 
 Keep the same custom `--project NAME` on every command. A new project name
 selects different volumes rather than moving progress. Return to local
-development deliberately with `./classroom --local-build --tag 1.1.0 --rebuild`.
+development deliberately with `./classroom --local-build --tag 1.2.0 --rebuild`.
 `--registry` controls public base-image sources for local preparation;
 `--from-hub` selects published classroom images.
 

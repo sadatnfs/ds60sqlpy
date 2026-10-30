@@ -31,7 +31,7 @@ Task: Create the authored bundle, verify hashes and run its self-test in a child
 The child executes the packaged bytes rather than an already imported development function. The receipt records the runtime that actually ran.
 
 ```javascript
-await withBundle(async directory => {
+await withBundle(async (directory) => {
   await verifyBundle(directory);
   const result = runBundle(directory, ['--self-test']);
   assert.equal(result.status, 0, result.stderr);
@@ -53,7 +53,7 @@ Task: Append a harmless comment to the owned application after manifest creation
 Even a behavior-preserving edit changes artifact identity. The correct repair is to create a new reviewed manifest and rerun evidence, not ignore the mismatch.
 
 ```javascript
-await withBundle(async directory => {
+await withBundle(async (directory) => {
   await appendFile(join(directory, 'app.mjs'), '\n// controlled tamper fixture\n');
   await assert.rejects(verifyBundle(directory), /digest mismatch/u);
 });
@@ -70,7 +70,7 @@ Task: Replace one file entry with ../outside.txt.
 A digest verifier should not treat a manifest as permission to traverse arbitrary files. The supported artifact surface is defined independently of the untrusted filename entry.
 
 ```javascript
-await withBundle(async directory => {
+await withBundle(async (directory) => {
   const path = join(directory, 'manifest.json');
   const manifest = JSON.parse(await readFile(path, 'utf8'));
   manifest.files[0].path = '../outside.txt';
@@ -90,7 +90,7 @@ Task: Invoke an unsupported argument containing a fake secret-like value.
 The application reports a useful failure category without reflecting arbitrary arguments. A caller can preserve structured diagnostics without parsing a success-shaped stdout value.
 
 ```javascript
-await withBundle(async directory => {
+await withBundle(async (directory) => {
   const result = runBundle(directory, ['--fixture-secret-value']);
   assert.notEqual(result.status, 0);
   assert.equal(result.stdout, '');
@@ -111,13 +111,13 @@ Task: Read and hash the same app twice and compare with its manifest entry.
 The digest is a deterministic function of file bytes. This claim does not imply that independent build systems would emit the same bytes without controlling their own inputs.
 
 ```javascript
-await withBundle(async directory => {
+await withBundle(async (directory) => {
   const bytes = await readFile(join(directory, 'app.mjs'));
   const first = hash(bytes);
   const second = hash(await readFile(join(directory, 'app.mjs')));
   assert.equal(first, second);
   const manifest = JSON.parse(await readFile(join(directory, 'manifest.json'), 'utf8'));
-  assert.equal(manifest.files.find(file => file.path === 'app.mjs').sha256, first);
+  assert.equal(manifest.files.find((file) => file.path === 'app.mjs').sha256, first);
 });
 ```
 
@@ -132,7 +132,7 @@ Task: Accept the current runtime major for the fixture and reject a different re
 The example tests the gate's mechanism with an observed value. The actual course policy is supplied by the prepared Node24 profile; accepting a development host in this fixture does not qualify it as that profile.
 
 ```javascript
-await withBundle(async directory => {
+await withBundle(async (directory) => {
   const receipt = JSON.parse(runBundle(directory, ['--self-test']).stdout);
   const actual = Number(process.versions.node.split('.')[0]);
   assert.equal(qualifyRuntime(receipt, actual), true);

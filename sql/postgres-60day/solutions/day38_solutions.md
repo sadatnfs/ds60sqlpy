@@ -70,16 +70,26 @@ CREATE TEMP TABLE savepoint_demo (
   id int PRIMARY KEY,
   qty int NOT NULL
 );
-INSERT INTO savepoint_demo VALUES (1, 10);
+
+INSERT INTO savepoint_demo
+  VALUES (1, 10);
 
 SAVEPOINT before_change;
-UPDATE savepoint_demo
-SET qty = qty + 100
-WHERE id = 1;
+
+UPDATE
+  savepoint_demo
+SET
+  qty = qty + 100
+WHERE
+  id = 1;
+
 ROLLBACK TO SAVEPOINT before_change;
 
-SELECT id, qty
-FROM savepoint_demo;
+SELECT
+  id,
+  qty
+FROM
+  savepoint_demo;
 
 ROLLBACK;
 ```

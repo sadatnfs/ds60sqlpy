@@ -20,10 +20,7 @@ from sklearn.datasets import load_diabetes
 X, y = load_diabetes(return_X_y=True)
 Xtr, Xte, ytr, yte = train_test_split(X, y, test_size=0.2, random_state=42)
 
-pipe = Pipeline([
-    ('sc', StandardScaler()),
-    ('lr', LinearRegression())
-])
+pipe = Pipeline([("sc", StandardScaler()), ("lr", LinearRegression())])
 pipe.fit(Xtr, ytr)
 score_lr = pipe.score(Xte, yte)
 score_lr
@@ -38,13 +35,10 @@ Worked reference for Exercise 2; Swap to Ridge and compare
 ```python
 from sklearn.linear_model import Ridge
 
-pipe_ridge = Pipeline([
-    ('sc', StandardScaler()),
-    ('ridge', Ridge(alpha=1.0, random_state=42))
-])
+pipe_ridge = Pipeline([("sc", StandardScaler()), ("ridge", Ridge(alpha=1.0, random_state=42))])
 pipe_ridge.fit(Xtr, ytr)
 score_ridge = pipe_ridge.score(Xte, yte)
-{'linear': score_lr, 'ridge': score_ridge}
+{"linear": score_lr, "ridge": score_ridge}
 ```
 Notes
 - Ridge adds L2 regularization which can improve generalization, especially with correlated features
@@ -56,10 +50,11 @@ Worked reference for Exercise 3; Inspect coefficients with and without scaling
 ```python
 # With scaling
 pipe.fit(Xtr, ytr)
-coefs_scaled = pipe.named_steps['lr'].coef_
+coefs_scaled = pipe.named_steps["lr"].coef_
 
 # Without scaling (not recommended generally for linear models)
 from sklearn.linear_model import LinearRegression
+
 lr_noscale = LinearRegression().fit(Xtr, ytr)
 coefs_noscale = lr_noscale.coef_
 
@@ -177,9 +172,7 @@ preprocess = ColumnTransformer(
     [
         (
             "num",
-            Pipeline(
-                [("impute", SimpleImputer(strategy="median")), ("scale", StandardScaler())]
-            ),
+            Pipeline([("impute", SimpleImputer(strategy="median")), ("scale", StandardScaler())]),
             numeric,
         ),
         (
@@ -194,9 +187,7 @@ preprocess = ColumnTransformer(
         ),
     ]
 )
-model = Pipeline(
-    [("preprocess", preprocess), ("model", LogisticRegression(max_iter=1_000))]
-)
+model = Pipeline([("preprocess", preprocess), ("model", LogisticRegression(max_iter=1_000))])
 ```
 
 Fit this object only after the split. Median and most-frequent values are
@@ -237,11 +228,13 @@ assumption or data boundary rather than hiding the failure.
 ```python
 required = numeric + categorical
 
+
 def validate_inference_frame(frame: pd.DataFrame) -> pd.DataFrame:
     missing = sorted(set(required) - set(frame.columns))
     if missing:
         raise ValueError(f"missing required columns: {missing}")
     return frame.loc[:, required].copy()
+
 
 # After `model.fit(train_frame, target)`:
 # names = model.named_steps["preprocess"].get_feature_names_out()

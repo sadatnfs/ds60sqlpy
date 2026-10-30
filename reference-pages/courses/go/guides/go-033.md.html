@@ -247,8 +247,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>err <span class="syntax-operator">==</span> <span class="syntax-keyword">nil</span> <span class="syntax-operator">&amp;&amp;</span> s<span class="syntax-punctuation">.</span>A <span class="syntax-operator">==</span> <span class="syntax-number">2</span> <span class="syntax-operator">&amp;&amp;</span> s<span class="syntax-punctuation">.</span>B <span class="syntax-operator">==</span> <span class="syntax-number">8</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;commit&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The committed balances are 2 and 8.</p>
 <p>The outer state changes only after the callback succeeds. This proves the local model policy, not database atomicity.</p>
 <h4 id="worked-example-2-rollback-an-explicit-failure">Worked example 2: Rollback an explicit failure<a class="heading-anchor" href="#worked-example-2-rollback-an-explicit-failure" aria-label="Link to this section">#</a></h4>
@@ -292,8 +291,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>err <span class="syntax-operator">!=</span> <span class="syntax-keyword">nil</span> <span class="syntax-operator">&amp;&amp;</span> s<span class="syntax-punctuation">.</span>A <span class="syntax-operator">==</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;rollback&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The outer balances remain unchanged.</p>
 <p>A staged mutation is not a committed mutation. The distinction is visible because the model uses a separate value copy.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>

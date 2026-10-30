@@ -73,12 +73,12 @@ def verify(root: Path, languages: set[str]) -> int:
     checks = 0
     try:
         for expected_equal, cases in ((True, TREE_EQUIVALENCES), (False, TREE_DIFFERENCES)):
-            for grammar, before, after in cases:
+            for grammar, before_text, after_text in cases:
                 if FAMILY[grammar] not in languages:
                     continue
                 equal = (
-                    inline.tree_signature(before.encode(), grammar)[0]
-                    == inline.tree_signature(after.encode(), grammar)[0]
+                    inline.tree_signature(before_text.encode(), grammar)[0]
+                    == inline.tree_signature(after_text.encode(), grammar)[0]
                 )
                 if equal != expected_equal:
                     raise ValueError(
@@ -101,7 +101,7 @@ def verify(root: Path, languages: set[str]) -> int:
                 raise ValueError("Inline guard contract failed: inert Python source")
             checks += 1
         if "java" in languages:
-            for source, expected in (
+            for java_source, expected in (
                 (b"class Main {}\n", "unit"),
                 (b"int value=1; assert value==1;\n", "statements"),
                 (
@@ -110,8 +110,8 @@ def verify(root: Path, languages: set[str]) -> int:
                 ),
                 (b"private int value=1;\n", "members"),
             ):
-                wrapped, mode = inline.java_context(source)
-                if mode != expected or inline.java_unwrap(wrapped, mode) != source:
+                wrapped, mode = inline.java_context(java_source)
+                if mode != expected or inline.java_unwrap(wrapped, mode) != java_source:
                     raise ValueError("Inline guard contract failed: Java excerpt context")
                 checks += 1
             try:
@@ -144,9 +144,9 @@ def verify(root: Path, languages: set[str]) -> int:
         if "shell" in languages:
             source = "```sh\ndocker run <your-formatting-image> command\n```\n"
             tool = inline.Formatter(root, lambda value, *args: value)
-            after, rows = inline.format_document(source, tool, {"shell"}, path="fixture.md")
+            rendered, rows = inline.format_document(source, tool, {"shell"}, path="fixture.md")
             if (
-                after != source
+                rendered != source
                 or rows[0].get("reason") != "unsubstituted-shell-template-placeholder"
             ):
                 raise ValueError("Inline guard contract failed: shell template")

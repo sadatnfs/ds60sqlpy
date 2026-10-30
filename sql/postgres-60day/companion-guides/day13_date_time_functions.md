@@ -100,12 +100,16 @@ These worked excerpts come from `sql/postgres-60day/day13_date_time_functions.sq
 ### Example 1
 
 ```sql
-SELECT customer_id, full_name,
-       now() - created_at AS tenure,
-       date_trunc('month', created_at AT TIME ZONE 'UTC')::date
-         AS cohort_month_utc
-FROM customers
-ORDER BY tenure DESC, customer_id
+SELECT
+  customer_id,
+  full_name,
+  now() - created_at AS tenure,
+  date_trunc('month', created_at AT TIME ZONE 'UTC')::date AS cohort_month_utc
+FROM
+  customers
+ORDER BY
+  tenure DESC,
+  customer_id
 LIMIT 50;
 ```
 
@@ -117,19 +121,22 @@ LIMIT 50;
 
 ```sql
 WITH daily AS (
-  SELECT (o.order_date AT TIME ZONE 'UTC')::date AS d_utc,
-         SUM(o.total_amount) AS revenue
-  FROM orders o
-  GROUP BY d_utc
+  SELECT
+    (o.order_date AT TIME ZONE 'UTC')::date AS d_utc,
+    SUM(o.total_amount) AS revenue
+  FROM
+    orders o
+  GROUP BY
+    d_utc
 )
-SELECT d_utc,
-       revenue,
-       SUM(revenue) OVER (
-         ORDER BY d_utc
-         ROWS BETWEEN 6 PRECEDING AND CURRENT ROW
-       ) AS revenue_7_observed_days
-FROM daily
-ORDER BY d_utc DESC
+SELECT
+  d_utc,
+  revenue,
+  SUM(revenue) OVER (ORDER BY d_utc ROWS BETWEEN 6 PRECEDING AND CURRENT ROW) AS revenue_7_observed_days
+FROM
+  daily
+ORDER BY
+  d_utc DESC
 LIMIT 30;
 ```
 

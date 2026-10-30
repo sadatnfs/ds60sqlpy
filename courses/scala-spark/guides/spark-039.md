@@ -68,32 +68,49 @@ The complete source creates the owned local session described above, then constr
 import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
-import java.nio.file.{Files,Path,Paths,StandardOpenOption,StandardCopyOption}
+import java.nio.file.{Files, Path, Paths, StandardOpenOption, StandardCopyOption}
 import java.nio.charset.StandardCharsets
 import java.util.UUID
 import scala.jdk.CollectionConverters._
-import org.apache.spark.sql.streaming.{StreamingQuery,Trigger}
+import org.apache.spark.sql.streaming.{StreamingQuery, Trigger}
 import scala.collection.mutable.ArrayBuffer
 
-require(spark.version == "4.0.1","Prepared Spark4.0.1 required")
-spark.conf.set("spark.sql.streaming.stopTimeout","5000")
-ownedRoot=Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(),"spark-039-")
-val source=spark.range(0L,20000L,1L,4).withColumn("key",when(col("id")<16000L,lit(0L)).otherwise(col("id")%100L))
+require(spark.version == "4.0.1", "Prepared Spark4.0.1 required")
+spark.conf.set("spark.sql.streaming.stopTimeout", "5000")
+ownedRoot = Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(), "spark-039-")
+val source = spark
+  .range(0L, 20000L, 1L, 4)
+  .withColumn("key", when(col("id") < 16000L, lit(0L)).otherwise(col("id") % 100L))
 ```
 
 ```python
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 from pathlib import Path
 import tempfile
 import shutil
 import json
 import uuid
 
-if spark.version!="4.0.1":raise ValueError("Prepared Spark4.0.1 required")
-spark.conf.set("spark.sql.streaming.stopTimeout","5000")
-owned_root=Path(tempfile.mkdtemp(prefix="spark-039-",dir=Path.cwd()))
-source=spark.range(0,20000,1,4).withColumn("key",F.when(F.col("id")<16000,F.lit(0).cast("long")).otherwise(F.col("id")%100))
+if spark.version != "4.0.1":
+    raise ValueError("Prepared Spark4.0.1 required")
+spark.conf.set("spark.sql.streaming.stopTimeout", "5000")
+owned_root = Path(tempfile.mkdtemp(prefix="spark-039-", dir=Path.cwd()))
+source = spark.range(0, 20000, 1, 4).withColumn(
+    "key", F.when(F.col("id") < 16000, F.lit(0).cast("long")).otherwise(F.col("id") % 100)
+)
 ```
 
 ## Worked example / walkthrough
@@ -101,13 +118,13 @@ source=spark.range(0,20000,1,4).withColumn("key",F.when(F.col("id")<16000,F.lit(
 ### Worked example 1
 
 ```scala
-val expected=(0L until 100L).map(k => (k,if(k==0L)16040L else 40L))
-assert(expected.size==100 && expected.map(_._2).sum==20000L)
+val expected = (0L until 100L).map(k => (k, if (k == 0L) 16040L else 40L))
+assert(expected.size == 100 && expected.map(_._2).sum == 20000L)
 ```
 
 ```python
-expected=[(key,16040 if key==0 else 40) for key in range(100)]
-assert len(expected)==100 and sum(count for _,count in expected)==20000
+expected = [(key, 16040 if key == 0 else 40) for key in range(100)]
+assert len(expected) == 100 and sum(count for _, count in expected) == 20000
 ```
 
 This independent arithmetic oracle fixes the product before any performance measurement. The hot key remains a separate visible condition, not an accidental unknown in the benchmark.
@@ -115,15 +132,15 @@ This independent arithmetic oracle fixes the product before any performance meas
 ### Worked example 2
 
 ```scala
-val compute=2.0*(3600.0/3600.0)*0.05
-val storage=2.0*(30.0/30.0)*0.02
-assert(math.abs(compute+storage-0.14)<1e-12)
+val compute = 2.0 * (3600.0 / 3600.0) * 0.05
+val storage = 2.0 * (30.0 / 30.0) * 0.02
+assert(math.abs(compute + storage - 0.14) < 1e-12)
 ```
 
 ```python
-compute=2*(3600/3600)*.05
-storage=2*(30/30)*.02
-assert abs(compute+storage-.14)<1e-12
+compute = 2 * (3600 / 3600) * 0.05
+storage = 2 * (30 / 30) * 0.02
+assert abs(compute + storage - 0.14) < 1e-12
 ```
 
 The hypothetical cost calculation exposes time/storage unit conversions. It is deliberately separate from actual Spark metrics and does not claim a cloud invoice.

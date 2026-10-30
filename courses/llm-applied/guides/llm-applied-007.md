@@ -118,22 +118,36 @@ The ranking follows the declared topic geometry. The fixture does not demonstrat
 
 ```python
 import numpy as np
+
+
 def unit(value):
-    value=np.asarray(value,dtype=np.float64)
-    if value.ndim!=1 or not len(value) or not np.isfinite(value).all(): raise ValueError('finite vector required')
-    norm=np.linalg.norm(value)
-    if norm==0 or not np.isfinite(norm): raise ValueError('nonzero finite norm required')
-    return value/norm
-def cosine_rank(query,documents):
-    q=unit(query); scores=[]
-    for key,value in documents.items():
-        v=unit(value)
-        if v.shape!=q.shape: raise ValueError('embedding dimensions differ')
-        scores.append((key,float(q@v)))
-    return sorted(scores,key=lambda row:(-row[1],row[0]))
-table={'purchase':np.array([1.,.1,0.]),'geometry':np.array([0.,1.,0.]),'mixed':np.array([.5,.5,0.])}
-ranked=cosine_rank(np.array([1.,0.,0.]),table)
-assert [key for key,score in ranked]==['purchase','mixed','geometry']
+    value = np.asarray(value, dtype=np.float64)
+    if value.ndim != 1 or not len(value) or not np.isfinite(value).all():
+        raise ValueError("finite vector required")
+    norm = np.linalg.norm(value)
+    if norm == 0 or not np.isfinite(norm):
+        raise ValueError("nonzero finite norm required")
+    return value / norm
+
+
+def cosine_rank(query, documents):
+    q = unit(query)
+    scores = []
+    for key, value in documents.items():
+        v = unit(value)
+        if v.shape != q.shape:
+            raise ValueError("embedding dimensions differ")
+        scores.append((key, float(q @ v)))
+    return sorted(scores, key=lambda row: (-row[1], row[0]))
+
+
+table = {
+    "purchase": np.array([1.0, 0.1, 0.0]),
+    "geometry": np.array([0.0, 1.0, 0.0]),
+    "mixed": np.array([0.5, 0.5, 0.0]),
+}
+ranked = cosine_rank(np.array([1.0, 0.0, 0.0]), table)
+assert [key for key, score in ranked] == ["purchase", "mixed", "geometry"]
 ```
 
 **Expected:** purchase ranks first, mixed second, geometry last.
@@ -143,9 +157,13 @@ assert [key for key,score in ranked]==['purchase','mixed','geometry']
 Normalization removes positive magnitude scaling from the score. A model trained for unnormalized dot products may use magnitude meaningfully, so the scoring convention must match the model contract.
 
 ```python
-query=np.array([1.,0.,0.]); original=table['purchase']; scaled=10*original
-np.testing.assert_allclose(unit(original)@unit(query),unit(scaled)@unit(query),atol=1e-12,rtol=0)
-assert scaled@query==10*(original@query)
+query = np.array([1.0, 0.0, 0.0])
+original = table["purchase"]
+scaled = 10 * original
+np.testing.assert_allclose(
+    unit(original) @ unit(query), unit(scaled) @ unit(query), atol=1e-12, rtol=0
+)
+assert scaled @ query == 10 * (original @ query)
 ```
 
 **Expected:** cosine unchanged within 1e-12; raw dot product multiplies by 10.
@@ -155,9 +173,9 @@ assert scaled@query==10*(original@query)
 The semantic relation was supplied by the fixture author. A pretrained encoder would need to learn or represent it, and a domain-specific synonym may still be missed.
 
 ```python
-word_vectors={'buy':np.array([1.,0.,0.]),'purchase':np.array([1.,0.,0.])}
-assert set('buy'.split())&set('purchase'.split())==set()
-np.testing.assert_array_equal(word_vectors['buy'],word_vectors['purchase'])
+word_vectors = {"buy": np.array([1.0, 0.0, 0.0]), "purchase": np.array([1.0, 0.0, 0.0])}
+assert set("buy".split()) & set("purchase".split()) == set()
+np.testing.assert_array_equal(word_vectors["buy"], word_vectors["purchase"])
 ```
 
 **Expected:** vector scores match; literal word overlap is empty.

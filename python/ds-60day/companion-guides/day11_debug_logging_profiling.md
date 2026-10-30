@@ -121,10 +121,12 @@ import logging
 logger = logging.getLogger("day11")
 logger.setLevel(logging.INFO)
 
+
 def accepted_count(values: list[int]) -> int:
     count = sum(value >= 0 for value in values)
     logger.info("accepted=%d total=%d", count, len(values))
     return count
+
 
 accepted_count([4, -1, 0])
 ```
@@ -150,8 +152,10 @@ values = list(range(1_000))
 value_set = set(values)
 list_seconds = timeit("999 in values", number=5_000, globals=globals())
 set_seconds = timeit("999 in value_set", number=5_000, globals=globals())
-{"same_answer": (999 in values) == (999 in value_set),
- "set_faster_here": set_seconds < list_seconds}
+{
+    "same_answer": (999 in values) == (999 in value_set),
+    "set_faster_here": set_seconds < list_seconds,
+}
 ```
 
 **Expected observation**
@@ -214,8 +218,10 @@ import timeit
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 
+
 def unique_count(values: list[int]) -> int:
     return len(set(values))
+
 
 values = list(range(1_000))
 logger.info("benchmarking unique_count count=%d", len(values))

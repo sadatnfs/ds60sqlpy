@@ -15,8 +15,17 @@ Return job_id, priority for tenant 1 jobs whose status equals ready, ordered by 
 **Verify:** For sql-deep-05 Exercise 1, list eligible queue IDs from the status and attempt conditions, including the NULL-attempt case, before considering whether an index could support the predicate.
 
 ```sql
-SELECT job_id,priority FROM deep5_jobs WHERE tenant_id=1 AND status='ready'
-ORDER BY priority DESC,job_id;
+SELECT
+  job_id,
+  priority
+FROM
+  deep5_jobs
+WHERE
+  tenant_id = 1
+  AND status = 'ready'
+ORDER BY
+  priority DESC,
+  job_id;
 ```
 
 The predicate states both authorization-like tenant scope and operational eligibility. Equality to ready also implies the partial-index predicate, although the planner may still choose another access method. The outer ordering includes job_id so equal priorities have a deterministic presentation. Replacing the status condition with not-done would change semantics before it changed performance.
@@ -32,9 +41,17 @@ Return job_id, status for tenant 1 rows selected by status<>done but not satisfy
 **Verify:** For sql-deep-05 Exercise 2, project both the original and rewritten predicates on the same rows; retain the counterexample where their truth values differ instead of relying on coincidentally equal counts.
 
 ```sql
-SELECT job_id,status FROM deep5_jobs
-WHERE tenant_id=1 AND status<>'done' AND status IS DISTINCT FROM 'ready'
-ORDER BY job_id;
+SELECT
+  job_id,
+  status
+FROM
+  deep5_jobs
+WHERE
+  tenant_id = 1
+  AND status <> 'done'
+  AND status IS DISTINCT FROM 'ready'
+ORDER BY
+  job_id;
 ```
 
 A single admitted blocked row disproves implication, so a ready-only index cannot supply every row of the broader predicate. The NULL-status row does not pass status<>done because that comparison is unknown. Using an explicit counterexample query is often clearer than arguing from a plan screenshot: it tests semantic equivalence before considering cost or index availability.
@@ -50,11 +67,22 @@ Return one row with index_name, is_partial, key_columns, ready_rows for the temp
 **Verify:** For sql-deep-05 Exercise 3, inspect the catalog index name, definition and predicate; confirm existence separately from planner choice, which would require actual EXPLAIN evidence.
 
 ```sql
-SELECT c.relname AS index_name,i.indpred IS NOT NULL AS is_partial,
- i.indnkeyatts AS key_columns,
- (SELECT count(*) FROM deep5_jobs WHERE status='ready') AS ready_rows
-FROM pg_index AS i JOIN pg_class AS c ON c.oid=i.indexrelid
-WHERE i.indexrelid='pg_temp.deep5_ready_idx'::regclass;
+SELECT
+  c.relname AS index_name,
+  i.indpred IS NOT NULL AS is_partial,
+  i.indnkeyatts AS key_columns,
+  (
+    SELECT
+      count(*)
+    FROM
+      deep5_jobs
+    WHERE
+      status = 'ready') AS ready_rows
+FROM
+  pg_index AS i
+  JOIN pg_class AS c ON c.oid = i.indexrelid
+WHERE
+  i.indexrelid = 'pg_temp.deep5_ready_idx'::regclass;
 ```
 
 The catalog query verifies an actual index object in the current temporary namespace rather than inferring it from source text. indpred distinguishes a partial index, and indnkeyatts counts key attributes independently of included columns. The source-row count explains the predicate population. None of these facts establishes a latency improvement or a chosen execution plan on a larger workload.
@@ -70,7 +98,11 @@ Within the exercise savepoint, increment attempts and version for job 1 only whe
 **Verify:** For sql-deep-05 Exercise 4, read the original value and version before writing, inspect the RETURNING receipt, and verify the committed-in-transaction state equals one increment with one version increase.
 
 ```sql
-CREATE TEMP TABLE deep5_receipt(action text,affected integer) ON COMMIT DROP;
+CREATE TEMP TABLE deep5_receipt (
+  action text,
+  affected integer
+) ON COMMIT DROP;
+
 DO $write$
 DECLARE changed integer;
 BEGIN
@@ -80,8 +112,20 @@ BEGIN
  INSERT INTO deep5_receipt VALUES('first',changed);
 END
 $write$;
-SELECT r.action,r.affected,j.job_id,j.attempts,j.version
-FROM deep5_receipt AS r CROSS JOIN deep5_jobs AS j WHERE j.job_id=1 ORDER BY r.action;
+
+SELECT
+  r.action,
+  r.affected,
+  j.job_id,
+  j.attempts,
+  j.version
+FROM
+  deep5_receipt AS r
+  CROSS JOIN deep5_jobs AS j
+WHERE
+  j.job_id = 1
+ORDER BY
+  r.action;
 ```
 
 The version and eligibility checks occur in the same UPDATE that changes the row, eliminating a separate check-then-write gap in this contract. GET DIAGNOSTICS captures the actual row count immediately after that statement. The result then verifies both the receipt and stored state. A printed UPDATE command tag alone would not establish which job changed or whether its version advanced correctly.
@@ -97,7 +141,11 @@ Starting from the original fixture, perform the same expected-version 1 update t
 **Verify:** For sql-deep-05 Exercise 5, apply the stale version a second time and inspect its empty RETURNING receipt; compare the final value and version with the first successful update to prove no second increment.
 
 ```sql
-CREATE TEMP TABLE deep5_receipt(action text,affected integer) ON COMMIT DROP;
+CREATE TEMP TABLE deep5_receipt (
+  action text,
+  affected integer
+) ON COMMIT DROP;
+
 DO $writes$
 DECLARE changed integer;
 BEGIN
@@ -107,8 +155,19 @@ BEGIN
  GET DIAGNOSTICS changed=ROW_COUNT; INSERT INTO deep5_receipt VALUES('stale',changed);
 END
 $writes$;
-SELECT r.action,r.affected,j.attempts,j.version FROM deep5_receipt AS r
-CROSS JOIN deep5_jobs AS j WHERE j.job_id=1 ORDER BY r.action;
+
+SELECT
+  r.action,
+  r.affected,
+  j.attempts,
+  j.version
+FROM
+  deep5_receipt AS r
+  CROSS JOIN deep5_jobs AS j
+WHERE
+  j.job_id = 1
+ORDER BY
+  r.action;
 ```
 
 The first mutation changes the version to two, so the identical second predicate no longer matches. Zero affected rows is the expected conflict signal for this fixture, while other real cases could involve missing identity or changed eligibility. The single-session sequence verifies the state predicate and prevents an accidental double increment. It does not establish all lock, isolation or network-response behavior of a concurrent application.
@@ -124,8 +183,10 @@ Implement a temporary apply_request function that stores request_key, job_id, a 
 **Verify:** For sql-deep-05 Exercise 6, perform an identical idempotent retry and then a conflicting payload under the same key; verify one stored receipt row and one increment, while the conflicting request raises the declared error.
 
 ```sql
-CREATE FUNCTION pg_temp.apply_request(p_key text,p_job integer,p_delta integer)
-RETURNS boolean LANGUAGE plpgsql AS $apply$
+CREATE FUNCTION pg_temp.apply_request (p_key text, p_job integer, p_delta integer)
+  RETURNS boolean
+  LANGUAGE plpgsql
+  AS $apply$
 DECLARE inserted integer; existing deep5_requests%ROWTYPE;
 BEGIN
  IF p_key IS NULL OR btrim(p_key)='' OR p_delta IS NULL OR p_delta<=0 THEN
@@ -144,10 +205,20 @@ BEGIN
  IF NOT FOUND THEN RAISE EXCEPTION 'Eligible job was not found'; END IF;
  RETURN true;
 END
-$apply$;
-CREATE TEMP TABLE deep5_apply_receipt(call_id integer,applied boolean,conflict_rejected boolean) ON COMMIT DROP;
-INSERT INTO deep5_apply_receipt VALUES(1,pg_temp.apply_request('request-a',1,1),false);
-INSERT INTO deep5_apply_receipt VALUES(2,pg_temp.apply_request('request-a',1,1),false);
+$apply$
+;
+CREATE TEMP TABLE deep5_apply_receipt (
+  call_id integer,
+  applied boolean,
+  conflict_rejected boolean
+) ON COMMIT DROP;
+
+INSERT INTO deep5_apply_receipt
+  VALUES (1, pg_temp.apply_request ('request-a', 1, 1), false);
+
+INSERT INTO deep5_apply_receipt
+  VALUES (2, pg_temp.apply_request ('request-a', 1, 1), false);
+
 DO $conflict$
 BEGIN
  BEGIN
@@ -158,12 +229,41 @@ BEGIN
  END;
 END
 $conflict$;
-SELECT 'request-a' AS request_key,
- (SELECT applied FROM deep5_apply_receipt WHERE call_id=1) AS first_applied,
- (SELECT applied FROM deep5_apply_receipt WHERE call_id=2) AS replay_applied,
- (SELECT conflict_rejected FROM deep5_apply_receipt WHERE call_id=3) AS conflict_rejected,
- j.attempts,j.version,(SELECT count(*) FROM deep5_requests) AS request_count
-FROM deep5_jobs AS j WHERE j.job_id=1;
+
+SELECT
+  'request-a' AS request_key,
+  (
+    SELECT
+      applied
+    FROM
+      deep5_apply_receipt
+    WHERE
+      call_id = 1) AS first_applied,
+  (
+    SELECT
+      applied
+    FROM
+      deep5_apply_receipt
+    WHERE
+      call_id = 2) AS replay_applied,
+  (
+    SELECT
+      conflict_rejected
+    FROM
+      deep5_apply_receipt
+    WHERE
+      call_id = 3) AS conflict_rejected,
+  j.attempts,
+  j.version,
+  (
+    SELECT
+      count(*)
+    FROM
+      deep5_requests) AS request_count
+FROM
+  deep5_jobs AS j
+WHERE
+  j.job_id = 1;
 ```
 
 The request-key constraint decides whether this operation is new, while stored payload fields distinguish a replay from a conflicting reuse. The request insert and job mutation share the transaction, so a failed eligible-job update cannot publish a successful request independently. The changed-payload test catches only the designated SQLSTATE; its own missing-error assertion has a different error class and cannot falsely pass. This teaches an atomic database boundary without claiming end-to-end distributed exactly-once delivery.

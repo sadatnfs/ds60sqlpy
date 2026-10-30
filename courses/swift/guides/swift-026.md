@@ -45,18 +45,16 @@ A portable contract can be shared by an executable, tests and a later app adapte
 ```swift
 import Foundation
 
-
-
 @main
 struct LessonMain {
-    static func main() async throws {
-        do {
-            func total(_ values: [Int]) -> Int { values.reduce(0, +) }
-            precondition(total([2, 3]) == 5)
-            precondition(total([]) == 0)
-        }
-        print("swift-026: passed")
+  static func main() async throws {
+    do {
+      func total(_ values: [Int]) -> Int { values.reduce(0, +) }
+      precondition(total([2, 3]) == 5)
+      precondition(total([]) == 0)
     }
+    print("swift-026: passed")
+  }
 }
 ```
 
@@ -69,17 +67,15 @@ Moving this function into another target requires a deliberate public interface 
 ```swift
 import Foundation
 
-
-
 @main
 struct LessonMain {
-    static func main() async throws {
-        do {
-            func render(_ total: Int) -> String { "total=\(total)" }
-            precondition(render(5) == "total=5")
-        }
-        print("swift-026: passed")
+  static func main() async throws {
+    do {
+      func render(_ total: Int) -> String { "total=\(total)" }
+      precondition(render(5) == "total=5")
     }
+    print("swift-026: passed")
+  }
 }
 ```
 

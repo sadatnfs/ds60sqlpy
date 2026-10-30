@@ -23,9 +23,12 @@ The question is: Use trutha0,b1,c2 and two prediction dictionaries with differen
 Dictionary insertion order is not an alignment contract. Joining by IDs keeps each difference attached to the same target record.
 
 ```python
-truth={'a':0.,'b':1.,'c':2.}; a={'a':0.,'b':2.,'c':2.}; b={'c':3.,'a':1.,'b':2.}
-ids=sorted(truth); diff=np.array([(a[i]-truth[i])**2-(b[i]-truth[i])**2 for i in ids])
-np.testing.assert_array_equal(diff,[-1,0,-1])
+truth = {"a": 0.0, "b": 1.0, "c": 2.0}
+a = {"a": 0.0, "b": 2.0, "c": 2.0}
+b = {"c": 3.0, "a": 1.0, "b": 2.0}
+ids = sorted(truth)
+diff = np.array([(a[i] - truth[i]) ** 2 - (b[i] - truth[i]) ** 2 for i in ids])
+np.testing.assert_array_equal(diff, [-1, 0, -1])
 ```
 
 **Expected:** paired differences[-1,0,-1].
@@ -39,7 +42,7 @@ The question is: Average the three paired loss differences and interpret its sig
 The sign depends on the declared subtraction order. A negative A-minus-B loss difference favors A for this metric and sample only.
 
 ```python
-np.testing.assert_allclose(diff.mean(),-2/3,atol=1e-12,rtol=0)
+np.testing.assert_allclose(diff.mean(), -2 / 3, atol=1e-12, rtol=0)
 ```
 
 **Expected:** mean-2/3; modelA has lower MSE on this fixture.
@@ -53,8 +56,15 @@ The question is: Draw1000 bootstrap index rows with seed7 and average each selec
 Sampling one difference vector automatically preserves pairing. The attainable bounds are known from the fixture, so they independently check the implementation.
 
 ```python
-rng=np.random.default_rng(7); indices=rng.integers(0,len(diff),size=(1000,len(diff))); estimates=diff[indices].mean(1)
-assert estimates.shape==(1000,) and np.isfinite(estimates).all() and estimates.min()>=-1 and estimates.max()<=0
+rng = np.random.default_rng(7)
+indices = rng.integers(0, len(diff), size=(1000, len(diff)))
+estimates = diff[indices].mean(1)
+assert (
+    estimates.shape == (1000,)
+    and np.isfinite(estimates).all()
+    and estimates.min() >= -1
+    and estimates.max() <= 0
+)
 ```
 
 **Expected:** 1000 finite estimates within[-1,0].
@@ -68,8 +78,8 @@ The question is: Repeat with a fresh seed7 generator and compare the entire esti
 The seed makes local execution repeatable. It does not address biased sampling, dependent observations or a metric chosen after seeing the results.
 
 ```python
-again=np.random.default_rng(7).integers(0,3,size=(1000,3))
-np.testing.assert_array_equal(diff[again].mean(1),estimates)
+again = np.random.default_rng(7).integers(0, 3, size=(1000, 3))
+np.testing.assert_array_equal(diff[again].mean(1), estimates)
 ```
 
 **Expected:** exact same estimates.
@@ -83,8 +93,8 @@ The question is: Remove predictionc from one model and check alignment before co
 An inner join would silently evaluate only the overlapping records. Missing predictions should be accounted for under an explicit failure policy rather than dropped.
 
 ```python
-missing={k:v for k,v in b.items() if k!='c'}
-assert set(missing)!=set(truth)
+missing = {k: v for k, v in b.items() if k != "c"}
+assert set(missing) != set(truth)
 ```
 
 **Expected:** key-set mismatch detected.
@@ -98,9 +108,13 @@ The question is: Record configuration choice on validation and a single frozen-t
 The audit concerns information use, not filenames. Once the final test influences a new choice, a new untouched assessment is needed for a fresh final claim.
 
 ```python
-ledger=[{'action':'choose','partition':'validation'},{'action':'assess','partition':'test'}]
-assert all(row['partition']=='validation' for row in ledger if row['action']=='choose')
-bad={'action':'choose','partition':'test'}; assert bad['partition']!='validation'
+ledger = [
+    {"action": "choose", "partition": "validation"},
+    {"action": "assess", "partition": "test"},
+]
+assert all(row["partition"] == "validation" for row in ledger if row["action"] == "choose")
+bad = {"action": "choose", "partition": "test"}
+assert bad["partition"] != "validation"
 ```
 
 **Expected:** selection partition validation; final-test tuning prohibited.

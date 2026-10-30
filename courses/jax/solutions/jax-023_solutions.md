@@ -9,7 +9,7 @@ The output cotangent of ones is solved through the transposed diagonal system.
 **Expected:** [0.5,1/3].
 
 ```python
-close(jax.grad(lambda b: implicit_solution(0., b).sum())(right), [.5, 1 / 3])
+close(jax.grad(lambda b: implicit_solution(0.0, b).sum())(right), [0.5, 1 / 3])
 ```
 
 ## Exercise 2: Change the diagonal
@@ -19,7 +19,7 @@ Only the first diagonal entry changes, so only the first solved coordinate chang
 **Expected:** [0.5,2].
 
 ```python
-close(implicit_solution(2., right), [.5, 2.])
+close(implicit_solution(2.0, right), [0.5, 2.0])
 ```
 
 ## Exercise 3: Compare an ordinary solve
@@ -29,8 +29,8 @@ The ordinary solver is a second implementation of the same tiny equation, not pr
 **Expected:** Matching primal values.
 
 ```python
-a = jnp.diag(jnp.array([2.5, 3.]))
-close(implicit_solution(.5, right), jnp.linalg.solve(a, right))
+a = jnp.diag(jnp.array([2.5, 3.0]))
+close(implicit_solution(0.5, right), jnp.linalg.solve(a, right))
 ```
 
 ## Exercise 4: Detect a bogus solver
@@ -40,8 +40,10 @@ custom_linear_solve relies on the supplied solver's correctness and does not est
 **Expected:** Finite zero output, but a nonzero residual; the contract fails.
 
 ```python
-diagonal = jnp.array([2., 3.])
-wrong = jax.lax.custom_linear_solve(lambda x: diagonal * x, right, solve=lambda operation, rhs: jnp.zeros_like(rhs), symmetric=True)
+diagonal = jnp.array([2.0, 3.0])
+wrong = jax.lax.custom_linear_solve(
+    lambda x: diagonal * x, right, solve=lambda operation, rhs: jnp.zeros_like(rhs), symmetric=True
+)
 assert bool(jnp.isfinite(wrong).all())
 assert not np.allclose(np.asarray(diagonal * wrong), np.asarray(right))
 ```
@@ -54,7 +56,7 @@ For 2/(2+theta), the second derivative is 4/(2+theta)^3.
 
 ```python
 second = jax.grad(jax.grad(lambda theta: implicit_solution(theta, right).sum()))
-close(second(0.), .5)
+close(second(0.0), 0.5)
 ```
 
 ## Exercise 6: Compile the valid interface
@@ -64,9 +66,9 @@ Compilation compatibility and solver correctness remain separate checks.
 **Expected:** [2/3,2], satisfying the diagonal equation.
 
 ```python
-solution = jax.jit(implicit_solution)(1., right)
-close(solution, [2 / 3, 2.])
-close(jnp.array([3., 3.]) * solution, right)
+solution = jax.jit(implicit_solution)(1.0, right)
+close(solution, [2 / 3, 2.0])
+close(jnp.array([3.0, 3.0]) * solution, right)
 ```
 
 ## Scope of this evidence

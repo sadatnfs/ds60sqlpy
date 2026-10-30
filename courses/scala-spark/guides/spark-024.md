@@ -61,24 +61,53 @@ import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 
-spark.conf.set("spark.sql.autoBroadcastJoinThreshold","-1")
-spark.conf.set("spark.sql.adaptive.autoBroadcastJoinThreshold","-1")
-spark.conf.set("spark.sql.join.preferSortMergeJoin","true")
-spark.conf.set("spark.sql.shuffle.partitions","4")
-val facts = spark.range(0L,10000L,1L,4).withColumnRenamed("id","fact_id").withColumn("key",when(col("fact_id") < 9000L,0L).otherwise((col("fact_id") - 9000L) % 10L + 1L)).withColumn("amount",lit(1L))
-val dimension = spark.range(0L,11L,1L,2).withColumnRenamed("id","key").withColumn("factor",col("key") + 1L)
+spark.conf.set("spark.sql.autoBroadcastJoinThreshold", "-1")
+spark.conf.set("spark.sql.adaptive.autoBroadcastJoinThreshold", "-1")
+spark.conf.set("spark.sql.join.preferSortMergeJoin", "true")
+spark.conf.set("spark.sql.shuffle.partitions", "4")
+val facts = spark
+  .range(0L, 10000L, 1L, 4)
+  .withColumnRenamed("id", "fact_id")
+  .withColumn(
+    "key",
+    when(col("fact_id") < 9000L, 0L).otherwise((col("fact_id") - 9000L) % 10L + 1L)
+  )
+  .withColumn("amount", lit(1L))
+val dimension =
+  spark.range(0L, 11L, 1L, 2).withColumnRenamed("id", "key").withColumn("factor", col("key") + 1L)
 ```
 
 ```python
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 
-spark.conf.set("spark.sql.autoBroadcastJoinThreshold","-1")
-spark.conf.set("spark.sql.adaptive.autoBroadcastJoinThreshold","-1")
-spark.conf.set("spark.sql.join.preferSortMergeJoin","true")
-spark.conf.set("spark.sql.shuffle.partitions","4")
-facts = spark.range(0,10000,1,4).withColumnRenamed("id","fact_id").withColumn("key",F.when(F.col("fact_id")<9000,0).otherwise((F.col("fact_id")-9000)%10+1)).withColumn("amount",F.lit(1).cast("long"))
-dimension = spark.range(0,11,1,2).withColumnRenamed("id","key").withColumn("factor",F.col("key")+1)
+spark.conf.set("spark.sql.autoBroadcastJoinThreshold", "-1")
+spark.conf.set("spark.sql.adaptive.autoBroadcastJoinThreshold", "-1")
+spark.conf.set("spark.sql.join.preferSortMergeJoin", "true")
+spark.conf.set("spark.sql.shuffle.partitions", "4")
+facts = (
+    spark.range(0, 10000, 1, 4)
+    .withColumnRenamed("id", "fact_id")
+    .withColumn(
+        "key", F.when(F.col("fact_id") < 9000, 0).otherwise((F.col("fact_id") - 9000) % 10 + 1)
+    )
+    .withColumn("amount", F.lit(1).cast("long"))
+)
+dimension = (
+    spark.range(0, 11, 1, 2).withColumnRenamed("id", "key").withColumn("factor", F.col("key") + 1)
+)
 ```
 
 ## Worked example / walkthrough
@@ -88,13 +117,13 @@ dimension = spark.range(0,11,1,2).withColumnRenamed("id","key").withColumn("fact
 ```scala
 val hot = facts.filter(col("key") === 0L).count()
 assert(hot == 9000L && hot.toDouble / 10000.0 == 0.9)
-println("Observed hot-key fraction=" + hot.toDouble/10000.0)
+println("Observed hot-key fraction=" + hot.toDouble / 10000.0)
 ```
 
 ```python
-hot = facts.filter(F.col("key")==0).count()
-assert hot == 9000 and hot/10000 == 0.9
-print("Observed hot-key fraction=",hot/10000)
+hot = facts.filter(F.col("key") == 0).count()
+assert hot == 9000 and hot / 10000 == 0.9
+print("Observed hot-key fraction=", hot / 10000)
 ```
 
 The hot-key fraction quantifies the input imbalance before choosing a remedy. It does not prove how much time a task will take, but it explains why key-only distribution can concentrate a large share of this relation in one destination.
@@ -108,9 +137,9 @@ println("Weighted-total conservation oracle=" + expectedWeighted)
 ```
 
 ```python
-expected_weighted = 9000 + 100*sum(range(2,12))
+expected_weighted = 9000 + 100 * sum(range(2, 12))
 assert expected_weighted == 15500
-print("Weighted-total conservation oracle=",expected_weighted)
+print("Weighted-total conservation oracle=", expected_weighted)
 ```
 
 The formula derives from the declared key frequencies and dimension factors, independently of any Spark join strategy. A salting implementation that duplicates hot facts would fail this total even if its partition layout looked more balanced.

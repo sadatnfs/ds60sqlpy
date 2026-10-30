@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=ds60sqlpy-worker-python-core:1.1.0
+ARG BASE_IMAGE=ds60sqlpy-worker-python-core:1.2.0
 FROM ${BASE_IMAGE}
 USER root
 COPY requirements.amd64.lock requirements.arm64.lock /tmp/preparation/

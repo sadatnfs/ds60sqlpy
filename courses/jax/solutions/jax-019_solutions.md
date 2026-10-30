@@ -9,7 +9,7 @@ Holding A fixed changes only the forcing values.
 **Expected:** [1,1].
 
 ```python
-close(jnp.linalg.solve(matrix, jnp.array([4., 3.])), [1., 1.])
+close(jnp.linalg.solve(matrix, jnp.array([4.0, 3.0])), [1.0, 1.0])
 ```
 
 ## Exercise 2: Differentiate with respect to b
@@ -20,8 +20,8 @@ The pullback solves the transposed system against an all-ones output cotangent.
 
 ```python
 gradient = jax.grad(lambda b: jnp.linalg.solve(matrix, b).sum())(right)
-close(gradient, [.2, .4])
-close(matrix.T @ gradient, [1., 1.])
+close(gradient, [0.2, 0.4])
+close(matrix.T @ gradient, [1.0, 1.0])
 ```
 
 ## Exercise 3: Reject a singular fixture
@@ -32,11 +32,11 @@ The second row is twice the first, so the system does not define a unique soluti
 
 ```python
 try:
-    admitted_matrix(jnp.array([[1., 2.], [2., 4.]]))
+    admitted_matrix(jnp.array([[1.0, 2.0], [2.0, 4.0]]))
 except ValueError:
     pass
 else:
-    raise AssertionError('singular matrix admitted')
+    raise AssertionError("singular matrix admitted")
 ```
 
 ## Exercise 4: Check the sensitivity numerically
@@ -48,7 +48,7 @@ The perturbed matrices remain within the local nonsingular regime.
 ```python
 h = 1e-5
 finite = (parameter_solution(h).sum() - parameter_solution(-h).sum()) / (2 * h)
-close(finite, -.5, atol=1e-8, rtol=0.)
+close(finite, -0.5, atol=1e-8, rtol=0.0)
 ```
 
 ## Exercise 5: Interpret ridge regularization
@@ -58,10 +58,10 @@ The denominator changes from 14 to 28 while the cross-product numerator remains 
 **Expected:** Ridge coefficient one, versus unpenalized two.
 
 ```python
-x = jnp.array([[1.], [2.], [3.]])
+x = jnp.array([[1.0], [2.0], [3.0]])
 y = 2 * x[:, 0]
 ridge = jnp.linalg.solve(x.T @ x + 14 * jnp.eye(1), x.T @ y)
-close(ridge, [1.])
+close(ridge, [1.0])
 ```
 
 ## Exercise 6: Compile a valid solve
@@ -73,7 +73,7 @@ Compilation does not eliminate the need for conditioning and problem-admission c
 ```python
 compiled = jax.jit(jnp.linalg.solve)
 solution = compiled(matrix, right)
-close(solution, [2., 3.])
+close(solution, [2.0, 3.0])
 close(matrix @ solution, right)
 ```
 

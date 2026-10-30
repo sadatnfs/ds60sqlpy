@@ -26,7 +26,8 @@ Changing the display zone does not move the event. A date-only grouping can neve
 var instant = java.time.Instant.parse("2024-01-01T00:00:00Z");
 var utc = instant.atZone(java.time.ZoneId.of("UTC"));
 var ny = instant.atZone(java.time.ZoneId.of("America/New_York"));
-assert utc.toInstant().equals(ny.toInstant()) && ny.toLocalDate().equals(java.time.LocalDate.of(2023,12,31));
+assert utc.toInstant().equals(ny.toInstant()) &&
+ny.toLocalDate().equals(java.time.LocalDate.of(2023, 12, 31));
 ```
 
 **Expected:** same instant; New York local date 2023-12-31.
@@ -40,9 +41,19 @@ Task: Start at noon before the2024New York spring transition and compareplusDays
 A day in the local calendar crosses a daylight-saving gap here. Duration and calendar arithmetic answer different questions.
 
 ```java
-var start = java.time.ZonedDateTime.of(2024,3,9,12,0,0,0,java.time.ZoneId.of("America/New_York"));
-var nextDay = start.plusDays(1); var next24 = start.plusHours(24);
-assert java.time.Duration.between(start,nextDay).toHours() == 23;
+var start = java.time.ZonedDateTime.of(
+  2024,
+  3,
+  9,
+  12,
+  0,
+  0,
+  0,
+  java.time.ZoneId.of("America/New_York")
+);
+var nextDay = start.plusDays(1);
+var next24 = start.plusHours(24);
+assert java.time.Duration.between(start, nextDay).toHours() == 23;
 assert nextDay.getHour() == 12 && next24.getHour() == 13;
 ```
 
@@ -58,7 +69,7 @@ A parser may resolve a gap according to an API policy, but the original local re
 
 ```java
 var zone = java.time.ZoneId.of("America/New_York");
-var gap = java.time.LocalDateTime.of(2024,3,10,2,30);
+var gap = java.time.LocalDateTime.of(2024, 3, 10, 2, 30);
 assert zone.getRules().getValidOffsets(gap).isEmpty();
 ```
 
@@ -73,7 +84,7 @@ Task: Ask for offsets at2024-11-03 01:30 in New York.
 The clock reading occurs twice during the fall transition. A domain record needs an offset or a declared ambiguity-resolution policy to identify one instant.
 
 ```java
-var overlap = java.time.LocalDateTime.of(2024,11,3,1,30);
+var overlap = java.time.LocalDateTime.of(2024, 11, 3, 1, 30);
 assert zone.getRules().getValidOffsets(overlap).size() == 2;
 ```
 
@@ -90,7 +101,11 @@ Validation follows calendar rules rather than accepting any numeric month/day co
 ```java
 assert java.time.LocalDate.parse("2024-02-29").getDayOfMonth() == 29;
 boolean invalid = false;
-try { java.time.LocalDate.parse("2023-02-29"); } catch(java.time.format.DateTimeParseException expected) { invalid = true; }
+try {
+  java.time.LocalDate.parse("2023-02-29");
+} catch (java.time.format.DateTimeParseException expected) {
+  invalid = true;
+}
 assert invalid;
 ```
 
@@ -107,7 +122,7 @@ Half-open intervals avoid double-counting an event on adjacent boundaries. The p
 ```java
 var end = instant.plusSeconds(3600);
 assert !instant.isBefore(instant) && instant.isBefore(end);
-assert !( !end.isBefore(instant) && end.isBefore(end) );
+assert !(!end.isBefore(instant) && end.isBefore(end));
 ```
 
 **Expected:** start included; end excluded.

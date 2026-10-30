@@ -79,13 +79,26 @@ import numpy as np
 import torch
 from torch import nn
 from torch.nn import functional as F
+
+
 class Accounts(torch.utils.data.Dataset):
     def __init__(self):
-        self.groups=list('AABBCCDD'); self.values=torch.tensor([1.,3.,5.,7.,20.,22.,30.,32.],dtype=torch.float64)
-    def __len__(self): return len(self.groups)
-    def __getitem__(self,index): return index,self.groups[index],self.values[index]
-dataset=Accounts(); assert len(dataset)==8
-identity,group,value=dataset[0]; assert identity==0 and group=='A' and value.item()==1
+        self.groups = list("AABBCCDD")
+        self.values = torch.tensor(
+            [1.0, 3.0, 5.0, 7.0, 20.0, 22.0, 30.0, 32.0], dtype=torch.float64
+        )
+
+    def __len__(self):
+        return len(self.groups)
+
+    def __getitem__(self, index):
+        return index, self.groups[index], self.values[index]
+
+
+dataset = Accounts()
+assert len(dataset) == 8
+identity, group, value = dataset[0]
+assert identity == 0 and group == "A" and value.item() == 1
 ```
 
 **Expected:** length 8; item 0 has ID 0, group A, value 1.
@@ -95,9 +108,11 @@ identity,group,value=dataset[0]; assert identity==0 and group=='A' and value.ite
 The grouping policy precedes the subset construction. Subset itself would happily accept a leaking row-level split.
 
 ```python
-train_ids=[i for i in range(len(dataset)) if dataset[i][1] in {'A','B'}]; test_ids=[i for i in range(len(dataset)) if i not in train_ids]
-train=torch.utils.data.Subset(dataset,train_ids); test=torch.utils.data.Subset(dataset,test_ids)
-assert len(train)==len(test)==4 and not {row[1] for row in train}&{row[1] for row in test}
+train_ids = [i for i in range(len(dataset)) if dataset[i][1] in {"A", "B"}]
+test_ids = [i for i in range(len(dataset)) if i not in train_ids]
+train = torch.utils.data.Subset(dataset, train_ids)
+test = torch.utils.data.Subset(dataset, test_ids)
+assert len(train) == len(test) == 4 and not {row[1] for row in train} & {row[1] for row in test}
 ```
 
 **Expected:** four records each; group intersection empty.
@@ -107,7 +122,8 @@ assert len(train)==len(test)==4 and not {row[1] for row in train}&{row[1] for ro
 The statistic is fitted state. Even without labels, it would leak assessment information if computed over the entire dataset.
 
 ```python
-mean=torch.stack([row[2] for row in train]).mean(); assert mean.item()==4
+mean = torch.stack([row[2] for row in train]).mean()
+assert mean.item() == 4
 ```
 
 **Expected:** mean 4.

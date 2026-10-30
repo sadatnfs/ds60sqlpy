@@ -14,7 +14,7 @@ try:
 except jax.errors.TracerArrayConversionError:
     pass
 else:
-    raise AssertionError('host conversion accepted')
+    raise AssertionError("host conversion accepted")
 ```
 
 ## Exercise 2: Expose a dynamic output length
@@ -25,11 +25,11 @@ The number of retained values depends on runtime data, so this expression does n
 
 ```python
 try:
-    jax.jit(lambda x: x[x > 0.])(jnp.array([-1., 2.]))
+    jax.jit(lambda x: x[x > 0.0])(jnp.array([-1.0, 2.0]))
 except jax.errors.NonConcreteBooleanIndexError:
     pass
 else:
-    raise AssertionError('dynamic shape accepted')
+    raise AssertionError("dynamic shape accepted")
 ```
 
 ## Exercise 3: Use a fixed-shape alternative
@@ -39,8 +39,8 @@ This asks for a sum, so retaining a padded vector is sufficient and does not req
 **Expected:** 2 for [-1,2].
 
 ```python
-function = jax.jit(lambda x: jnp.where(x > 0., x, 0.).sum())
-close(function(jnp.array([-1., 2.])), 2.)
+function = jax.jit(lambda x: jnp.where(x > 0.0, x, 0.0).sum())
+close(function(jnp.array([-1.0, 2.0])), 2.0)
 ```
 
 ## Exercise 4: Print a runtime diagnostic
@@ -52,9 +52,11 @@ Runtime diagnostics observe numerical values; they are excluded from later timin
 ```python
 def observed(x):
     total = x.sum()
-    jax.debug.print('total={total}', total=total)
+    jax.debug.print("total={total}", total=total)
     return total
-close(jax.jit(observed)(jnp.array([1., 2.])), 3.)
+
+
+close(jax.jit(observed)(jnp.array([1.0, 2.0])), 3.0)
 ```
 
 ## Exercise 5: Compare with JIT disabled
@@ -66,8 +68,8 @@ The comparison localizes transformation behavior without treating eager success 
 ```python
 function = jax.jit(lambda x: x * x + 1)
 with jax.disable_jit():
-    eager = function(jnp.array([1., 2.]))
-close(function(jnp.array([1., 2.])), eager)
+    eager = function(jnp.array([1.0, 2.0]))
+close(function(jnp.array([1.0, 2.0])), eager)
 ```
 
 ## Exercise 6: Retain the positive-domain derivative
@@ -77,7 +79,7 @@ A repair for invalid inputs must not damage the intended formula on its valid do
 **Expected:** [1,0.5,0.25].
 
 ```python
-close(jax.grad(lambda x: safe_log_extension(x).sum())(jnp.array([1., 2., 4.])), [1., .5, .25])
+close(jax.grad(lambda x: safe_log_extension(x).sum())(jnp.array([1.0, 2.0, 4.0])), [1.0, 0.5, 0.25])
 ```
 
 ## Scope of this evidence

@@ -127,29 +127,29 @@ this backup instead of continuing to later steps.
 
 ```bash
 (
-set -eu
-study_project=ds60-classroom
-mkdir -p "$HOME/Documents"
-backup_dir="$HOME/Documents/DS60-backup-$(date +%Y%m%d-%H%M%S)"
-mkdir -m 700 "$backup_dir"
-compose=(docker compose --project-name "$study_project" -f compose.classroom.yaml)
-db_container=$("${compose[@]}" ps -q postgres)
-app_container=$("${compose[@]}" ps -q lab)
-[ -n "$db_container" ] && [ -n "$app_container" ]
-backup_image=$(docker inspect --format '{{.Image}}' "$db_container")
-app_image=$(docker inspect --format '{{.Image}}' "$app_container")
-learning_volume="${study_project}_classroom-learning"
-docker volume inspect "$learning_volume" --format '{{.Name}}'
-"${compose[@]}" stop lab
-"${compose[@]}" exec -T postgres pg_dump -U ds60_admin -d advanced_sql_training -Fc -f /tmp/classroom-database.dump
-"${compose[@]}" cp postgres:/tmp/classroom-database.dump "$backup_dir/classroom-database.dump"
-./classroom stop --project "$study_project"
-backup_helper="${study_project}-backup-$(date +%Y%m%d-%H%M%S)"
-docker create --name "$backup_helper" --pull never --network none --mount "type=volume,source=$learning_volume,target=/learning,readonly" --entrypoint tar "$backup_image" -czf /tmp/classroom-learning.tar.gz -C /learning .
-docker start -a "$backup_helper"
-[ "$(docker inspect --format '{{.State.ExitCode}}' "$backup_helper")" = 0 ]
-docker cp "$backup_helper:/tmp/classroom-learning.tar.gz" "$backup_dir/classroom-learning.tar.gz"
-docker run --rm -i --pull never --network none --read-only --mount "type=bind,source=$backup_dir,target=/backup,readonly" --entrypoint python "$app_image" - <<'PY' > "$backup_dir/SHA256SUMS"
+  set -eu
+  study_project=ds60-classroom
+  mkdir -p "$HOME/Documents"
+  backup_dir="$HOME/Documents/DS60-backup-$(date +%Y%m%d-%H%M%S)"
+  mkdir -m 700 "$backup_dir"
+  compose=(docker compose --project-name "$study_project" -f compose.classroom.yaml)
+  db_container=$("${compose[@]}" ps -q postgres)
+  app_container=$("${compose[@]}" ps -q lab)
+  [ -n "$db_container" ] && [ -n "$app_container" ]
+  backup_image=$(docker inspect --format '{{.Image}}' "$db_container")
+  app_image=$(docker inspect --format '{{.Image}}' "$app_container")
+  learning_volume="${study_project}_classroom-learning"
+  docker volume inspect "$learning_volume" --format '{{.Name}}'
+  "${compose[@]}" stop lab
+  "${compose[@]}" exec -T postgres pg_dump -U ds60_admin -d advanced_sql_training -Fc -f /tmp/classroom-database.dump
+  "${compose[@]}" cp postgres:/tmp/classroom-database.dump "$backup_dir/classroom-database.dump"
+  ./classroom stop --project "$study_project"
+  backup_helper="${study_project}-backup-$(date +%Y%m%d-%H%M%S)"
+  docker create --name "$backup_helper" --pull never --network none --mount "type=volume,source=$learning_volume,target=/learning,readonly" --entrypoint tar "$backup_image" -czf /tmp/classroom-learning.tar.gz -C /learning .
+  docker start -a "$backup_helper"
+  [ "$(docker inspect --format '{{.State.ExitCode}}' "$backup_helper")" = 0 ]
+  docker cp "$backup_helper:/tmp/classroom-learning.tar.gz" "$backup_dir/classroom-learning.tar.gz"
+  docker run --rm -i --pull never --network none --read-only --mount "type=bind,source=$backup_dir,target=/backup,readonly" --entrypoint python "$app_image" - <<'PY' >"$backup_dir/SHA256SUMS"
 from hashlib import file_digest
 from pathlib import Path
 for name in ("classroom-learning.tar.gz", "classroom-database.dump"):
@@ -159,11 +159,11 @@ for name in ("classroom-learning.tar.gz", "classroom-database.dump"):
     with path.open("rb") as stream:
         print(f"{file_digest(stream, 'sha256').hexdigest()}  {name}")
 PY
-printf 'Source project: %s\nApp image: %s\nPostgreSQL image: %s\n' "$study_project" "$app_image" "$backup_image" > "$backup_dir/backup-info.txt"
-tar -tzf "$backup_dir/classroom-learning.tar.gz" > "$backup_dir/archive-files.txt"
-docker rm "$backup_helper"
-./classroom resume --project "$study_project" --no-browser
-printf 'Export complete: %s\n' "$backup_dir"
+  printf 'Source project: %s\nApp image: %s\nPostgreSQL image: %s\n' "$study_project" "$app_image" "$backup_image" >"$backup_dir/backup-info.txt"
+  tar -tzf "$backup_dir/classroom-learning.tar.gz" >"$backup_dir/archive-files.txt"
+  docker rm "$backup_helper"
+  ./classroom resume --project "$study_project" --no-browser
+  printf 'Export complete: %s\n' "$backup_dir"
 )
 ```
 
@@ -223,34 +223,34 @@ causes a failure instead of an unexpected build or download.
 
 ```bash
 (
-set -eu
-backup_dir="$HOME/Documents/REPLACE_WITH_YOUR_BACKUP_FOLDER"
-restore_project="ds60-restored-$(date +%Y%m%d-%H%M%S)"
-restore_tag=1.1.0
-[[ "$restore_project" =~ ^[a-z0-9][a-z0-9_-]*$ ]]
-docker info --format '{{.OSType}}'
-[ -d "$backup_dir" ]
-if [ -e ".classroom/$restore_project" ]; then
-  echo "Refusing existing destination settings: $restore_project" >&2
-  exit 1
-fi
-existing_containers=$(docker ps -aq --filter "label=com.docker.compose.project=$restore_project")
-existing_networks=$(docker network ls -q --filter "label=com.docker.compose.project=$restore_project")
-existing_volumes=$(docker volume ls -q --filter "label=com.docker.compose.project=$restore_project")
-if [ -n "$existing_containers$existing_networks$existing_volumes" ]; then
-  echo "Refusing existing destination Docker resources: $restore_project" >&2
-  exit 1
-fi
-for suffix in classroom-learning postgres-data classroom-runtime; do
-  if docker volume inspect "${restore_project}_${suffix}" >/dev/null 2>&1; then
-    echo "Refusing an existing destination volume: ${restore_project}_${suffix}" >&2
+  set -eu
+  backup_dir="$HOME/Documents/REPLACE_WITH_YOUR_BACKUP_FOLDER"
+  restore_project="ds60-restored-$(date +%Y%m%d-%H%M%S)"
+  restore_tag=1.1.0
+  [[ "$restore_project" =~ ^[a-z0-9][a-z0-9_-]*$ ]]
+  docker info --format '{{.OSType}}'
+  [ -d "$backup_dir" ]
+  if [ -e ".classroom/$restore_project" ]; then
+    echo "Refusing existing destination settings: $restore_project" >&2
     exit 1
   fi
-done
-app_image=$(docker image inspect "ds60sqlpy-lab:$restore_tag" --format '{{.Id}}')
-restore_volume="${restore_project}_classroom-learning"
-docker volume create --label "com.docker.compose.project=$restore_project" --label com.docker.compose.volume=classroom-learning "$restore_volume"
-docker run --rm -i --pull never --network none --read-only --user 0:0 --cap-drop ALL --cap-add CHOWN --cap-add DAC_OVERRIDE --cap-add FOWNER --security-opt no-new-privileges --mount "type=bind,source=$backup_dir,target=/backup,readonly" --mount "type=volume,source=$restore_volume,target=/restore,volume-nocopy" --entrypoint python "$app_image" - <<'PY'
+  existing_containers=$(docker ps -aq --filter "label=com.docker.compose.project=$restore_project")
+  existing_networks=$(docker network ls -q --filter "label=com.docker.compose.project=$restore_project")
+  existing_volumes=$(docker volume ls -q --filter "label=com.docker.compose.project=$restore_project")
+  if [ -n "$existing_containers$existing_networks$existing_volumes" ]; then
+    echo "Refusing existing destination Docker resources: $restore_project" >&2
+    exit 1
+  fi
+  for suffix in classroom-learning postgres-data classroom-runtime; do
+    if docker volume inspect "${restore_project}_${suffix}" >/dev/null 2>&1; then
+      echo "Refusing an existing destination volume: ${restore_project}_${suffix}" >&2
+      exit 1
+    fi
+  done
+  app_image=$(docker image inspect "ds60sqlpy-lab:$restore_tag" --format '{{.Id}}')
+  restore_volume="${restore_project}_classroom-learning"
+  docker volume create --label "com.docker.compose.project=$restore_project" --label com.docker.compose.volume=classroom-learning "$restore_volume"
+  docker run --rm -i --pull never --network none --read-only --user 0:0 --cap-drop ALL --cap-add CHOWN --cap-add DAC_OVERRIDE --cap-add FOWNER --security-opt no-new-privileges --mount "type=bind,source=$backup_dir,target=/backup,readonly" --mount "type=volume,source=$restore_volume,target=/restore,volume-nocopy" --entrypoint python "$app_image" - <<'PY'
 import os
 import tarfile
 from hashlib import file_digest
@@ -291,13 +291,13 @@ for path in (destination, *destination.rglob('*')):
     path.chmod(0o700 if path.is_dir() else 0o600 | (path.stat().st_mode & 0o100))
 print('Checksums verified; learner files restored to the empty destination')
 PY
-./classroom resume --starter --project "$restore_project" --tag "$restore_tag" --local-build --no-browser
-restore_compose=(docker compose --project-name "$restore_project" -f compose.classroom.yaml)
-"${restore_compose[@]}" stop lab
-"${restore_compose[@]}" cp "$backup_dir/classroom-database.dump" postgres:/tmp/classroom-database.dump
-"${restore_compose[@]}" exec -T postgres pg_restore -U ds60_admin -d advanced_sql_training --clean --if-exists --exit-on-error /tmp/classroom-database.dump
-./classroom resume --project "$restore_project" --no-browser
-printf 'Restored into new project: %s\n' "$restore_project"
+  ./classroom resume --starter --project "$restore_project" --tag "$restore_tag" --local-build --no-browser
+  restore_compose=(docker compose --project-name "$restore_project" -f compose.classroom.yaml)
+  "${restore_compose[@]}" stop lab
+  "${restore_compose[@]}" cp "$backup_dir/classroom-database.dump" postgres:/tmp/classroom-database.dump
+  "${restore_compose[@]}" exec -T postgres pg_restore -U ds60_admin -d advanced_sql_training --clean --if-exists --exit-on-error /tmp/classroom-database.dump
+  ./classroom resume --project "$restore_project" --no-browser
+  printf 'Restored into new project: %s\n' "$restore_project"
 )
 ```
 

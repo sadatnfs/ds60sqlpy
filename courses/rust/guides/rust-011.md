@@ -43,11 +43,11 @@ Read the operations in dependency order. Record which values exist before each l
 The function requires read access, not a particular allocation strategy.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
-        fn total(values: &[i32]) -> i32 { values.iter().sum() }
+        fn total(values: &[i32]) -> i32 {
+            values.iter().sum()
+        }
         assert_eq!(total(&[2, 3, 4]), 9);
         assert_eq!(total(&vec![1, 2]), 3);
         assert_eq!(total(&[]), 0);
@@ -64,8 +64,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 The optional lookup exposes absence instead of indexing uninitialized capacity.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let mut values: Vec<i32> = Vec::with_capacity(10);

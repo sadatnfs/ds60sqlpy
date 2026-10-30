@@ -52,8 +52,11 @@ The question is: Use float64 x = [1, 2, 3], y = 2x and scalar w = 0.
 The three squared residuals are 4, 16, 36. Their sum 56 divided by three defines the objective denominator.
 
 ```python
-x=torch.tensor([1.,2.,3.],dtype=torch.float64); y=2*x; w=nn.Parameter(torch.tensor(0.,dtype=torch.float64))
-loss=((w*x-y)**2).mean(); np.testing.assert_allclose(loss.item(),56/3,atol=1e-12,rtol=0)
+x = torch.tensor([1.0, 2.0, 3.0], dtype=torch.float64)
+y = 2 * x
+w = nn.Parameter(torch.tensor(0.0, dtype=torch.float64))
+loss = ((w * x - y) ** 2).mean()
+np.testing.assert_allclose(loss.item(), 56 / 3, atol=1e-12, rtol=0)
 ```
 
 **Expected:** mean squared loss \(\frac{56}{3}\).
@@ -67,8 +70,9 @@ The question is: Back propagate the initial loss and compare with-\(\frac{56}{3}
 Backward computes derivatives but does not update the parameter. Separating these observations helps diagnose a missing optimizer step.
 
 ```python
-loss.backward(); np.testing.assert_allclose(w.grad.item(),-56/3,atol=1e-12,rtol=0)
-assert w.item()==0
+loss.backward()
+np.testing.assert_allclose(w.grad.item(), -56 / 3, atol=1e-12, rtol=0)
+assert w.item() == 0
 ```
 
 **Expected:** gradient-\(\frac{56}{3}\); weight still 0.
@@ -82,9 +86,10 @@ The question is: Use SGD learning rate 0.1 onw and recompute the objective after
 The optimizer consumes the stored gradient. The old loss tensor remains the before-update result, so the new loss requires another forward calculation.
 
 ```python
-optimizer=torch.optim.SGD([w],lr=.1); optimizer.step()
-np.testing.assert_allclose(w.item(),28/15,atol=1e-12,rtol=0)
-np.testing.assert_allclose(((w*x-y)**2).mean().item(),56/675,atol=1e-12,rtol=0)
+optimizer = torch.optim.SGD([w], lr=0.1)
+optimizer.step()
+np.testing.assert_allclose(w.item(), 28 / 15, atol=1e-12, rtol=0)
+np.testing.assert_allclose(((w * x - y) ** 2).mean().item(), 56 / 675, atol=1e-12, rtol=0)
 ```
 
 **Expected:** w28/15; loss \(\frac{56}{675}\).
@@ -98,8 +103,11 @@ The question is: At a fresh w = 0, compare vector predictions with column target
 The result now contains nine pairwise residuals. Equal initial loss is a coincidence of the zero prediction and does not preserve the intended pairing.
 
 ```python
-wrong=nn.Parameter(torch.tensor(0.,dtype=torch.float64)); broken=((wrong*x-y[:,None])**2).mean(); broken.backward()
-np.testing.assert_allclose(broken.item(),56/3,atol=1e-12,rtol=0); assert wrong.grad.item()==-16
+wrong = nn.Parameter(torch.tensor(0.0, dtype=torch.float64))
+broken = ((wrong * x - y[:, None]) ** 2).mean()
+broken.backward()
+np.testing.assert_allclose(broken.item(), 56 / 3, atol=1e-12, rtol=0)
+assert wrong.grad.item() == -16
 ```
 
 **Expected:** initial loss still \(\frac{56}{3}\), but gradient-16.
@@ -113,9 +121,11 @@ The question is: Use a plain NumPy scalar objective around \(w=0\) with finite-d
 The checker does not read the PyTorch gradient buffer. It verifies the complete scalar objective through perturbed values.
 
 ```python
-values=np.array([1.,2.,3.]); objective=lambda value:np.mean((value*values-2*values)**2); h=.001
-slope=(objective(h)-objective(-h))/(2*h)
-np.testing.assert_allclose(slope,-56/3,atol=1e-9,rtol=0)
+values = np.array([1.0, 2.0, 3.0])
+objective = lambda value: np.mean((value * values - 2 * values) ** 2)
+h = 0.001
+slope = (objective(h) - objective(-h)) / (2 * h)
+np.testing.assert_allclose(slope, -56 / 3, atol=1e-9, rtol=0)
 ```
 
 **Expected:** slope-\(\frac{56}{3}\) within 1e-9.
@@ -129,8 +139,9 @@ The question is: Call `optimizer.zero_grad(set_to_none=True)` after the step and
 Clearing derivatives is not undoing the parameter update. It prepares an independent next gradient calculation.
 
 ```python
-saved=w.item(); optimizer.zero_grad(set_to_none=True)
-assert w.grad is None and w.item()==saved
+saved = w.item()
+optimizer.zero_grad(set_to_none=True)
+assert w.grad is None and w.item() == saved
 ```
 
 **Expected:** `w.grad` None; updated weight unchanged.

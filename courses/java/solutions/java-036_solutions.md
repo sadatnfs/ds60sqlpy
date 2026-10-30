@@ -27,8 +27,17 @@ Task: Compile the fixture with --release 21 and inspect its class header.
 The header is direct evidence of the target bytecode level. Afilename or README claim cannot replace it.
 
 ```java
-try(ReleaseFixture fixture=new ReleaseFixture()) {
-    fixture.build();try(var input=new java.io.DataInputStream(java.nio.file.Files.newInputStream(fixture.classes.resolve("App.class")))){assert input.readInt()==0xCAFEBABE;input.readUnsignedShort();assert input.readUnsignedShort()==65;}
+try (ReleaseFixture fixture = new ReleaseFixture()) {
+  fixture.build();
+  try (
+    var input = new java.io.DataInputStream(
+      java.nio.file.Files.newInputStream(fixture.classes.resolve("App.class"))
+    )
+  ) {
+    assert input.readInt() == 0xCAFEBABE;
+    input.readUnsignedShort();
+    assert input.readUnsignedShort() == 65;
+  }
 }
 ```
 
@@ -43,8 +52,12 @@ Task: Open thebuiltJAR andcheckMain-Class andApp.class.
 Packaging can fail independently of compilation. The archive must contain the intended entrypoint and matching metadata.
 
 ```java
-try(ReleaseFixture fixture=new ReleaseFixture()) {
-    fixture.build();try(var jar=new java.util.jar.JarFile(fixture.jar.toFile())){assert jar.getManifest().getMainAttributes().getValue("Main-Class").equals("App") && jar.getJarEntry("App.class")!=null;}
+try (ReleaseFixture fixture = new ReleaseFixture()) {
+  fixture.build();
+  try (var jar = new java.util.jar.JarFile(fixture.jar.toFile())) {
+    assert jar.getManifest().getMainAttributes().getValue("Main-Class").equals("App") &&
+    jar.getJarEntry("App.class") != null;
+  }
 }
 ```
 
@@ -59,7 +72,11 @@ Task: Launch the JAR with--self-test through a bounded childJVM.
 The newprocess cannot reuse classes loaded by the authoring program. Thischecks the actual packaged launch path.
 
 ```java
-try(ReleaseFixture fixture=new ReleaseFixture()) {fixture.build();Run result=fixture.run("--self-test");assert result.code()==0 && result.output().strip().equals("release-ok");}
+try (ReleaseFixture fixture = new ReleaseFixture()) {
+  fixture.build();
+  Run result = fixture.run("--self-test");
+  assert result.code() == 0 && result.output().strip().equals("release-ok");
+}
 ```
 
 **Expected:** exit 0 andoutputrelease-ok.
@@ -73,7 +90,11 @@ Task: Run thesameJAR with an unsupported argument.
 An acceptance suite should include a meaningful failure path. Returningexit0 for every argument would make automation unable to distinguish misuse.
 
 ```java
-try(ReleaseFixture fixture=new ReleaseFixture()) {fixture.build();Run result=fixture.run("--unsupported");assert result.code()==2 && result.error().contains("unknown argument");}
+try (ReleaseFixture fixture = new ReleaseFixture()) {
+  fixture.build();
+  Run result = fixture.run("--unsupported");
+  assert result.code() == 2 && result.error().contains("unknown argument");
+}
 ```
 
 **Expected:** exit2 and unknown argument diagnostic.
@@ -87,10 +108,23 @@ Task: Hash the JAR,fliponebyte,and call the integrity gate.
 The corrupt artifact is never executed. Ahashcheck verifies byte identity,while theself-test separately verifies behavior.
 
 ```java
-try(ReleaseFixture fixture=new ReleaseFixture()) {
-    fixture.build();byte[] original=java.nio.file.Files.readAllBytes(fixture.jar);byte[] expected=sha256(original);byte[] changed=original.clone();changed[0]^=1;java.nio.file.Files.write(fixture.jar,changed);boolean rejected=false;
-    try{verify(fixture.jar,expected);}catch(SecurityException failure){rejected=true;}finally{java.nio.file.Files.write(fixture.jar,original);}
-    assert rejected;verify(fixture.jar,expected);
+try (ReleaseFixture fixture = new ReleaseFixture()) {
+  fixture.build();
+  byte[] original = java.nio.file.Files.readAllBytes(fixture.jar);
+  byte[] expected = sha256(original);
+  byte[] changed = original.clone();
+  changed[0] ^= 1;
+  java.nio.file.Files.write(fixture.jar, changed);
+  boolean rejected = false;
+  try {
+    verify(fixture.jar, expected);
+  } catch (SecurityException failure) {
+    rejected = true;
+  } finally {
+    java.nio.file.Files.write(fixture.jar, original);
+  }
+  assert rejected;
+  verify(fixture.jar, expected);
 }
 ```
 
@@ -105,9 +139,22 @@ Task: Inspect whether jlink exists,and write a record distinguishing local JAR a
 Toolpresence is not a runtime-image build receipt. Amanualjlink build needs its own module closure,platform,launch and failure checks before distribution.
 
 ```java
-var jlink=java.nio.file.Path.of(System.getProperty("java.home"),"bin","jlink");
-Map<String,Object> receipt=Map.of("jar_contract_checked",true,"previous_artifact","v1","jlink_tool_present",java.nio.file.Files.isExecutable(jlink),"custom_runtime_built",false,"production_deployed",false);
-assert receipt.get("previous_artifact").equals("v1") && receipt.get("custom_runtime_built").equals(false) && receipt.get("production_deployed").equals(false);
+var jlink = java.nio.file.Path.of(System.getProperty("java.home"), "bin", "jlink");
+Map<String, Object> receipt = Map.of(
+  "jar_contract_checked",
+  true,
+  "previous_artifact",
+  "v1",
+  "jlink_tool_present",
+  java.nio.file.Files.isExecutable(jlink),
+  "custom_runtime_built",
+  false,
+  "production_deployed",
+  false
+);
+assert receipt.get("previous_artifact").equals("v1") &&
+receipt.get("custom_runtime_built").equals(false) &&
+receipt.get("production_deployed").equals(false);
 ```
 
 **Expected:** previous artifact v1 retained; custom_runtime_built False.

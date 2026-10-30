@@ -53,20 +53,57 @@ import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 
-val inputSchema = StructType(Seq(StructField("source_id",LongType,false),StructField("raw",StringType,true)))
-val raw = spark.createDataFrame(spark.sparkContext.parallelize(Seq(
- Row(1L,"""{"parent_id":10,"items":[{"sku":"a","qty":2},{"sku":"a","qty":3}]}"""),
- Row(2L,"""{"parent_id":20,"items":[]}"""),Row(3L,"""{"parent_id":30,"items":null}"""),
- Row(4L,"""{"parent_id":40,"items":[{"sku":"b","qty":null}]}"""),
- Row(5L,"{bad"),Row(6L,"""{"items":[]}"""),Row(7L,null)),2),inputSchema)
+val inputSchema = StructType(
+  Seq(StructField("source_id", LongType, false), StructField("raw", StringType, true))
+)
+val raw = spark.createDataFrame(
+  spark.sparkContext.parallelize(
+    Seq(
+      Row(1L, """{"parent_id":10,"items":[{"sku":"a","qty":2},{"sku":"a","qty":3}]}"""),
+      Row(2L, """{"parent_id":20,"items":[]}"""),
+      Row(3L, """{"parent_id":30,"items":null}"""),
+      Row(4L, """{"parent_id":40,"items":[{"sku":"b","qty":null}]}"""),
+      Row(5L, "{bad"),
+      Row(6L, """{"items":[]}"""),
+      Row(7L, null)
+    ),
+    2
+  ),
+  inputSchema
+)
 ```
 
 ```python
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 
-input_schema = StructType([StructField("source_id",LongType(),False),StructField("raw",StringType(),True)])
-raw = spark.createDataFrame([(1,'{"parent_id":10,"items":[{"sku":"a","qty":2},{"sku":"a","qty":3}]}'),(2,'{"parent_id":20,"items":[]}'),(3,'{"parent_id":30,"items":null}'),(4,'{"parent_id":40,"items":[{"sku":"b","qty":null}]}'),(5,'{bad'),(6,'{"items":[]}'),(7,None)],schema=input_schema)
+input_schema = StructType(
+    [StructField("source_id", LongType(), False), StructField("raw", StringType(), True)]
+)
+raw = spark.createDataFrame(
+    [
+        (1, '{"parent_id":10,"items":[{"sku":"a","qty":2},{"sku":"a","qty":3}]}'),
+        (2, '{"parent_id":20,"items":[]}'),
+        (3, '{"parent_id":30,"items":null}'),
+        (4, '{"parent_id":40,"items":[{"sku":"b","qty":null}]}'),
+        (5, "{bad"),
+        (6, '{"items":[]}'),
+        (7, None),
+    ],
+    schema=input_schema,
+)
 ```
 
 ## Worked example / walkthrough
@@ -90,14 +127,18 @@ The generator returns a zero-based position and the element. Position belongs to
 ### Worked example 2
 
 ```scala
-val sample = spark.sql("SELECT CAST(array() AS ARRAY<BIGINT>) AS empty_items, CAST(NULL AS ARRAY<BIGINT>) AS unknown_items")
+val sample = spark.sql(
+  "SELECT CAST(array() AS ARRAY<BIGINT>) AS empty_items, CAST(NULL AS ARRAY<BIGINT>) AS unknown_items"
+)
 assert(sample.select(explode(col("empty_items"))).count() == 0L)
 assert(sample.select(explode_outer(col("unknown_items"))).count() == 1L)
 println("An outer row can be a placeholder, not an item")
 ```
 
 ```python
-sample = spark.sql("SELECT CAST(array() AS ARRAY<BIGINT>) AS empty_items, CAST(NULL AS ARRAY<BIGINT>) AS unknown_items")
+sample = spark.sql(
+    "SELECT CAST(array() AS ARRAY<BIGINT>) AS empty_items, CAST(NULL AS ARRAY<BIGINT>) AS unknown_items"
+)
 assert sample.select(F.explode("empty_items")).count() == 0
 assert sample.select(F.explode_outer("unknown_items")).count() == 1
 print("An outer row can be a placeholder, not an item")

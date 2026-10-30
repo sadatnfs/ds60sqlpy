@@ -62,9 +62,7 @@ assert places.crs is not None
 assert places.geometry.is_valid.all()
 assert spatial_profile["geometry_types"] == ["Point"]
 assert spatial_profile["bounds"][0] < -122
-assert places.loc[
-    places["name"].eq("San Francisco"), "geometry"
-].iloc[0].x == -122.4
+assert places.loc[places["name"].eq("San Francisco"), "geometry"].iloc[0].x == -122.4
 projected = places.to_crs("EPSG:3857")
 assert len(projected) == len(places)
 assert projected.crs == "EPSG:3857"
@@ -90,23 +88,24 @@ import matplotlib.pyplot as plt
 import networkx as nx
 
 graph = nx.Graph()
-graph.add_nodes_from([
-    ("source", {"role": "input"}),
-    ("clean", {"role": "transform"}),
-    ("report", {"role": "output"}),
-])
-graph.add_edges_from([
-    ("source", "clean", {"meaning": "feeds"}),
-    ("clean", "report", {"meaning": "produces"}),
-])
+graph.add_nodes_from(
+    [
+        ("source", {"role": "input"}),
+        ("clean", {"role": "transform"}),
+        ("report", {"role": "output"}),
+    ]
+)
+graph.add_edges_from(
+    [
+        ("source", "clean", {"meaning": "feeds"}),
+        ("clean", "report", {"meaning": "produces"}),
+    ]
+)
 positions = nx.spring_layout(graph, seed=42)
 fig, ax = plt.subplots(figsize=(5, 3))
 role_shapes = {"input": "s", "transform": "o", "output": "^"}
 for role, shape in role_shapes.items():
-    nodes = [
-        node for node, attributes in graph.nodes(data=True)
-        if attributes["role"] == role
-    ]
+    nodes = [node for node, attributes in graph.nodes(data=True) if attributes["role"] == role]
     nx.draw_networkx_nodes(
         graph,
         positions,
@@ -205,10 +204,7 @@ class GeographicBounds:
             raise ValueError("latitude bounds must satisfy -90 <= south <= north <= 90")
 
     def contains(self, longitude: float, latitude: float) -> bool:
-        return (
-            self.west <= longitude <= self.east
-            and self.south <= latitude <= self.north
-        )
+        return self.west <= longitude <= self.east and self.south <= latitude <= self.north
 
 
 bounds = GeographicBounds(west=-125, south=32, east=-114, north=42)

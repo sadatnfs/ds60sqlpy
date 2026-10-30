@@ -45,8 +45,8 @@ The question is: Pool patch 1, 3; 2, 4 with a 2-by-2 window.
 The two operators retain different information despite identical output shape. The average uses all four values while the maximum ignores three smaller ones.
 
 ```python
-image=torch.tensor([[[[1.,3.],[2.,4.]]]])
-assert F.max_pool2d(image,2).item()==4 and F.avg_pool2d(image,2).item()==2.5
+image = torch.tensor([[[[1.0, 3.0], [2.0, 4.0]]]])
+assert F.max_pool2d(image, 2).item() == 4 and F.avg_pool2d(image, 2).item() == 2.5
 ```
 
 **Expected:** max 4; average 2.5.
@@ -60,8 +60,8 @@ The question is: Flip the width axis and read the pixel s.
 The last axis is the width under NCHW. Flipping the channel or height axis would be a different operation.
 
 ```python
-flipped=torch.flip(image,dims=(-1,))
-assert flipped[0,0].tolist()==[[3.,1.],[4.,2.]]
+flipped = torch.flip(image, dims=(-1,))
+assert flipped[0, 0].tolist() == [[3.0, 1.0], [4.0, 2.0]]
 ```
 
 **Expected:** rows 3, 1 and 4, 2.
@@ -75,7 +75,7 @@ The question is: Flip the image horizontal l y twice.
 Reversibility is a useful indexing check, but does not prove the intermediate image has the original semantic label.
 
 ```python
-assert torch.equal(torch.flip(flipped,dims=(-1,)),image)
+assert torch.equal(torch.flip(flipped, dims=(-1,)), image)
 ```
 
 **Expected:** exact original values.
@@ -89,8 +89,9 @@ The question is: Change only the non maximum pixel 1 to0 and compare pool s.
 The perturbation is invisible to max pooling. That can be useful robustness or harmful information loss, depending on the task.
 
 ```python
-changed=image.clone(); changed[0,0,0,0]=0
-assert F.max_pool2d(changed,2).item()==4 and F.avg_pool2d(changed,2).item()==2.25
+changed = image.clone()
+changed[0, 0, 0, 0] = 0
+assert F.max_pool2d(changed, 2).item() == 4 and F.avg_pool2d(changed, 2).item() == 2.25
 ```
 
 **Expected:** max still 4; average 2.25.
@@ -104,9 +105,14 @@ The question is: Define a transform that flips only in training and returns an o
 A clear branch makes mode behavior reviewable. The owned copy also prevents downstream mutation from changing the original fixture.
 
 ```python
-def transform(value,training): return torch.flip(value,(-1,)) if training else value.clone()
-evaluated=transform(image,False); assert torch.equal(evaluated,image)
-evaluated[0,0,0,0]=99; assert image[0,0,0,0].item()==1
+def transform(value, training):
+    return torch.flip(value, (-1,)) if training else value.clone()
+
+
+evaluated = transform(image, False)
+assert torch.equal(evaluated, image)
+evaluated[0, 0, 0, 0] = 99
+assert image[0, 0, 0, 0].item() == 1
 ```
 
 **Expected:** evaluation equals source and does not alias it.
@@ -120,8 +126,8 @@ The question is: Map left to right under horizontal reflect i on and check the i
 A valid augmentation can transform the target rather than preserve it, but that mapping must be explicit. Keeping the left label after a flip would teach contradictory examples.
 
 ```python
-labels={'left':'right','right':'left'}
-assert labels['left']=='right' and labels[labels['left']]=='left'
+labels = {"left": "right", "right": "left"}
+assert labels["left"] == "right" and labels[labels["left"]] == "left"
 ```
 
 **Expected:** left->right->left.

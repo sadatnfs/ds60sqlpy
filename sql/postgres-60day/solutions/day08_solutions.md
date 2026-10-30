@@ -82,15 +82,21 @@ executable companion when you want a self-contained check.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT o.order_id,
-       o.customer_id,
-       o.total_amount
-FROM orders AS o
-WHERE o.total_amount > (
-  SELECT AVG(all_orders.total_amount)
-  FROM orders AS all_orders
-)
-ORDER BY o.total_amount DESC, o.order_id;
+SELECT
+  o.order_id,
+  o.customer_id,
+  o.total_amount
+FROM
+  orders AS o
+WHERE
+  o.total_amount > (
+    SELECT
+      AVG(all_orders.total_amount)
+    FROM
+      orders AS all_orders)
+ORDER BY
+  o.total_amount DESC,
+  o.order_id;
 ```
 
 **Expected shape:** Order rows above the global average.
@@ -123,12 +129,21 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT c.country,
-       COUNT(*) AS country_customers,
-       (SELECT COUNT(*) FROM customers) AS all_customers
-FROM customers AS c
-GROUP BY c.country
-ORDER BY country_customers DESC, c.country;
+SELECT
+  c.country,
+  COUNT(*) AS country_customers,
+  (
+    SELECT
+      COUNT(*)
+    FROM
+      customers) AS all_customers
+FROM
+  customers AS c
+GROUP BY
+  c.country
+ORDER BY
+  country_customers DESC,
+  c.country;
 ```
 
 **Expected shape:** One row per country with a common global total.
@@ -161,15 +176,21 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT c.customer_id,
-       c.full_name,
-       (
-         SELECT MAX(o.order_date)
-         FROM orders AS o
-         WHERE o.customer_id = c.customer_id
-       ) AS latest_order_date
-FROM customers AS c
-ORDER BY latest_order_date DESC NULLS LAST, c.customer_id;
+SELECT
+  c.customer_id,
+  c.full_name,
+  (
+    SELECT
+      MAX(o.order_date)
+    FROM
+      orders AS o
+    WHERE
+      o.customer_id = c.customer_id) AS latest_order_date
+FROM
+  customers AS c
+ORDER BY
+  latest_order_date DESC NULLS LAST,
+  c.customer_id;
 ```
 
 **Expected shape:** One row per customer.
@@ -201,11 +222,14 @@ cardinality contract.
 - `WHERE`: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass.
 
 ```sql
-SELECT (
-         SELECT p.price
-         FROM products AS p
-         WHERE p.product_id = -1
-       ) IS NULL AS no_row_becomes_null;
+SELECT
+  (
+    SELECT
+      p.price
+    FROM
+      products AS p
+    WHERE
+      p.product_id = -1) IS NULL AS no_row_becomes_null;
 ```
 
 **Expected shape:** One row whose boolean result is true.
@@ -238,12 +262,20 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT p.category,
-       MAX(p.price) AS category_max_price,
-       (SELECT MAX(all_products.price) FROM products AS all_products) AS global_max_price
-FROM products AS p
-GROUP BY p.category
-ORDER BY p.category;
+SELECT
+  p.category,
+  MAX(p.price) AS category_max_price,
+  (
+    SELECT
+      MAX(all_products.price)
+    FROM
+      products AS all_products) AS global_max_price
+FROM
+  products AS p
+GROUP BY
+  p.category
+ORDER BY
+  p.category;
 ```
 
 **Expected shape:** One row per category with a scalar global maximum for comparison.
@@ -280,16 +312,24 @@ cardinality contract.
 
 ```sql
 WITH global AS (
-  SELECT COUNT(*)::numeric AS customer_count
-  FROM customers
+  SELECT
+    COUNT(*)::numeric AS customer_count
+  FROM
+    customers
 )
-SELECT c.country,
-       COUNT(*) AS country_customers,
-       ROUND(COUNT(*) / NULLIF(global.customer_count, 0), 4) AS customer_share
-FROM customers AS c
-CROSS JOIN global
-GROUP BY c.country, global.customer_count
-ORDER BY customer_share DESC, c.country;
+SELECT
+  c.country,
+  COUNT(*) AS country_customers,
+  ROUND(COUNT(*) / NULLIF (global.customer_count, 0), 4) AS customer_share
+FROM
+  customers AS c
+  CROSS JOIN global
+GROUP BY
+  c.country,
+  global.customer_count
+ORDER BY
+  customer_share DESC,
+  c.country;
 ```
 
 **Expected shape:** One row per country with country share.

@@ -230,27 +230,34 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-keyword">using</span> System.Text.RegularExpressions<span class="syntax-punctuation">;</span>
 <span class="syntax-keyword">using</span> System.Buffers<span class="syntax-punctuation">;</span>
 
-<span class="syntax-keyword">internal</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Program</span>
-<span class="syntax-punctuation">{</span>
-    <span class="syntax-keyword">private</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">Check</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">bool</span> condition<span class="syntax-punctuation">,</span> <span class="syntax-keyword">string</span> reason<span class="syntax-punctuation">)</span>
-    <span class="syntax-punctuation">{</span>
-        <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>condition<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> InvalidOperationException<span class="syntax-punctuation">(</span>reason<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-    <span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">internal</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Program</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">private</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">Check</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">bool</span> condition<span class="syntax-punctuation">,</span> <span class="syntax-keyword">string</span> reason<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>condition<span class="syntax-punctuation">)</span>
+      <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-function">InvalidOperationException</span><span class="syntax-punctuation">(</span>reason<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
 
-    <span class="syntax-keyword">private</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">async</span> Task <span class="syntax-function">Main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-keyword">private</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">async</span> Task <span class="syntax-function">Main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
     <span class="syntax-punctuation">{</span>
-        <span class="syntax-punctuation">{</span>
-            <span class="syntax-keyword">var</span> first <span class="syntax-operator">=</span> <span class="syntax-keyword">new</span> Point<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-            <span class="syntax-keyword">var</span> second <span class="syntax-operator">=</span> first<span class="syntax-punctuation">;</span>
-            second<span class="syntax-punctuation">.</span>X <span class="syntax-operator">=</span> <span class="syntax-number">9</span><span class="syntax-punctuation">;</span>
-            Check<span class="syntax-punctuation">(</span>first<span class="syntax-punctuation">.</span>X <span class="syntax-operator">==</span> <span class="syntax-number">2</span> <span class="syntax-operator">&amp;&amp;</span> second<span class="syntax-punctuation">.</span>X <span class="syntax-operator">==</span> <span class="syntax-number">9</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;struct copy&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-        <span class="syntax-punctuation">}</span>
-        Console<span class="syntax-punctuation">.</span>WriteLine<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;csharp-012: passed&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-        <span class="syntax-keyword">await</span> Task<span class="syntax-punctuation">.</span>CompletedTask<span class="syntax-punctuation">;</span>
+      <span class="syntax-keyword">var</span> first <span class="syntax-operator">=</span> <span class="syntax-keyword">new</span> Point<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      <span class="syntax-keyword">var</span> second <span class="syntax-operator">=</span> first<span class="syntax-punctuation">;</span>
+      second<span class="syntax-punctuation">.</span>X <span class="syntax-operator">=</span> <span class="syntax-number">9</span><span class="syntax-punctuation">;</span>
+      Check<span class="syntax-punctuation">(</span>first<span class="syntax-punctuation">.</span>X <span class="syntax-operator">==</span> <span class="syntax-number">2</span> <span class="syntax-operator">&amp;&amp;</span> second<span class="syntax-punctuation">.</span>X <span class="syntax-operator">==</span> <span class="syntax-number">9</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;struct copy&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
     <span class="syntax-punctuation">}</span>
+    Console<span class="syntax-punctuation">.</span>WriteLine<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;csharp-012: passed&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">await</span> Task<span class="syntax-punctuation">.</span>CompletedTask<span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
 
-    <span class="syntax-keyword">public</span> <span class="syntax-keyword">struct</span> <span class="syntax-class">Point</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">public</span> <span class="syntax-keyword">int</span> X<span class="syntax-punctuation">;</span> <span class="syntax-keyword">public</span> <span class="syntax-keyword">int</span> Y<span class="syntax-punctuation">;</span> <span class="syntax-keyword">public</span> Point<span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span> x<span class="syntax-punctuation">,</span> <span class="syntax-keyword">int</span> y<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> X <span class="syntax-operator">=</span> x<span class="syntax-punctuation">;</span> Y <span class="syntax-operator">=</span> y<span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span> <span class="syntax-punctuation">}</span>
-    <span class="syntax-keyword">public</span> <span class="syntax-keyword">sealed</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Counter</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">public</span> <span class="syntax-keyword">int</span> Value <span class="syntax-punctuation">{</span> <span class="syntax-keyword">get</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">set</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span> <span class="syntax-punctuation">}</span>
+  <span class="syntax-keyword">public</span> <span class="syntax-keyword">struct</span> <span class="syntax-class">Point</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">public</span> <span class="syntax-keyword">int</span> X<span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">public</span> <span class="syntax-keyword">int</span> Y<span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">public</span> <span class="syntax-function">Point</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span> x<span class="syntax-punctuation">,</span> <span class="syntax-keyword">int</span> y<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+      X <span class="syntax-operator">=</span> x<span class="syntax-punctuation">;</span>
+      Y <span class="syntax-operator">=</span> y<span class="syntax-punctuation">;</span>
+    <span class="syntax-punctuation">}</span>
+  <span class="syntax-punctuation">}</span>
+  <span class="syntax-keyword">public</span> <span class="syntax-keyword">sealed</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Counter</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">public</span> <span class="syntax-keyword">int</span> Value <span class="syntax-punctuation">{</span> <span class="syntax-keyword">get</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">set</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+  <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Changing the copied point leaves the original X at 2.</p>
 <h4 id="example-b-share-an-object-identity">Example B: Share an object identity<a class="heading-anchor" href="#example-b-share-an-object-identity" aria-label="Link to this section">#</a></h4>
@@ -271,28 +278,35 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-keyword">using</span> System.Text.RegularExpressions<span class="syntax-punctuation">;</span>
 <span class="syntax-keyword">using</span> System.Buffers<span class="syntax-punctuation">;</span>
 
-<span class="syntax-keyword">internal</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Program</span>
-<span class="syntax-punctuation">{</span>
-    <span class="syntax-keyword">private</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">Check</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">bool</span> condition<span class="syntax-punctuation">,</span> <span class="syntax-keyword">string</span> reason<span class="syntax-punctuation">)</span>
-    <span class="syntax-punctuation">{</span>
-        <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>condition<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> InvalidOperationException<span class="syntax-punctuation">(</span>reason<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-    <span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">internal</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Program</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">private</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">Check</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">bool</span> condition<span class="syntax-punctuation">,</span> <span class="syntax-keyword">string</span> reason<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>condition<span class="syntax-punctuation">)</span>
+      <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-function">InvalidOperationException</span><span class="syntax-punctuation">(</span>reason<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
 
-    <span class="syntax-keyword">private</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">async</span> Task <span class="syntax-function">Main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-keyword">private</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">async</span> Task <span class="syntax-function">Main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
     <span class="syntax-punctuation">{</span>
-        <span class="syntax-punctuation">{</span>
-            <span class="syntax-keyword">var</span> first <span class="syntax-operator">=</span> <span class="syntax-keyword">new</span> Counter<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-            <span class="syntax-keyword">var</span> second <span class="syntax-operator">=</span> first<span class="syntax-punctuation">;</span>
-            second<span class="syntax-punctuation">.</span>Value<span class="syntax-operator">++</span><span class="syntax-punctuation">;</span>
-            Check<span class="syntax-punctuation">(</span>first<span class="syntax-punctuation">.</span>Value <span class="syntax-operator">==</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;shared mutation&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-            Check<span class="syntax-punctuation">(</span>ReferenceEquals<span class="syntax-punctuation">(</span>first<span class="syntax-punctuation">,</span> second<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;same object&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-        <span class="syntax-punctuation">}</span>
-        Console<span class="syntax-punctuation">.</span>WriteLine<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;csharp-012: passed&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-        <span class="syntax-keyword">await</span> Task<span class="syntax-punctuation">.</span>CompletedTask<span class="syntax-punctuation">;</span>
+      <span class="syntax-keyword">var</span> first <span class="syntax-operator">=</span> <span class="syntax-keyword">new</span> Counter<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      <span class="syntax-keyword">var</span> second <span class="syntax-operator">=</span> first<span class="syntax-punctuation">;</span>
+      second<span class="syntax-punctuation">.</span>Value<span class="syntax-operator">++</span><span class="syntax-punctuation">;</span>
+      Check<span class="syntax-punctuation">(</span>first<span class="syntax-punctuation">.</span>Value <span class="syntax-operator">==</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;shared mutation&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      Check<span class="syntax-punctuation">(</span>ReferenceEquals<span class="syntax-punctuation">(</span>first<span class="syntax-punctuation">,</span> second<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;same object&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
     <span class="syntax-punctuation">}</span>
+    Console<span class="syntax-punctuation">.</span>WriteLine<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;csharp-012: passed&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">await</span> Task<span class="syntax-punctuation">.</span>CompletedTask<span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
 
-    <span class="syntax-keyword">public</span> <span class="syntax-keyword">struct</span> <span class="syntax-class">Point</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">public</span> <span class="syntax-keyword">int</span> X<span class="syntax-punctuation">;</span> <span class="syntax-keyword">public</span> <span class="syntax-keyword">int</span> Y<span class="syntax-punctuation">;</span> <span class="syntax-keyword">public</span> Point<span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span> x<span class="syntax-punctuation">,</span> <span class="syntax-keyword">int</span> y<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> X <span class="syntax-operator">=</span> x<span class="syntax-punctuation">;</span> Y <span class="syntax-operator">=</span> y<span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span> <span class="syntax-punctuation">}</span>
-    <span class="syntax-keyword">public</span> <span class="syntax-keyword">sealed</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Counter</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">public</span> <span class="syntax-keyword">int</span> Value <span class="syntax-punctuation">{</span> <span class="syntax-keyword">get</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">set</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span> <span class="syntax-punctuation">}</span>
+  <span class="syntax-keyword">public</span> <span class="syntax-keyword">struct</span> <span class="syntax-class">Point</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">public</span> <span class="syntax-keyword">int</span> X<span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">public</span> <span class="syntax-keyword">int</span> Y<span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">public</span> <span class="syntax-function">Point</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span> x<span class="syntax-punctuation">,</span> <span class="syntax-keyword">int</span> y<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+      X <span class="syntax-operator">=</span> x<span class="syntax-punctuation">;</span>
+      Y <span class="syntax-operator">=</span> y<span class="syntax-punctuation">;</span>
+    <span class="syntax-punctuation">}</span>
+  <span class="syntax-punctuation">}</span>
+  <span class="syntax-keyword">public</span> <span class="syntax-keyword">sealed</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Counter</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">public</span> <span class="syntax-keyword">int</span> Value <span class="syntax-punctuation">{</span> <span class="syntax-keyword">get</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">set</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+  <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Both references observe the same counter increment.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>

@@ -249,8 +249,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
   puts<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Worked example checks passed.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
   <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The result is 25.</p>
 <p>Parentheses preserve grouping. This macro still evaluates its argument twice, so side effects remain inappropriate.</p>
 <h4 id="worked-example-2-prefer-a-typed-helper-for-mutation">Worked example 2: Prefer a typed helper for mutation<a class="heading-anchor" href="#worked-example-2-prefer-a-typed-helper-for-mutation" aria-label="Link to this section">#</a></h4>
@@ -292,8 +291,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
   puts<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Worked example checks passed.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
   <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The result is 9 and value increments once to 4.</p>
 <p>A function argument expression is evaluated once for this call. SQUARE(value++) would create an unsequenced modification hazard.</p>
 <h3 id="prediction-before-execution">Prediction before execution<a class="heading-anchor" href="#prediction-before-execution" aria-label="Link to this section">#</a></h3>

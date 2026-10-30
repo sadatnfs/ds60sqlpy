@@ -63,73 +63,87 @@ model. See [`day49_solutions.sql`](day49_solutions.sql).
 SET search_path TO training, public;
 
 WITH monthly_observed AS (
-  SELECT date_trunc('month', order_date)::date AS month,
-         SUM(total_amount) AS revenue
-  FROM orders
-  GROUP BY date_trunc('month', order_date)
-), bounds AS (
-  SELECT MIN(month) AS first_month, MAX(month) AS last_month
-  FROM monthly_observed
-), month_spine AS (
-  SELECT generate_series(
-           first_month, last_month, interval '1 month'
-         )::date AS month
-  FROM bounds
-), monthly_complete AS (
-  SELECT spine.month,
-         COALESCE(observed.revenue, 0::numeric) AS revenue,
-         observed.month IS NOT NULL AS had_source_rows
-  FROM month_spine spine
-  LEFT JOIN monthly_observed observed USING (month)
-), forecast_rows AS (
-  SELECT month,
-         revenue,
-         AVG(revenue) OVER (
-           ORDER BY month ROWS BETWEEN 6 PRECEDING AND 1 PRECEDING
-         ) AS ma6_forecast,
-         COUNT(revenue) OVER (
-           ORDER BY month ROWS BETWEEN 6 PRECEDING AND 1 PRECEDING
-         ) AS ma6_history_rows,
-         AVG(revenue) OVER (
-           ORDER BY month ROWS BETWEEN 12 PRECEDING AND 1 PRECEDING
-         ) AS ma12_forecast,
-         COUNT(revenue) OVER (
-           ORDER BY month ROWS BETWEEN 12 PRECEDING AND 1 PRECEDING
-         ) AS ma12_history_rows,
-         LAG(revenue, 12) OVER (ORDER BY month) AS seasonal_naive
-  FROM monthly_complete
-), common_scoring_rows AS (
-  SELECT month,
-         revenue,
-         ma6_forecast,
-         ma12_forecast,
-         seasonal_naive,
-         0.5 * seasonal_naive + 0.5 * ma6_forecast AS blended_forecast
-  FROM forecast_rows
-  WHERE ma6_history_rows = 6
+  SELECT
+    date_trunc('month', order_date)::date AS month,
+    SUM(total_amount) AS revenue
+  FROM
+    orders
+  GROUP BY
+    date_trunc('month', order_date)
+),
+bounds AS (
+  SELECT
+    MIN(month) AS first_month,
+    MAX(month) AS last_month
+  FROM
+    monthly_observed
+),
+month_spine AS (
+  SELECT
+    generate_series(first_month, last_month, interval '1 month')::date AS month
+  FROM
+    bounds
+),
+monthly_complete AS (
+  SELECT
+    spine.month,
+    COALESCE(observed.revenue, 0::numeric) AS revenue,
+    observed.month IS NOT NULL AS had_source_rows
+  FROM
+    month_spine spine
+    LEFT JOIN monthly_observed observed USING (month)
+),
+forecast_rows AS (
+  SELECT
+    month,
+    revenue,
+    AVG(revenue) OVER (ORDER BY month ROWS BETWEEN 6 PRECEDING AND 1 PRECEDING) AS ma6_forecast,
+    COUNT(revenue) OVER (ORDER BY month ROWS BETWEEN 6 PRECEDING AND 1 PRECEDING) AS ma6_history_rows,
+    AVG(revenue) OVER (ORDER BY month ROWS BETWEEN 12 PRECEDING AND 1 PRECEDING) AS ma12_forecast,
+    COUNT(revenue) OVER (ORDER BY month ROWS BETWEEN 12 PRECEDING AND 1 PRECEDING) AS ma12_history_rows,
+    LAG(revenue, 12) OVER (ORDER BY month) AS seasonal_naive
+  FROM
+    monthly_complete
+),
+common_scoring_rows AS (
+  SELECT
+    month,
+    revenue,
+    ma6_forecast,
+    ma12_forecast,
+    seasonal_naive,
+    0.5 * seasonal_naive + 0.5 * ma6_forecast AS blended_forecast
+  FROM
+    forecast_rows
+  WHERE
+    ma6_history_rows = 6
     AND ma12_history_rows = 12
     AND seasonal_naive IS NOT NULL
-), model_scores AS (
-  SELECT rows.month,
-         rows.revenue,
-         model.model,
-         model.forecast
-  FROM common_scoring_rows rows
-  CROSS JOIN LATERAL (
-    VALUES
-      ('MA(6)'::text, rows.ma6_forecast),
-      ('MA(12)', rows.ma12_forecast),
-      ('seasonal naive', rows.seasonal_naive),
-      ('50% seasonal + 50% MA(6)', rows.blended_forecast)
-  ) AS model(model, forecast)
-)
-SELECT model,
-       COUNT(*) FILTER (WHERE revenue <> 0) AS scored_rows,
-       COUNT(*) FILTER (WHERE revenue = 0) AS zero_actual_rows,
-       ROUND(AVG(ABS(revenue - forecast) / NULLIF(revenue, 0)), 4) AS mape
-FROM model_scores
-GROUP BY model
-ORDER BY model;
+),
+model_scores AS (
+  SELECT
+    rows.month,
+    rows.revenue,
+    model.model,
+    model.forecast
+  FROM
+    common_scoring_rows rows
+    CROSS JOIN LATERAL (
+      VALUES ('MA(6)'::text, rows.ma6_forecast),
+        ('MA(12)', rows.ma12_forecast),
+        ('seasonal naive', rows.seasonal_naive),
+        ('50% seasonal + 50% MA(6)', rows.blended_forecast)) AS model (model, forecast))
+SELECT
+  model,
+  COUNT(*) FILTER (WHERE revenue <> 0) AS scored_rows,
+  COUNT(*) FILTER (WHERE revenue = 0) AS zero_actual_rows,
+  ROUND(AVG(ABS(revenue - forecast) / NULLIF (revenue, 0)), 4) AS mape
+FROM
+  model_scores
+GROUP BY
+  model
+ORDER BY
+  model;
 ```
 
 Expected shape: four model rows scored on the identical complete-history month
@@ -151,27 +165,35 @@ set. `scored_rows` and `zero_actual_rows` make the MAPE denominator explicit.
 SET search_path TO training, public;
 
 WITH monthly AS (
-  SELECT date_trunc('month', order_date)::date AS month,
-         SUM(total_amount) AS revenue
-  FROM orders
-  GROUP BY date_trunc('month', order_date)
-), forecasted AS (
-  SELECT month,
-         revenue,
-         LAG(revenue, 12) OVER (ORDER BY month) AS seasonal_naive,
-         AVG(revenue) OVER (
-           ORDER BY month ROWS BETWEEN 6 PRECEDING AND 1 PRECEDING
-         ) AS ma6_forecast
-  FROM monthly
+  SELECT
+    date_trunc('month', order_date)::date AS month,
+    SUM(total_amount) AS revenue
+  FROM
+    orders
+  GROUP BY
+    date_trunc('month', order_date)
+),
+forecasted AS (
+  SELECT
+    month,
+    revenue,
+    LAG(revenue, 12) OVER (ORDER BY month) AS seasonal_naive,
+    AVG(revenue) OVER (ORDER BY month ROWS BETWEEN 6 PRECEDING AND 1 PRECEDING) AS ma6_forecast
+  FROM
+    monthly
 )
-SELECT month,
-       ROUND(revenue, 2) AS actual,
-       ROUND(seasonal_naive, 2) AS seasonal_naive,
-       ROUND(ma6_forecast, 2) AS ma6_forecast,
-       ROUND(0.5 * seasonal_naive + 0.5 * ma6_forecast, 2) AS blended_forecast
-FROM forecasted
-WHERE seasonal_naive IS NOT NULL
-ORDER BY month DESC;
+SELECT
+  month,
+  ROUND(revenue, 2) AS actual,
+  ROUND(seasonal_naive, 2) AS seasonal_naive,
+  ROUND(ma6_forecast, 2) AS ma6_forecast,
+  ROUND(0.5 * seasonal_naive + 0.5 * ma6_forecast, 2) AS blended_forecast
+FROM
+  forecasted
+WHERE
+  seasonal_naive IS NOT NULL
+ORDER BY
+  month DESC;
 ```
 
 ### Reasoning and verification

@@ -23,9 +23,16 @@ The question is: Use anchor[1,0],positive[1,1],negative[0,1]; compute dots and c
 The positive is not parallel to the anchor, so its cosine is below one despite a dot product of one. Magnitudes and directions should not be conflated.
 
 ```python
-a=np.array([1.,0.]); pos=np.array([1.,1.]); neg=np.array([0.,1.])
-assert (a@pos,a@neg)==(1,0)
-np.testing.assert_allclose([(a@pos)/(np.linalg.norm(a)*np.linalg.norm(pos)),a@neg],[1/np.sqrt(2),0],atol=1e-12,rtol=0)
+a = np.array([1.0, 0.0])
+pos = np.array([1.0, 1.0])
+neg = np.array([0.0, 1.0])
+assert (a @ pos, a @ neg) == (1, 0)
+np.testing.assert_allclose(
+    [(a @ pos) / (np.linalg.norm(a) * np.linalg.norm(pos)), a @ neg],
+    [1 / np.sqrt(2), 0],
+    atol=1e-12,
+    rtol=0,
+)
 ```
 
 **Expected:** dots1,0; cosines1/sqrt2,0.
@@ -39,9 +46,11 @@ The question is: Multiply the positive vector by10 and compare dot product and c
 Scaling changes the unnormalized score but leaves direction unchanged. This demonstrates why normalization is a modeling choice with consequences for retrieval rankings.
 
 ```python
-scaled=10*pos
-assert a@scaled==10
-np.testing.assert_allclose((a@scaled)/(np.linalg.norm(a)*np.linalg.norm(scaled)),1/np.sqrt(2),atol=1e-12,rtol=0)
+scaled = 10 * pos
+assert a @ scaled == 10
+np.testing.assert_allclose(
+    (a @ scaled) / (np.linalg.norm(a) * np.linalg.norm(scaled)), 1 / np.sqrt(2), atol=1e-12, rtol=0
+)
 ```
 
 **Expected:** dot10; cosine unchanged.
@@ -55,8 +64,8 @@ The question is: Use logits[1,0] with the positive at index0.
 The loss encourages the positive score to exceed the negative score. It does not independently establish that the selected negative is semantically unrelated.
 
 ```python
-loss=tf.nn.sparse_softmax_cross_entropy_with_logits(labels=[0],logits=[[1.,0.]])
-np.testing.assert_allclose(loss.numpy(),[np.log1p(np.exp(-1))],atol=1e-6,rtol=0)
+loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=[0], logits=[[1.0, 0.0]])
+np.testing.assert_allclose(loss.numpy(), [np.log1p(np.exp(-1))], atol=1e-6, rtol=0)
 ```
 
 **Expected:** loss \(\log(1+e^{-1})\).
@@ -70,8 +79,10 @@ The question is: Replace the negative vector and identity with the positive iden
 Identity checks belong before interpreting training loss. Two equal vectors may arise legitimately, but the same document explicitly labelled both positive and negative is a direct contradiction.
 
 ```python
-positive_id='doc-a'; negative_id='doc-a'; duplicate=np.array_equal(pos,pos.copy())
-assert duplicate and positive_id==negative_id
+positive_id = "doc-a"
+negative_id = "doc-a"
+duplicate = np.array_equal(pos, pos.copy())
+assert duplicate and positive_id == negative_id
 ```
 
 **Expected:** duplicate positive/negative identity is flagged.
@@ -85,8 +96,9 @@ The question is: Compare softmax[1,0] at temperatures1 and.5.
 A lower positive temperature sharpens this distribution. It is not a source of additional evidence and must not be confused with a calibrated probability of semantic truth.
 
 ```python
-p1=tf.nn.softmax([1.,0.]).numpy(); p2=tf.nn.softmax(np.array([1.,0.],dtype='float32')/.5).numpy()
-assert p2[0]>p1[0] and int(p1.argmax())==int(p2.argmax())==0
+p1 = tf.nn.softmax([1.0, 0.0]).numpy()
+p2 = tf.nn.softmax(np.array([1.0, 0.0], dtype="float32") / 0.5).numpy()
+assert p2[0] > p1[0] and int(p1.argmax()) == int(p2.argmax()) == 0
 ```
 
 **Expected:** positive probability increases at.5; ranking stays0 first.
@@ -100,13 +112,20 @@ The question is: Implement cosine with finite and nonzero-norm checks; pass a ze
 Inventing zero similarity for a zero vector hides an undefined directional comparison. Rejecting it forces the caller to decide whether to skip, repair or represent missing information.
 
 ```python
-def cosine(x,y):
-    x,y=np.asarray(x),np.asarray(y); den=np.linalg.norm(x)*np.linalg.norm(y)
-    if x.shape!=y.shape or not np.isfinite(den) or den==0: raise ValueError('finite nonzero vectors')
-    return float(x@y/den)
-try: cosine([0,0],[1,1])
-except ValueError: pass
-else: raise AssertionError('undefined cosine accepted')
+def cosine(x, y):
+    x, y = np.asarray(x), np.asarray(y)
+    den = np.linalg.norm(x) * np.linalg.norm(y)
+    if x.shape != y.shape or not np.isfinite(den) or den == 0:
+        raise ValueError("finite nonzero vectors")
+    return float(x @ y / den)
+
+
+try:
+    cosine([0, 0], [1, 1])
+except ValueError:
+    pass
+else:
+    raise AssertionError("undefined cosine accepted")
 ```
 
 **Expected:** ValueError for zero norm.

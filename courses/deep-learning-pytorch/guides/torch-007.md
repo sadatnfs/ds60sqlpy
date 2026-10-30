@@ -84,8 +84,13 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-w=torch.tensor(0.,requires_grad=True); intermediate=2*w; intermediate.retain_grad(); intermediate.backward()
-assert w.is_leaf and not intermediate.is_leaf and w.grad.item()==2 and intermediate.grad.item()==1
+w = torch.tensor(0.0, requires_grad=True)
+intermediate = 2 * w
+intermediate.retain_grad()
+intermediate.backward()
+assert (
+    w.is_leaf and not intermediate.is_leaf and w.grad.item() == 2 and intermediate.grad.item() == 1
+)
 ```
 
 **Expected:** `w.is_leaf` is `True`; `u.is_leaf` is `False`; the gradients with respect to \(w\) and \(u\) are 2 and 1.
@@ -95,8 +100,11 @@ assert w.is_leaf and not intermediate.is_leaf and w.grad.item()==2 and intermedi
 The second forward creates a new graph, but backward still adds into the existing leaf gradient buffer. Graph freshness does not imply gradient-buffer freshness.
 
 ```python
-w.grad=None; ((w-2)**2).backward(); assert w.grad.item()==-4
-((w-2)**2).backward(); assert w.grad.item()==-8
+w.grad = None
+((w - 2) ** 2).backward()
+assert w.grad.item() == -4
+((w - 2) ** 2).backward()
+assert w.grad.item() == -8
 ```
 
 **Expected:** after resetting first, grad -4 then -8.
@@ -106,7 +114,9 @@ w.grad=None; ((w-2)**2).backward(); assert w.grad.item()==-4
 This is the intended reset for independent batches. Intentional microbatch accumulation needs a separate scaling and update policy.
 
 ```python
-w.grad=None; ((w-2)**2).backward(); assert w.grad.item()==-4
+w.grad = None
+((w - 2) ** 2).backward()
+assert w.grad.item() == -4
 ```
 
 **Expected:** grad returns to-4.

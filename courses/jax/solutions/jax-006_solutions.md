@@ -10,7 +10,7 @@ This ledger explains which arrays a later transformation will receive.
 
 ```python
 shapes = jax.tree.map(lambda x: x.shape, params)
-assert shapes == {'weight': (2, 2), 'bias': (2,)}
+assert shapes == {"weight": (2, 2), "bias": (2,)}
 ```
 
 ## Exercise 2: Count stored scalars
@@ -33,7 +33,7 @@ The structure descriptor preserves how leaves belong to containers.
 leaves, structure = jax.tree.flatten(params)
 restored = jax.tree.unflatten(structure, leaves)
 assert jax.tree.structure(restored) == jax.tree.structure(params)
-close(restored['weight'], params['weight'])
+close(restored["weight"], params["weight"])
 ```
 
 ## Exercise 4: Reject a missing field
@@ -44,11 +44,11 @@ A smaller gradient tree does not describe an update for every parameter under th
 
 ```python
 try:
-    checked_update(params, {'weight': jnp.ones((2, 2))}, .1)
+    checked_update(params, {"weight": jnp.ones((2, 2))}, 0.1)
 except ValueError:
     pass
 else:
-    raise AssertionError('missing leaf accepted')
+    raise AssertionError("missing leaf accepted")
 ```
 
 ## Exercise 5: Apply distinct gradients
@@ -58,10 +58,10 @@ Leaf correspondence preserves which gradient belongs to which parameter.
 **Expected:** Weight [[0,1],[2,3]], bias [-0.5,1].
 
 ```python
-g = {'weight': jnp.full((2, 2), 2.), 'bias': jnp.array([3., -4.])}
-u = checked_update(params, g, .5)
-close(u['weight'], [[0., 1.], [2., 3.]])
-close(u['bias'], [-.5, 1.])
+g = {"weight": jnp.full((2, 2), 2.0), "bias": jnp.array([3.0, -4.0])}
+u = checked_update(params, g, 0.5)
+close(u["weight"], [[0.0, 1.0], [2.0, 3.0]])
+close(u["bias"], [-0.5, 1.0])
 ```
 
 ## Exercise 6: Transfer to nested state

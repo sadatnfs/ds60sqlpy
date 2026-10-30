@@ -23,10 +23,11 @@ The question is: Evaluate two rectified differences on inputs(0,0),(0,1),(1,0),(
 The hidden features encode the two possible directions of disagreement. Their values are never simultaneously positive on the binary fixture, so their sum behaves like XOR.
 
 ```python
-x=tf.constant([[0.,0.],[0.,1.],[1.,0.],[1.,1.]])
-w=tf.constant([[1.,-1.],[-1.,1.]])
-h=tf.nn.relu(x@w); output=tf.reduce_sum(h,axis=1)
-np.testing.assert_array_equal(output.numpy(),[0,1,1,0])
+x = tf.constant([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]])
+w = tf.constant([[1.0, -1.0], [-1.0, 1.0]])
+h = tf.nn.relu(x @ w)
+output = tf.reduce_sum(h, axis=1)
+np.testing.assert_array_equal(output.numpy(), [0, 1, 1, 0])
 ```
 
 **Expected:** outputs[0,1,1,0].
@@ -40,7 +41,7 @@ The question is: Sum the two raw difference columns before applying a threshold.
 The columns cancel exactly. The ReLU was the step that prevented the positive and negative differences from cancelling, rather than merely adding an extra layer name.
 
 ```python
-np.testing.assert_array_equal(tf.reduce_sum(x@w,axis=1).numpy(),[0,0,0,0])
+np.testing.assert_array_equal(tf.reduce_sum(x @ w, axis=1).numpy(), [0, 0, 0, 0])
 ```
 
 **Expected:** all four sums0.
@@ -54,8 +55,9 @@ The question is: Multiply two fixed matrices and verify that a two-layer linear 
 Associativity collapses linear layers. Bias terms can also be combined, so adding affine depth alone does not overcome the XOR separation problem.
 
 ```python
-a=tf.constant([[1.,2.],[3.,4.]]); b=tf.constant([[2.],[-1.]])
-np.testing.assert_allclose(((x@a)@b).numpy(),(x@(a@b)).numpy(),atol=1e-6,rtol=0)
+a = tf.constant([[1.0, 2.0], [3.0, 4.0]])
+b = tf.constant([[2.0], [-1.0]])
+np.testing.assert_allclose(((x @ a) @ b).numpy(), (x @ (a @ b)).numpy(), atol=1e-6, rtol=0)
 ```
 
 **Expected:** two paths agree within 1e-6.
@@ -69,9 +71,11 @@ The question is: Evaluate ReLU and its tape gradient at-2 and+2.
 A negative preactivation has zero local derivative in this example. Units initialized or driven into inactive regions can receive no update from those observations, which is distinct from a missing gradient path.
 
 ```python
-z=tf.Variable([-2.,2.])
-with tf.GradientTape() as tape: total=tf.reduce_sum(tf.nn.relu(z))
-np.testing.assert_array_equal(tf.nn.relu(z).numpy(),[0,2]); np.testing.assert_array_equal(tape.gradient(total,z).numpy(),[0,1])
+z = tf.Variable([-2.0, 2.0])
+with tf.GradientTape() as tape:
+    total = tf.reduce_sum(tf.nn.relu(z))
+np.testing.assert_array_equal(tf.nn.relu(z).numpy(), [0, 2])
+np.testing.assert_array_equal(tape.gradient(total, z).numpy(), [0, 1])
 ```
 
 **Expected:** values[0,2], gradients[0,1].
@@ -85,8 +89,9 @@ The question is: Create two hidden units with identical columns and compare thei
 Identical initialization can leave units redundant under symmetric gradient updates. Distinct parameters do not automatically create distinct learned features.
 
 ```python
-same=tf.constant([[1.,1.],[2.,2.]])
-features=tf.nn.relu(x@same).numpy(); np.testing.assert_array_equal(features[:,0],features[:,1])
+same = tf.constant([[1.0, 1.0], [2.0, 2.0]])
+features = tf.nn.relu(x @ same).numpy()
+np.testing.assert_array_equal(features[:, 0], features[:, 1])
 ```
 
 **Expected:** hidden columns match exactly.
@@ -100,8 +105,10 @@ The question is: Evaluate the fixed construction at(.2,.8) and(.8,.2), and state
 The exact network computes absolute difference on continuous inputs. Calling it XOR outside the binary domain would conceal an assumption about the input space.
 
 ```python
-q=tf.constant([[.2,.8],[.8,.2]])
-np.testing.assert_allclose(tf.reduce_sum(tf.nn.relu(q@w),axis=1).numpy(),[.6,.6],atol=1e-6,rtol=0)
+q = tf.constant([[0.2, 0.8], [0.8, 0.2]])
+np.testing.assert_allclose(
+    tf.reduce_sum(tf.nn.relu(q @ w), axis=1).numpy(), [0.6, 0.6], atol=1e-6, rtol=0
+)
 ```
 
 **Expected:** both outputs.6; function is absolute difference.

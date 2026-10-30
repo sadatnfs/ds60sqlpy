@@ -216,38 +216,34 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The transformation is pure and its element-to-element relationship is visible.</p>
 <pre class="highlighted-code"><code class="language-swift"><span class="syntax-keyword">import</span> <span class="syntax-class">Foundation</span>
 
-
-
 <span class="syntax-punctuation">@</span>main
 <span class="syntax-keyword">struct</span> <span class="syntax-class">LessonMain</span> <span class="syntax-punctuation">{</span>
-    <span class="syntax-keyword">static</span> <span class="syntax-keyword">func</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">async</span> <span class="syntax-keyword">throws</span> <span class="syntax-punctuation">{</span>
-        <span class="syntax-keyword">do</span> <span class="syntax-punctuation">{</span>
-            <span class="syntax-keyword">let</span> values <span class="syntax-punctuation">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span>
-            <span class="syntax-keyword">let</span> doubled <span class="syntax-punctuation">=</span> values<span class="syntax-punctuation">.</span><span class="syntax-builtin">map</span> <span class="syntax-punctuation">{</span> value <span class="syntax-keyword">in</span> value <span class="syntax-operator">*</span> <span class="syntax-number">2</span> <span class="syntax-punctuation">}</span>
-            <span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>doubled <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
-            <span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>values <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
-        <span class="syntax-punctuation">}</span>
-        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">swift-015: passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-keyword">static</span> <span class="syntax-keyword">func</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">async</span> <span class="syntax-keyword">throws</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">do</span> <span class="syntax-punctuation">{</span>
+      <span class="syntax-keyword">let</span> values <span class="syntax-punctuation">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span>
+      <span class="syntax-keyword">let</span> doubled <span class="syntax-punctuation">=</span> values<span class="syntax-punctuation">.</span><span class="syntax-builtin">map</span> <span class="syntax-punctuation">{</span> value <span class="syntax-keyword">in</span> value <span class="syntax-operator">*</span> <span class="syntax-number">2</span> <span class="syntax-punctuation">}</span>
+      <span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>doubled <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+      <span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>values <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
     <span class="syntax-punctuation">}</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">swift-015: passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Map creates transformed values while retaining the original array.</p>
 <h4 id="example-b-freeze-a-captured-value-deliberately">Example B: Freeze a captured value deliberately<a class="heading-anchor" href="#example-b-freeze-a-captured-value-deliberately" aria-label="Link to this section">#</a></h4>
 <p>This differs from a closure observing a mutable captured variable later.</p>
 <pre class="highlighted-code"><code class="language-swift"><span class="syntax-keyword">import</span> <span class="syntax-class">Foundation</span>
 
-
-
 <span class="syntax-punctuation">@</span>main
 <span class="syntax-keyword">struct</span> <span class="syntax-class">LessonMain</span> <span class="syntax-punctuation">{</span>
-    <span class="syntax-keyword">static</span> <span class="syntax-keyword">func</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">async</span> <span class="syntax-keyword">throws</span> <span class="syntax-punctuation">{</span>
-        <span class="syntax-keyword">do</span> <span class="syntax-punctuation">{</span>
-            <span class="syntax-keyword">var</span> factor <span class="syntax-punctuation">=</span> <span class="syntax-number">2</span>
-            <span class="syntax-keyword">let</span> scale <span class="syntax-punctuation">=</span> <span class="syntax-punctuation">{</span> <span class="syntax-punctuation">[</span>factor<span class="syntax-punctuation">]</span> <span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">:</span> <span class="syntax-builtin">Int</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">in</span> value <span class="syntax-operator">*</span> factor <span class="syntax-punctuation">}</span>
-            factor <span class="syntax-punctuation">=</span> <span class="syntax-number">5</span>
-            <span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>scale<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-number">6</span> <span class="syntax-operator">&amp;&amp;</span> factor <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span>
-        <span class="syntax-punctuation">}</span>
-        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">swift-015: passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-keyword">static</span> <span class="syntax-keyword">func</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">async</span> <span class="syntax-keyword">throws</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">do</span> <span class="syntax-punctuation">{</span>
+      <span class="syntax-keyword">var</span> factor <span class="syntax-punctuation">=</span> <span class="syntax-number">2</span>
+      <span class="syntax-keyword">let</span> scale <span class="syntax-punctuation">=</span> <span class="syntax-punctuation">{</span> <span class="syntax-punctuation">[</span>factor<span class="syntax-punctuation">]</span> <span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">:</span> <span class="syntax-builtin">Int</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">in</span> value <span class="syntax-operator">*</span> factor <span class="syntax-punctuation">}</span>
+      factor <span class="syntax-punctuation">=</span> <span class="syntax-number">5</span>
+      <span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>scale<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-number">6</span> <span class="syntax-operator">&amp;&amp;</span> factor <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span>
     <span class="syntax-punctuation">}</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">swift-015: passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The explicit capture list retains factor 2 for the closure.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>

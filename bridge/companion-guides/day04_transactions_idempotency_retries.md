@@ -222,9 +222,9 @@ Use one disposable connection. Inside it, create:
 
 ```sql
 CREATE TEMP TABLE bridge_jobs (
-    job_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    idempotency_key text NOT NULL UNIQUE,
-    payload text NOT NULL
+  job_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  idempotency_key text NOT NULL UNIQUE,
+  payload text NOT NULL
 ) ON COMMIT DROP;
 ```
 

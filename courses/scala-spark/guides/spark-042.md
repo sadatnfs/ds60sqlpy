@@ -82,36 +82,73 @@ The complete source creates the owned local session described above, then constr
 import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
-import java.nio.file.{Files,Path,Paths,StandardOpenOption,StandardCopyOption}
+import java.nio.file.{Files, Path, Paths, StandardOpenOption, StandardCopyOption}
 import java.nio.charset.StandardCharsets
 import java.util.UUID
 import scala.jdk.CollectionConverters._
-import org.apache.spark.sql.streaming.{StreamingQuery,Trigger}
+import org.apache.spark.sql.streaming.{StreamingQuery, Trigger}
 import scala.collection.mutable.ArrayBuffer
 
-require(spark.version == "4.0.1","Prepared Spark4.0.1 required")
-spark.conf.set("spark.sql.streaming.stopTimeout","5000")
-ownedRoot=Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(),"spark-042-")
-val input=ownedRoot.resolve("input");val checkpoint=ownedRoot.resolve("checkpoint");val sink=Files.createDirectory(ownedRoot.resolve("sink"))
-publishFile(ownedRoot,input,"batch-01.json",Seq("""{"delivery":1,"id":"A","event_second":100,"cents":10}""","""{"delivery":2,"id":"B","event_second":105,"cents":20}""","""{"delivery":3,"id":"A","event_second":100,"cents":10}""","""{"delivery":4,"id":null,"event_second":106,"cents":30}"""))
-val staticA=spark.read.schema(productSchema).json(input.toString)
+require(spark.version == "4.0.1", "Prepared Spark4.0.1 required")
+spark.conf.set("spark.sql.streaming.stopTimeout", "5000")
+ownedRoot = Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(), "spark-042-")
+val input = ownedRoot.resolve("input"); val checkpoint = ownedRoot.resolve("checkpoint");
+val sink = Files.createDirectory(ownedRoot.resolve("sink"))
+publishFile(
+  ownedRoot,
+  input,
+  "batch-01.json",
+  Seq(
+    """{"delivery":1,"id":"A","event_second":100,"cents":10}""",
+    """{"delivery":2,"id":"B","event_second":105,"cents":20}""",
+    """{"delivery":3,"id":"A","event_second":100,"cents":10}""",
+    """{"delivery":4,"id":null,"event_second":106,"cents":30}"""
+  )
+)
+val staticA = spark.read.schema(productSchema).json(input.toString)
 ```
 
 ```python
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 from pathlib import Path
 import tempfile
 import shutil
 import json
 import uuid
 
-if spark.version!="4.0.1":raise ValueError("Prepared Spark4.0.1 required")
-spark.conf.set("spark.sql.streaming.stopTimeout","5000")
-owned_root=Path(tempfile.mkdtemp(prefix="spark-042-",dir=Path.cwd()))
-input_path=owned_root/"input";checkpoint=owned_root/"checkpoint";sink=owned_root/"sink";sink.mkdir()
-publish_file(owned_root,input_path,"batch-01.json",['{"delivery":1,"id":"A","event_second":100,"cents":10}', '{"delivery":2,"id":"B","event_second":105,"cents":20}', '{"delivery":3,"id":"A","event_second":100,"cents":10}', '{"delivery":4,"id":null,"event_second":106,"cents":30}'])
-static_a=spark.read.schema(PRODUCT_SCHEMA).json(str(input_path))
+if spark.version != "4.0.1":
+    raise ValueError("Prepared Spark4.0.1 required")
+spark.conf.set("spark.sql.streaming.stopTimeout", "5000")
+owned_root = Path(tempfile.mkdtemp(prefix="spark-042-", dir=Path.cwd()))
+input_path = owned_root / "input"
+checkpoint = owned_root / "checkpoint"
+sink = owned_root / "sink"
+sink.mkdir()
+publish_file(
+    owned_root,
+    input_path,
+    "batch-01.json",
+    [
+        '{"delivery":1,"id":"A","event_second":100,"cents":10}',
+        '{"delivery":2,"id":"B","event_second":105,"cents":20}',
+        '{"delivery":3,"id":"A","event_second":100,"cents":10}',
+        '{"delivery":4,"id":null,"event_second":106,"cents":30}',
+    ],
+)
+static_a = spark.read.schema(PRODUCT_SCHEMA).json(str(input_path))
 ```
 
 ## Worked example / walkthrough
@@ -119,15 +156,16 @@ static_a=spark.read.schema(PRODUCT_SCHEMA).json(str(input_path))
 ### Worked example 1
 
 ```scala
-val previousMax=105L;val cutoff=previousMax-10L
-val orderedSeconds=Seq(120L,95L,94L)
-assert(orderedSeconds.filter(_ >= cutoff)==Seq(120L,95L))
+val previousMax = 105L; val cutoff = previousMax - 10L
+val orderedSeconds = Seq(120L, 95L, 94L)
+assert(orderedSeconds.filter(_ >= cutoff) == Seq(120L, 95L))
 ```
 
 ```python
-previous_max=105;cutoff=previous_max-10
-ordered_seconds=[120,95,94]
-assert [second for second in ordered_seconds if second>=cutoff]==[120,95]
+previous_max = 105
+cutoff = previous_max - 10
+ordered_seconds = [120, 95, 94]
+assert [second for second in ordered_seconds if second >= cutoff] == [120, 95]
 ```
 
 The cutoff remains 95 for the whole microbatch. Advancing it immediately after 120 would incorrectly reject 95. This independent arithmetic trace fixes the intended policy before streaming execution.
@@ -135,14 +173,15 @@ The cutoff remains 95 for the whole microbatch. Advancing it immediately after 1
 ### Worked example 2
 
 ```scala
-val counts=Seq(5L,2L,1L,2L)
-val acceptedCents=Seq(10L,20L,0L,40L,5L)
-assert(counts.sum==10L && acceptedCents.size==5 && acceptedCents.sum==75L)
+val counts = Seq(5L, 2L, 1L, 2L)
+val acceptedCents = Seq(10L, 20L, 0L, 40L, 5L)
+assert(counts.sum == 10L && acceptedCents.size == 5 && acceptedCents.sum == 75L)
 ```
 
 ```python
-counts=[5,2,1,2];accepted_cents=[10,20,0,40,5]
-assert sum(counts)==10 and len(accepted_cents)==5 and sum(accepted_cents)==75
+counts = [5, 2, 1, 2]
+accepted_cents = [10, 20, 0, 40, 5]
+assert sum(counts) == 10 and len(accepted_cents) == 5 and sum(accepted_cents) == 75
 ```
 
 The independent final oracle checks both conservation and zero retention. The total alone cannot establish that all five accepted identities survived.

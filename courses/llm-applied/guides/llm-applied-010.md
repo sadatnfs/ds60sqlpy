@@ -124,19 +124,35 @@ The substitution is explicitly authored. A learned rewrite would need evaluation
 
 ```python
 from collections import deque
-def rewrite(query,synonyms): return ' '.join(synonyms.get(token,token) for token in query.lower().split())
-def walk(start,graph,max_hops):
-    if type(max_hops) is not int or max_hops<0: raise ValueError('nonnegative integer hop budget required')
-    if start not in graph: return []
-    queue=deque([(start,0)]); seen={start}; result=[]
+
+
+def rewrite(query, synonyms):
+    return " ".join(synonyms.get(token, token) for token in query.lower().split())
+
+
+def walk(start, graph, max_hops):
+    if type(max_hops) is not int or max_hops < 0:
+        raise ValueError("nonnegative integer hop budget required")
+    if start not in graph:
+        return []
+    queue = deque([(start, 0)])
+    seen = {start}
+    result = []
     while queue:
-        node,depth=queue.popleft(); result.append(node)
-        if depth==max_hops: continue
+        node, depth = queue.popleft()
+        result.append(node)
+        if depth == max_hops:
+            continue
         for target in graph[node]:
-            if target in graph and target not in seen: seen.add(target); queue.append((target,depth+1))
+            if target in graph and target not in seen:
+                seen.add(target)
+                queue.append((target, depth + 1))
     return result
-original='buy rate'; rewritten=rewrite(original,{'buy':'purchase'})
-assert rewritten=='purchase rate' and original=='buy rate'
+
+
+original = "buy rate"
+rewritten = rewrite(original, {"buy": "purchase"})
+assert rewritten == "purchase rate" and original == "buy rate"
 ```
 
 **Expected:** rewrittenpurchase rate; original unchanged.
@@ -146,8 +162,8 @@ assert rewritten=='purchase rate' and original=='buy rate'
 A retrieval failure can originate in the rewrite rather than the ranking model. Keeping both strings makes that stage diagnosable.
 
 ```python
-trace={'original':original,'rewritten':rewritten,'policy':'synonyms-v1'}
-assert set(trace)=={'original','rewritten','policy'}
+trace = {"original": original, "rewritten": rewritten, "policy": "synonyms-v1"}
+assert set(trace) == {"original", "rewritten", "policy"}
 ```
 
 **Expected:** trace includes all three fields.
@@ -157,8 +173,8 @@ assert set(trace)=={'original','rewritten','policy'}
 The depth counts edges from the starting evidence item. The final document is included because it is exactly two links away.
 
 ```python
-graph={'metric':['exclusions'],'exclusions':['test_accounts'],'test_accounts':[]}
-assert walk('metric',graph,2)==['metric','exclusions','test_accounts']
+graph = {"metric": ["exclusions"], "exclusions": ["test_accounts"], "test_accounts": []}
+assert walk("metric", graph, 2) == ["metric", "exclusions", "test_accounts"]
 ```
 
 **Expected:** visited metric, exclusions, test_accounts.

@@ -120,11 +120,13 @@ identify which line creates each intermediate object.
 ```python
 import pandas as pd
 
-sales = pd.DataFrame({
-    "order_id": [101, 102, 103],
-    "region": ["west", "east", "west"],
-    "amount": [20.0, 35.0, 15.0],
-})
+sales = pd.DataFrame(
+    {
+        "order_id": [101, 102, 103],
+        "region": ["west", "east", "west"],
+        "amount": [20.0, 35.0, 15.0],
+    }
+)
 (sales.shape, sales.dtypes.astype(str).to_dict(), sales["order_id"].is_unique)
 ```
 

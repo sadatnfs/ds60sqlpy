@@ -83,8 +83,9 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-logits=torch.zeros((1,3),dtype=torch.float64); target=torch.tensor([1],dtype=torch.long)
-np.testing.assert_allclose(F.cross_entropy(logits,target).item(),np.log(3),atol=1e-12,rtol=0)
+logits = torch.zeros((1, 3), dtype=torch.float64)
+target = torch.tensor([1], dtype=torch.long)
+np.testing.assert_allclose(F.cross_entropy(logits, target).item(), np.log(3), atol=1e-12, rtol=0)
 ```
 
 **Expected:** cross entropy log 3.
@@ -94,8 +95,8 @@ np.testing.assert_allclose(F.cross_entropy(logits,target).item(),np.log(3),atol=
 Independent probabilities need not sum to one. A softmax would force labels to compete and change the task.
 
 ```python
-independent=torch.sigmoid(logits)
-assert independent.tolist()==[[.5,.5,.5]] and independent.sum().item()==1.5
+independent = torch.sigmoid(logits)
+assert independent.tolist() == [[0.5, 0.5, 0.5]] and independent.sum().item() == 1.5
 ```
 
 **Expected:** probabilities.5, .5, .5 with sum 1.5.
@@ -105,8 +106,14 @@ assert independent.tolist()==[[.5,.5,.5]] and independent.sum().item()==1.5
 The target contracts differ because the prediction events differ. Reshaping or casting without understanding those events can make a wrong task appear accepted.
 
 ```python
-classes=torch.tensor([2,0],dtype=torch.long); labels=torch.tensor([[1.,0.,1.],[0.,1.,0.]])
-assert tuple(classes.shape)==(2,) and tuple(labels.shape)==(2,3) and classes.dtype==torch.long and labels.is_floating_point()
+classes = torch.tensor([2, 0], dtype=torch.long)
+labels = torch.tensor([[1.0, 0.0, 1.0], [0.0, 1.0, 0.0]])
+assert (
+    tuple(classes.shape) == (2,)
+    and tuple(labels.shape) == (2, 3)
+    and classes.dtype == torch.long
+    and labels.is_floating_point()
+)
 ```
 
 **Expected:** shapes(2, ) and(2, 3); long versus floating.

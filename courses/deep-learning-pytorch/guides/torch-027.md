@@ -78,11 +78,14 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-base=nn.Linear(2,2,bias=False)
-with torch.no_grad(): base.weight.copy_(torch.eye(2))
-for parameter in base.parameters(): parameter.requires_grad_(False); parameter.grad=None
-x=torch.tensor([[1.,0.],[0.,1.],[1.,1.]])
-assert torch.equal(base(x),x) and not any(p.requires_grad for p in base.parameters())
+base = nn.Linear(2, 2, bias=False)
+with torch.no_grad():
+    base.weight.copy_(torch.eye(2))
+for parameter in base.parameters():
+    parameter.requires_grad_(False)
+    parameter.grad = None
+x = torch.tensor([[1.0, 0.0], [0.0, 1.0], [1.0, 1.0]])
+assert torch.equal(base(x), x) and not any(p.requires_grad for p in base.parameters())
 ```
 
 **Expected:** base output equals input; all base parameters frozen.
@@ -92,11 +95,18 @@ assert torch.equal(base(x),x) and not any(p.requires_grad for p in base.paramete
 The optimizer receives only head parameters. The direct snapshot check proves preservation rather than trusting a flag alone.
 
 ```python
-head=nn.Linear(2,1,bias=False)
-with torch.no_grad(): head.weight.zero_()
-base_before=base.weight.detach().clone(); head_before=head.weight.detach().clone(); target=torch.tensor([[1.],[2.],[3.]])
-optimizer=torch.optim.SGD(head.parameters(),lr=.1); optimizer.zero_grad(set_to_none=True); loss=(head(base(x))-target).square().mean(); loss.backward(); optimizer.step()
-assert not torch.equal(head.weight,head_before) and torch.equal(base.weight,base_before)
+head = nn.Linear(2, 1, bias=False)
+with torch.no_grad():
+    head.weight.zero_()
+base_before = base.weight.detach().clone()
+head_before = head.weight.detach().clone()
+target = torch.tensor([[1.0], [2.0], [3.0]])
+optimizer = torch.optim.SGD(head.parameters(), lr=0.1)
+optimizer.zero_grad(set_to_none=True)
+loss = (head(base(x)) - target).square().mean()
+loss.backward()
+optimizer.step()
+assert not torch.equal(head.weight, head_before) and torch.equal(base.weight, base_before)
 ```
 
 **Expected:** head changes; base remains exact identity.

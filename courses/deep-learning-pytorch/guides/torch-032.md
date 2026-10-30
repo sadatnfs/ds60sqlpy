@@ -79,13 +79,16 @@ import numpy as np
 import torch
 from torch import nn
 from torch.nn import functional as F
-import tempfile,json,subprocess,sys,textwrap
+import tempfile, json, subprocess, sys, textwrap
 from pathlib import Path
 
-model=nn.Linear(2,1,bias=False)
-with torch.no_grad(): model.weight.copy_(torch.tensor([[2.,-1.]]))
-model.eval(); x=torch.tensor([[1.,2.],[3.,4.]]); expected=model(x).detach()
-assert expected.tolist()==[[0.],[2.]]
+model = nn.Linear(2, 1, bias=False)
+with torch.no_grad():
+    model.weight.copy_(torch.tensor([[2.0, -1.0]]))
+model.eval()
+x = torch.tensor([[1.0, 2.0], [3.0, 4.0]])
+expected = model(x).detach()
+assert expected.tolist() == [[0.0], [2.0]]
 ```
 
 **Expected:** outputs 0, 2.
@@ -95,9 +98,14 @@ assert expected.tolist()==[[0.],[2.]]
 The architecture is reconstructed explicitly. A compatible set of names and shapes is necessary, but the application should also retain semantic feature order and dtype metadata.
 
 ```python
-temporary=tempfile.TemporaryDirectory(); folder=Path(temporary.name); state_path=folder/'weights.pt'; torch.save(model.state_dict(),state_path)
-restored=nn.Linear(2,1,bias=False); restored.load_state_dict(torch.load(state_path,map_location='cpu',weights_only=True)); restored.eval()
-torch.testing.assert_close(restored(x),expected,atol=1e-6,rtol=0)
+temporary = tempfile.TemporaryDirectory()
+folder = Path(temporary.name)
+state_path = folder / "weights.pt"
+torch.save(model.state_dict(), state_path)
+restored = nn.Linear(2, 1, bias=False)
+restored.load_state_dict(torch.load(state_path, map_location="cpu", weights_only=True))
+restored.eval()
+torch.testing.assert_close(restored(x), expected, atol=1e-6, rtol=0)
 ```
 
 **Expected:** restored predictions match within 1e-6.
@@ -107,9 +115,12 @@ torch.testing.assert_close(restored(x),expected,atol=1e-6,rtol=0)
 The program includes shape constraints from the example. A readable archive alone would not prove that those constraints or operations execute correctly.
 
 ```python
-program=torch.export.export(model,(x,),strict=True); export_path=folder/'model.pt2'; torch.export.save(program,export_path)
-loaded_program=torch.export.load(export_path); exported_module=loaded_program.module()
-torch.testing.assert_close(exported_module(x),expected,atol=1e-6,rtol=0)
+program = torch.export.export(model, (x,), strict=True)
+export_path = folder / "model.pt2"
+torch.export.save(program, export_path)
+loaded_program = torch.export.load(export_path)
+exported_module = loaded_program.module()
+torch.testing.assert_close(exported_module(x), expected, atol=1e-6, rtol=0)
 ```
 
 **Expected:** exported predictions match within 1e-6.

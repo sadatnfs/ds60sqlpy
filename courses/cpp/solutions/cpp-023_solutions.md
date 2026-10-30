@@ -31,7 +31,8 @@ If the caller reads output after a nonzero status, it may be using an old value.
 ## Worked example 1
 
 ```cpp
-int out=0; assert(add_checked(2,3,&out)==0 && out==5);
+int out = 0;
+assert(add_checked(2, 3, &out) == 0 && out == 5);
 ```
 
 Expected: Status 0 publishes value 5 through the caller-owned pointer.
@@ -39,7 +40,7 @@ Expected: Status 0 publishes value 5 through the caller-owned pointer.
 ## Worked example 2
 
 ```cpp
-assert(add_checked(2,3,nullptr)==1);
+assert(add_checked(2, 3, nullptr) == 1);
 ```
 
 Expected: Null output pointer returns status 1 without dereferencing it.

@@ -433,93 +433,134 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These worked excerpts come from <code>sql/postgres-60day/day59_final_capstone_part2.sql</code>. Use <strong>Whole SQL lesson (psql)</strong> in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared <code>psql</code> routes are described above.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> order_values <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>unit_price<span class="syntax-operator">*</span>oi<span class="syntax-punctuation">.</span>quantity<span class="syntax-operator">*</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">-</span>oi<span class="syntax-punctuation">.</span>discount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> order_value<span class="syntax-punctuation">,</span>
-         o<span class="syntax-punctuation">.</span>order_date
-  <span class="syntax-keyword">FROM</span> orders o
-  <span class="syntax-keyword">JOIN</span> order_items oi <span class="syntax-keyword">ON</span> oi<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>order_id
-  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_date
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> ltv <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span>
-         date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">MIN</span><span class="syntax-punctuation">(</span>order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> first_order_month<span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>order_value<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> ltv
-  <span class="syntax-keyword">FROM</span> order_values
-  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> customer_id
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> cohort <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
-         date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>created_at<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> cohort_month<span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>segment<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;standard&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> segment
-  <span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">c</span>
+  <span class="syntax-keyword">SELECT</span>
+    o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+    o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>unit_price <span class="syntax-operator">*</span> oi<span class="syntax-punctuation">.</span>quantity <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span> <span class="syntax-operator">-</span> oi<span class="syntax-punctuation">.</span>discount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> order_value<span class="syntax-punctuation">,</span>
+    o<span class="syntax-punctuation">.</span>order_date
+  <span class="syntax-keyword">FROM</span>
+    orders o
+    <span class="syntax-keyword">JOIN</span> order_items oi <span class="syntax-keyword">ON</span> oi<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>order_id
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+    o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+    o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span>
+    o<span class="syntax-punctuation">.</span>order_date
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+ltv <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span>
+    customer_id<span class="syntax-punctuation">,</span>
+    date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">MIN</span><span class="syntax-punctuation">(</span>order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> first_order_month<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>order_value<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> ltv
+  <span class="syntax-keyword">FROM</span>
+    order_values
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+    customer_id
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+cohort <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span>
+    <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+    date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>created_at<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> cohort_month<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>segment<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;standard&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> segment
+  <span class="syntax-keyword">FROM</span>
+    customers <span class="syntax-keyword">c</span>
 <span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> cohort<span class="syntax-punctuation">.</span>segment<span class="syntax-punctuation">,</span>
-       cohort<span class="syntax-punctuation">.</span>cohort_month<span class="syntax-punctuation">,</span>
-       ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">AVG</span><span class="syntax-punctuation">(</span>ltv<span class="syntax-punctuation">.</span>ltv<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> avg_ltv<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> customers
-<span class="syntax-keyword">FROM</span> ltv
-<span class="syntax-keyword">JOIN</span> cohort <span class="syntax-keyword">ON</span> cohort<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> ltv<span class="syntax-punctuation">.</span>customer_id
-<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> cohort<span class="syntax-punctuation">.</span>segment<span class="syntax-punctuation">,</span> cohort<span class="syntax-punctuation">.</span>cohort_month
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> cohort<span class="syntax-punctuation">.</span>cohort_month <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> avg_ltv <span class="syntax-keyword">DESC</span>
+<span class="syntax-keyword">SELECT</span>
+  cohort<span class="syntax-punctuation">.</span>segment<span class="syntax-punctuation">,</span>
+  cohort<span class="syntax-punctuation">.</span>cohort_month<span class="syntax-punctuation">,</span>
+  ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">AVG</span><span class="syntax-punctuation">(</span>ltv<span class="syntax-punctuation">.</span>ltv<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> avg_ltv<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> customers
+<span class="syntax-keyword">FROM</span>
+  ltv
+  <span class="syntax-keyword">JOIN</span> cohort <span class="syntax-keyword">ON</span> cohort<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> ltv<span class="syntax-punctuation">.</span>customer_id
+<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+  cohort<span class="syntax-punctuation">.</span>segment<span class="syntax-punctuation">,</span>
+  cohort<span class="syntax-punctuation">.</span>cohort_month
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  cohort<span class="syntax-punctuation">.</span>cohort_month <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span>
+  avg_ltv <span class="syntax-keyword">DESC</span>
 <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">100</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 1: Start with <code>orders</code>, <code>order_items</code>, and <code>customers</code> in <code>FROM</code>/<code>JOIN</code>; let <code>GROUP BY</code> collapse rows to its grouping keys. The final <code>SELECT</code> displays <code>segment</code>, <code>cohort_month</code>, <code>avg_ltv</code>, and <code>customers</code>. <code>ORDER BY</code> determines presentation order and the final <code>LIMIT 100</code> caps displayed rows. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 1 returns one grouped row per <code>customer_id</code>, <code>order_id</code>, and <code>order_date</code>, capped at 100 rows with columns <code>customer_id</code>, <code>order_id</code>, <code>order_value</code>, <code>order_date</code>, <code>first_order_month</code>, and <code>ltv</code> from <code>orders</code>, <code>order_items</code>, and <code>customers</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> viewed_stage <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">MIN</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>event_time<span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span>
-           <span class="syntax-keyword">WHERE</span> e<span class="syntax-punctuation">.</span>event_type <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;page_view&#x27;</span>
-         <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> viewed_at
-  <span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">c</span>
-  <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> events e
-    <span class="syntax-keyword">ON</span> e<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id
-   <span class="syntax-keyword">AND</span> e<span class="syntax-punctuation">.</span>event_time <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;90 days&#x27;</span>
-  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> added_stage <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> viewed<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
-         viewed<span class="syntax-punctuation">.</span>viewed_at<span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">MIN</span><span class="syntax-punctuation">(</span>event<span class="syntax-punctuation">.</span>event_time<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> added_at
-  <span class="syntax-keyword">FROM</span> viewed_stage viewed
-  <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> events event
-    <span class="syntax-keyword">ON</span> event<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> viewed<span class="syntax-punctuation">.</span>customer_id
-   <span class="syntax-keyword">AND</span> event<span class="syntax-punctuation">.</span>event_type <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;add_to_cart&#x27;</span>
-   <span class="syntax-keyword">AND</span> event<span class="syntax-punctuation">.</span>event_time <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> viewed<span class="syntax-punctuation">.</span>viewed_at
-  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> viewed<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> viewed<span class="syntax-punctuation">.</span>viewed_at
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> checkout_stage <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> added<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
-         added<span class="syntax-punctuation">.</span>viewed_at<span class="syntax-punctuation">,</span>
-         added<span class="syntax-punctuation">.</span>added_at<span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">MIN</span><span class="syntax-punctuation">(</span>event<span class="syntax-punctuation">.</span>event_time<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> checkout_at
-  <span class="syntax-keyword">FROM</span> added_stage added
-  <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> events event
-    <span class="syntax-keyword">ON</span> event<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> added<span class="syntax-punctuation">.</span>customer_id
-   <span class="syntax-keyword">AND</span> event<span class="syntax-punctuation">.</span>event_type <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;checkout&#x27;</span>
-   <span class="syntax-keyword">AND</span> event<span class="syntax-punctuation">.</span>event_time <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> added<span class="syntax-punctuation">.</span>added_at
-  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> added<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> added<span class="syntax-punctuation">.</span>viewed_at<span class="syntax-punctuation">,</span> added<span class="syntax-punctuation">.</span>added_at
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> purchase_stage <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> checkout<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
-         checkout<span class="syntax-punctuation">.</span>viewed_at<span class="syntax-punctuation">,</span>
-         checkout<span class="syntax-punctuation">.</span>added_at<span class="syntax-punctuation">,</span>
-         checkout<span class="syntax-punctuation">.</span>checkout_at<span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">MIN</span><span class="syntax-punctuation">(</span>customer_order<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> purchased_at
-  <span class="syntax-keyword">FROM</span> checkout_stage checkout
-  <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> orders customer_order
-    <span class="syntax-keyword">ON</span> customer_order<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> checkout<span class="syntax-punctuation">.</span>customer_id
-   <span class="syntax-keyword">AND</span> customer_order<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> checkout<span class="syntax-punctuation">.</span>checkout_at
-   <span class="syntax-keyword">AND</span> customer_order<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;90 days&#x27;</span>
-  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> checkout<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> checkout<span class="syntax-punctuation">.</span>viewed_at<span class="syntax-punctuation">,</span>
-           checkout<span class="syntax-punctuation">.</span>added_at<span class="syntax-punctuation">,</span> checkout<span class="syntax-punctuation">.</span>checkout_at
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> activity <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span>
-         viewed_at <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">AS</span> viewed<span class="syntax-punctuation">,</span>
-         added_at <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">AND</span> added_at <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> viewed_at <span class="syntax-keyword">AS</span> added<span class="syntax-punctuation">,</span>
-         checkout_at <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">AND</span> checkout_at <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> added_at <span class="syntax-keyword">AS</span> checked_out<span class="syntax-punctuation">,</span>
-         purchased_at <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">AND</span> purchased_at <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> checkout_at <span class="syntax-keyword">AS</span> bought
-  <span class="syntax-keyword">FROM</span> purchase_stage
+  <span class="syntax-keyword">SELECT</span>
+    <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">MIN</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>event_time<span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> e<span class="syntax-punctuation">.</span>event_type <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;page_view&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> viewed_at
+  <span class="syntax-keyword">FROM</span>
+    customers <span class="syntax-keyword">c</span>
+    <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> events e <span class="syntax-keyword">ON</span> e<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id
+      <span class="syntax-keyword">AND</span> e<span class="syntax-punctuation">.</span>event_time <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;90 days&#x27;</span>
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+    <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+added_stage <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span>
+    viewed<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+    viewed<span class="syntax-punctuation">.</span>viewed_at<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">MIN</span><span class="syntax-punctuation">(</span>event<span class="syntax-punctuation">.</span>event_time<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> added_at
+  <span class="syntax-keyword">FROM</span>
+    viewed_stage viewed
+    <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> events event <span class="syntax-keyword">ON</span> event<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> viewed<span class="syntax-punctuation">.</span>customer_id
+      <span class="syntax-keyword">AND</span> event<span class="syntax-punctuation">.</span>event_type <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;add_to_cart&#x27;</span>
+      <span class="syntax-keyword">AND</span> event<span class="syntax-punctuation">.</span>event_time <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> viewed<span class="syntax-punctuation">.</span>viewed_at
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+    viewed<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+    viewed<span class="syntax-punctuation">.</span>viewed_at
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+checkout_stage <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span>
+    added<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+    added<span class="syntax-punctuation">.</span>viewed_at<span class="syntax-punctuation">,</span>
+    added<span class="syntax-punctuation">.</span>added_at<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">MIN</span><span class="syntax-punctuation">(</span>event<span class="syntax-punctuation">.</span>event_time<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> checkout_at
+  <span class="syntax-keyword">FROM</span>
+    added_stage added
+    <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> events event <span class="syntax-keyword">ON</span> event<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> added<span class="syntax-punctuation">.</span>customer_id
+      <span class="syntax-keyword">AND</span> event<span class="syntax-punctuation">.</span>event_type <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;checkout&#x27;</span>
+      <span class="syntax-keyword">AND</span> event<span class="syntax-punctuation">.</span>event_time <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> added<span class="syntax-punctuation">.</span>added_at
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+    added<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+    added<span class="syntax-punctuation">.</span>viewed_at<span class="syntax-punctuation">,</span>
+    added<span class="syntax-punctuation">.</span>added_at
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+purchase_stage <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span>
+    checkout<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+    checkout<span class="syntax-punctuation">.</span>viewed_at<span class="syntax-punctuation">,</span>
+    checkout<span class="syntax-punctuation">.</span>added_at<span class="syntax-punctuation">,</span>
+    checkout<span class="syntax-punctuation">.</span>checkout_at<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">MIN</span><span class="syntax-punctuation">(</span>customer_order<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> purchased_at
+  <span class="syntax-keyword">FROM</span>
+    checkout_stage checkout
+    <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> orders customer_order <span class="syntax-keyword">ON</span> customer_order<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> checkout<span class="syntax-punctuation">.</span>customer_id
+      <span class="syntax-keyword">AND</span> customer_order<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> checkout<span class="syntax-punctuation">.</span>checkout_at
+      <span class="syntax-keyword">AND</span> customer_order<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;90 days&#x27;</span>
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+    checkout<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+    checkout<span class="syntax-punctuation">.</span>viewed_at<span class="syntax-punctuation">,</span>
+    checkout<span class="syntax-punctuation">.</span>added_at<span class="syntax-punctuation">,</span>
+    checkout<span class="syntax-punctuation">.</span>checkout_at
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+activity <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span>
+    customer_id<span class="syntax-punctuation">,</span>
+    viewed_at <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">AS</span> viewed<span class="syntax-punctuation">,</span>
+    added_at <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span>
+    <span class="syntax-keyword">AND</span> added_at <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> viewed_at <span class="syntax-keyword">AS</span> added<span class="syntax-punctuation">,</span>
+    checkout_at <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span>
+    <span class="syntax-keyword">AND</span> checkout_at <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> added_at <span class="syntax-keyword">AS</span> checked_out<span class="syntax-punctuation">,</span>
+    purchased_at <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span>
+    <span class="syntax-keyword">AND</span> purchased_at <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> checkout_at <span class="syntax-keyword">AS</span> bought
+  <span class="syntax-keyword">FROM</span>
+    purchase_stage
 <span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> viewed<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> viewers<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> added<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> adders<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> checked_out<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> checkouts<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> bought<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> buyers
-<span class="syntax-keyword">FROM</span> activity<span class="syntax-punctuation">;</span></code></pre>
+<span class="syntax-keyword">SELECT</span>
+  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> viewed<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> viewers<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> added<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> adders<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> checked_out<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> checkouts<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> bought<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> buyers
+<span class="syntax-keyword">FROM</span>
+  activity<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> <code>viewed_stage</code> retains one row per customer and records the earliest recent page view. Each later <code>LEFT JOIN</code> searches only at or after its prior timestamp. A customer who checks out before adding to cart therefore does not enter the ordered checkout population. <code>activity</code> turns the four timestamps into nested Boolean populations, and aggregate <code>FILTER</code> returns one summary row. This is different from independently asking whether each event happened at any time; independent reach can increase between stages and is not a funnel.</p>
 <p><strong>Expected result/shape:</strong> Exactly one row with <code>viewers</code>, <code>adders</code>, <code>checkouts</code>, and <code>buyers</code>. The invariant is <code>buyers &lt;= checkouts &lt;= adders &lt;= viewers</code>. Inspect one customer&#x27;s four timestamps before trusting the aggregate, and add a counterexample whose checkout precedes add-to-cart; that checkout must not count.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -1032,81 +1073,115 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
 <span class="syntax-keyword">WITH</span> customer_ltv <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>segment<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;standard&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> segment<span class="syntax-punctuation">,</span>
-         date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>created_at<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> cohort_month<span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> ltv
-  <span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">c</span>
-  <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">)</span>
-  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>segment<span class="syntax-punctuation">,</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>created_at<span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> cohort_month<span class="syntax-punctuation">,</span>
-       segment<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> customers<span class="syntax-punctuation">,</span>
-       ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">AVG</span><span class="syntax-punctuation">(</span>ltv<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> avg_ltv<span class="syntax-punctuation">,</span>
-       ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>ltv<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> total_ltv
-<span class="syntax-keyword">FROM</span> customer_ltv
-<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> cohort_month<span class="syntax-punctuation">,</span> segment
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> cohort_month <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> total_ltv <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span></code></pre>
+  <span class="syntax-keyword">SELECT</span>
+    <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>segment<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;standard&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> segment<span class="syntax-punctuation">,</span>
+    date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>created_at<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> cohort_month<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> ltv
+  <span class="syntax-keyword">FROM</span>
+    customers <span class="syntax-keyword">c</span>
+    <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">)</span>
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+    <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>segment<span class="syntax-punctuation">,</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>created_at<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span>
+  cohort_month<span class="syntax-punctuation">,</span>
+  segment<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> customers<span class="syntax-punctuation">,</span>
+  ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">AVG</span><span class="syntax-punctuation">(</span>ltv<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> avg_ltv<span class="syntax-punctuation">,</span>
+  ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>ltv<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> total_ltv
+<span class="syntax-keyword">FROM</span>
+  customer_ltv
+<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+  cohort_month<span class="syntax-punctuation">,</span>
+  segment
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  cohort_month <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span>
+  total_ltv <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span></code></pre>
 <p>Expected grain: one row per <code>(cohort_month, segment)</code>, including customers with zero orders.</p>
 <h5 id="solution-1--ninety-day-conversion-funnel">Ninety-day conversion funnel<a class="heading-anchor" href="#solution-1--ninety-day-conversion-funnel" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
 <span class="syntax-keyword">WITH</span> viewed_stage <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">MIN</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>event_time<span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span>
-           <span class="syntax-keyword">WHERE</span> e<span class="syntax-punctuation">.</span>event_type <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;page_view&#x27;</span>
-         <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> viewed_at
-  <span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">c</span>
-  <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> events e
-    <span class="syntax-keyword">ON</span> e<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id
-   <span class="syntax-keyword">AND</span> e<span class="syntax-punctuation">.</span>event_time <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;90 days&#x27;</span>
-  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> added_stage <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> v<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> v<span class="syntax-punctuation">.</span>viewed_at<span class="syntax-punctuation">,</span> <span class="syntax-keyword">MIN</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>event_time<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> added_at
-  <span class="syntax-keyword">FROM</span> viewed_stage v
-  <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> events e
-    <span class="syntax-keyword">ON</span> e<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> v<span class="syntax-punctuation">.</span>customer_id
-   <span class="syntax-keyword">AND</span> e<span class="syntax-punctuation">.</span>event_type <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;add_to_cart&#x27;</span>
-   <span class="syntax-keyword">AND</span> e<span class="syntax-punctuation">.</span>event_time <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> v<span class="syntax-punctuation">.</span>viewed_at
-  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> v<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> v<span class="syntax-punctuation">.</span>viewed_at
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> checkout_stage <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> a<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> a<span class="syntax-punctuation">.</span>viewed_at<span class="syntax-punctuation">,</span> a<span class="syntax-punctuation">.</span>added_at<span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">MIN</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>event_time<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> checkout_at
-  <span class="syntax-keyword">FROM</span> added_stage a
-  <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> events e
-    <span class="syntax-keyword">ON</span> e<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> a<span class="syntax-punctuation">.</span>customer_id
-   <span class="syntax-keyword">AND</span> e<span class="syntax-punctuation">.</span>event_type <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;checkout&#x27;</span>
-   <span class="syntax-keyword">AND</span> e<span class="syntax-punctuation">.</span>event_time <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> a<span class="syntax-punctuation">.</span>added_at
-  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> a<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> a<span class="syntax-punctuation">.</span>viewed_at<span class="syntax-punctuation">,</span> a<span class="syntax-punctuation">.</span>added_at
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> purchase_stage <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> ch<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> ch<span class="syntax-punctuation">.</span>viewed_at<span class="syntax-punctuation">,</span> ch<span class="syntax-punctuation">.</span>added_at<span class="syntax-punctuation">,</span> ch<span class="syntax-punctuation">.</span>checkout_at<span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">MIN</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> purchased_at
-  <span class="syntax-keyword">FROM</span> checkout_stage ch
-  <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> orders o
-    <span class="syntax-keyword">ON</span> o<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> ch<span class="syntax-punctuation">.</span>customer_id
-   <span class="syntax-keyword">AND</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> ch<span class="syntax-punctuation">.</span>checkout_at
-   <span class="syntax-keyword">AND</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;90 days&#x27;</span>
-  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> ch<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> ch<span class="syntax-punctuation">.</span>viewed_at<span class="syntax-punctuation">,</span> ch<span class="syntax-punctuation">.</span>added_at<span class="syntax-punctuation">,</span> ch<span class="syntax-punctuation">.</span>checkout_at
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> activity <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span>
-         viewed_at <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">AS</span> viewed<span class="syntax-punctuation">,</span>
-         added_at <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">AND</span> added_at <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> viewed_at <span class="syntax-keyword">AS</span> added<span class="syntax-punctuation">,</span>
-         checkout_at <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">AND</span> checkout_at <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> added_at <span class="syntax-keyword">AS</span> checked_out<span class="syntax-punctuation">,</span>
-         purchased_at <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">AND</span> purchased_at <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> checkout_at <span class="syntax-keyword">AS</span> bought
-  <span class="syntax-keyword">FROM</span> purchase_stage
+  <span class="syntax-keyword">SELECT</span>
+    <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">MIN</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>event_time<span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> e<span class="syntax-punctuation">.</span>event_type <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;page_view&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> viewed_at
+  <span class="syntax-keyword">FROM</span>
+    customers <span class="syntax-keyword">c</span>
+    <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> events e <span class="syntax-keyword">ON</span> e<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id
+      <span class="syntax-keyword">AND</span> e<span class="syntax-punctuation">.</span>event_time <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;90 days&#x27;</span>
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+    <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+added_stage <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span>
+    v<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+    v<span class="syntax-punctuation">.</span>viewed_at<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">MIN</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>event_time<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> added_at
+  <span class="syntax-keyword">FROM</span>
+    viewed_stage v
+    <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> events e <span class="syntax-keyword">ON</span> e<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> v<span class="syntax-punctuation">.</span>customer_id
+      <span class="syntax-keyword">AND</span> e<span class="syntax-punctuation">.</span>event_type <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;add_to_cart&#x27;</span>
+      <span class="syntax-keyword">AND</span> e<span class="syntax-punctuation">.</span>event_time <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> v<span class="syntax-punctuation">.</span>viewed_at
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+    v<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+    v<span class="syntax-punctuation">.</span>viewed_at
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+checkout_stage <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span>
+    a<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+    a<span class="syntax-punctuation">.</span>viewed_at<span class="syntax-punctuation">,</span>
+    a<span class="syntax-punctuation">.</span>added_at<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">MIN</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>event_time<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> checkout_at
+  <span class="syntax-keyword">FROM</span>
+    added_stage a
+    <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> events e <span class="syntax-keyword">ON</span> e<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> a<span class="syntax-punctuation">.</span>customer_id
+      <span class="syntax-keyword">AND</span> e<span class="syntax-punctuation">.</span>event_type <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;checkout&#x27;</span>
+      <span class="syntax-keyword">AND</span> e<span class="syntax-punctuation">.</span>event_time <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> a<span class="syntax-punctuation">.</span>added_at
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+    a<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+    a<span class="syntax-punctuation">.</span>viewed_at<span class="syntax-punctuation">,</span>
+    a<span class="syntax-punctuation">.</span>added_at
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+purchase_stage <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span>
+    ch<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+    ch<span class="syntax-punctuation">.</span>viewed_at<span class="syntax-punctuation">,</span>
+    ch<span class="syntax-punctuation">.</span>added_at<span class="syntax-punctuation">,</span>
+    ch<span class="syntax-punctuation">.</span>checkout_at<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">MIN</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> purchased_at
+  <span class="syntax-keyword">FROM</span>
+    checkout_stage ch
+    <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">ON</span> o<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> ch<span class="syntax-punctuation">.</span>customer_id
+      <span class="syntax-keyword">AND</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> ch<span class="syntax-punctuation">.</span>checkout_at
+      <span class="syntax-keyword">AND</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;90 days&#x27;</span>
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+    ch<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+    ch<span class="syntax-punctuation">.</span>viewed_at<span class="syntax-punctuation">,</span>
+    ch<span class="syntax-punctuation">.</span>added_at<span class="syntax-punctuation">,</span>
+    ch<span class="syntax-punctuation">.</span>checkout_at
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+activity <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span>
+    customer_id<span class="syntax-punctuation">,</span>
+    viewed_at <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">AS</span> viewed<span class="syntax-punctuation">,</span>
+    added_at <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span>
+    <span class="syntax-keyword">AND</span> added_at <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> viewed_at <span class="syntax-keyword">AS</span> added<span class="syntax-punctuation">,</span>
+    checkout_at <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span>
+    <span class="syntax-keyword">AND</span> checkout_at <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> added_at <span class="syntax-keyword">AS</span> checked_out<span class="syntax-punctuation">,</span>
+    purchased_at <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span>
+    <span class="syntax-keyword">AND</span> purchased_at <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> checkout_at <span class="syntax-keyword">AS</span> bought
+  <span class="syntax-keyword">FROM</span>
+    purchase_stage
 <span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> viewed<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> viewers<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> added<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> adders<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> checked_out<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> checkouts<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> bought<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> buyers<span class="syntax-punctuation">,</span>
-       ROUND<span class="syntax-punctuation">(</span>
-         <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> bought<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span>
-           <span class="syntax-operator">/</span> <span class="syntax-keyword">NULLIF</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> viewed<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
-         <span class="syntax-number">4</span>
-       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> viewer_to_buyer_rate
-<span class="syntax-keyword">FROM</span> activity<span class="syntax-punctuation">;</span></code></pre>
+<span class="syntax-keyword">SELECT</span>
+  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> viewed<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> viewers<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> added<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> adders<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> checked_out<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> checkouts<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> bought<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> buyers<span class="syntax-punctuation">,</span>
+  ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> bought<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span> <span class="syntax-operator">/</span> <span class="syntax-keyword">NULLIF</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> viewed<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> viewer_to_buyer_rate
+<span class="syntax-keyword">FROM</span>
+  activity<span class="syntax-punctuation">;</span></code></pre>
 <p>Expected shape: one row. Every later funnel population is a subset of the preceding population because its timestamp must follow the prior stage.</p>
 <h5 id="solution-1--product-pair-affinity">Product-pair affinity<a class="heading-anchor" href="#solution-1--product-pair-affinity" aria-label="Link to this section">#</a></h5>
 <p>The learner script already supplies the runnable market-basket query. Its deliverable is the 20 most frequent distinct product pairs. Deduplicate <code>(order_id, product_id)</code> first and enforce <code>a.product_id &lt; b.product_id</code>; this prevents self-pairs and reversed duplicates. The metric is co-occurrence count, despite the starter comment saying “revenue.”</p>
@@ -1114,15 +1189,23 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span>
 <span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
-<span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> idx_orders_customer_date_day59_solution
-  <span class="syntax-keyword">ON</span> orders<span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">,</span> order_date<span class="syntax-punctuation">)</span> INCLUDE <span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> idx_orders_customer_date_day59_solution <span class="syntax-keyword">ON</span> orders <span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">,</span> order_date<span class="syntax-punctuation">)</span> INCLUDE <span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 
-<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span> BUFFERS<span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue
-<span class="syntax-keyword">FROM</span> orders
-<span class="syntax-keyword">WHERE</span> order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;180 days&#x27;</span>
-<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> customer_id
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> revenue <span class="syntax-keyword">DESC</span>
+<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span>
+  BUFFERS
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span>
+  customer_id<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue
+<span class="syntax-keyword">FROM</span>
+  orders
+<span class="syntax-keyword">WHERE</span>
+  order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;180 days&#x27;</span>
+<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+  customer_id
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  revenue <span class="syntax-keyword">DESC</span>
 <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">50</span><span class="syntax-punctuation">;</span>
 
 <span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></code></pre>
@@ -1132,23 +1215,37 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
 <span class="syntax-keyword">WITH</span> actual <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> category<span class="syntax-punctuation">,</span> <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> actual
-  <span class="syntax-keyword">FROM</span> expenses
-  <span class="syntax-keyword">WHERE</span> expense_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;year&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_DATE</span><span class="syntax-punctuation">)</span>
-  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> category
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> budget <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> category<span class="syntax-punctuation">,</span> <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> budget
-  <span class="syntax-keyword">FROM</span> budgets
-  <span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">period</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;year&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_DATE</span><span class="syntax-punctuation">)</span>
-  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> category
+  <span class="syntax-keyword">SELECT</span>
+    category<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> actual
+  <span class="syntax-keyword">FROM</span>
+    expenses
+  <span class="syntax-keyword">WHERE</span>
+    expense_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;year&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_DATE</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+    category
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+budget <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span>
+    category<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> budget
+  <span class="syntax-keyword">FROM</span>
+    budgets
+  <span class="syntax-keyword">WHERE</span>
+    <span class="syntax-keyword">period</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;year&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_DATE</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+    category
 <span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> category<span class="syntax-punctuation">,</span>
-       ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">.</span>budget<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> budget<span class="syntax-punctuation">,</span>
-       ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">.</span>actual<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> actual<span class="syntax-punctuation">,</span>
-       ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">.</span>actual<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">.</span>budget<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> variance
-<span class="syntax-keyword">FROM</span> actual a
-<span class="syntax-keyword">FULL</span> <span class="syntax-keyword">OUTER</span> <span class="syntax-keyword">JOIN</span> budget b <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>category<span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> category<span class="syntax-punctuation">;</span></code></pre>
+<span class="syntax-keyword">SELECT</span>
+  <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> category<span class="syntax-punctuation">,</span>
+  ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">.</span>budget<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> budget<span class="syntax-punctuation">,</span>
+  ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">.</span>actual<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> actual<span class="syntax-punctuation">,</span>
+  ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">.</span>actual<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">.</span>budget<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> variance
+<span class="syntax-keyword">FROM</span>
+  actual a
+  <span class="syntax-keyword">FULL</span> <span class="syntax-keyword">OUTER</span> <span class="syntax-keyword">JOIN</span> budget b <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>category<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  category<span class="syntax-punctuation">;</span></code></pre>
 <p>Expected grain: one row per category found in actuals or budget.</p>
 <h5 id="solution-1--marketing-campaign-assisted-purchases">Marketing: campaign-assisted purchases<a class="heading-anchor" href="#solution-1--marketing-campaign-assisted-purchases" aria-label="Link to this section">#</a></h5>
 <p>The learner query anchors on each customer&#x27;s first order and counts distinct customers with a campaign touch in the preceding seven days. The touch whitelist is <code>page_view</code>, <code>add_to_cart</code>, and <code>checkout</code>; campaign metadata on a different event type does not qualify. Document that definition: it is first-purchase assistance, not all-purchase event attribution from Day 48. Multiple campaigns can assist one customer, so campaign rows are not additive.</p>

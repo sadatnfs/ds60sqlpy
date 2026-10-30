@@ -433,20 +433,20 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These worked excerpts come from <code>sql/postgres-60day/day54_project3_dwh_part3_aggregations.sql</code>. Use <strong>Whole SQL lesson (psql)</strong> in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared <code>psql</code> routes are described above.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> agg_sales_category_month <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">year</span>    <span class="syntax-builtin">INT</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
-  <span class="syntax-keyword">month</span>   <span class="syntax-builtin">INT</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">year</span> <span class="syntax-builtin">INT</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">month</span> <span class="syntax-builtin">INT</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
   category <span class="syntax-builtin">TEXT</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
-  revenue <span class="syntax-builtin">NUMERIC</span><span class="syntax-punctuation">(</span><span class="syntax-number">14</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
+  revenue <span class="syntax-builtin">NUMERIC</span><span class="syntax-punctuation">(</span><span class="syntax-number">14</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
   <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">)</span>
 <span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 1 is data definition language (DDL). <code>psql</code> prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.</p>
 <p><strong>Expected result/shape:</strong> Example 1 must print the expected DDL command tag for <code>agg_sales_category_month</code>. Verify the object in <code>pg_catalog.pg_class</code>, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> agg_sales_customer_month <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">year</span>     <span class="syntax-builtin">INT</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
-  <span class="syntax-keyword">month</span>    <span class="syntax-builtin">INT</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">year</span> <span class="syntax-builtin">INT</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">month</span> <span class="syntax-builtin">INT</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
   customer_sk <span class="syntax-builtin">INT</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
-  revenue  <span class="syntax-builtin">NUMERIC</span><span class="syntax-punctuation">(</span><span class="syntax-number">14</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
+  revenue <span class="syntax-builtin">NUMERIC</span><span class="syntax-punctuation">(</span><span class="syntax-number">14</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
   <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> customer_sk<span class="syntax-punctuation">)</span>
 <span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 2 is data definition language (DDL). <code>psql</code> prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.</p>
@@ -796,44 +796,63 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> agg_sales_product_month <span class="syntax-punctuation">(</span>
   <span class="syntax-keyword">year</span> <span class="syntax-builtin">int</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
   <span class="syntax-keyword">month</span> <span class="syntax-builtin">int</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
-  product_sk <span class="syntax-builtin">int</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">REFERENCES</span> dim_product<span class="syntax-punctuation">(</span>product_sk<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
-  revenue <span class="syntax-builtin">numeric</span><span class="syntax-punctuation">(</span><span class="syntax-number">14</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
+  product_sk <span class="syntax-builtin">int</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">REFERENCES</span> dim_product <span class="syntax-punctuation">(</span>product_sk<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+  revenue <span class="syntax-builtin">numeric</span><span class="syntax-punctuation">(</span><span class="syntax-number">14</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
   units <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
   orders <span class="syntax-builtin">bigint</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
   <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> product_sk<span class="syntax-punctuation">)</span>
 <span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 
-<span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> agg_sales_product_month<span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> product_sk<span class="syntax-punctuation">,</span> revenue<span class="syntax-punctuation">,</span> units<span class="syntax-punctuation">,</span> orders
-<span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span>
-       dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
-       fs<span class="syntax-punctuation">.</span>product_sk<span class="syntax-punctuation">,</span>
-       ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>fs<span class="syntax-punctuation">.</span>amount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>fs<span class="syntax-punctuation">.</span>quantity<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> fs<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">FROM</span> fact_sales fs
-<span class="syntax-keyword">JOIN</span> dim_date dd <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>date_key<span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> fs<span class="syntax-punctuation">.</span>product_sk<span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> agg_sales_product_month <span class="syntax-punctuation">(</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> product_sk<span class="syntax-punctuation">,</span> revenue<span class="syntax-punctuation">,</span> units<span class="syntax-punctuation">,</span> orders<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span>
+  dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span>
+  dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
+  fs<span class="syntax-punctuation">.</span>product_sk<span class="syntax-punctuation">,</span>
+  ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>fs<span class="syntax-punctuation">.</span>amount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>fs<span class="syntax-punctuation">.</span>quantity<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> fs<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">FROM</span>
+  fact_sales fs
+  <span class="syntax-keyword">JOIN</span> dim_date dd <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>date_key<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+  dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span>
+  dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
+  fs<span class="syntax-punctuation">.</span>product_sk<span class="syntax-punctuation">;</span>
 
 <span class="syntax-keyword">WITH</span> aggregate_total <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue
-  <span class="syntax-keyword">FROM</span> agg_sales_product_month
-  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">month</span>
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> fact_total <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span> ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>fs<span class="syntax-punctuation">.</span>amount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue
-  <span class="syntax-keyword">FROM</span> fact_sales fs
-  <span class="syntax-keyword">JOIN</span> dim_date dd <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>date_key<span class="syntax-punctuation">)</span>
-  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span>
+  <span class="syntax-keyword">SELECT</span>
+    <span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue
+  <span class="syntax-keyword">FROM</span>
+    agg_sales_product_month
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+    <span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">month</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+fact_total <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span>
+    dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span>
+    dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
+    ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>fs<span class="syntax-punctuation">.</span>amount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue
+  <span class="syntax-keyword">FROM</span>
+    fact_sales fs
+    <span class="syntax-keyword">JOIN</span> dim_date dd <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>date_key<span class="syntax-punctuation">)</span>
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+    dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> dd<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span>
 <span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> a<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span>
-       a<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
-       a<span class="syntax-punctuation">.</span>revenue <span class="syntax-keyword">AS</span> aggregate_revenue<span class="syntax-punctuation">,</span>
-       f<span class="syntax-punctuation">.</span>revenue <span class="syntax-keyword">AS</span> fact_revenue<span class="syntax-punctuation">,</span>
-       a<span class="syntax-punctuation">.</span>revenue <span class="syntax-operator">-</span> f<span class="syntax-punctuation">.</span>revenue <span class="syntax-keyword">AS</span> difference
-<span class="syntax-keyword">FROM</span> aggregate_total a
-<span class="syntax-keyword">JOIN</span> fact_total f <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> a<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> a<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">SELECT</span>
+  a<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span>
+  a<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
+  a<span class="syntax-punctuation">.</span>revenue <span class="syntax-keyword">AS</span> aggregate_revenue<span class="syntax-punctuation">,</span>
+  f<span class="syntax-punctuation">.</span>revenue <span class="syntax-keyword">AS</span> fact_revenue<span class="syntax-punctuation">,</span>
+  a<span class="syntax-punctuation">.</span>revenue <span class="syntax-operator">-</span> f<span class="syntax-punctuation">.</span>revenue <span class="syntax-keyword">AS</span> difference
+<span class="syntax-keyword">FROM</span>
+  aggregate_total a
+  <span class="syntax-keyword">JOIN</span> fact_total f <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  a<span class="syntax-punctuation">.</span><span class="syntax-keyword">year</span><span class="syntax-punctuation">,</span>
+  a<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">;</span>
 
 <span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></code></pre>
 <p>The two sides are aggregated independently before joining, preventing join fanout. Expected <code>difference</code> is zero for every built month.</p>

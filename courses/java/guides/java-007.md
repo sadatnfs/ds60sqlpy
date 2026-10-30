@@ -49,19 +49,38 @@ Equal initial values do not mean shared identity. Eachnew expression creates a s
 import java.util.*;
 
 public class Main {
-    static final class Account {
-        private int cents;
-        Account(int cents) { if (cents < 0) throw new IllegalArgumentException("negative balance"); this.cents = cents; }
-        int balance() { return cents; }
-        void deposit(int amount) { if (amount < 0) throw new IllegalArgumentException("negative deposit"); cents = Math.addExact(cents, amount); }
-        void withdraw(int amount) { if (amount < 0 || amount > cents) throw new IllegalArgumentException("invalid withdrawal"); cents -= amount; }
-    }
-    public static void main(String[] args) throws Exception {
-        Account first = new Account(100); Account second = new Account(100); first.deposit(50);
-        assert first.balance() == 150 && second.balance() == 100;
-    }
-}
 
+  static final class Account {
+
+    private int cents;
+
+    Account(int cents) {
+      if (cents < 0) throw new IllegalArgumentException("negative balance");
+      this.cents = cents;
+    }
+
+    int balance() {
+      return cents;
+    }
+
+    void deposit(int amount) {
+      if (amount < 0) throw new IllegalArgumentException("negative deposit");
+      cents = Math.addExact(cents, amount);
+    }
+
+    void withdraw(int amount) {
+      if (amount < 0 || amount > cents) throw new IllegalArgumentException("invalid withdrawal");
+      cents -= amount;
+    }
+  }
+
+  public static void main(String[] args) throws Exception {
+    Account first = new Account(100);
+    Account second = new Account(100);
+    first.deposit(50);
+    assert first.balance() == 150 && second.balance() == 100;
+  }
+}
 ```
 
 **Expected:** balances 150 and 100.
@@ -74,21 +93,41 @@ The method validates the amount against current state, then performs one state c
 import java.util.*;
 
 public class Main {
-    static final class Account {
-        private int cents;
-        Account(int cents) { if (cents < 0) throw new IllegalArgumentException("negative balance"); this.cents = cents; }
-        int balance() { return cents; }
-        void deposit(int amount) { if (amount < 0) throw new IllegalArgumentException("negative deposit"); cents = Math.addExact(cents, amount); }
-        void withdraw(int amount) { if (amount < 0 || amount > cents) throw new IllegalArgumentException("invalid withdrawal"); cents -= amount; }
-    }
-    public static void main(String[] args) throws Exception {
-        Account first = new Account(100); Account second = new Account(100); first.deposit(50);
-        assert first.balance() == 150 && second.balance() == 100;
 
-        first.withdraw(40); assert first.balance() == 110;
+  static final class Account {
+
+    private int cents;
+
+    Account(int cents) {
+      if (cents < 0) throw new IllegalArgumentException("negative balance");
+      this.cents = cents;
     }
+
+    int balance() {
+      return cents;
+    }
+
+    void deposit(int amount) {
+      if (amount < 0) throw new IllegalArgumentException("negative deposit");
+      cents = Math.addExact(cents, amount);
+    }
+
+    void withdraw(int amount) {
+      if (amount < 0 || amount > cents) throw new IllegalArgumentException("invalid withdrawal");
+      cents -= amount;
+    }
+  }
+
+  public static void main(String[] args) throws Exception {
+    Account first = new Account(100);
+    Account second = new Account(100);
+    first.deposit(50);
+    assert first.balance() == 150 && second.balance() == 100;
+
+    first.withdraw(40);
+    assert first.balance() == 110;
+  }
 }
-
 ```
 
 **Expected:** balance110.

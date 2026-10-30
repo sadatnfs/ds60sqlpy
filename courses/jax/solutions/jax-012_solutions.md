@@ -9,7 +9,7 @@ The loop supplies a transparent oracle for this tiny batch; it is not a performa
 **Expected:** The same [0,2] values.
 
 ```python
-w = jnp.array([2., -1.])
+w = jnp.array([2.0, -1.0])
 loop = jnp.stack([predict_one(w, row) for row in features])
 close(jax.vmap(predict_one, in_axes=(None, 0))(w, features), loop)
 ```
@@ -22,7 +22,7 @@ The equality depends on the stated separable loss and equal observation weights.
 
 ```python
 batch_loss = lambda w: jnp.mean(jax.vmap(loss_one, in_axes=(None, 0, 0))(w, features, targets))
-close(jax.grad(batch_loss)(jnp.zeros(2)), [-7., -10.])
+close(jax.grad(batch_loss)(jnp.zeros(2)), [-7.0, -10.0])
 ```
 
 ## Exercise 3: Change to a sum
@@ -33,7 +33,7 @@ The batch contains two equally weighted observations, so sum and mean differ by 
 
 ```python
 summed = lambda w: jnp.sum(jax.vmap(loss_one, in_axes=(None, 0, 0))(w, features, targets))
-close(jax.grad(summed)(jnp.zeros(2)), [-14., -20.])
+close(jax.grad(summed)(jnp.zeros(2)), [-14.0, -20.0])
 ```
 
 ## Exercise 4: Map several models
@@ -43,8 +43,8 @@ Now the model axis is mapped and the input observation is shared. This answers a
 **Expected:** [2,3,5].
 
 ```python
-weights = jnp.array([[1., 0.], [0., 1.], [1., 1.]])
-close(jax.vmap(predict_one, in_axes=(0, None))(weights, jnp.array([2., 3.])), [2., 3., 5.])
+weights = jnp.array([[1.0, 0.0], [0.0, 1.0], [1.0, 1.0]])
+close(jax.vmap(predict_one, in_axes=(0, None))(weights, jnp.array([2.0, 3.0])), [2.0, 3.0, 5.0])
 ```
 
 ## Exercise 5: Compose with JIT
@@ -55,7 +55,7 @@ Vectorization and compilation can compose without changing the requested mathema
 
 ```python
 compiled = jax.jit(jax.vmap(predict_one, in_axes=(None, 0)))
-close(compiled(jnp.array([2., -1.]), features), [0., 2.])
+close(compiled(jnp.array([2.0, -1.0]), features), [0.0, 2.0])
 ```
 
 ## Exercise 6: Allocate random streams per row

@@ -23,7 +23,9 @@ Task: Copy array 1,2,3,mutate the copy and compare the original.
 The new array owns its storage. A simple assignment copy=original would alias the same array and make the mutation visible through both variables.
 
 ```java
-int[] original = {1, 2, 3}; int[] copy = Arrays.copyOf(original, original.length); copy[0] = 9;
+int[] original = { 1, 2, 3 };
+int[] copy = Arrays.copyOf(original, original.length);
+copy[0] = 9;
 assert original[0] == 1 && copy[0] == 9;
 ```
 
@@ -54,7 +56,8 @@ Task: Convert lowercasered to uppercase and retain both references.
 The method returns a new value rather than changing lower. Locale.ROOT makes the case policy explicit for a language-neutral fixture.
 
 ```java
-String lower = "red"; String upper = lower.toUpperCase(Locale.ROOT);
+String lower = "red";
+String upper = lower.toUpperCase(Locale.ROOT);
 assert lower.equals("red") && upper.equals("RED");
 ```
 
@@ -69,7 +72,8 @@ Task: Find the UTF-16 offset of the second code point and take the remaining sub
 Converting a code-point position to a UTF-16 offset respects surrogate boundaries. Arbitrarily slicing at the second surrogate would create malformed text.
 
 ```java
-int offset = text.offsetByCodePoints(0, 1); String emoji = text.substring(offset);
+int offset = text.offsetByCodePoints(0, 1);
+String emoji = text.substring(offset);
 assert emoji.length() == 2 && emoji.codePointCount(0, emoji.length()) == 1;
 ```
 
@@ -84,9 +88,12 @@ Task: Compare composedé ande plus combining acute before and afterNFC.
 Normalization can merge representations that look equivalent. Whether that is appropriate for an identifier, password or display field is a domain decision.
 
 ```java
-String composed = "é"; String decomposed = "é";
+String composed = "é";
+String decomposed = "é";
 assert !composed.equals(decomposed);
-assert java.text.Normalizer.normalize(decomposed, java.text.Normalizer.Form.NFC).equals(composed);
+assert java.text.Normalizer.normalize(decomposed, java.text.Normalizer.Form.NFC).equals(
+  composed
+);
 ```
 
 **Expected:** raw strings differ;normalized strings equal.
@@ -101,7 +108,11 @@ The highest valid index islength-1. A container having three elements does not m
 
 ```java
 boolean invalid = false;
-try { int ignored = original[3]; } catch (ArrayIndexOutOfBoundsException expected) { invalid = true; }
+try {
+  int ignored = original[3];
+} catch (ArrayIndexOutOfBoundsException expected) {
+  invalid = true;
+}
 assert invalid;
 ```
 

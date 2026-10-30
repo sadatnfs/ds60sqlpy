@@ -5,7 +5,13 @@ Run `python -m spark_tmb.cli` in the prepared environment. Each process accepts 
 Evaluation request:
 
 ```json
-{"schema_version":1,"operation":"evaluate","model_id":"normal_mean","data":{"y":[1,2,4,7]},"parameters":[2.2,0.3]}
+{
+  "schema_version": 1,
+  "operation": "evaluate",
+  "model_id": "normal_mean",
+  "data": { "y": [1, 2, 4, 7] },
+  "parameters": [2.2, 0.3]
+}
 ```
 
 Replace `evaluate` with `fit` for an independent bounded local fit starting at `parameters`. This is not a shared distributed optimizer. Success has exactly the envelope `schema_version`, `operation`, `model_id`, `result`. The result is the prepared runtime's validated detached object, including objective, gradient, parameter names, observation count, ABI, input parameter digest and source/library hashes. Fit additionally returns fitted parameters and convergence diagnostics.
@@ -13,7 +19,7 @@ Replace `evaluate` with `fit` for an independent bounded local fit starting at `
 Read-only description request:
 
 ```json
-{"schema_version":1,"operation":"describe","model_id":"normal_mean"}
+{ "schema_version": 1, "operation": "describe", "model_id": "normal_mean" }
 ```
 
 Its result has `spec`, `max_rows`, `max_parameters`, `max_groups` and `prepared`. `spec` is the validated installed model declaration. `prepared` contains `source_sha256`, `library_sha256`, `registry_sha256` and `abi`. Description verifies installed artifacts without starting R. Scala/JVM callers must use this same registry description rather than invent a second model schema. A first independent-row adapter can explicitly refuse `complete_groups` or non-null `random` until its complete-unit handling is implemented and tested.
@@ -23,7 +29,15 @@ No request may supply a project path, library path, compiler flags, R expression
 Registered prediction request:
 
 ```json
-{"schema_version":1,"operation":"predict","model_id":"linear_regression","data":{"x_prediction":[-1,0,2]},"parameters":[1,2,-0.5],"n_rows":3,"target":"conditional_mean"}
+{
+  "schema_version": 1,
+  "operation": "predict",
+  "model_id": "linear_regression",
+  "data": { "x_prediction": [-1, 0, 2] },
+  "parameters": [1, 2, -0.5],
+  "n_rows": 3,
+  "target": "conditional_mean"
+}
 ```
 
 Prediction requires exactly these extra fields: data, parameters, n_rows and target. The registered response-free inputs and report semantics are authoritative. Results contain prediction (one finite scalar per row), target, nobs, parameter_names, input parameter digest and the same source/library/registry/ABI identities. Undeclared predictions and response inputs are rejected. Evaluating a likelihood does not implicitly define a transform method.

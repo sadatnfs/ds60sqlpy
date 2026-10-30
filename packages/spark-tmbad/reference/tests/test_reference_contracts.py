@@ -153,8 +153,13 @@ class ReferenceContracts(unittest.TestCase):
 
     def test_fixed_data_posterior_draw_replays_do_not_invent_dataset_mcse(self):
         records = [
-            {"status": "passed", "result": {"fixture_sha256": "a" * 64,
-                "metrics": {"primary_estimate": 0.7, "truth": 0.8}}}
+            {
+                "status": "passed",
+                "result": {
+                    "fixture_sha256": "a" * 64,
+                    "metrics": {"primary_estimate": 0.7, "truth": 0.8},
+                },
+            }
             for _ in range(4)
         ]
         for fixed in [False, True]:
@@ -169,8 +174,10 @@ class ReferenceContracts(unittest.TestCase):
 
     def test_predictive_mse_is_separate_from_parameter_mse(self):
         records = [
-            {"status": "passed", "result": {"metrics": {
-                "primary_estimate": 1, "truth": 1, "mse": value}}}
+            {
+                "status": "passed",
+                "result": {"metrics": {"primary_estimate": 1, "truth": 1, "mse": value}},
+            }
             for value in [1, 9]
         ]
         summary = aggregate(records, 2)

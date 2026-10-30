@@ -43,14 +43,15 @@ Read the operations in dependency order. Record which values exist before each l
 The summary retains only counters, not a duplicate copy of every processed batch.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let values = [1_i32, 2, 3, 4, 5];
         let mut total = 0;
         let mut rows = 0;
-        for batch in values.chunks(2) { rows += batch.len(); total += batch.iter().sum::<i32>(); }
+        for batch in values.chunks(2) {
+            rows += batch.len();
+            total += batch.iter().sum::<i32>();
+        }
         assert_eq!((rows, total), (5, 15));
     }
     println!("rust-045: passed");
@@ -65,8 +66,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 A rejection policy must preserve the denominator needed to interpret the result.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let values = [2, -1, 0, 3];

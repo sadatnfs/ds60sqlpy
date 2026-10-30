@@ -44,24 +44,20 @@ For this lesson's **time-aware indexes, timezone policy, resampling, rolling win
 ```python
 import pandas as pd
 
+
 def parse_source_times(values: list[str]) -> pd.Series:
     parsed = pd.Series(pd.to_datetime(values, errors="coerce"))
     if parsed.isna().any():
         bad = [value for value, ok in zip(values, parsed.notna()) if not ok]
         raise ValueError(f"unparseable timestamps: {bad}")
-    return (
-        parsed.dt.tz_localize(
-            "America/Los_Angeles",
-            ambiguous="raise",
-            nonexistent="raise",
-        )
-        .dt.tz_convert("UTC")
-    )
+    return parsed.dt.tz_localize(
+        "America/Los_Angeles",
+        ambiguous="raise",
+        nonexistent="raise",
+    ).dt.tz_convert("UTC")
 
 
-utc_times = parse_source_times(
-    ["2025-01-01 09:00", "2025-01-01 10:00"]
-)
+utc_times = parse_source_times(["2025-01-01 09:00", "2025-01-01 10:00"])
 assert str(utc_times.dt.tz) == "UTC"
 assert utc_times.dt.strftime("%Y-%m-%d %H:%M %Z").tolist() == [
     "2025-01-01 17:00 UTC",

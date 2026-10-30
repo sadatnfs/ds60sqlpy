@@ -248,8 +248,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>validateTarget<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;https://cluster.invalid:6443&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;lesson&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;owned-lesson&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-keyword">nil</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;target&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The configuration is accepted.</p>
 <p>The hostname is a nonresolving fixture and no request is sent. Real target ownership requires stronger runtime evidence than these syntax checks.</p>
 <h4 id="worked-example-2-reject-insecure-transport">Worked example 2: Reject insecure transport<a class="heading-anchor" href="#worked-example-2-reject-insecure-transport" aria-label="Link to this section">#</a></h4>
@@ -291,8 +290,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>validateTarget<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;http://cluster.invalid&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;lesson&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;owned-lesson&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> <span class="syntax-keyword">nil</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;TLS&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The configuration is rejected.</p>
 <p>TLS policy protects transport identity. Disabling certificate verification is not a reasonable response to a configuration error.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>

@@ -6,23 +6,26 @@ import importlib.util
 import json
 import subprocess
 from pathlib import Path
+from types import ModuleType
+from typing import Any
 
 import pytest
-import yaml
+import yaml  # type: ignore[import-untyped]
 
 ROOT = Path(__file__).resolve().parents[1]
 BASE = ROOT / "courses/spark-deployment"
 PROJECT = BASE / "projects/cluster-lab"
 
 
-def module(name, path):
+def module(name: str, path: Path) -> ModuleType:
     spec = importlib.util.spec_from_file_location(name, path)
+    assert spec is not None and spec.loader is not None
     result = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(result)
     return result
 
 
-def test_saved_state_is_not_overwritten(tmp_path):
+def test_saved_state_is_not_overwritten(tmp_path: Path) -> None:
     lab = module("deployment_lab", PROJECT / "lab.py")
     saved = tmp_path / "saved"
     saved.mkdir()
@@ -33,7 +36,7 @@ def test_saved_state_is_not_overwritten(tmp_path):
     assert sentinel.read_text() == "retained"
 
 
-def test_image_admission_rejects_emulation(monkeypatch):
+def test_image_admission_rejects_emulation(monkeypatch: pytest.MonkeyPatch) -> None:
     lab = module("deployment_lab", PROJECT / "lab.py")
     monkeypatch.setattr(lab.platform, "machine", lambda: "arm64")
     monkeypatch.setattr(lab, "require_local_engine", lambda: None)
@@ -50,9 +53,15 @@ def test_image_admission_rejects_emulation(monkeypatch):
         lab.local_image("prepared-image")
 
 
-def test_initialize_saves_image_and_private_state(tmp_path, monkeypatch):
+def test_initialize_saves_image_and_private_state(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     lab = module("deployment_lab", PROJECT / "lab.py")
-    image = {"id": "sha256:" + "b" * 64, "architecture": "arm64", "reference": "prepared"}
+    image = {
+        "id": "sha256:" + "b" * 64,
+        "architecture": "arm64",
+        "reference": "prepared",
+    }
     monkeypatch.setattr(lab, "local_image", lambda reference: image)
     saved = tmp_path / "new-state"
     lab.initialize(saved, "prepared", None)
@@ -67,11 +76,11 @@ def test_initialize_saves_image_and_private_state(tmp_path, monkeypatch):
         lab.load(saved)
 
 
-def test_foreign_container_prevents_lifecycle(monkeypatch):
+def test_foreign_container_prevents_lifecycle(monkeypatch: pytest.MonkeyPatch) -> None:
     lab = module("deployment_lab", PROJECT / "lab.py")
-    calls = []
+    calls: list[list[str]] = []
 
-    def fake(args, **kwargs):
+    def fake(args: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
         calls.append(args)
         return subprocess.CompletedProcess(
             args,
@@ -98,11 +107,13 @@ def test_foreign_container_prevents_lifecycle(monkeypatch):
     assert all(call[1] in {"ps", "inspect"} for call in calls)
 
 
-def test_compose_uses_saved_identity_and_discards_ambient_overrides(monkeypatch):
+def test_compose_uses_saved_identity_and_discards_ambient_overrides(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     lab = module("deployment_lab", PROJECT / "lab.py")
     monkeypatch.setenv("COMPOSE_PROJECT_NAME", "unrelated-project")
     monkeypatch.setenv("DS60_SPARK_IMAGE", "moving:latest")
-    record = {
+    record: dict[str, Any] = {
         "owner": "ds60-spark-deploy-0123456789ab",
         "state": "/owned",
         "runtime": {"id": "sha256:" + "c" * 64},
@@ -115,7 +126,7 @@ def test_compose_uses_saved_identity_and_discards_ambient_overrides(monkeypatch)
     assert argv[argv.index("--project-name") + 1] == record["owner"]
 
 
-def test_network_mount_and_resource_boundaries():
+def test_network_mount_and_resource_boundaries() -> None:
     compose = yaml.safe_load((PROJECT / "compose.yaml").read_text())
     assert compose["networks"]["lab"]["internal"] is True
     services = compose["services"]
@@ -134,7 +145,7 @@ def test_network_mount_and_resource_boundaries():
     assert "volumes" not in compose
 
 
-def k8s_args(tmp_path):
+def k8s_args(tmp_path: Path) -> argparse.Namespace:
     config = tmp_path / "owned-kubeconfig"
     config.write_text("explicit-test-fixture")
     return argparse.Namespace(
@@ -155,7 +166,9 @@ def k8s_args(tmp_path):
         ("image", "example.invalid/spark:latest"),
     ],
 )
-def test_kubernetes_rejects_ambient_or_mutable_target(tmp_path, field, value):
+def test_kubernetes_rejects_ambient_or_mutable_target(
+    tmp_path: Path, field: str, value: str
+) -> None:
     submit = module("deployment_submit", PROJECT / "kubernetes/submit.py")
     args = k8s_args(tmp_path)
     setattr(args, field, value)
@@ -163,7 +176,7 @@ def test_kubernetes_rejects_ambient_or_mutable_target(tmp_path, field, value):
         submit.command(args)
 
 
-def test_kubernetes_plan_retains_namespace_context_and_bounds(tmp_path):
+def test_kubernetes_plan_retains_namespace_context_and_bounds(tmp_path: Path) -> None:
     submit = module("deployment_submit", PROJECT / "kubernetes/submit.py")
     argv = submit.command(k8s_args(tmp_path))
     assert "spark.kubernetes.namespace=ds60-spark-study" in argv
@@ -173,13 +186,15 @@ def test_kubernetes_plan_retains_namespace_context_and_bounds(tmp_path):
     assert argv[-1].startswith("local:///")
 
 
-def test_generated_route_matches_maintained_chapters():
+def test_generated_route_matches_maintained_chapters() -> None:
     author = module("deployment_author", BASE / "authoring/build.py")
     for path, expected in author.outputs().items():
         assert path.read_text() == expected, str(path)
 
 
-def test_remote_docker_endpoint_is_rejected_without_contact(monkeypatch):
+def test_remote_docker_endpoint_is_rejected_without_contact(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     lab = module("deployment_local_engine", PROJECT / "lab.py")
     monkeypatch.setenv("DOCKER_HOST", "tcp://example.invalid:2376")
     monkeypatch.delenv("DOCKER_CONTEXT", raising=False)
@@ -196,7 +211,9 @@ def test_remote_docker_endpoint_is_rejected_without_contact(monkeypatch):
         "k8s://https://example.invalid:6443/path",
     ],
 )
-def test_kubernetes_endpoint_excludes_credential_and_path_data(tmp_path, endpoint):
+def test_kubernetes_endpoint_excludes_credential_and_path_data(
+    tmp_path: Path, endpoint: str
+) -> None:
     submit = module("deployment_endpoint", PROJECT / "kubernetes/submit.py")
     args = k8s_args(tmp_path)
     args.master = endpoint
@@ -204,11 +221,13 @@ def test_kubernetes_endpoint_excludes_credential_and_path_data(tmp_path, endpoin
         submit.command(args)
 
 
-def test_execution_rejects_context_endpoint_mismatch(tmp_path, monkeypatch):
+def test_execution_rejects_context_endpoint_mismatch(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     submit = module("deployment_context", PROJECT / "kubernetes/submit.py")
-    observed = []
+    observed: list[list[str]] = []
 
-    def local_config(args, **kwargs):
+    def local_config(args: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
         observed.append(args)
         return subprocess.CompletedProcess(args, 0, "https://different.invalid:6443")
 
@@ -220,7 +239,7 @@ def test_execution_rejects_context_endpoint_mismatch(tmp_path, monkeypatch):
     assert "--raw" not in observed[0]
 
 
-def test_qualified_runtime_sources_match_retained_execution_receipt():
+def test_qualified_runtime_sources_match_retained_execution_receipt() -> None:
     receipt = json.loads((PROJECT / "qualification-arm64.json").read_text())
     for relative, expected in receipt["runtime_source_sha256"].items():
         assert hashlib.sha256((PROJECT / relative).read_bytes()).hexdigest() == expected, relative

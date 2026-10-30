@@ -57,19 +57,16 @@ df = pd.DataFrame(
 
 # Grain: one row per observed (day, smoker) pair. This fixture has no
 # missing group keys; dropna=False would retain them if introduced.
-summary = (
-    df.groupby(
-        ["day", "smoker"],
-        as_index=False,
-        observed=True,
-        dropna=False,
-    )
-    .agg(
-        row_count=("tip", "size"),
-        total_bill=("total_bill", "sum"),
-        mean_tip=("tip", "mean"),
-        median_tip=("tip", "median"),
-    )
+summary = df.groupby(
+    ["day", "smoker"],
+    as_index=False,
+    observed=True,
+    dropna=False,
+).agg(
+    row_count=("tip", "size"),
+    total_bill=("total_bill", "sum"),
+    mean_tip=("tip", "mean"),
+    median_tip=("tip", "median"),
 )
 assert not summary.duplicated(["day", "smoker"]).any()
 assert summary["total_bill"].sum() == df["total_bill"].sum()

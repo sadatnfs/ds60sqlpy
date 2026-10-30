@@ -46,10 +46,10 @@ These are Scala collection semantics. They prepare the mental model for Spark tr
 
 ```scala
 var visits = 0
-val pipeline = Seq(1,2,3).iterator.map { value => visits += 1; value * 2 }
+val pipeline = Seq(1, 2, 3).iterator.map { value => visits += 1; value * 2 }
 assert(visits == 0)
 assert(pipeline.next() == 2 && visits == 1)
-assert(pipeline.toVector == Vector(4,6) && visits == 3)
+assert(pipeline.toVector == Vector(4, 6) && visits == 3)
 assert(pipeline.toVector.isEmpty)
 println(s"visits=$visits after complete consumption")
 ```
@@ -59,11 +59,11 @@ Creating the mapped iterator does no mapped work. Each requested value increment
 ### Worked example 2
 
 ```scala
-val source = Seq(1,2,3,4)
+val source = Seq(1, 2, 3, 4)
 def fresh(): Iterator[Int] = source.iterator.filter(_ % 2 == 0).map(_ * 2)
-assert(fresh().toVector == Vector(4,8))
-assert(fresh().toVector == Vector(4,8))
-assert(source == Seq(1,2,3,4))
+assert(fresh().toVector == Vector(4, 8))
+assert(fresh().toVector == Vector(4, 8))
+assert(source == Seq(1, 2, 3, 4))
 println("A factory creates a new traversal each time")
 ```
 

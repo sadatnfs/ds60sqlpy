@@ -101,7 +101,10 @@ function negativeTypeCheck(): void {
   new ReceiptService({ now: () => 'today' });
 }
 void negativeTypeCheck;
-assert.equal(new ReceiptService({ now: () => new Date(0) }).create('B').createdAt, '1970-01-01T00:00:00.000Z');
+assert.equal(
+  new ReceiptService({ now: () => new Date(0) }).create('B').createdAt,
+  '1970-01-01T00:00:00.000Z',
+);
 ```
 
 **Expected:** expected compiler error; valid Date clock works.

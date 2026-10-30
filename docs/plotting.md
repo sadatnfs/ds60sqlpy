@@ -90,14 +90,14 @@ using .DS60Plots
 
 show_plotly(
     [Dict("type" => "scatter", "x" => [1, 2], "y" => [3, 5])];
-    layout=Dict(
+    layout = Dict(
         "title" => Dict("text" => "Measured response"),
         "meta" => Dict(
             "description" => "Two synthetic visits; this line is not a fitted trend.",
             "table" => Dict("columns" => ["Visit", "Response"], "rows" => [[1, 3], [2, 5]]),
         ),
     ),
-    description="Synthetic response by visit",
+    description = "Synthetic response by visit",
 )
 ```
 

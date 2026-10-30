@@ -97,30 +97,46 @@ These worked excerpts come from `sql/postgres-60day/day47_project1_ecommerce_par
 
 ```sql
 WITH orders_m AS (
-  SELECT o.customer_id,
-         date_trunc('month', o.order_date)::date AS order_month
-  FROM orders o
-  GROUP BY o.customer_id, date_trunc('month', o.order_date)
-), cohorts AS (
-  SELECT c.customer_id,
-         date_trunc('month', c.created_at)::date AS cohort_month
-  FROM customers c
-), retention AS (
-  SELECT co.cohort_month,
-         om.order_month,
-         (
-           EXTRACT(YEAR FROM age(om.order_month, co.cohort_month)) * 12
-           + EXTRACT(MONTH FROM age(om.order_month, co.cohort_month))
-         )::int AS month_offset,
-         COUNT(DISTINCT om.customer_id) AS active_customers
-  FROM orders_m om
-  JOIN cohorts co ON co.customer_id = om.customer_id
-  GROUP BY co.cohort_month, om.order_month
+  SELECT
+    o.customer_id,
+    date_trunc('month', o.order_date)::date AS order_month
+  FROM
+    orders o
+  GROUP BY
+    o.customer_id,
+    date_trunc('month', o.order_date)
+),
+cohorts AS (
+  SELECT
+    c.customer_id,
+    date_trunc('month', c.created_at)::date AS cohort_month
+  FROM
+    customers c
+),
+retention AS (
+  SELECT
+    co.cohort_month,
+    om.order_month,
+    (EXTRACT(YEAR FROM age(om.order_month, co.cohort_month)) * 12 + EXTRACT(MONTH FROM age(om.order_month, co.cohort_month)))::int AS month_offset,
+    COUNT(DISTINCT om.customer_id) AS active_customers
+  FROM
+    orders_m om
+    JOIN cohorts co ON co.customer_id = om.customer_id
+  GROUP BY
+    co.cohort_month,
+    om.order_month
 )
-SELECT cohort_month, month_offset, active_customers
-FROM retention
-WHERE month_offset BETWEEN 0 AND 12
-ORDER BY cohort_month DESC, month_offset;
+SELECT
+  cohort_month,
+  month_offset,
+  active_customers
+FROM
+  retention
+WHERE
+  month_offset BETWEEN 0 AND 12
+ORDER BY
+  cohort_month DESC,
+  month_offset;
 ```
 
 **How to read it:** Example 1: Start with `orders`, `customers`, and `age` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows; let `GROUP BY` collapse rows to its grouping keys. The final `SELECT` displays `cohort_month`, `month_offset`, and `active_customers`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
@@ -131,32 +147,47 @@ ORDER BY cohort_month DESC, month_offset;
 
 ```sql
 -- The same topic query shown as a plan instead of business rows.
-EXPLAIN (COSTS OFF)
-WITH orders_m AS (
-  SELECT o.customer_id,
-         date_trunc('month', o.order_date)::date AS order_month
-  FROM orders o
-  GROUP BY o.customer_id, date_trunc('month', o.order_date)
-), cohorts AS (
-  SELECT c.customer_id,
-         date_trunc('month', c.created_at)::date AS cohort_month
-  FROM customers c
-), retention AS (
-  SELECT co.cohort_month,
-         om.order_month,
-         (
-           EXTRACT(YEAR FROM age(om.order_month, co.cohort_month)) * 12
-           + EXTRACT(MONTH FROM age(om.order_month, co.cohort_month))
-         )::int AS month_offset,
-         COUNT(DISTINCT om.customer_id) AS active_customers
-  FROM orders_m om
-  JOIN cohorts co ON co.customer_id = om.customer_id
-  GROUP BY co.cohort_month, om.order_month
+EXPLAIN (
+  COSTS OFF
+) WITH orders_m AS (
+  SELECT
+    o.customer_id,
+    date_trunc('month', o.order_date)::date AS order_month
+  FROM
+    orders o
+  GROUP BY
+    o.customer_id,
+    date_trunc('month', o.order_date)),
+  cohorts AS (
+    SELECT
+      c.customer_id,
+      date_trunc('month', c.created_at)::date AS cohort_month
+    FROM
+      customers c),
+    retention AS (
+      SELECT
+        co.cohort_month,
+        om.order_month,
+        (EXTRACT(YEAR FROM age(om.order_month, co.cohort_month)) * 12 + EXTRACT(MONTH FROM age(om.order_month, co.cohort_month)))::int AS month_offset,
+        COUNT(DISTINCT om.customer_id) AS active_customers
+      FROM
+        orders_m om
+        JOIN cohorts co ON co.customer_id = om.customer_id
+      GROUP BY
+        co.cohort_month,
+        om.order_month
 )
-SELECT cohort_month, month_offset, active_customers
-FROM retention
-WHERE month_offset BETWEEN 0 AND 12
-ORDER BY cohort_month DESC, month_offset;
+    SELECT
+      cohort_month,
+      month_offset,
+      active_customers
+    FROM
+      retention
+    WHERE
+      month_offset BETWEEN 0 AND 12
+    ORDER BY
+      cohort_month DESC,
+      month_offset;
 ```
 
 **How to read it:** Example 2 is executed by `psql` as part of the complete lesson. Expected notices are evidence; an unexpected error stops the script.

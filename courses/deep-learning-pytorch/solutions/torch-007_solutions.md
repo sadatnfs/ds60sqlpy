@@ -53,8 +53,13 @@ The question is: Create a leaf tensor \(w=0\) and intermediate tensor \(u=2w\), 
 Leaf status follows graph construction, not whether a tensor is assigned to a Python variable. retain_grad explicitly requests storage for the intermediate diagnostic.
 
 ```python
-w=torch.tensor(0.,requires_grad=True); intermediate=2*w; intermediate.retain_grad(); intermediate.backward()
-assert w.is_leaf and not intermediate.is_leaf and w.grad.item()==2 and intermediate.grad.item()==1
+w = torch.tensor(0.0, requires_grad=True)
+intermediate = 2 * w
+intermediate.retain_grad()
+intermediate.backward()
+assert (
+    w.is_leaf and not intermediate.is_leaf and w.grad.item() == 2 and intermediate.grad.item() == 1
+)
 ```
 
 **Expected:** `w.is_leaf` is `True`; `u.is_leaf` is `False`; the gradients with respect to \(w\) and \(u\) are 2 and 1.
@@ -68,8 +73,11 @@ The question is: Compute \({\left(w-2\right)}^{2}\) twice at \(w=0\) without cle
 The second forward creates a new graph, but backward still adds into the existing leaf gradient buffer. Graph freshness does not imply gradient-buffer freshness.
 
 ```python
-w.grad=None; ((w-2)**2).backward(); assert w.grad.item()==-4
-((w-2)**2).backward(); assert w.grad.item()==-8
+w.grad = None
+((w - 2) ** 2).backward()
+assert w.grad.item() == -4
+((w - 2) ** 2).backward()
+assert w.grad.item() == -8
 ```
 
 **Expected:** after resetting first, grad -4 then -8.
@@ -83,7 +91,9 @@ The question is: Set grad None and backpropagate once more.
 This is the intended reset for independent batches. Intentional microbatch accumulation needs a separate scaling and update policy.
 
 ```python
-w.grad=None; ((w-2)**2).backward(); assert w.grad.item()==-4
+w.grad = None
+((w - 2) ** 2).backward()
+assert w.grad.item() == -4
 ```
 
 **Expected:** grad returns to-4.
@@ -97,8 +107,11 @@ The question is: Detach a tensor, mutate the detached view, and compare with a d
 Detach cuts gradient history but does not promise a copy. A logging snapshot that must survive later mutation should clone its storage.
 
 ```python
-source=torch.tensor([1.,2.],requires_grad=True); detached=source.detach(); owned=source.detach().clone(); detached[0]=9
-assert source[0].item()==9 and owned[0].item()==1 and not detached.requires_grad
+source = torch.tensor([1.0, 2.0], requires_grad=True)
+detached = source.detach()
+owned = source.detach().clone()
+detached[0] = 9
+assert source[0].item() == 9 and owned[0].item() == 1 and not detached.requires_grad
 ```
 
 **Expected:** shared original changes; owned clone stays unchanged.
@@ -112,8 +125,10 @@ The question is: Multiply a `requires_grad` tensor inside and outside no_grad.
 The scope affects new operation recording. It does not change the original tensor `requires_grad` flag.
 
 ```python
-value=torch.tensor(2.,requires_grad=True); tracked=value*3
-with torch.no_grad(): observed=value*3
+value = torch.tensor(2.0, requires_grad=True)
+tracked = value * 3
+with torch.no_grad():
+    observed = value * 3
 assert tracked.requires_grad and not observed.requires_grad
 ```
 
@@ -128,7 +143,9 @@ The question is: Put a Linear module in eval mode, run a differentiable input, a
 Evaluation mode changes module behavior, not the global autograd mode. Use no_grad or inference_mode separately for inference when appropriate.
 
 ```python
-model=nn.Linear(1,1); model.eval(); result=model(torch.tensor([[1.]],requires_grad=True))
+model = nn.Linear(1, 1)
+model.eval()
+result = model(torch.tensor([[1.0]], requires_grad=True))
 assert result.requires_grad and model.training is False
 ```
 

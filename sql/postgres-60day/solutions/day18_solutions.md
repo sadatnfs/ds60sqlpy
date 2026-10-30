@@ -83,15 +83,17 @@ executable companion when you want a self-contained check.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT o.order_id,
-       o.customer_id,
-       o.order_date,
-       LAG(o.order_date) OVER (
-         PARTITION BY o.customer_id
-         ORDER BY o.order_date, o.order_id
-       ) AS previous_order_date
-FROM orders AS o
-ORDER BY o.customer_id, o.order_date, o.order_id;
+SELECT
+  o.order_id,
+  o.customer_id,
+  o.order_date,
+  LAG(o.order_date) OVER (PARTITION BY o.customer_id ORDER BY o.order_date, o.order_id) AS previous_order_date
+FROM
+  orders AS o
+ORDER BY
+  o.customer_id,
+  o.order_date,
+  o.order_id;
 ```
 
 **Expected shape:** One row per order; first customer order has NULL previous timestamp.
@@ -127,20 +129,25 @@ cardinality contract.
 
 ```sql
 WITH sequenced AS (
-  SELECT o.*,
-         LAG(o.order_date) OVER (
-           PARTITION BY o.customer_id
-           ORDER BY o.order_date, o.order_id
-         ) AS previous_order_date
-  FROM orders AS o
+  SELECT
+    o.*,
+    LAG(o.order_date) OVER (PARTITION BY o.customer_id ORDER BY o.order_date,
+      o.order_id) AS previous_order_date
+  FROM
+    orders AS o
 )
-SELECT order_id,
-       customer_id,
-       order_date,
-       previous_order_date,
-       EXTRACT(EPOCH FROM (order_date - previous_order_date)) / 86400.0 AS days_since_previous
-FROM sequenced
-ORDER BY customer_id, order_date, order_id;
+SELECT
+  order_id,
+  customer_id,
+  order_date,
+  previous_order_date,
+  EXTRACT(EPOCH FROM (order_date - previous_order_date)) / 86400.0 AS days_since_previous
+FROM
+  sequenced
+ORDER BY
+  customer_id,
+  order_date,
+  order_id;
 ```
 
 **Expected shape:** One row per order with nullable interval/days.
@@ -174,15 +181,17 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT pr.promotion_id,
-       pr.product_id,
-       pr.start_date,
-       LEAD(pr.start_date) OVER (
-         PARTITION BY pr.product_id
-         ORDER BY pr.start_date, pr.promotion_id
-       ) AS next_promotion_start
-FROM promotions AS pr
-ORDER BY pr.product_id, pr.start_date, pr.promotion_id;
+SELECT
+  pr.promotion_id,
+  pr.product_id,
+  pr.start_date,
+  LEAD(pr.start_date) OVER (PARTITION BY pr.product_id ORDER BY pr.start_date, pr.promotion_id) AS next_promotion_start
+FROM
+  promotions AS pr
+ORDER BY
+  pr.product_id,
+  pr.start_date,
+  pr.promotion_id;
 ```
 
 **Expected shape:** One row per promotion; last product promotion has NULL next date.
@@ -219,19 +228,23 @@ cardinality contract.
 
 ```sql
 WITH sequenced AS (
-  SELECT o.*,
-         LAG(o.order_id) OVER (
-           PARTITION BY o.customer_id
-           ORDER BY o.order_date, o.order_id
-         ) AS previous_order_id
-  FROM orders AS o
+  SELECT
+    o.*,
+    LAG(o.order_id) OVER (PARTITION BY o.customer_id ORDER BY o.order_date,
+      o.order_id) AS previous_order_id
+  FROM
+    orders AS o
 )
-SELECT order_id,
-       customer_id,
-       order_date
-FROM sequenced
-WHERE previous_order_id IS NULL
-ORDER BY customer_id;
+SELECT
+  order_id,
+  customer_id,
+  order_date
+FROM
+  sequenced
+WHERE
+  previous_order_id IS NULL
+ORDER BY
+  customer_id;
 ```
 
 **Expected shape:** One row per customer's first order.
@@ -268,22 +281,31 @@ cardinality contract.
 
 ```sql
 WITH monthly AS (
-  SELECT date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date AS month_start,
-         SUM(o.total_amount) AS revenue
-  FROM orders AS o
-  GROUP BY date_trunc('month', o.order_date AT TIME ZONE 'UTC')
-), compared AS (
-  SELECT month_start,
-         revenue,
-         LAG(revenue) OVER (ORDER BY month_start) AS previous_revenue
-  FROM monthly
+  SELECT
+    date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date AS month_start,
+    SUM(o.total_amount) AS revenue
+  FROM
+    orders AS o
+  GROUP BY
+    date_trunc('month', o.order_date AT TIME ZONE 'UTC')
+),
+compared AS (
+  SELECT
+    month_start,
+    revenue,
+    LAG(revenue) OVER (ORDER BY month_start) AS previous_revenue
+  FROM
+    monthly
 )
-SELECT month_start,
-       ROUND(revenue, 2) AS revenue,
-       ROUND(previous_revenue, 2) AS previous_revenue,
-       ROUND(revenue - previous_revenue, 2) AS revenue_change
-FROM compared
-ORDER BY month_start;
+SELECT
+  month_start,
+  ROUND(revenue, 2) AS revenue,
+  ROUND(previous_revenue, 2) AS previous_revenue,
+  ROUND(revenue - previous_revenue, 2) AS revenue_change
+FROM
+  compared
+ORDER BY
+  month_start;
 ```
 
 **Expected shape:** One row per month with nullable first change.
@@ -317,15 +339,17 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT p.product_id,
-       p.category,
-       p.price,
-       LEAD(p.price) OVER (
-         PARTITION BY p.category
-         ORDER BY p.price, p.product_id
-       ) AS next_price
-FROM products AS p
-ORDER BY p.category, p.price, p.product_id;
+SELECT
+  p.product_id,
+  p.category,
+  p.price,
+  LEAD(p.price) OVER (PARTITION BY p.category ORDER BY p.price, p.product_id) AS next_price
+FROM
+  products AS p
+ORDER BY
+  p.category,
+  p.price,
+  p.product_id;
 ```
 
 **Expected shape:** One row per product with nullable next price.

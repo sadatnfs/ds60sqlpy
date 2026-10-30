@@ -222,16 +222,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 
 <span class="syntax-punctuation">@</span>main
 <span class="syntax-keyword">struct</span> <span class="syntax-class">LessonMain</span> <span class="syntax-punctuation">{</span>
-    <span class="syntax-keyword">static</span> <span class="syntax-keyword">func</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">async</span> <span class="syntax-keyword">throws</span> <span class="syntax-punctuation">{</span>
-        <span class="syntax-keyword">do</span> <span class="syntax-punctuation">{</span>
-            <span class="syntax-keyword">var</span> owner<span class="syntax-punctuation">:</span> Owner<span class="syntax-punctuation">?</span> <span class="syntax-punctuation">=</span> Owner<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
-            <span class="syntax-keyword">weak</span> <span class="syntax-keyword">var</span> observer <span class="syntax-punctuation">=</span> owner
-            <span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>observer <span class="syntax-operator">!=</span> <span class="syntax-keyword">nil</span><span class="syntax-punctuation">)</span>
-            owner <span class="syntax-punctuation">=</span> <span class="syntax-keyword">nil</span>
-            <span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>observer <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-keyword">nil</span><span class="syntax-punctuation">)</span>
-        <span class="syntax-punctuation">}</span>
-        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">swift-022: passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-keyword">static</span> <span class="syntax-keyword">func</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">async</span> <span class="syntax-keyword">throws</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">do</span> <span class="syntax-punctuation">{</span>
+      <span class="syntax-keyword">var</span> owner<span class="syntax-punctuation">:</span> Owner<span class="syntax-punctuation">?</span> <span class="syntax-punctuation">=</span> Owner<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+      <span class="syntax-keyword">weak</span> <span class="syntax-keyword">var</span> observer <span class="syntax-punctuation">=</span> owner
+      <span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>observer <span class="syntax-operator">!=</span> <span class="syntax-keyword">nil</span><span class="syntax-punctuation">)</span>
+      owner <span class="syntax-punctuation">=</span> <span class="syntax-keyword">nil</span>
+      <span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>observer <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-keyword">nil</span><span class="syntax-punctuation">)</span>
     <span class="syntax-punctuation">}</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">swift-022: passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The weak observer becomes nil after the last strong reference is removed.</p>
 <h4 id="example-b-break-a-parent-child-cycle">Example B: Break a parent-child cycle<a class="heading-anchor" href="#example-b-break-a-parent-child-cycle" aria-label="Link to this section">#</a></h4>
@@ -244,18 +244,18 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 
 <span class="syntax-punctuation">@</span>main
 <span class="syntax-keyword">struct</span> <span class="syntax-class">LessonMain</span> <span class="syntax-punctuation">{</span>
-    <span class="syntax-keyword">static</span> <span class="syntax-keyword">func</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">async</span> <span class="syntax-keyword">throws</span> <span class="syntax-punctuation">{</span>
-        <span class="syntax-keyword">do</span> <span class="syntax-punctuation">{</span>
-            <span class="syntax-keyword">var</span> parent<span class="syntax-punctuation">:</span> Parent<span class="syntax-punctuation">?</span> <span class="syntax-punctuation">=</span> Parent<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
-            <span class="syntax-keyword">let</span> child <span class="syntax-punctuation">=</span> Child<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
-            parent<span class="syntax-punctuation">?</span><span class="syntax-punctuation">.</span>child <span class="syntax-punctuation">=</span> child
-            child<span class="syntax-punctuation">.</span>parent <span class="syntax-punctuation">=</span> parent
-            <span class="syntax-keyword">weak</span> <span class="syntax-keyword">var</span> observed <span class="syntax-punctuation">=</span> parent
-            parent <span class="syntax-punctuation">=</span> <span class="syntax-keyword">nil</span>
-            <span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>observed <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-keyword">nil</span> <span class="syntax-operator">&amp;&amp;</span> child<span class="syntax-punctuation">.</span>parent <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-keyword">nil</span><span class="syntax-punctuation">)</span>
-        <span class="syntax-punctuation">}</span>
-        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">swift-022: passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-keyword">static</span> <span class="syntax-keyword">func</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">async</span> <span class="syntax-keyword">throws</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">do</span> <span class="syntax-punctuation">{</span>
+      <span class="syntax-keyword">var</span> parent<span class="syntax-punctuation">:</span> Parent<span class="syntax-punctuation">?</span> <span class="syntax-punctuation">=</span> Parent<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+      <span class="syntax-keyword">let</span> child <span class="syntax-punctuation">=</span> Child<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+      parent<span class="syntax-punctuation">?</span><span class="syntax-punctuation">.</span>child <span class="syntax-punctuation">=</span> child
+      child<span class="syntax-punctuation">.</span>parent <span class="syntax-punctuation">=</span> parent
+      <span class="syntax-keyword">weak</span> <span class="syntax-keyword">var</span> observed <span class="syntax-punctuation">=</span> parent
+      parent <span class="syntax-punctuation">=</span> <span class="syntax-keyword">nil</span>
+      <span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>observed <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-keyword">nil</span> <span class="syntax-operator">&amp;&amp;</span> child<span class="syntax-punctuation">.</span>parent <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-keyword">nil</span><span class="syntax-punctuation">)</span>
     <span class="syntax-punctuation">}</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">swift-022: passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The child survives independently without retaining its parent.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>

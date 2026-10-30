@@ -123,6 +123,7 @@ def classify_score(score: int) -> str:
         return "pass"
     return "fail"
 
+
 [classify_score(value) for value in (42, 75, 95)]
 ```
 
@@ -148,6 +149,7 @@ def parse_count(text: str) -> int | None:
         return None
     else:
         return count
+
 
 [parse_count(text) for text in (" 12 ", "twelve")]
 ```

@@ -43,8 +43,6 @@ Read the operations in dependency order. Record which values exist before each l
 A no-op waker is sufficient only because this fixture cannot require a later external wakeup.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         use std::future::Future;
@@ -65,8 +63,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 The program stops after one inspection rather than wasting CPU pretending a tight loop is a runtime.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         use std::future::Future;

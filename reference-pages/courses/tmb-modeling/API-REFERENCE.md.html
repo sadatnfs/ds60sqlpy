@@ -538,8 +538,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   obj<span class="syntax-punctuation">,</span>
   observation.name <span class="syntax-operator">=</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
   data.term.indicator <span class="syntax-operator">=</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
-  method <span class="syntax-operator">=</span> <span class="syntax-function">c</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">oneStepGaussianOffMode&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">fullGaussian&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">oneStepGeneric&quot;</span><span class="syntax-punctuation">,</span>
-    <span class="syntax-string">&quot;</span><span class="syntax-string">oneStepGaussian&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cdf&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+  method <span class="syntax-operator">=</span> <span class="syntax-function">c</span><span class="syntax-punctuation">(</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">oneStepGaussianOffMode&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">fullGaussian&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">oneStepGeneric&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">oneStepGaussian&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cdf&quot;</span>
+  <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
   subset <span class="syntax-operator">=</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
   conditional <span class="syntax-operator">=</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
   discrete <span class="syntax-operator">=</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
@@ -678,7 +680,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   h <span class="syntax-operator">=</span> <span class="syntax-number">1e-04</span><span class="syntax-punctuation">,</span>
   ytol <span class="syntax-operator">=</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span>
   ystep <span class="syntax-operator">=</span> <span class="syntax-number">0.1</span><span class="syntax-punctuation">,</span>
-  maxit <span class="syntax-operator">=</span> <span class="syntax-function">ceiling</span><span class="syntax-punctuation">(</span><span class="syntax-number">5</span> <span class="syntax-operator">*</span> ytol<span class="syntax-operator">/</span>ystep<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+  maxit <span class="syntax-operator">=</span> <span class="syntax-function">ceiling</span><span class="syntax-punctuation">(</span><span class="syntax-number">5</span> <span class="syntax-operator">*</span> ytol <span class="syntax-operator">/</span> ystep<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
   parm.range <span class="syntax-operator">=</span> <span class="syntax-function">c</span><span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-keyword">Inf</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">Inf</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
   slice <span class="syntax-operator">=</span> <span class="syntax-keyword">FALSE</span><span class="syntax-punctuation">,</span>
   adaptive <span class="syntax-operator">=</span> <span class="syntax-keyword">TRUE</span><span class="syntax-punctuation">,</span>

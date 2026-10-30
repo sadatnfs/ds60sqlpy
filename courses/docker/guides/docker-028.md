@@ -47,7 +47,12 @@ docker image inspect ds60-docker-study:local --format "{{json .RepoTags}}"
 Use real verified values in a private or public record as appropriate.
 
 ```json
-{"source_revision":"recorded revision","platform":"linux/amd64","image_digest":"recorded immutable digest","acceptance":"separate test receipt"}
+{
+  "source_revision": "recorded revision",
+  "platform": "linux/amd64",
+  "image_digest": "recorded immutable digest",
+  "acceptance": "separate test receipt"
+}
 ```
 
 **Expected observation:** Each field has a distinct source of evidence; placeholder text is not a qualified release.

@@ -12,8 +12,8 @@ case "$command" in
     }
     docker build --pull=false --progress=plain \
       --build-arg "TMB_IMAGE=${DS60_TMB_BASE:-ds60-tmb-local:dev-1.9.25}" \
-      --build-arg "SPARK_IMAGE=${DS60_SPARK_BASE:-ds60sqlpy-worker-spark-local-python:1.1.0}" \
-      --build-arg "JAVA_IMAGE=${DS60_JAVA_BASE:-ds60sqlpy-worker-java21:1.1.0}" \
+      --build-arg "SPARK_IMAGE=${DS60_SPARK_BASE:-ds60sqlpy-worker-spark-local-python:1.2.0}" \
+      --build-arg "JAVA_IMAGE=${DS60_JAVA_BASE:-ds60sqlpy-worker-java21:1.2.0}" \
       -f "$here/Dockerfile" -t "$image" "$repo"
     ;;
   run | check)

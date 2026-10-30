@@ -198,30 +198,30 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 1: Verify a real local database</span></span>
-<span class="source-line">    <span class="syntax-comment">// Open the fixture,inspect product metadata andcount the two account rows.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: database productH2;2 rows;auto-commit initiallytrue.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Open the fixture,inspect product metadata and count the two account rows.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: database product H2; 2 rows; auto-commit initially true.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 2: Bind an injection-shaped value as data</span></span>
 <span class="source-line">    <span class="syntax-comment">// Query byname usingAlice andthenAlicequoteOR1=1-shaped text through the same prepared</span></span>
 <span class="source-line">    <span class="syntax-comment">// statement.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: Alice matches1row;the injection-shaped value matches0.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: Alice matches 1 row;the injection-shaped value matches0.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 3: Roll back a transfer</span></span>
-<span class="source-line">    <span class="syntax-comment">// Disableauto-commit,move20cents fromaccount1to2,inspect intermediate balances,androllback.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Disableauto-commit,move20cents fromaccount1to2,inspect intermediate balances,and rollback.</span></span>
 <span class="source-line">    <span class="syntax-comment">// Expected: inside80,70;afterrollback100,50.</span></span>
 <span class="source-line"></span>
-<span class="source-line">    <span class="syntax-comment">// Exercise 4: Commit andread from a second session</span></span>
-<span class="source-line">    <span class="syntax-comment">// Transfer10cents,commit,andopen another connection to the same owned memory database.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Exercise 4: Commit and read from a second session</span></span>
+<span class="source-line">    <span class="syntax-comment">// Transfer10cents,commit,and open another connection to the same owned memory database.</span></span>
 <span class="source-line">    <span class="syntax-comment">// Expected: second connection sees90,60 andtotal150.</span></span>
 <span class="source-line"></span>
-<span class="source-line">    <span class="syntax-comment">// Exercise 5: Handle a constraint failure androllback</span></span>
-<span class="source-line">    <span class="syntax-comment">// Attempt tosubtract200frombalance100,catch theSQL integrity error,androllback.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: SQLState class23;balance remains100 afterrollback.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Exercise 5: Handle a constraint failure and rollback</span></span>
+<span class="source-line">    <span class="syntax-comment">// Attempt tosubtract200frombalance100,catch the SQL integrity error,and rollback.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: SQLState class23;balance remains100 after rollback.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 6: Observe committed visibility under the declared isolation</span></span>
-<span class="source-line">    <span class="syntax-comment">// Use twoH2connections atREAD_COMMITTED;updateaccount1 withoutcommit,read</span></span>
-<span class="source-line">    <span class="syntax-comment">// fromtheother,thencommit andreadagain.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: second session sees100beforecommit and95aftercommit.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Use twoH2connections atREAD_COMMITTED;updateaccount1 without commit,read from the</span></span>
+<span class="source-line">    <span class="syntax-comment">// other,then commit and read again.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: second session sees 100 before commit and 95 after commit.</span></span>
 <span class="source-line">    System<span class="syntax-punctuation">.</span><span class="syntax-attribute">out</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">println</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement and check the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line">  <span class="syntax-punctuation">}</span></span>
 <span class="source-line"><span class="syntax-punctuation">}</span></span>

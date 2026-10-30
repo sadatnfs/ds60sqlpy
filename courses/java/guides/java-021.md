@@ -51,14 +51,28 @@ The join establishes the required visibility after completion. A timed sleep wou
 import java.util.*;
 
 public class Main {
-    static final class Publication { int data; volatile boolean ready; }
-    static void joinBounded(Thread thread) throws InterruptedException {thread.join(2500);if(thread.isAlive()){thread.interrupt();throw new AssertionError("thread did not terminate");}}
-    public static void main(String[] args) throws Exception {
-        int[] result={0}; Thread worker=Thread.ofPlatform().start(() -> result[0]=42);
-        joinBounded(worker); assert result[0]==42;
-    }
-}
 
+  static final class Publication {
+
+    int data;
+    volatile boolean ready;
+  }
+
+  static void joinBounded(Thread thread) throws InterruptedException {
+    thread.join(2500);
+    if (thread.isAlive()) {
+      thread.interrupt();
+      throw new AssertionError("thread did not terminate");
+    }
+  }
+
+  public static void main(String[] args) throws Exception {
+    int[] result = { 0 };
+    Thread worker = Thread.ofPlatform().start(() -> result[0] = 42);
+    joinBounded(worker);
+    assert result[0] == 42;
+  }
+}
 ```
 
 **Expected:** worker terminated; result 42.
@@ -71,18 +85,34 @@ Actions before start happen-before actions in the started thread. The fixture do
 import java.util.*;
 
 public class Main {
-    static final class Publication { int data; volatile boolean ready; }
-    static void joinBounded(Thread thread) throws InterruptedException {thread.join(2500);if(thread.isAlive()){thread.interrupt();throw new AssertionError("thread did not terminate");}}
-    public static void main(String[] args) throws Exception {
-        int[] result={0}; Thread worker=Thread.ofPlatform().start(() -> result[0]=42);
-        joinBounded(worker); assert result[0]==42;
 
-        int[] input={7}; var observed=new java.util.concurrent.atomic.AtomicInteger();
-        Thread reader=Thread.ofPlatform().start(() -> observed.set(input[0])); joinBounded(reader);
-        assert observed.get()==7;
+  static final class Publication {
+
+    int data;
+    volatile boolean ready;
+  }
+
+  static void joinBounded(Thread thread) throws InterruptedException {
+    thread.join(2500);
+    if (thread.isAlive()) {
+      thread.interrupt();
+      throw new AssertionError("thread did not terminate");
     }
-}
+  }
 
+  public static void main(String[] args) throws Exception {
+    int[] result = { 0 };
+    Thread worker = Thread.ofPlatform().start(() -> result[0] = 42);
+    joinBounded(worker);
+    assert result[0] == 42;
+
+    int[] input = { 7 };
+    var observed = new java.util.concurrent.atomic.AtomicInteger();
+    Thread reader = Thread.ofPlatform().start(() -> observed.set(input[0]));
+    joinBounded(reader);
+    assert observed.get() == 7;
+  }
+}
 ```
 
 **Expected:** worker observes7.

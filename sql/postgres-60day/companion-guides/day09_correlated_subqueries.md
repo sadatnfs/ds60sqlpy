@@ -100,17 +100,23 @@ These worked excerpts come from `sql/postgres-60day/day09_correlated_subqueries.
 ### Example 1
 
 ```sql
-SELECT c.*
-FROM customers c
-WHERE EXISTS (
-  SELECT 1
-  FROM orders o
-  JOIN order_items oi ON oi.order_id = o.order_id
-  JOIN products p ON p.product_id = oi.product_id
-  WHERE o.customer_id = c.customer_id
-    AND p.category = 'Electronics'
-)
-ORDER BY c.customer_id;
+SELECT
+  c.*
+FROM
+  customers c
+WHERE
+  EXISTS (
+    SELECT
+      1
+    FROM
+      orders o
+      JOIN order_items oi ON oi.order_id = o.order_id
+      JOIN products p ON p.product_id = oi.product_id
+    WHERE
+      o.customer_id = c.customer_id
+      AND p.category = 'Electronics')
+ORDER BY
+  c.customer_id;
 ```
 
 **How to read it:** Example 1: Start with `customers`, `orders`, `order_items`, and `products` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows. The final `SELECT` displays the columns written in the final `SELECT`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
@@ -120,15 +126,21 @@ ORDER BY c.customer_id;
 ### Example 2
 
 ```sql
-SELECT p.product_id, p.name
-FROM products p
-WHERE p.product_id IN (
-  SELECT DISTINCT oi.product_id
-  FROM order_items oi
-  JOIN orders o ON o.order_id = oi.order_id
-  WHERE o.order_date >= now() - interval '30 days'
-)
-ORDER BY p.product_id;
+SELECT
+  p.product_id,
+  p.name
+FROM
+  products p
+WHERE
+  p.product_id IN ( SELECT DISTINCT
+      oi.product_id
+    FROM
+      order_items oi
+      JOIN orders o ON o.order_id = oi.order_id
+    WHERE
+      o.order_date >= now() - interval '30 days')
+ORDER BY
+  p.product_id;
 ```
 
 **How to read it:** Example 2: Start with `products`, `order_items`, and `orders` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows. The final `SELECT` displays `product_id`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.

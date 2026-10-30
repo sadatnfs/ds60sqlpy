@@ -101,10 +101,14 @@ These worked excerpts come from `sql/postgres-60day/day10_dml_with_subqueries.sq
 
 ```sql
 CREATE TEMP TABLE tmp_category_revenue AS
-SELECT p.category, ROUND(SUM(oi.unit_price*oi.quantity*(1-oi.discount)),2) AS revenue
-FROM order_items oi
-JOIN products p ON p.product_id = oi.product_id
-GROUP BY p.category;
+SELECT
+  p.category,
+  ROUND(SUM(oi.unit_price * oi.quantity * (1 - oi.discount)), 2) AS revenue
+FROM
+  order_items oi
+  JOIN products p ON p.product_id = oi.product_id
+GROUP BY
+  p.category;
 ```
 
 **How to read it:** Example 1 is data definition language (DDL). `psql` prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.
@@ -114,9 +118,14 @@ GROUP BY p.category;
 ### Example 2
 
 ```sql
-SELECT category, revenue
-FROM tmp_category_revenue
-ORDER BY revenue DESC, category;
+SELECT
+  category,
+  revenue
+FROM
+  tmp_category_revenue
+ORDER BY
+  revenue DESC,
+  category;
 ```
 
 **How to read it:** Example 2: Start with `tmp_category_revenue` in `FROM`/`JOIN`. The final `SELECT` displays `category`, and `revenue`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.

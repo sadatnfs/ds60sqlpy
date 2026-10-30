@@ -43,11 +43,11 @@ Read the operations in dependency order. Record which values exist before each l
 The Copy semantics of this small value permit reuse without transferring an owned allocation.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
-        fn double(value: i32) -> i32 { value * 2 }
+        fn double(value: i32) -> i32 {
+            value * 2
+        }
         let original = 7;
         assert_eq!(double(original), 14);
         assert_eq!(original, 7);
@@ -64,11 +64,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 The function needs only a read-only text view, so taking String would impose unnecessary ownership transfer.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
-        fn starts_with_p(text: &str) -> bool { text.starts_with('p') }
+        fn starts_with_p(text: &str) -> bool {
+            text.starts_with('p')
+        }
         let owned = String::from("pear");
         assert!(starts_with_p(&owned));
         assert!(!starts_with_p("apple"));

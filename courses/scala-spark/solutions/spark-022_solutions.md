@@ -11,15 +11,15 @@ Compute input row count, distinct key count and total id sum. Confirm the key fo
 **Expected:** Metrics(20000,1000,199990000); keys 0..999 each occur 20 times by construction.
 
 ```scala
-def sourceMetrics(source: DataFrame): (Long,Long,Long) = {
-  val row = source.agg(count(lit(1)),countDistinct("key"),sum("id")).first()
-  (row.getLong(0),row.getLong(1),row.getLong(2))
+def sourceMetrics(source: DataFrame): (Long, Long, Long) = {
+  val row = source.agg(count(lit(1)), countDistinct("key"), sum("id")).first()
+  (row.getLong(0), row.getLong(1), row.getLong(2))
 }
 ```
 
 ```python
 def source_metrics(source):
-    return tuple(source.agg(F.count(F.lit(1)),F.countDistinct("key"),F.sum("id")).first())
+    return tuple(source.agg(F.count(F.lit(1)), F.countDistinct("key"), F.sum("id")).first())
 ```
 
 These checks establish the exact population before changing execution settings. The modulo construction gives each key 20 occurrences because 20000 is 20 complete cycles of 1000 keys. The independent arithmetic identity sum helps detect source-range mistakes without depending on the same Spark grouping implementation being studied.
@@ -34,17 +34,17 @@ Require 1..16 shuffle partitions, set that configuration in the owned session an
 
 ```scala
 def buildGrouped(source: DataFrame, partitions: Int): DataFrame = {
-  require(partitions >= 1 && partitions <= 16,"Partition budget is1..16")
-  source.sparkSession.conf.set("spark.sql.shuffle.partitions",partitions.toString)
+  require(partitions >= 1 && partitions <= 16, "Partition budget is1..16")
+  source.sparkSession.conf.set("spark.sql.shuffle.partitions", partitions.toString)
   source.groupBy("key").agg(count(lit(1)).as("n"))
 }
 ```
 
 ```python
 def build_grouped(source, partitions):
-    if isinstance(partitions,bool) or not isinstance(partitions,int) or not 1 <= partitions <= 16:
+    if isinstance(partitions, bool) or not isinstance(partitions, int) or not 1 <= partitions <= 16:
         raise ValueError("Partition budget is1..16")
-    source.sparkSession.conf.set("spark.sql.shuffle.partitions",str(partitions))
+    source.sparkSession.conf.set("spark.sql.shuffle.partitions", str(partitions))
     return source.groupBy("key").agg(F.count(F.lit(1)).alias("n"))
 ```
 
@@ -59,8 +59,11 @@ Traverse the executed classic Spark plan, collecting each Exchange metric map. U
 **Expected:** One exchange map for this aggregate, with numPartitions 2 and dataSize>0. Record other available metrics without inventing units or missing values.
 
 ```scala
-def exchangeMetrics(frame: DataFrame): Seq[Map[String,Long]] = {
-  frame.queryExecution.executedPlan.collect { case node if node.nodeName == "Exchange" => node.metrics.map { case (key,metric) => key -> metric.value }.toMap }
+def exchangeMetrics(frame: DataFrame): Seq[Map[String, Long]] = {
+  frame.queryExecution.executedPlan.collect {
+    case node if node.nodeName == "Exchange" =>
+      node.metrics.map { case (key, metric) => key -> metric.value }.toMap
+  }
 }
 ```
 
@@ -94,10 +97,20 @@ Use the status tracker to find jobs for a supplied group and their retained stag
 **Expected:** Nonempty retained stage evidence for the p2 action, including a stage with 2 tasks. All task counters are nonnegative.
 
 ```scala
-def stageEvidence(spark: SparkSession, group: String): Seq[(Int,Int,Int,Int)] = {
+def stageEvidence(spark: SparkSession, group: String): Seq[(Int, Int, Int, Int)] = {
   val tracker = spark.sparkContext.statusTracker
-  val stages = tracker.getJobIdsForGroup(group).flatMap(id => tracker.getJobInfo(id).toSeq.flatMap(_.stageIds)).distinct.sorted
-  stages.flatMap(id => tracker.getStageInfo(id).map(info => (id,info.numTasks,info.numCompletedTasks,info.numFailedTasks))).toSeq
+  val stages = tracker
+    .getJobIdsForGroup(group)
+    .flatMap(id => tracker.getJobInfo(id).toSeq.flatMap(_.stageIds))
+    .distinct
+    .sorted
+  stages
+    .flatMap(id =>
+      tracker
+        .getStageInfo(id)
+        .map(info => (id, info.numTasks, info.numCompletedTasks, info.numFailedTasks))
+    )
+    .toSeq
 }
 ```
 
@@ -113,7 +126,7 @@ def stage_evidence(spark, group):
     for stage_id in sorted(stages):
         info = tracker.getStageInfo(stage_id)
         if info is not None:
-            result.append((stage_id,info.numTasks,info.numCompletedTasks,info.numFailedTasks))
+            result.append((stage_id, info.numTasks, info.numCompletedTasks, info.numFailedTasks))
     return result
 ```
 
@@ -128,14 +141,17 @@ Run the same source aggregation with 5 shuffle partitions under its own job grou
 **Expected:** Exact output matches p2 and the literal oracle. Exchange numPartitions 5 and positive dataSize; retained task evidence includes a five-task stage.
 
 ```scala
-def compareResults(left: Seq[(Long,Long)], right: Seq[(Long,Long)]): Unit = {
-  require(left == right && left.size == 1000 && left.map(_._2).sum == 20000L,"Grouped result contract changed")
+def compareResults(left: Seq[(Long, Long)], right: Seq[(Long, Long)]): Unit = {
+  require(
+    left == right && left.size == 1000 && left.map(_._2).sum == 20000L,
+    "Grouped result contract changed"
+  )
 }
 ```
 
 ```python
 def compare_results(left, right):
-    if left != right or len(left) != 1000 or sum(n for _,n in left) != 20000:
+    if left != right or len(left) != 1000 or sum(n for _, n in left) != 20000:
         raise ValueError("Grouped result contract changed")
 ```
 
@@ -150,17 +166,17 @@ For the declared 20000-row,1000-key, four-mapper fixture, return source_rows_per
 **Expected:** For reducers 2:5000,4000,500. For reducers 5:5000,4000,200. These values do not assert actual balanced hash buckets or network bytes.
 
 ```scala
-def workModel(reducers: Int): (Long,Long,Double) = {
-  require(reducers > 0,"Positive reducer count required")
-  (20000L/4L,4L*1000L,1000.0/reducers)
+def workModel(reducers: Int): (Long, Long, Double) = {
+  require(reducers > 0, "Positive reducer count required")
+  (20000L / 4L, 4L * 1000L, 1000.0 / reducers)
 }
 ```
 
 ```python
 def work_model(reducers):
-    if isinstance(reducers,bool) or not isinstance(reducers,int) or reducers <= 0:
+    if isinstance(reducers, bool) or not isinstance(reducers, int) or reducers <= 0:
         raise ValueError("Positive reducer count required")
-    return 20000//4,4*1000,1000/reducers
+    return 20000 // 4, 4 * 1000, 1000 / reducers
 ```
 
 The arithmetic explains why local aggregation and reduce partition count can matter while keeping estimates distinct from observed metrics. Hash distribution can be uneven and task overhead can offset smaller per-task state. The reference intentionally makes no faster/slower assertion. A useful tuning conclusion would require representative data, controlled repeats and measured task/spill distributions beyond this lesson.

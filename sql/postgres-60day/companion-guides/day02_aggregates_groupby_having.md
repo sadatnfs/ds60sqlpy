@@ -98,10 +98,16 @@ These worked excerpts come from `sql/postgres-60day/day02_aggregates_groupby_hav
 ### Example 1
 
 ```sql
-SELECT c.country, COUNT(*) AS customers
-FROM customers c
-GROUP BY c.country
-ORDER BY customers DESC, c.country;
+SELECT
+  c.country,
+  COUNT(*) AS customers
+FROM
+  customers c
+GROUP BY
+  c.country
+ORDER BY
+  customers DESC,
+  c.country;
 ```
 
 **How to read it:** Example 1: Start with `customers` in `FROM`/`JOIN`; let `GROUP BY` collapse rows to its grouping keys. The final `SELECT` displays `country`, and `customers`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
@@ -111,12 +117,19 @@ ORDER BY customers DESC, c.country;
 ### Example 2
 
 ```sql
-SELECT p.category, ROUND(SUM(oi.unit_price * oi.quantity * (1 - oi.discount)),2) AS revenue
-FROM order_items oi
-JOIN products p ON p.product_id = oi.product_id
-GROUP BY p.category
-HAVING SUM(oi.unit_price * oi.quantity) > 10000
-ORDER BY revenue DESC, p.category;
+SELECT
+  p.category,
+  ROUND(SUM(oi.unit_price * oi.quantity * (1 - oi.discount)), 2) AS revenue
+FROM
+  order_items oi
+  JOIN products p ON p.product_id = oi.product_id
+GROUP BY
+  p.category
+HAVING
+  SUM(oi.unit_price * oi.quantity) > 10000
+ORDER BY
+  revenue DESC,
+  p.category;
 ```
 
 **How to read it:** Example 2: Start with `order_items`, and `products` in `FROM`/`JOIN`; let `GROUP BY` collapse rows to its grouping keys. The final `SELECT` displays `category`, and `revenue`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.

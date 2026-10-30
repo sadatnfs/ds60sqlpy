@@ -242,8 +242,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>errors<span class="syntax-punctuation">.</span>Is<span class="syntax-punctuation">(</span>err<span class="syntax-punctuation">,</span> ErrMissing<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;wrapped cause&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> errors.Is still recognizes ErrMissing.</p>
 <p>%w exposes the cause to the error-inspection protocol. Replacing it with %v would format the cause as text but lose that wrapping relationship.</p>
 <h4 id="worked-example-2-reject-text-equality">Worked example 2: Reject text equality<a class="heading-anchor" href="#worked-example-2-reject-text-equality" aria-label="Link to this section">#</a></h4>
@@ -282,8 +281,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span><span class="syntax-punctuation">!</span>errors<span class="syntax-punctuation">.</span>Is<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;identity not text&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Their identities differ.</p>
 <p>A matching message does not establish the same error contract. Use an exported sentinel or typed error only when callers should rely on that distinction.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>

@@ -10,8 +10,8 @@ Compilation should preserve the declared operation within its numerical contract
 
 ```python
 function = lambda z: z * z + z + 1
-values = jnp.array([1., 2., 3.])
-close(function(values), [3., 7., 13.])
+values = jnp.array([1.0, 2.0, 3.0])
+close(function(values), [3.0, 7.0, 13.0])
 close(jax.jit(function)(values), function(values))
 ```
 
@@ -23,9 +23,13 @@ Abstract shape information changes the specialization even when the elementwise 
 
 ```python
 traces = []
+
+
 def shaped(z):
     traces.append(z.shape)
     return z * 2
+
+
 compiled = jax.jit(shaped)
 compiled(jnp.ones(2)).block_until_ready()
 compiled(jnp.ones(3)).block_until_ready()
@@ -43,12 +47,14 @@ def bad(z):
     if z > 0:
         return z
     return -z
+
+
 try:
-    jax.jit(bad)(jnp.float64(2.))
+    jax.jit(bad)(jnp.float64(2.0))
 except jax.errors.TracerBoolConversionError:
     pass
 else:
-    raise AssertionError('dynamic Python condition accepted')
+    raise AssertionError("dynamic Python condition accepted")
 ```
 
 ## Exercise 4: Keep zero iterations defined
@@ -58,7 +64,7 @@ The initial carry is the result when no iterations execute.
 **Expected:** Zero with the input's scalar shape.
 
 ```python
-close(compiled_repeat(3., n=0), 0.)
+close(compiled_repeat(3.0, n=0), 0.0)
 ```
 
 ## Exercise 5: Compose differentiation with compilation
@@ -69,7 +75,7 @@ A supported transformation composition preserves the chain rule for the same sca
 
 ```python
 compiled_loss = jax.jit(lambda z: jnp.sum(z * z))
-close(jax.grad(compiled_loss)(jnp.array([1., 2.])), [2., 4.])
+close(jax.grad(compiled_loss)(jnp.array([1.0, 2.0])), [2.0, 4.0])
 ```
 
 ## Exercise 6: Inspect the staged operations
@@ -79,7 +85,7 @@ This is inspection of the staged computation, not proof of speed or a particular
 **Expected:** A jaxpr with numerical equations and one output variable.
 
 ```python
-closed = jax.make_jaxpr(lambda z: z * z + 1)(jnp.float64(2.))
+closed = jax.make_jaxpr(lambda z: z * z + 1)(jnp.float64(2.0))
 assert len(closed.jaxpr.eqns) >= 1
 assert len(closed.jaxpr.outvars) == 1
 ```

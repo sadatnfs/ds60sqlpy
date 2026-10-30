@@ -53,25 +53,63 @@ The annotation's retention policy makes it visible at runtime. Its value is info
 import java.util.*;
 
 public class Main {
-    @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.RUNTIME)
-    @java.lang.annotation.Target(java.lang.annotation.ElementType.TYPE)
-    public @interface Version { int value(); }
-    public interface Greeting { String greet(String name); }
-    @Version(2) public static final class Friendly implements Greeting {
-        public Friendly(){}
-        public String greet(String name){if(name==null||name.isBlank())throw new IllegalArgumentException("nonblank name required");return "Hello, "+name;}
-    }
-    static final class ServiceFixture implements AutoCloseable {
-        final java.nio.file.Path root;final java.net.URLClassLoader loader;
-        ServiceFixture() throws Exception {root=java.nio.file.Files.createTempDirectory("ds60-service-");var descriptor=root.resolve("META-INF/services").resolve(Greeting.class.getName());java.nio.file.Files.createDirectories(descriptor.getParent());java.nio.file.Files.writeString(descriptor,Friendly.class.getName()+System.lineSeparator());loader=new java.net.URLClassLoader(new java.net.URL[]{root.toUri().toURL()},Main.class.getClassLoader());}
-        public void close() throws Exception {loader.close();try(var paths=java.nio.file.Files.walk(root)){for(var path:paths.sorted(Comparator.reverseOrder()).toList())java.nio.file.Files.deleteIfExists(path);}}
-    }
-    public static void main(String[] args) throws Exception {
-        Version version=Friendly.class.getAnnotation(Version.class);
-        assert version!=null && version.value()==2;
-    }
-}
 
+  @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.RUNTIME)
+  @java.lang.annotation.Target(java.lang.annotation.ElementType.TYPE)
+  public @interface Version {
+    int value();
+  }
+
+  public interface Greeting {
+    String greet(String name);
+  }
+
+  @Version(2)
+  public static final class Friendly implements Greeting {
+
+    public Friendly() {}
+
+    public String greet(String name) {
+      if (name == null || name.isBlank()) throw new IllegalArgumentException(
+        "nonblank name required"
+      );
+      return "Hello, " + name;
+    }
+  }
+
+  static final class ServiceFixture implements AutoCloseable {
+
+    final java.nio.file.Path root;
+    final java.net.URLClassLoader loader;
+
+    ServiceFixture() throws Exception {
+      root = java.nio.file.Files.createTempDirectory("ds60-service-");
+      var descriptor = root.resolve("META-INF/services").resolve(Greeting.class.getName());
+      java.nio.file.Files.createDirectories(descriptor.getParent());
+      java.nio.file.Files.writeString(
+        descriptor,
+        Friendly.class.getName() + System.lineSeparator()
+      );
+      loader = new java.net.URLClassLoader(
+        new java.net.URL[] { root.toUri().toURL() },
+        Main.class.getClassLoader()
+      );
+    }
+
+    public void close() throws Exception {
+      loader.close();
+      try (var paths = java.nio.file.Files.walk(root)) {
+        for (var path : paths.sorted(Comparator.reverseOrder()).toList())
+          java.nio.file.Files.deleteIfExists(path);
+      }
+    }
+  }
+
+  public static void main(String[] args) throws Exception {
+    Version version = Friendly.class.getAnnotation(Version.class);
+    assert version != null && version.value() == 2;
+  }
+}
 ```
 
 **Expected:** version 2.
@@ -84,28 +122,66 @@ The method name and parameter types form an explicit signature. A wrong signatur
 import java.util.*;
 
 public class Main {
-    @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.RUNTIME)
-    @java.lang.annotation.Target(java.lang.annotation.ElementType.TYPE)
-    public @interface Version { int value(); }
-    public interface Greeting { String greet(String name); }
-    @Version(2) public static final class Friendly implements Greeting {
-        public Friendly(){}
-        public String greet(String name){if(name==null||name.isBlank())throw new IllegalArgumentException("nonblank name required");return "Hello, "+name;}
-    }
-    static final class ServiceFixture implements AutoCloseable {
-        final java.nio.file.Path root;final java.net.URLClassLoader loader;
-        ServiceFixture() throws Exception {root=java.nio.file.Files.createTempDirectory("ds60-service-");var descriptor=root.resolve("META-INF/services").resolve(Greeting.class.getName());java.nio.file.Files.createDirectories(descriptor.getParent());java.nio.file.Files.writeString(descriptor,Friendly.class.getName()+System.lineSeparator());loader=new java.net.URLClassLoader(new java.net.URL[]{root.toUri().toURL()},Main.class.getClassLoader());}
-        public void close() throws Exception {loader.close();try(var paths=java.nio.file.Files.walk(root)){for(var path:paths.sorted(Comparator.reverseOrder()).toList())java.nio.file.Files.deleteIfExists(path);}}
-    }
-    public static void main(String[] args) throws Exception {
-        Version version=Friendly.class.getAnnotation(Version.class);
-        assert version!=null && version.value()==2;
 
-        var method=Friendly.class.getMethod("greet",String.class);
-        assert method.invoke(new Friendly(),"Ada").equals("Hello, Ada");
+  @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.RUNTIME)
+  @java.lang.annotation.Target(java.lang.annotation.ElementType.TYPE)
+  public @interface Version {
+    int value();
+  }
+
+  public interface Greeting {
+    String greet(String name);
+  }
+
+  @Version(2)
+  public static final class Friendly implements Greeting {
+
+    public Friendly() {}
+
+    public String greet(String name) {
+      if (name == null || name.isBlank()) throw new IllegalArgumentException(
+        "nonblank name required"
+      );
+      return "Hello, " + name;
     }
+  }
+
+  static final class ServiceFixture implements AutoCloseable {
+
+    final java.nio.file.Path root;
+    final java.net.URLClassLoader loader;
+
+    ServiceFixture() throws Exception {
+      root = java.nio.file.Files.createTempDirectory("ds60-service-");
+      var descriptor = root.resolve("META-INF/services").resolve(Greeting.class.getName());
+      java.nio.file.Files.createDirectories(descriptor.getParent());
+      java.nio.file.Files.writeString(
+        descriptor,
+        Friendly.class.getName() + System.lineSeparator()
+      );
+      loader = new java.net.URLClassLoader(
+        new java.net.URL[] { root.toUri().toURL() },
+        Main.class.getClassLoader()
+      );
+    }
+
+    public void close() throws Exception {
+      loader.close();
+      try (var paths = java.nio.file.Files.walk(root)) {
+        for (var path : paths.sorted(Comparator.reverseOrder()).toList())
+          java.nio.file.Files.deleteIfExists(path);
+      }
+    }
+  }
+
+  public static void main(String[] args) throws Exception {
+    Version version = Friendly.class.getAnnotation(Version.class);
+    assert version != null && version.value() == 2;
+
+    var method = Friendly.class.getMethod("greet", String.class);
+    assert method.invoke(new Friendly(), "Ada").equals("Hello, Ada");
+  }
 }
-
 ```
 
 **Expected:** Hello, Ada.

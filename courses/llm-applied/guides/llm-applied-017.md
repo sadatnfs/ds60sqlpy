@@ -124,9 +124,10 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-original=np.array([[.1,-.9],[1.7,-.2]],dtype=np.float32); scale=float(np.abs(original).max()/7)
-codes=np.clip(np.rint(original/scale),-7,7).astype(np.int8)
-np.testing.assert_array_equal(codes,[[0,-4],[7,-1]])
+original = np.array([[0.1, -0.9], [1.7, -0.2]], dtype=np.float32)
+scale = float(np.abs(original).max() / 7)
+codes = np.clip(np.rint(original / scale), -7, 7).astype(np.int8)
+np.testing.assert_array_equal(codes, [[0, -4], [7, -1]])
 ```
 
 **Expected:** codes[[0, -4], [7, -1]].
@@ -136,11 +137,14 @@ np.testing.assert_array_equal(codes,[[0,-4],[7,-1]])
 The storage calculation is backed by actual byte packing. Keeping four int8 codes without packing would use eight bits per code despite a nominal 4-bit value range.
 
 ```python
-unsigned=(codes.reshape(-1).astype(np.int16)+8).astype(np.uint8)
-packed=unsigned[::2] | (unsigned[1::2]<<4)
-unpacked=np.empty(4,dtype=np.uint8); unpacked[::2]=packed&15; unpacked[1::2]=packed>>4
-restored_codes=(unpacked.astype(np.int16)-8).astype(np.int8).reshape(2,2)
-np.testing.assert_array_equal(packed,[72,127]); np.testing.assert_array_equal(restored_codes,codes)
+unsigned = (codes.reshape(-1).astype(np.int16) + 8).astype(np.uint8)
+packed = unsigned[::2] | (unsigned[1::2] << 4)
+unpacked = np.empty(4, dtype=np.uint8)
+unpacked[::2] = packed & 15
+unpacked[1::2] = packed >> 4
+restored_codes = (unpacked.astype(np.int16) - 8).astype(np.int8).reshape(2, 2)
+np.testing.assert_array_equal(packed, [72, 127])
+np.testing.assert_array_equal(restored_codes, codes)
 ```
 
 **Expected:** packed bytes[72, 127]; round-trip codes exact.
@@ -150,10 +154,12 @@ np.testing.assert_array_equal(packed,[72,127]); np.testing.assert_array_equal(re
 A compact representation changes numerical behavior before any adaptation. The adapter experiment should not conceal that initial approximation error.
 
 ```python
-dequantized=restored_codes.astype(np.float32)*scale; x_np=np.array([1.,-2.],dtype=np.float32)
-reference=original@x_np; approximate=dequantized@x_np
-np.testing.assert_allclose(reference,[1.9,2.1],atol=1e-6,rtol=0)
-assert np.isfinite(approximate).all() and np.max(np.abs(approximate-reference))>0
+dequantized = restored_codes.astype(np.float32) * scale
+x_np = np.array([1.0, -2.0], dtype=np.float32)
+reference = original @ x_np
+approximate = dequantized @ x_np
+np.testing.assert_allclose(reference, [1.9, 2.1], atol=1e-6, rtol=0)
+assert np.isfinite(approximate).all() and np.max(np.abs(approximate - reference)) > 0
 ```
 
 **Expected:** reference[1.9, 2.1]; finite nonzero approximation error.

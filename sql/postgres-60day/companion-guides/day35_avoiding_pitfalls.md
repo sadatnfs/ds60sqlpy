@@ -96,7 +96,13 @@ These worked excerpts come from `sql/postgres-60day/day35_avoiding_pitfalls.sql`
 ### Example 1
 
 ```sql
-EXPLAIN ANALYZE SELECT * FROM orders WHERE date_trunc('day', order_date) = date_trunc('day', now());
+EXPLAIN ANALYZE
+SELECT
+  *
+FROM
+  orders
+WHERE
+  date_trunc('day', order_date) = date_trunc('day', now());
 ```
 
 **How to read it:** Example 1 returns plan rows rather than business rows. The node tree is evidence about one execution strategy; it does not replace a correctness check on the underlying query.
@@ -106,7 +112,14 @@ EXPLAIN ANALYZE SELECT * FROM orders WHERE date_trunc('day', order_date) = date_
 ### Example 2
 
 ```sql
-EXPLAIN ANALYZE SELECT * FROM orders WHERE order_date >= date_trunc('day', now()) AND order_date < date_trunc('day', now()) + interval '1 day';
+EXPLAIN ANALYZE
+SELECT
+  *
+FROM
+  orders
+WHERE
+  order_date >= date_trunc('day', now())
+  AND order_date < date_trunc('day', now()) + interval '1 day';
 ```
 
 **How to read it:** Example 2 returns plan rows rather than business rows. The node tree is evidence about one execution strategy; it does not replace a correctness check on the underlying query.

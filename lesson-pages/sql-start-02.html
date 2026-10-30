@@ -460,16 +460,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
 <p>Run these in the complete learner file so the temporary fixture and transaction are present. The fixture values are fixed; the examples never depend on the current clock. Predict each result before running it.</p>
 <h5 id="guide--example-1-inspect-truth-before-filtering">Example 1: Inspect truth before filtering<a class="heading-anchor" href="#guide--example-1-inspect-truth-before-filtering" aria-label="Link to this section">#</a></h5>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> shipment_id<span class="syntax-punctuation">,</span> weight<span class="syntax-punctuation">,</span> weight <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span> <span class="syntax-keyword">AS</span> is_positive<span class="syntax-punctuation">,</span>
-       weight <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">AS</span> is_missing
-<span class="syntax-keyword">FROM</span> start_shipments
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> shipment_id<span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  shipment_id<span class="syntax-punctuation">,</span>
+  weight<span class="syntax-punctuation">,</span>
+  weight <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span> <span class="syntax-keyword">AS</span> is_positive<span class="syntax-punctuation">,</span>
+  weight <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">AS</span> is_missing
+<span class="syntax-keyword">FROM</span>
+  start_shipments
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  shipment_id<span class="syntax-punctuation">;</span></code></pre>
 <p>Every output row still represents one shipment. The comparison is false for ID 1, unknown for IDs 2 and 5, and true for IDs 3 and 4. IS NULL instead produces true for IDs 2 and 5 and false elsewhere. Looking at the predicate as a column exposes information that WHERE would discard. No string comparison or implicit conversion is required.</p>
 <p><strong>Expected:</strong> Five shipment rows; columns shipment_id, weight, is_positive, is_missing. True positive IDs are 3 and 4; missing IDs are 2 and 5.</p>
 <h5 id="guide--example-2-rank-known-values-while-preserving-unknowns">Example 2: Rank known values while preserving unknowns<a class="heading-anchor" href="#guide--example-2-rank-known-values-while-preserving-unknowns" aria-label="Link to this section">#</a></h5>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> shipment_id<span class="syntax-punctuation">,</span> weight<span class="syntax-punctuation">,</span> label
-<span class="syntax-keyword">FROM</span> start_shipments
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> weight <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span> shipment_id<span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  shipment_id<span class="syntax-punctuation">,</span>
+  weight<span class="syntax-punctuation">,</span>
+  label
+<span class="syntax-keyword">FROM</span>
+  start_shipments
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  weight <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span>
+  shipment_id<span class="syntax-punctuation">;</span></code></pre>
 <p>The result contains all five shipments. Weights 5,5,0 precede unknowns, and identity orders the tied 5s and the unknown pair. PostgreSQL has a default NULL placement, but writing the policy avoids relying on remembering it. A known zero stays ahead of unknown measurements. This presentation does not impute or update any weight.</p>
 <p><strong>Expected:</strong> IDs 3,4,1,2,5, with columns shipment_id, weight, label. The NULL weights remain NULL.</p>
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
@@ -707,41 +718,88 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <p>The code below is the answer for each numbered prompt, followed by its reasoning. Inspect the first discrepancy in your own transcript before reading a different answer. A solution is one defensible implementation of this contract; an alternative is valid if its identities, values, missingness, ordering, and transaction behavior match. Tests constrain the actual returned relation, rather than assuming a familiar-looking query must be right.</p>
 <h4 id="solution-1--exercise-solutions">Exercise solutions<a class="heading-anchor" href="#solution-1--exercise-solutions" aria-label="Link to this section">#</a></h4>
 <h4 id="solution-1--exercise-1-inspect-missingness">Exercise 1: Inspect missingness<a class="heading-anchor" href="#solution-1--exercise-1-inspect-missingness" aria-label="Link to this section">#</a></h4>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> shipment_id<span class="syntax-punctuation">,</span> weight<span class="syntax-punctuation">,</span> weight <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">AS</span> is_missing <span class="syntax-keyword">FROM</span> start_shipments <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> shipment_id<span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  shipment_id<span class="syntax-punctuation">,</span>
+  weight<span class="syntax-punctuation">,</span>
+  weight <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">AS</span> is_missing
+<span class="syntax-keyword">FROM</span>
+  start_shipments
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  shipment_id<span class="syntax-punctuation">;</span></code></pre>
 <p>IS NULL asks about the marker itself, so it produces a definite Boolean for every shipment. Equality against NULL would return unknown instead of answering that question. Keeping shipment_id visible ties each Boolean to a real source fact. The known zero for ID 1 is present and therefore not missing. The assertion compares the identities of rows marked missing with the fixed fixture expectation. This is a stronger check than merely counting two missing values, because the wrong pair of rows could otherwise pass. Nothing in the query changes the source values; it is an inspection tool for building the later filter.</p>
 <p><strong>Inputs/evidence:</strong> For sql-start-02 Exercise 1, Return shipment_id, weight, and weight IS NULL named is_missing for every shipment. Predict the Boolean column before executing.</p>
 <p><strong>Expected result/shape:</strong> For sql-start-02 Exercise 1, Five shipment rows with columns shipment_id, weight, is_missing; final ORDER BY shipment_id. is_missing is true only for IDs 2 and 5.</p>
 <p><strong>Verify:</strong> For sql-start-02 Exercise 1, Inspect true only at shipment_id 2 and 5; ID 1 has zero weight and a false is_missing flag. The missingness test itself never produces unknown.</p>
 <h4 id="solution-1--exercise-2-compare-a-complement-with-missingness">Exercise 2: Compare a complement with missingness<a class="heading-anchor" href="#solution-1--exercise-2-compare-a-complement-with-missingness" aria-label="Link to this section">#</a></h4>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> shipment_id<span class="syntax-punctuation">,</span> weight <span class="syntax-keyword">FROM</span> start_shipments <span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">NOT</span> <span class="syntax-punctuation">(</span>weight <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> shipment_id<span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  shipment_id<span class="syntax-punctuation">,</span>
+  weight
+<span class="syntax-keyword">FROM</span>
+  start_shipments
+<span class="syntax-keyword">WHERE</span>
+  <span class="syntax-keyword">NOT</span> <span class="syntax-punctuation">(</span>weight <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  shipment_id<span class="syntax-punctuation">;</span></code></pre>
 <p>WHERE retains only true. For ID 1 the inner comparison is false, so NOT turns it true. For IDs 3 and 4 the inner comparison is true and NOT turns it false. For IDs 2 and 5 the unknown input stays unknown, which WHERE excludes. This explains why a positive filter and its negation need not partition all rows when missing values are possible. The check requires precisely ID 1. If the business asks for every shipment that is not known to be positive, it needs an explicitly different predicate that includes missing values, rather than assuming ordinary negation already does that.</p>
 <p><strong>Inputs/evidence:</strong> For sql-start-02 Exercise 2, Return shipment_id, weight for NOT (weight &gt; 0). Explain why the result is not the complement of the positive-weight result over all five shipments.</p>
 <p><strong>Expected result/shape:</strong> For sql-start-02 Exercise 2, One row keyed by shipment_id with columns shipment_id, weight, final ORDER BY shipment_id: (1,0). Unknown IDs 2 and 5 are absent from both positive and negated filters.</p>
 <p><strong>Verify:</strong> For sql-start-02 Exercise 2, Inspect the projected predicate values for all five input rows: ID 1 is false, IDs 3 and 4 true, IDs 2 and 5 unknown. Only ID 1 qualifies after ordinary negation.</p>
 <h4 id="solution-1--exercise-3-keep-unknown-and-zero-as-separate-categories">Exercise 3: Keep unknown and zero as separate categories<a class="heading-anchor" href="#solution-1--exercise-3-keep-unknown-and-zero-as-separate-categories" aria-label="Link to this section">#</a></h4>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> shipment_id<span class="syntax-punctuation">,</span> weight <span class="syntax-keyword">FROM</span> start_shipments <span class="syntax-keyword">WHERE</span> weight <span class="syntax-operator">=</span> <span class="syntax-number">0</span> <span class="syntax-keyword">OR</span> weight <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> shipment_id<span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  shipment_id<span class="syntax-punctuation">,</span>
+  weight
+<span class="syntax-keyword">FROM</span>
+  start_shipments
+<span class="syntax-keyword">WHERE</span>
+  weight <span class="syntax-operator">=</span> <span class="syntax-number">0</span>
+  <span class="syntax-keyword">OR</span> weight <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  shipment_id<span class="syntax-punctuation">;</span></code></pre>
 <p>The OR joins two separate eligibility rules while the projection preserves the original measurement. ID 1 satisfies the equality comparison, and IDs 2 and 5 satisfy IS NULL. No imputation is needed just to select them. Replacing the displayed weight with zero would erase the difference the exercise is teaching. The assertion checks both the identities and the fact that two returned measurements remain unknown. This pattern is useful when routing zero and missing values to review while still allowing a reviewer to distinguish their causes. If the policy later treats the two categories differently, the original information remains available.</p>
 <p><strong>Inputs/evidence:</strong> For sql-start-02 Exercise 3, Return shipment_id, weight for weights that are known zero or missing. Use explicit predicates rather than replacing unknown weights with zero.</p>
 <p><strong>Expected result/shape:</strong> For sql-start-02 Exercise 3, Three shipment rows with columns shipment_id, weight, final ORDER BY shipment_id: IDs 1,2,5. ID 1 is zero; IDs 2 and 5 remain NULL.</p>
 <p><strong>Verify:</strong> For sql-start-02 Exercise 3, Require identities 1,2,5 and exactly two NULL weights. Inspect the original measurements to prove selection did not replace unknown values with zero.</p>
 <h4 id="solution-1--exercise-4-specify-every-ordering-decision">Exercise 4: Specify every ordering decision<a class="heading-anchor" href="#solution-1--exercise-4-specify-every-ordering-decision" aria-label="Link to this section">#</a></h4>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> shipment_id<span class="syntax-punctuation">,</span> weight <span class="syntax-keyword">FROM</span> start_shipments <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> weight <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span> shipment_id <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  shipment_id<span class="syntax-punctuation">,</span>
+  weight
+<span class="syntax-keyword">FROM</span>
+  start_shipments
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  weight <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span>
+  shipment_id
+<span class="syntax-keyword">LIMIT</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span></code></pre>
 <p>The sort places known large values first, then orders equal measurements by shipment_id. LIMIT restricts the already ordered result to two rows. NULLS LAST prevents unknown measurements from taking the leading positions under the chosen policy, but it is not a filter. Here two known maximum weights exist, so IDs 3 and 4 are returned. If the limit exceeded the number of known values, the query would eventually include unknowns; add IS NOT NULL when that is forbidden by the question. The assertion checks the ordered identity sequence, which captures both tie-breaking and selection rather than just checking that each weight is 5.</p>
 <p><strong>Inputs/evidence:</strong> For sql-start-02 Exercise 4, Return the top two known weights with shipment_id, weight. Use descending weight, NULLS LAST, and ascending shipment_id before LIMIT 2.</p>
 <p><strong>Expected result/shape:</strong> For sql-start-02 Exercise 4, Two rows keyed by shipment_id, columns shipment_id, weight, final ORDER BY weight DESC NULLS LAST, shipment_id: IDs 3 and 4, each weight 5.</p>
 <p><strong>Verify:</strong> For sql-start-02 Exercise 4, Inspect ordered IDs 3 then 4 and both weights 5; repeat on unchanged input and justify the unique identity tie-breaker rather than relying on one observed storage order.</p>
 <h4 id="solution-1--exercise-5-debug-an-empty-text-display-policy">Exercise 5: Debug an empty text display policy<a class="heading-anchor" href="#solution-1--exercise-5-debug-an-empty-text-display-policy" aria-label="Link to this section">#</a></h4>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> shipment_id<span class="syntax-punctuation">,</span> label<span class="syntax-punctuation">,</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">NULLIF</span><span class="syntax-punctuation">(</span>label<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;(unlabeled)&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> display_label <span class="syntax-keyword">FROM</span> start_shipments <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> shipment_id<span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  shipment_id<span class="syntax-punctuation">,</span>
+  label<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">NULLIF</span> <span class="syntax-punctuation">(</span>label<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;(unlabeled)&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> display_label
+<span class="syntax-keyword">FROM</span>
+  start_shipments
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  shipment_id<span class="syntax-punctuation">;</span></code></pre>
 <p>NULLIF compares label with the empty string and produces NULL only when they are equal. COALESCE then uses the fallback for either a converted empty string or an originally missing label. A present label such as ready or hold passes through. The original label is also selected so the display policy remains distinguishable from stored data. COALESCE alone does not treat empty text as missing. The assertion compares all five final labels rather than checking only one successful replacement. Whitespace-only labels would still pass through this specific policy; trimming them would be a separate normalization decision that should be stated and tested.</p>
 <p><strong>Inputs/evidence:</strong> For sql-start-02 Exercise 5, Return shipment_id, label, and a display_label that uses (unlabeled) for both NULL and empty text. Explain why COALESCE(label, &#x27;(unlabeled)&#x27;) alone misses IDs 1 and 4.</p>
 <p><strong>Expected result/shape:</strong> For sql-start-02 Exercise 5, Five shipment rows with columns shipment_id, label, display_label; final ORDER BY shipment_id. Display labels in ID order are (unlabeled),(unlabeled),ready,(unlabeled),hold; original empty labels remain empty.</p>
 <p><strong>Verify:</strong> For sql-start-02 Exercise 5, Compare all five display_label values and inspect original labels beside them: IDs 1 and 4 remain empty strings, while ID 2 remains NULL.</p>
 <h4 id="solution-1--exercise-6-transfer-to-a-null-safe-change-detector">Exercise 6: Transfer to a NULL-safe change detector<a class="heading-anchor" href="#solution-1--exercise-6-transfer-to-a-null-safe-change-detector" aria-label="Link to this section">#</a></h4>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> shipment_id<span class="syntax-punctuation">,</span> old_weight<span class="syntax-punctuation">,</span> new_weight
-<span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">11</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
-             <span class="syntax-punctuation">(</span><span class="syntax-number">12</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">13</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> changes<span class="syntax-punctuation">(</span>shipment_id<span class="syntax-punctuation">,</span> old_weight<span class="syntax-punctuation">,</span> new_weight<span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">WHERE</span> old_weight <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> new_weight
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> shipment_id<span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  shipment_id<span class="syntax-punctuation">,</span>
+  old_weight<span class="syntax-punctuation">,</span>
+  new_weight
+<span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-number">11</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-number">12</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-number">13</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> changes <span class="syntax-punctuation">(</span>shipment_id<span class="syntax-punctuation">,</span> old_weight<span class="syntax-punctuation">,</span> new_weight<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">WHERE</span>
+  old_weight <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> new_weight
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  shipment_id<span class="syntax-punctuation">;</span></code></pre>
 <p>The VALUES input names both versions explicitly and casts the initially unknown measurements to numeric. IS DISTINCT FROM tests whether the two states differ, treating a pair of NULLs as equal for this comparison. It catches known-to-unknown and unknown-to-known transitions that ordinary inequality would leave unknown. It does not invent a replacement weight. The output grain remains one changed shipment identified by shipment_id. The assertion checks IDs 11 and 13, so the unchanged known value and unchanged missing pair are both negative controls. This technique becomes useful for reconciliation and update detection later, but its meaning is already inspectable with these four rows.</p>
 <p><strong>Inputs/evidence:</strong> For sql-start-02 Exercise 6, Compare old and new weights (10,NULL,NULL), (11,0,NULL), (12,5,5), (13,NULL,0), named shipment_id, old_weight, new_weight. Return shipment_id, old_weight, new_weight only for changed values, including missingness transitions.</p>
 <p><strong>Expected result/shape:</strong> For sql-start-02 Exercise 6, Two changed shipment rows, columns shipment_id, old_weight, new_weight, final ORDER BY shipment_id: IDs 11 and 13. Two unknowns at ID 10 do not count as a change.</p>

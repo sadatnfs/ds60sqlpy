@@ -115,23 +115,43 @@ Authorization and freshness are independent gates. The final example combines an
 The clock is supplied rather than read globally, so the test is reproducible. The result concerns the declared age policy, not the truth of the content.
 
 ```python
-from datetime import datetime,timedelta,timezone
-def fresh(published,now,maximum_age):
-    if published.tzinfo is None or now.tzinfo is None or published.utcoffset() is None or now.utcoffset() is None: raise ValueError('aware timestamps required')
-    if maximum_age<timedelta(0): raise ValueError('nonnegative age limit')
-    age=now-published
-    return timedelta(0)<=age<=maximum_age
+from datetime import datetime, timedelta, timezone
+
+
+def fresh(published, now, maximum_age):
+    if (
+        published.tzinfo is None
+        or now.tzinfo is None
+        or published.utcoffset() is None
+        or now.utcoffset() is None
+    ):
+        raise ValueError("aware timestamps required")
+    if maximum_age < timedelta(0):
+        raise ValueError("nonnegative age limit")
+    age = now - published
+    return timedelta(0) <= age <= maximum_age
+
+
 class Budget:
-    def __init__(self,limit):
-        if type(limit) is not int or limit<0: raise ValueError('nonnegative integer limit')
-        self.limit=limit; self.used=0
+    def __init__(self, limit):
+        if type(limit) is not int or limit < 0:
+            raise ValueError("nonnegative integer limit")
+        self.limit = limit
+        self.used = 0
+
     def consume(self):
-        if self.used>=self.limit: raise RuntimeError('operation budget exhausted')
-        self.used+=1
+        if self.used >= self.limit:
+            raise RuntimeError("operation budget exhausted")
+        self.used += 1
+
+
 def trace_record(value):
-    return {key:value[key] for key in ['request_id','corpus_version','policy','result']}
-now=datetime(2026,10,22,tzinfo=timezone.utc); published=now-timedelta(days=1)
-assert fresh(published,now,timedelta(days=2))
+    return {key: value[key] for key in ["request_id", "corpus_version", "policy", "result"]}
+
+
+now = datetime(2026, 10, 22, tzinfo=timezone.utc)
+published = now - timedelta(days=1)
+assert fresh(published, now, timedelta(days=2))
 ```
 
 **Expected:** fresh True.
@@ -141,8 +161,8 @@ assert fresh(published,now,timedelta(days=2))
 Future timestamps can indicate clock or metadata errors. Accepting them as indefinitely fresh would conceal that data-quality problem.
 
 ```python
-assert not fresh(now-timedelta(days=3),now,timedelta(days=2))
-assert not fresh(now+timedelta(hours=1),now,timedelta(days=2))
+assert not fresh(now - timedelta(days=3), now, timedelta(days=2))
+assert not fresh(now + timedelta(hours=1), now, timedelta(days=2))
 ```
 
 **Expected:** both fail freshness admission.
@@ -152,12 +172,16 @@ assert not fresh(now+timedelta(hours=1),now,timedelta(days=2))
 The failing request does not perform work first and report the overrun afterward. Real execution also needs bounded duration and cancellation, which this counter does not implement.
 
 ```python
-budget=Budget(3)
-for _ in range(3): budget.consume()
-try: budget.consume()
-except RuntimeError: pass
-else: raise AssertionError('budget exceeded')
-assert budget.used==3
+budget = Budget(3)
+for _ in range(3):
+    budget.consume()
+try:
+    budget.consume()
+except RuntimeError:
+    pass
+else:
+    raise AssertionError("budget exceeded")
+assert budget.used == 3
 ```
 
 **Expected:** used 3; fourth raisesRuntimeError before increment.

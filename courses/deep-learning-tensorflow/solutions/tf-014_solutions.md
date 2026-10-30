@@ -23,8 +23,9 @@ The question is: Compute sparse cross entropy for target1 and three zero logits.
 Three equal scores create a uniform distribution. The target probability is one third, so the negative log likelihood is log3, independent of which class index is chosen.
 
 ```python
-logits=tf.zeros((1,3)); loss=tf.nn.sparse_softmax_cross_entropy_with_logits(labels=[1],logits=logits)
-np.testing.assert_allclose(loss.numpy(),[np.log(3)],atol=1e-6,rtol=0)
+logits = tf.zeros((1, 3))
+loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=[1], logits=logits)
+np.testing.assert_allclose(loss.numpy(), [np.log(3)], atol=1e-6, rtol=0)
 ```
 
 **Expected:** loss \(\log(3)\).
@@ -38,9 +39,9 @@ The question is: Calculate sigmoid probabilities for three zero logits and label
 Independent binary probabilities do not need to sum to one. Forcing a softmax here would make the two present labels compete for probability mass.
 
 ```python
-probs=tf.math.sigmoid(logits).numpy()
-np.testing.assert_array_equal(probs,[[.5,.5,.5]])
-assert probs.sum()==1.5
+probs = tf.math.sigmoid(logits).numpy()
+np.testing.assert_array_equal(probs, [[0.5, 0.5, 0.5]])
+assert probs.sum() == 1.5
 ```
 
 **Expected:** three probabilities.5 with total1.5.
@@ -54,8 +55,9 @@ The question is: Build sparse targets[2,0] and multilabel targets[[1,0,1],[0,1,0
 A class index is a category identity, not a magnitude. The multilabel row contains three observations of presence. Keeping these shapes explicit prevents unintended broadcasting.
 
 ```python
-sparse=np.array([2,0],dtype=np.int32); multi=np.array([[1,0,1],[0,1,0]],dtype=np.float32)
-assert sparse.shape==(2,) and multi.shape==(2,3)
+sparse = np.array([2, 0], dtype=np.int32)
+multi = np.array([[1, 0, 1], [0, 1, 0]], dtype=np.float32)
+assert sparse.shape == (2,) and multi.shape == (2, 3)
 ```
 
 **Expected:** shapes(2,) and(2,3).
@@ -69,9 +71,9 @@ The question is: Apply softmax to[[2,0,-2]] and compare its sum with sigmoid out
 The normalizer in softmax couples categories. Sigmoids do not share a normalizer, which is why changing one logit has different consequences in the two tasks.
 
 ```python
-z=tf.constant([[2.,0.,-2.]])
-np.testing.assert_allclose(tf.nn.softmax(z).numpy().sum(),1,atol=1e-6,rtol=0)
-np.testing.assert_allclose(tf.math.sigmoid(z).numpy().sum(),1.5,atol=1e-6,rtol=0)
+z = tf.constant([[2.0, 0.0, -2.0]])
+np.testing.assert_allclose(tf.nn.softmax(z).numpy().sum(), 1, atol=1e-6, rtol=0)
+np.testing.assert_allclose(tf.math.sigmoid(z).numpy().sum(), 1.5, atol=1e-6, rtol=0)
 ```
 
 **Expected:** softmax sum1; sigmoid sum1.5.
@@ -85,8 +87,12 @@ The question is: Compute binary cross entropy for two three-label rows of zero l
 There are six binary entries but only two records. A mean per record of summed labels differs from a mean per binary entry by three. State the intended objective instead of comparing unlabelled loss numbers.
 
 ```python
-losses=tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.constant(multi),logits=tf.zeros((2,3))).numpy()
-np.testing.assert_allclose([losses.sum(),losses.mean()],[6*np.log(2),np.log(2)],atol=1e-6,rtol=0)
+losses = tf.nn.sigmoid_cross_entropy_with_logits(
+    labels=tf.constant(multi), logits=tf.zeros((2, 3))
+).numpy()
+np.testing.assert_allclose(
+    [losses.sum(), losses.mean()], [6 * np.log(2), np.log(2)], atol=1e-6, rtol=0
+)
 ```
 
 **Expected:** sum6log2; meanlog2.
@@ -101,12 +107,18 @@ A target index equal to the vocabulary size is out of range. Early validation ke
 
 ```python
 def validate_class(value):
-    if not isinstance(value,int) or isinstance(value,bool) or not 0<=value<3: raise ValueError('class index')
+    if not isinstance(value, int) or isinstance(value, bool) or not 0 <= value < 3:
+        raise ValueError("class index")
     return value
-assert validate_class(2)==2
-try: validate_class(3)
-except ValueError: pass
-else: raise AssertionError('accepted unknown class')
+
+
+assert validate_class(2) == 2
+try:
+    validate_class(3)
+except ValueError:
+    pass
+else:
+    raise AssertionError("accepted unknown class")
 ```
 
 **Expected:** index3 is outside legal indices0,1,2.

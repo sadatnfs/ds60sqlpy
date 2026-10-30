@@ -27,7 +27,9 @@ Task: Use add with 2, 3 and with negative 1, 1.
 The function depends only on its arguments and changes no external state. Boundary examples can be tested independently.
 
 ```javascript
-function add(left, right) { return left + right; }
+function add(left, right) {
+  return left + right;
+}
 assert.equal(add(2, 3), 5);
 assert.equal(add(-1, 1), 0);
 ```
@@ -65,8 +67,14 @@ const block = [];
 for (let index = 0; index < 3; index += 1) block.push(() => index);
 const shared = [];
 for (var index = 0; index < 3; index += 1) shared.push(() => index);
-assert.deepEqual(block.map(fn => fn()), [0, 1, 2]);
-assert.deepEqual(shared.map(fn => fn()), [3, 3, 3]);
+assert.deepEqual(
+  block.map((fn) => fn()),
+  [0, 1, 2],
+);
+assert.deepEqual(
+  shared.map((fn) => fn()),
+  [3, 3, 3],
+);
 ```
 
 **Expected:** let returns 0, 1, 2; var returns 3, 3, 3.
@@ -80,7 +88,9 @@ Task: Call a greeting function with no argument, undefined and null.
 A default parameter does not define a general missing-value policy. If null is invalid, the function must validate it explicitly.
 
 ```javascript
-function label(value = 'guest') { return value; }
+function label(value = 'guest') {
+  return value;
+}
 assert.equal(label(), 'guest');
 assert.equal(label(undefined), 'guest');
 assert.equal(label(null), null);
@@ -97,7 +107,12 @@ Task: Call a method through its object and then with an explicit alternate recei
 The same function can operate on different receivers. Detaching it and calling without a receiver may produce an error rather than retain the original object.
 
 ```javascript
-const item = { value: 4, read() { return this.value; } };
+const item = {
+  value: 4,
+  read() {
+    return this.value;
+  },
+};
 assert.equal(item.read(), 4);
 assert.equal(item.read.call({ value: 9 }), 9);
 ```

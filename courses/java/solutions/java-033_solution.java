@@ -52,7 +52,7 @@ public class Main {
       ).equals("hello");
     });
 
-    // Exercise 2: Reject lexical traversal andabsolute paths
+    // Exercise 2: Reject lexical traversal and absolute paths
     withRoot(root -> {
       for (String name : List.of("../outside.txt", root.resolve("input.txt").toString())) {
         boolean rejected = false;
@@ -101,7 +101,7 @@ public class Main {
       }
     });
 
-    // Exercise 5: Keep operation names out ofcode execution
+    // Exercise 5: Keep operation names out of code execution
     Map<String, String> operations = Map.of("read_fixture", "fixed local reader");
     assert operations.containsKey("read_fixture");
     boolean rejected = false;

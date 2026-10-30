@@ -52,9 +52,7 @@ X, y = make_classification(
     flip_y=0.01,
     random_state=42,
 )
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, stratify=y, random_state=42
-)
+X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, random_state=42)
 model = LogisticRegression(
     class_weight="balanced",
     max_iter=1_000,
@@ -147,11 +145,13 @@ from sklearn.metrics import accuracy_score, recall_score
 
 y_true = np.array([0] * 95 + [1] * 5)
 always_negative = np.zeros_like(y_true)
-print({
-    "prevalence": y_true.mean(),
-    "accuracy": accuracy_score(y_true, always_negative),
-    "positive_recall": recall_score(y_true, always_negative),
-})
+print(
+    {
+        "prevalence": y_true.mean(),
+        "accuracy": accuracy_score(y_true, always_negative),
+        "positive_recall": recall_score(y_true, always_negative),
+    }
+)
 assert accuracy_score(y_true, always_negative) == 0.95
 assert recall_score(y_true, always_negative) == 0.0
 ```

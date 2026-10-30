@@ -101,42 +101,56 @@ These worked excerpts come from `sql/postgres-60day/day25_multiple_ctes_hierarch
 
 ```sql
 WITH RECURSIVE base_org AS (
-  SELECT e.employee_id,
-         e.manager_id,
-         e.department_id,
-         e.salary,
-         1 AS depth,
-         ARRAY[e.employee_id] AS path
-  FROM employees e
-  WHERE e.manager_id IS NULL
+  SELECT
+    e.employee_id,
+    e.manager_id,
+    e.department_id,
+    e.salary,
+    1 AS depth,
+    ARRAY[e.employee_id] AS path
+  FROM
+    employees e
+  WHERE
+    e.manager_id IS NULL
   UNION ALL
-  SELECT e.employee_id,
-         e.manager_id,
-         e.department_id,
-         e.salary,
-         b.depth + 1,
-         b.path || e.employee_id
-  FROM employees e
-  JOIN base_org b ON e.manager_id = b.employee_id
-  WHERE NOT e.employee_id = ANY(b.path)
-), dept_counts AS (
+  SELECT
+    e.employee_id,
+    e.manager_id,
+    e.department_id,
+    e.salary,
+    b.depth + 1,
+    b.path || e.employee_id
+  FROM
+    employees e
+    JOIN base_org b ON e.manager_id = b.employee_id
+  WHERE
+    NOT e.employee_id = ANY (b.path)
+),
+dept_counts AS (
   -- Aggregate the traversed employee relation so the hierarchy CTE is an
   -- observable, testable stage rather than an unused declaration.
-  SELECT department_id,
-         COUNT(*) AS reachable_headcount,
-         ROUND(AVG(salary), 2) AS avg_salary,
-         MAX(depth) AS deepest_level
-  FROM base_org
-  GROUP BY department_id
+  SELECT
+    department_id,
+    COUNT(*) AS reachable_headcount,
+    ROUND(AVG(salary), 2) AS avg_salary,
+    MAX(depth) AS deepest_level
+  FROM
+    base_org
+  GROUP BY
+    department_id
 )
-SELECT d.department_id,
-       d.name AS department,
-       COALESCE(dc.reachable_headcount, 0) AS reachable_headcount,
-       dc.avg_salary,
-       dc.deepest_level
-FROM departments d
-LEFT JOIN dept_counts dc ON dc.department_id = d.department_id
-ORDER BY reachable_headcount DESC, d.department_id;
+SELECT
+  d.department_id,
+  d.name AS department,
+  COALESCE(dc.reachable_headcount, 0) AS reachable_headcount,
+  dc.avg_salary,
+  dc.deepest_level
+FROM
+  departments d
+  LEFT JOIN dept_counts dc ON dc.department_id = d.department_id
+ORDER BY
+  reachable_headcount DESC,
+  d.department_id;
 ```
 
 **How to read it:** Example 1: Start with `employees`, `base_org`, and `departments` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows; let `GROUP BY` collapse rows to its grouping keys; append branches with `UNION ALL` (duplicates are retained). The final `SELECT` displays `department_id`, `department`, `reachable_headcount`, `avg_salary`, and `deepest_level`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
@@ -147,44 +161,58 @@ ORDER BY reachable_headcount DESC, d.department_id;
 
 ```sql
 -- The same topic query shown as a plan instead of business rows.
-EXPLAIN (COSTS OFF)
-WITH RECURSIVE base_org AS (
-  SELECT e.employee_id,
-         e.manager_id,
-         e.department_id,
-         e.salary,
-         1 AS depth,
-         ARRAY[e.employee_id] AS path
-  FROM employees e
-  WHERE e.manager_id IS NULL
+EXPLAIN (
+  COSTS OFF
+) WITH RECURSIVE base_org AS (
+  SELECT
+    e.employee_id,
+    e.manager_id,
+    e.department_id,
+    e.salary,
+    1 AS depth,
+    ARRAY[e.employee_id] AS path
+  FROM
+    employees e
+  WHERE
+    e.manager_id IS NULL
   UNION ALL
-  SELECT e.employee_id,
-         e.manager_id,
-         e.department_id,
-         e.salary,
-         b.depth + 1,
-         b.path || e.employee_id
-  FROM employees e
-  JOIN base_org b ON e.manager_id = b.employee_id
-  WHERE NOT e.employee_id = ANY(b.path)
-), dept_counts AS (
-  -- Aggregate the traversed employee relation so the hierarchy CTE is an
-  -- observable, testable stage rather than an unused declaration.
-  SELECT department_id,
-         COUNT(*) AS reachable_headcount,
-         ROUND(AVG(salary), 2) AS avg_salary,
-         MAX(depth) AS deepest_level
-  FROM base_org
-  GROUP BY department_id
+  SELECT
+    e.employee_id,
+    e.manager_id,
+    e.department_id,
+    e.salary,
+    b.depth + 1,
+    b.path || e.employee_id
+  FROM
+    employees e
+    JOIN base_org b ON e.manager_id = b.employee_id
+  WHERE
+    NOT e.employee_id = ANY (b.path)),
+  dept_counts AS (
+    -- Aggregate the traversed employee relation so the hierarchy CTE is an
+    -- observable, testable stage rather than an unused declaration.
+    SELECT
+      department_id,
+      COUNT(*) AS reachable_headcount,
+      ROUND(AVG(salary), 2) AS avg_salary,
+      MAX(depth) AS deepest_level
+    FROM
+      base_org
+    GROUP BY
+      department_id
 )
-SELECT d.department_id,
-       d.name AS department,
-       COALESCE(dc.reachable_headcount, 0) AS reachable_headcount,
-       dc.avg_salary,
-       dc.deepest_level
-FROM departments d
-LEFT JOIN dept_counts dc ON dc.department_id = d.department_id
-ORDER BY reachable_headcount DESC, d.department_id;
+  SELECT
+    d.department_id,
+    d.name AS department,
+    COALESCE(dc.reachable_headcount, 0) AS reachable_headcount,
+  dc.avg_salary,
+  dc.deepest_level
+FROM
+  departments d
+  LEFT JOIN dept_counts dc ON dc.department_id = d.department_id
+ORDER BY
+  reachable_headcount DESC,
+  d.department_id;
 ```
 
 **How to read it:** Example 2 is executed by `psql` as part of the complete lesson. Expected notices are evidence; an unexpected error stops the script.

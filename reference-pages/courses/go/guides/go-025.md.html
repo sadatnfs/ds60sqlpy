@@ -243,8 +243,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>sum <span class="syntax-operator">==</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;drain&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Both values arrive and the sum is 5.</p>
 <p>Close does not erase buffered values. Iteration ends after those values have been received.</p>
 <h4 id="worked-example-2-distinguish-zero-from-closed">Worked example 2: Distinguish zero from closed<a class="heading-anchor" href="#worked-example-2-distinguish-zero-from-closed" aria-label="Link to this section">#</a></h4>
@@ -287,8 +286,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>a <span class="syntax-operator">==</span> <span class="syntax-number">0</span> <span class="syntax-operator">&amp;&amp;</span> b <span class="syntax-operator">==</span> <span class="syntax-number">0</span> <span class="syntax-operator">&amp;&amp;</span> okA <span class="syntax-operator">&amp;&amp;</span> <span class="syntax-punctuation">!</span>okB<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;closed presence&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The first zero has ok true; the second has ok false.</p>
 <p>Value equality cannot distinguish a delivered zero from the post-closure zero. The boolean carries completion information.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>

@@ -49,16 +49,21 @@ The predicate has a single purpose and no side effects. Boundary zero is checked
 import java.util.*;
 
 public class Main {
-    static int parsePositive(String text) {
-        if(text==null || text.isBlank()) throw new IllegalArgumentException("positive integer text required");
-        int value=Integer.parseInt(text); if(value<=0) throw new IllegalArgumentException("positive value required"); return value;
-    }
-    public static void main(String[] args) throws Exception {
-        java.util.function.Predicate<Integer> positive = value -> value > 0;
-        assert positive.test(3) && !positive.test(0) && !positive.test(-1);
-    }
-}
 
+  static int parsePositive(String text) {
+    if (text == null || text.isBlank()) throw new IllegalArgumentException(
+      "positive integer text required"
+    );
+    int value = Integer.parseInt(text);
+    if (value <= 0) throw new IllegalArgumentException("positive value required");
+    return value;
+  }
+
+  public static void main(String[] args) throws Exception {
+    java.util.function.Predicate<Integer> positive = value -> value > 0;
+    assert positive.test(3) && !positive.test(0) && !positive.test(-1);
+  }
+}
 ```
 
 **Expected:** true, false, false.
@@ -71,20 +76,25 @@ The composition order is explicit. For transformations that do not commute, reve
 import java.util.*;
 
 public class Main {
-    static int parsePositive(String text) {
-        if(text==null || text.isBlank()) throw new IllegalArgumentException("positive integer text required");
-        int value=Integer.parseInt(text); if(value<=0) throw new IllegalArgumentException("positive value required"); return value;
-    }
-    public static void main(String[] args) throws Exception {
-        java.util.function.Predicate<Integer> positive = value -> value > 0;
-        assert positive.test(3) && !positive.test(0) && !positive.test(-1);
 
-        java.util.function.Function<String,String> strip = String::strip;
-        java.util.function.Function<String,String> upper = value -> value.toUpperCase(Locale.ROOT);
-        assert strip.andThen(upper).apply(" red ").equals("RED");
-    }
+  static int parsePositive(String text) {
+    if (text == null || text.isBlank()) throw new IllegalArgumentException(
+      "positive integer text required"
+    );
+    int value = Integer.parseInt(text);
+    if (value <= 0) throw new IllegalArgumentException("positive value required");
+    return value;
+  }
+
+  public static void main(String[] args) throws Exception {
+    java.util.function.Predicate<Integer> positive = value -> value > 0;
+    assert positive.test(3) && !positive.test(0) && !positive.test(-1);
+
+    java.util.function.Function<String, String> strip = String::strip;
+    java.util.function.Function<String, String> upper = value -> value.toUpperCase(Locale.ROOT);
+    assert strip.andThen(upper).apply(" red ").equals("RED");
+  }
 }
-
 ```
 
 **Expected:** input space red space becomesRED.

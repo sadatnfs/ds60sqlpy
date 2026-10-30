@@ -51,9 +51,11 @@ The question is: Set policy difference 0, reference difference 0, beta.5.
 The objective has no preference advantage at equal margins. This exact value is an independent arithmetic check of the loss convention.
 
 ```python
-difference=nn.Parameter(torch.tensor(0.,dtype=torch.float64)); reference=0.; beta=.5
-loss=F.softplus(-beta*(difference-reference))
-np.testing.assert_allclose(loss.item(),np.log(2),atol=1e-12,rtol=0)
+difference = nn.Parameter(torch.tensor(0.0, dtype=torch.float64))
+reference = 0.0
+beta = 0.5
+loss = F.softplus(-beta * (difference - reference))
+np.testing.assert_allclose(loss.item(), np.log(2), atol=1e-12, rtol=0)
 ```
 
 **Expected:** loss log 2.
@@ -67,7 +69,8 @@ The question is: Backpropagate the equal-margin loss.
 The negative gradient means gradient descent increases the chosen-response advantage. The scale includes beta and the sigmoid derivative at zero.
 
 ```python
-loss.backward(); np.testing.assert_allclose(difference.grad.item(),-.25,atol=1e-12,rtol=0)
+loss.backward()
+np.testing.assert_allclose(difference.grad.item(), -0.25, atol=1e-12, rtol=0)
 ```
 
 **Expected:** gradient-.25.
@@ -81,8 +84,11 @@ The question is: TakeSGD.2 on the scalar policy difference and recompute the los
 The reference remains fixed while the policy margin changes. A smaller loss demonstrates agreement with the supplied preference label, not independent answer quality.
 
 ```python
-opt=torch.optim.SGD([difference],lr=.2); opt.step(); after=F.softplus(-beta*(difference-reference))
-np.testing.assert_allclose(difference.item(),.05,atol=1e-12,rtol=0); assert after.item()<loss.item()
+opt = torch.optim.SGD([difference], lr=0.2)
+opt.step()
+after = F.softplus(-beta * (difference - reference))
+np.testing.assert_allclose(difference.item(), 0.05, atol=1e-12, rtol=0)
+assert after.item() < loss.item()
 ```
 
 **Expected:** difference.05; loss belowlog2.
@@ -96,8 +102,10 @@ The question is: At zero policy difference, reverse the chosen/rejected orientat
 Both response identities and score differences must reverse consistently. Swapping only a label string without changing the associated scores would corrupt the objective.
 
 ```python
-reversed_difference=nn.Parameter(torch.tensor(0.,dtype=torch.float64)); reversed_loss=F.softplus(beta*(reversed_difference-reference)); reversed_loss.backward()
-np.testing.assert_allclose(reversed_difference.grad.item(),.25,atol=1e-12,rtol=0)
+reversed_difference = nn.Parameter(torch.tensor(0.0, dtype=torch.float64))
+reversed_loss = F.softplus(beta * (reversed_difference - reference))
+reversed_loss.backward()
+np.testing.assert_allclose(reversed_difference.grad.item(), 0.25, atol=1e-12, rtol=0)
 ```
 
 **Expected:** gradient+.25.
@@ -111,8 +119,12 @@ The question is: Record a preferred fluent answer that invents a metric denomina
 Preference labels may encode presentation quality or annotator bias. Grounded factual support requires its own rubric and evidence.
 
 ```python
-answer={'preferred':True,'source_supported':False,'claim':'Conversion rate divides by all employees.'}
-assert answer['preferred'] and not answer['source_supported']
+answer = {
+    "preferred": True,
+    "source_supported": False,
+    "claim": "Conversion rate divides by all employees.",
+}
+assert answer["preferred"] and not answer["source_supported"]
 ```
 
 **Expected:** preferenceTrue; source_supportedFalse; not accepted as a grounded answer.
@@ -126,8 +138,17 @@ The question is: Create an execution receipt distinguishing the scalar offline u
 Accurate scope prevents a small differentiable calculation from being advertised as a complete alignment pipeline. A full workflow would need data, policy, reward and evaluation evidence for each stage.
 
 ```python
-receipt={'offline_preference_update':True,'reward_model_trained':False,'online_rl':False,'production_alignment_established':False}
-assert receipt['offline_preference_update'] and not receipt['online_rl'] and not receipt['reward_model_trained']
+receipt = {
+    "offline_preference_update": True,
+    "reward_model_trained": False,
+    "online_rl": False,
+    "production_alignment_established": False,
+}
+assert (
+    receipt["offline_preference_update"]
+    and not receipt["online_rl"]
+    and not receipt["reward_model_trained"]
+)
 ```
 
 **Expected:** offline update True; reward_model_trained False; online_rl False.

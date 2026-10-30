@@ -250,8 +250,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>cached<span class="syntax-punctuation">.</span>Labels<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;app&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;web&quot;</span> <span class="syntax-operator">&amp;&amp;</span> copy<span class="syntax-punctuation">.</span>Labels<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;app&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;api&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;copy&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The cache still contains the original label.</p>
 <p>The copy duplicates the map as well as the struct. An outer assignment alone would still share mutable labels.</p>
 <h4 id="worked-example-2-expose-a-shallow-copy-defect-safely">Worked example 2: Expose a shallow-copy defect safely<a class="heading-anchor" href="#worked-example-2-expose-a-shallow-copy-defect-safely" aria-label="Link to this section">#</a></h4>
@@ -299,8 +298,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>cached<span class="syntax-punctuation">.</span>Labels<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;app&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;bad&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;shallow counterexample&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The original observes the unintended change.</p>
 <p>This is a deterministic sequential demonstration of aliasing. The real cache rule forbids such mutation, especially across concurrent consumers.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>

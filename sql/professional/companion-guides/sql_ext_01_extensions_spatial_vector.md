@@ -109,26 +109,28 @@ These worked excerpts come from `sql/professional/lessons/sql_ext_01_extensions_
 ### Example 1
 
 ```sql
-WITH requested(name, purpose) AS (
-    VALUES
-        ('pg_trgm'::text, 'trigram similarity and wildcard indexes'::text),
-        ('citext', 'case-insensitive text type'),
-        ('pgcrypto', 'cryptographic digest/encryption helpers'),
-        ('postgis', 'coordinate reference systems and spatial operations'),
-        ('vector', 'vector type and nearest-neighbour indexes'),
-        ('postgres_fdw', 'foreign PostgreSQL tables')
-)
+WITH requested (
+  name,
+  purpose
+) AS (
+  VALUES ('pg_trgm'::text, 'trigram similarity and wildcard indexes'::text),
+    ('citext', 'case-insensitive text type'),
+    ('pgcrypto', 'cryptographic digest/encryption helpers'),
+    ('postgis', 'coordinate reference systems and spatial operations'),
+    ('vector', 'vector type and nearest-neighbour indexes'),
+    ('postgres_fdw', 'foreign PostgreSQL tables'))
 SELECT
-    requested.name,
-    requested.purpose,
-    available.default_version,
-    available.installed_version,
-    available.name IS NOT NULL AS available_on_server,
-    available.installed_version IS NOT NULL AS installed_in_database
-FROM requested
-LEFT JOIN pg_catalog.pg_available_extensions AS available
-  ON available.name = requested.name
-ORDER BY requested.name;
+  requested.name,
+  requested.purpose,
+  available.default_version,
+  available.installed_version,
+  available.name IS NOT NULL AS available_on_server,
+  available.installed_version IS NOT NULL AS installed_in_database
+FROM
+  requested
+  LEFT JOIN pg_catalog.pg_available_extensions AS available ON available.name = requested.name
+ORDER BY
+  requested.name;
 ```
 
 **How to read it:** Example 1: Start with `requested`, and `pg_catalog.pg_available_extensions` in `FROM`/`JOIN`. The final `SELECT` displays `name`, `purpose`, `default_version`, `installed_version`, `available_on_server`, and `installed_in_database`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
@@ -139,17 +141,14 @@ ORDER BY requested.name;
 
 ```sql
 CREATE TABLE pro_extensions_lab.resources (
-    resource_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    display_name text NOT NULL CHECK (btrim(display_name) <> ''),
-    normalized_name text GENERATED ALWAYS AS (lower(display_name)) STORED,
-    summary text NOT NULL,
-    location point NOT NULL,
-    embedding double precision[] NOT NULL
-        CHECK (cardinality(embedding) = 3),
-    payload text NOT NULL,
-    payload_sha256 text GENERATED ALWAYS AS (
-        encode(sha256(payload::bytea), 'hex')
-    ) STORED
+  resource_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  display_name text NOT NULL CHECK (btrim(display_name) <> ''),
+  normalized_name text GENERATED ALWAYS AS (lower(display_name)) STORED,
+  summary text NOT NULL,
+  location point NOT NULL,
+  embedding double precision[] NOT NULL CHECK (cardinality(embedding) = 3),
+  payload text NOT NULL,
+  payload_sha256 text GENERATED ALWAYS AS (encode(sha256 (payload::bytea), 'hex')) STORED
 );
 ```
 
@@ -230,10 +229,15 @@ DBA-only SQL inside that isolated target might include:
 
 ```sql
 CREATE EXTENSION pg_trgm;
+
 CREATE EXTENSION citext;
+
 CREATE EXTENSION pgcrypto;
+
 CREATE EXTENSION postgis;
+
 CREATE EXTENSION vector;
+
 CREATE EXTENSION postgres_fdw;
 ```
 

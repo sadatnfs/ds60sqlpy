@@ -226,10 +226,10 @@ Within one disposable connection, create a temporary target:
 
 ```sql
 CREATE TEMP TABLE bridge_sales (
-    source_id text PRIMARY KEY,
-    customer_id integer NOT NULL REFERENCES training.customers(customer_id),
-    amount numeric(12,2) NOT NULL CHECK (amount > 0),
-    occurred_on date NOT NULL
+  source_id text PRIMARY KEY,
+  customer_id integer NOT NULL REFERENCES training.customers (customer_id),
+  amount numeric(12, 2) NOT NULL CHECK (amount > 0),
+  occurred_on date NOT NULL
 ) ON COMMIT DROP;
 ```
 

@@ -31,11 +31,14 @@ The question is: Normalize vector [3, 4] with unit gain and epsilon 1e-8.
 The two methods normalize different statistics. Equal output shape does not imply that one is a drop-in numerical replacement for the other.
 
 ```python
-x=torch.tensor([3.,4.],dtype=torch.float64)
-rms=rms_norm(x); centered=layer_norm(x)
-assert abs(rms.mean().item())>.5
-np.testing.assert_allclose(centered.mean().item(),0,atol=1e-12,rtol=0)
-np.testing.assert_allclose(rms.detach().numpy(),np.array([3.,4.])/np.sqrt(12.5+1e-8),atol=1e-12,rtol=0)
+x = torch.tensor([3.0, 4.0], dtype=torch.float64)
+rms = rms_norm(x)
+centered = layer_norm(x)
+assert abs(rms.mean().item()) > 0.5
+np.testing.assert_allclose(centered.mean().item(), 0, atol=1e-12, rtol=0)
+np.testing.assert_allclose(
+    rms.detach().numpy(), np.array([3.0, 4.0]) / np.sqrt(12.5 + 1e-8), atol=1e-12, rtol=0
+)
 ```
 
 **Expected:** RMSNorm mean nonzero; LayerNorm mean approximately 0.
@@ -49,11 +52,16 @@ The question is: Set the transformed branch to zero and compare pre-norm x with 
 The zero-branch control isolates placement. LayerNorm removes a common feature shift, so its derivative along the all-ones direction is zero rather than identity.
 
 ```python
-value=torch.tensor([1.,2.,4.],dtype=torch.float64,requires_grad=True)
-pre=torch.autograd.functional.jacobian(lambda z:z+0*layer_norm(z),value)
-post=torch.autograd.functional.jacobian(lambda z:layer_norm(z+0*z),value)
-torch.testing.assert_close(pre,torch.eye(3,dtype=torch.float64),atol=1e-12,rtol=0)
-torch.testing.assert_close(post@torch.ones(3,dtype=torch.float64),torch.zeros(3,dtype=torch.float64),atol=1e-10,rtol=0)
+value = torch.tensor([1.0, 2.0, 4.0], dtype=torch.float64, requires_grad=True)
+pre = torch.autograd.functional.jacobian(lambda z: z + 0 * layer_norm(z), value)
+post = torch.autograd.functional.jacobian(lambda z: layer_norm(z + 0 * z), value)
+torch.testing.assert_close(pre, torch.eye(3, dtype=torch.float64), atol=1e-12, rtol=0)
+torch.testing.assert_close(
+    post @ torch.ones(3, dtype=torch.float64),
+    torch.zeros(3, dtype=torch.float64),
+    atol=1e-10,
+    rtol=0,
+)
 ```
 
 **Expected:** pre-norm Jacobian is identity; post-norm Jacobian annihilates a constant feature shift.
@@ -67,9 +75,11 @@ The question is: Use scalar \(g=0\), \(u=2\) and output SiLU(g)*u.
 At zero, SiLU has derivative one-half. Multiplication by up2 gives gate gradient 1, while the up branch sees the zero gate value. A connected zero gradient is not a missing path.
 
 ```python
-gate=torch.tensor(0.,dtype=torch.float64,requires_grad=True); up=torch.tensor(2.,dtype=torch.float64,requires_grad=True)
-output=F.silu(gate)*up; output.backward()
-assert output.item()==0 and gate.grad.item()==1 and up.grad.item()==0
+gate = torch.tensor(0.0, dtype=torch.float64, requires_grad=True)
+up = torch.tensor(2.0, dtype=torch.float64, requires_grad=True)
+output = F.silu(gate) * up
+output.backward()
+assert output.item() == 0 and gate.grad.item() == 1 and up.grad.item() == 0
 ```
 
 **Expected:** output 0; gradient with respect to g is 1; with respect to u is 0.
@@ -83,10 +93,12 @@ The question is: Compare autograd with \(J=\frac{I}{r}-\frac{xx^{\mathsf T}}{d\c
 The derivative contains a direct coordinate term andacoupling term through the sharedRMSdenominator. Omitting the coupling would treat normalization as constant scaling and produce incorrect gradients.
 
 ```python
-value=torch.tensor([1.,2.,3.],dtype=torch.float64,requires_grad=True); r=torch.sqrt(value.square().mean()+1e-8); width=value.numel()
-analytic=torch.eye(width,dtype=torch.float64)/r-torch.outer(value,value)/(width*r**3)
-automatic=torch.autograd.functional.jacobian(rms_norm,value)
-torch.testing.assert_close(automatic,analytic,atol=1e-10,rtol=0)
+value = torch.tensor([1.0, 2.0, 3.0], dtype=torch.float64, requires_grad=True)
+r = torch.sqrt(value.square().mean() + 1e-8)
+width = value.numel()
+analytic = torch.eye(width, dtype=torch.float64) / r - torch.outer(value, value) / (width * r**3)
+automatic = torch.autograd.functional.jacobian(rms_norm, value)
+torch.testing.assert_close(automatic, analytic, atol=1e-10, rtol=0)
 ```
 
 **Expected:** matrices agree within 1e-10.
@@ -100,11 +112,16 @@ The question is: Compare plain FFN model width \(d=4\), hidden 6 with SwiGLU hid
 Matching hidden widths would not match parameter counts. The2/3 width relation is a budget arithmetic rule here, not a universal model-quality prescription.
 
 ```python
-d=4; plain_hidden=6; gated_hidden=4
-assert 2*d*plain_hidden==3*d*gated_hidden==48
-inputs=torch.tensor([[1.,0.,-1.,2.],[0.,1.,2.,-1.]],dtype=torch.float64); wg=torch.eye(4,dtype=torch.float64); wu=2*wg; wd=.5*wg
-result=(F.silu(inputs@wg)*(inputs@wu))@wd
-assert tuple(result.shape)==(2,4) and torch.isfinite(result).all()
+d = 4
+plain_hidden = 6
+gated_hidden = 4
+assert 2 * d * plain_hidden == 3 * d * gated_hidden == 48
+inputs = torch.tensor([[1.0, 0.0, -1.0, 2.0], [0.0, 1.0, 2.0, -1.0]], dtype=torch.float64)
+wg = torch.eye(4, dtype=torch.float64)
+wu = 2 * wg
+wd = 0.5 * wg
+result = (F.silu(inputs @ wg) * (inputs @ wu)) @ wd
+assert tuple(result.shape) == (2, 4) and torch.isfinite(result).all()
 ```
 
 **Expected:** both 48 weight entries; output shape(2, 4).
@@ -118,10 +135,10 @@ The question is: Shift x=[1, 2, 3] by 5, compare the two normalizers, and normal
 Epsilon handles zero magnitude, but does not create the mean-subtraction invariance thatRMSNorm deliberately omits. These invariants clarify what information each normalizer removes.
 
 ```python
-base=torch.tensor([1.,2.,3.],dtype=torch.float64)
-torch.testing.assert_close(layer_norm(base+5),layer_norm(base),atol=1e-12,rtol=0)
-assert not torch.allclose(rms_norm(base+5),rms_norm(base))
-assert torch.isfinite(rms_norm(torch.zeros(3,dtype=torch.float64))).all()
+base = torch.tensor([1.0, 2.0, 3.0], dtype=torch.float64)
+torch.testing.assert_close(layer_norm(base + 5), layer_norm(base), atol=1e-12, rtol=0)
+assert not torch.allclose(rms_norm(base + 5), rms_norm(base))
+assert torch.isfinite(rms_norm(torch.zeros(3, dtype=torch.float64))).all()
 ```
 
 **Expected:** LayerNorm shift invariant; RMSNorm changes; both zero cases finite.

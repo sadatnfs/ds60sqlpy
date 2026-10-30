@@ -52,9 +52,13 @@ The question is: Use training x-2, -1, 1, 2 with labels 0, 0, 1, 1 and test x-3,
 The labels are defined from the fixture geometry before training. The holdout is not used to design a different target after seeing predictions.
 
 ```python
-x=torch.tensor([[-2.],[-1.],[1.],[2.]]); y=torch.tensor([[0.],[0.],[1.],[1.]])
-test_x=torch.tensor([[-3.],[3.]]); truth=torch.tensor([False,True]); train_ids={'a','b','c','d'}; test_ids={'e','f'}
-assert not train_ids&test_ids and len(test_ids)==2
+x = torch.tensor([[-2.0], [-1.0], [1.0], [2.0]])
+y = torch.tensor([[0.0], [0.0], [1.0], [1.0]])
+test_x = torch.tensor([[-3.0], [3.0]])
+truth = torch.tensor([False, True])
+train_ids = {"a", "b", "c", "d"}
+test_ids = {"e", "f"}
+assert not train_ids & test_ids and len(test_ids) == 2
 ```
 
 **Expected:** 4training records, 2test records.
@@ -68,8 +72,12 @@ The question is: Calculate training mean and population standard deviation.
 PyTorch's default sample correction would produce a different scale. Specifying correction 0 aligns this fixture with the paired TensorFlow/NumPy calculation.
 
 ```python
-mean=x.mean(0); scale=x.std(0,correction=0); tx=(x-mean)/scale; vx=(test_x-mean)/scale
-assert mean.item()==0; np.testing.assert_allclose(scale.item(),np.sqrt(2.5),atol=1e-6,rtol=0)
+mean = x.mean(0)
+scale = x.std(0, correction=0)
+tx = (x - mean) / scale
+vx = (test_x - mean) / scale
+assert mean.item() == 0
+np.testing.assert_allclose(scale.item(), np.sqrt(2.5), atol=1e-6, rtol=0)
 ```
 
 **Expected:** mean 0; scale sqrt 2.5.
@@ -83,12 +91,16 @@ The question is: Zero-initialize the weight and run 40 SGD with rate 0.1 steps w
 The fixed budget is part of the experiment. It is not repeated until the test happens to look favorable.
 
 ```python
-model=nn.Linear(1,1,bias=False)
-with torch.no_grad(): model.weight.zero_()
-optimizer=torch.optim.SGD(model.parameters(),lr=.1)
+model = nn.Linear(1, 1, bias=False)
+with torch.no_grad():
+    model.weight.zero_()
+optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
 for _ in range(40):
-    optimizer.zero_grad(set_to_none=True); loss=F.binary_cross_entropy_with_logits(model(tx),y); loss.backward(); optimizer.step()
-assert model.weight.item()>0 and torch.isfinite(model.weight).all()
+    optimizer.zero_grad(set_to_none=True)
+    loss = F.binary_cross_entropy_with_logits(model(tx), y)
+    loss.backward()
+    optimizer.step()
+assert model.weight.item() > 0 and torch.isfinite(model.weight).all()
 ```
 
 **Expected:** positive finite weight after 40 updates.
@@ -103,9 +115,15 @@ The conservation check prevents dropped or duplicated test rows from silently ch
 
 ```python
 model.eval()
-with torch.no_grad(): prediction=model(vx).ravel()>=0
-counts={'tp':int((prediction&truth).sum()),'tn':int((~prediction&~truth).sum()),'fp':int((prediction&~truth).sum()),'fn':int((~prediction&truth).sum())}
-assert counts=={'tp':1,'tn':1,'fp':0,'fn':0} and sum(counts.values())==2
+with torch.no_grad():
+    prediction = model(vx).ravel() >= 0
+counts = {
+    "tp": int((prediction & truth).sum()),
+    "tn": int((~prediction & ~truth).sum()),
+    "fp": int((prediction & ~truth).sum()),
+    "fn": int((~prediction & truth).sum()),
+}
+assert counts == {"tp": 1, "tn": 1, "fp": 0, "fn": 0} and sum(counts.values()) == 2
 ```
 
 **Expected:** TP 1, TN 1, FP 0, FN 0, total 2.
@@ -119,8 +137,8 @@ The question is: Predict class 0 for both test rows and count mistakes.
 The comparison uses identical test units. It does not justify a population claim from two cases.
 
 ```python
-baseline=torch.zeros(2,dtype=torch.bool)
-assert int((baseline!=truth).sum())==1 and int((prediction!=truth).sum())==0
+baseline = torch.zeros(2, dtype=torch.bool)
+assert int((baseline != truth).sum()) == 1 and int((prediction != truth).sum()) == 0
 ```
 
 **Expected:** baseline 1 error; model 0 on this fixture.
@@ -134,9 +152,12 @@ The question is: Flip only the positive group decision and report group counts.
 A global error rate of one-half would hide the entire failure in the positive group. Counts and group meaning belong beside the aggregate.
 
 ```python
-broken=prediction.clone(); broken[1]=False
-report={group:(int(broken[i]!=truth[i]),1) for i,group in enumerate(['negative','positive'])}
-assert report=={'negative':(0,1),'positive':(1,1)}
+broken = prediction.clone()
+broken[1] = False
+report = {
+    group: (int(broken[i] != truth[i]), 1) for i, group in enumerate(["negative", "positive"])
+}
+assert report == {"negative": (0, 1), "positive": (1, 1)}
 ```
 
 **Expected:** negative 0/1errors; positive \(\frac{1}{1}\).

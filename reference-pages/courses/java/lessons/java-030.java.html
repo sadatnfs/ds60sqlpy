@@ -197,29 +197,29 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-keyword">public</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Main</span> <span class="syntax-punctuation">{</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span></span>
-<span class="source-line">    <span class="syntax-comment">// Exercise 1: Round-trip version2 data</span></span>
-<span class="source-line">    <span class="syntax-comment">// Encode accounta1,balance125,noteCafé withversion2 anddecode.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: equal domain record andexact Unicode note.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Exercise 1: Round-trip version 2 data</span></span>
+<span class="source-line">    <span class="syntax-comment">// Encode account a1, balance 125, note Café with version 2 and decode.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: equal domain record and exact Unicode note.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 2: Apply a version1 default</span></span>
-<span class="source-line">    <span class="syntax-comment">// Encode the same core fields usingversion1,which lacksnote.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Encode the same core fields usingversion1,which lacks note.</span></span>
 <span class="source-line">    <span class="syntax-comment">// Expected: decoded noteunlabelled.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 3: Reject an unknown version</span></span>
-<span class="source-line">    <span class="syntax-comment">// Change theversion bytes to99 anddecode.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: IOException namingversion.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Change the version bytes to99 and decode.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: IOException naming version.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 4: Detect truncation</span></span>
-<span class="source-line">    <span class="syntax-comment">// Remove thefinalbyte from a validversion2payload.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: IOException orEOFException before returning a record.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Remove the final byte from a validversion2payload.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: IOException or EOFException before returning a record.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 5: Reject an oversized declared text length</span></span>
-<span class="source-line">    <span class="syntax-comment">// Replace thefirsttextlength withInteger.MAX_VALUE.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: IOException forlength before allocating thatsize.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Replace the first text length withInteger.MAX_VALUE.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: IOException for length before allocating that size.</span></span>
 <span class="source-line"></span>
-<span class="source-line">    <span class="syntax-comment">// Exercise 6: Reject trailing data andinvalid domain state</span></span>
-<span class="source-line">    <span class="syntax-comment">// Append anextra byte,then try constructing a negative-balance account.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: trailing payloadIOException;negative balanceIllegalArgumentException.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Exercise 6: Reject trailing data and invalid domain state</span></span>
+<span class="source-line">    <span class="syntax-comment">// Append an extra byte,then try constructing a negative-balance account.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: trailing payload IOException; negative balance IllegalArgumentException.</span></span>
 <span class="source-line">    System<span class="syntax-punctuation">.</span><span class="syntax-attribute">out</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">println</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement and check the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line">  <span class="syntax-punctuation">}</span></span>
 <span class="source-line"><span class="syntax-punctuation">}</span></span>

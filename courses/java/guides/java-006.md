@@ -50,12 +50,12 @@ import java.util.*;
 
 public class Main {
 
-    public static void main(String[] args) throws Exception {
-        List<String> colors = new ArrayList<>(List.of("red", "blue", "red")); colors.add("green");
-        assert colors.size() == 4 && Collections.frequency(colors, "red") == 2;
-    }
+  public static void main(String[] args) throws Exception {
+    List<String> colors = new ArrayList<>(List.of("red", "blue", "red"));
+    colors.add("green");
+    assert colors.size() == 4 && Collections.frequency(colors, "red") == 2;
+  }
 }
-
 ```
 
 **Expected:** size 4; red appears twice.
@@ -69,16 +69,16 @@ import java.util.*;
 
 public class Main {
 
-    public static void main(String[] args) throws Exception {
-        List<String> colors = new ArrayList<>(List.of("red", "blue", "red")); colors.add("green");
-        assert colors.size() == 4 && Collections.frequency(colors, "red") == 2;
+  public static void main(String[] args) throws Exception {
+    List<String> colors = new ArrayList<>(List.of("red", "blue", "red"));
+    colors.add("green");
+    assert colors.size() == 4 && Collections.frequency(colors, "red") == 2;
 
-        Map<String, Integer> counts = new HashMap<>();
-        for (String color : colors) counts.merge(color, 1, Integer::sum);
-        assert counts.equals(Map.of("red", 2, "blue", 1, "green", 1));
-    }
+    Map<String, Integer> counts = new HashMap<>();
+    for (String color : colors) counts.merge(color, 1, Integer::sum);
+    assert counts.equals(Map.of("red", 2, "blue", 1, "green", 1));
+  }
 }
-
 ```
 
 **Expected:** red2,blue1,green1.

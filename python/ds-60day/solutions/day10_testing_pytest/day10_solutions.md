@@ -185,7 +185,7 @@ def test_slugify(source: str, expected: str) -> None:
 def positive_root(value: float) -> float:
     if value < 0:
         raise ValueError("value must be non-negative")
-    return value ** 0.5
+    return value**0.5
 
 
 def test_negative_root_is_rejected() -> None:

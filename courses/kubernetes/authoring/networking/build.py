@@ -10,15 +10,32 @@ ROOT = BASE.parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from scripts.format_inline_code import canonical_markdown  # noqa: E402
+from scripts.format_inline_code import canonical_markdown, ownership  # noqa: E402
+from scripts.format_repo import load_policy  # noqa: E402
 
 SPECS = runpy.run_path(str(Path(__file__).with_name("chapters.py")))["CHAPTERS"]
 
 
 def write(path, text):
-    path.parent.mkdir(parents=True, exist_ok=True)
     if path.suffix == ".md":
-        text = canonical_markdown(text, root=ROOT, path=path.relative_to(ROOT).as_posix())
+        relative = path.relative_to(ROOT).as_posix()
+        if ".." in Path(relative).parts or "\\" in relative:
+            raise ValueError("Generator Markdown path must stay inside its owned root")
+        for component in (path, *path.parents):
+            if component.is_symlink():
+                raise ValueError("Generator Markdown output cannot use symlinks")
+            if component == ROOT:
+                break
+        generated, protected = ownership(relative, load_policy(ROOT))
+        if protected is not None:
+            raise ValueError("Generator Markdown output is protected: " + relative)
+        if generated:
+            text = canonical_markdown(text, root=ROOT, path=relative)
+        else:
+            print(
+                "GENERATION-DIRECT " + relative + ": layout owned by format-repo", file=sys.stderr
+            )
+    path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(text.rstrip() + "\n", encoding="utf-8", newline="\n")
 
 

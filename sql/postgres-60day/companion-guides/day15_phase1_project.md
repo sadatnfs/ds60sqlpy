@@ -102,27 +102,44 @@ These worked excerpts come from `sql/postgres-60day/day15_phase1_project.sql`. U
 
 ```sql
 WITH line AS (
-  SELECT o.customer_id,
-         date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date
-           AS month_utc,
-         SUM(oi.unit_price*oi.quantity*(1-oi.discount)) AS revenue
-  FROM orders o
-  JOIN order_items oi ON oi.order_id = o.order_id
-  GROUP BY o.customer_id,
-           date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date
+  SELECT
+    o.customer_id,
+    date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date AS month_utc,
+    SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS revenue
+  FROM
+    orders o
+    JOIN order_items oi ON oi.order_id = o.order_id
+  GROUP BY
+    o.customer_id,
+    date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date
 ),
 segment AS (
-  SELECT c.customer_id, COALESCE(c.segment,'standard') AS segment, c.country
-  FROM customers c
+  SELECT
+    c.customer_id,
+    COALESCE(c.segment, 'standard') AS segment,
+    c.country
+  FROM
+    customers c
 )
-SELECT s.segment, s.country, l.month_utc,
-       ROUND(SUM(l.revenue),2) AS revenue,
-       COUNT(DISTINCT l.customer_id) AS actives,
-       ROUND(SUM(l.revenue)/NULLIF(COUNT(DISTINCT l.customer_id),0),2) AS rev_per_active
-FROM line l
-JOIN segment s ON s.customer_id = l.customer_id
-GROUP BY s.segment, s.country, l.month_utc
-ORDER BY l.month_utc DESC, revenue DESC, s.segment, s.country
+SELECT
+  s.segment,
+  s.country,
+  l.month_utc,
+  ROUND(SUM(l.revenue), 2) AS revenue,
+  COUNT(DISTINCT l.customer_id) AS actives,
+  ROUND(SUM(l.revenue) / NULLIF (COUNT(DISTINCT l.customer_id), 0), 2) AS rev_per_active
+FROM
+  line l
+  JOIN segment s ON s.customer_id = l.customer_id
+GROUP BY
+  s.segment,
+  s.country,
+  l.month_utc
+ORDER BY
+  l.month_utc DESC,
+  revenue DESC,
+  s.segment,
+  s.country
 LIMIT 200;
 ```
 
@@ -134,29 +151,46 @@ LIMIT 200;
 
 ```sql
 -- The same topic query shown as a plan instead of business rows.
-EXPLAIN (COSTS OFF)
-WITH line AS (
-  SELECT o.customer_id,
-         date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date
-           AS month_utc,
-         SUM(oi.unit_price*oi.quantity*(1-oi.discount)) AS revenue
-  FROM orders o
-  JOIN order_items oi ON oi.order_id = o.order_id
-  GROUP BY o.customer_id,
-           date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date
-),
-segment AS (
-  SELECT c.customer_id, COALESCE(c.segment,'standard') AS segment, c.country
-  FROM customers c
+EXPLAIN (
+  COSTS OFF
+) WITH line AS (
+  SELECT
+    o.customer_id,
+    date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date AS month_utc,
+    SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS revenue
+  FROM
+    orders o
+    JOIN order_items oi ON oi.order_id = o.order_id
+  GROUP BY
+    o.customer_id,
+    date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date),
+  segment AS (
+    SELECT
+      c.customer_id,
+      COALESCE(c.segment, 'standard') AS segment,
+      c.country
+    FROM
+      customers c
 )
-SELECT s.segment, s.country, l.month_utc,
-       ROUND(SUM(l.revenue),2) AS revenue,
-       COUNT(DISTINCT l.customer_id) AS actives,
-       ROUND(SUM(l.revenue)/NULLIF(COUNT(DISTINCT l.customer_id),0),2) AS rev_per_active
-FROM line l
-JOIN segment s ON s.customer_id = l.customer_id
-GROUP BY s.segment, s.country, l.month_utc
-ORDER BY l.month_utc DESC, revenue DESC, s.segment, s.country
+  SELECT
+    s.segment,
+    s.country,
+    l.month_utc,
+    ROUND(SUM(l.revenue), 2) AS revenue,
+  COUNT(DISTINCT l.customer_id) AS actives,
+  ROUND(SUM(l.revenue) / NULLIF (COUNT(DISTINCT l.customer_id), 0), 2) AS rev_per_active
+FROM
+  line l
+  JOIN segment s ON s.customer_id = l.customer_id
+GROUP BY
+  s.segment,
+  s.country,
+  l.month_utc
+ORDER BY
+  l.month_utc DESC,
+  revenue DESC,
+  s.segment,
+  s.country
 LIMIT 200;
 ```
 

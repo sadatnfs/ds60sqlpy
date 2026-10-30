@@ -31,7 +31,8 @@ If a release test passes only in Debug, inspect assert-only validation and confi
 ## Worked example 1
 
 ```cpp
-if(std::accumulate(fixture.begin(),fixture.end(),0)!=6) return 1;
+if (std::accumulate(fixture.begin(), fixture.end(), 0) != 6)
+  return 1;
 ```
 
 Expected: The release check remains active even under NDEBUG.

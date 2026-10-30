@@ -11,14 +11,19 @@ Return the ordered list of(id, key, value) tuples for the declared 24-row fixtur
 **Expected:** IDs 0..23 appear once, key=id%4, value=10*id. Metrics are 24,24,276,2760.
 
 ```scala
-def canonical(frame: DataFrame): Seq[(Long,Long,Long)] = {
-  frame.select("id","key","value").orderBy("id").collect().toSeq.map(r => (r.getLong(0),r.getLong(1),r.getLong(2)))
+def canonical(frame: DataFrame): Seq[(Long, Long, Long)] = {
+  frame
+    .select("id", "key", "value")
+    .orderBy("id")
+    .collect()
+    .toSeq
+    .map(r => (r.getLong(0), r.getLong(1), r.getLong(2)))
 }
 ```
 
 ```python
 def canonical(frame):
-    return [tuple(r) for r in frame.select("id","key","value").orderBy("id").collect()]
+    return [tuple(r) for r in frame.select("id", "key", "value").orderBy("id").collect()]
 ```
 
 The sorted tuple list is a representation for comparison, not a claim that the underlying relation is intrinsically ordered. It retains every declared field and occurrence. The aggregate checks provide readable diagnostics if a future implementation drops or repeats data, but the full bag comparison is what prevents compensating errors from passing accidentally.
@@ -33,13 +38,13 @@ Return facts repartitioned to 6 partitions by key. Record its partition count an
 
 ```scala
 def keyedLayout(facts: DataFrame): DataFrame = {
-  facts.repartition(6,col("key"))
+  facts.repartition(6, col("key"))
 }
 ```
 
 ```python
 def keyed_layout(facts):
-    return facts.repartition(6,"key")
+    return facts.repartition(6, "key")
 ```
 
 Hash repartitioning expresses equal-key colocation, not one partition per key. The assertion tolerates collisions between distinct keys and does not attach meaning to a numeric partition index. Logical equality is checked independently so a distribution experiment cannot be judged successful merely because the requested partition count was achieved.
@@ -75,13 +80,20 @@ Return partition_id, row_count, id_total for occupied partitions of the supplied
 
 ```scala
 def partitionLedger(frame: DataFrame): DataFrame = {
-  frame.select(col("id"),spark_partition_id().as("partition_id")).groupBy("partition_id").agg(count(lit(1)).as("row_count"),sum("id").as("id_total"))
+  frame
+    .select(col("id"), spark_partition_id().as("partition_id"))
+    .groupBy("partition_id")
+    .agg(count(lit(1)).as("row_count"), sum("id").as("id_total"))
 }
 ```
 
 ```python
 def partition_ledger(frame):
-    return frame.select("id",F.spark_partition_id().alias("partition_id")).groupBy("partition_id").agg(F.count(F.lit(1)).alias("row_count"),F.sum("id").alias("id_total"))
+    return (
+        frame.select("id", F.spark_partition_id().alias("partition_id"))
+        .groupBy("partition_id")
+        .agg(F.count(F.lit(1)).alias("row_count"), F.sum("id").alias("id_total"))
+    )
 ```
 
 The ledger turns a physical layout into inspectable run evidence while reconciling it to the logical population. Empty partitions lack rows and are absent from the grouped result, so metadata is needed to report the total. Persisting partition IDs as business identities would be a mistake because a later shuffle or different plan can change them.
@@ -96,13 +108,13 @@ Return a relation sorted within each partition by key ascending, id ascending. I
 
 ```scala
 def localOrder(frame: DataFrame): DataFrame = {
-  frame.sortWithinPartitions(col("key"),col("id"))
+  frame.sortWithinPartitions(col("key"), col("id"))
 }
 ```
 
 ```python
 def local_order(frame):
-    return frame.sortWithinPartitions("key","id")
+    return frame.sortWithinPartitions("key", "id")
 ```
 
 The operator promises order inside a partition and the test checks exactly that scope. It avoids the common but fragile test that an inadequately specified global order must visibly change or be unsorted. Coincidental global ordering on a tiny fixture is compatible with a weaker contract. Consumers needing a stable global presentation must request it explicitly.
@@ -116,14 +128,26 @@ Order key descending then event identity id ascending and return the first 5 row
 **Expected:** IDs[3,7,11,15,19], allkey 3 and values[30,70,110,150,190]. The final sixthkey 3 row is outside the limit.
 
 ```scala
-def preview(frame: DataFrame): Seq[(Long,Long,Long)] = {
-  frame.orderBy(col("key").desc,col("id").asc).limit(5).select("id","key","value").collect().toSeq.map(r => (r.getLong(0),r.getLong(1),r.getLong(2)))
+def preview(frame: DataFrame): Seq[(Long, Long, Long)] = {
+  frame
+    .orderBy(col("key").desc, col("id").asc)
+    .limit(5)
+    .select("id", "key", "value")
+    .collect()
+    .toSeq
+    .map(r => (r.getLong(0), r.getLong(1), r.getLong(2)))
 }
 ```
 
 ```python
 def preview(frame):
-    return [tuple(r) for r in frame.orderBy(F.col("key").desc(),F.col("id").asc()).limit(5).select("id","key","value").collect()]
+    return [
+        tuple(r)
+        for r in frame.orderBy(F.col("key").desc(), F.col("id").asc())
+        .limit(5)
+        .select("id", "key", "value")
+        .collect()
+    ]
 ```
 
 The complete ordering converts a relation into a specified display sequence before selecting a bounded prefix. A key-only sort leaves same-key peers unresolved; an unordered limit chooses an arbitrary subset. The reference compares every displayed identity and value across layouts, providing a reusable pattern for deterministic small previews without implying that a full production result should be collected on the driver.

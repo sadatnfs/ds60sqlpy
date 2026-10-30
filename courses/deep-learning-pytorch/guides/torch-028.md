@@ -88,18 +88,31 @@ import numpy as np
 import torch
 from torch import nn
 from torch.nn import functional as F
-import tempfile,json,subprocess,sys,textwrap
+import tempfile, json, subprocess, sys, textwrap
 from pathlib import Path
+
+
 def make_state():
-    model=nn.Linear(1,1,bias=False)
-    with torch.no_grad(): model.weight.zero_()
-    return model,torch.optim.Adam(model.parameters(),lr=.05)
-def step(model,optimizer,noise):
-    x=torch.tensor([[1.],[2.]]); target=2*x+noise
-    optimizer.zero_grad(set_to_none=True); (model(x)-target).square().mean().backward(); optimizer.step()
-torch.manual_seed(7); model,optimizer=make_state()
-for _ in range(2): step(model,optimizer,torch.zeros((2,1)))
-parameter=next(model.parameters()); assert optimizer.state[parameter]['step'].item()==2 and parameter.item()>0
+    model = nn.Linear(1, 1, bias=False)
+    with torch.no_grad():
+        model.weight.zero_()
+    return model, torch.optim.Adam(model.parameters(), lr=0.05)
+
+
+def step(model, optimizer, noise):
+    x = torch.tensor([[1.0], [2.0]])
+    target = 2 * x + noise
+    optimizer.zero_grad(set_to_none=True)
+    (model(x) - target).square().mean().backward()
+    optimizer.step()
+
+
+torch.manual_seed(7)
+model, optimizer = make_state()
+for _ in range(2):
+    step(model, optimizer, torch.zeros((2, 1)))
+parameter = next(model.parameters())
+assert optimizer.state[parameter]["step"].item() == 2 and parameter.item() > 0
 ```
 
 **Expected:** optimizer step 2 and positive weight.
@@ -109,9 +122,17 @@ parameter=next(model.parameters()); assert optimizer.state[parameter]['step'].it
 The state dictionary values are serialized at this point. The checkpoint is local and trusted; the example does not load arbitrary external pick led objects.
 
 ```python
-temporary=tempfile.TemporaryDirectory(); folder=Path(temporary.name); path=folder/'checkpoint.pt'
-checkpoint={'model':model.state_dict(),'optimizer':optimizer.state_dict(),'rng':torch.get_rng_state(),'data_position':2}
-torch.save(checkpoint,path); assert path.is_file() and checkpoint['data_position']==2
+temporary = tempfile.TemporaryDirectory()
+folder = Path(temporary.name)
+path = folder / "checkpoint.pt"
+checkpoint = {
+    "model": model.state_dict(),
+    "optimizer": optimizer.state_dict(),
+    "rng": torch.get_rng_state(),
+    "data_position": 2,
+}
+torch.save(checkpoint, path)
+assert path.is_file() and checkpoint["data_position"] == 2
 ```
 
 **Expected:** file exists and metadata position 2.
@@ -121,8 +142,15 @@ torch.save(checkpoint,path); assert path.is_file() and checkpoint['data_position
 The order of random draws is part of the continuation contract. Restoring only the seed without the consumed generator state would not reproduce this point.
 
 ```python
-probe=torch.rand(3); noise=torch.rand((2,1))*.01; step(model,optimizer,noise); expected=parameter.item()
-assert torch.isfinite(probe).all() and optimizer.state[parameter]['step'].item()==3 and np.isfinite(expected)
+probe = torch.rand(3)
+noise = torch.rand((2, 1)) * 0.01
+step(model, optimizer, noise)
+expected = parameter.item()
+assert (
+    torch.isfinite(probe).all()
+    and optimizer.state[parameter]["step"].item() == 3
+    and np.isfinite(expected)
+)
 ```
 
 **Expected:** finite weight, step 3, and saved three-value random probe.

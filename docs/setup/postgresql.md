@@ -15,7 +15,9 @@ Open **PostgreSQL**, choose the first on-ramp lesson and select SQL snippet
 mode when offered. Run:
 
 ```sql
-SELECT current_database() AS database_name, current_user AS learner_role;
+SELECT
+  current_database() AS database_name,
+  current_user AS learner_role;
 ```
 
 On a fresh default installation, expect `advanced_sql_training` and `admin`.

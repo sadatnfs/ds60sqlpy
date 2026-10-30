@@ -59,26 +59,22 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Buffers;
 
-internal static class Program
-{
-    private static void Check(bool condition, string reason)
+internal static class Program {
+  private static void Check(bool condition, string reason) {
+    if (!condition)
+      throw new InvalidOperationException(reason);
+  }
+
+  private static async Task Main() {
     {
-        if (!condition) throw new InvalidOperationException(reason);
+      string? label = null;
+      int? length = label?.Length;
+      Check(length is null, "absence remains absent");
+      Check((length ?? -1) == -1, "explicit display sentinel");
     }
-
-    private static async Task Main()
-    {
-        {
-            string? label = null;
-            int? length = label?.Length;
-            Check(length is null, "absence remains absent");
-            Check((length ?? -1) == -1, "explicit display sentinel");
-        }
-        Console.WriteLine("csharp-011: passed");
-        await Task.CompletedTask;
-    }
-
-
+    Console.WriteLine("csharp-011: passed");
+    await Task.CompletedTask;
+  }
 }
 ```
 
@@ -105,28 +101,26 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Buffers;
 
-internal static class Program
-{
-    private static void Check(bool condition, string reason)
-    {
-        if (!condition) throw new InvalidOperationException(reason);
-    }
+internal static class Program {
+  private static void Check(bool condition, string reason) {
+    if (!condition)
+      throw new InvalidOperationException(reason);
+  }
 
-    private static async Task Main()
+  private static async Task Main() {
     {
-        {
-            int? measured = 0;
-            int? missing = null;
-            Check(measured.HasValue && measured.Value == 0, "valid zero");
-            Check(!missing.HasValue, "unknown measurement");
+      int? measured = 0;
+      int? missing = null;
+      Check(measured.HasValue && measured.Value == 0, "valid zero");
+      Check(!missing.HasValue, "unknown measurement");
             string Describe(int? value) => value is int actual ? $"measured:{actual}" : "unknown";
-            Check(Describe(measured) == "measured:0" && Describe(missing) == "unknown", "preserved meaning");
-        }
-        Console.WriteLine("csharp-011: passed");
-        await Task.CompletedTask;
+            Check(Describe(measured) == "measured:0" &&
+                      Describe(missing) == "unknown",
+                  "preserved meaning");
     }
-
-
+    Console.WriteLine("csharp-011: passed");
+    await Task.CompletedTask;
+  }
 }
 ```
 

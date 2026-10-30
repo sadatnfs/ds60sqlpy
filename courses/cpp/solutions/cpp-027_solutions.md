@@ -31,7 +31,7 @@ If a clean build fails while a long-lived build succeeds, inspect undeclared gen
 ## Worked example 1
 
 ```cpp
-static_assert(vendored::api_version==1);
+static_assert(vendored::api_version == 1);
 ```
 
 Expected: The expected source API version is pinned at compilation.
@@ -39,7 +39,7 @@ Expected: The expected source API version is pinned at compilation.
 ## Worked example 2
 
 ```cpp
-assert(vendored::add(2,3)==5);
+assert(vendored::add(2, 3) == 5);
 ```
 
 Expected: A consumer still checks behavior instead of trusting a version label.

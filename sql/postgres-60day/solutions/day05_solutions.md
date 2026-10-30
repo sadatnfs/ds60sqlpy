@@ -82,14 +82,16 @@ executable companion when you want a self-contained check.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT e.employee_id,
-       e.full_name AS employee_name,
-       m.employee_id AS manager_id,
-       m.full_name AS manager_name
-FROM employees AS e
-LEFT JOIN employees AS m
-  ON m.employee_id = e.manager_id
-ORDER BY e.employee_id;
+SELECT
+  e.employee_id,
+  e.full_name AS employee_name,
+  m.employee_id AS manager_id,
+  m.full_name AS manager_name
+FROM
+  employees AS e
+  LEFT JOIN employees AS m ON m.employee_id = e.manager_id
+ORDER BY
+  e.employee_id;
 ```
 
 **Expected shape:** One row per employee.
@@ -123,13 +125,16 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT e.employee_id,
-       e.full_name
-FROM employees AS e
-LEFT JOIN employees AS report
-  ON report.manager_id = e.employee_id
-WHERE report.employee_id IS NULL
-ORDER BY e.employee_id;
+SELECT
+  e.employee_id,
+  e.full_name
+FROM
+  employees AS e
+  LEFT JOIN employees AS report ON report.manager_id = e.employee_id
+WHERE
+  report.employee_id IS NULL
+ORDER BY
+  e.employee_id;
 ```
 
 **Expected shape:** One row per leaf employee.
@@ -165,20 +170,24 @@ cardinality contract.
 
 ```sql
 WITH months AS (
-  SELECT generate_series(
-           date_trunc('month', CURRENT_DATE) - INTERVAL '5 months',
-           date_trunc('month', CURRENT_DATE),
-           INTERVAL '1 month'
-         )::date AS month_start
-), categories AS (
-  SELECT DISTINCT e.category
-  FROM expenses AS e
+  SELECT
+    generate_series(date_trunc('month', CURRENT_DATE) - INTERVAL '5 months', date_trunc('month', CURRENT_DATE), INTERVAL '1 month')::date AS month_start
+),
+categories AS (
+  SELECT DISTINCT
+    e.category
+  FROM
+    expenses AS e
 )
-SELECT c.category,
-       m.month_start
-FROM categories AS c
-CROSS JOIN months AS m
-ORDER BY c.category, m.month_start;
+SELECT
+  c.category,
+  m.month_start
+FROM
+  categories AS c
+  CROSS JOIN months AS m
+ORDER BY
+  c.category,
+  m.month_start;
 ```
 
 **Expected shape:** Six rows per distinct expense category.
@@ -212,11 +221,14 @@ cardinality contract.
 
 ```sql
 WITH months AS (
-  SELECT generate_series(1, 12) AS month_number
+  SELECT
+    generate_series(1, 12) AS month_number
 )
-SELECT COUNT(*) AS department_month_combinations
-FROM departments AS d
-CROSS JOIN months AS m;
+SELECT
+  COUNT(*) AS department_month_combinations
+FROM
+  departments AS d
+  CROSS JOIN months AS m;
 ```
 
 **Expected shape:** One row containing 72.
@@ -249,16 +261,18 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT left_employee.department_id,
-       left_employee.employee_id AS first_employee_id,
-       right_employee.employee_id AS second_employee_id
-FROM employees AS left_employee
-JOIN employees AS right_employee
-  ON right_employee.department_id = left_employee.department_id
- AND left_employee.employee_id < right_employee.employee_id
-ORDER BY left_employee.department_id,
-         left_employee.employee_id,
-         right_employee.employee_id;
+SELECT
+  left_employee.department_id,
+  left_employee.employee_id AS first_employee_id,
+  right_employee.employee_id AS second_employee_id
+FROM
+  employees AS left_employee
+  JOIN employees AS right_employee ON right_employee.department_id = left_employee.department_id
+    AND left_employee.employee_id < right_employee.employee_id
+  ORDER BY
+    left_employee.department_id,
+    left_employee.employee_id,
+    right_employee.employee_id;
 ```
 
 **Expected shape:** One row per unordered same-department pair.
@@ -291,16 +305,17 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT e.employee_id,
-       e.full_name AS employee_name,
-       manager.full_name AS manager_name,
-       grandmanager.full_name AS grandmanager_name
-FROM employees AS e
-LEFT JOIN employees AS manager
-  ON manager.employee_id = e.manager_id
-LEFT JOIN employees AS grandmanager
-  ON grandmanager.employee_id = manager.manager_id
-ORDER BY e.employee_id;
+SELECT
+  e.employee_id,
+  e.full_name AS employee_name,
+  manager.full_name AS manager_name,
+  grandmanager.full_name AS grandmanager_name
+FROM
+  employees AS e
+  LEFT JOIN employees AS manager ON manager.employee_id = e.manager_id
+  LEFT JOIN employees AS grandmanager ON grandmanager.employee_id = manager.manager_id
+ORDER BY
+  e.employee_id;
 ```
 
 **Expected shape:** One row per employee with up to two ancestor columns.

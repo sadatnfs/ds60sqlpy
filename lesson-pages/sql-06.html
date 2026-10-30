@@ -433,26 +433,58 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These worked excerpts come from <code>sql/postgres-60day/day06_set_operations.sql</code>. Use <strong>Whole SQL lesson (psql)</strong> in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared <code>psql</code> routes are described above.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> purchasers <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span> o<span class="syntax-punctuation">.</span>customer_id <span class="syntax-keyword">FROM</span> orders o
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> supporters <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span> e<span class="syntax-punctuation">.</span>customer_id <span class="syntax-keyword">FROM</span> events e <span class="syntax-keyword">WHERE</span> e<span class="syntax-punctuation">.</span>event_type <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;support&#x27;</span>
+  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span>
+    o<span class="syntax-punctuation">.</span>customer_id
+  <span class="syntax-keyword">FROM</span>
+    orders o
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+supporters <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span>
+    e<span class="syntax-punctuation">.</span>customer_id
+  <span class="syntax-keyword">FROM</span>
+    events e
+  <span class="syntax-keyword">WHERE</span>
+    e<span class="syntax-punctuation">.</span>event_type <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;support&#x27;</span>
 <span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> purchasers
+<span class="syntax-keyword">SELECT</span>
+  <span class="syntax-operator">*</span>
+<span class="syntax-keyword">FROM</span>
+  purchasers
 <span class="syntax-keyword">INTERSECT</span>
-<span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> supporters
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> customer_id<span class="syntax-punctuation">;</span></code></pre>
+<span class="syntax-keyword">SELECT</span>
+  <span class="syntax-operator">*</span>
+<span class="syntax-keyword">FROM</span>
+  supporters
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  customer_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 1: Start with <code>orders</code>, and <code>events</code> in <code>FROM</code>/<code>JOIN</code>; let <code>WHERE</code> remove nonqualifying rows. The final <code>SELECT</code> displays <code>*</code>. <code>ORDER BY</code> determines presentation order. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 1 returns one row per <code>*</code> with columns <code>*</code> from <code>orders</code>, and <code>events</code>. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an <code>ORDER BY</code>, and inspect <code>NULL</code> only for columns this example can produce.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> browsers <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span> e<span class="syntax-punctuation">.</span>customer_id <span class="syntax-keyword">FROM</span> events e <span class="syntax-keyword">WHERE</span> e<span class="syntax-punctuation">.</span>event_type <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;page_view&#x27;</span>
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> purchasers <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span> o<span class="syntax-punctuation">.</span>customer_id <span class="syntax-keyword">FROM</span> orders o
+  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span>
+    e<span class="syntax-punctuation">.</span>customer_id
+  <span class="syntax-keyword">FROM</span>
+    events e
+  <span class="syntax-keyword">WHERE</span>
+    e<span class="syntax-punctuation">.</span>event_type <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;page_view&#x27;</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+purchasers <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span>
+    o<span class="syntax-punctuation">.</span>customer_id
+  <span class="syntax-keyword">FROM</span>
+    orders o
 <span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> browsers
+<span class="syntax-keyword">SELECT</span>
+  <span class="syntax-operator">*</span>
+<span class="syntax-keyword">FROM</span>
+  browsers
 <span class="syntax-keyword">EXCEPT</span>
-<span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> purchasers
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> customer_id<span class="syntax-punctuation">;</span></code></pre>
+<span class="syntax-keyword">SELECT</span>
+  <span class="syntax-operator">*</span>
+<span class="syntax-keyword">FROM</span>
+  purchasers
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  customer_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 2: Start with <code>events</code>, and <code>orders</code> in <code>FROM</code>/<code>JOIN</code>; let <code>WHERE</code> remove nonqualifying rows. The final <code>SELECT</code> displays <code>*</code>. <code>ORDER BY</code> determines presentation order. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 2 returns one row per <code>*</code> with columns <code>*</code> from <code>events</code>, and <code>orders</code>. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an <code>ORDER BY</code>, and inspect <code>NULL</code> only for columns this example can produce.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -785,13 +817,19 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li>set operation: combines compatible result shapes; the presence or absence of <code>ALL</code> controls duplicate preservation.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>customer_id
-<span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  o<span class="syntax-punctuation">.</span>customer_id
+<span class="syntax-keyword">FROM</span>
+  orders <span class="syntax-keyword">AS</span> o
 <span class="syntax-keyword">UNION</span>
-<span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>customer_id
-<span class="syntax-keyword">FROM</span> events <span class="syntax-keyword">AS</span> e
-<span class="syntax-keyword">WHERE</span> e<span class="syntax-punctuation">.</span>event_type <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;support&#x27;</span>
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> customer_id<span class="syntax-punctuation">;</span></code></pre>
+<span class="syntax-keyword">SELECT</span>
+  e<span class="syntax-punctuation">.</span>customer_id
+<span class="syntax-keyword">FROM</span>
+  events <span class="syntax-keyword">AS</span> e
+<span class="syntax-keyword">WHERE</span>
+  e<span class="syntax-punctuation">.</span>event_type <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;support&#x27;</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  customer_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One distinct customer ID per qualifying customer.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
@@ -815,13 +853,19 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li>set operation: combines compatible result shapes; the presence or absence of <code>ALL</code> controls duplicate preservation.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>customer_id
-<span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  o<span class="syntax-punctuation">.</span>customer_id
+<span class="syntax-keyword">FROM</span>
+  orders <span class="syntax-keyword">AS</span> o
 <span class="syntax-keyword">INTERSECT</span>
-<span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>customer_id
-<span class="syntax-keyword">FROM</span> events <span class="syntax-keyword">AS</span> e
-<span class="syntax-keyword">WHERE</span> e<span class="syntax-punctuation">.</span>event_type <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;support&#x27;</span>
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> customer_id<span class="syntax-punctuation">;</span></code></pre>
+<span class="syntax-keyword">SELECT</span>
+  e<span class="syntax-punctuation">.</span>customer_id
+<span class="syntax-keyword">FROM</span>
+  events <span class="syntax-keyword">AS</span> e
+<span class="syntax-keyword">WHERE</span>
+  e<span class="syntax-punctuation">.</span>event_type <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;support&#x27;</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  customer_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One distinct customer ID in both sets.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
@@ -844,12 +888,17 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li>set operation: combines compatible result shapes; the presence or absence of <code>ALL</code> controls duplicate preservation.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id
-<span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id
+<span class="syntax-keyword">FROM</span>
+  customers <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span>
 <span class="syntax-keyword">EXCEPT</span>
-<span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>customer_id
-<span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> customer_id<span class="syntax-punctuation">;</span></code></pre>
+<span class="syntax-keyword">SELECT</span>
+  o<span class="syntax-punctuation">.</span>customer_id
+<span class="syntax-keyword">FROM</span>
+  orders <span class="syntax-keyword">AS</span> o
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  customer_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One row per customer absent from orders.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-3">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-3" aria-label="Link to this section">#</a></h5>
@@ -875,30 +924,47 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> combined_all <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>status
-  <span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o
-  <span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>status <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;paid&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;shipped&#x27;</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-keyword">SELECT</span>
+    o<span class="syntax-punctuation">.</span>status
+  <span class="syntax-keyword">FROM</span>
+    orders <span class="syntax-keyword">AS</span> o
+  <span class="syntax-keyword">WHERE</span>
+    o<span class="syntax-punctuation">.</span>status <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;paid&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;shipped&#x27;</span><span class="syntax-punctuation">)</span>
   <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span>
-  <span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>status
-  <span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o
-  <span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>status <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;shipped&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;delivered&#x27;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> combined_distinct <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>status
-  <span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o
-  <span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>status <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;paid&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;shipped&#x27;</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-keyword">SELECT</span>
+    o<span class="syntax-punctuation">.</span>status
+  <span class="syntax-keyword">FROM</span>
+    orders <span class="syntax-keyword">AS</span> o
+  <span class="syntax-keyword">WHERE</span>
+    o<span class="syntax-punctuation">.</span>status <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;shipped&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;delivered&#x27;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+combined_distinct <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span>
+    o<span class="syntax-punctuation">.</span>status
+  <span class="syntax-keyword">FROM</span>
+    orders <span class="syntax-keyword">AS</span> o
+  <span class="syntax-keyword">WHERE</span>
+    o<span class="syntax-punctuation">.</span>status <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;paid&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;shipped&#x27;</span><span class="syntax-punctuation">)</span>
   <span class="syntax-keyword">UNION</span>
-  <span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>status
-  <span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o
-  <span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>status <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;shipped&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;delivered&#x27;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;UNION ALL&#x27;</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">operation</span><span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">row_count</span>
-<span class="syntax-keyword">FROM</span> combined_all
+  <span class="syntax-keyword">SELECT</span>
+    o<span class="syntax-punctuation">.</span>status
+  <span class="syntax-keyword">FROM</span>
+    orders <span class="syntax-keyword">AS</span> o
+  <span class="syntax-keyword">WHERE</span>
+    o<span class="syntax-punctuation">.</span>status <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;shipped&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;delivered&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span>
+  <span class="syntax-string">&#x27;UNION ALL&#x27;</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">operation</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">row_count</span>
+<span class="syntax-keyword">FROM</span>
+  combined_all
 <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span>
-<span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;UNION&#x27;</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">operation</span><span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">row_count</span>
-<span class="syntax-keyword">FROM</span> combined_distinct
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">operation</span><span class="syntax-punctuation">;</span></code></pre>
+<span class="syntax-keyword">SELECT</span>
+  <span class="syntax-string">&#x27;UNION&#x27;</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">operation</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">row_count</span>
+<span class="syntax-keyword">FROM</span>
+  combined_distinct
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  <span class="syntax-keyword">operation</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> Two labeled summary rows showing all-count &gt;= distinct-count.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-4">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-4" aria-label="Link to this section">#</a></h5>
@@ -921,14 +987,19 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li>set operation: combines compatible result shapes; the presence or absence of <code>ALL</code> controls duplicate preservation.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;order_revenue&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span> <span class="syntax-keyword">AS</span> measure<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span> <span class="syntax-keyword">AS</span> amount
-<span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  <span class="syntax-string">&#x27;order_revenue&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span> <span class="syntax-keyword">AS</span> measure<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span> <span class="syntax-keyword">AS</span> amount
+<span class="syntax-keyword">FROM</span>
+  orders <span class="syntax-keyword">AS</span> o
 <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span>
-<span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;expense&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span> <span class="syntax-keyword">AS</span> measure<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>amount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span> <span class="syntax-keyword">AS</span> amount
-<span class="syntax-keyword">FROM</span> expenses <span class="syntax-keyword">AS</span> e
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> measure<span class="syntax-punctuation">;</span></code></pre>
+<span class="syntax-keyword">SELECT</span>
+  <span class="syntax-string">&#x27;expense&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span> <span class="syntax-keyword">AS</span> measure<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>amount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span> <span class="syntax-keyword">AS</span> amount
+<span class="syntax-keyword">FROM</span>
+  expenses <span class="syntax-keyword">AS</span> e
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  measure<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> Rows identify revenue and expense measures with compatible types.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-5">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-5" aria-label="Link to this section">#</a></h5>
@@ -954,27 +1025,55 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> ordering_customers <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span> o<span class="syntax-punctuation">.</span>customer_id
-  <span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> support_customers <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span> e<span class="syntax-punctuation">.</span>customer_id
-  <span class="syntax-keyword">FROM</span> events <span class="syntax-keyword">AS</span> e
-  <span class="syntax-keyword">WHERE</span> e<span class="syntax-punctuation">.</span>event_type <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;support&#x27;</span>
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> only_orders <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> customer_id <span class="syntax-keyword">FROM</span> ordering_customers
+  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span>
+    o<span class="syntax-punctuation">.</span>customer_id
+  <span class="syntax-keyword">FROM</span>
+    orders <span class="syntax-keyword">AS</span> o
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+support_customers <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span>
+    e<span class="syntax-punctuation">.</span>customer_id
+  <span class="syntax-keyword">FROM</span>
+    events <span class="syntax-keyword">AS</span> e
+  <span class="syntax-keyword">WHERE</span>
+    e<span class="syntax-punctuation">.</span>event_type <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;support&#x27;</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+only_orders <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span>
+    customer_id
+  <span class="syntax-keyword">FROM</span>
+    ordering_customers
   <span class="syntax-keyword">EXCEPT</span>
-  <span class="syntax-keyword">SELECT</span> customer_id <span class="syntax-keyword">FROM</span> support_customers
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> only_support <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> customer_id <span class="syntax-keyword">FROM</span> support_customers
+  <span class="syntax-keyword">SELECT</span>
+    customer_id
+  <span class="syntax-keyword">FROM</span>
+    support_customers
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+only_support <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span>
+    customer_id
+  <span class="syntax-keyword">FROM</span>
+    support_customers
   <span class="syntax-keyword">EXCEPT</span>
-  <span class="syntax-keyword">SELECT</span> customer_id <span class="syntax-keyword">FROM</span> ordering_customers
+  <span class="syntax-keyword">SELECT</span>
+    customer_id
+  <span class="syntax-keyword">FROM</span>
+    ordering_customers
 <span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;orders_only&#x27;</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">source</span>
-<span class="syntax-keyword">FROM</span> only_orders
+<span class="syntax-keyword">SELECT</span>
+  customer_id<span class="syntax-punctuation">,</span>
+  <span class="syntax-string">&#x27;orders_only&#x27;</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">source</span>
+<span class="syntax-keyword">FROM</span>
+  only_orders
 <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span>
-<span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;support_only&#x27;</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">source</span>
-<span class="syntax-keyword">FROM</span> only_support
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> customer_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">source</span><span class="syntax-punctuation">;</span></code></pre>
+<span class="syntax-keyword">SELECT</span>
+  customer_id<span class="syntax-punctuation">,</span>
+  <span class="syntax-string">&#x27;support_only&#x27;</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">source</span>
+<span class="syntax-keyword">FROM</span>
+  only_support
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  customer_id<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">source</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> Customers present in exactly one of the two source sets.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-6">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-6" aria-label="Link to this section">#</a></h5>

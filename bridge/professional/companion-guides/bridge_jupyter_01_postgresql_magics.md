@@ -263,7 +263,10 @@ Parameters bind values, not grammar. A table name cannot replace a value marker:
 
 ```sql
 -- Not identifier binding:
-SELECT count(*) FROM :table_name;
+SELECT
+  count(*)
+FROM
+  :table_name;
 ```
 
 For a notebook, prefer a static course table. In reusable Psycopg code, enforce

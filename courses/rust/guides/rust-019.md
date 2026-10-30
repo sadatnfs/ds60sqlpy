@@ -43,7 +43,13 @@ Read the operations in dependency order. Record which values exist before each l
 The annotation prevents a caller from using the view after a required owner is gone.
 
 ```rust
-fn longer<'a>(left: &'a str, right: &'a str) -> &'a str { if left.len() >= right.len() { left } else { right } }
+fn longer<'a>(left: &'a str, right: &'a str) -> &'a str {
+    if left.len() >= right.len() {
+        left
+    } else {
+        right
+    }
+}
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
@@ -63,11 +69,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 A deliberate owned copy changes the lifetime contract rather than pretending the borrow is static.
 
 ```rust
-fn longer<'a>(left: &'a str, right: &'a str) -> &'a str { if left.len() >= right.len() { left } else { right } }
+fn longer<'a>(left: &'a str, right: &'a str) -> &'a str {
+    if left.len() >= right.len() {
+        left
+    } else {
+        right
+    }
+}
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
-        let result = { let temporary = String::from("retained"); temporary.to_owned() };
+        let result = {
+            let temporary = String::from("retained");
+            temporary.to_owned()
+        };
         assert_eq!(result, "retained");
     }
     println!("rust-019: passed");

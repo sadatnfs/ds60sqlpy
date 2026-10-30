@@ -54,7 +54,8 @@ The question is: Use weights 1, -2 and compute L1 and squared L2 sums.
 The squared L2penalty is not the square root norm. Naming the convention avoids a factor or square-root mismatch when comparing implementations.
 
 ```python
-w=torch.tensor([1.,-2.]); assert w.abs().sum().item()==3 and w.square().sum().item()==5
+w = torch.tensor([1.0, -2.0])
+assert w.abs().sum().item() == 3 and w.square().sum().item() == 5
 ```
 
 **Expected:** \(L_{1}=3\); squared \(L_{2}=5\).
@@ -68,8 +69,10 @@ The question is: Apply Dropout.5 in eval mode to ones twice.
 The local inference behavior is deterministic. Other pipeline components can still be random, so a full model needs its own evaluation contract.
 
 ```python
-drop=nn.Dropout(.5); drop.eval(); x=torch.ones((4,8))
-assert torch.equal(drop(x),x) and torch.equal(drop(x),x)
+drop = nn.Dropout(0.5)
+drop.eval()
+x = torch.ones((4, 8))
+assert torch.equal(drop(x), x) and torch.equal(drop(x), x)
 ```
 
 **Expected:** both outputs exactly ones.
@@ -83,8 +86,9 @@ The question is: Switch the same layer to train mode and inspect output values.
 The test does not require a particular mask or count of zeros. Such a pattern would overfit the random implementation rather than the Dropout contract.
 
 ```python
-drop.train(); sampled=drop(x)
-assert tuple(sampled.shape)==(4,8) and set(sampled.unique().tolist())<={0.,2.}
+drop.train()
+sampled = drop(x)
+assert tuple(sampled.shape) == (4, 8) and set(sampled.unique().tolist()) <= {0.0, 2.0}
 ```
 
 **Expected:** shape(4, 8); only 0 or2.
@@ -98,8 +102,9 @@ The question is: Combine data loss 2 with coefficient.1 times squared L2.
 A total objective may change while the predictive error stays fixed. Logging components helps distinguish those mechanisms.
 
 ```python
-data_loss=torch.tensor(2.); penalty=.1*w.square().sum()
-assert penalty.item()==.5 and (data_loss+penalty).item()==2.5
+data_loss = torch.tensor(2.0)
+penalty = 0.1 * w.square().sum()
+assert penalty.item() == 0.5 and (data_loss + penalty).item() == 2.5
 ```
 
 **Expected:** penalty.5; total 2.5.
@@ -113,8 +118,9 @@ The question is: Differentiate \(0.1\cdot \operatorname{sum}(v\cdot v)\) at v=[1
 The derivative contains 2*coefficient*v under this definition. Copying a coefficient from a half-scaled objective would change the update.
 
 ```python
-v=torch.tensor([1.,-2.],requires_grad=True); (.1*v.square().sum()).backward()
-torch.testing.assert_close(v.grad,torch.tensor([.2,-.4]),atol=1e-6,rtol=0)
+v = torch.tensor([1.0, -2.0], requires_grad=True)
+(0.1 * v.square().sum()).backward()
+torch.testing.assert_close(v.grad, torch.tensor([0.2, -0.4]), atol=1e-6, rtol=0)
 ```
 
 **Expected:** gradient [.2, -.4].
@@ -128,8 +134,11 @@ The question is: Set Dropout to eval and pass a requires_grad input.
 Evaluation mode can be used with gradient-based analysis. Disable gradient recording separately when performing ordinary inference.
 
 ```python
-drop.eval(); differentiable=torch.ones(3,requires_grad=True); observed=drop(differentiable); observed.sum().backward()
-assert observed.requires_grad and torch.equal(differentiable.grad,torch.ones(3))
+drop.eval()
+differentiable = torch.ones(3, requires_grad=True)
+observed = drop(differentiable)
+observed.sum().backward()
+assert observed.requires_grad and torch.equal(differentiable.grad, torch.ones(3))
 ```
 
 **Expected:** output still requires grad; backward gives ones.

@@ -40,7 +40,11 @@ A zero dimension is rejected because this method models a strictly positive rect
 ```java
 assert positiveArea(3, 4) == 12;
 boolean badArea = false;
-try { positiveArea(0, 4); } catch (IllegalArgumentException expected) { badArea = true; }
+try {
+  positiveArea(0, 4);
+} catch (IllegalArgumentException expected) {
+  badArea = true;
+}
 assert badArea;
 ```
 
@@ -55,7 +59,9 @@ Task: Passint5 to a helper that reassigns its local parameter to99.
 The callee receives a copy of the integer. Reassigning its parameter does not create a link back to the caller variable.
 
 ```java
-int original = 5; reassignInt(original); assert original == 5;
+int original = 5;
+reassignInt(original);
+assert original == 5;
 ```
 
 **Expected:** caller value remains5.
@@ -69,7 +75,8 @@ Task: Pass a list containing1 to a helper that appends2.
 The reference value is copied, and both references identify the same list. Mutating that object is visible through either reference.
 
 ```java
-List<Integer> list = new ArrayList<>(List.of(1)); append(list);
+List<Integer> list = new ArrayList<>(List.of(1));
+append(list);
 assert list.equals(List.of(1, 2));
 ```
 
@@ -84,7 +91,8 @@ Task: Pass the list to a helper that replaces only its local parameter with a ne
 Reassigning a local reference does not mutate the original object and does not reassign the caller variable. This is still pass by value.
 
 ```java
-replace(list); assert list.equals(List.of(1, 2));
+replace(list);
+assert list.equals(List.of(1, 2));
 ```
 
 **Expected:** caller list remains1,2.

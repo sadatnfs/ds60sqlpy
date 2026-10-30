@@ -220,14 +220,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <pre class="highlighted-code"><code class="language-cpp"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;iostream&gt;</span>
 
 <span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
-    std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">hello, learner</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
-    <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
+  std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">hello, learner</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected:</strong> stdout is exactly hello, learner followed by a newline; exit 0.</p>
 <h4 id="worked-example-2-reject-a-failed-process">Worked example 2: Reject a failed process<a class="heading-anchor" href="#worked-example-2-reject-a-failed-process" aria-label="Link to this section">#</a></h4>
 <p>Normal text and a failure status can coexist. This example is a deliberate failure, not an answer to normalize to success.</p>
 <pre class="highlighted-code"><code class="language-cpp"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;iostream&gt;</span>
-<span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cerr <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">fixture rejected</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">return</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span></code></pre>
+<span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+  std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cerr <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">fixture rejected</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">return</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected:</strong> stderr fixture rejected plus newline; exit2, intentionally.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-compile-a-fixed-source">Exercise 1: Compile a fixed source<a class="heading-anchor" href="#exercise-1-compile-a-fixed-source" aria-label="Link to this section">#</a></h4>

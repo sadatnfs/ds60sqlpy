@@ -49,9 +49,7 @@ expected = (
     .sort_index()
 )
 assert result.index.tolist() == expected.index.tolist()
-np.testing.assert_allclose(
-    result.to_numpy(), expected.to_numpy(), rtol=1e-12
-)
+np.testing.assert_allclose(result.to_numpy(), expected.to_numpy(), rtol=1e-12)
 print(result)
 ```
 Explanation
@@ -65,10 +63,12 @@ Worked reference for Exercise 2; Persisted reuse timing
 ```python
 import time
 
+
 def timed_mean(frame) -> tuple[float, float]:
     started = time.perf_counter()
     value = float(frame.amount.mean().compute())
     return value, time.perf_counter() - started
+
 
 uncached_value, uncached_seconds = timed_mean(ddf)
 persisted = ddf.persist(scheduler="threads")
@@ -97,8 +97,14 @@ from dask.distributed import Client
 
 # Threads avoid Windows process-spawn boilerplate in a notebook. Enable the
 # dashboard intentionally after confirming that the configured port is free.
-client = Client(processes=False, host="127.0.0.1", dashboard_address=None,
-                n_workers=2, threads_per_worker=1, memory_limit="256MiB")
+client = Client(
+    processes=False,
+    host="127.0.0.1",
+    dashboard_address=None,
+    n_workers=2,
+    threads_per_worker=1,
+    memory_limit="256MiB",
+)
 try:
     cached = client.persist(ddf)
     row_count = int(cached.shape[0].compute())

@@ -100,15 +100,22 @@ These worked excerpts come from `sql/postgres-60day/day08_scalar_inline_subqueri
 ### Example 1
 
 ```sql
-SELECT c.customer_id, c.full_name,
+SELECT
+  c.customer_id,
+  c.full_name,
   (
-    SELECT ROUND(COALESCE(SUM(oi.unit_price * oi.quantity * (1 - oi.discount)),0),2)
-    FROM orders o
-    JOIN order_items oi ON oi.order_id = o.order_id
-    WHERE o.customer_id = c.customer_id
-  ) AS lifetime_revenue
-FROM customers c
-ORDER BY lifetime_revenue DESC, c.customer_id
+    SELECT
+      ROUND(COALESCE(SUM(oi.unit_price * oi.quantity * (1 - oi.discount)), 0), 2)
+    FROM
+      orders o
+      JOIN order_items oi ON oi.order_id = o.order_id
+    WHERE
+      o.customer_id = c.customer_id) AS lifetime_revenue
+FROM
+  customers c
+ORDER BY
+  lifetime_revenue DESC,
+  c.customer_id
 LIMIT 20;
 ```
 
@@ -119,16 +126,26 @@ LIMIT 20;
 ### Example 2
 
 ```sql
-SELECT x.category, ROUND(AVG(x.order_total),2) AS avg_order_total
+SELECT
+  x.category,
+  ROUND(AVG(x.order_total), 2) AS avg_order_total
 FROM (
-  SELECT p.category, o.order_id, SUM(oi.unit_price*oi.quantity*(1-oi.discount)) AS order_total
-  FROM orders o
-  JOIN order_items oi ON oi.order_id = o.order_id
-  JOIN products p ON p.product_id = oi.product_id
-  GROUP BY p.category, o.order_id
-) x
-GROUP BY x.category
-ORDER BY avg_order_total DESC, x.category;
+  SELECT
+    p.category,
+    o.order_id,
+    SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS order_total
+  FROM
+    orders o
+    JOIN order_items oi ON oi.order_id = o.order_id
+    JOIN products p ON p.product_id = oi.product_id
+  GROUP BY
+    p.category,
+    o.order_id) x
+GROUP BY
+  x.category
+ORDER BY
+  avg_order_total DESC,
+  x.category;
 ```
 
 **How to read it:** Example 2: Start with `orders`, `order_items`, and `products` in `FROM`/`JOIN`; let `GROUP BY` collapse rows to its grouping keys. The final `SELECT` displays `category`, `order_id`, and `order_total`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.

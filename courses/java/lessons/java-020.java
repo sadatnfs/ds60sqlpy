@@ -3,8 +3,8 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     // Exercise 1: Find the first duplicate boundary
-    // RunlowerBound on1,2,2,5 withtarget2 andtarget6.
-    // Expected: indices1 and4.
+    // Run lowerBound on 1,2,2,5 with target 2 and target 6.
+    // Expected: indices 1 and 4.
 
     // Exercise 2: Handle empty and outside searches
     // Search an empty array and a target below the first element.
@@ -24,7 +24,7 @@ public class Main {
 
     // Exercise 6: Reject invalid recurrence inputs
     // Pass a negative amount or a zero-valued coin.
-    // Expected: IllegalArgumentException forboth.
+    // Expected: IllegalArgumentException for both.
     System.out.println("Implement and check the six exercises in your saved copy.");
   }
 }

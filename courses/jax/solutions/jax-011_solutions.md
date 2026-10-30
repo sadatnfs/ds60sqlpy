@@ -9,8 +9,8 @@ Each transition multiplies the incoming initial-state sensitivity by one half.
 **Expected:** 1/8 for three steps.
 
 ```python
-values = jnp.array([2., 2., 2.])
-close(jax.grad(lambda h: recurrence(h, values)[0])(0.), .125)
+values = jnp.array([2.0, 2.0, 2.0])
+close(jax.grad(lambda h: recurrence(h, values)[0])(0.0), 0.125)
 ```
 
 ## Exercise 2: Differentiate sequence inputs
@@ -20,7 +20,10 @@ The last input reaches the output directly; earlier ones pass through later tran
 **Expected:** [1/4,1/2,1].
 
 ```python
-close(jax.grad(lambda values: recurrence(jnp.float64(0.), values)[0])(jnp.array([2., 2., 2.])), [.25, .5, 1.])
+close(
+    jax.grad(lambda values: recurrence(jnp.float64(0.0), values)[0])(jnp.array([2.0, 2.0, 2.0])),
+    [0.25, 0.5, 1.0],
+)
 ```
 
 ## Exercise 3: Handle an empty scan
@@ -30,8 +33,8 @@ No transition executes, so the identity of the empty computation is its initial 
 **Expected:** Final five and a length-zero history.
 
 ```python
-last, history = recurrence(jnp.float64(5.), jnp.array([], dtype=jnp.float64))
-close(last, 5.)
+last, history = recurrence(jnp.float64(5.0), jnp.array([], dtype=jnp.float64))
+close(last, 5.0)
 assert history.shape == (0,)
 ```
 
@@ -54,10 +57,12 @@ The stopping count is stable in a neighborhood of the chosen point. This does no
 
 ```python
 def double_until(value):
-    return jax.lax.while_loop(lambda z: z < 10., lambda z: 2. * z, value)
-value, tangent = jax.jvp(double_until, (jnp.float64(1.),), (jnp.float64(1.),))
-close(value, 16.)
-close(tangent, 16.)
+    return jax.lax.while_loop(lambda z: z < 10.0, lambda z: 2.0 * z, value)
+
+
+value, tangent = jax.jvp(double_until, (jnp.float64(1.0),), (jnp.float64(1.0),))
+close(value, 16.0)
+close(tangent, 16.0)
 ```
 
 ## Exercise 6: Transfer to a batched state
@@ -67,8 +72,8 @@ The carry can be an array as long as its shape remains unchanged across steps.
 **Expected:** Final [2,4] from inputs [[2,4],[1,2]].
 
 ```python
-last, history = recurrence(jnp.zeros(2), jnp.array([[2., 4.], [1., 2.]]))
-close(last, [2., 4.])
+last, history = recurrence(jnp.zeros(2), jnp.array([[2.0, 4.0], [1.0, 2.0]]))
+close(last, [2.0, 4.0])
 assert history.shape == (2, 2)
 ```
 

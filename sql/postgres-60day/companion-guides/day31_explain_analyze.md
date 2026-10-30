@@ -97,7 +97,14 @@ These worked excerpts come from `sql/postgres-60day/day31_explain_analyze.sql`. 
 ### Example 1
 
 ```sql
-EXPLAIN SELECT o.order_id, o.total_amount FROM orders o WHERE o.total_amount > 500;
+EXPLAIN
+SELECT
+  o.order_id,
+  o.total_amount
+FROM
+  orders o
+WHERE
+  o.total_amount > 500;
 ```
 
 **How to read it:** Example 1 returns plan rows rather than business rows. The node tree is evidence about one execution strategy; it does not replace a correctness check on the underlying query.
@@ -107,7 +114,15 @@ EXPLAIN SELECT o.order_id, o.total_amount FROM orders o WHERE o.total_amount > 5
 ### Example 2
 
 ```sql
-EXPLAIN ANALYZE SELECT o.order_id, o.total_amount FROM orders o WHERE o.total_amount > 500 LIMIT 100;
+EXPLAIN ANALYZE
+SELECT
+  o.order_id,
+  o.total_amount
+FROM
+  orders o
+WHERE
+  o.total_amount > 500
+LIMIT 100;
 ```
 
 **How to read it:** Example 2 returns plan rows rather than business rows. The node tree is evidence about one execution strategy; it does not replace a correctness check on the underlying query.

@@ -99,9 +99,7 @@ def csv_to_records(path: Path) -> list[dict[str, str]]:
         return list(csv.DictReader(handle))
 
 
-def records_to_csv(
-    records: list[dict[str, str]], path: Path
-) -> None:
+def records_to_csv(records: list[dict[str, str]], path: Path) -> None:
     with path.open("w", encoding="utf-8", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=CSV_FIELDS)
         writer.writeheader()

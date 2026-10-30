@@ -27,7 +27,13 @@ Task: Create `input.txt` inside an owned root and read at most 10 bytes.
 The helper reads actual local bytes under a bounded contract. The fixture root is owned by the lesson and contains no user data.
 
 ```java
-withRoot(root -> {java.nio.file.Files.writeString(root.resolve("input.txt"),"hello");assert new String(readBounded(root,"input.txt",10),java.nio.charset.StandardCharsets.UTF_8).equals("hello");});
+withRoot(root -> {
+  java.nio.file.Files.writeString(root.resolve("input.txt"), "hello");
+  assert new String(
+    readBounded(root, "input.txt", 10),
+    java.nio.charset.StandardCharsets.UTF_8
+  ).equals("hello");
+});
 ```
 
 **Expected:** content hello.
@@ -42,7 +48,15 @@ A path's string appearance is not a permission decision. Normalization andrelati
 
 ```java
 withRoot(root -> {
-    for(String name:List.of("../outside.txt",root.resolve("input.txt").toString())){boolean rejected=false;try{readBounded(root,name,10);}catch(SecurityException expected){rejected=true;}assert rejected;}
+  for (String name : List.of("../outside.txt", root.resolve("input.txt").toString())) {
+    boolean rejected = false;
+    try {
+      readBounded(root, name, 10);
+    } catch (SecurityException expected) {
+      rejected = true;
+    }
+    assert rejected;
+  }
 });
 ```
 
@@ -57,7 +71,16 @@ Task: Writefivebytes and request a four-byte maximum.
 A preflightFiles.size check alone can race with file growth. Readingonlylimit+1bytes keeps allocation bounded and detects an oversized result.
 
 ```java
-withRoot(root -> {java.nio.file.Files.writeString(root.resolve("large.txt"),"abcde");boolean rejected=false;try{readBounded(root,"large.txt",4);}catch(java.io.IOException expected){rejected=expected.getMessage().contains("limit");}assert rejected;});
+withRoot(root -> {
+  java.nio.file.Files.writeString(root.resolve("large.txt"), "abcde");
+  boolean rejected = false;
+  try {
+    readBounded(root, "large.txt", 4);
+  } catch (java.io.IOException expected) {
+    rejected = expected.getMessage().contains("limit");
+  }
+  assert rejected;
+});
 ```
 
 **Expected:** IOException for oversized content.
@@ -72,9 +95,26 @@ The default policy rejects allsymlink components,even anin-root target. A more p
 
 ```java
 withRoot(root -> {
-    java.nio.file.Files.writeString(root.resolve("target.txt"),"fixture");boolean created=false;
-    try{java.nio.file.Files.createSymbolicLink(root.resolve("link.txt"),java.nio.file.Path.of("target.txt"));created=true;}catch(UnsupportedOperationException|java.io.IOException unavailable){System.out.println("symbolic-link fixture unavailable on this platform");}
-    if(created){boolean rejected=false;try{readBounded(root,"link.txt",20);}catch(SecurityException expected){rejected=true;}assert rejected;}
+  java.nio.file.Files.writeString(root.resolve("target.txt"), "fixture");
+  boolean created = false;
+  try {
+    java.nio.file.Files.createSymbolicLink(
+      root.resolve("link.txt"),
+      java.nio.file.Path.of("target.txt")
+    );
+    created = true;
+  } catch (UnsupportedOperationException | java.io.IOException unavailable) {
+    System.out.println("symbolic-link fixture unavailable on this platform");
+  }
+  if (created) {
+    boolean rejected = false;
+    try {
+      readBounded(root, "link.txt", 20);
+    } catch (SecurityException expected) {
+      rejected = true;
+    }
+    assert rejected;
+  }
 });
 ```
 
@@ -89,8 +129,16 @@ Task: Admitonlyread_fixture andrejectrun_shell.
 The input selects among fixed behavior;it does not become executable text. A model proposal or retrieved instruction cannot expand thiscatalog.
 
 ```java
-Map<String,String> operations=Map.of("read_fixture","fixed local reader");assert operations.containsKey("read_fixture");boolean rejected=false;
-try{if(!operations.containsKey("run_shell"))throw new IllegalArgumentException("operation not allowed");}catch(IllegalArgumentException expected){rejected=true;}
+Map<String, String> operations = Map.of("read_fixture", "fixed local reader");
+assert operations.containsKey("read_fixture");
+boolean rejected = false;
+try {
+  if (!operations.containsKey("run_shell")) throw new IllegalArgumentException(
+    "operation not allowed"
+  );
+} catch (IllegalArgumentException expected) {
+  rejected = true;
+}
 assert rejected;
 ```
 
@@ -105,9 +153,27 @@ Task: Copy onlyrequest_id,operation and status from a map containing token andso
 Logs are another data surface. Selecting metadata deliberately is more reliable than assuming everyrawinput is safe to print.
 
 ```java
-Map<String,String> raw=Map.of("request_id","r1","operation","read_fixture","status","rejected","token","do-not-log","source_text","private fixture");
-Map<String,String> safe=Map.of("request_id",raw.get("request_id"),"operation",raw.get("operation"),"status",raw.get("status"));
-assert !safe.containsKey("token") && !safe.containsKey("source_text") && safe.size()==3;
+Map<String, String> raw = Map.of(
+  "request_id",
+  "r1",
+  "operation",
+  "read_fixture",
+  "status",
+  "rejected",
+  "token",
+  "do-not-log",
+  "source_text",
+  "private fixture"
+);
+Map<String, String> safe = Map.of(
+  "request_id",
+  raw.get("request_id"),
+  "operation",
+  raw.get("operation"),
+  "status",
+  raw.get("status")
+);
+assert !safe.containsKey("token") && !safe.containsKey("source_text") && safe.size() == 3;
 ```
 
 **Expected:** diagnostic excludes both sensitive fields.

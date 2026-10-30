@@ -55,15 +55,15 @@ The mean update reveals old-versus-new weighting. The separate variance probe is
 
 ```python
 epsilon = 1e-3
-values = tf.constant([[1., 3.], [3., 5.]])
+values = tf.constant([[1.0, 3.0], [3.0, 5.0]])
 bn = tf.keras.layers.BatchNormalization(axis=-1, momentum=0.5, epsilon=epsilon)
 training_output = bn(values, training=True)
 np.testing.assert_allclose(bn.moving_mean.numpy(), [1, 2], atol=1e-6, rtol=0)
 np.testing.assert_allclose(bn.moving_variance.numpy(), [1, 1], atol=1e-6, rtol=0)
-expected = np.array([[-1., -1.], [1., 1.]]) / np.sqrt(1 + epsilon)
+expected = np.array([[-1.0, -1.0], [1.0, 1.0]]) / np.sqrt(1 + epsilon)
 np.testing.assert_allclose(training_output.numpy(), expected, atol=1e-6, rtol=0)
 probe = tf.keras.layers.BatchNormalization(axis=-1, momentum=0.5, epsilon=epsilon)
-probe(tf.constant([[0., 0.], [4., 4.]]), training=True)
+probe(tf.constant([[0.0, 0.0], [4.0, 4.0]]), training=True)
 np.testing.assert_allclose(probe.moving_variance.numpy(), [2.5, 2.5], atol=1e-6, rtol=0)
 ```
 
@@ -79,7 +79,7 @@ Inference can change the function's output while leaving all state untouched, be
 
 ```python
 epsilon = 1e-3
-values = tf.constant([[1., 3.], [3., 5.]])
+values = tf.constant([[1.0, 3.0], [3.0, 5.0]])
 bn = tf.keras.layers.BatchNormalization(momentum=0.5, epsilon=epsilon)
 training_output = bn(values, training=True).numpy()
 mean_before = bn.moving_mean.numpy().copy()
@@ -104,10 +104,10 @@ The reduced feature axis belongs to one row. No statistic from the unrelated sec
 
 ```python
 ln = tf.keras.layers.LayerNormalization(axis=-1, epsilon=1e-3)
-alone = ln(tf.constant([[1., 3.]])).numpy()[0]
-together = ln(tf.constant([[1., 3.], [100., 200.]])).numpy()[0]
+alone = ln(tf.constant([[1.0, 3.0]])).numpy()[0]
+together = ln(tf.constant([[1.0, 3.0], [100.0, 200.0]])).numpy()[0]
 np.testing.assert_allclose(alone, together, atol=1e-6, rtol=0)
-np.testing.assert_allclose(alone, np.array([-1., 1.]) / np.sqrt(1.001), atol=1e-6, rtol=0)
+np.testing.assert_allclose(alone, np.array([-1.0, 1.0]) / np.sqrt(1.001), atol=1e-6, rtol=0)
 assert len(ln.non_trainable_variables) == 0
 ```
 
@@ -122,13 +122,15 @@ The question is: Compare the first row of training normalization with and withou
 The current training batch is part of the BatchNorm function. A record's output can change when its neighbors change, even before considering moving state. The independent NumPy oracle checks the reduction axes and population-variance arithmetic.
 
 ```python
-small = np.array([[1., 3.], [3., 5.]], dtype=np.float32)
-large = np.vstack([small, [98., 199.]]).astype(np.float32)
+small = np.array([[1.0, 3.0], [3.0, 5.0]], dtype=np.float32)
+large = np.vstack([small, [98.0, 199.0]]).astype(np.float32)
 outputs = []
 for batch in [small, large]:
     layer = tf.keras.layers.BatchNormalization(momentum=0.5, epsilon=1e-3)
     observed = layer(tf.constant(batch), training=True).numpy()
-    expected = (batch - batch.mean(axis=0, keepdims=True)) / np.sqrt(batch.var(axis=0, keepdims=True) + 1e-3)
+    expected = (batch - batch.mean(axis=0, keepdims=True)) / np.sqrt(
+        batch.var(axis=0, keepdims=True) + 1e-3
+    )
     np.testing.assert_allclose(observed, expected, atol=1e-6, rtol=0)
     outputs.append(observed[0])
 assert not np.allclose(outputs[0], outputs[1])
@@ -146,7 +148,7 @@ The question is: Repeat the 0.5 update, then run a fresh Keras layer with moment
 At 0.5 the coefficients are equal, hiding the convention difference. The asymmetric example identifies which coefficient belongs to the new batch. The Torch values here are an arithmetic comparison from its documented formula, not a claim that a Torch layer ran inside the TensorFlow profile.
 
 ```python
-values = tf.constant([[1., 3.], [3., 5.]])
+values = tf.constant([[1.0, 3.0], [3.0, 5.0]])
 bn = tf.keras.layers.BatchNormalization(momentum=0.5)
 bn(values, training=True)
 bn(values, training=True)
@@ -156,7 +158,7 @@ asymmetric(values, training=True)
 np.testing.assert_allclose(asymmetric.moving_mean.numpy(), [0.4, 0.8], atol=1e-6, rtol=0)
 asymmetric(values, training=True)
 np.testing.assert_allclose(asymmetric.moving_mean.numpy(), [0.72, 1.44], atol=1e-6, rtol=0)
-batch_mean = np.array([2., 4.])
+batch_mean = np.array([2.0, 4.0])
 keras_first = (1 - 0.8) * batch_mean
 torch_same_number_formula = 0.8 * batch_mean
 torch_matched_formula = 0.2 * batch_mean
@@ -176,15 +178,15 @@ Positive epsilon handles a zero-variance row. Keras BatchNorm also has a documen
 
 ```python
 ln = tf.keras.layers.LayerNormalization(axis=-1, epsilon=1e-3)
-constant = ln(tf.constant([[5., 5.]])).numpy()
+constant = ln(tf.constant([[5.0, 5.0]])).numpy()
 assert np.isfinite(constant).all()
 np.testing.assert_allclose(constant, [[0, 0]], atol=1e-6, rtol=0)
 bn = tf.keras.layers.BatchNormalization(momentum=0.5, epsilon=1e-3)
-bn(tf.constant([[1., 3.], [3., 5.]]), training=True)
+bn(tf.constant([[1.0, 3.0], [3.0, 5.0]]), training=True)
 bn.trainable = False
 before_mean = bn.moving_mean.numpy().copy()
 before_variance = bn.moving_variance.numpy().copy()
-probe = tf.constant([[100., 200.]])
+probe = tf.constant([[100.0, 200.0]])
 output = bn(probe, training=True).numpy()
 np.testing.assert_array_equal(bn.moving_mean.numpy(), before_mean)
 np.testing.assert_array_equal(bn.moving_variance.numpy(), before_variance)

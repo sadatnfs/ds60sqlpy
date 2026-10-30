@@ -149,10 +149,17 @@ Run these in the complete learner file so the temporary fixture and transaction 
 ### Example 1: Watch a predicate narrow the identities
 
 ```sql
-SELECT task_id, team, status, effort
-FROM start_tasks
-WHERE status = 'open'
-ORDER BY task_id;
+SELECT
+  task_id,
+  team,
+  status,
+  effort
+FROM
+  start_tasks
+WHERE
+  status = 'open'
+ORDER BY
+  task_id;
 ```
 
 Start with all six task identities. The status condition keeps 1,3,4,5, including the task with unknown effort because this predicate does not inspect effort. If your prediction omitted ID 3, you added an unstated assumption. Check this stage before introducing an effort threshold. The output is one open task per task_id, not one team.
@@ -162,10 +169,16 @@ Start with all six task identities. The status condition keeps 1,3,4,5, includin
 ### Example 2: Compute a label without using it too early
 
 ```sql
-SELECT task_id, effort * 2 AS doubled_effort
-FROM start_tasks
-WHERE effort * 2 >= 6
-ORDER BY doubled_effort DESC, task_id;
+SELECT
+  task_id,
+  effort * 2 AS doubled_effort
+FROM
+  start_tasks
+WHERE
+  effort * 2 >= 6
+ORDER BY
+  doubled_effort DESC,
+  task_id;
 ```
 
 The filter repeats the arithmetic because doubled_effort is an output name unavailable to WHERE at this query level. ORDER BY can use the alias. The unknown effort yields an unknown comparison and does not qualify. The expression does not alter stored effort. Sorting ties by task_id makes the two doubled values of 6 appear in a declared order.

@@ -96,11 +96,23 @@ These worked excerpts come from `sql/postgres-60day/day42_data_quality_validatio
 ### Example 1
 
 ```sql
-SELECT 'customers' AS table,
-       COUNT(*) AS rows,
-       SUM(CASE WHEN email IS NULL THEN 1 ELSE 0 END) AS null_emails,
-       SUM(CASE WHEN country IS NULL THEN 1 ELSE 0 END) AS null_country
-FROM customers;
+SELECT
+  'customers' AS table,
+  COUNT(*) AS rows,
+  SUM(
+    CASE WHEN email IS NULL THEN
+      1
+    ELSE
+      0
+    END) AS null_emails,
+  SUM(
+    CASE WHEN country IS NULL THEN
+      1
+    ELSE
+      0
+    END) AS null_country
+FROM
+  customers;
 ```
 
 **How to read it:** Example 1: Start with `customers` in `FROM`/`JOIN`. The final `SELECT` displays `table`, `rows`, `null_emails`, and `null_country`. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
@@ -110,11 +122,17 @@ FROM customers;
 ### Example 2
 
 ```sql
-SELECT email, COUNT(*) AS cnt
-FROM customers
-GROUP BY email
-HAVING COUNT(*) > 1
-ORDER BY cnt DESC;
+SELECT
+  email,
+  COUNT(*) AS cnt
+FROM
+  customers
+GROUP BY
+  email
+HAVING
+  COUNT(*) > 1
+ORDER BY
+  cnt DESC;
 ```
 
 **How to read it:** Example 2: Start with `customers` in `FROM`/`JOIN`; let `GROUP BY` collapse rows to its grouping keys. The final `SELECT` displays `email`, and `cnt`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.

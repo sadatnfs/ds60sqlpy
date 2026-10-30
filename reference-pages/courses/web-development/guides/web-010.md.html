@@ -209,12 +209,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-a-reusable-rule">Worked example 1: A reusable rule<a class="heading-anchor" href="#worked-example-1-a-reusable-rule" aria-label="Link to this section">#</a></h4>
 <p>A class describes a group of elements.</p>
-<pre class="highlighted-code"><code class="language-css"><span class="syntax-punctuation">.</span><span class="syntax-class">note</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">color</span><span class="syntax-punctuation">:</span> <span class="syntax-number">#17324d</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">padding</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-keyword">rem</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span></code></pre>
+<pre class="highlighted-code"><code class="language-css"><span class="syntax-punctuation">.</span><span class="syntax-class">note</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">color</span><span class="syntax-punctuation">:</span> <span class="syntax-number">#17324d</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">padding</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-keyword">rem</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected observation:</strong> Every element with class note receives those declarations.</p>
 <h4 id="worked-example-2-equal-specificity">Worked example 2: Equal specificity<a class="heading-anchor" href="#worked-example-2-equal-specificity" aria-label="Link to this section">#</a></h4>
 <p>Source order decides after the relevant priorities tie.</p>
-<pre class="highlighted-code"><code class="language-css"><span class="syntax-punctuation">.</span><span class="syntax-class">note</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">color</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">blue</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
-<span class="syntax-punctuation">.</span><span class="syntax-class">note</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">color</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">darkred</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span></code></pre>
+<pre class="highlighted-code"><code class="language-css"><span class="syntax-punctuation">.</span><span class="syntax-class">note</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">color</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">blue</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">.</span><span class="syntax-class">note</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">color</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">darkred</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected observation:</strong> Dark red wins for matching elements in this simple unlayered example.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-predict-the-winning-color-in-the-second-example">Exercise 1: Predict the winning color in the second example.<a class="heading-anchor" href="#exercise-1-predict-the-winning-color-in-the-second-example" aria-label="Link to this section">#</a></h4>

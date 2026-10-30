@@ -17,6 +17,10 @@ with the actual lowercase username or organization namespace. The app and every
 ordinary worker have separate tags. PostgreSQL keeps its upstream/mirror image;
 GPU workers, SDK/tooling base images and unrelated local images are excluded.
 
+This checkout targets **1.2.0**. Its publication, native image indexes and fresh
+pull/resume acceptance must be checked for that exact release. A version string
+or an earlier successful run does not establish those gates.
+
 ## Published release and its evidence
 
 The [1.1.0 publisher](https://github.com/sadatnfs/ds60sqlpy/actions/runs/40961726148)
@@ -29,10 +33,13 @@ started App/Core, retained the saved release and learner marker, and passed
 stop/resume with the same stateful containers and volumes.
 
 The original acceptance started App/Core only. The additional
-[all-module pull audit](#audit-every-published-module-without-republishing) is
-pending; its source implementation and tests are not a completed hosted result.
+[all-module pull audit](https://github.com/sadatnfs/ds60sqlpy/actions/runs/40999272225)
+accepted 19 native groups and retained 19 failed groups. A later authenticated
+[metadata-only observation](https://github.com/sadatnfs/ds60sqlpy/actions/runs/41019340315)
+returned HTTP 404 for the 1.1.0 App tag on October 30, 2026. Keep the original
+receipts as historical evidence and verify current tag availability separately.
 Worker runtime qualification, canonical publication, fresh module pulls and
-saved-state acceptance are separate evidence.
+saved-state acceptance remain separate gates.
 
 Use the [exact 1.1.0 source ZIP](https://github.com/sadatnfs/ds60sqlpy/archive/59a0d116a1759d5d509718c52c4f3439e1986644.zip)
 or its matching release starter for reproducibility. The launcher compares the
@@ -47,13 +54,13 @@ that version does not select a classroom image tag.
 
 | Publication route | App tag | Example worker tag |
 | --- | --- | --- |
-| Full CI release after promotion | `1.1.0`, with `latest` then pointing to that completed release | `1.1.0-worker-python-core` |
-| Manual architecture set | `1.1.0-lab-arm64` or `1.1.0-lab-amd64` | `1.1.0-worker-python-core-arm64` or `1.1.0-worker-python-core-amd64` |
+| Full CI release after promotion | `1.2.0`, with `latest` then pointing to that completed release | `1.2.0-worker-python-core` |
+| Manual architecture set | `1.2.0-lab-arm64` or `1.2.0-lab-amd64` | `1.2.0-worker-python-core-arm64` or `1.2.0-worker-python-core-amd64` |
 
 A candidate such as
 `ci-59a0d116a1759d5d509718c52c4f3439e1986644-40961726148-1-r-statistics-amd64`
 records the source, run, attempt, profile and native architecture. It is a
-staging tag. Normal R setup uses `1.1.0-worker-r-statistics`; the corresponding
+staging tag. Normal R setup uses `1.2.0-worker-r-statistics`; the corresponding
 moving alias is `latest-worker-r-statistics`. All ordinary worker aliases use
 `latest-<catalog suffix>`. Do not enter a `ci-*` candidate as the learner release.
 
@@ -71,39 +78,40 @@ the prepared tools for its execution profile. Several subjects can share a
 compatible worker, and a subject can offer variants using different workers.
 There is no separate image for each lesson. The following mapping comes from
 `ModuleCatalog` and [`docker/classroom-images.tsv`](../docker/classroom-images.tsv).
-Every tag below is under `sadatnfs/ds60sqlpy:` for the accepted 1.1.0 release.
+Every tag below is under `sadatnfs/ds60sqlpy:` for the 1.2.0 release layout.
+They are available only after its completed publication and acceptance.
 Each row describes only the lessons or variants declaring that profile. App is
 always included; use `--profile` for ordinary workers and `--image-tag app=VERSION`
 when explicitly choosing the app version.
 
 | Subjects using the execution profile | Image profile | Canonical version tag |
 | --- | --- | --- |
-| Complete reading library, classroom UI and coordination | `app` | `1.1.0` |
-| Applied Science; Bayesian Computing; CUDA CPU study variants; Data and ML Engineering; Data Visualization; TensorFlow; Applied LLMs; LLM Evaluation; LLM Theory; NLP; Statistics and ML | `python-core` | `1.1.0-worker-python-core` |
-| C++ | `cpp20` | `1.1.0-worker-cpp20` |
-| Java | `java21` | `1.1.0-worker-java21` |
-| JavaScript and TypeScript | `javascript-node` | `1.1.0-worker-javascript-node` |
-| JavaScript and TypeScript | `typescript-node` | `1.1.0-worker-typescript-node` |
-| CUDA CPU study variants; TensorFlow | `tensorflow-cpu` | `1.1.0-worker-tensorflow-cpu` |
-| CUDA CPU study variants; Custom Likelihoods; Data and ML Engineering; PyTorch; Applied LLMs; LLM Evaluation; LLM Theory | `llm-torch-cpu` | `1.1.0-worker-llm-torch-cpu` |
-| Scala and Spark | `scala-jvm` | `1.1.0-worker-scala-jvm` |
-| Advanced Spark Modeling; CUDA CPU study variants; Scala and Spark | `spark-local-scala` | `1.1.0-worker-spark-local-scala` |
-| Advanced Spark Modeling; CUDA CPU study variants; Data and ML Engineering; Scala and Spark | `spark-local-python` | `1.1.0-worker-spark-local-python` |
-| C | `c17` | `1.1.0-worker-c17` |
-| Go | `go` | `1.1.0-worker-go` |
-| C# | `csharp-dotnet` | `1.1.0-worker-csharp-dotnet` |
-| Rust | `rust-stable` | `1.1.0-worker-rust-stable` |
-| Swift | `swift-linux` | `1.1.0-worker-swift-linux` |
-| Web Development | `php-cli` | `1.1.0-worker-php-cli` |
-| JAX | `jax-cpu` | `1.1.0-worker-jax-cpu` |
-| Bayesian Computing; Statistics and ML | `bayesian-cpu` | `1.1.0-worker-bayesian-cpu` |
-| R; TMB Modeling | `r-statistics` | `1.1.0-worker-r-statistics` |
-| Data and ML Engineering; dbt; ML Engineering; Polars | `data-engineering` | `1.1.0-worker-data-engineering` |
-| Apache and Open Data Platforms | `data-platforms-python` | `1.1.0-worker-data-platforms-python` |
-| Bayesian Computing | `stan-cpu` | `1.1.0-worker-stan-cpu` |
-| Julia | `julia` | `1.1.0-worker-julia` |
-| dbt | `dbt-duckdb` | `1.1.0-worker-dbt-duckdb` |
-| Python Web Development | `python-web` | `1.1.0-worker-python-web` |
+| Complete reading library, classroom UI and coordination | `app` | `1.2.0` |
+| Applied Science; Bayesian Computing; CUDA CPU study variants; Data and ML Engineering; Data Visualization; TensorFlow; Applied LLMs; LLM Evaluation; LLM Theory; NLP; Statistics and ML | `python-core` | `1.2.0-worker-python-core` |
+| C++ | `cpp20` | `1.2.0-worker-cpp20` |
+| Java | `java21` | `1.2.0-worker-java21` |
+| JavaScript and TypeScript | `javascript-node` | `1.2.0-worker-javascript-node` |
+| JavaScript and TypeScript | `typescript-node` | `1.2.0-worker-typescript-node` |
+| CUDA CPU study variants; TensorFlow | `tensorflow-cpu` | `1.2.0-worker-tensorflow-cpu` |
+| CUDA CPU study variants; Custom Likelihoods; Data and ML Engineering; PyTorch; Applied LLMs; LLM Evaluation; LLM Theory | `llm-torch-cpu` | `1.2.0-worker-llm-torch-cpu` |
+| Scala and Spark | `scala-jvm` | `1.2.0-worker-scala-jvm` |
+| Advanced Spark Modeling; CUDA CPU study variants; Scala and Spark | `spark-local-scala` | `1.2.0-worker-spark-local-scala` |
+| Advanced Spark Modeling; CUDA CPU study variants; Data and ML Engineering; Scala and Spark | `spark-local-python` | `1.2.0-worker-spark-local-python` |
+| C | `c17` | `1.2.0-worker-c17` |
+| Go | `go` | `1.2.0-worker-go` |
+| C# | `csharp-dotnet` | `1.2.0-worker-csharp-dotnet` |
+| Rust | `rust-stable` | `1.2.0-worker-rust-stable` |
+| Swift | `swift-linux` | `1.2.0-worker-swift-linux` |
+| Web Development | `php-cli` | `1.2.0-worker-php-cli` |
+| JAX | `jax-cpu` | `1.2.0-worker-jax-cpu` |
+| Bayesian Computing; Statistics and ML | `bayesian-cpu` | `1.2.0-worker-bayesian-cpu` |
+| R; TMB Modeling | `r-statistics` | `1.2.0-worker-r-statistics` |
+| Data and ML Engineering; dbt; ML Engineering; Polars | `data-engineering` | `1.2.0-worker-data-engineering` |
+| Apache and Open Data Platforms | `data-platforms-python` | `1.2.0-worker-data-platforms-python` |
+| Bayesian Computing | `stan-cpu` | `1.2.0-worker-stan-cpu` |
+| Julia | `julia` | `1.2.0-worker-julia` |
+| dbt | `dbt-duckdb` | `1.2.0-worker-dbt-duckdb` |
+| Python Web Development | `python-web` | `1.2.0-worker-python-web` |
 
 Legacy Python and Python/PostgreSQL bridge work also uses the Core environment;
 PostgreSQL uses its separately selected upstream database image. Browser
@@ -115,7 +123,7 @@ workshops have their own explicit preparation and state contracts.
 For R and TMB lesson pads, select the R profile with the matching source release:
 
 ```sh
-./classroom --profile r-statistics --from-hub sadatnfs --tag 1.1.0
+./classroom --profile r-statistics --from-hub sadatnfs --tag 1.2.0
 ```
 
 That selects App, Core, R and PostgreSQL. It does not pull all unrelated language
@@ -133,13 +141,13 @@ Use Terminal on macOS, a Linux terminal, or Ubuntu inside WSL 2 on Windows.
 Build the complete ordinary set with visible logs and start the classroom:
 
 ```sh
-./classroom --all --local-build --tag 1.1.0 --rebuild
+./classroom --all --local-build --tag 1.2.0 --rebuild
 ```
 
 To build without starting services:
 
 ```sh
-./classroom build --all --local-build --tag 1.1.0
+./classroom build --all --local-build --tag 1.2.0
 ```
 
 Already built and tested the matching image set? No rebuild is required merely
@@ -187,7 +195,7 @@ account. The local publisher never logs in or reads a password.
 Preview the complete local image set without tagging or uploading:
 
 ```sh
-./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag 1.1.0
+./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag 1.2.0
 ```
 
 Omitting a selection, or adding `--all`, includes the app and every ordinary
@@ -200,7 +208,7 @@ It neither builds missing images nor proves that existing images passed tests.
 After reviewing the mapping and your local qualification, upload deliberately:
 
 ```sh
-./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag 1.1.0 --push
+./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag 1.2.0 --push
 ```
 
 Keep the tested image set unchanged between review and upload. A missing image
@@ -210,7 +218,7 @@ complete set first, or explicitly select a smaller distribution.
 For a starter-only set, preview both necessary images:
 
 ```sh
-./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag 1.1.0 --profile app --profile python-core
+./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag 1.2.0 --profile app --profile python-core
 ```
 
 Append `--push` only when ready to upload that same selection. Repeated
@@ -223,7 +231,7 @@ namespace/version option.
 This route creates architecture tags only. A learner on that architecture uses:
 
 ```sh
-./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 1.1.0 --architecture-tags
+./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 1.2.0 --architecture-tags
 ```
 
 Use `--starter` instead of `--all` for the explicitly published starter set.
@@ -237,13 +245,13 @@ and Compose files. After a full `[publish-docker]` publication, pull and start t
 combined release:
 
 ```sh
-./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 1.1.0
+./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 1.2.0
 ```
 
 For a new project, omitting `--tag` resolves the app's `latest` alias and
 saves its concrete version. The accepted partial 1.0.0 release contains App,
 Core, JavaScript and TypeScript. Select only those workers and pin that release,
-including after `latest` moved to the completed full 1.1.0 release:
+including after `latest` moves to a later completed full release:
 
 ```sh
 ./classroom --profile javascript-node --profile typescript-node \
@@ -315,7 +323,7 @@ sets a new default and resets previous worker pins unless you repeat them.
 For a new project using a completed full release, separate downloading from startup:
 
 ```sh
-./classroom pull --all --from-hub YOUR_DOCKERHUB_USER --tag 1.1.0
+./classroom pull --all --from-hub YOUR_DOCKERHUB_USER --tag 1.2.0
 ./classroom resume
 ```
 
@@ -335,7 +343,7 @@ tags, or an intentional Hub version update, keep the project name and apply
 the intended full release explicitly:
 
 ```sh
-./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 1.1.0 --rebuild
+./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 1.2.0 --rebuild
 ```
 
 Use the matching new source version when upgrading. To deliberately follow
@@ -346,7 +354,7 @@ A new download alone does not replace running containers.
 To return to local development:
 
 ```sh
-./classroom --local-build --tag 1.1.0 --rebuild
+./classroom --local-build --tag 1.2.0 --rebuild
 ```
 
 Keep the same custom `--project NAME` on every command. Images contain runtime
@@ -393,7 +401,7 @@ git commit -m "Release the reviewed version [publish-docker]"
 git push origin main
 ```
 
-The accepted source version is `1.1.0`. A new image release from changed source
+The checked-in source version is `1.2.0`. A new image release from changed source
 needs the next coherent checked-in version before this commit. The workflow
 reads that version rather than inventing a registry-only version. Do not combine
 a publication commit with a CI-skip marker or overwrite an existing release.
@@ -440,7 +448,7 @@ A failed promotion can complete matching partial version tags using those
 original image identities, without rewriting completed matching tags. A new
 commit or a full rebuild that encounters partial or conflicting immutable tags
 must finish the original failed promotion or use a consistent checked-in patch
-bump, such as `1.1.1` after 1.1.0. No registry-only version is invented.
+bump, such as `1.2.1` after 1.2.0. No registry-only version is invented.
 
 A complete same-revision release can be recognized without rebuilding or used
 to finish missing latest aliases. Older reruns cannot move latest backward.
@@ -455,7 +463,7 @@ passed on AMD64 and ARM64 after a test expectation and learner-identity fix.
 A new release still needs its own promotion and automatic pull acceptance.
 
 Review the actual workflow result, receipts and published manifests before
-announcing availability. The accepted 1.1.0 evidence is identified above;
+announcing availability. The historical 1.1.0 evidence is identified above;
 configuration, staging pushes and local tests do not establish a later release.
 
 ### Audit every published module without republishing
@@ -519,7 +527,7 @@ A maintainer can dispatch that observation with:
 
 ```sh
 gh workflow run inspect-registry-metadata.yml \
-  --repo sadatnfs/ds60sqlpy --ref main -f version=1.1.0
+  --repo sadatnfs/ds60sqlpy --ref main -f version=1.2.0
 ```
 
 A successful login alone does not prove how every later request was attributed.

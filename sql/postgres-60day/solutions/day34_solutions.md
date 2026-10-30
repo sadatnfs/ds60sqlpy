@@ -64,25 +64,38 @@ the join form because one order can contain multiple Electronics lines.
 ```sql
 SET search_path TO training, public;
 
-EXPLAIN (ANALYZE, BUFFERS)
-SELECT o.order_id,
-       o.order_date
-FROM orders o
-WHERE EXISTS (
-  SELECT 1
-  FROM order_items oi
-  JOIN products p ON p.product_id = oi.product_id
-  WHERE oi.order_id = o.order_id
-    AND p.category = 'Electronics'
-);
+EXPLAIN (
+  ANALYZE,
+  BUFFERS
+)
+SELECT
+  o.order_id,
+  o.order_date
+FROM
+  orders o
+WHERE
+  EXISTS (
+    SELECT
+      1
+    FROM
+      order_items oi
+      JOIN products p ON p.product_id = oi.product_id
+    WHERE
+      oi.order_id = o.order_id
+      AND p.category = 'Electronics');
 
-EXPLAIN (ANALYZE, BUFFERS)
-SELECT DISTINCT o.order_id,
-       o.order_date
-FROM orders o
-JOIN order_items oi ON oi.order_id = o.order_id
-JOIN products p ON p.product_id = oi.product_id
-WHERE p.category = 'Electronics';
+EXPLAIN (
+  ANALYZE,
+  BUFFERS
+) SELECT DISTINCT
+  o.order_id,
+  o.order_date
+FROM
+  orders o
+  JOIN order_items oi ON oi.order_id = o.order_id
+  JOIN products p ON p.product_id = oi.product_id
+WHERE
+  p.category = 'Electronics';
 ```
 
 PostgreSQL may already transform `EXISTS` into a semi-join, so the explicit join
@@ -106,30 +119,47 @@ makes the bounded order set explicit before the dimension join.
 ```sql
 SET search_path TO training, public;
 
-EXPLAIN (ANALYZE, BUFFERS)
-SELECT o.order_id,
-       o.order_date,
-       c.country
-FROM orders o
-JOIN customers c ON c.customer_id = o.customer_id
-ORDER BY o.order_date DESC, o.order_id DESC
+EXPLAIN (
+  ANALYZE,
+  BUFFERS
+)
+SELECT
+  o.order_id,
+  o.order_date,
+  c.country
+FROM
+  orders o
+  JOIN customers c ON c.customer_id = o.customer_id
+ORDER BY
+  o.order_date DESC,
+  o.order_id DESC
 LIMIT 100;
 
-EXPLAIN (ANALYZE, BUFFERS)
-WITH top_orders AS MATERIALIZED (
-  SELECT order_id,
-         customer_id,
-         order_date
-  FROM orders
-  ORDER BY order_date DESC, order_id DESC
+EXPLAIN (
+  ANALYZE,
+  BUFFERS
+) WITH top_orders AS MATERIALIZED (
+  SELECT
+    order_id,
+    customer_id,
+    order_date
+  FROM
+    orders
+  ORDER BY
+    order_date DESC,
+    order_id DESC
   LIMIT 100
 )
-SELECT t.order_id,
-       t.order_date,
-       c.country
-FROM top_orders t
-JOIN customers c ON c.customer_id = t.customer_id
-ORDER BY t.order_date DESC, t.order_id DESC;
+SELECT
+  t.order_id,
+  t.order_date,
+  c.country
+FROM
+  top_orders t
+  JOIN customers c ON c.customer_id = t.customer_id
+ORDER BY
+  t.order_date DESC,
+  t.order_id DESC;
 ```
 
 Expected shape for either actual query: 100 rows when at least 100 orders exist.

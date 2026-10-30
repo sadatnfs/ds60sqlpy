@@ -31,7 +31,7 @@ If a layout optimization changes which value belongs to an ID, the transformatio
 ## Worked example 1
 
 ```cpp
-std::vector<Sample> rows{{1,10},{2,20},{3,30}};
+std::vector<Sample> rows{{1, 10}, {2, 20}, {3, 30}};
 ```
 
 Expected: Three full records retain the relationship between identity and value.
@@ -39,7 +39,8 @@ Expected: Three full records retain the relationship between identity and value.
 ## Worked example 2
 
 ```cpp
-std::vector<int> values{10,20,30}; assert(std::accumulate(values.begin(),values.end(),0)==60);
+std::vector<int> values{10, 20, 30};
+assert(std::accumulate(values.begin(), values.end(), 0) == 60);
 ```
 
 Expected: The value-only representation yields the same total 60.

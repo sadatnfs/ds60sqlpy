@@ -83,12 +83,17 @@ executable companion when you want a self-contained check.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT o.order_id,
-       o.customer_id,
-       o.total_amount,
-       ROUND(AVG(o.total_amount) OVER (PARTITION BY o.customer_id), 2) AS customer_average
-FROM orders AS o
-ORDER BY o.customer_id, o.order_date, o.order_id;
+SELECT
+  o.order_id,
+  o.customer_id,
+  o.total_amount,
+  ROUND(AVG(o.total_amount) OVER (PARTITION BY o.customer_id), 2) AS customer_average
+FROM
+  orders AS o
+ORDER BY
+  o.customer_id,
+  o.order_date,
+  o.order_id;
 ```
 
 **Expected shape:** One row per order.
@@ -122,14 +127,18 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT e.employee_id,
-       e.department_id,
-       e.salary,
-       ROUND(AVG(e.salary) OVER (PARTITION BY e.department_id), 2) AS department_average,
-       MIN(e.salary) OVER (PARTITION BY e.department_id) AS department_minimum,
-       MAX(e.salary) OVER (PARTITION BY e.department_id) AS department_maximum
-FROM employees AS e
-ORDER BY e.department_id, e.employee_id;
+SELECT
+  e.employee_id,
+  e.department_id,
+  e.salary,
+  ROUND(AVG(e.salary) OVER (PARTITION BY e.department_id), 2) AS department_average,
+  MIN(e.salary) OVER (PARTITION BY e.department_id) AS department_minimum,
+  MAX(e.salary) OVER (PARTITION BY e.department_id) AS department_maximum
+FROM
+  employees AS e
+ORDER BY
+  e.department_id,
+  e.employee_id;
 ```
 
 **Expected shape:** One row per employee.
@@ -164,16 +173,17 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT o.order_id,
-       o.customer_id,
-       o.total_amount,
-       ROUND(
-         o.total_amount
-           / NULLIF(SUM(o.total_amount) OVER (PARTITION BY o.customer_id), 0),
-         4
-       ) AS customer_revenue_share
-FROM orders AS o
-ORDER BY o.customer_id, o.order_date, o.order_id;
+SELECT
+  o.order_id,
+  o.customer_id,
+  o.total_amount,
+  ROUND(o.total_amount / NULLIF (SUM(o.total_amount) OVER (PARTITION BY o.customer_id), 0), 4) AS customer_revenue_share
+FROM
+  orders AS o
+ORDER BY
+  o.customer_id,
+  o.order_date,
+  o.order_id;
 ```
 
 **Expected shape:** One row per order with shares summing near one per customer.
@@ -211,18 +221,34 @@ cardinality contract.
 
 ```sql
 WITH grouped AS (
-  SELECT o.customer_id, AVG(o.total_amount) AS average_total
-  FROM orders AS o
-  GROUP BY o.customer_id
-), windowed AS (
-  SELECT o.order_id,
-         AVG(o.total_amount) OVER (PARTITION BY o.customer_id) AS average_total
-  FROM orders AS o
+  SELECT
+    o.customer_id,
+    AVG(o.total_amount) AS average_total
+  FROM
+    orders AS o
+  GROUP BY
+    o.customer_id
+),
+windowed AS (
+  SELECT
+    o.order_id,
+    AVG(o.total_amount) OVER (PARTITION BY o.customer_id) AS average_total
+  FROM
+    orders AS o
 )
-SELECT 'grouped' AS method, COUNT(*) AS row_count FROM grouped
+SELECT
+  'grouped' AS method,
+  COUNT(*) AS row_count
+FROM
+  grouped
 UNION ALL
-SELECT 'windowed' AS method, COUNT(*) AS row_count FROM windowed
-ORDER BY method;
+SELECT
+  'windowed' AS method,
+  COUNT(*) AS row_count
+FROM
+  windowed
+ORDER BY
+  method;
 ```
 
 **Expected shape:** Two labeled count rows.
@@ -259,17 +285,25 @@ cardinality contract.
 
 ```sql
 WITH scored AS (
-  SELECT o.*,
-         AVG(o.total_amount) OVER (PARTITION BY o.customer_id) AS customer_average
-  FROM orders AS o
+  SELECT
+    o.*,
+    AVG(o.total_amount) OVER (PARTITION BY o.customer_id) AS customer_average
+  FROM
+    orders AS o
 )
-SELECT order_id,
-       customer_id,
-       total_amount,
-       ROUND(customer_average, 2) AS customer_average
-FROM scored
-WHERE total_amount > customer_average
-ORDER BY customer_id, total_amount DESC, order_id;
+SELECT
+  order_id,
+  customer_id,
+  total_amount,
+  ROUND(customer_average, 2) AS customer_average
+FROM
+  scored
+WHERE
+  total_amount > customer_average
+ORDER BY
+  customer_id,
+  total_amount DESC,
+  order_id;
 ```
 
 **Expected shape:** Order rows above their customer mean.
@@ -304,16 +338,21 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT o.order_id,
-       o.customer_id,
-       c.country,
-       COUNT(*) OVER (PARTITION BY o.customer_id) AS customer_order_count,
-       SUM(o.total_amount) OVER (PARTITION BY o.customer_id) AS customer_revenue,
-       SUM(o.total_amount) OVER (PARTITION BY c.country) AS country_revenue
-FROM orders AS o
-JOIN customers AS c
-  ON c.customer_id = o.customer_id
-ORDER BY c.country, o.customer_id, o.order_date, o.order_id;
+SELECT
+  o.order_id,
+  o.customer_id,
+  c.country,
+  COUNT(*) OVER (PARTITION BY o.customer_id) AS customer_order_count,
+  SUM(o.total_amount) OVER (PARTITION BY o.customer_id) AS customer_revenue,
+  SUM(o.total_amount) OVER (PARTITION BY c.country) AS country_revenue
+FROM
+  orders AS o
+  JOIN customers AS c ON c.customer_id = o.customer_id
+ORDER BY
+  c.country,
+  o.customer_id,
+  o.order_date,
+  o.order_id;
 ```
 
 **Expected shape:** One row per order with customer and country totals.

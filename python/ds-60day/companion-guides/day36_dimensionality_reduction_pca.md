@@ -142,15 +142,16 @@ from sklearn.preprocessing import StandardScaler
 
 rng = np.random.default_rng(3601)
 signal = rng.normal(size=300)
-X = np.column_stack([
-    signal + rng.normal(scale=0.1, size=300),
-    1_000 * rng.normal(size=300),
-])
+X = np.column_stack(
+    [
+        signal + rng.normal(scale=0.1, size=300),
+        1_000 * rng.normal(size=300),
+    ]
+)
 
 raw = PCA(n_components=1).fit(X)
 scaled = PCA(n_components=1).fit(StandardScaler().fit_transform(X))
-print({"raw_loading": raw.components_[0],
-       "scaled_loading": scaled.components_[0]})
+print({"raw_loading": raw.components_[0], "scaled_loading": scaled.components_[0]})
 ```
 
 **Expected observation:** Raw PCA points almost entirely along the large-unit feature; scaling changes the geometry and loadings.

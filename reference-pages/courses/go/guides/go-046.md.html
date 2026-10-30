@@ -255,8 +255,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>d<span class="syntax-punctuation">.</span>Allowed <span class="syntax-operator">&amp;&amp;</span> d<span class="syntax-punctuation">.</span>UID <span class="syntax-operator">==</span> <span class="syntax-string">&quot;r1&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;allow&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The decision allows the request.</p>
 <p>The pure rule is independently testable. The HTTP adapter still needs protocol and transport validation.</p>
 <h4 id="worked-example-2-reject-a-negative-value">Worked example 2: Reject a negative value<a class="heading-anchor" href="#worked-example-2-reject-a-negative-value" aria-label="Link to this section">#</a></h4>
@@ -307,8 +306,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span><span class="syntax-punctuation">!</span>d<span class="syntax-punctuation">.</span>Allowed <span class="syntax-operator">&amp;&amp;</span> d<span class="syntax-punctuation">.</span>Reason <span class="syntax-operator">!=</span> <span class="syntax-string">&quot;&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;negative&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The decision denies it with a reason.</p>
 <p>Field-specific validation gives an actionable failure instead of an unexplained generic denial.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>

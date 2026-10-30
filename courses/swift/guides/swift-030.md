@@ -45,22 +45,23 @@ The loop observes cancellation state rather than guessing a scheduling delay.
 ```swift
 import Foundation
 
-
-
 @main
 struct LessonMain {
-    static func main() async throws {
+  static func main() async throws {
+    do {
+      let task = Task {
+        while !Task.isCancelled { await Task.yield() }
         do {
-            let task = Task {
-                while !Task.isCancelled { await Task.yield() }
-                do { try Task.checkCancellation(); return false } catch is CancellationError { return true } catch { return false }
-            }
-            task.cancel()
-            let acknowledged = await task.value
-            precondition(acknowledged)
-        }
-        print("swift-030: passed")
+          try Task.checkCancellation()
+          return false
+        } catch is CancellationError { return true } catch { return false }
+      }
+      task.cancel()
+      let acknowledged = await task.value
+      precondition(acknowledged)
     }
+    print("swift-030: passed")
+  }
 }
 ```
 
@@ -73,19 +74,17 @@ A cancellation request alone is not proof that an operation failed to execute.
 ```swift
 import Foundation
 
-
-
 @main
 struct LessonMain {
-    static func main() async throws {
-        do {
-            let task = Task { 9 }
-            task.cancel()
-            let value = await task.value
-            precondition(value == 9)
-        }
-        print("swift-030: passed")
+  static func main() async throws {
+    do {
+      let task = Task { 9 }
+      task.cancel()
+      let value = await task.value
+      precondition(value == 9)
     }
+    print("swift-030: passed")
+  }
 }
 ```
 

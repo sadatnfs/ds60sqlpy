@@ -23,8 +23,9 @@ The question is: Combine document mean losses1 and3 with token counts1 and3.
 The two statistics answer different questions. Neither should be labelled average loss without naming its weighting unit.
 
 ```python
-means=np.array([1.,3.]); counts=np.array([1,3])
-assert np.average(means,weights=counts)==2.5 and means.mean()==2
+means = np.array([1.0, 3.0])
+counts = np.array([1, 3])
+assert np.average(means, weights=counts) == 2.5 and means.mean() == 2
 ```
 
 **Expected:** token mean 2.5; document mean 2.
@@ -38,8 +39,11 @@ The question is: Use confidences.6,.8,.8,1 with correctness1,1,0,1 in a single b
 The gap between confidence and frequency is observable for this small sample. Its sampling uncertainty remains large, so the bin is not a population guarantee.
 
 ```python
-confidence=np.array([.6,.8,.8,1.]); correct=np.array([1,1,0,1])
-assert len(confidence)==4; np.testing.assert_allclose(confidence.mean(),.8,atol=1e-12,rtol=0); assert correct.mean()==.75
+confidence = np.array([0.6, 0.8, 0.8, 1.0])
+correct = np.array([1, 1, 0, 1])
+assert len(confidence) == 4
+np.testing.assert_allclose(confidence.mean(), 0.8, atol=1e-12, rtol=0)
+assert correct.mean() == 0.75
 ```
 
 **Expected:** count4,mean confidence.8,accuracy.75.
@@ -53,8 +57,12 @@ The question is: Select confidence values below.5 and summarize without fabricat
 Zero accuracy would imply observed failures, while perfect accuracy would imply observed successes. An empty bin supports neither statement.
 
 ```python
-mask=confidence<.5; summary={'count':int(mask.sum()),'accuracy':None if not mask.any() else float(correct[mask].mean())}
-assert summary=={'count':0,'accuracy':None}
+mask = confidence < 0.5
+summary = {
+    "count": int(mask.sum()),
+    "accuracy": None if not mask.any() else float(correct[mask].mean()),
+}
+assert summary == {"count": 0, "accuracy": None}
 ```
 
 **Expected:** count0 and accuracyNone.
@@ -68,8 +76,9 @@ The question is: Use bins[.5,.8) and[.8,1] on the fixture.
 A value exactly on a boundary must enter only one bin. Double inclusion or omission changes denominators and can distort calibration plots.
 
 ```python
-low=(confidence>=.5)&(confidence<.8); high=(confidence>=.8)&(confidence<=1)
-assert (int(low.sum()),int(high.sum()))==(1,3) and int((low|high).sum())==4
+low = (confidence >= 0.5) & (confidence < 0.8)
+high = (confidence >= 0.8) & (confidence <= 1)
+assert (int(low.sum()), int(high.sum())) == (1, 3) and int((low | high).sum()) == 4
 ```
 
 **Expected:** counts1 and3, total4.
@@ -83,8 +92,12 @@ The question is: Compare dictionariesA q1=0,q2=1 and B q2=0,q1=1 by IDs.
 A zero mean can hide opposite per-question outcomes. Pairing preserves which system fails on which case.
 
 ```python
-a={'q1':0,'q2':1}; b={'q2':0,'q1':1}; ids=sorted(a)
-diff=np.array([a[i]-b[i] for i in ids]); np.testing.assert_array_equal(diff,[-1,1]); assert diff.mean()==0
+a = {"q1": 0, "q2": 1}
+b = {"q2": 0, "q1": 1}
+ids = sorted(a)
+diff = np.array([a[i] - b[i] for i in ids])
+np.testing.assert_array_equal(diff, [-1, 1])
+assert diff.mean() == 0
 ```
 
 **Expected:** differences[-1,1], mean0.
@@ -98,8 +111,9 @@ The question is: Compare evaluation metadata with tokenizer hashv1 versusv2.
 The same text can be divided into different numbers and identities of tokens. A new common evaluation unit is needed before treating the scores as directly comparable.
 
 ```python
-left={'tokenizer':'v1','unit':'token'}; right={'tokenizer':'v2','unit':'token'}
-assert left!=right
+left = {"tokenizer": "v1", "unit": "token"}
+right = {"tokenizer": "v2", "unit": "token"}
+assert left != right
 ```
 
 **Expected:** direct token-loss comparison marked incompatible.

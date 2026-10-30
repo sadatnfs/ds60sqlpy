@@ -23,8 +23,9 @@ The question is: Use batch1,heads2 and contexts16,32.
 Both the query and key axes double, producing four times as many scores. The number of heads remains fixed.
 
 ```python
-b,h=1,2; counts=[b*h*t*t for t in [16,32]]
-assert counts==[512,2048]
+b, h = 1, 2
+counts = [b * h * t * t for t in [16, 32]]
+assert counts == [512, 2048]
 ```
 
 **Expected:** 512 and2048 score elements.
@@ -38,8 +39,8 @@ The question is: Use1 layer,2 heads,width per head16,float32 bytes4 and contexts
 The factor two counts keys and values. Each past position adds a fixed number of features, so doubling context doubles this raw storage.
 
 ```python
-cache=[2*1*1*2*t*16*4 for t in [16,32]]
-assert cache==[4096,8192]
+cache = [2 * 1 * 1 * 2 * t * 16 * 4 for t in [16, 32]]
+assert cache == [4096, 8192]
 ```
 
 **Expected:** 4096 and8192 bytes.
@@ -53,8 +54,8 @@ The question is: Calculate cache bytes at context32 using 2-byte versus 4-byte e
 A storage reduction does not establish an acceptable accuracy change. Precision policy requires separate numerical evaluation.
 
 ```python
-assert 2*1*1*2*32*16*2==4096
-assert 2*1*1*2*32*16*4==8192
+assert 2 * 1 * 1 * 2 * 32 * 16 * 2 == 4096
+assert 2 * 1 * 1 * 2 * 32 * 16 * 4 == 8192
 ```
 
 **Expected:** 4096 versus8192 bytes.
@@ -68,7 +69,7 @@ The question is: Increase batch from 1 to3 with context32 and all other cache di
 Independent requests each need their own context state unless a documented sharing mechanism applies. Batching improves utilization in some systems but does not eliminate storage per request.
 
 ```python
-assert 2*1*3*2*32*16*4==24576
+assert 2 * 1 * 3 * 2 * 32 * 16 * 4 == 24576
 ```
 
 **Expected:** 24576 raw cache bytes.
@@ -82,7 +83,7 @@ The question is: Compare4 heads of width8 with2 heads of width16.
 Head count and head width must be considered together. Multiplying by model width and by head count would double-count features.
 
 ```python
-assert 2*4*32*8*4==2*2*32*16*4
+assert 2 * 4 * 32 * 8 * 4 == 2 * 2 * 32 * 16 * 4
 ```
 
 **Expected:** equal raw cache bytes for the same context.
@@ -96,8 +97,12 @@ The question is: Produce an estimate record naming omitted allocations and avoid
 An honest estimate is still useful. It helps explain scaling while making clear that a real runtime measurement is needed before selecting resource limits.
 
 ```python
-estimate={'raw_kv_bytes':8192,'excludes':['parameters','temporary tensors','allocator overhead'],'measured_peak':False}
-assert len(estimate['excludes'])==3 and not estimate['measured_peak']
+estimate = {
+    "raw_kv_bytes": 8192,
+    "excludes": ["parameters", "temporary tensors", "allocator overhead"],
+    "measured_peak": False,
+}
+assert len(estimate["excludes"]) == 3 and not estimate["measured_peak"]
 ```
 
 **Expected:** record identifies parameters,temporary tensors,allocator overhead as excluded.

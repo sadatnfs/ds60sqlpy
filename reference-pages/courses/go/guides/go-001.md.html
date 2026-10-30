@@ -234,8 +234,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>greeting <span class="syntax-operator">==</span> <span class="syntax-string">&quot;Hello, Go&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;greeting&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> greeting equals Hello, Go.</p>
 <p>The quotes delimit a string literal; they are not part of the stored value. Matching the exact text catches a changed greeting even if printing would still look reasonable.</p>
 <h4 id="worked-example-2-compute-before-formatting">Worked example 2: Compute before formatting<a class="heading-anchor" href="#worked-example-2-compute-before-formatting" aria-label="Link to this section">#</a></h4>
@@ -266,8 +265,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>total <span class="syntax-operator">==</span> <span class="syntax-number">5</span> <span class="syntax-operator">&amp;&amp;</span> line <span class="syntax-operator">==</span> <span class="syntax-string">&quot;total=5&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;format&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The integer is 5 and the text is total=5.</p>
 <p>The arithmetic result and its presentation are separate values. %d formats a decimal integer, and a wrong formatting verb can produce diagnostic text rather than the intended representation.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>

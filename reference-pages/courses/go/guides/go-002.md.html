@@ -235,8 +235,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>a <span class="syntax-operator">==</span> <span class="syntax-number">3</span> <span class="syntax-operator">&amp;&amp;</span> b <span class="syntax-operator">==</span> <span class="syntax-number">3.5</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;division&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The results are 3 and 3.5.</p>
 <p>Converting before division selects floating arithmetic. float64(7/2) would instead be 3.0 because integer division has already occurred.</p>
 <h4 id="worked-example-2-expose-narrowing">Worked example 2: Expose narrowing<a class="heading-anchor" href="#worked-example-2-expose-narrowing" aria-label="Link to this section">#</a></h4>
@@ -268,8 +267,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>small <span class="syntax-operator">==</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;narrowing&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The narrowed value is 4.</p>
 <p>The eight-bit unsigned result retains the value modulo 256. A direct constant assignment of 260 to uint8 would be rejected instead of silently accepted.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>

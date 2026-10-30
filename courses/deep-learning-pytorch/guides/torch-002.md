@@ -80,8 +80,13 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-x=torch.arange(6,dtype=torch.float64,device='cpu').reshape(2,3)
-assert tuple(x.shape)==(2,3) and x.stride()==(3,1) and x.device.type=='cpu' and x.dtype==torch.float64
+x = torch.arange(6, dtype=torch.float64, device="cpu").reshape(2, 3)
+assert (
+    tuple(x.shape) == (2, 3)
+    and x.stride() == (3, 1)
+    and x.device.type == "cpu"
+    and x.dtype == torch.float64
+)
 ```
 
 **Expected:** shape(2, 3), stride(3, 1), CPU, float64.
@@ -91,8 +96,9 @@ assert tuple(x.shape)==(2,3) and x.stride()==(3,1) and x.device.type=='cpu' and 
 Basic slicing returns a view here. A function receiving that view can mutate caller-owned data unless it copies or documents the ownership contract.
 
 ```python
-row=x[0]; row[0]=99
-assert x[0,0].item()==99
+row = x[0]
+row[0] = 99
+assert x[0, 0].item() == 99
 ```
 
 **Expected:** original x[0, 0] becomes 99.
@@ -102,8 +108,9 @@ assert x[0,0].item()==99
 clone copies storage and preserves a differentiable relationship when gradients are enabled. Detaching and copying are separate operations discussed later.
 
 ```python
-owned=x.clone(); owned[0,0]=-1
-assert owned[0,0].item()==-1 and x[0,0].item()==99
+owned = x.clone()
+owned[0, 0] = -1
+assert owned[0, 0].item() == -1 and x[0, 0].item() == 99
 ```
 
 **Expected:** clone starts-1; original remains 99.

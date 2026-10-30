@@ -22,9 +22,11 @@ from typing import TypedDict
 
 from prefect import flow, get_run_logger, task
 
+
 class ExtractedData(TypedDict):
     run_date: str
     values: list[int]
+
 
 @task(retries=2, retry_delay_seconds=1)
 def extract(run_date: str) -> ExtractedData:
@@ -32,9 +34,11 @@ def extract(run_date: str) -> ExtractedData:
     logger.info("Extracting the local sample for %s", run_date)
     return {"run_date": run_date, "values": [3, 1, 4, 1, 5]}
 
+
 @task
 def transform(data: ExtractedData) -> ExtractedData:
     return {**data, "values": sorted(set(data["values"]))}
+
 
 @task
 def load(data: ExtractedData) -> dict[str, int | str]:
@@ -45,6 +49,7 @@ def load(data: ExtractedData) -> dict[str, int | str]:
         "loaded_rows": len(data["values"]),
     }
 
+
 @flow(name="etl-daily")
 def etl_flow(run_date: str | None = None) -> dict[str, int | str]:
     effective_date = run_date or date.today().isoformat()
@@ -52,14 +57,19 @@ def etl_flow(run_date: str | None = None) -> dict[str, int | str]:
     clean = transform(raw)
     return load(clean)
 
+
 RUN_LOCAL_PREFECT_FLOW = False
 if RUN_LOCAL_PREFECT_FLOW:
     from urllib.parse import urlsplit
     from prefect.settings import PREFECT_API_URL
 
     endpoint = urlsplit(PREFECT_API_URL.value() or "")
-    if (endpoint.scheme != "http" or endpoint.hostname not in {"localhost", "127.0.0.1"}
-            or endpoint.username or endpoint.password):
+    if (
+        endpoint.scheme != "http"
+        or endpoint.hostname not in {"localhost", "127.0.0.1"}
+        or endpoint.username
+        or endpoint.password
+    ):
         raise RuntimeError("Prepare a loopback Prefect API before running this extension")
     print(etl_flow(run_date="2026-01-15"))
 ```
@@ -70,6 +80,7 @@ Worked reference for Exercise 2; Retries and a local failure hook
 ```python
 from prefect.logging.loggers import flow_run_logger
 
+
 def log_failure(flow, flow_run, state) -> None:
     logger = flow_run_logger(flow_run, flow)
     logger.error(
@@ -78,6 +89,7 @@ def log_failure(flow, flow_run, state) -> None:
         state.name,
         state.message,
     )
+
 
 @flow(name="monitored-etl", on_failure=[log_failure])
 def monitored_etl(run_date: str | None = None) -> dict[str, int | str]:
@@ -101,8 +113,12 @@ def serve_daily() -> None:
     from prefect.settings import PREFECT_API_URL
 
     endpoint = urlsplit(PREFECT_API_URL.value() or "")
-    if (endpoint.scheme != "http" or endpoint.hostname not in {"localhost", "127.0.0.1"}
-            or endpoint.username or endpoint.password):
+    if (
+        endpoint.scheme != "http"
+        or endpoint.hostname not in {"localhost", "127.0.0.1"}
+        or endpoint.username
+        or endpoint.password
+    ):
         raise RuntimeError("Prepare a loopback Prefect API before serving this extension")
     # serve() creates a deployment and then blocks while listening for work.
     etl_flow.serve(
@@ -110,6 +126,7 @@ def serve_daily() -> None:
         cron="0 2 * * *",
         pause_on_shutdown=True,
     )
+
 
 # Put the function above in etl_schedule.py, then uncomment for scheduled use:
 # if __name__ == "__main__":

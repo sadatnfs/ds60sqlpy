@@ -62,13 +62,17 @@ flattened_counts <- try(reference_simulation_summary(list(as.numeric(counts), as
 reference_assert(inherits(flattened_counts, "try-error"), "Flattened binomial simulations must fail")
 cat("Passed three additional quadrature, mutable-state and simulation-shape groups; no upstream fitting claim\n")
 
-coefficients <- structure(list(cond = c("(Intercept)" = 1.2, x = -0.3),
-  zi = numeric(), disp = c("(Intercept)" = 0.4)), class = "fixef.glmmTMB")
+coefficients <- structure(list(
+  cond = c("(Intercept)" = 1.2, x = -0.3),
+  zi = numeric(), disp = c("(Intercept)" = 0.4)
+), class = "fixef.glmmTMB")
 document <- reference_coefficients(coefficients)
 serialized <- jsonlite::toJSON(document, auto_unbox = TRUE, digits = NA)
 restored_coefficients <- jsonlite::fromJSON(serialized, simplifyVector = FALSE)
-reference_assert(identical(unlist(restored_coefficients$cond$parameter_names), c("(Intercept)", "x")),
-  "Coefficient names changed during serialization")
+reference_assert(
+  identical(unlist(restored_coefficients$cond$parameter_names), c("(Intercept)", "x")),
+  "Coefficient names changed during serialization"
+)
 reference_close(unlist(restored_coefficients$cond$values), c(1.2, -0.3), 1e-12)
 reference_assert(length(restored_coefficients$zi$values) == 0L &&
   length(restored_coefficients$disp$values) == 1L, "Coefficient component shape changed")

@@ -244,8 +244,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>delay<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span> <span class="syntax-operator">&amp;&amp;</span> delay<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">2</span> <span class="syntax-operator">&amp;&amp;</span> delay<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;growth&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The delays are 1, 2 and 4 units.</p>
 <p>The first attempt and retry numbering must be documented. Ambiguous numbering creates off-by-one operational behavior.</p>
 <h4 id="worked-example-2-cap-the-delay">Worked example 2: Cap the delay<a class="heading-anchor" href="#worked-example-2-cap-the-delay" aria-label="Link to this section">#</a></h4>
@@ -284,8 +283,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>delay<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">8</span> <span class="syntax-operator">&amp;&amp;</span> delay<span class="syntax-punctuation">(</span><span class="syntax-number">10</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">8</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;cap&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The delay never exceeds 8 units.</p>
 <p>A cap prevents exponential growth from becoming impractical or overflowing. It does not replace a total retry budget.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>

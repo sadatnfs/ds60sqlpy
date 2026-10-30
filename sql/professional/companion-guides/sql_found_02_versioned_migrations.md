@@ -114,11 +114,13 @@ These worked excerpts come from `sql/professional/lessons/sql_found_02_versioned
 
 ```sql
 SELECT
-    sm.migration_id,
-    sm.migration_name,
-    sm.content_tag
-FROM pro_migration_lab.schema_migrations AS sm
-ORDER BY sm.migration_id;
+  sm.migration_id,
+  sm.migration_name,
+  sm.content_tag
+FROM
+  pro_migration_lab.schema_migrations AS sm
+ORDER BY
+  sm.migration_id;
 ```
 
 **How to read it:** Example 1: Start with `pro_migration_lab.schema_migrations` in `FROM`/`JOIN`. The final `SELECT` displays `migration_id`, `migration_name`, and `content_tag`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
@@ -129,14 +131,15 @@ ORDER BY sm.migration_id;
 
 ```sql
 SELECT
-    sr.request_key,
-    sr.urgency_label AS legacy_storage,
-    sr.priority_code AS new_storage,
-    api.priority_code AS stable_api_value
-FROM pro_migration_lab.service_requests AS sr
-JOIN pro_migration_lab.service_requests_api AS api
-  ON api.request_id = sr.request_id
-ORDER BY sr.request_key;
+  sr.request_key,
+  sr.urgency_label AS legacy_storage,
+  sr.priority_code AS new_storage,
+  api.priority_code AS stable_api_value
+FROM
+  pro_migration_lab.service_requests AS sr
+  JOIN pro_migration_lab.service_requests_api AS api ON api.request_id = sr.request_id
+ORDER BY
+  sr.request_key;
 ```
 
 **How to read it:** Example 2: Start with `pro_migration_lab.service_requests`, and `pro_migration_lab.service_requests_api` in `FROM`/`JOIN`. The final `SELECT` displays `request_key`, `legacy_storage`, `new_storage`, and `stable_api_value`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.

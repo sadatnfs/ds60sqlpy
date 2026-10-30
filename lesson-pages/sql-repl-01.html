@@ -437,26 +437,48 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These worked excerpts come from <code>sql/professional/lessons/sql_repl_01_cdc_high_availability.sql</code>. Use <strong>Whole SQL lesson (psql)</strong> in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared <code>psql</code> routes are described above.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
-    current_database<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> database_name<span class="syntax-punctuation">,</span>
-    current_setting<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;wal_level&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> wal_level<span class="syntax-punctuation">,</span>
-    current_setting<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;max_wal_senders&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> max_wal_senders<span class="syntax-punctuation">,</span>
-    current_setting<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;max_replication_slots&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> max_replication_slots<span class="syntax-punctuation">,</span>
-    current_setting<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;hot_standby&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> hot_standby<span class="syntax-punctuation">,</span>
-    pg_catalog<span class="syntax-punctuation">.</span>pg_is_in_recovery<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> is_in_recovery<span class="syntax-punctuation">;</span></code></pre>
+  current_database<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> database_name<span class="syntax-punctuation">,</span>
+  current_setting<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;wal_level&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> wal_level<span class="syntax-punctuation">,</span>
+  current_setting<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;max_wal_senders&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> max_wal_senders<span class="syntax-punctuation">,</span>
+  current_setting<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;max_replication_slots&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> max_replication_slots<span class="syntax-punctuation">,</span>
+  current_setting<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;hot_standby&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> hot_standby<span class="syntax-punctuation">,</span>
+  pg_catalog<span class="syntax-punctuation">.</span>pg_is_in_recovery<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> is_in_recovery<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 1: Start with the row source produced by the preceding CTEs in <code>FROM</code>/<code>JOIN</code>. The final <code>SELECT</code> displays <code>database_name</code>, <code>wal_level</code>, <code>max_wal_senders</code>, <code>max_replication_slots</code>, and <code>hot_standby</code>. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 1 returns one row per <code>database_name</code> with columns <code>database_name</code>, <code>wal_level</code>, <code>max_wal_senders</code>, <code>max_replication_slots</code>, and <code>hot_standby</code> from the lesson evidence named below. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
-    <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> pg_catalog<span class="syntax-punctuation">.</span>pg_replication_slots<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> slot_count<span class="syntax-punctuation">,</span>
-    <span class="syntax-punctuation">(</span>
-        <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span>
-        <span class="syntax-keyword">FROM</span> pg_catalog<span class="syntax-punctuation">.</span>pg_replication_slots <span class="syntax-keyword">AS</span> s
-        <span class="syntax-keyword">WHERE</span> s<span class="syntax-punctuation">.</span>active
-    <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> active_slot_count<span class="syntax-punctuation">,</span>
-    <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> pg_catalog<span class="syntax-punctuation">.</span>pg_publication<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> publication_count<span class="syntax-punctuation">,</span>
-    <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> pg_catalog<span class="syntax-punctuation">.</span>pg_subscription<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> subscription_count<span class="syntax-punctuation">,</span>
-    <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> pg_catalog<span class="syntax-punctuation">.</span>pg_stat_replication<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> sender_count<span class="syntax-punctuation">,</span>
-    <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> pg_catalog<span class="syntax-punctuation">.</span>pg_stat_wal_receiver<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> receiver_count<span class="syntax-punctuation">;</span></code></pre>
+  <span class="syntax-punctuation">(</span>
+    <span class="syntax-keyword">SELECT</span>
+      <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">FROM</span>
+      pg_catalog<span class="syntax-punctuation">.</span>pg_replication_slots<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> slot_count<span class="syntax-punctuation">,</span>
+  <span class="syntax-punctuation">(</span>
+    <span class="syntax-keyword">SELECT</span>
+      <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">FROM</span>
+      pg_catalog<span class="syntax-punctuation">.</span>pg_replication_slots <span class="syntax-keyword">AS</span> s
+    <span class="syntax-keyword">WHERE</span>
+      s<span class="syntax-punctuation">.</span>active<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> active_slot_count<span class="syntax-punctuation">,</span>
+  <span class="syntax-punctuation">(</span>
+    <span class="syntax-keyword">SELECT</span>
+      <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">FROM</span>
+      pg_catalog<span class="syntax-punctuation">.</span>pg_publication<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> publication_count<span class="syntax-punctuation">,</span>
+  <span class="syntax-punctuation">(</span>
+    <span class="syntax-keyword">SELECT</span>
+      <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">FROM</span>
+      pg_catalog<span class="syntax-punctuation">.</span>pg_subscription<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> subscription_count<span class="syntax-punctuation">,</span>
+  <span class="syntax-punctuation">(</span>
+    <span class="syntax-keyword">SELECT</span>
+      <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">FROM</span>
+      pg_catalog<span class="syntax-punctuation">.</span>pg_stat_replication<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> sender_count<span class="syntax-punctuation">,</span>
+  <span class="syntax-punctuation">(</span>
+    <span class="syntax-keyword">SELECT</span>
+      <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">FROM</span>
+      pg_catalog<span class="syntax-punctuation">.</span>pg_stat_wal_receiver<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> receiver_count<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 2: Start with <code>pg_catalog.pg_replication_slots</code>, <code>pg_catalog.pg_publication</code>, <code>pg_catalog.pg_subscription</code>, and <code>pg_catalog.pg_stat_replication</code> in <code>FROM</code>/<code>JOIN</code>; let <code>WHERE</code> remove nonqualifying rows. The final <code>SELECT</code> displays the columns written in the final <code>SELECT</code>. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 2 returns exactly one summary row with columns <code>slot_count</code>, <code>active_slot_count</code>, <code>publication_count</code>, <code>subscription_count</code>, and <code>sender_count</code> from <code>pg_catalog.pg_replication_slots</code>, <code>pg_catalog.pg_publication</code>, <code>pg_catalog.pg_subscription</code>, <code>pg_catalog.pg_stat_replication</code>, and <code>pg_catalog.pg_stat_wal_receiver</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>

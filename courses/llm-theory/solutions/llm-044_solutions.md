@@ -31,9 +31,10 @@ The question is: Rotate[1, 0] by \(\frac{\pi}{2}\) and check length preservation
 A rotation changes direction while preserving the Euclidean norm. This separates position encoding from arbitrary magnitude scaling.
 
 ```python
-vector=np.array([1.,0.]); rotated=rotate(vector,np.pi/2)
-np.testing.assert_allclose(rotated,[0,1],atol=1e-12,rtol=0)
-np.testing.assert_allclose(np.linalg.norm(rotated),1,atol=1e-12,rtol=0)
+vector = np.array([1.0, 0.0])
+rotated = rotate(vector, np.pi / 2)
+np.testing.assert_allclose(rotated, [0, 1], atol=1e-12, rtol=0)
+np.testing.assert_allclose(np.linalg.norm(rotated), 1, atol=1e-12, rtol=0)
 ```
 
 **Expected:** approximately[0, 1]; norm 1.
@@ -47,9 +48,13 @@ The question is: Use q[1, 2], k[3, -1], angles \(m=0.3\), \(n=1.1\).
 The transpose of a rotation is its inverse, so the absolute angles combine into their difference. This is an algebraic property, not a measured long-context quality result.
 
 ```python
-q=np.array([1.,2.]); k=np.array([3.,-1.]); m=.3; n=1.1
-left=rotate(q,m)@rotate(k,n); right=q@rotate(k,n-m)
-np.testing.assert_allclose(left,right,atol=1e-12,rtol=0)
+q = np.array([1.0, 2.0])
+k = np.array([3.0, -1.0])
+m = 0.3
+n = 1.1
+left = rotate(q, m) @ rotate(k, n)
+right = q @ rotate(k, n - m)
+np.testing.assert_allclose(left, right, atol=1e-12, rtol=0)
 ```
 
 **Expected:** dot(Rm q, Rn k)=dot(q, R(n-m)k) within 1e-12.
@@ -63,8 +68,11 @@ The question is: Use zero content scores for query position 2, keys 0, 1, 2 and 
 The distance penalties produce exponentials1/4, \(\frac{1}{2}\), 1 before normalization. The current key receives the largest weight under this illustrative slope.
 
 ```python
-positions=np.arange(3); score=-np.log(2)*(2-positions); mass=np.exp(score-score.max()); weights=mass/mass.sum()
-np.testing.assert_allclose(weights,[1/7,2/7,4/7],atol=1e-12,rtol=0)
+positions = np.arange(3)
+score = -np.log(2) * (2 - positions)
+mass = np.exp(score - score.max())
+weights = mass / mass.sum()
+np.testing.assert_allclose(weights, [1 / 7, 2 / 7, 4 / 7], atol=1e-12, rtol=0)
 ```
 
 **Expected:** normalized weights[1/7, \(\frac{2}{7}\), 4/7].
@@ -78,10 +86,15 @@ The question is: Use width 4, base 10000 and positions 0, 1 on two fixed vectors
 Different feature pairs rotate at different rates. The fixture uses adjacent-pair layout; other implementations may store paired components differently and need a layout translation.
 
 ```python
-values=np.array([[1.,0.,3.,4.],[2.,1.,0.,2.]])
-encoded=rope(values,np.array([0,1]),base=10000.)
-np.testing.assert_allclose(np.linalg.norm(encoded.reshape(2,2,2),axis=-1),np.linalg.norm(values.reshape(2,2,2),axis=-1),atol=1e-12,rtol=0)
-np.testing.assert_allclose(10000.**(-2*np.arange(2)/4),[1,.01],atol=1e-12,rtol=0)
+values = np.array([[1.0, 0.0, 3.0, 4.0], [2.0, 1.0, 0.0, 2.0]])
+encoded = rope(values, np.array([0, 1]), base=10000.0)
+np.testing.assert_allclose(
+    np.linalg.norm(encoded.reshape(2, 2, 2), axis=-1),
+    np.linalg.norm(values.reshape(2, 2, 2), axis=-1),
+    atol=1e-12,
+    rtol=0,
+)
+np.testing.assert_allclose(10000.0 ** (-2 * np.arange(2) / 4), [1, 0.01], atol=1e-12, rtol=0)
 ```
 
 **Expected:** frequencies 1, .01; each pair norm preserved.
@@ -95,10 +108,12 @@ The question is: Encode the third key at position 2 and compare with mistakenly 
 A cache contains position-dependent key state. Correct tensor dimensions do not reveal that a new token was assigned the wrong position.
 
 ```python
-keys=np.array([[1.,0.],[0.,1.],[1.,1.]])
-full=rope(keys,np.arange(3)); incremental=rope(keys[2:],np.array([2])); reset=rope(keys[2:],np.array([0]))
-np.testing.assert_allclose(incremental,full[2:],atol=1e-12,rtol=0)
-assert not np.allclose(reset,full[2:])
+keys = np.array([[1.0, 0.0], [0.0, 1.0], [1.0, 1.0]])
+full = rope(keys, np.arange(3))
+incremental = rope(keys[2:], np.array([2]))
+reset = rope(keys[2:], np.array([0]))
+np.testing.assert_allclose(incremental, full[2:], atol=1e-12, rtol=0)
+assert not np.allclose(reset, full[2:])
 ```
 
 **Expected:** correct incremental encoding matches full encoding; reset differs.
@@ -112,11 +127,16 @@ The question is: Compute a finite encoding at position 1000000, then record that
 A valid sine/cosine calculation says nothing about whether a model learned useful behavior at that distance. The dimension check is a mathematical contract, the quality question is empirical.
 
 ```python
-far=rope(np.array([[1.,0.,1.,0.]]),np.array([1_000_000]))
-assert np.isfinite(far).all(); report={'formula_evaluated':True,'long_context_quality_verified':False}; assert not report['long_context_quality_verified']
-try: rope(np.ones((1,3)),np.array([0]))
-except ValueError: pass
-else: raise AssertionError('odd rotary width accepted')
+far = rope(np.array([[1.0, 0.0, 1.0, 0.0]]), np.array([1_000_000]))
+assert np.isfinite(far).all()
+report = {"formula_evaluated": True, "long_context_quality_verified": False}
+assert not report["long_context_quality_verified"]
+try:
+    rope(np.ones((1, 3)), np.array([0]))
+except ValueError:
+    pass
+else:
+    raise AssertionError("odd rotary width accepted")
 ```
 
 **Expected:** finite vector; long_context_quality_verified=False; odd width rejected.

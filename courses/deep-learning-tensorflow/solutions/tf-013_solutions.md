@@ -23,8 +23,9 @@ The question is: Convert logits[-2,0,2] into probabilities and inspect the centr
 The sigmoid is monotonic, so ordering survives. A score of zero lies at the probability midpoint, which makes it a useful exact boundary fixture.
 
 ```python
-z=tf.constant([-2.,0.,2.]); p=tf.math.sigmoid(z).numpy()
-assert p[1]==.5 and np.all(np.diff(p)>0)
+z = tf.constant([-2.0, 0.0, 2.0])
+p = tf.math.sigmoid(z).numpy()
+assert p[1] == 0.5 and np.all(np.diff(p) > 0)
 ```
 
 **Expected:** middle probability 0.5; probabilities increase.
@@ -38,8 +39,8 @@ The question is: Calculate positive-label binary cross entropy at zero logit.
 A fifty-fifty prediction assigns probability one half to either outcome. Its negative logarithm provides an independent reference that does not depend on a trained model.
 
 ```python
-loss=tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.constant([1.]),logits=tf.constant([0.]))
-np.testing.assert_allclose(loss.numpy(),[np.log(2)],atol=1e-6,rtol=0)
+loss = tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.constant([1.0]), logits=tf.constant([0.0]))
+np.testing.assert_allclose(loss.numpy(), [np.log(2)], atol=1e-6, rtol=0)
 ```
 
 **Expected:** loss \(\log(2)\) within 1e-6.
@@ -53,8 +54,8 @@ The question is: Compare decisions at thresholds.5 and.8 with >= ties.
 Only the middle decision changes. Save scores independently from decisions so threshold exploration does not look like a second model fitting operation.
 
 ```python
-assert (p>=.5).tolist()==[False,True,True]
-assert (p>=.8).tolist()==[False,False,True]
+assert (p >= 0.5).tolist() == [False, True, True]
+assert (p >= 0.8).tolist() == [False, False, True]
 ```
 
 **Expected:** decisions[False,True,True] versus[False,False,True].
@@ -68,8 +69,10 @@ The question is: Treat probability 0.5 as if it were a logit and compare the pos
 The mistaken argument is interpreted as a score favoring the positive class. The API cannot infer that the caller intended a probability; explicit naming and shape contracts are necessary.
 
 ```python
-wrong=float(tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.constant(1.),logits=tf.constant(.5)))
-assert abs(wrong-np.log(2))>.1
+wrong = float(
+    tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.constant(1.0), logits=tf.constant(0.5))
+)
+assert abs(wrong - np.log(2)) > 0.1
 ```
 
 **Expected:** wrong loss differs from log2 by more than.1.
@@ -83,8 +86,11 @@ The question is: Calculate losses for logits 1000,-1000 with labels1,0 using the
 A naive `log(sigmoid())` path can lose precision at extreme probabilities. The stable form handles the algebra before exponentiation creates overflow or logarithms receive rounded zero.
 
 ```python
-stable=tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.constant([1.,0.]),logits=tf.constant([1000.,-1000.])).numpy()
-assert np.isfinite(stable).all(); np.testing.assert_allclose(stable,[0,0],atol=1e-6,rtol=0)
+stable = tf.nn.sigmoid_cross_entropy_with_logits(
+    labels=tf.constant([1.0, 0.0]), logits=tf.constant([1000.0, -1000.0])
+).numpy()
+assert np.isfinite(stable).all()
+np.testing.assert_allclose(stable, [0, 0], atol=1e-6, rtol=0)
 ```
 
 **Expected:** both finite losses approximately0.
@@ -98,8 +104,9 @@ The question is: For labels[0,1,1], count errors under the two thresholds.
 This count is a decision metric. It does not replace the probability loss and cannot show that threshold .5 is optimal for a different cost structure or population.
 
 ```python
-labels=np.array([0,1,1]); assert np.count_nonzero((p>=.5)!=labels)==0
-assert np.count_nonzero((p>=.8)!=labels)==1
+labels = np.array([0, 1, 1])
+assert np.count_nonzero((p >= 0.5) != labels) == 0
+assert np.count_nonzero((p >= 0.8) != labels) == 1
 ```
 
 **Expected:** 0 errors at.5 and 1 at.8 on this fixture.

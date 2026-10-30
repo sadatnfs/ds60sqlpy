@@ -80,9 +80,14 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-def function(value): return value*value+1
-x=torch.tensor([1.,2.]); eager=function(x)
-assert eager.tolist()==[2.,5.]
+
+def function(value):
+    return value * value + 1
+
+
+x = torch.tensor([1.0, 2.0])
+eager = function(x)
+assert eager.tolist() == [2.0, 5.0]
 ```
 
 **Expected:** output[2, 5].
@@ -92,10 +97,18 @@ assert eager.tolist()==[2.,5.]
 This executes a captured graph through an eager backend. It deliberately avoids a claim that native optimized kernels were generated.
 
 ```python
-graphs=[]
-def backend(graph,example_inputs): graphs.append(graph); return graph.forward
-compiled=torch.compile(function,backend=backend,fullgraph=True,dynamic=False)
-torch.testing.assert_close(compiled(x),eager,atol=0,rtol=0); first=len(graphs); assert first>=1
+graphs = []
+
+
+def backend(graph, example_inputs):
+    graphs.append(graph)
+    return graph.forward
+
+
+compiled = torch.compile(function, backend=backend, fullgraph=True, dynamic=False)
+torch.testing.assert_close(compiled(x), eager, atol=0, rtol=0)
+first = len(graphs)
+assert first >= 1
 ```
 
 **Expected:** captured graph exists; output matches eager.
@@ -105,8 +118,11 @@ torch.testing.assert_close(compiled(x),eager,atol=0,rtol=0); first=len(graphs); 
 Values can vary within a compatible signature. Dtype changes alter the operation contract and should not be hidden inside an average timing result.
 
 ```python
-assert compiled(torch.tensor([3.,4.])).tolist()==[10.,17.] and len(graphs)==first
-assert compiled(torch.tensor([1.,2.],dtype=torch.float64)).tolist()==[2.,5.] and len(graphs)>first
+assert compiled(torch.tensor([3.0, 4.0])).tolist() == [10.0, 17.0] and len(graphs) == first
+assert (
+    compiled(torch.tensor([1.0, 2.0], dtype=torch.float64)).tolist() == [2.0, 5.0]
+    and len(graphs) > first
+)
 ```
 
 **Expected:** same signature reuses capture; changed dtype adds a graph.

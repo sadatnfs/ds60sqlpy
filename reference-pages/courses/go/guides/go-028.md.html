@@ -269,8 +269,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>err <span class="syntax-operator">==</span> <span class="syntax-keyword">nil</span> <span class="syntax-operator">&amp;&amp;</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>v<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">3</span> <span class="syntax-operator">&amp;&amp;</span> v<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">9</span> <span class="syntax-operator">&amp;&amp;</span> v<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span> <span class="syntax-operator">&amp;&amp;</span> v<span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;order&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The result is 9, 1, 4.</p>
 <p>Indices restore presentation order. Channel arrival order is not the input-order contract.</p>
 <h4 id="worked-example-2-handle-empty-input">Worked example 2: Handle empty input<a class="heading-anchor" href="#worked-example-2-handle-empty-input" aria-label="Link to this section">#</a></h4>
@@ -335,8 +334,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>err <span class="syntax-operator">==</span> <span class="syntax-keyword">nil</span> <span class="syntax-operator">&amp;&amp;</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>v<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;empty&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> It returns an empty result and terminates.</p>
 <p>Every channel reaches its owned closure point even when no jobs exist.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>

@@ -85,18 +85,24 @@ executable companion when you want a self-contained check.
 
 ```sql
 WITH customer_spend AS (
-  SELECT o.customer_id,
-         SUM(o.total_amount) AS stored_spend
-  FROM orders AS o
-  GROUP BY o.customer_id
+  SELECT
+    o.customer_id,
+    SUM(o.total_amount) AS stored_spend
+  FROM
+    orders AS o
+  GROUP BY
+    o.customer_id
 )
-SELECT customer_id,
-       ROUND(stored_spend, 2) AS stored_spend,
-       NTILE(4) OVER (
-         ORDER BY stored_spend DESC, customer_id
-       ) AS spend_quartile
-FROM customer_spend
-ORDER BY spend_quartile, stored_spend DESC, customer_id;
+SELECT
+  customer_id,
+  ROUND(stored_spend, 2) AS stored_spend,
+  NTILE(4) OVER (ORDER BY stored_spend DESC, customer_id) AS spend_quartile
+FROM
+  customer_spend
+ORDER BY
+  spend_quartile,
+  stored_spend DESC,
+  customer_id;
 ```
 
 **Expected shape:** One row per ordering customer with bucket 1–4.
@@ -130,14 +136,17 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT e.employee_id,
-       e.department_id,
-       e.salary,
-       PERCENT_RANK() OVER (
-         PARTITION BY e.department_id ORDER BY e.salary
-       ) AS salary_percent_rank
-FROM employees AS e
-ORDER BY e.department_id, e.salary, e.employee_id;
+SELECT
+  e.employee_id,
+  e.department_id,
+  e.salary,
+  PERCENT_RANK() OVER (PARTITION BY e.department_id ORDER BY e.salary) AS salary_percent_rank
+FROM
+  employees AS e
+ORDER BY
+  e.department_id,
+  e.salary,
+  e.employee_id;
 ```
 
 **Expected shape:** One row per employee with values from 0 to 1.
@@ -171,14 +180,17 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT p.product_id,
-       p.category,
-       p.price,
-       CUME_DIST() OVER (
-         PARTITION BY p.category ORDER BY p.price
-       ) AS price_cume_dist
-FROM products AS p
-ORDER BY p.category, p.price, p.product_id;
+SELECT
+  p.product_id,
+  p.category,
+  p.price,
+  CUME_DIST() OVER (PARTITION BY p.category ORDER BY p.price) AS price_cume_dist
+FROM
+  products AS p
+ORDER BY
+  p.category,
+  p.price,
+  p.product_id;
 ```
 
 **Expected shape:** One row per product with cume_dist in (0, 1].
@@ -212,12 +224,17 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT row_id,
-       value,
-       PERCENT_RANK() OVER (ORDER BY value) AS percent_rank_value,
-       CUME_DIST() OVER (ORDER BY value) AS cume_dist_value
-FROM (VALUES (1, 10), (2, 10), (3, 20)) AS sample(row_id, value)
-ORDER BY row_id;
+SELECT
+  row_id,
+  value,
+  PERCENT_RANK() OVER (ORDER BY value) AS percent_rank_value,
+  CUME_DIST() OVER (ORDER BY value) AS cume_dist_value
+FROM (
+  VALUES (1, 10),
+    (2, 10),
+    (3, 20)) AS sample (row_id, value)
+ORDER BY
+  row_id;
 ```
 
 **Expected shape:** Three rows making tie behavior visible.
@@ -253,22 +270,31 @@ cardinality contract.
 
 ```sql
 WITH spend AS (
-  SELECT o.customer_id,
-         SUM(o.total_amount) AS total_spend
-  FROM orders AS o
-  GROUP BY o.customer_id
-), bucketed AS (
-  SELECT customer_id,
-         NTILE(10) OVER (
-           ORDER BY total_spend DESC, customer_id
-         ) AS decile
-  FROM spend
+  SELECT
+    o.customer_id,
+    SUM(o.total_amount) AS total_spend
+  FROM
+    orders AS o
+  GROUP BY
+    o.customer_id
+),
+bucketed AS (
+  SELECT
+    customer_id,
+    NTILE(10) OVER (ORDER BY total_spend DESC,
+      customer_id) AS decile
+  FROM
+    spend
 )
-SELECT decile,
-       COUNT(*) AS customers
-FROM bucketed
-GROUP BY decile
-ORDER BY decile;
+SELECT
+  decile,
+  COUNT(*) AS customers
+FROM
+  bucketed
+GROUP BY
+  decile
+ORDER BY
+  decile;
 ```
 
 **Expected shape:** Up to 10 bucket rows with counts.
@@ -305,26 +331,36 @@ cardinality contract.
 
 ```sql
 WITH spend AS (
-  SELECT o.customer_id,
-         SUM(o.total_amount) AS total_spend
-  FROM orders AS o
-  GROUP BY o.customer_id
-), bucketed AS (
-  SELECT customer_id,
-         total_spend,
-         NTILE(10) OVER (
-           ORDER BY total_spend DESC, customer_id
-         ) AS decile,
-         COUNT(*) OVER () AS population
-  FROM spend
+  SELECT
+    o.customer_id,
+    SUM(o.total_amount) AS total_spend
+  FROM
+    orders AS o
+  GROUP BY
+    o.customer_id
+),
+bucketed AS (
+  SELECT
+    customer_id,
+    total_spend,
+    NTILE(10) OVER (ORDER BY total_spend DESC,
+      customer_id) AS decile,
+    COUNT(*) OVER () AS population
+  FROM
+    spend
 )
-SELECT customer_id,
-       ROUND(total_spend, 2) AS total_spend,
-       decile,
-       population
-FROM bucketed
-WHERE decile = 1
-ORDER BY total_spend DESC, customer_id;
+SELECT
+  customer_id,
+  ROUND(total_spend, 2) AS total_spend,
+  decile,
+  population
+FROM
+  bucketed
+WHERE
+  decile = 1
+ORDER BY
+  total_spend DESC,
+  customer_id;
 ```
 
 **Expected shape:** Customers in decile 1.

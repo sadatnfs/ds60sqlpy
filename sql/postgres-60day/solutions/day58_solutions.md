@@ -72,16 +72,14 @@ The staged answer supports these guarded timestamp formats:
 Phone cleanup removes every non-digit character:
 
 ```sql
-SELECT phone,
-       regexp_replace(phone, '[^0-9]', '', 'g') AS phone_digits,
-       regexp_replace(phone, '[^0-9]', '', 'g') ~ '^(1)?[0-9]{10}$'
-         AS phone_valid
+SELECT
+  phone,
+  regexp_replace(phone, '[^0-9]', '', 'g') AS phone_digits,
+  regexp_replace(phone, '[^0-9]', '', 'g') ~ '^(1)?[0-9]{10}$' AS phone_valid
 FROM (
-  VALUES
-    ('(415) 555-0101'),
+  VALUES ('(415) 555-0101'),
     ('+1 415 555 0101'),
-    ('123')
-) AS sample(phone);
+    ('123')) AS sample (phone);
 ```
 
 Expected shape: one row per raw phone with normalized digits and a Boolean
@@ -109,18 +107,12 @@ CREATE TEMP TABLE stg_customer_ingest_solution (
   attributes text
 );
 
-INSERT INTO stg_customer_ingest_solution(
-  full_name, email, country, segment, created_at, phone, attributes
-)
+INSERT INTO stg_customer_ingest_solution (full_name, email, country, segment, created_at, phone, attributes)
 VALUES
-  (' Customer 601 ', 'CUSTOMER601@EXAMPLE.COM ', 'USA', 'gold',
-   '2026/01/03 10:00', '(415) 555-0101', '{"channel":"web"}'),
-  ('Customer 602', 'customer602@example.com', 'GB', 'silver',
-   '01/15/2026 08:30', '+44 20 7946 0958', '{"channel":"mobile"}'),
-  ('Customer 603', 'customer603@example.com', 'DE', NULL,
-   '15-Jan-2026 12:00', '030-1234567', '{"channel":"store"}'),
-  ('Customer bad', 'not-an-email', 'XX', 'bronze',
-   'not-a-date', '123', 'not-json');
+  (' Customer 601 ', 'CUSTOMER601@EXAMPLE.COM ', 'USA', 'gold', '2026/01/03 10:00', '(415) 555-0101', '{"channel":"web"}'),
+  ('Customer 602', 'customer602@example.com', 'GB', 'silver', '01/15/2026 08:30', '+44 20 7946 0958', '{"channel":"mobile"}'),
+  ('Customer 603', 'customer603@example.com', 'DE', NULL, '15-Jan-2026 12:00', '030-1234567', '{"channel":"store"}'),
+  ('Customer bad', 'not-an-email', 'XX', 'bronze', 'not-a-date', '123', 'not-json');
 
 CREATE TEMP TABLE cleaned_customer_ingest_solution (
   source_row_number bigint PRIMARY KEY,
@@ -142,11 +134,7 @@ CREATE TEMP TABLE cleaned_customer_ingest_solution (
 -- the procedure. It uses exact-format guards, round-trip checks, exception
 -- handling, and STABLE volatility after SET LOCAL TIME ZONE 'UTC'. STABLE is
 -- required because parsing timestamptz can depend on session settings.
-
-CREATE OR REPLACE PROCEDURE ingest_customer_stage_solution(
-  INOUT upserted_rows integer,
-  INOUT invalid_rows integer
-)
+CREATE OR REPLACE PROCEDURE ingest_customer_stage_solution (INOUT upserted_rows integer, INOUT invalid_rows integer)
 LANGUAGE plpgsql
 AS $procedure$
 BEGIN
@@ -231,13 +219,16 @@ BEGIN
 
   GET DIAGNOSTICS upserted_rows = ROW_COUNT;
 END
-$procedure$;
+$procedure$
+;
+CALL ingest_customer_stage_solution (0, 0);
 
-CALL ingest_customer_stage_solution(0, 0);
-
-SELECT *
-FROM cleaned_customer_ingest_solution
-ORDER BY email;
+SELECT
+  *
+FROM
+  cleaned_customer_ingest_solution
+ORDER BY
+  email;
 
 ROLLBACK;
 ```

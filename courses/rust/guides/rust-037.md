@@ -43,8 +43,6 @@ Read the operations in dependency order. Record which values exist before each l
 The trait supplies common array behavior while the concrete type supplies typed value access.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         use arrow::array::{Array, Int32Array};
@@ -65,8 +63,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 Offsets and UTF-8 data support variable-width values without pretending every row has a fixed-size string slot.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         use arrow::array::{Array, StringArray};

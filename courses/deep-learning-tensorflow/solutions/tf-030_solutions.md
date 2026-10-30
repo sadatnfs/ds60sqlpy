@@ -23,8 +23,9 @@ The question is: Combine means2,6 with counts1,3 and compare equal shard averagi
 Multiplying each local mean by its count restores the gradient numerator. The final division then gives each example equal weight.
 
 ```python
-means=np.array([2.,6.]); counts=np.array([1,3])
-assert np.average(means,weights=counts)==5 and means.mean()==4
+means = np.array([2.0, 6.0])
+counts = np.array([1, 3])
+assert np.average(means, weights=counts) == 5 and means.mean() == 4
 ```
 
 **Expected:** global5; naive4.
@@ -38,9 +39,10 @@ The question is: Partition gradients[2,4,6,8] into sizes 1 and3 and reconstruct 
 The explicit per-example values are an independent oracle for the shard calculation. A test that compares two formulas using the same wrong weights would miss the error.
 
 ```python
-g=np.array([2.,4.,6.,8.]); parts=[g[:1],g[1:]]
-recombined=sum(p.sum() for p in parts)/sum(len(p) for p in parts)
-assert recombined==g.mean()==5
+g = np.array([2.0, 4.0, 6.0, 8.0])
+parts = [g[:1], g[1:]]
+recombined = sum(p.sum() for p in parts) / sum(len(p) for p in parts)
+assert recombined == g.mean() == 5
 ```
 
 **Expected:** both full and reconstructed means5.
@@ -54,13 +56,18 @@ The question is: At w = 0 use x = [1, 2, 3, 4],y = 2x; compare full-batch gradie
 The variable remains fixed while all microbatch gradients are calculated. This is the condition under which accumulation matches the full-batch gradient.
 
 ```python
-x=tf.constant([1.,2.,3.,4.]); y=2*x; w=tf.Variable(0.)
-with tf.GradientTape() as tape: full=tf.reduce_mean((w*x-y)**2)
-full_g=tape.gradient(full,w); total=0.
-for start,end in [(0,1),(1,4)]:
-    with tf.GradientTape() as tape: summed=tf.reduce_sum((w*x[start:end]-y[start:end])**2)
-    total+=float(tape.gradient(summed,w))
-assert float(full_g)==total/4==-30
+x = tf.constant([1.0, 2.0, 3.0, 4.0])
+y = 2 * x
+w = tf.Variable(0.0)
+with tf.GradientTape() as tape:
+    full = tf.reduce_mean((w * x - y) ** 2)
+full_g = tape.gradient(full, w)
+total = 0.0
+for start, end in [(0, 1), (1, 4)]:
+    with tf.GradientTape() as tape:
+        summed = tf.reduce_sum((w * x[start:end] - y[start:end]) ** 2)
+    total += float(tape.gradient(summed, w))
+assert float(full_g) == total / 4 == -30
 ```
 
 **Expected:** gradient-30 for both.
@@ -74,7 +81,8 @@ The question is: Use rate 0.01 with accumulated global gradient-30.
 The update counter should increment once for this effective batch. Incrementing a learning-rate schedule once per microbatch changes the optimizer policy even if gradients are combined correctly.
 
 ```python
-w.assign_sub(.01*(total/4)); np.testing.assert_allclose(float(w),.3,atol=1e-6,rtol=0)
+w.assign_sub(0.01 * (total / 4))
+np.testing.assert_allclose(float(w), 0.3, atol=1e-6, rtol=0)
 ```
 
 **Expected:** updated weight.3.
@@ -88,11 +96,12 @@ The question is: Update separately for the two microbatches and compare the fina
 The second gradient uses the weight changed by the first update. This is ordinary minibatch training, not a numerical implementation of one full-batch step.
 
 ```python
-other=tf.Variable(0.)
-for start,end in [(0,1),(1,4)]:
-    with tf.GradientTape() as tape: loss=tf.reduce_mean((other*x[start:end]-y[start:end])**2)
-    other.assign_sub(.01*tape.gradient(loss,other))
-assert abs(float(other)-.3)>1e-6
+other = tf.Variable(0.0)
+for start, end in [(0, 1), (1, 4)]:
+    with tf.GradientTape() as tape:
+        loss = tf.reduce_mean((other * x[start:end] - y[start:end]) ** 2)
+    other.assign_sub(0.01 * tape.gradient(loss, other))
+assert abs(float(other) - 0.3) > 1e-6
 ```
 
 **Expected:** endpoint differs from.3.
@@ -106,10 +115,10 @@ The question is: Combine an empty shard and the four real gradients using sums a
 A local empty shard need not invalidate a nonempty global batch, but mean(empty) is undefined. Carrying sums and counts avoids producing a NaN local mean.
 
 ```python
-parts=[np.array([],dtype=float),g]
-count=sum(len(p) for p in parts)
-assert count==4 and sum(p.sum() for p in parts)/count==5
-assert sum(len(p) for p in [np.array([])])==0
+parts = [np.array([], dtype=float), g]
+count = sum(len(p) for p in parts)
+assert count == 4 and sum(p.sum() for p in parts) / count == 5
+assert sum(len(p) for p in [np.array([])]) == 0
 ```
 
 **Expected:** empty shard contributes0; total remains5.

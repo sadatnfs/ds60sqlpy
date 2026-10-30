@@ -83,9 +83,13 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-x=torch.tensor([[-2.],[-1.],[1.],[2.]]); y=torch.tensor([[0.],[0.],[1.],[1.]])
-test_x=torch.tensor([[-3.],[3.]]); truth=torch.tensor([False,True]); train_ids={'a','b','c','d'}; test_ids={'e','f'}
-assert not train_ids&test_ids and len(test_ids)==2
+x = torch.tensor([[-2.0], [-1.0], [1.0], [2.0]])
+y = torch.tensor([[0.0], [0.0], [1.0], [1.0]])
+test_x = torch.tensor([[-3.0], [3.0]])
+truth = torch.tensor([False, True])
+train_ids = {"a", "b", "c", "d"}
+test_ids = {"e", "f"}
+assert not train_ids & test_ids and len(test_ids) == 2
 ```
 
 **Expected:** 4training records, 2test records.
@@ -95,8 +99,12 @@ assert not train_ids&test_ids and len(test_ids)==2
 PyTorch's default sample correction would produce a different scale. Specifying correction 0 aligns this fixture with the paired TensorFlow/NumPy calculation.
 
 ```python
-mean=x.mean(0); scale=x.std(0,correction=0); tx=(x-mean)/scale; vx=(test_x-mean)/scale
-assert mean.item()==0; np.testing.assert_allclose(scale.item(),np.sqrt(2.5),atol=1e-6,rtol=0)
+mean = x.mean(0)
+scale = x.std(0, correction=0)
+tx = (x - mean) / scale
+vx = (test_x - mean) / scale
+assert mean.item() == 0
+np.testing.assert_allclose(scale.item(), np.sqrt(2.5), atol=1e-6, rtol=0)
 ```
 
 **Expected:** mean 0; scale sqrt 2.5.
@@ -106,12 +114,16 @@ assert mean.item()==0; np.testing.assert_allclose(scale.item(),np.sqrt(2.5),atol
 The fixed budget is part of the experiment. It is not repeated until the test happens to look favorable.
 
 ```python
-model=nn.Linear(1,1,bias=False)
-with torch.no_grad(): model.weight.zero_()
-optimizer=torch.optim.SGD(model.parameters(),lr=.1)
+model = nn.Linear(1, 1, bias=False)
+with torch.no_grad():
+    model.weight.zero_()
+optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
 for _ in range(40):
-    optimizer.zero_grad(set_to_none=True); loss=F.binary_cross_entropy_with_logits(model(tx),y); loss.backward(); optimizer.step()
-assert model.weight.item()>0 and torch.isfinite(model.weight).all()
+    optimizer.zero_grad(set_to_none=True)
+    loss = F.binary_cross_entropy_with_logits(model(tx), y)
+    loss.backward()
+    optimizer.step()
+assert model.weight.item() > 0 and torch.isfinite(model.weight).all()
 ```
 
 **Expected:** positive finite weight after 40 updates.

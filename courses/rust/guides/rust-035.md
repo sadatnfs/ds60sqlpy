@@ -43,8 +43,6 @@ Read the operations in dependency order. Record which values exist before each l
 Inline size is not a total retained-memory measurement.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let small = String::from("a");
@@ -64,8 +62,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 Reserved capacity is a resource decision, not part of the logical dataset.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let mut values = Vec::with_capacity(100);

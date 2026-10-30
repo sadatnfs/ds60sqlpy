@@ -97,21 +97,36 @@ These worked excerpts come from `sql/postgres-60day/day46_project1_ecommerce_par
 
 ```sql
 WITH order_values AS (
-  SELECT o.customer_id,
-         SUM(oi.unit_price*oi.quantity*(1-oi.discount)) AS order_value
-  FROM orders o
-  JOIN order_items oi ON oi.order_id = o.order_id
-  GROUP BY o.customer_id, o.order_id
-), ltv AS (
-  SELECT customer_id, ROUND(SUM(order_value),2) AS ltv
-  FROM order_values
-  GROUP BY customer_id
+  SELECT
+    o.customer_id,
+    SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS order_value
+  FROM
+    orders o
+    JOIN order_items oi ON oi.order_id = o.order_id
+  GROUP BY
+    o.customer_id,
+    o.order_id
+),
+ltv AS (
+  SELECT
+    customer_id,
+    ROUND(SUM(order_value), 2) AS ltv
+  FROM
+    order_values
+  GROUP BY
+    customer_id
 )
-SELECT c.customer_id, c.country, c.segment, l.ltv,
-       NTILE(4) OVER (ORDER BY l.ltv DESC) AS ltv_quartile
-FROM customers c
-JOIN ltv l ON l.customer_id = c.customer_id
-ORDER BY l.ltv DESC
+SELECT
+  c.customer_id,
+  c.country,
+  c.segment,
+  l.ltv,
+  NTILE(4) OVER (ORDER BY l.ltv DESC) AS ltv_quartile
+FROM
+  customers c
+  JOIN ltv l ON l.customer_id = c.customer_id
+ORDER BY
+  l.ltv DESC
 LIMIT 100;
 ```
 
@@ -122,11 +137,15 @@ LIMIT 100;
 ### Example 2
 
 ```sql
-SELECT date_trunc('month', created_at)::date AS cohort_month,
-       COUNT(*) AS new_customers
-FROM customers
-GROUP BY 1
-ORDER BY cohort_month DESC;
+SELECT
+  date_trunc('month', created_at)::date AS cohort_month,
+  COUNT(*) AS new_customers
+FROM
+  customers
+GROUP BY
+  1
+ORDER BY
+  cohort_month DESC;
 ```
 
 **How to read it:** Example 2: Start with `customers` in `FROM`/`JOIN`; let `GROUP BY` collapse rows to its grouping keys. The final `SELECT` displays `cohort_month`, and `new_customers`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.

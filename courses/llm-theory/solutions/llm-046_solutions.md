@@ -33,10 +33,18 @@ The question is: Use batch 1, time 5, query heads4, head width 2, float32, and c
 The cache factor2 counts keys and values. These are raw tensor/weight counts excluding allocator, activation, quantization-metadata and communication overhead.
 
 ```python
-query_heads=4; head_width=2; width=8; time=5
-cache_bytes=[2*1*time*kv_heads*head_width*4 for kv_heads in [4,2,1]]
-parameters=[width*(query_heads*head_width)+2*width*(kv_heads*head_width)+(query_heads*head_width)*width for kv_heads in [4,2,1]]
-assert cache_bytes==[320,160,80] and parameters==[256,192,160]
+query_heads = 4
+head_width = 2
+width = 8
+time = 5
+cache_bytes = [2 * 1 * time * kv_heads * head_width * 4 for kv_heads in [4, 2, 1]]
+parameters = [
+    width * (query_heads * head_width)
+    + 2 * width * (kv_heads * head_width)
+    + (query_heads * head_width) * width
+    for kv_heads in [4, 2, 1]
+]
+assert cache_bytes == [320, 160, 80] and parameters == [256, 192, 160]
 ```
 
 **Expected:** raw KV bytes 320, 160, 80; projection weights 256, 192, 160 for model width 8 without biases.
@@ -50,13 +58,17 @@ The question is: Use 4 query heads and 2 KV heads; repeat each KV head twice onl
 The comparison manufactures identical shared heads, so parity is expected. It does not say that an arbitrary trained four-KV-head model can be compressed to two heads without changing behavior.
 
 ```python
-q=np.arange(24,dtype=float).reshape(4,3,2)/10
-k=np.arange(12,dtype=float).reshape(2,3,2)/7
-v=np.array([[[1.,0.],[0.,2.],[3.,1.]],[[2.,1.],[1.,4.],[5.,2.]]])
-grouped=gqa(q,k,v)
-expanded_k=np.repeat(k,2,axis=0); expanded_v=np.repeat(v,2,axis=0)
-oracle=np.stack([dense(q[h],expanded_k[h],expanded_v[h],np.tri(3,dtype=bool)) for h in range(4)])
-assert grouped.shape==(4,3,2); np.testing.assert_allclose(grouped,oracle,atol=1e-12,rtol=0)
+q = np.arange(24, dtype=float).reshape(4, 3, 2) / 10
+k = np.arange(12, dtype=float).reshape(2, 3, 2) / 7
+v = np.array([[[1.0, 0.0], [0.0, 2.0], [3.0, 1.0]], [[2.0, 1.0], [1.0, 4.0], [5.0, 2.0]]])
+grouped = gqa(q, k, v)
+expanded_k = np.repeat(k, 2, axis=0)
+expanded_v = np.repeat(v, 2, axis=0)
+oracle = np.stack(
+    [dense(q[h], expanded_k[h], expanded_v[h], np.tri(3, dtype=bool)) for h in range(4)]
+)
+assert grouped.shape == (4, 3, 2)
+np.testing.assert_allclose(grouped, oracle, atol=1e-12, rtol=0)
 ```
 
 **Expected:** outputs agree within 1e-12; shape(4, 3, 2).
@@ -70,10 +82,13 @@ The question is: Combine scores 1000, 999, 998 and values 1, 3, 5 in blocks of 2
 When the running maximum changes, the old numerator and denominator must both be rescaled. Updating only one produces a plausible but incorrect weighted average.
 
 ```python
-scores=np.array([1000.,999.,998.]); values=np.array([[1.],[3.],[5.]])
-online,peak=online_row(scores,values,2)
-mass=np.exp(np.array([0.,-1.,-2.])); expected=(mass@values)/mass.sum()
-np.testing.assert_allclose(online,expected,atol=1e-12,rtol=0); assert peak==2 and np.isfinite(online).all()
+scores = np.array([1000.0, 999.0, 998.0])
+values = np.array([[1.0], [3.0], [5.0]])
+online, peak = online_row(scores, values, 2)
+mass = np.exp(np.array([0.0, -1.0, -2.0]))
+expected = (mass @ values) / mass.sum()
+np.testing.assert_allclose(online, expected, atol=1e-12, rtol=0)
+assert peak == 2 and np.isfinite(online).all()
 ```
 
 **Expected:** finite output equals a maximum-shifted dense calculation.
@@ -87,12 +102,15 @@ The question is: Use five nonuniform query/key rows and compare block sizes 1, 2
 The odd length exercises a partial final block. The mask makes some early-row blocks empty, which the implementation must skip without generating negative-infinity subtractionNaNs.
 
 ```python
-queries=np.array([[1.,0.],[0.,1.],[1.,1.],[-1.,2.],[2.,-1.]])
-keys=np.array([[2.,0.],[1.,1.],[0.,2.],[-1.,1.],[1.,-2.]])
-values=np.arange(10,dtype=float).reshape(5,2); allowed=np.tri(5,dtype=bool); expected=dense(queries,keys,values,allowed)
-for block in [1,2,3,5]:
-    output,peak=online_attention(queries,keys,values,allowed,block)
-    np.testing.assert_allclose(output,expected,atol=1e-12,rtol=0); assert peak<=block
+queries = np.array([[1.0, 0.0], [0.0, 1.0], [1.0, 1.0], [-1.0, 2.0], [2.0, -1.0]])
+keys = np.array([[2.0, 0.0], [1.0, 1.0], [0.0, 2.0], [-1.0, 1.0], [1.0, -2.0]])
+values = np.arange(10, dtype=float).reshape(5, 2)
+allowed = np.tri(5, dtype=bool)
+expected = dense(queries, keys, values, allowed)
+for block in [1, 2, 3, 5]:
+    output, peak = online_attention(queries, keys, values, allowed, block)
+    np.testing.assert_allclose(output, expected, atol=1e-12, rtol=0)
+    assert peak <= block
 ```
 
 **Expected:** all outputs agree within 1e-12; largest temporary score block does not exceed the chosen size.
@@ -106,9 +124,10 @@ The question is: Change only value rows 3 and 4 and compare the first three onli
 Block processing must preserve the same information boundary as dense attention. Tiling is not permission to normalize with future values or include masked keys in the denominator.
 
 ```python
-changed=values.copy(); changed[3:]+=100
-altered,_=online_attention(queries,keys,changed,allowed,2)
-np.testing.assert_allclose(altered[:3],expected[:3],atol=1e-12,rtol=0)
+changed = values.copy()
+changed[3:] += 100
+altered, _ = online_attention(queries, keys, changed, allowed, 2)
+np.testing.assert_allclose(altered[:3], expected[:3], atol=1e-12, rtol=0)
 ```
 
 **Expected:** first three rows unchanged.
@@ -122,13 +141,20 @@ The question is: Try 4 query heads with 3 KV heads, and an all-false attention r
 Head mapping needs an integer group size, and each query needs at least one legal key. Clear validation separates architecture misuse from numerical-kernel failure.
 
 ```python
-try: gqa(np.zeros((4,2,2)),np.zeros((3,2,2)),np.zeros((3,2,2)))
-except ValueError: pass
-else: raise AssertionError('indivisible head grouping accepted')
-bad=allowed.copy(); bad[0]=False
-try: online_attention(queries,keys,values,bad,2)
-except ValueError: pass
-else: raise AssertionError('empty attention support accepted')
+try:
+    gqa(np.zeros((4, 2, 2)), np.zeros((3, 2, 2)), np.zeros((3, 2, 2)))
+except ValueError:
+    pass
+else:
+    raise AssertionError("indivisible head grouping accepted")
+bad = allowed.copy()
+bad[0] = False
+try:
+    online_attention(queries, keys, values, bad, 2)
+except ValueError:
+    pass
+else:
+    raise AssertionError("empty attention support accepted")
 ```
 
 **Expected:** both raise ValueError; no output NaNs are accepted.

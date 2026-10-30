@@ -224,19 +224,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-tag">minReplicas</span><span class="syntax-punctuation">:</span> 1
   <span class="syntax-tag">maxReplicas</span><span class="syntax-punctuation">:</span> 2
   <span class="syntax-tag">metrics</span><span class="syntax-punctuation">:</span>
-  <span class="syntax-punctuation">-</span> <span class="syntax-tag">type</span><span class="syntax-punctuation">:</span> Resource
-    <span class="syntax-tag">resource</span><span class="syntax-punctuation">:</span>
-      <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> cpu
-      <span class="syntax-tag">target</span><span class="syntax-punctuation">:</span>
-        <span class="syntax-tag">type</span><span class="syntax-punctuation">:</span> Utilization
-        <span class="syntax-tag">averageUtilization</span><span class="syntax-punctuation">:</span> 50
+    <span class="syntax-punctuation">-</span> <span class="syntax-tag">type</span><span class="syntax-punctuation">:</span> Resource
+      <span class="syntax-tag">resource</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> cpu
+        <span class="syntax-tag">target</span><span class="syntax-punctuation">:</span>
+          <span class="syntax-tag">type</span><span class="syntax-punctuation">:</span> Utilization
+          <span class="syntax-tag">averageUtilization</span><span class="syntax-punctuation">:</span> 50
   <span class="syntax-tag">behavior</span><span class="syntax-punctuation">:</span>
     <span class="syntax-tag">scaleDown</span><span class="syntax-punctuation">:</span>
       <span class="syntax-tag">stabilizationWindowSeconds</span><span class="syntax-punctuation">:</span> 60
       <span class="syntax-tag">policies</span><span class="syntax-punctuation">:</span>
-      <span class="syntax-punctuation">-</span> <span class="syntax-tag">type</span><span class="syntax-punctuation">:</span> Pods
-        <span class="syntax-tag">value</span><span class="syntax-punctuation">:</span> 1
-        <span class="syntax-tag">periodSeconds</span><span class="syntax-punctuation">:</span> 60</code></pre>
+        <span class="syntax-punctuation">-</span> <span class="syntax-tag">type</span><span class="syntax-punctuation">:</span> Pods
+          <span class="syntax-tag">value</span><span class="syntax-punctuation">:</span> 1
+          <span class="syntax-tag">periodSeconds</span><span class="syntax-punctuation">:</span> 60</code></pre>
 <p>With one replica and80 percent utilization against50 percent, the ideal count is2. With200 percent, ideal4 is limited to maximum 2.</p>
 <p><strong>Expected:</strong> Both cases request at most2; the second remains potentially capacity-limited.</p>
 <h4 id="worked-example-2-explain-a-delayed-scale-down">Worked example 2: Explain a delayed scale-down<a class="heading-anchor" href="#worked-example-2-explain-a-delayed-scale-down" aria-label="Link to this section">#</a></h4>

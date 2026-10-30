@@ -84,7 +84,10 @@ Task: Cancel a running job, then deliver a late completion.
 The model prevents a late event from reviving a terminal job. A real worker still needs a cancellation channel; this pure state decision does not stop it by itself.
 
 ```typescript
-const cancelled = transition(transition(initial(), { type: 'start' }), { type: 'cancel', reason: 'user request' });
+const cancelled = transition(transition(initial(), { type: 'start' }), {
+  type: 'cancel',
+  reason: 'user request',
+});
 assert.equal(cancelled.kind, 'cancelled');
 assert.throws(() => transition(cancelled, { type: 'complete', value: 2 }), /terminal/u);
 ```
@@ -100,7 +103,13 @@ Task: Replay start, failure, retry, start and completion twice.
 The event history is sufficient for this deterministic decision logic. Time, randomness or I/O would need explicit inputs rather than hidden dependencies inside transition.
 
 ```typescript
-const events: Event[] = [{ type: 'start' }, { type: 'fail', reason: 'retryable' }, { type: 'retry' }, { type: 'start' }, { type: 'complete', value: 3 }];
+const events: Event[] = [
+  { type: 'start' },
+  { type: 'fail', reason: 'retryable' },
+  { type: 'retry' },
+  { type: 'start' },
+  { type: 'complete', value: 3 },
+];
 const first = replay(initial(), events);
 const second = replay(initial(), events);
 assert.deepEqual(first, second);

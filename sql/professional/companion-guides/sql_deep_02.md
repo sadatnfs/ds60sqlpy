@@ -105,11 +105,19 @@ This lesson extends the existing fanout lesson by examining the algebra of measu
 ### Example 1
 
 ```sql
-WITH groups(group_id,successes,trials) AS (VALUES ('small',1::numeric,2),('large',9::numeric,10))
-SELECT 'population' AS metric_id,
- round(sum(successes)/sum(trials),3) AS trial_weighted_rate,
- round(avg(successes/trials),3) AS equal_group_rate
-FROM groups;
+WITH groups (
+  group_id,
+  successes,
+  trials
+) AS (
+  VALUES ('small', 1::numeric, 2),
+    ('large', 9::numeric, 10))
+SELECT
+  'population' AS metric_id,
+  round(sum(successes) / sum(trials), 3) AS trial_weighted_rate,
+  round(avg(successes / trials), 3) AS equal_group_rate
+FROM
+  groups;
 ```
 
 One output row keyed by metric_id has trial_weighted_rate0.833 and equal_group_rate0.700. The small group rate is 0.5 and large group rate 0.9. Summing first weights by trials; averaging the two ratios gives each group equal influence. Neither formula is inherently wrong, but they answer different questions.
@@ -117,10 +125,24 @@ One output row keyed by metric_id has trial_weighted_rate0.833 and equal_group_r
 ### Example 2
 
 ```sql
-WITH states(day,product_id,units) AS (VALUES
- (DATE '2026-01-01',1,10),(DATE '2026-01-01',2,20),
- (DATE '2026-01-02',1,12),(DATE '2026-01-02',2,17))
-SELECT day,sum(units) AS units_at_day FROM states GROUP BY day ORDER BY day;
+WITH states (
+  day,
+  product_id,
+  units
+) AS (
+  VALUES (DATE '2026-01-01', 1, 10),
+    (DATE '2026-01-01', 2, 20),
+    (DATE '2026-01-02', 1, 12),
+    (DATE '2026-01-02', 2, 17))
+SELECT
+  day,
+  sum(units) AS units_at_day
+FROM
+  states
+GROUP BY
+  day
+ORDER BY
+  day;
 ```
 
 The result grain is one snapshot day, with columns day and units_at_day, ordered by day. Totals are 30 and 29. Adding those two totals to 59 does not describe inventory at either day; it sums repeated state measurements across time. The example makes the dimension along which summation is meaningful explicit.

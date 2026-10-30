@@ -192,14 +192,14 @@ for invalid in invalid_inputs:
     except ValueError:
         pass
     else:
-        raise AssertionError('invalid token/context contract was accepted')
+        raise AssertionError("invalid token/context contract was accepted")
 for options in [dict(width=5, heads=2), dict(heads=0), dict(context=0)]:
     try:
         TinyDecoder(**options)
     except ValueError:
         pass
     else:
-        raise AssertionError('invalid model dimensions were accepted')
+        raise AssertionError("invalid model dimensions were accepted")
 ```
 
 **Expected:** Every invalid contract raises ValueError before a misleading reshape or embedding computation.

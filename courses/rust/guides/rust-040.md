@@ -43,8 +43,6 @@ Read the operations in dependency order. Record which values exist before each l
 The mask expresses one admission decision for every original position.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         use arrow::array::{BooleanArray, Int32Array};
@@ -66,8 +64,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 A selected row can appear more than once, so cardinality and aggregation assumptions need review.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         use arrow::array::{Int32Array, UInt32Array};

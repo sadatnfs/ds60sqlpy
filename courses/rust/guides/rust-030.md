@@ -43,8 +43,6 @@ Read the operations in dependency order. Record which values exist before each l
 String's ownership and Send contract make the transfer valid without shared mutation.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let text = String::from("owned");
@@ -63,8 +61,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 Compile-time capability evidence is different from a runtime stress test.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         fn require_send<T: Send>() {}

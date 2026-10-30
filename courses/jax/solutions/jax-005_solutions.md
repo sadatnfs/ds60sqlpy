@@ -65,6 +65,8 @@ def sequence():
         key, value = draw_step(key)
         values.append(value)
     return key, jnp.stack(values)
+
+
 a, x = sequence()
 b, y = sequence()
 assert same_key(a, b)
@@ -79,8 +81,8 @@ The defect is key reuse when independence was intended, not the coincidence of i
 
 ```python
 key = jax.random.key(5)
-a = jax.random.bernoulli(key, .5, (8,))
-b = jax.random.bernoulli(key, .5, (8,))
+a = jax.random.bernoulli(key, 0.5, (8,))
+b = jax.random.bernoulli(key, 0.5, (8,))
 assert np.array_equal(np.asarray(a), np.asarray(b))
 k1, k2 = jax.random.split(key)
 assert not same_key(k1, k2)

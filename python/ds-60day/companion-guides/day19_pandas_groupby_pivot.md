@@ -120,14 +120,15 @@ identify which line creates each intermediate object.
 ```python
 import pandas as pd
 
-orders = pd.DataFrame({
-    "order_id": [1, 2, 3, 4],
-    "region": ["east", "east", "west", "west"],
-    "amount": [10, 15, 7, 8],
-})
-summary = (
-    orders.groupby("region", as_index=False)
-    .agg(order_count=("order_id", "nunique"), total=("amount", "sum"))
+orders = pd.DataFrame(
+    {
+        "order_id": [1, 2, 3, 4],
+        "region": ["east", "east", "west", "west"],
+        "amount": [10, 15, 7, 8],
+    }
+)
+summary = orders.groupby("region", as_index=False).agg(
+    order_count=("order_id", "nunique"), total=("amount", "sum")
 )
 summary.to_dict("records")
 ```
@@ -147,9 +148,7 @@ Transform preserves the original index and row count. Before running it, predict
 identify which line creates each intermediate object.
 
 ```python
-orders = orders.assign(
-    region_total=orders.groupby("region")["amount"].transform("sum")
-)
+orders = orders.assign(region_total=orders.groupby("region")["amount"].transform("sum"))
 orders[["order_id", "region", "amount", "region_total"]].to_dict("records")
 ```
 

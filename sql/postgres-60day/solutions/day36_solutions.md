@@ -67,21 +67,27 @@ SET LOCAL search_path TO training, public;
 DROP MATERIALIZED VIEW IF EXISTS mv_weekly_country_revenue_solution;
 
 CREATE MATERIALIZED VIEW mv_weekly_country_revenue_solution AS
-SELECT date_trunc('week', o.order_date)::date AS week_start,
-       c.country,
-       SUM(
-         oi.unit_price * oi.quantity * (1 - oi.discount)
-       ) AS revenue
-FROM orders o
-JOIN customers c ON c.customer_id = o.customer_id
-JOIN order_items oi ON oi.order_id = o.order_id
-GROUP BY date_trunc('week', o.order_date), c.country;
+SELECT
+  date_trunc('week', o.order_date)::date AS week_start,
+  c.country,
+  SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS revenue
+FROM
+  orders o
+  JOIN customers c ON c.customer_id = o.customer_id
+  JOIN order_items oi ON oi.order_id = o.order_id
+GROUP BY
+  date_trunc('week', o.order_date),
+  c.country;
 
-SELECT week_start,
-       country,
-       ROUND(revenue, 2) AS revenue
-FROM mv_weekly_country_revenue_solution
-ORDER BY week_start DESC, revenue DESC;
+SELECT
+  week_start,
+  country,
+  ROUND(revenue, 2) AS revenue
+FROM
+  mv_weekly_country_revenue_solution
+ORDER BY
+  week_start DESC,
+  revenue DESC;
 
 ROLLBACK;
 ```
@@ -108,32 +114,44 @@ SET LOCAL search_path TO training, public;
 DROP MATERIALIZED VIEW IF EXISTS mv_weekly_country_revenue_compare;
 
 CREATE MATERIALIZED VIEW mv_weekly_country_revenue_compare AS
-SELECT date_trunc('week', o.order_date)::date AS week_start,
-       c.country,
-       SUM(
-         oi.unit_price * oi.quantity * (1 - oi.discount)
-       ) AS revenue
-FROM orders o
-JOIN customers c ON c.customer_id = o.customer_id
-JOIN order_items oi ON oi.order_id = o.order_id
-GROUP BY date_trunc('week', o.order_date), c.country;
+SELECT
+  date_trunc('week', o.order_date)::date AS week_start,
+  c.country,
+  SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS revenue
+FROM
+  orders o
+  JOIN customers c ON c.customer_id = o.customer_id
+  JOIN order_items oi ON oi.order_id = o.order_id
+GROUP BY
+  date_trunc('week', o.order_date),
+  c.country;
 
-EXPLAIN (ANALYZE, BUFFERS)
-SELECT date_trunc('week', o.order_date)::date AS week_start,
-       c.country,
-       SUM(
-         oi.unit_price * oi.quantity * (1 - oi.discount)
-       ) AS revenue
-FROM orders o
-JOIN customers c ON c.customer_id = o.customer_id
-JOIN order_items oi ON oi.order_id = o.order_id
-GROUP BY date_trunc('week', o.order_date), c.country;
+EXPLAIN (
+  ANALYZE,
+  BUFFERS
+)
+SELECT
+  date_trunc('week', o.order_date)::date AS week_start,
+  c.country,
+  SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS revenue
+FROM
+  orders o
+  JOIN customers c ON c.customer_id = o.customer_id
+  JOIN order_items oi ON oi.order_id = o.order_id
+GROUP BY
+  date_trunc('week', o.order_date),
+  c.country;
 
-EXPLAIN (ANALYZE, BUFFERS)
-SELECT week_start,
-       country,
-       revenue
-FROM mv_weekly_country_revenue_compare;
+EXPLAIN (
+  ANALYZE,
+  BUFFERS
+)
+SELECT
+  week_start,
+  country,
+  revenue
+FROM
+  mv_weekly_country_revenue_compare;
 
 ROLLBACK;
 ```

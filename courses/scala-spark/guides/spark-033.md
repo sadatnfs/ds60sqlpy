@@ -58,36 +58,68 @@ The complete source creates the owned local session described above, then constr
 import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
-import org.apache.spark.sql.streaming.{StreamingQueryProgress,Trigger}
-import java.nio.file.{Files,Path,Paths,StandardOpenOption,StandardCopyOption}
+import org.apache.spark.sql.streaming.{StreamingQueryProgress, Trigger}
+import java.nio.file.{Files, Path, Paths, StandardOpenOption, StandardCopyOption}
 import java.nio.charset.StandardCharsets
 import scala.jdk.CollectionConverters._
 
-spark.conf.set("spark.sql.streaming.stopTimeout","10000")
-ownedRoot = Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(),".ds60-spark-033-")
-Files.createDirectory(ownedRoot.resolve("input"));Files.createDirectory(ownedRoot.resolve("staging"))
+spark.conf.set("spark.sql.streaming.stopTimeout", "10000")
+ownedRoot = Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(), ".ds60-spark-033-")
+Files.createDirectory(ownedRoot.resolve("input"));
+Files.createDirectory(ownedRoot.resolve("staging"))
 val batches = Seq(
- Seq("""{"delivery_id":1,"event_id":"e1","amount":10,"event_time":"2024-01-01T00:01:00Z"}""","""{"delivery_id":2,"event_id":"e2","amount":10,"event_time":"2024-01-01T00:02:00Z"}""","""{"delivery_id":3,"event_id":null,"amount":99,"event_time":"2024-01-01T00:02:00Z"}"""),
- Seq("""{"delivery_id":4,"event_id":"e1","amount":10,"event_time":"2024-01-01T00:01:00Z"}""","""{"delivery_id":5,"event_id":"e3","amount":10,"event_time":"2024-01-01T00:03:00Z"}"""),
- Seq("""{"delivery_id":6,"event_id":"__advance__","amount":0,"event_time":"2024-01-01T00:20:00Z"}"""))
+  Seq(
+    """{"delivery_id":1,"event_id":"e1","amount":10,"event_time":"2024-01-01T00:01:00Z"}""",
+    """{"delivery_id":2,"event_id":"e2","amount":10,"event_time":"2024-01-01T00:02:00Z"}""",
+    """{"delivery_id":3,"event_id":null,"amount":99,"event_time":"2024-01-01T00:02:00Z"}"""
+  ),
+  Seq(
+    """{"delivery_id":4,"event_id":"e1","amount":10,"event_time":"2024-01-01T00:01:00Z"}""",
+    """{"delivery_id":5,"event_id":"e3","amount":10,"event_time":"2024-01-01T00:03:00Z"}"""
+  ),
+  Seq(
+    """{"delivery_id":6,"event_id":"__advance__","amount":0,"event_time":"2024-01-01T00:20:00Z"}"""
+  )
+)
 ```
 
 ```python
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 from pathlib import Path
 import tempfile
 import shutil
 import os
 import uuid
 
-spark.conf.set("spark.sql.streaming.stopTimeout","10000")
-owned_root = Path(tempfile.mkdtemp(prefix=".ds60-spark-033-",dir=".")).resolve()
-(owned_root/"input").mkdir();(owned_root/"staging").mkdir()
+spark.conf.set("spark.sql.streaming.stopTimeout", "10000")
+owned_root = Path(tempfile.mkdtemp(prefix=".ds60-spark-033-", dir=".")).resolve()
+(owned_root / "input").mkdir()
+(owned_root / "staging").mkdir()
 batches = [
- ['{"delivery_id":1,"event_id":"e1","amount":10,"event_time":"2024-01-01T00:01:00Z"}','{"delivery_id":2,"event_id":"e2","amount":10,"event_time":"2024-01-01T00:02:00Z"}','{"delivery_id":3,"event_id":null,"amount":99,"event_time":"2024-01-01T00:02:00Z"}'],
- ['{"delivery_id":4,"event_id":"e1","amount":10,"event_time":"2024-01-01T00:01:00Z"}','{"delivery_id":5,"event_id":"e3","amount":10,"event_time":"2024-01-01T00:03:00Z"}'],
- ['{"delivery_id":6,"event_id":"__advance__","amount":0,"event_time":"2024-01-01T00:20:00Z"}']]
+    [
+        '{"delivery_id":1,"event_id":"e1","amount":10,"event_time":"2024-01-01T00:01:00Z"}',
+        '{"delivery_id":2,"event_id":"e2","amount":10,"event_time":"2024-01-01T00:02:00Z"}',
+        '{"delivery_id":3,"event_id":null,"amount":99,"event_time":"2024-01-01T00:02:00Z"}',
+    ],
+    [
+        '{"delivery_id":4,"event_id":"e1","amount":10,"event_time":"2024-01-01T00:01:00Z"}',
+        '{"delivery_id":5,"event_id":"e3","amount":10,"event_time":"2024-01-01T00:03:00Z"}',
+    ],
+    ['{"delivery_id":6,"event_id":"__advance__","amount":0,"event_time":"2024-01-01T00:20:00Z"}'],
+]
 ```
 
 ## Worked example / walkthrough
@@ -95,14 +127,17 @@ batches = [
 ### Worked example 1
 
 ```scala
-val occurrences = Seq(("e1",10L),("e2",10L),("e1",10L),("e3",10L))
+val occurrences = Seq(("e1", 10L), ("e2", 10L), ("e1", 10L), ("e3", 10L))
 assert(occurrences.map(_._1).distinct.size == 3 && occurrences.map(_._2).distinct.size == 1)
 println("Equal amounts are not equal event identities")
 ```
 
 ```python
-occurrences = [("e1",10),("e2",10),("e1",10),("e3",10)]
-assert len({event for event,_ in occurrences}) == 3 and len({amount for _,amount in occurrences}) == 1
+occurrences = [("e1", 10), ("e2", 10), ("e1", 10), ("e3", 10)]
+assert (
+    len({event for event, _ in occurrences}) == 3
+    and len({amount for _, amount in occurrences}) == 1
+)
 print("Equal amounts are not equal event identities")
 ```
 
@@ -111,12 +146,12 @@ The independent collection example isolates the key choice. Event identity yield
 ### Worked example 2
 
 ```scala
-assert(batches.map(_.size) == Seq(3,2,1) && batches.flatten.size == 6)
+assert(batches.map(_.size) == Seq(3, 2, 1) && batches.flatten.size == 6)
 println("Six source deliveries feed two independently checkpointed branches")
 ```
 
 ```python
-assert [len(batch) for batch in batches] == [3,2,1] and sum(map(len,batches)) == 6
+assert [len(batch) for batch in batches] == [3, 2, 1] and sum(map(len, batches)) == 6
 print("Six source deliveries feed two independently checkpointed branches")
 ```
 

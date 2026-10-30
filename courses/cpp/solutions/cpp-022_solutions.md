@@ -31,7 +31,7 @@ If a round-trip passes only because both writer and reader share the same bug, a
 ## Worked example 1
 
 ```cpp
-assert(encode(7,125)=="v1,7,125");
+assert(encode(7, 125) == "v1,7,125");
 ```
 
 Expected: The exact wire text is independent of struct padding.
@@ -39,7 +39,7 @@ Expected: The exact wire text is independent of struct padding.
 ## Worked example 2
 
 ```cpp
-auto p=std::filesystem::path("records")/"batch.csv";
+auto p = std::filesystem::path("records") / "batch.csv";
 ```
 
 Expected: The path joins components using platform rules; filename is batch.csv.

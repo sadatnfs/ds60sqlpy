@@ -86,18 +86,24 @@ WHERE order_id = 2;
 Before completing the cycle, run this safe diagnostic in a third session:
 
 ```sql
-SELECT a.pid,
-       a.state,
-       l.locktype,
-       l.relation::regclass AS relation,
-       l.mode,
-       l.granted,
-       pg_blocking_pids(a.pid) AS blocking_pids
-FROM pg_stat_activity a
-JOIN pg_locks l ON l.pid = a.pid
-WHERE cardinality(pg_blocking_pids(a.pid)) > 0
-   OR NOT l.granted
-ORDER BY a.pid, l.granted, l.locktype;
+SELECT
+  a.pid,
+  a.state,
+  l.locktype,
+  l.relation::regclass AS relation,
+  l.mode,
+  l.granted,
+  pg_blocking_pids (a.pid) AS blocking_pids
+FROM
+  pg_stat_activity a
+  JOIN pg_locks l ON l.pid = a.pid
+WHERE
+  cardinality(pg_blocking_pids (a.pid)) > 0
+  OR NOT l.granted
+ORDER BY
+  a.pid,
+  l.granted,
+  l.locktype;
 ```
 
 Then Session B completes the cycle:
@@ -130,13 +136,18 @@ Every worker must acquire the same set of row locks in the same order:
 ```sql
 BEGIN;
 SET LOCAL search_path TO training, public;
+
 SET LOCAL lock_timeout = '5s';
 
-SELECT order_id,
-       total_amount
-FROM orders
-WHERE order_id IN (1, 2)
-ORDER BY order_id
+SELECT
+  order_id,
+  total_amount
+FROM
+  orders
+WHERE
+  order_id IN (1, 2)
+ORDER BY
+  order_id
 FOR UPDATE;
 
 ROLLBACK;
@@ -161,14 +172,19 @@ order 2 while requesting order 1, so this pair does not form a cycle.
 BEGIN;
 SET LOCAL search_path TO training, public;
 
-SELECT order_id,
-       order_date,
-       status
-FROM orders
-WHERE status = 'placed'
-ORDER BY order_id
+SELECT
+  order_id,
+  order_date,
+  status
+FROM
+  orders
+WHERE
+  status = 'placed'
+ORDER BY
+  order_id
 LIMIT 5
-FOR UPDATE SKIP LOCKED;
+FOR UPDATE
+  SKIP LOCKED;
 
 ROLLBACK;
 ```

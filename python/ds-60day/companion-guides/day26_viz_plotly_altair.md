@@ -139,14 +139,20 @@ identify which line creates each intermediate object.
 import pandas as pd
 import plotly.express as px
 
-points = pd.DataFrame({
-    "team": ["A", "A", "B", "B"],
-    "hours": [2, 4, 3, 5],
-    "tasks": [3, 7, 4, 9],
-})
+points = pd.DataFrame(
+    {
+        "team": ["A", "A", "B", "B"],
+        "hours": [2, 4, 3, 5],
+        "tasks": [3, 7, 4, 9],
+    }
+)
 fig = px.scatter(
-    points, x="hours", y="tasks", color="team",
-    hover_data=["team"], title="Tasks completed versus hours"
+    points,
+    x="hours",
+    y="tasks",
+    color="team",
+    hover_data=["team"],
+    title="Tasks completed versus hours",
 )
 (len(fig.data), fig.layout.xaxis.title.text, fig.layout.yaxis.title.text)
 ```
@@ -230,9 +236,7 @@ from pathlib import Path
 import pandas as pd
 import plotly.express as px
 
-frame = pd.DataFrame(
-    {"day": ["Mon", "Tue", "Wed"], "orders": [12, 18, 15], "returns": [1, 2, 1]}
-)
+frame = pd.DataFrame({"day": ["Mon", "Tue", "Wed"], "orders": [12, 18, 15], "returns": [1, 2, 1]})
 figure = px.scatter(
     frame,
     x="orders",

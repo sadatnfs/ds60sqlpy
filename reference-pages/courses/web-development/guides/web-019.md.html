@@ -209,11 +209,15 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-a-focused-group">Worked example 1: A focused group<a class="heading-anchor" href="#worked-example-1-a-focused-group" aria-label="Link to this section">#</a></h4>
 <p>The container helps the user locate the current task.</p>
-<pre class="highlighted-code"><code class="language-css"><span class="syntax-punctuation">.</span><span class="syntax-class">field</span><span class="syntax-punctuation">:</span><span class="syntax-decorator">focus-within</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">border-color</span><span class="syntax-punctuation">:</span> <span class="syntax-number">#0753a4</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span></code></pre>
+<pre class="highlighted-code"><code class="language-css"><span class="syntax-punctuation">.</span><span class="syntax-class">field</span><span class="syntax-punctuation">:</span><span class="syntax-decorator">focus-within</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">border-color</span><span class="syntax-punctuation">:</span> <span class="syntax-number">#0753a4</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected observation:</strong> The field group changes while its descendant is focused.</p>
 <h4 id="worked-example-2-a-native-checked-state">Worked example 2: A native checked state<a class="heading-anchor" href="#worked-example-2-a-native-checked-state" aria-label="Link to this section">#</a></h4>
 <p>The checkbox remains the actual control.</p>
-<pre class="highlighted-code"><code class="language-css"><span class="syntax-tag">input</span><span class="syntax-punctuation">:</span><span class="syntax-decorator">checked</span> <span class="syntax-operator">+</span> <span class="syntax-tag">span</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">font-weight</span><span class="syntax-punctuation">:</span> <span class="syntax-number">700</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span></code></pre>
+<pre class="highlighted-code"><code class="language-css"><span class="syntax-tag">input</span><span class="syntax-punctuation">:</span><span class="syntax-decorator">checked</span> <span class="syntax-operator">+</span> <span class="syntax-tag">span</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">font-weight</span><span class="syntax-punctuation">:</span> <span class="syntax-number">700</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected observation:</strong> The adjacent label becomes bold when checked.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-distinguish-a-condition-selector-from-generated-content">Exercise 1: Distinguish a condition selector from generated content.<a class="heading-anchor" href="#exercise-1-distinguish-a-condition-selector-from-generated-content" aria-label="Link to this section">#</a></h4>

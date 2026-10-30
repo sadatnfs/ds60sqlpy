@@ -37,7 +37,7 @@ For Dockerfile examples, create a file named `Dockerfile` in a scratch project. 
 This is synthetic stored state.
 
 ```json
-{"schema_version":1,"counter":7}
+{ "schema_version": 1, "counter": 7 }
 ```
 
 **Expected observation:** The reader checks the version before interpreting fields.

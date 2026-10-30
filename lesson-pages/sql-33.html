@@ -432,11 +432,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
 <p>These worked excerpts come from <code>sql/postgres-60day/day33_index_optimization_strategies.sql</code>. Use <strong>Whole SQL lesson (psql)</strong> in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared <code>psql</code> routes are described above.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> idx_orders_customer_date <span class="syntax-keyword">ON</span> orders<span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">,</span> order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> idx_orders_customer_date <span class="syntax-keyword">ON</span> orders <span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">,</span> order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 1 is data definition language (DDL). <code>psql</code> prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.</p>
 <p><strong>Expected result/shape:</strong> Example 1 must print the expected DDL command tag for <code>idx_orders_customer_date</code>, and <code>orders</code>. Verify the object in <code>pg_catalog.pg_index</code>, and <code>pg_catalog.pg_indexes</code>, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> idx_oi_order_product_inc <span class="syntax-keyword">ON</span> order_items<span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">,</span> product_id<span class="syntax-punctuation">)</span> INCLUDE <span class="syntax-punctuation">(</span>quantity<span class="syntax-punctuation">,</span> unit_price<span class="syntax-punctuation">,</span> discount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> idx_oi_order_product_inc <span class="syntax-keyword">ON</span> order_items <span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">,</span> product_id<span class="syntax-punctuation">)</span> INCLUDE <span class="syntax-punctuation">(</span>quantity<span class="syntax-punctuation">,</span> unit_price<span class="syntax-punctuation">,</span> discount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 2 is data definition language (DDL). <code>psql</code> prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.</p>
 <p><strong>Expected result/shape:</strong> Example 2 must print the expected DDL command tag for <code>idx_oi_order_product_inc</code>, and <code>order_items</code>. Verify the object in <code>pg_catalog.pg_index</code>, and <code>pg_catalog.pg_indexes</code>, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -708,17 +708,24 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
 <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">INDEX</span> <span class="syntax-keyword">IF</span> <span class="syntax-keyword">EXISTS</span> training<span class="syntax-punctuation">.</span>idx_products_category_created_solution<span class="syntax-punctuation">;</span>
-<span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> idx_products_category_created_solution
-  <span class="syntax-keyword">ON</span> products<span class="syntax-punctuation">(</span>category<span class="syntax-punctuation">,</span> created_at<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 
-<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span> BUFFERS<span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> product_id<span class="syntax-punctuation">,</span>
-       name<span class="syntax-punctuation">,</span>
-       created_at
-<span class="syntax-keyword">FROM</span> products
-<span class="syntax-keyword">WHERE</span> category <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;Electronics&#x27;</span>
+<span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> idx_products_category_created_solution <span class="syntax-keyword">ON</span> products <span class="syntax-punctuation">(</span>category<span class="syntax-punctuation">,</span> created_at<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+
+<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span>
+  BUFFERS
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span>
+  product_id<span class="syntax-punctuation">,</span>
+  name<span class="syntax-punctuation">,</span>
+  created_at
+<span class="syntax-keyword">FROM</span>
+  products
+<span class="syntax-keyword">WHERE</span>
+  category <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;Electronics&#x27;</span>
   <span class="syntax-keyword">AND</span> created_at <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;6 years&#x27;</span>
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> created_at <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  created_at <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span>
 
 <span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></code></pre>
 <p>The equality condition on the leading <code>category</code> column lets the B-tree narrow the search before applying the <code>created_at</code> range and can also support the <code>ORDER BY created_at, product_id</code>. A predicate on <code>created_at</code> alone cannot use the leftmost <code>category</code> key as efficiently.</p>
@@ -737,18 +744,26 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
 <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">INDEX</span> <span class="syntax-keyword">IF</span> <span class="syntax-keyword">EXISTS</span> training<span class="syntax-punctuation">.</span>idx_orders_high_value_solution<span class="syntax-punctuation">;</span>
-<span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> idx_orders_high_value_solution
-  <span class="syntax-keyword">ON</span> orders<span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">,</span> order_date<span class="syntax-punctuation">)</span>
-  <span class="syntax-keyword">WHERE</span> total_amount <span class="syntax-operator">&gt;</span> <span class="syntax-number">1000</span><span class="syntax-punctuation">;</span>
 
-<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span> BUFFERS<span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> order_id<span class="syntax-punctuation">,</span>
-       total_amount<span class="syntax-punctuation">,</span>
-       order_date
-<span class="syntax-keyword">FROM</span> orders
-<span class="syntax-keyword">WHERE</span> total_amount <span class="syntax-operator">&gt;</span> <span class="syntax-number">1000</span>
+<span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> idx_orders_high_value_solution <span class="syntax-keyword">ON</span> orders <span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">,</span> order_date<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">WHERE</span>
+  total_amount <span class="syntax-operator">&gt;</span> <span class="syntax-number">1000</span><span class="syntax-punctuation">;</span>
+
+<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span>
+  BUFFERS
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span>
+  order_id<span class="syntax-punctuation">,</span>
+  total_amount<span class="syntax-punctuation">,</span>
+  order_date
+<span class="syntax-keyword">FROM</span>
+  orders
+<span class="syntax-keyword">WHERE</span>
+  total_amount <span class="syntax-operator">&gt;</span> <span class="syntax-number">1000</span>
   <span class="syntax-keyword">AND</span> order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;365 days&#x27;</span>
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> total_amount <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  total_amount <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span>
 
 <span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></code></pre>
 <p>The query repeats the partial predicate in a form the planner can prove implies the index condition. The index excludes lower-value orders, reducing its size.</p>

@@ -130,9 +130,12 @@ Pairing by IDs prevents dictionary order from changing which observations are su
 ```python
 import numpy as np
 
-a={'q1':0,'q2':0,'q3':1}; b={'q3':0,'q1':1,'q2':1}; ids=sorted(a)
-assert set(a)==set(b); difference=np.array([a[i]-b[i] for i in ids],dtype=float)
-np.testing.assert_array_equal(difference,[-1,-1,1])
+a = {"q1": 0, "q2": 0, "q3": 1}
+b = {"q3": 0, "q1": 1, "q2": 1}
+ids = sorted(a)
+assert set(a) == set(b)
+difference = np.array([a[i] - b[i] for i in ids], dtype=float)
+np.testing.assert_array_equal(difference, [-1, -1, 1])
 ```
 
 **Expected:** differences[-1, -1, 1] by sortedID.
@@ -142,8 +145,10 @@ np.testing.assert_array_equal(difference,[-1,-1,1])
 The repeated family changes the row-weighted conclusion. This is a design choice about the evaluation population, not a numerical bug.
 
 ```python
-families=np.array(['F','F','G']); family_values=np.array([difference[families==f].mean() for f in ['F','G']])
-np.testing.assert_allclose(difference.mean(),-1/3,atol=1e-12,rtol=0); assert family_values.mean()==0
+families = np.array(["F", "F", "G"])
+family_values = np.array([difference[families == f].mean() for f in ["F", "G"]])
+np.testing.assert_allclose(difference.mean(), -1 / 3, atol=1e-12, rtol=0)
+assert family_values.mean() == 0
 ```
 
 **Expected:** row mean-1/3; family mean 0.
@@ -153,9 +158,10 @@ np.testing.assert_allclose(difference.mean(),-1/3,atol=1e-12,rtol=0); assert fam
 Two families produce a coarse empirical distribution. A large number of bootstrap draws does not create additional independent evidence.
 
 ```python
-indices=np.random.default_rng(17).integers(0,2,size=(2000,2)); estimates=family_values[indices].mean(1)
-assert set(np.unique(estimates))=={-1.,0.,1.}
-np.testing.assert_array_equal(indices,np.random.default_rng(17).integers(0,2,size=(2000,2)))
+indices = np.random.default_rng(17).integers(0, 2, size=(2000, 2))
+estimates = family_values[indices].mean(1)
+assert set(np.unique(estimates)) == {-1.0, 0.0, 1.0}
+np.testing.assert_array_equal(indices, np.random.default_rng(17).integers(0, 2, size=(2000, 2)))
 ```
 
 **Expected:** all estimates are-1, 0 or 1; repeatable with same seed.

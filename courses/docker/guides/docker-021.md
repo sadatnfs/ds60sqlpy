@@ -37,7 +37,7 @@ For Dockerfile examples, create a file named `Dockerfile` in a scratch project. 
 The sample values are synthetic and make no claim about your volume.
 
 ```json
-{"schema_version": 1, "counter": 7}
+{ "schema_version": 1, "counter": 7 }
 ```
 
 **Expected observation:** A restore must preserve the schema and the counter value, not merely recreate a file with the same name.

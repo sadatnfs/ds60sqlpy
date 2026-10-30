@@ -63,24 +63,48 @@ country/category/product top-five drill-down. See
 SET search_path TO training, public;
 
 WITH line AS (
-  SELECT c.country,
-         p.category,
-         oi.unit_price * oi.quantity * (1 - oi.discount) AS revenue
-  FROM orders o
-  JOIN customers c USING (customer_id)
-  JOIN order_items oi USING (order_id)
-  JOIN products p USING (product_id)
-), rollup_rows AS (
-  SELECT country, category, SUM(revenue) AS revenue
-  FROM line
-  GROUP BY ROLLUP (country, category)
-), cube_rows AS (
-  SELECT country, category, SUM(revenue) AS revenue
-  FROM line
-  GROUP BY CUBE (country, category)
-)
-SELECT (SELECT COUNT(*) FROM rollup_rows) AS rollup_row_count,
-       (SELECT COUNT(*) FROM cube_rows) AS cube_row_count;
+  SELECT
+    c.country,
+    p.category,
+    oi.unit_price * oi.quantity * (1 - oi.discount) AS revenue
+  FROM
+    orders o
+    JOIN customers c USING (customer_id)
+    JOIN order_items oi USING (order_id)
+    JOIN products p USING (product_id)
+),
+rollup_rows AS (
+  SELECT
+    country,
+    category,
+    SUM(revenue) AS revenue
+  FROM
+    line
+  GROUP BY
+    ROLLUP (country,
+    category)
+),
+cube_rows AS (
+SELECT
+  country,
+  category,
+  SUM(revenue) AS revenue
+  FROM
+    line
+  GROUP BY
+    CUBE (country,
+    category))
+  SELECT
+    (
+      SELECT
+        COUNT(*)
+      FROM
+        rollup_rows) AS rollup_row_count,
+  (
+    SELECT
+      COUNT(*)
+    FROM
+      cube_rows) AS cube_row_count;
 ```
 
 Expected shape: one comparison row. `CUBE(country, category)` adds category-only
@@ -103,43 +127,63 @@ is greater on this seed.
 SET search_path TO training, public;
 
 WITH line AS (
-  SELECT c.country,
-         p.category,
-         o.status,
-         p.product_id,
-         p.name,
-         oi.unit_price * oi.quantity * (1 - oi.discount) AS revenue
-  FROM orders o
-  JOIN customers c USING (customer_id)
-  JOIN order_items oi USING (order_id)
-  JOIN products p USING (product_id)
-), product_revenue AS (
-  SELECT country,
-         category,
-         status,
-         product_id,
-         name,
-         SUM(revenue) AS revenue
-  FROM line
-  GROUP BY country, category, status, product_id, name
-), ranked AS (
-  SELECT *,
-         ROW_NUMBER() OVER (
-           PARTITION BY country, category, status
-           ORDER BY revenue DESC, product_id
-         ) AS product_rank
-  FROM product_revenue
+  SELECT
+    c.country,
+    p.category,
+    o.status,
+    p.product_id,
+    p.name,
+    oi.unit_price * oi.quantity * (1 - oi.discount) AS revenue
+  FROM
+    orders o
+    JOIN customers c USING (customer_id)
+    JOIN order_items oi USING (order_id)
+    JOIN products p USING (product_id)
+),
+product_revenue AS (
+  SELECT
+    country,
+    category,
+    status,
+    product_id,
+    name,
+    SUM(revenue) AS revenue
+  FROM
+    line
+  GROUP BY
+    country,
+    category,
+    status,
+    product_id,
+    name
+),
+ranked AS (
+  SELECT
+    *,
+    ROW_NUMBER() OVER (PARTITION BY country,
+      category,
+      status ORDER BY revenue DESC,
+      product_id) AS product_rank
+  FROM
+    product_revenue
 )
-SELECT country,
-       category,
-       status,
-       product_id,
-       name,
-       ROUND(revenue, 2) AS revenue,
-       product_rank
-FROM ranked
-WHERE product_rank <= 5
-ORDER BY country, category, status, product_rank;
+SELECT
+  country,
+  category,
+  status,
+  product_id,
+  name,
+  ROUND(revenue, 2) AS revenue,
+  product_rank
+FROM
+  ranked
+WHERE
+  product_rank <= 5
+ORDER BY
+  country,
+  category,
+  status,
+  product_rank;
 ```
 
 Expected grain: up to five rows per `(country, category, status)`.

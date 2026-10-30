@@ -4,16 +4,31 @@ package io.ds60.spark.tmbad
 import com.fasterxml.jackson.databind.JsonNode
 
 private[tmbad] object EvaluationDocument {
-  def create(model: NativeModel, artifact: PreparedArtifact, parameters: Vector[Double],
-             options: FitOptions, settings: FitTarget.Settings, evaluated: FitTarget.Evaluated): String = {
+  def create(
+      model: NativeModel,
+      artifact: PreparedArtifact,
+      parameters: Vector[Double],
+      options: FitOptions,
+      settings: FitTarget.Settings,
+      evaluated: FitTarget.Evaluated
+  ): String = {
     val data = evaluated.data
-    val node = Json.obj().put("schema_version", 1).put("kind", "spark-tmbad-evaluation")
-      .put("package_version", artifact.packageVersion).put("model_id", model.id)
-      .put("model_digest", model.digest).put("parameter_digest", FitTarget.parameterDigest(model, parameters))
-      .put("target_spec_digest", settings.targetDigest).put("reduction", options.reduction)
+    val node = Json
+      .obj()
+      .put("schema_version", 1)
+      .put("kind", "spark-tmbad-evaluation")
+      .put("package_version", artifact.packageVersion)
+      .put("model_id", model.id)
+      .put("model_digest", model.digest)
+      .put("parameter_digest", FitTarget.parameterDigest(model, parameters))
+      .put("target_spec_digest", settings.targetDigest)
+      .put("reduction", options.reduction)
       .put("weight_kind", if (model.fitKind == "unit") "unit" else "observation")
-      .put("row_count", data.rows).put("unit_count", data.units).put("weight_sum", data.weight)
-      .put("partition_count", data.partitions).put("summed_kkt_inf", evaluated.summedKkt)
+      .put("row_count", data.rows)
+      .put("unit_count", data.units)
+      .put("weight_sum", data.weight)
+      .put("partition_count", data.partitions)
+      .put("summed_kkt_inf", evaluated.summedKkt)
       .put("reduced_kkt_inf", evaluated.reducedKkt)
     node.set[JsonNode]("artifact_identity", Json.read(artifact.identityJson))
     Json.putStrings(node, "parameter_names", model.parameterNames)

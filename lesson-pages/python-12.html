@@ -435,6 +435,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Keep line-item state and its subtotal behavior together. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> dataclasses <span class="syntax-keyword">import</span> dataclass
 
+
 <span class="syntax-decorator">@dataclass</span>
 <span class="syntax-keyword">class</span> <span class="syntax-class">LineItem</span><span class="syntax-punctuation">:</span>
     name<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span>
@@ -447,6 +448,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 
     <span class="syntax-keyword">def</span> <span class="syntax-function">subtotal</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">:</span>
         <span class="syntax-keyword">return</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>unit_price <span class="syntax-operator">*</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>quantity
+
 
 item <span class="syntax-operator">=</span> LineItem<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">notebook</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4.5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
 <span class="syntax-punctuation">(</span>item<span class="syntax-punctuation">,</span> item<span class="syntax-operator">.</span>subtotal<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
@@ -492,6 +494,7 @@ first<span class="syntax-operator">.</span>quantity <span class="syntax-operator
 </ul>
 <h4 id="guide--worked-example">Worked example<a class="heading-anchor" href="#guide--worked-example" aria-label="Link to this section">#</a></h4>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> dataclasses <span class="syntax-keyword">import</span> dataclass
+
 
 <span class="syntax-decorator">@dataclass</span><span class="syntax-punctuation">(</span>frozen<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> slots<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">class</span> <span class="syntax-class">Temperature</span><span class="syntax-punctuation">:</span>

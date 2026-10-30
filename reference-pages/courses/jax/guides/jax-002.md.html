@@ -213,13 +213,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Different result lengths reveal the reduced axis. Labeling both results merely a sum hides the statistical unit.</p>
 <p><strong>Expected:</strong> Rows [3,12]; columns [3,5,7].</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-string">&quot;&quot;&quot;Small offline JAX mechanism investigation; CPU evidence only.&quot;&quot;&quot;</span>
+
 <span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
 
 <span class="syntax-keyword">import</span> math
 <span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 <span class="syntax-keyword">import</span> jax
 <span class="syntax-keyword">import</span> jax.numpy <span class="syntax-keyword">as</span> jnp
-
 
 
 <span class="syntax-comment"># Choose precision before creating arrays; the usual JAX default is 32 bit.</span>
@@ -229,7 +229,8 @@ jax<span class="syntax-operator">.</span>config<span class="syntax-operator">.</
 <span class="syntax-keyword">def</span> <span class="syntax-function">close</span><span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-10</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">1e-10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span>atol<span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span>rtol<span class="syntax-punctuation">)</span>
 
-table <span class="syntax-operator">=</span> jnp<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">6.</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>jnp<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+
+table <span class="syntax-operator">=</span> jnp<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">6.0</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>jnp<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">def</span> <span class="syntax-function">replace_at</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> index<span class="syntax-punctuation">,</span> value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
@@ -240,10 +241,10 @@ table <span class="syntax-operator">=</span> jnp<span class="syntax-operator">.<
 
 <span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-comment"># Case 1: Two valid reductions</span>
-    close<span class="syntax-punctuation">(</span>table<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span>axis<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">12.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
-    close<span class="syntax-punctuation">(</span>table<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span>axis<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">7.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    close<span class="syntax-punctuation">(</span>table<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span>axis<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">12.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    close<span class="syntax-punctuation">(</span>table<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span>axis<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">7.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
 
-    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">jax-002</span><span class="syntax-string">&#x27;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">: 1 asserted cases passed</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">jax-002</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&quot;</span><span class="syntax-string">: 1 asserted cases passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
@@ -253,13 +254,13 @@ table <span class="syntax-operator">=</span> jnp<span class="syntax-operator">.<
 <p>The update is a function from old value and instruction to new value. Retaining both arrays makes the ownership contract observable.</p>
 <p><strong>Expected:</strong> New [10,99,30]; original [10,20,30].</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-string">&quot;&quot;&quot;Small offline JAX mechanism investigation; CPU evidence only.&quot;&quot;&quot;</span>
+
 <span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
 
 <span class="syntax-keyword">import</span> math
 <span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 <span class="syntax-keyword">import</span> jax
 <span class="syntax-keyword">import</span> jax.numpy <span class="syntax-keyword">as</span> jnp
-
 
 
 <span class="syntax-comment"># Choose precision before creating arrays; the usual JAX default is 32 bit.</span>
@@ -269,7 +270,8 @@ jax<span class="syntax-operator">.</span>config<span class="syntax-operator">.</
 <span class="syntax-keyword">def</span> <span class="syntax-function">close</span><span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-10</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">1e-10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span>atol<span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span>rtol<span class="syntax-punctuation">)</span>
 
-table <span class="syntax-operator">=</span> jnp<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">6.</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>jnp<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+
+table <span class="syntax-operator">=</span> jnp<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">6.0</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>jnp<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">def</span> <span class="syntax-function">replace_at</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> index<span class="syntax-punctuation">,</span> value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
@@ -280,12 +282,12 @@ table <span class="syntax-operator">=</span> jnp<span class="syntax-operator">.<
 
 <span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-comment"># Case 1: Return a changed value</span>
-    old <span class="syntax-operator">=</span> jnp<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">10.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">30.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
-    new <span class="syntax-operator">=</span> replace_at<span class="syntax-punctuation">(</span>old<span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">99.</span><span class="syntax-punctuation">)</span>
-    close<span class="syntax-punctuation">(</span>new<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">10.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">99.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">30.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
-    close<span class="syntax-punctuation">(</span>old<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">10.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">30.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    old <span class="syntax-operator">=</span> jnp<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">10.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">30.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    new <span class="syntax-operator">=</span> replace_at<span class="syntax-punctuation">(</span>old<span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">99.0</span><span class="syntax-punctuation">)</span>
+    close<span class="syntax-punctuation">(</span>new<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">10.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">99.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">30.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    close<span class="syntax-punctuation">(</span>old<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">10.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">30.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
 
-    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">jax-002</span><span class="syntax-string">&#x27;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">: 1 asserted cases passed</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">jax-002</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&quot;</span><span class="syntax-string">: 1 asserted cases passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>

@@ -29,24 +29,29 @@ import numpy as np, pandas as pd
 from sklearn.metrics import precision_score, recall_score
 
 # Synthetic predictions grouped by sensitive attr 'group'
-df = pd.DataFrame({
-    'y_true':  np.random.randint(0,2, size=1000),
-    'y_pred':  np.random.randint(0,2, size=1000),
-    'group':   np.random.choice(['A','B'], size=1000)
-})
+df = pd.DataFrame(
+    {
+        "y_true": np.random.randint(0, 2, size=1000),
+        "y_pred": np.random.randint(0, 2, size=1000),
+        "group": np.random.choice(["A", "B"], size=1000),
+    }
+)
 
-metrics = (df.groupby('group')
-             .apply(lambda g: pd.Series({
-                 'precision': precision_score(g.y_true, g.y_pred, zero_division=0),
-                 'recall':    recall_score(g.y_true, g.y_pred, zero_division=0),
-                 'count':     len(g)
-             })))
+metrics = df.groupby("group").apply(
+    lambda g: pd.Series(
+        {
+            "precision": precision_score(g.y_true, g.y_pred, zero_division=0),
+            "recall": recall_score(g.y_true, g.y_pred, zero_division=0),
+            "count": len(g),
+        }
+    )
+)
 print(metrics)
 
 # Disparity checks
-prec_gap = abs(metrics.loc['A','precision'] - metrics.loc['B','precision'])
-rec_gap  = abs(metrics.loc['A','recall'] - metrics.loc['B','recall'])
-print({'precision_gap': prec_gap, 'recall_gap': rec_gap})
+prec_gap = abs(metrics.loc["A", "precision"] - metrics.loc["B", "precision"])
+rec_gap = abs(metrics.loc["A", "recall"] - metrics.loc["B", "recall"])
+print({"precision_gap": prec_gap, "recall_gap": rec_gap})
 ```
 Notes
 - For imbalanced data, compare PR curves per group; consider equalized odds/TPR parity goals

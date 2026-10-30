@@ -43,8 +43,6 @@ Read the operations in dependency order. Record which values exist before each l
 The explicit check connects a value to its expected observation.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let greeting = "Hello, Rust";
@@ -63,8 +61,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 A second check rejects a plausible wrong operator rather than merely confirming that printing works.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let rows = 4;

@@ -100,17 +100,18 @@ These worked excerpts come from `sql/postgres-60day/day19_running_aggregates.sql
 ### Example 1
 
 ```sql
-SELECT o.customer_id,
-       o.order_id,
-       o.order_date,
-       o.total_amount,
-       SUM(o.total_amount) OVER (
-         PARTITION BY o.customer_id
-         ORDER BY o.order_date, o.order_id
-         ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
-       ) AS running_total
-FROM orders o
-ORDER BY o.customer_id, o.order_date, o.order_id
+SELECT
+  o.customer_id,
+  o.order_id,
+  o.order_date,
+  o.total_amount,
+  SUM(o.total_amount) OVER (PARTITION BY o.customer_id ORDER BY o.order_date, o.order_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running_total
+FROM
+  orders o
+ORDER BY
+  o.customer_id,
+  o.order_date,
+  o.order_id
 LIMIT 200;
 ```
 
@@ -122,19 +123,22 @@ LIMIT 200;
 
 ```sql
 WITH daily AS (
-  SELECT (order_date AT TIME ZONE 'UTC')::date AS d_utc,
-         SUM(total_amount) AS revenue
-  FROM orders
-  GROUP BY d_utc
+  SELECT
+    (order_date AT TIME ZONE 'UTC')::date AS d_utc,
+    SUM(total_amount) AS revenue
+  FROM
+    orders
+  GROUP BY
+    d_utc
 )
-SELECT d_utc,
-       revenue,
-       ROUND(AVG(revenue) OVER (
-         ORDER BY d_utc
-         ROWS BETWEEN 6 PRECEDING AND CURRENT ROW
-       ),2) AS ma7
-FROM daily
-ORDER BY d_utc DESC
+SELECT
+  d_utc,
+  revenue,
+  ROUND(AVG(revenue) OVER (ORDER BY d_utc ROWS BETWEEN 6 PRECEDING AND CURRENT ROW), 2) AS ma7
+FROM
+  daily
+ORDER BY
+  d_utc DESC
 LIMIT 40;
 ```
 

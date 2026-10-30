@@ -3,8 +3,8 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     // Exercise 1: Create independent accounts
-    // Construct accounts with100 and100 cents,deposit50 into the first.
-    // Expected: balances150 and100.
+    // Construct accounts with 100 and 100 cents,deposit 50 into the first.
+    // Expected: balances 150 and 100.
 
     // Exercise 2: Withdraw within the contract
     // Withdraw40 cents from the first account.

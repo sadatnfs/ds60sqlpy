@@ -222,22 +222,22 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;string&gt;</span>
 <span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;variant&gt;</span>
 
-<span class="syntax-keyword">struct</span> <span class="syntax-class">ParseError</span>  <span class="syntax-punctuation">{</span>
-     std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>string reason<span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">struct</span> <span class="syntax-class">ParseError</span> <span class="syntax-punctuation">{</span>
+  std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>string reason<span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
 
-<span class="syntax-keyword">using</span> Result<span class="syntax-operator">=</span>std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>variant<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-punctuation">,</span>ParseError<span class="syntax-operator">&gt;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">using</span> Result <span class="syntax-operator">=</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>variant<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-punctuation">,</span> ParseError<span class="syntax-operator">&gt;</span><span class="syntax-punctuation">;</span>
 
-Result <span class="syntax-function">positive</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span> x<span class="syntax-punctuation">)</span>  <span class="syntax-punctuation">{</span>
-     <span class="syntax-keyword">if</span><span class="syntax-punctuation">(</span>x<span class="syntax-operator">&lt;</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-keyword">return</span> ParseError <span class="syntax-punctuation">{</span>
-        <span class="syntax-string">&quot;</span><span class="syntax-string">negative</span><span class="syntax-string">&quot;</span>
-    <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
-     <span class="syntax-keyword">return</span> x<span class="syntax-punctuation">;</span>
+Result <span class="syntax-function">positive</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span> x<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>x <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> ParseError<span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">negative</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">return</span> x<span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span>
 <span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
-    <span class="syntax-keyword">auto</span> result<span class="syntax-operator">=</span>positive<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> assert<span class="syntax-punctuation">(</span>std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>holds_alternative<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span><span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-    std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpp-017 example 1 checks passed</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
-    <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">auto</span> result <span class="syntax-operator">=</span> positive<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">(</span>std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>holds_alternative<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span><span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpp-017 example 1 checks passed</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
 <pre class="highlighted-code"><code class="language-text">cpp-017 example 1 checks passed</code></pre>
@@ -248,22 +248,22 @@ Result <span class="syntax-function">positive</span><span class="syntax-punctuat
 <span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;string&gt;</span>
 <span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;variant&gt;</span>
 
-<span class="syntax-keyword">struct</span> <span class="syntax-class">ParseError</span>  <span class="syntax-punctuation">{</span>
-     std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>string reason<span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">struct</span> <span class="syntax-class">ParseError</span> <span class="syntax-punctuation">{</span>
+  std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>string reason<span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
 
-<span class="syntax-keyword">using</span> Result<span class="syntax-operator">=</span>std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>variant<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-punctuation">,</span>ParseError<span class="syntax-operator">&gt;</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">using</span> Result <span class="syntax-operator">=</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>variant<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-punctuation">,</span> ParseError<span class="syntax-operator">&gt;</span><span class="syntax-punctuation">;</span>
 
-Result <span class="syntax-function">positive</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span> x<span class="syntax-punctuation">)</span>  <span class="syntax-punctuation">{</span>
-     <span class="syntax-keyword">if</span><span class="syntax-punctuation">(</span>x<span class="syntax-operator">&lt;</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-keyword">return</span> ParseError <span class="syntax-punctuation">{</span>
-        <span class="syntax-string">&quot;</span><span class="syntax-string">negative</span><span class="syntax-string">&quot;</span>
-    <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
-     <span class="syntax-keyword">return</span> x<span class="syntax-punctuation">;</span>
+Result <span class="syntax-function">positive</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span> x<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>x <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> ParseError<span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">negative</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">return</span> x<span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span>
 <span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
-    <span class="syntax-keyword">auto</span> result<span class="syntax-operator">=</span>positive<span class="syntax-punctuation">(</span><span class="syntax-number">-1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> assert<span class="syntax-punctuation">(</span>std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>get<span class="syntax-operator">&lt;</span>ParseError<span class="syntax-operator">&gt;</span><span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>reason<span class="syntax-operator">=</span><span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">negative</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-    std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpp-017 example 2 checks passed</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
-    <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">auto</span> result <span class="syntax-operator">=</span> positive<span class="syntax-punctuation">(</span><span class="syntax-number">-1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">(</span>std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>get<span class="syntax-operator">&lt;</span>ParseError<span class="syntax-operator">&gt;</span><span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>reason <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">negative</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpp-017 example 2 checks passed</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
 <pre class="highlighted-code"><code class="language-text">cpp-017 example 2 checks passed</code></pre>

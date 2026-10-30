@@ -55,18 +55,57 @@ import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 
-spark.conf.set("spark.sql.timestampType","TIMESTAMP_LTZ")
-val schema = StructType(Seq(StructField("event_id",LongType,false),StructField("text",StringType,false)))
-val raw = spark.createDataFrame(spark.sparkContext.parallelize(Seq(Row(1L,"2024-11-03T07:00:00Z"),Row(2L,"2024-11-03T01:30:00-07:00"),Row(3L,"2024-11-03T01:30:00-08:00"),Row(4L,"2024-11-04T08:00:00Z"),Row(5L,"2024-11-03T08:30:00Z"),Row(6L,"2024-11-03T06:59:59Z")),2),schema)
+spark.conf.set("spark.sql.timestampType", "TIMESTAMP_LTZ")
+val schema = StructType(
+  Seq(StructField("event_id", LongType, false), StructField("text", StringType, false))
+)
+val raw = spark.createDataFrame(
+  spark.sparkContext.parallelize(
+    Seq(
+      Row(1L, "2024-11-03T07:00:00Z"),
+      Row(2L, "2024-11-03T01:30:00-07:00"),
+      Row(3L, "2024-11-03T01:30:00-08:00"),
+      Row(4L, "2024-11-04T08:00:00Z"),
+      Row(5L, "2024-11-03T08:30:00Z"),
+      Row(6L, "2024-11-03T06:59:59Z")
+    ),
+    2
+  ),
+  schema
+)
 ```
 
 ```python
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 
-spark.conf.set("spark.sql.timestampType","TIMESTAMP_LTZ")
-schema = StructType([StructField("event_id",LongType(),False),StructField("text",StringType(),False)])
-raw = spark.createDataFrame([(1,"2024-11-03T07:00:00Z"),(2,"2024-11-03T01:30:00-07:00"),(3,"2024-11-03T01:30:00-08:00"),(4,"2024-11-04T08:00:00Z"),(5,"2024-11-03T08:30:00Z"),(6,"2024-11-03T06:59:59Z")],schema=schema)
+spark.conf.set("spark.sql.timestampType", "TIMESTAMP_LTZ")
+schema = StructType(
+    [StructField("event_id", LongType(), False), StructField("text", StringType(), False)]
+)
+raw = spark.createDataFrame(
+    [
+        (1, "2024-11-03T07:00:00Z"),
+        (2, "2024-11-03T01:30:00-07:00"),
+        (3, "2024-11-03T01:30:00-08:00"),
+        (4, "2024-11-04T08:00:00Z"),
+        (5, "2024-11-03T08:30:00Z"),
+        (6, "2024-11-03T06:59:59Z"),
+    ],
+    schema=schema,
+)
 ```
 
 ## Worked example / walkthrough
@@ -74,14 +113,19 @@ raw = spark.createDataFrame([(1,"2024-11-03T07:00:00Z"),(2,"2024-11-03T01:30:00-
 ### Worked example 1
 
 ```scala
-val pair = spark.sql("SELECT unix_timestamp(to_timestamp('2024-11-03T08:30:00Z')) AS utc, unix_timestamp(to_timestamp('2024-11-03T01:30:00-07:00')) AS offset")
-val r = pair.first();assert(r.getLong(0) == r.getLong(1))
+val pair = spark.sql(
+  "SELECT unix_timestamp(to_timestamp('2024-11-03T08:30:00Z')) AS utc, unix_timestamp(to_timestamp('2024-11-03T01:30:00-07:00')) AS offset"
+)
+val r = pair.first(); assert(r.getLong(0) == r.getLong(1))
 println("Different text, same instant")
 ```
 
 ```python
-pair = spark.sql("SELECT unix_timestamp(to_timestamp('2024-11-03T08:30:00Z')) AS utc, unix_timestamp(to_timestamp('2024-11-03T01:30:00-07:00')) AS offset")
-r = pair.first(); assert r[0] == r[1]
+pair = spark.sql(
+    "SELECT unix_timestamp(to_timestamp('2024-11-03T08:30:00Z')) AS utc, unix_timestamp(to_timestamp('2024-11-03T01:30:00-07:00')) AS offset"
+)
+r = pair.first()
+assert r[0] == r[1]
 print("Different text, same instant")
 ```
 
@@ -90,13 +134,19 @@ The explicit offset makes both strings unambiguous. Comparing epoch seconds chec
 ### Worked example 2
 
 ```scala
-val r = spark.sql("SELECT timestampdiff(HOUR,to_timestamp('2024-11-03T07:00:00Z'),to_timestamp('2024-11-04T08:00:00Z')) AS hours").first()
+val r = spark
+  .sql(
+    "SELECT timestampdiff(HOUR,to_timestamp('2024-11-03T07:00:00Z'),to_timestamp('2024-11-04T08:00:00Z')) AS hours"
+  )
+  .first()
 assert(r.getLong(0) == 25L)
 println("Declared Los Angeles day spans 25 elapsed hours")
 ```
 
 ```python
-r = spark.sql("SELECT timestampdiff(HOUR,to_timestamp('2024-11-03T07:00:00Z'),to_timestamp('2024-11-04T08:00:00Z')) AS hours").first()
+r = spark.sql(
+    "SELECT timestampdiff(HOUR,to_timestamp('2024-11-03T07:00:00Z'),to_timestamp('2024-11-04T08:00:00Z')) AS hours"
+).first()
 assert r[0] == 25
 print("Declared Los Angeles day spans 25 elapsed hours")
 ```

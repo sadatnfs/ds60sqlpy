@@ -214,13 +214,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The returned carry and history have different roles. The final carry is the last updated state; the history makes every transition inspectable.</p>
 <p><strong>Expected:</strong> Final 3.5, history [2,3,3.5].</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-string">&quot;&quot;&quot;Small offline JAX mechanism investigation; CPU evidence only.&quot;&quot;&quot;</span>
+
 <span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
 
 <span class="syntax-keyword">import</span> math
 <span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 <span class="syntax-keyword">import</span> jax
 <span class="syntax-keyword">import</span> jax.numpy <span class="syntax-keyword">as</span> jnp
-
 
 
 <span class="syntax-comment"># Choose precision before creating arrays; the usual JAX default is 32 bit.</span>
@@ -230,24 +230,26 @@ jax<span class="syntax-operator">.</span>config<span class="syntax-operator">.</
 <span class="syntax-keyword">def</span> <span class="syntax-function">close</span><span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-10</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">1e-10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span>atol<span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span>rtol<span class="syntax-punctuation">)</span>
 
+
 <span class="syntax-keyword">def</span> <span class="syntax-function">recurrence</span><span class="syntax-punctuation">(</span>initial<span class="syntax-punctuation">,</span> values<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">def</span> <span class="syntax-function">step</span><span class="syntax-punctuation">(</span>carry<span class="syntax-punctuation">,</span> value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
-        updated <span class="syntax-operator">=</span> <span class="syntax-number">.5</span> <span class="syntax-operator">*</span> carry <span class="syntax-operator">+</span> value
+        updated <span class="syntax-operator">=</span> <span class="syntax-number">0.5</span> <span class="syntax-operator">*</span> carry <span class="syntax-operator">+</span> value
         <span class="syntax-keyword">return</span> updated<span class="syntax-punctuation">,</span> updated
+
     <span class="syntax-keyword">return</span> jax<span class="syntax-operator">.</span>lax<span class="syntax-operator">.</span>scan<span class="syntax-punctuation">(</span>step<span class="syntax-punctuation">,</span> initial<span class="syntax-punctuation">,</span> values<span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">def</span> <span class="syntax-function">branch</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
-    <span class="syntax-keyword">return</span> jax<span class="syntax-operator">.</span>lax<span class="syntax-operator">.</span>cond<span class="syntax-punctuation">(</span>value <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0.</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">lambda</span> x<span class="syntax-punctuation">:</span> x <span class="syntax-operator">*</span> x<span class="syntax-punctuation">,</span> <span class="syntax-keyword">lambda</span> x<span class="syntax-punctuation">:</span> <span class="syntax-operator">-</span>x<span class="syntax-punctuation">,</span> value<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> jax<span class="syntax-operator">.</span>lax<span class="syntax-operator">.</span>cond<span class="syntax-punctuation">(</span>value <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">lambda</span> x<span class="syntax-punctuation">:</span> x <span class="syntax-operator">*</span> x<span class="syntax-punctuation">,</span> <span class="syntax-keyword">lambda</span> x<span class="syntax-punctuation">:</span> <span class="syntax-operator">-</span>x<span class="syntax-punctuation">,</span> value<span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-comment"># Case 1: Trace a scan</span>
-    last<span class="syntax-punctuation">,</span> history <span class="syntax-operator">=</span> recurrence<span class="syntax-punctuation">(</span>jnp<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">(</span><span class="syntax-number">0.</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> jnp<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    last<span class="syntax-punctuation">,</span> history <span class="syntax-operator">=</span> recurrence<span class="syntax-punctuation">(</span>jnp<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">(</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> jnp<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
     close<span class="syntax-punctuation">(</span>last<span class="syntax-punctuation">,</span> <span class="syntax-number">3.5</span><span class="syntax-punctuation">)</span>
-    close<span class="syntax-punctuation">(</span>history<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3.5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    close<span class="syntax-punctuation">(</span>history<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3.5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
 
-    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">jax-011</span><span class="syntax-string">&#x27;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">: 1 asserted cases passed</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">jax-011</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&quot;</span><span class="syntax-string">: 1 asserted cases passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
@@ -257,13 +259,13 @@ jax<span class="syntax-operator">.</span>config<span class="syntax-operator">.</
 <p>Both branches return one scalar with the same dtype. The condition is represented inside the numerical program rather than converted to a Python Boolean during tracing.</p>
 <p><strong>Expected:</strong> 4 and 2.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-string">&quot;&quot;&quot;Small offline JAX mechanism investigation; CPU evidence only.&quot;&quot;&quot;</span>
+
 <span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
 
 <span class="syntax-keyword">import</span> math
 <span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 <span class="syntax-keyword">import</span> jax
 <span class="syntax-keyword">import</span> jax.numpy <span class="syntax-keyword">as</span> jnp
-
 
 
 <span class="syntax-comment"># Choose precision before creating arrays; the usual JAX default is 32 bit.</span>
@@ -273,24 +275,26 @@ jax<span class="syntax-operator">.</span>config<span class="syntax-operator">.</
 <span class="syntax-keyword">def</span> <span class="syntax-function">close</span><span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-10</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">1e-10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span>atol<span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span>rtol<span class="syntax-punctuation">)</span>
 
+
 <span class="syntax-keyword">def</span> <span class="syntax-function">recurrence</span><span class="syntax-punctuation">(</span>initial<span class="syntax-punctuation">,</span> values<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">def</span> <span class="syntax-function">step</span><span class="syntax-punctuation">(</span>carry<span class="syntax-punctuation">,</span> value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
-        updated <span class="syntax-operator">=</span> <span class="syntax-number">.5</span> <span class="syntax-operator">*</span> carry <span class="syntax-operator">+</span> value
+        updated <span class="syntax-operator">=</span> <span class="syntax-number">0.5</span> <span class="syntax-operator">*</span> carry <span class="syntax-operator">+</span> value
         <span class="syntax-keyword">return</span> updated<span class="syntax-punctuation">,</span> updated
+
     <span class="syntax-keyword">return</span> jax<span class="syntax-operator">.</span>lax<span class="syntax-operator">.</span>scan<span class="syntax-punctuation">(</span>step<span class="syntax-punctuation">,</span> initial<span class="syntax-punctuation">,</span> values<span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">def</span> <span class="syntax-function">branch</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
-    <span class="syntax-keyword">return</span> jax<span class="syntax-operator">.</span>lax<span class="syntax-operator">.</span>cond<span class="syntax-punctuation">(</span>value <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0.</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">lambda</span> x<span class="syntax-punctuation">:</span> x <span class="syntax-operator">*</span> x<span class="syntax-punctuation">,</span> <span class="syntax-keyword">lambda</span> x<span class="syntax-punctuation">:</span> <span class="syntax-operator">-</span>x<span class="syntax-punctuation">,</span> value<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> jax<span class="syntax-operator">.</span>lax<span class="syntax-operator">.</span>cond<span class="syntax-punctuation">(</span>value <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">lambda</span> x<span class="syntax-punctuation">:</span> x <span class="syntax-operator">*</span> x<span class="syntax-punctuation">,</span> <span class="syntax-keyword">lambda</span> x<span class="syntax-punctuation">:</span> <span class="syntax-operator">-</span>x<span class="syntax-punctuation">,</span> value<span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-comment"># Case 1: Branch on a runtime value</span>
     compiled <span class="syntax-operator">=</span> jax<span class="syntax-operator">.</span>jit<span class="syntax-punctuation">(</span>branch<span class="syntax-punctuation">)</span>
-    close<span class="syntax-punctuation">(</span>compiled<span class="syntax-punctuation">(</span>jnp<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">(</span><span class="syntax-number">2.</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4.</span><span class="syntax-punctuation">)</span>
-    close<span class="syntax-punctuation">(</span>compiled<span class="syntax-punctuation">(</span>jnp<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">2.</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.</span><span class="syntax-punctuation">)</span>
+    close<span class="syntax-punctuation">(</span>compiled<span class="syntax-punctuation">(</span>jnp<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">(</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4.0</span><span class="syntax-punctuation">)</span>
+    close<span class="syntax-punctuation">(</span>compiled<span class="syntax-punctuation">(</span>jnp<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">)</span>
 
-    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">jax-011</span><span class="syntax-string">&#x27;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">: 1 asserted cases passed</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">jax-011</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&quot;</span><span class="syntax-string">: 1 asserted cases passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>

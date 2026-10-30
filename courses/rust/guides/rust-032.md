@@ -43,7 +43,23 @@ Read the operations in dependency order. Record which values exist before each l
 The core chooses data semantics while presentation can remain a separate adapter.
 
 ```rust
-fn summarize<'a>(rows: &[( &'a str, i32)]) -> (std::collections::BTreeMap<&'a str, i32>, usize) { let mut totals = std::collections::BTreeMap::new(); let mut rejected = 0; for &(name, value) in rows { if name.is_empty() || value < 0 { rejected += 1; continue; } let previous: i32 = *totals.get(name).unwrap_or(&0); if let Some(total) = previous.checked_add(value) { totals.insert(name, total); } else { rejected += 1; } } (totals, rejected) }
+fn summarize<'a>(rows: &[(&'a str, i32)]) -> (std::collections::BTreeMap<&'a str, i32>, usize) {
+    let mut totals = std::collections::BTreeMap::new();
+    let mut rejected = 0;
+    for &(name, value) in rows {
+        if name.is_empty() || value < 0 {
+            rejected += 1;
+            continue;
+        }
+        let previous: i32 = *totals.get(name).unwrap_or(&0);
+        if let Some(total) = previous.checked_add(value) {
+            totals.insert(name, total);
+        } else {
+            rejected += 1;
+        }
+    }
+    (totals, rejected)
+}
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
@@ -63,7 +79,23 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 The library contract preserves information needed by every future adapter.
 
 ```rust
-fn summarize<'a>(rows: &[( &'a str, i32)]) -> (std::collections::BTreeMap<&'a str, i32>, usize) { let mut totals = std::collections::BTreeMap::new(); let mut rejected = 0; for &(name, value) in rows { if name.is_empty() || value < 0 { rejected += 1; continue; } let previous: i32 = *totals.get(name).unwrap_or(&0); if let Some(total) = previous.checked_add(value) { totals.insert(name, total); } else { rejected += 1; } } (totals, rejected) }
+fn summarize<'a>(rows: &[(&'a str, i32)]) -> (std::collections::BTreeMap<&'a str, i32>, usize) {
+    let mut totals = std::collections::BTreeMap::new();
+    let mut rejected = 0;
+    for &(name, value) in rows {
+        if name.is_empty() || value < 0 {
+            rejected += 1;
+            continue;
+        }
+        let previous: i32 = *totals.get(name).unwrap_or(&0);
+        if let Some(total) = previous.checked_add(value) {
+            totals.insert(name, total);
+        } else {
+            rejected += 1;
+        }
+    }
+    (totals, rejected)
+}
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {

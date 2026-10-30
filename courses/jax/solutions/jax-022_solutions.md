@@ -9,7 +9,7 @@ The independent primitive provides a direct analytic derivative implementation.
 **Expected:** Matching values.
 
 ```python
-points = jnp.array([-2., 0., 2.])
+points = jnp.array([-2.0, 0.0, 2.0])
 close(jax.vmap(jax.grad(stable_softplus))(points), jax.nn.sigmoid(points))
 ```
 
@@ -20,8 +20,8 @@ Linearity is required of the local derivative map, not an optional optimization.
 **Expected:** The five-direction result equals the sum of the two and three results.
 
 ```python
-jvp = lambda tangent: jax.jvp(stable_softplus, (jnp.float64(1.),), (jnp.float64(tangent),))[1]
-close(jvp(5.), jvp(2.) + jvp(3.))
+jvp = lambda tangent: jax.jvp(stable_softplus, (jnp.float64(1.0),), (jnp.float64(tangent),))[1]
+close(jvp(5.0), jvp(2.0) + jvp(3.0))
 ```
 
 ## Exercise 3: Check an extreme stable input
@@ -31,8 +31,8 @@ The primal avoids constructing exp(1000); the derivative also remains representa
 **Expected:** Finite value 1000 and gradient one.
 
 ```python
-close(stable_softplus(1000.), 1000.)
-close(jax.grad(stable_softplus)(1000.), 1.)
+close(stable_softplus(1000.0), 1000.0)
+close(jax.grad(stable_softplus)(1000.0), 1.0)
 ```
 
 ## Exercise 4: Differentiate a composition
@@ -42,7 +42,7 @@ This independently tests that upstream scaling survives through grad.
 **Expected:** 24.
 
 ```python
-close(jax.grad(lambda x: 4 * custom_square(x))(3.), 24.)
+close(jax.grad(lambda x: 4 * custom_square(x))(3.0), 24.0)
 ```
 
 ## Exercise 5: Check a second derivative
@@ -52,7 +52,7 @@ This exercises a higher derivative of the implemented custom rule rather than as
 **Expected:** 0.25.
 
 ```python
-close(jax.grad(jax.grad(stable_softplus))(0.), .25)
+close(jax.grad(jax.grad(stable_softplus))(0.0), 0.25)
 ```
 
 ## Exercise 6: Name the forward-mode limit
@@ -63,11 +63,11 @@ The VJP decorator provides reverse-mode behavior, not an automatic forward-mode 
 
 ```python
 try:
-    jax.jvp(custom_square, (jnp.float64(3.),), (jnp.float64(1.),))
+    jax.jvp(custom_square, (jnp.float64(3.0),), (jnp.float64(1.0),))
 except TypeError:
     pass
 else:
-    raise AssertionError('unexpected custom_vjp forward-mode support')
+    raise AssertionError("unexpected custom_vjp forward-mode support")
 ```
 
 ## Scope of this evidence

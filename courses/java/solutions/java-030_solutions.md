@@ -27,7 +27,8 @@ Task: Encode account a1, balance 125, note Café with version 2 and decode.
 The comparison includes both domain values and text identity. A successful byte write alone would not show that the reader agrees on encoding and field order.
 
 ```java
-Account record=new Account("a1",125,"Café");byte[] encoded=encode(record,2);
+Account record = new Account("a1", 125, "Café");
+byte[] encoded = encode(record, 2);
 assert decode(encoded).equals(record);
 ```
 
@@ -42,8 +43,8 @@ Task: Encode the same core fields usingversion1,which lacks note.
 The default is an explicit compatibility rule. It should not be inferred from an emptyString or whatever value happened to initialize a field.
 
 ```java
-Account legacy=decode(encode(new Account("a1",125,"ignored by v1"),1));
-assert legacy.id().equals("a1") && legacy.cents()==125 && legacy.note().equals("unlabelled");
+Account legacy = decode(encode(new Account("a1", 125, "ignored by v1"), 1));
+assert legacy.id().equals("a1") && legacy.cents() == 125 && legacy.note().equals("unlabelled");
 ```
 
 **Expected:** decoded noteunlabelled.
@@ -57,8 +58,15 @@ Task: Change the version bytes to99 and decode.
 A reader that guesses the layout of an unknown version can reinterpret bytes incorrectly while appearing to succeed.
 
 ```java
-byte[] unknown=encoded.clone();unknown[4]=0;unknown[5]=99;boolean rejected=false;
-try{decode(unknown);}catch(java.io.IOException expected){rejected=expected.getMessage().contains("version");}
+byte[] unknown = encoded.clone();
+unknown[4] = 0;
+unknown[5] = 99;
+boolean rejected = false;
+try {
+  decode(unknown);
+} catch (java.io.IOException expected) {
+  rejected = expected.getMessage().contains("version");
+}
 assert rejected;
 ```
 
@@ -73,8 +81,12 @@ Task: Remove the final byte from a validversion2payload.
 The reader must obtain exactly the declared field length. A partial field is not a valid shorter value.
 
 ```java
-boolean truncated=false;
-try{decode(Arrays.copyOf(encoded,encoded.length-1));}catch(java.io.IOException expected){truncated=true;}
+boolean truncated = false;
+try {
+  decode(Arrays.copyOf(encoded, encoded.length - 1));
+} catch (java.io.IOException expected) {
+  truncated = true;
+}
 assert truncated;
 ```
 
@@ -89,8 +101,14 @@ Task: Replace the first text length withInteger.MAX_VALUE.
 Length-prefix validation is a resource boundary. Reading orallocating first and checking afterward defeats that protection.
 
 ```java
-byte[] huge=encoded.clone();java.nio.ByteBuffer.wrap(huge,6,4).putInt(Integer.MAX_VALUE);boolean bounded=false;
-try{decode(huge);}catch(java.io.IOException expected){bounded=expected.getMessage().contains("length");}
+byte[] huge = encoded.clone();
+java.nio.ByteBuffer.wrap(huge, 6, 4).putInt(Integer.MAX_VALUE);
+boolean bounded = false;
+try {
+  decode(huge);
+} catch (java.io.IOException expected) {
+  bounded = expected.getMessage().contains("length");
+}
 assert bounded;
 ```
 
@@ -105,9 +123,19 @@ Task: Append an extra byte,then try constructing a negative-balance account.
 Format validity and domain validity are separate gates. The fixture chooses strict trailing-byte rejection rather than an undocumented forward-compatibility policy.
 
 ```java
-byte[] trailing=Arrays.copyOf(encoded,encoded.length+1);boolean extra=false,negative=false;
-try{decode(trailing);}catch(java.io.IOException expected){extra=expected.getMessage().contains("trailing");}
-try{new Account("a1",-1,"x");}catch(IllegalArgumentException expected){negative=true;}
+byte[] trailing = Arrays.copyOf(encoded, encoded.length + 1);
+boolean extra = false,
+  negative = false;
+try {
+  decode(trailing);
+} catch (java.io.IOException expected) {
+  extra = expected.getMessage().contains("trailing");
+}
+try {
+  new Account("a1", -1, "x");
+} catch (IllegalArgumentException expected) {
+  negative = true;
+}
 assert extra && negative;
 ```
 

@@ -169,13 +169,11 @@ from sklearn.datasets import make_regression
 from sklearn.linear_model import Lasso
 from sklearn.preprocessing import StandardScaler
 
-X, y = make_regression(n_samples=120, n_features=20, n_informative=5,
-                       noise=25, random_state=3702)
+X, y = make_regression(n_samples=120, n_features=20, n_informative=5, noise=25, random_state=3702)
 Xs = StandardScaler().fit_transform(X)
 for alpha in (0.1, 1.0, 10.0):
     coef = Lasso(alpha=alpha, max_iter=20_000).fit(Xs, y).coef_
-    print(alpha, {"nonzero": np.count_nonzero(coef),
-                  "largest_abs": np.max(np.abs(coef))})
+    print(alpha, {"nonzero": np.count_nonzero(coef), "largest_abs": np.max(np.abs(coef))})
 ```
 
 **Expected observation:** Stronger L1 regularization generally produces more exact zeros, but selected columns can change with data and alpha.

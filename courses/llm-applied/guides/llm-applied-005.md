@@ -118,16 +118,35 @@ The step is two tokens, so each adjacent pair shares one token. The final full w
 
 ```python
 import re
-def chunk(text,document_id,version,size,overlap):
-    if type(size) is not int or type(overlap) is not int or size<=0 or not 0<=overlap<size: raise ValueError('0<=overlap<size required')
-    spans=list(re.finditer(r'\S+',text)); result=[]; step=size-overlap
-    for begin in range(0,len(spans),step):
-        end=min(begin+size,len(spans)); start_char=spans[begin].start(); end_char=spans[end-1].end()
-        result.append({'document_id':document_id,'version':version,'start':start_char,'end':end_char,'text':text[start_char:end_char]})
-        if end==len(spans): break
+
+
+def chunk(text, document_id, version, size, overlap):
+    if type(size) is not int or type(overlap) is not int or size <= 0 or not 0 <= overlap < size:
+        raise ValueError("0<=overlap<size required")
+    spans = list(re.finditer(r"\S+", text))
+    result = []
+    step = size - overlap
+    for begin in range(0, len(spans), step):
+        end = min(begin + size, len(spans))
+        start_char = spans[begin].start()
+        end_char = spans[end - 1].end()
+        result.append(
+            {
+                "document_id": document_id,
+                "version": version,
+                "start": start_char,
+                "end": end_char,
+                "text": text[start_char:end_char],
+            }
+        )
+        if end == len(spans):
+            break
     return result
-text='one two three four five six seven'; chunks=chunk(text,'d',1,3,1)
-assert [c['text'] for c in chunks]==['one two three','three four five','five six seven']
+
+
+text = "one two three four five six seven"
+chunks = chunk(text, "d", 1, 3, 1)
+assert [c["text"] for c in chunks] == ["one two three", "three four five", "five six seven"]
 ```
 
 **Expected:** chunks one two three, three four five and five six seven.
@@ -137,8 +156,8 @@ assert [c['text'] for c in chunks]==['one two three','three four five','five six
 Offsets remain meaningful only relative to the exact source version. Reconstructing chunk text with join could normalize whitespace and break this equality.
 
 ```python
-assert all(text[c['start']:c['end']]==c['text'] for c in chunks)
-assert chunks[1]['start']==text.index('three')
+assert all(text[c["start"] : c["end"]] == c["text"] for c in chunks)
+assert chunks[1]["start"] == text.index("three")
 ```
 
 **Expected:** every source slice equals the stored chunk text.
@@ -148,8 +167,9 @@ assert chunks[1]['start']==text.index('three')
 The splitter counts token spans but retains original characters inside the chunk. Citation fidelity and tokenization are separate concerns.
 
 ```python
-odd='alpha  beta\ngamma'; pieces=chunk(odd,'odd',2,2,0)
-assert pieces[0]['text']=='alpha  beta' and pieces[1]['text']=='gamma'
+odd = "alpha  beta\ngamma"
+pieces = chunk(odd, "odd", 2, 2, 0)
+assert pieces[0]["text"] == "alpha  beta" and pieces[1]["text"] == "gamma"
 ```
 
 **Expected:** first chunk retains the double space; second chunk is gamma.

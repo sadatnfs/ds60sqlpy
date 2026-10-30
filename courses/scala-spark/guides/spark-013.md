@@ -116,27 +116,36 @@ import org.apache.spark.sql.Row
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 
-val exampleSchema = StructType(Seq(
-  StructField("team", StringType, true),
-  StructField("amount_cents", LongType, true)
-))
+val exampleSchema = StructType(
+  Seq(
+    StructField("team", StringType, true),
+    StructField("amount_cents", LongType, true)
+  )
+)
 val exampleRows = Seq(Row("x", 10L), Row("x", null), Row("y", 0L))
 val example = spark.createDataFrame(
-  spark.sparkContext.parallelize(exampleRows, 2), exampleSchema
+  spark.sparkContext.parallelize(exampleRows, 2),
+  exampleSchema
 )
-val metrics = example.agg(
-  count(lit(1)).as("rows"),
-  count(col("amount_cents")).as("valued"),
-  sum(col("amount_cents")).as("total_cents")
-).first()
+val metrics = example
+  .agg(
+    count(lit(1)).as("rows"),
+    count(col("amount_cents")).as("valued"),
+    sum(col("amount_cents")).as("total_cents")
+  )
+  .first()
 assert(metrics.getLong(0) == 3L)
 assert(metrics.getLong(1) == 2L)
 assert(metrics.getLong(2) == 10L)
-example.groupBy("team").agg(
-  count(lit(1)).as("rows"),
-  count(col("amount_cents")).as("valued"),
-  sum(col("amount_cents")).as("total_cents")
-).orderBy(col("team").asc_nulls_last).show()
+example
+  .groupBy("team")
+  .agg(
+    count(lit(1)).as("rows"),
+    count(col("amount_cents")).as("valued"),
+    sum(col("amount_cents")).as("total_cents")
+  )
+  .orderBy(col("team").asc_nulls_last)
+  .show()
 ```
 
 The equivalent PySpark expressions:
@@ -145,13 +154,13 @@ The equivalent PySpark expressions:
 from pyspark.sql import functions as F
 from pyspark.sql.types import LongType, StringType, StructField, StructType
 
-example_schema = StructType([
-    StructField("team", StringType(), True),
-    StructField("amount_cents", LongType(), True),
-])
-example = spark.createDataFrame(
-    [("x", 10), ("x", None), ("y", 0)], schema=example_schema
+example_schema = StructType(
+    [
+        StructField("team", StringType(), True),
+        StructField("amount_cents", LongType(), True),
+    ]
 )
+example = spark.createDataFrame([("x", 10), ("x", None), ("y", 0)], schema=example_schema)
 metrics = example.agg(
     F.count(F.lit(1)).alias("rows"),
     F.count("amount_cents").alias("valued"),
@@ -184,14 +193,20 @@ for `n`. Reuse `exampleSchema`/`example_schema` from the first example.
 ```scala
 val missingExample = spark.createDataFrame(
   spark.sparkContext.parallelize(
-    Seq(Row("m", null), Row("m", null), Row("n", 0L)), 2
-  ), exampleSchema
+    Seq(Row("m", null), Row("m", null), Row("n", 0L)),
+    2
+  ),
+  exampleSchema
 )
-val missingSummary = missingExample.groupBy("team").agg(
-  count(lit(1)).as("rows"),
-  count(col("amount_cents")).as("valued"),
-  sum(col("amount_cents")).as("total_cents")
-).orderBy(col("team").asc_nulls_last).collect()
+val missingSummary = missingExample
+  .groupBy("team")
+  .agg(
+    count(lit(1)).as("rows"),
+    count(col("amount_cents")).as("valued"),
+    sum(col("amount_cents")).as("total_cents")
+  )
+  .orderBy(col("team").asc_nulls_last)
+  .collect()
 assert(missingSummary(0).getString(0) == "m")
 assert(missingSummary(0).getLong(1) == 2L)
 assert(missingSummary(0).getLong(2) == 0L)
@@ -200,14 +215,17 @@ assert(missingSummary(1).getLong(3) == 0L)
 ```
 
 ```python
-missing_example = spark.createDataFrame(
-    [("m", None), ("m", None), ("n", 0)], schema=example_schema
+missing_example = spark.createDataFrame([("m", None), ("m", None), ("n", 0)], schema=example_schema)
+missing_summary = (
+    missing_example.groupBy("team")
+    .agg(
+        F.count(F.lit(1)).alias("rows"),
+        F.count("amount_cents").alias("valued"),
+        F.sum("amount_cents").alias("total_cents"),
+    )
+    .orderBy(F.col("team").asc_nulls_last())
+    .collect()
 )
-missing_summary = missing_example.groupBy("team").agg(
-    F.count(F.lit(1)).alias("rows"),
-    F.count("amount_cents").alias("valued"),
-    F.sum("amount_cents").alias("total_cents"),
-).orderBy(F.col("team").asc_nulls_last()).collect()
 assert [tuple(row) for row in missing_summary] == [
     ("m", 2, 0, None),
     ("n", 1, 1, 0),
@@ -252,29 +270,38 @@ import org.apache.spark.sql.types._
 
 object Main {
   def main(args: Array[String]): Unit = {
-    val spark = SparkSession.builder().appName("ds60-spark-013-attempt")
+    val spark = SparkSession
+      .builder()
+      .appName("ds60-spark-013-attempt")
       .master("local[2]")
       .config("spark.ui.enabled", "false")
       .config("spark.driver.host", "127.0.0.1")
       .config("spark.driver.bindAddress", "127.0.0.1")
       .config("spark.sql.shuffle.partitions", "2")
-      .config("spark.sql.session.timeZone", "UTC").getOrCreate()
+      .config("spark.sql.session.timeZone", "UTC")
+      .getOrCreate()
     try {
       require(spark.sparkContext.master == "local[2]")
-      val schema = StructType(Seq(
-        StructField("event_id", LongType, false),
-        StructField("team", StringType, true),
-        StructField("amount_cents", LongType, true),
-        StructField("status", StringType, false)
-      ))
+      val schema = StructType(
+        Seq(
+          StructField("event_id", LongType, false),
+          StructField("team", StringType, true),
+          StructField("amount_cents", LongType, true),
+          StructField("status", StringType, false)
+        )
+      )
       val rows = Seq(
-        Row(1L, "A", 100L, "paid"), Row(2L, "A", null, "paid"),
-        Row(3L, "B", 0L, "paid"), Row(4L, null, 50L, "paid"),
-        Row(5L, "B", 150L, "void"), Row(6L, "A", 100L, "paid"),
+        Row(1L, "A", 100L, "paid"),
+        Row(2L, "A", null, "paid"),
+        Row(3L, "B", 0L, "paid"),
+        Row(4L, null, 50L, "paid"),
+        Row(5L, "B", 150L, "void"),
+        Row(6L, "A", 100L, "paid"),
         Row(7L, "C", null, "paid")
       )
       val raw = spark.createDataFrame(
-        spark.sparkContext.parallelize(rows, 2), schema
+        spark.sparkContext.parallelize(rows, 2),
+        schema
       )
       println(raw.schema.simpleString)
       // Exercise 1: retain event identity and filter status.
@@ -308,16 +335,21 @@ spark = (
 )
 try:
     assert spark.sparkContext.master == "local[2]"
-    schema = StructType([
-        StructField("event_id", LongType(), False),
-        StructField("team", StringType(), True),
-        StructField("amount_cents", LongType(), True),
-        StructField("status", StringType(), False),
-    ])
+    schema = StructType(
+        [
+            StructField("event_id", LongType(), False),
+            StructField("team", StringType(), True),
+            StructField("amount_cents", LongType(), True),
+            StructField("status", StringType(), False),
+        ]
+    )
     rows = [
-        (1, "A", 100, "paid"), (2, "A", None, "paid"),
-        (3, "B", 0, "paid"), (4, None, 50, "paid"),
-        (5, "B", 150, "void"), (6, "A", 100, "paid"),
+        (1, "A", 100, "paid"),
+        (2, "A", None, "paid"),
+        (3, "B", 0, "paid"),
+        (4, None, 50, "paid"),
+        (5, "B", 150, "void"),
+        (6, "A", 100, "paid"),
         (7, "C", None, "paid"),
     ]
     raw = spark.createDataFrame(rows, schema=schema)

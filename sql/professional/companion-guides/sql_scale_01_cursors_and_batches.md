@@ -151,9 +151,14 @@ Run these in the complete learner file so the temporary fixture and transaction 
 ### Example 1: Save the whole boundary from the first page
 
 ```sql
-SELECT event_id, occurred_at
-FROM scale_events
-ORDER BY occurred_at DESC NULLS LAST, event_id DESC
+SELECT
+  event_id,
+  occurred_at
+FROM
+  scale_events
+ORDER BY
+  occurred_at DESC NULLS LAST,
+  event_id DESC
 LIMIT 2;
 ```
 
@@ -164,10 +169,15 @@ The first page returns IDs 6 and 3. The continuation boundary is the second row,
 ### Example 2: Continue across a tied timestamp
 
 ```sql
-SELECT event_id, occurred_at
-FROM scale_events
-WHERE (occurred_at,event_id) < (TIMESTAMPTZ '2024-01-01 11:00+00',3)
-ORDER BY occurred_at DESC NULLS LAST,event_id DESC
+SELECT
+  event_id,
+  occurred_at
+FROM
+  scale_events
+WHERE (occurred_at, event_id) < (TIMESTAMPTZ '2024-01-01 11:00+00', 3)
+ORDER BY
+  occurred_at DESC NULLS LAST,
+  event_id DESC
 LIMIT 2;
 ```
 

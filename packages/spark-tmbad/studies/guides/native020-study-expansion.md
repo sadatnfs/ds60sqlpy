@@ -390,7 +390,7 @@ The initial two named-target smoke receipts can be summarized without refitting:
 ```sh
 python3 studies/aggregate_extended.py \
   --reports studies/observed/native020-targets-arm64-v1/sim-003-r0.json \
-            studies/observed/native020-targets-arm64-v1/sim-004-r0.json \
+  studies/observed/native020-targets-arm64-v1/sim-004-r0.json \
   --output /out/named-targets-one-replication-summary.json
 ```
 

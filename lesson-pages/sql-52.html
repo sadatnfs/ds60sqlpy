@@ -433,27 +433,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These worked excerpts come from <code>sql/postgres-60day/day52_project3_dwh_part1.sql</code>. Use <strong>Whole SQL lesson (psql)</strong> in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared <code>psql</code> routes are described above.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> dim_date <span class="syntax-punctuation">(</span>
-  date_key       <span class="syntax-builtin">INT</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span>      <span class="syntax-comment">-- yyyymmdd</span>
-  date_actual    <span class="syntax-builtin">DATE</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
-  <span class="syntax-keyword">year</span>           <span class="syntax-builtin">INT</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
-  quarter        <span class="syntax-builtin">INT</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
-  <span class="syntax-keyword">month</span>          <span class="syntax-builtin">INT</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
-  <span class="syntax-keyword">day</span>            <span class="syntax-builtin">INT</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
-  day_name       <span class="syntax-builtin">TEXT</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
-  is_weekend     <span class="syntax-builtin">BOOLEAN</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span>
+  date_key <span class="syntax-builtin">INT</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span> <span class="syntax-comment">-- yyyymmdd</span>
+  date_actual <span class="syntax-builtin">DATE</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">year</span> <span class="syntax-builtin">INT</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
+  quarter <span class="syntax-builtin">INT</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">month</span> <span class="syntax-builtin">INT</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">day</span> <span class="syntax-builtin">INT</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
+  day_name <span class="syntax-builtin">TEXT</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
+  is_weekend <span class="syntax-builtin">BOOLEAN</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span>
 <span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 1 is data definition language (DDL). <code>psql</code> prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.</p>
 <p><strong>Expected result/shape:</strong> Example 1 must print the expected DDL command tag for <code>dim_date</code>. Verify the object in <code>pg_catalog.pg_class</code>, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> dim_customer <span class="syntax-punctuation">(</span>
-  customer_sk    <span class="syntax-builtin">INT</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span> <span class="syntax-keyword">DEFAULT</span> nextval<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;dim_customer_sk_seq&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
-  customer_id    <span class="syntax-builtin">INT</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>   <span class="syntax-comment">-- business key</span>
-  full_name      <span class="syntax-builtin">TEXT</span><span class="syntax-punctuation">,</span>
-  country        <span class="syntax-builtin">TEXT</span><span class="syntax-punctuation">,</span>
-  segment        <span class="syntax-builtin">TEXT</span><span class="syntax-punctuation">,</span>
-  valid_from     <span class="syntax-builtin">DATE</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
-  valid_to       <span class="syntax-builtin">DATE</span><span class="syntax-punctuation">,</span>
-  is_current     <span class="syntax-builtin">BOOLEAN</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">DEFAULT</span> <span class="syntax-keyword">TRUE</span>
+  customer_sk <span class="syntax-builtin">INT</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span> <span class="syntax-keyword">DEFAULT</span> nextval<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;dim_customer_sk_seq&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+  customer_id <span class="syntax-builtin">INT</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span> <span class="syntax-comment">-- business key</span>
+  full_name <span class="syntax-builtin">TEXT</span><span class="syntax-punctuation">,</span>
+  country <span class="syntax-builtin">TEXT</span><span class="syntax-punctuation">,</span>
+  segment <span class="syntax-builtin">TEXT</span><span class="syntax-punctuation">,</span>
+  valid_from <span class="syntax-builtin">DATE</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
+  valid_to <span class="syntax-builtin">DATE</span><span class="syntax-punctuation">,</span>
+  is_current <span class="syntax-builtin">BOOLEAN</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">DEFAULT</span> <span class="syntax-keyword">TRUE</span>
 <span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 2 is data definition language (DDL). <code>psql</code> prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.</p>
 <p><strong>Expected result/shape:</strong> Example 2 must print the expected DDL command tag for <code>dim_customer</code>. Verify the object in <code>pg_catalog.pg_class</code>, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.</p>
@@ -897,29 +897,49 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <p>The temporal join is:</p>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> dwh<span class="syntax-punctuation">,</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
-<span class="syntax-keyword">SELECT</span> p<span class="syntax-punctuation">.</span>payment_id<span class="syntax-punctuation">,</span>
-       p<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span>
-       dd<span class="syntax-punctuation">.</span>date_key<span class="syntax-punctuation">,</span>
-       dc<span class="syntax-punctuation">.</span>customer_sk<span class="syntax-punctuation">,</span>
-       p<span class="syntax-punctuation">.</span>amount<span class="syntax-punctuation">,</span>
-       p<span class="syntax-punctuation">.</span><span class="syntax-keyword">method</span>
-<span class="syntax-keyword">FROM</span> training<span class="syntax-punctuation">.</span>payments p
-<span class="syntax-keyword">JOIN</span> training<span class="syntax-punctuation">.</span>orders o <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">JOIN</span> dim_date dd <span class="syntax-keyword">ON</span> dd<span class="syntax-punctuation">.</span>date_actual <span class="syntax-operator">=</span> p<span class="syntax-punctuation">.</span>payment_date<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span>
-<span class="syntax-keyword">JOIN</span> dim_customer dc
-  <span class="syntax-keyword">ON</span> dc<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>customer_id
- <span class="syntax-keyword">AND</span> p<span class="syntax-punctuation">.</span>payment_date<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> dc<span class="syntax-punctuation">.</span>valid_from
- <span class="syntax-keyword">AND</span> p<span class="syntax-punctuation">.</span>payment_date<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>dc<span class="syntax-punctuation">.</span>valid_to<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;infinity&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span><span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>payment_id
-<span class="syntax-keyword">LIMIT</span> <span class="syntax-number">20</span><span class="syntax-punctuation">;</span></code></pre>
+<span class="syntax-keyword">SELECT</span>
+  p<span class="syntax-punctuation">.</span>payment_id<span class="syntax-punctuation">,</span>
+  p<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span>
+  dd<span class="syntax-punctuation">.</span>date_key<span class="syntax-punctuation">,</span>
+  dc<span class="syntax-punctuation">.</span>customer_sk<span class="syntax-punctuation">,</span>
+  p<span class="syntax-punctuation">.</span>amount<span class="syntax-punctuation">,</span>
+  p<span class="syntax-punctuation">.</span><span class="syntax-keyword">method</span>
+<span class="syntax-keyword">FROM</span>
+  training<span class="syntax-punctuation">.</span>payments p
+  <span class="syntax-keyword">JOIN</span> training<span class="syntax-punctuation">.</span>orders o <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span>
+  <span class="syntax-keyword">JOIN</span> dim_date dd <span class="syntax-keyword">ON</span> dd<span class="syntax-punctuation">.</span>date_actual <span class="syntax-operator">=</span> p<span class="syntax-punctuation">.</span>payment_date<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span>
+  <span class="syntax-keyword">JOIN</span> dim_customer dc <span class="syntax-keyword">ON</span> dc<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>customer_id
+    <span class="syntax-keyword">AND</span> p<span class="syntax-punctuation">.</span>payment_date<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> dc<span class="syntax-punctuation">.</span>valid_from
+    <span class="syntax-keyword">AND</span> p<span class="syntax-punctuation">.</span>payment_date<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>dc<span class="syntax-punctuation">.</span>valid_to<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;infinity&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+    p<span class="syntax-punctuation">.</span>payment_id
+  <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">20</span><span class="syntax-punctuation">;</span></code></pre>
 <p>After running the solution, verify source-to-fact completeness:</p>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> dwh<span class="syntax-punctuation">,</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
-<span class="syntax-keyword">SELECT</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> dim_country<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> countries<span class="syntax-punctuation">,</span>
-       <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> fact_payments<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> fact_payment_rows<span class="syntax-punctuation">,</span>
-       <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> training<span class="syntax-punctuation">.</span>payments<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> source_payment_rows<span class="syntax-punctuation">,</span>
-       <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> dim_customer <span class="syntax-keyword">WHERE</span> country_sk <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span>
-         <span class="syntax-keyword">AS</span> customers_without_country_key<span class="syntax-punctuation">;</span></code></pre>
+<span class="syntax-keyword">SELECT</span>
+  <span class="syntax-punctuation">(</span>
+    <span class="syntax-keyword">SELECT</span>
+      <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">FROM</span>
+      dim_country<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> countries<span class="syntax-punctuation">,</span>
+  <span class="syntax-punctuation">(</span>
+    <span class="syntax-keyword">SELECT</span>
+      <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">FROM</span>
+      fact_payments<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> fact_payment_rows<span class="syntax-punctuation">,</span>
+  <span class="syntax-punctuation">(</span>
+    <span class="syntax-keyword">SELECT</span>
+      <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">FROM</span>
+      training<span class="syntax-punctuation">.</span>payments<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> source_payment_rows<span class="syntax-punctuation">,</span>
+  <span class="syntax-punctuation">(</span>
+    <span class="syntax-keyword">SELECT</span>
+      <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">FROM</span>
+      dim_customer
+    <span class="syntax-keyword">WHERE</span>
+      country_sk <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> customers_without_country_key<span class="syntax-punctuation">;</span></code></pre>
 <p>The two payment counts must match and <code>customers_without_country_key</code> must be zero.</p>
 <h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
 <ul>

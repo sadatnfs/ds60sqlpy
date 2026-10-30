@@ -100,12 +100,15 @@ These worked excerpts come from `sql/postgres-60day/day12_string_functions.sql`.
 ### Example 1
 
 ```sql
-SELECT customer_id,
-       email,
-       lower(trim(email)) AS email_clean,
-       split_part(email, '@', 2) AS domain
-FROM customers
-ORDER BY customer_id
+SELECT
+  customer_id,
+  email,
+  lower(trim(email)) AS email_clean,
+  split_part(email, '@', 2) AS domain
+FROM
+  customers
+ORDER BY
+  customer_id
 LIMIT 50;
 ```
 
@@ -116,12 +119,15 @@ LIMIT 50;
 ### Example 2
 
 ```sql
-SELECT product_id,
-       name,
-       replace(name, 'Product', 'Item') AS renamed,
-       substr(name, 1, 10) AS short_name
-FROM products
-ORDER BY product_id
+SELECT
+  product_id,
+  name,
+  replace(name, 'Product', 'Item') AS renamed,
+  substr(name, 1, 10) AS short_name
+FROM
+  products
+ORDER BY
+  product_id
 LIMIT 50;
 ```
 

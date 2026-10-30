@@ -252,8 +252,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>finalAction<span class="syntax-punctuation">(</span><span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;add-finalizer&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;register&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The next action is add-finalizer.</p>
 <p>Register responsibility before creating an external resource that would otherwise be orphaned during deletion.</p>
 <h4 id="worked-example-2-retain-a-healthy-object">Worked example 2: Retain a healthy object<a class="heading-anchor" href="#worked-example-2-retain-a-healthy-object" aria-label="Link to this section">#</a></h4>
@@ -300,8 +299,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>finalAction<span class="syntax-punctuation">(</span><span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;reconcile&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;normal&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The action is reconcile.</p>
 <p>A finalizer does not itself request deletion. Normal desired-state work continues while deletion has not begun.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>

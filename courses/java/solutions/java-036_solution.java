@@ -153,7 +153,7 @@ public class Main {
       verify(fixture.jar, expected);
     }
 
-    // Exercise 6: Record runtime-image scope androllback identity
+    // Exercise 6: Record runtime-image scope and rollback identity
     var jlink = java.nio.file.Path.of(System.getProperty("java.home"), "bin", "jlink");
     Map<String, Object> receipt = Map.of(
       "jar_contract_checked",

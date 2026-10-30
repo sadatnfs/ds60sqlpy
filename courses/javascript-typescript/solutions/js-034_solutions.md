@@ -59,7 +59,7 @@ for (let trial = 0; trial < 5; trial += 1) {
 const sorted = [...samples].sort((a, b) => a - b);
 const median = sorted[2];
 assert.equal(samples.length, 5);
-assert.ok(samples.every(value => Number.isFinite(value) && value >= 0));
+assert.ok(samples.every((value) => Number.isFinite(value) && value >= 0));
 assert.ok(median >= sorted[0] && median <= sorted[4]);
 console.log(JSON.stringify({ samplesMs: samples, medianMs: median }));
 ```
@@ -152,7 +152,9 @@ try {
   assert.ok(Number.isInteger(count) && count >= 0);
   if (count > 0) assert.ok(Number.isFinite(histogram.mean));
   console.log(JSON.stringify({ samples: count, meanMs: count > 0 ? histogram.mean / 1e6 : null }));
-} finally { histogram.disable(); }
+} finally {
+  histogram.disable();
+}
 ```
 
 **Expected:** monitor disabled afterward; sample count reported honestly.

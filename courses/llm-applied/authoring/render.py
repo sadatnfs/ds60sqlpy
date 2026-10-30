@@ -163,6 +163,7 @@ def polish_textbook_prose(document):
             "65, 536": "65,536",
             "16, 777, 216": "16,777,216",
             "pretrained executionunverified": "this hypothetical learner run remains unverified",
+            "pretrained execution unverified": "this hypothetical learner run remains unverified",
             "notNF4": "not NF4",
             "fromNF4": "from NF4",
             "quantizationNF4": "quantization NF4",

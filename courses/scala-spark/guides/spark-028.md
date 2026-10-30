@@ -59,26 +59,100 @@ import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 
-spark.conf.set("spark.sql.autoBroadcastJoinThreshold","-1")
-val factSchema = StructType(Seq(StructField("source_id",LongType,false),StructField("fact_id",LongType,true),StructField("key",LongType,false),StructField("amount",LongType,true)))
-val generated = (1L to 2000L).map { id => Row(id,id,if(id<=1600L) 0L else (id-1601L)%4L+1L,if(id%10L==0L) null else java.lang.Long.valueOf(id%7L+1L)) }
-val rawFacts = spark.createDataFrame(spark.sparkContext.parallelize(generated ++ Seq(Row(2001L,null,0L,10L),Row(2002L,2001L,99L,-3L)),4),factSchema)
-val dimSchema = StructType(Seq(StructField("key",LongType,false),StructField("factor",LongType,false),StructField("approved",BooleanType,false)))
-val rawDimension = spark.createDataFrame(spark.sparkContext.parallelize(Seq(Row(0L,1L,false),Row(0L,2L,true)) ++ (1L to 5L).map(k => Row(k,k+2L,true)),2),dimSchema)
-val expectedMetrics = Map("rows"->2000L,"unique_facts"->2000L,"known_amounts"->1800L,"amount_total"->7196L,"weighted_total"->17913L)
+spark.conf.set("spark.sql.autoBroadcastJoinThreshold", "-1")
+val factSchema = StructType(
+  Seq(
+    StructField("source_id", LongType, false),
+    StructField("fact_id", LongType, true),
+    StructField("key", LongType, false),
+    StructField("amount", LongType, true)
+  )
+)
+val generated = (1L to 2000L).map { id =>
+  Row(
+    id,
+    id,
+    if (id <= 1600L) 0L else (id - 1601L) % 4L + 1L,
+    if (id % 10L == 0L) null else java.lang.Long.valueOf(id % 7L + 1L)
+  )
+}
+val rawFacts = spark.createDataFrame(
+  spark.sparkContext
+    .parallelize(generated ++ Seq(Row(2001L, null, 0L, 10L), Row(2002L, 2001L, 99L, -3L)), 4),
+  factSchema
+)
+val dimSchema = StructType(
+  Seq(
+    StructField("key", LongType, false),
+    StructField("factor", LongType, false),
+    StructField("approved", BooleanType, false)
+  )
+)
+val rawDimension = spark.createDataFrame(
+  spark.sparkContext.parallelize(
+    Seq(Row(0L, 1L, false), Row(0L, 2L, true)) ++ (1L to 5L).map(k => Row(k, k + 2L, true)),
+    2
+  ),
+  dimSchema
+)
+val expectedMetrics = Map(
+  "rows" -> 2000L,
+  "unique_facts" -> 2000L,
+  "known_amounts" -> 1800L,
+  "amount_total" -> 7196L,
+  "weighted_total" -> 17913L
+)
 ```
 
 ```python
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 
-spark.conf.set("spark.sql.autoBroadcastJoinThreshold","-1")
-fact_schema = StructType([StructField("source_id",LongType(),False),StructField("fact_id",LongType(),True),StructField("key",LongType(),False),StructField("amount",LongType(),True)])
-generated = [(i,i,0 if i<=1600 else (i-1601)%4+1,None if i%10==0 else i%7+1) for i in range(1,2001)]
-raw_facts = spark.createDataFrame(generated+[(2001,None,0,10),(2002,2001,99,-3)],schema=fact_schema)
-dim_schema = StructType([StructField("key",LongType(),False),StructField("factor",LongType(),False),StructField("approved",BooleanType(),False)])
-raw_dimension = spark.createDataFrame([(0,1,False),(0,2,True)]+[(k,k+2,True) for k in range(1,6)],schema=dim_schema)
-expected_metrics = {"rows":2000,"unique_facts":2000,"known_amounts":1800,"amount_total":7196,"weighted_total":17913}
+spark.conf.set("spark.sql.autoBroadcastJoinThreshold", "-1")
+fact_schema = StructType(
+    [
+        StructField("source_id", LongType(), False),
+        StructField("fact_id", LongType(), True),
+        StructField("key", LongType(), False),
+        StructField("amount", LongType(), True),
+    ]
+)
+generated = [
+    (i, i, 0 if i <= 1600 else (i - 1601) % 4 + 1, None if i % 10 == 0 else i % 7 + 1)
+    for i in range(1, 2001)
+]
+raw_facts = spark.createDataFrame(
+    generated + [(2001, None, 0, 10), (2002, 2001, 99, -3)], schema=fact_schema
+)
+dim_schema = StructType(
+    [
+        StructField("key", LongType(), False),
+        StructField("factor", LongType(), False),
+        StructField("approved", BooleanType(), False),
+    ]
+)
+raw_dimension = spark.createDataFrame(
+    [(0, 1, False), (0, 2, True)] + [(k, k + 2, True) for k in range(1, 6)], schema=dim_schema
+)
+expected_metrics = {
+    "rows": 2000,
+    "unique_facts": 2000,
+    "known_amounts": 1800,
+    "amount_total": 7196,
+    "weighted_total": 17913,
+}
 ```
 
 ## Worked example / walkthrough
@@ -86,13 +160,13 @@ expected_metrics = {"rows":2000,"unique_facts":2000,"known_amounts":1800,"amount
 ### Worked example 1
 
 ```scala
-val predictedRawJoinRows = 1600L*2L + 400L
+val predictedRawJoinRows = 1600L * 2L + 400L
 assert(predictedRawJoinRows == 3600L)
 println("Raw dimension multiplicity predicts3600 pairs for2000 accepted facts")
 ```
 
 ```python
-predicted_raw_join_rows = 1600*2+400
+predicted_raw_join_rows = 1600 * 2 + 400
 assert predicted_raw_join_rows == 3600
 print("Raw dimension multiplicity predicts3600 pairs for2000 accepted facts")
 ```
@@ -110,11 +184,11 @@ println("Independent formula totals=" + amountTotal + "," + weighted)
 ```
 
 ```python
-known = [i for i in range(1,2001) if i%10 != 0]
-amount_total = sum(i%7+1 for i in known)
-weighted = sum((i%7+1)*((0 if i<=1600 else (i-1601)%4+1)+2) for i in known)
+known = [i for i in range(1, 2001) if i % 10 != 0]
+amount_total = sum(i % 7 + 1 for i in known)
+weighted = sum((i % 7 + 1) * ((0 if i <= 1600 else (i - 1601) % 4 + 1) + 2) for i in known)
 assert len(known) == 1800 and amount_total == 7196 and weighted == 17913
-print("Independent formula totals=",amount_total,weighted)
+print("Independent formula totals=", amount_total, weighted)
 ```
 
 The oracle follows the input-generation and approved-factor rules without calling the Spark join or aggregate under review. Unknown amounts are excluded from known totals while remaining part of the accepted population, so completeness and value cannot be conflated.

@@ -115,9 +115,7 @@ identify which line creates each intermediate object.
 ```python
 import re
 
-pattern = re.compile(
-    r"sales_(?P<date>\d{4}-\d{2}-\d{2})_(?P<region>[a-z]+)\.csv"
-)
+pattern = re.compile(r"sales_(?P<date>\d{4}-\d{2}-\d{2})_(?P<region>[a-z]+)\.csv")
 match = pattern.fullmatch("sales_2025-07-01_west.csv")
 match.groupdict() if match else None
 ```

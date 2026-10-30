@@ -45,18 +45,21 @@ The report checks state and identity rather than only a formatted label.
 ```swift
 import Foundation
 
-struct CapstoneItem: Equatable, Sendable { let id: String; var complete: Bool }
+struct CapstoneItem: Equatable, Sendable {
+  let id: String
+  var complete: Bool
+}
 
 @main
 struct LessonMain {
-    static func main() async throws {
-        do {
-            let items = [CapstoneItem(id: "a", complete: true), CapstoneItem(id: "b", complete: false)]
-            precondition(items.filter(\.complete).count == 1)
-            precondition(Set(items.map(\.id)).count == items.count)
-        }
-        print("swift-048: passed")
+  static func main() async throws {
+    do {
+      let items = [CapstoneItem(id: "a", complete: true), CapstoneItem(id: "b", complete: false)]
+      precondition(items.filter(\.complete).count == 1)
+      precondition(Set(items.map(\.id)).count == items.count)
     }
+    print("swift-048: passed")
+  }
 }
 ```
 
@@ -69,19 +72,22 @@ These are the core semantics needed by undo, navigation and persistence.
 ```swift
 import Foundation
 
-struct CapstoneItem: Equatable, Sendable { let id: String; var complete: Bool }
+struct CapstoneItem: Equatable, Sendable {
+  let id: String
+  var complete: Bool
+}
 
 @main
 struct LessonMain {
-    static func main() async throws {
-        do {
-            let original = CapstoneItem(id: "a", complete: false)
-            var changed = original
-            changed.complete = true
-            precondition(changed.id == original.id && !original.complete && changed.complete)
-        }
-        print("swift-048: passed")
+  static func main() async throws {
+    do {
+      let original = CapstoneItem(id: "a", complete: false)
+      var changed = original
+      changed.complete = true
+      precondition(changed.id == original.id && !original.complete && changed.complete)
     }
+    print("swift-048: passed")
+  }
 }
 ```
 

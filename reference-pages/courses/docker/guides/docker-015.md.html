@@ -212,11 +212,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-inspect-a-cache-mount">Worked example 1: Inspect a cache mount<a class="heading-anchor" href="#worked-example-1-inspect-a-cache-mount" aria-label="Link to this section">#</a></h4>
 <p>This pattern is illustrative for a Python project with an actual lock procedure.</p>
-<pre class="highlighted-code"><code class="language-dockerfile"><span class="syntax-keyword">RUN</span> --mount<span class="syntax-operator">=</span>type<span class="syntax-operator">=</span>cache,target<span class="syntax-operator">=</span>/root/.cache/pip python -m pip --version</code></pre>
+<pre class="highlighted-code"><code class="language-dockerfile"><span class="syntax-keyword">RUN</span> --mount<span class="syntax-operator">=</span>type<span class="syntax-operator">=</span>cache,target<span class="syntax-operator">=</span>/root/.cache/pip <span class="syntax-string">\</span>
+    python -m pip --version</code></pre>
 <p><strong>Expected observation:</strong> The cache directory is available to this step; it is not copied as normal application data.</p>
 <h4 id="worked-example-2-require-a-synthetic-build-secret-without-printing-it">Worked example 2: Require a synthetic build secret without printing it<a class="heading-anchor" href="#worked-example-2-require-a-synthetic-build-secret-without-printing-it" aria-label="Link to this section">#</a></h4>
 <p>Use only an invented demo value in a separate scratch build.</p>
-<pre class="highlighted-code"><code class="language-dockerfile"><span class="syntax-keyword">RUN</span> --mount<span class="syntax-operator">=</span>type<span class="syntax-operator">=</span>secret,id<span class="syntax-operator">=</span>demo,required<span class="syntax-operator">=</span><span class="syntax-builtin">true</span> <span class="syntax-builtin">test</span> -s /run/secrets/demo</code></pre>
+<pre class="highlighted-code"><code class="language-dockerfile"><span class="syntax-keyword">RUN</span> --mount<span class="syntax-operator">=</span>type<span class="syntax-operator">=</span>secret,id<span class="syntax-operator">=</span>demo,required<span class="syntax-operator">=</span><span class="syntax-builtin">true</span> <span class="syntax-string">\</span>
+    <span class="syntax-builtin">test</span> -s /run/secrets/demo</code></pre>
 <p><strong>Expected observation:</strong> The build succeeds only when the named nonempty secret is supplied; the command does not reveal its content.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-compare-a-cache-mount-and-a-secret-mount">Exercise 1: Compare a cache mount and a secret mount.<a class="heading-anchor" href="#exercise-1-compare-a-cache-mount-and-a-secret-mount" aria-label="Link to this section">#</a></h4>

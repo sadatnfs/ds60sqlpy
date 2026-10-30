@@ -96,7 +96,7 @@ These worked excerpts come from `sql/postgres-60day/day33_index_optimization_str
 ### Example 1
 
 ```sql
-CREATE INDEX idx_orders_customer_date ON orders(customer_id, order_date);
+CREATE INDEX idx_orders_customer_date ON orders (customer_id, order_date);
 ```
 
 **How to read it:** Example 1 is data definition language (DDL). `psql` prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.
@@ -106,7 +106,7 @@ CREATE INDEX idx_orders_customer_date ON orders(customer_id, order_date);
 ### Example 2
 
 ```sql
-CREATE INDEX idx_oi_order_product_inc ON order_items(order_id, product_id) INCLUDE (quantity, unit_price, discount);
+CREATE INDEX idx_oi_order_product_inc ON order_items (order_id, product_id) INCLUDE (quantity, unit_price, discount);
 ```
 
 **How to read it:** Example 2 is data definition language (DDL). `psql` prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.

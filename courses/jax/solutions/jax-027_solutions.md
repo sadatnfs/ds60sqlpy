@@ -9,8 +9,8 @@ A mesh name does not imply more than the explicitly supplied device inventory.
 **Expected:** One data-axis device, CPU platform.
 
 ```python
-assert mesh.shape['data'] == 1
-assert all(device.platform == 'cpu' for device in mesh.devices.flat)
+assert mesh.shape["data"] == 1
+assert all(device.platform == "cpu" for device in mesh.devices.flat)
 ```
 
 ## Exercise 2: Round-trip values
@@ -32,7 +32,7 @@ Their intended layout meanings differ even though one device makes their concret
 **Expected:** The row spec names data on axis zero; replicated spec has no partition axes.
 
 ```python
-assert row_layout.spec == PartitionSpec('data', None)
+assert row_layout.spec == PartitionSpec("data", None)
 assert replicated.spec == PartitionSpec()
 ```
 
@@ -54,7 +54,7 @@ The specification describes axis meaning rather than hard-coding the original nu
 **Expected:** Global shape (5,2), one local shard with all rows.
 
 ```python
-other = np.arange(10., dtype=np.float64).reshape(5, 2)
+other = np.arange(10.0, dtype=np.float64).reshape(5, 2)
 placed = jax.device_put(other, row_layout)
 assert placed.shape == (5, 2)
 close(placed.addressable_shards[0].data, other)

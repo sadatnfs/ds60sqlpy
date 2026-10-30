@@ -453,13 +453,30 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The executable reference uses temporary tables and single-session sequences to verify exact predicates, receipts and replay behavior. It does not claim to simulate every concurrent interleaving, crash boundary or distributed delivery scenario. Database atomicity and constraints provide mechanisms; a production service must also preserve transaction boundaries, authorization scope and durable request identity across retries.</p>
 <h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> job_id<span class="syntax-punctuation">,</span>status<span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span>status<span class="syntax-operator">=</span><span class="syntax-string">&#x27;ready&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> ready_predicate<span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span>status<span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span><span class="syntax-string">&#x27;done&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> broad_predicate
-<span class="syntax-keyword">FROM</span> deep5_jobs <span class="syntax-keyword">WHERE</span> job_id <span class="syntax-keyword">IN</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">7</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> job_id<span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  job_id<span class="syntax-punctuation">,</span>
+  status<span class="syntax-punctuation">,</span>
+  <span class="syntax-punctuation">(</span>status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;ready&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> ready_predicate<span class="syntax-punctuation">,</span>
+  <span class="syntax-punctuation">(</span>status <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;done&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> broad_predicate
+<span class="syntax-keyword">FROM</span>
+  deep5_jobs
+<span class="syntax-keyword">WHERE</span>
+  job_id <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  job_id<span class="syntax-punctuation">;</span></code></pre>
 <p>One row per job_id projects both predicates. Ready job 1 satisfies both, blocked job 5 satisfies only the broad predicate, and unknown-status job 7 yields NULL for both comparisons. The blocked row disproves the claim that not-done implies ready, independently of any physical query plan.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> job_id<span class="syntax-punctuation">,</span>priority <span class="syntax-keyword">FROM</span> deep5_jobs
-<span class="syntax-keyword">WHERE</span> tenant_id<span class="syntax-operator">=</span><span class="syntax-number">1</span> <span class="syntax-keyword">AND</span> status<span class="syntax-operator">=</span><span class="syntax-string">&#x27;ready&#x27;</span>
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> priority <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span>job_id<span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  job_id<span class="syntax-punctuation">,</span>
+  priority
+<span class="syntax-keyword">FROM</span>
+  deep5_jobs
+<span class="syntax-keyword">WHERE</span>
+  tenant_id <span class="syntax-operator">=</span> <span class="syntax-number">1</span>
+  <span class="syntax-keyword">AND</span> status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;ready&#x27;</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  priority <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span>
+  job_id<span class="syntax-punctuation">;</span></code></pre>
 <p>The result grain is one eligible job with columns job_id and priority. IDs 1,3,6 appear with priorities 10,5,5; job_id resolves the equal-priority tie. This is a read-only ordered candidate list, not a claim that these jobs were locked or assigned to a worker.</p>
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
 <ol>
@@ -680,35 +697,67 @@ Done when all six projected-result contracts and their counterexamples have insp
 <p><strong>Inputs/evidence:</strong> For sql-deep-05 Exercise 1, Return job_id, priority for tenant 1 jobs whose status equals ready, ordered by priority descending then job_id ascending. Preserve the three eligible job identities and exclude another tenant, blocked, done and unknown statuses.</p>
 <p><strong>Expected result/shape:</strong> For sql-deep-05 Exercise 1, Rows are(1,10),(3,5),(6,5). The tie between 3 and 6 follows job identity, not unspecified physical row order.</p>
 <p><strong>Verify:</strong> For sql-deep-05 Exercise 1, list eligible queue IDs from the status and attempt conditions, including the NULL-attempt case, before considering whether an index could support the predicate.</p>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> job_id<span class="syntax-punctuation">,</span>priority <span class="syntax-keyword">FROM</span> deep5_jobs <span class="syntax-keyword">WHERE</span> tenant_id<span class="syntax-operator">=</span><span class="syntax-number">1</span> <span class="syntax-keyword">AND</span> status<span class="syntax-operator">=</span><span class="syntax-string">&#x27;ready&#x27;</span>
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> priority <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span>job_id<span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  job_id<span class="syntax-punctuation">,</span>
+  priority
+<span class="syntax-keyword">FROM</span>
+  deep5_jobs
+<span class="syntax-keyword">WHERE</span>
+  tenant_id <span class="syntax-operator">=</span> <span class="syntax-number">1</span>
+  <span class="syntax-keyword">AND</span> status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;ready&#x27;</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  priority <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span>
+  job_id<span class="syntax-punctuation">;</span></code></pre>
 <p>The predicate states both authorization-like tenant scope and operational eligibility. Equality to ready also implies the partial-index predicate, although the planner may still choose another access method. The outer ordering includes job_id so equal priorities have a deterministic presentation. Replacing the status condition with not-done would change semantics before it changed performance.</p>
 <h4 id="solution-1--exercise-2-produce-a-counterexample-to-an-invalid-predicate-rewrite">Exercise 2: Produce a counterexample to an invalid predicate rewrite<a class="heading-anchor" href="#solution-1--exercise-2-produce-a-counterexample-to-an-invalid-predicate-rewrite" aria-label="Link to this section">#</a></h4>
 <p>Return job_id, status for tenant 1 rows selected by status&lt;&gt;done but not satisfying status=ready under a known nonready value. One row represents one counterexample, ordered by job_id. Explain why the ready-only partial index cannot cover the broader query.</p>
 <p><strong>Inputs/evidence:</strong> For sql-deep-05 Exercise 2, Return job_id, status for tenant 1 rows selected by status&lt;&gt;done but not satisfying status=ready under a known nonready value. One row represents one counterexample, ordered by job_id. Explain why the ready-only partial index cannot cover the broader query.</p>
 <p><strong>Expected result/shape:</strong> For sql-deep-05 Exercise 2, Only job 5 with status blocked is returned. Unknown status is not selected by ordinary inequality and is not silently classified as ready.</p>
 <p><strong>Verify:</strong> For sql-deep-05 Exercise 2, project both the original and rewritten predicates on the same rows; retain the counterexample where their truth values differ instead of relying on coincidentally equal counts.</p>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> job_id<span class="syntax-punctuation">,</span>status <span class="syntax-keyword">FROM</span> deep5_jobs
-<span class="syntax-keyword">WHERE</span> tenant_id<span class="syntax-operator">=</span><span class="syntax-number">1</span> <span class="syntax-keyword">AND</span> status<span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span><span class="syntax-string">&#x27;done&#x27;</span> <span class="syntax-keyword">AND</span> status <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> <span class="syntax-string">&#x27;ready&#x27;</span>
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> job_id<span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  job_id<span class="syntax-punctuation">,</span>
+  status
+<span class="syntax-keyword">FROM</span>
+  deep5_jobs
+<span class="syntax-keyword">WHERE</span>
+  tenant_id <span class="syntax-operator">=</span> <span class="syntax-number">1</span>
+  <span class="syntax-keyword">AND</span> status <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;done&#x27;</span>
+  <span class="syntax-keyword">AND</span> status <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> <span class="syntax-string">&#x27;ready&#x27;</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  job_id<span class="syntax-punctuation">;</span></code></pre>
 <p>A single admitted blocked row disproves implication, so a ready-only index cannot supply every row of the broader predicate. The NULL-status row does not pass status&lt;&gt;done because that comparison is unknown. Using an explicit counterexample query is often clearer than arguing from a plan screenshot: it tests semantic equivalence before considering cost or index availability.</p>
 <h4 id="solution-1--exercise-3-inspect-index-existence-without-inventing-a-plan-guarantee">Exercise 3: Inspect index existence without inventing a plan guarantee<a class="heading-anchor" href="#solution-1--exercise-3-inspect-index-existence-without-inventing-a-plan-guarantee" aria-label="Link to this section">#</a></h4>
 <p>Return one row with index_name, is_partial, key_columns, ready_rows for the temporary <code>deep5_ready_idx</code>. Use pg_index and pg_class to verify a predicate exists and there are three key attributes; count ready source rows separately. Do not assert that the planner must choose this index.</p>
 <p><strong>Inputs/evidence:</strong> For sql-deep-05 Exercise 3, Return one row with index_name, is_partial, key_columns, ready_rows for the temporary <code>deep5_ready_idx</code>. Use pg_index and pg_class to verify a predicate exists and there are three key attributes; count ready source rows separately. Do not assert that the planner must choose this index.</p>
 <p><strong>Expected result/shape:</strong> For sql-deep-05 Exercise 3, The row is <code>deep5_ready_idx</code>, true,3,4. The ready count includes tenant 2 job 4 because the index predicate restricts status, not tenant.</p>
 <p><strong>Verify:</strong> For sql-deep-05 Exercise 3, inspect the catalog index name, definition and predicate; confirm existence separately from planner choice, which would require actual EXPLAIN evidence.</p>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>relname <span class="syntax-keyword">AS</span> index_name<span class="syntax-punctuation">,</span>i<span class="syntax-punctuation">.</span>indpred <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">AS</span> is_partial<span class="syntax-punctuation">,</span>
- i<span class="syntax-punctuation">.</span>indnkeyatts <span class="syntax-keyword">AS</span> key_columns<span class="syntax-punctuation">,</span>
- <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> deep5_jobs <span class="syntax-keyword">WHERE</span> status<span class="syntax-operator">=</span><span class="syntax-string">&#x27;ready&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> ready_rows
-<span class="syntax-keyword">FROM</span> pg_index <span class="syntax-keyword">AS</span> i <span class="syntax-keyword">JOIN</span> pg_class <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>oid<span class="syntax-operator">=</span>i<span class="syntax-punctuation">.</span>indexrelid
-<span class="syntax-keyword">WHERE</span> i<span class="syntax-punctuation">.</span>indexrelid<span class="syntax-operator">=</span><span class="syntax-string">&#x27;pg_temp.deep5_ready_idx&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>regclass<span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>relname <span class="syntax-keyword">AS</span> index_name<span class="syntax-punctuation">,</span>
+  i<span class="syntax-punctuation">.</span>indpred <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">AS</span> is_partial<span class="syntax-punctuation">,</span>
+  i<span class="syntax-punctuation">.</span>indnkeyatts <span class="syntax-keyword">AS</span> key_columns<span class="syntax-punctuation">,</span>
+  <span class="syntax-punctuation">(</span>
+    <span class="syntax-keyword">SELECT</span>
+      <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">FROM</span>
+      deep5_jobs
+    <span class="syntax-keyword">WHERE</span>
+      status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;ready&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> ready_rows
+<span class="syntax-keyword">FROM</span>
+  pg_index <span class="syntax-keyword">AS</span> i
+  <span class="syntax-keyword">JOIN</span> pg_class <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>oid <span class="syntax-operator">=</span> i<span class="syntax-punctuation">.</span>indexrelid
+<span class="syntax-keyword">WHERE</span>
+  i<span class="syntax-punctuation">.</span>indexrelid <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;pg_temp.deep5_ready_idx&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>regclass<span class="syntax-punctuation">;</span></code></pre>
 <p>The catalog query verifies an actual index object in the current temporary namespace rather than inferring it from source text. indpred distinguishes a partial index, and indnkeyatts counts key attributes independently of included columns. The source-row count explains the predicate population. None of these facts establishes a latency improvement or a chosen execution plan on a larger workload.</p>
 <h4 id="solution-1--exercise-4-apply-a-version-checked-mutation-and-inspect-its-receipt">Exercise 4: Apply a version-checked mutation and inspect its receipt<a class="heading-anchor" href="#solution-1--exercise-4-apply-a-version-checked-mutation-and-inspect-its-receipt" aria-label="Link to this section">#</a></h4>
 <p>Within the exercise savepoint, increment attempts and version for job 1 only when tenant 1, status ready and expected version 1 still match. Capture ROW_COUNT and return action, affected, job_id, attempts, version in one row. Roll back after checking.</p>
 <p><strong>Inputs/evidence:</strong> For sql-deep-05 Exercise 4, Within the exercise savepoint, increment attempts and version for job 1 only when tenant 1, status ready and expected version 1 still match. Capture ROW_COUNT and return action, affected, job_id, attempts, version in one row. Roll back after checking.</p>
 <p><strong>Expected result/shape:</strong> For sql-deep-05 Exercise 4, action first, affected 1, job_id1, attempts 1, version 2. A read followed by an unguarded update is not an acceptable substitute for the combined predicate.</p>
 <p><strong>Verify:</strong> For sql-deep-05 Exercise 4, read the original value and version before writing, inspect the RETURNING receipt, and verify the committed-in-transaction state equals one increment with one version increase.</p>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> deep5_receipt<span class="syntax-punctuation">(</span>action <span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span>affected <span class="syntax-builtin">integer</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> deep5_receipt <span class="syntax-punctuation">(</span>
+  action <span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span>
+  affected <span class="syntax-builtin">integer</span>
+<span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span>
+
 <span class="syntax-keyword">DO</span> $<span class="syntax-keyword">write</span>$
 <span class="syntax-keyword">DECLARE</span> changed <span class="syntax-builtin">integer</span><span class="syntax-punctuation">;</span>
 <span class="syntax-keyword">BEGIN</span>
@@ -718,15 +767,31 @@ Done when all six projected-result contracts and their counterexamples have insp
  <span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> deep5_receipt <span class="syntax-keyword">VALUES</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;first&#x27;</span><span class="syntax-punctuation">,</span>changed<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 <span class="syntax-keyword">END</span>
 $<span class="syntax-keyword">write</span>$<span class="syntax-punctuation">;</span>
-<span class="syntax-keyword">SELECT</span> r<span class="syntax-punctuation">.</span>action<span class="syntax-punctuation">,</span>r<span class="syntax-punctuation">.</span>affected<span class="syntax-punctuation">,</span>j<span class="syntax-punctuation">.</span>job_id<span class="syntax-punctuation">,</span>j<span class="syntax-punctuation">.</span>attempts<span class="syntax-punctuation">,</span>j<span class="syntax-punctuation">.</span><span class="syntax-keyword">version</span>
-<span class="syntax-keyword">FROM</span> deep5_receipt <span class="syntax-keyword">AS</span> r <span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> deep5_jobs <span class="syntax-keyword">AS</span> j <span class="syntax-keyword">WHERE</span> j<span class="syntax-punctuation">.</span>job_id<span class="syntax-operator">=</span><span class="syntax-number">1</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> r<span class="syntax-punctuation">.</span>action<span class="syntax-punctuation">;</span></code></pre>
+
+<span class="syntax-keyword">SELECT</span>
+  r<span class="syntax-punctuation">.</span>action<span class="syntax-punctuation">,</span>
+  r<span class="syntax-punctuation">.</span>affected<span class="syntax-punctuation">,</span>
+  j<span class="syntax-punctuation">.</span>job_id<span class="syntax-punctuation">,</span>
+  j<span class="syntax-punctuation">.</span>attempts<span class="syntax-punctuation">,</span>
+  j<span class="syntax-punctuation">.</span><span class="syntax-keyword">version</span>
+<span class="syntax-keyword">FROM</span>
+  deep5_receipt <span class="syntax-keyword">AS</span> r
+  <span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> deep5_jobs <span class="syntax-keyword">AS</span> j
+<span class="syntax-keyword">WHERE</span>
+  j<span class="syntax-punctuation">.</span>job_id <span class="syntax-operator">=</span> <span class="syntax-number">1</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  r<span class="syntax-punctuation">.</span>action<span class="syntax-punctuation">;</span></code></pre>
 <p>The version and eligibility checks occur in the same UPDATE that changes the row, eliminating a separate check-then-write gap in this contract. GET DIAGNOSTICS captures the actual row count immediately after that statement. The result then verifies both the receipt and stored state. A printed UPDATE command tag alone would not establish which job changed or whether its version advanced correctly.</p>
 <h4 id="solution-1--exercise-5-reject-a-stale-replay-without-a-second-increment">Exercise 5: Reject a stale replay without a second increment<a class="heading-anchor" href="#solution-1--exercise-5-reject-a-stale-replay-without-a-second-increment" aria-label="Link to this section">#</a></h4>
 <p>Starting from the original fixture, perform the same expected-version 1 update twice and capture first/stale receipts. Return action, affected, attempts, version for both receipts ordered by action. Both rows report final stored state; this is a sequential stale-version model, not a multi-session timing proof.</p>
 <p><strong>Inputs/evidence:</strong> For sql-deep-05 Exercise 5, Starting from the original fixture, perform the same expected-version 1 update twice and capture first/stale receipts. Return action, affected, attempts, version for both receipts ordered by action. Both rows report final stored state; this is a sequential stale-version model, not a multi-session timing proof.</p>
 <p><strong>Expected result/shape:</strong> For sql-deep-05 Exercise 5, first affected 1 and stale affected 0; both show final attempts 1, version 2. The second attempt must not raise attempts to 2.</p>
 <p><strong>Verify:</strong> For sql-deep-05 Exercise 5, apply the stale version a second time and inspect its empty RETURNING receipt; compare the final value and version with the first successful update to prove no second increment.</p>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> deep5_receipt<span class="syntax-punctuation">(</span>action <span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span>affected <span class="syntax-builtin">integer</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> deep5_receipt <span class="syntax-punctuation">(</span>
+  action <span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span>
+  affected <span class="syntax-builtin">integer</span>
+<span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span>
+
 <span class="syntax-keyword">DO</span> $writes$
 <span class="syntax-keyword">DECLARE</span> changed <span class="syntax-builtin">integer</span><span class="syntax-punctuation">;</span>
 <span class="syntax-keyword">BEGIN</span>
@@ -736,16 +801,29 @@ $<span class="syntax-keyword">write</span>$<span class="syntax-punctuation">;</s
  <span class="syntax-keyword">GET</span> <span class="syntax-keyword">DIAGNOSTICS</span> changed<span class="syntax-operator">=</span><span class="syntax-keyword">ROW_COUNT</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> deep5_receipt <span class="syntax-keyword">VALUES</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;stale&#x27;</span><span class="syntax-punctuation">,</span>changed<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 <span class="syntax-keyword">END</span>
 $writes$<span class="syntax-punctuation">;</span>
-<span class="syntax-keyword">SELECT</span> r<span class="syntax-punctuation">.</span>action<span class="syntax-punctuation">,</span>r<span class="syntax-punctuation">.</span>affected<span class="syntax-punctuation">,</span>j<span class="syntax-punctuation">.</span>attempts<span class="syntax-punctuation">,</span>j<span class="syntax-punctuation">.</span><span class="syntax-keyword">version</span> <span class="syntax-keyword">FROM</span> deep5_receipt <span class="syntax-keyword">AS</span> r
-<span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> deep5_jobs <span class="syntax-keyword">AS</span> j <span class="syntax-keyword">WHERE</span> j<span class="syntax-punctuation">.</span>job_id<span class="syntax-operator">=</span><span class="syntax-number">1</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> r<span class="syntax-punctuation">.</span>action<span class="syntax-punctuation">;</span></code></pre>
+
+<span class="syntax-keyword">SELECT</span>
+  r<span class="syntax-punctuation">.</span>action<span class="syntax-punctuation">,</span>
+  r<span class="syntax-punctuation">.</span>affected<span class="syntax-punctuation">,</span>
+  j<span class="syntax-punctuation">.</span>attempts<span class="syntax-punctuation">,</span>
+  j<span class="syntax-punctuation">.</span><span class="syntax-keyword">version</span>
+<span class="syntax-keyword">FROM</span>
+  deep5_receipt <span class="syntax-keyword">AS</span> r
+  <span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> deep5_jobs <span class="syntax-keyword">AS</span> j
+<span class="syntax-keyword">WHERE</span>
+  j<span class="syntax-punctuation">.</span>job_id <span class="syntax-operator">=</span> <span class="syntax-number">1</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  r<span class="syntax-punctuation">.</span>action<span class="syntax-punctuation">;</span></code></pre>
 <p>The first mutation changes the version to two, so the identical second predicate no longer matches. Zero affected rows is the expected conflict signal for this fixture, while other real cases could involve missing identity or changed eligibility. The single-session sequence verifies the state predicate and prevents an accidental double increment. It does not establish all lock, isolation or network-response behavior of a concurrent application.</p>
 <h4 id="solution-1--exercise-6-make-retry-identity-distinct-from-payload-identity">Exercise 6: Make retry identity distinct from payload identity<a class="heading-anchor" href="#solution-1--exercise-6-make-retry-identity-distinct-from-payload-identity" aria-label="Link to this section">#</a></h4>
 <p>Implement a temporary apply_request function that stores request_key, job_id, a positive delta and applies a tenant 1 ready-job increment only on a new key. Replay the same key/payload without applying again, then reject the same key with a changed delta using SQLSTATE 22023. Return one row with request_key, first_applied, replay_applied, conflict_rejected, attempts, version, request_count.</p>
 <p><strong>Inputs/evidence:</strong> For sql-deep-05 Exercise 6, Implement a temporary apply_request function that stores request_key, job_id, a positive delta and applies a tenant 1 ready-job increment only on a new key. Replay the same key/payload without applying again, then reject the same key with a changed delta using SQLSTATE 22023. Return one row with request_key, first_applied, replay_applied, conflict_rejected, attempts, version, request_count.</p>
 <p><strong>Expected result/shape:</strong> For sql-deep-05 Exercise 6, request-a, true, false, true,1,2,1. The changed-payload attempt is caught as an expected error and must not change the job or create another request row.</p>
 <p><strong>Verify:</strong> For sql-deep-05 Exercise 6, perform an identical idempotent retry and then a conflicting payload under the same key; verify one stored receipt row and one increment, while the conflicting request raises the declared error.</p>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">FUNCTION</span> pg_temp<span class="syntax-punctuation">.</span>apply_request<span class="syntax-punctuation">(</span>p_key <span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span>p_job <span class="syntax-builtin">integer</span><span class="syntax-punctuation">,</span>p_delta <span class="syntax-builtin">integer</span><span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">RETURNS</span> <span class="syntax-builtin">boolean</span> <span class="syntax-keyword">LANGUAGE</span> plpgsql <span class="syntax-keyword">AS</span> $apply$
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">FUNCTION</span> pg_temp<span class="syntax-punctuation">.</span>apply_request <span class="syntax-punctuation">(</span>p_key <span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span> p_job <span class="syntax-builtin">integer</span><span class="syntax-punctuation">,</span> p_delta <span class="syntax-builtin">integer</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-keyword">RETURNS</span> <span class="syntax-builtin">boolean</span>
+  <span class="syntax-keyword">LANGUAGE</span> plpgsql
+  <span class="syntax-keyword">AS</span> $apply$
 <span class="syntax-keyword">DECLARE</span> inserted <span class="syntax-builtin">integer</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">existing</span> deep5_requests<span class="syntax-operator">%</span>ROWTYPE<span class="syntax-punctuation">;</span>
 <span class="syntax-keyword">BEGIN</span>
  <span class="syntax-keyword">IF</span> p_key <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">OR</span> btrim<span class="syntax-punctuation">(</span>p_key<span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;&#x27;</span> <span class="syntax-keyword">OR</span> p_delta <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">OR</span> p_delta<span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span><span class="syntax-number">0</span> <span class="syntax-keyword">THEN</span>
@@ -764,10 +842,20 @@ $writes$<span class="syntax-punctuation">;</span>
  <span class="syntax-keyword">IF</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">FOUND</span> <span class="syntax-keyword">THEN</span> RAISE <span class="syntax-keyword">EXCEPTION</span> <span class="syntax-string">&#x27;Eligible job was not found&#x27;</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span>
  <span class="syntax-keyword">RETURN</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">;</span>
 <span class="syntax-keyword">END</span>
-$apply$<span class="syntax-punctuation">;</span>
-<span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> deep5_apply_receipt<span class="syntax-punctuation">(</span>call_id <span class="syntax-builtin">integer</span><span class="syntax-punctuation">,</span>applied <span class="syntax-builtin">boolean</span><span class="syntax-punctuation">,</span>conflict_rejected <span class="syntax-builtin">boolean</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span>
-<span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> deep5_apply_receipt <span class="syntax-keyword">VALUES</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span>pg_temp<span class="syntax-punctuation">.</span>apply_request<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;request-a&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-<span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> deep5_apply_receipt <span class="syntax-keyword">VALUES</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span>pg_temp<span class="syntax-punctuation">.</span>apply_request<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;request-a&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+$apply$
+<span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> deep5_apply_receipt <span class="syntax-punctuation">(</span>
+  call_id <span class="syntax-builtin">integer</span><span class="syntax-punctuation">,</span>
+  applied <span class="syntax-builtin">boolean</span><span class="syntax-punctuation">,</span>
+  conflict_rejected <span class="syntax-builtin">boolean</span>
+<span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span>
+
+<span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> deep5_apply_receipt
+  <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> pg_temp<span class="syntax-punctuation">.</span>apply_request <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;request-a&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+
+<span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> deep5_apply_receipt
+  <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> pg_temp<span class="syntax-punctuation">.</span>apply_request <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;request-a&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+
 <span class="syntax-keyword">DO</span> $conflict$
 <span class="syntax-keyword">BEGIN</span>
  <span class="syntax-keyword">BEGIN</span>
@@ -778,12 +866,41 @@ $apply$<span class="syntax-punctuation">;</span>
  <span class="syntax-keyword">END</span><span class="syntax-punctuation">;</span>
 <span class="syntax-keyword">END</span>
 $conflict$<span class="syntax-punctuation">;</span>
-<span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;request-a&#x27;</span> <span class="syntax-keyword">AS</span> request_key<span class="syntax-punctuation">,</span>
- <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> applied <span class="syntax-keyword">FROM</span> deep5_apply_receipt <span class="syntax-keyword">WHERE</span> call_id<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> first_applied<span class="syntax-punctuation">,</span>
- <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> applied <span class="syntax-keyword">FROM</span> deep5_apply_receipt <span class="syntax-keyword">WHERE</span> call_id<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> replay_applied<span class="syntax-punctuation">,</span>
- <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> conflict_rejected <span class="syntax-keyword">FROM</span> deep5_apply_receipt <span class="syntax-keyword">WHERE</span> call_id<span class="syntax-operator">=</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> conflict_rejected<span class="syntax-punctuation">,</span>
- j<span class="syntax-punctuation">.</span>attempts<span class="syntax-punctuation">,</span>j<span class="syntax-punctuation">.</span><span class="syntax-keyword">version</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> deep5_requests<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> request_count
-<span class="syntax-keyword">FROM</span> deep5_jobs <span class="syntax-keyword">AS</span> j <span class="syntax-keyword">WHERE</span> j<span class="syntax-punctuation">.</span>job_id<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">;</span></code></pre>
+
+<span class="syntax-keyword">SELECT</span>
+  <span class="syntax-string">&#x27;request-a&#x27;</span> <span class="syntax-keyword">AS</span> request_key<span class="syntax-punctuation">,</span>
+  <span class="syntax-punctuation">(</span>
+    <span class="syntax-keyword">SELECT</span>
+      applied
+    <span class="syntax-keyword">FROM</span>
+      deep5_apply_receipt
+    <span class="syntax-keyword">WHERE</span>
+      call_id <span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> first_applied<span class="syntax-punctuation">,</span>
+  <span class="syntax-punctuation">(</span>
+    <span class="syntax-keyword">SELECT</span>
+      applied
+    <span class="syntax-keyword">FROM</span>
+      deep5_apply_receipt
+    <span class="syntax-keyword">WHERE</span>
+      call_id <span class="syntax-operator">=</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> replay_applied<span class="syntax-punctuation">,</span>
+  <span class="syntax-punctuation">(</span>
+    <span class="syntax-keyword">SELECT</span>
+      conflict_rejected
+    <span class="syntax-keyword">FROM</span>
+      deep5_apply_receipt
+    <span class="syntax-keyword">WHERE</span>
+      call_id <span class="syntax-operator">=</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> conflict_rejected<span class="syntax-punctuation">,</span>
+  j<span class="syntax-punctuation">.</span>attempts<span class="syntax-punctuation">,</span>
+  j<span class="syntax-punctuation">.</span><span class="syntax-keyword">version</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-punctuation">(</span>
+    <span class="syntax-keyword">SELECT</span>
+      <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">FROM</span>
+      deep5_requests<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> request_count
+<span class="syntax-keyword">FROM</span>
+  deep5_jobs <span class="syntax-keyword">AS</span> j
+<span class="syntax-keyword">WHERE</span>
+  j<span class="syntax-punctuation">.</span>job_id <span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span></code></pre>
 <p>The request-key constraint decides whether this operation is new, while stored payload fields distinguish a replay from a conflicting reuse. The request insert and job mutation share the transaction, so a failed eligible-job update cannot publish a successful request independently. The changed-payload test catches only the designated SQLSTATE; its own missing-error assertion has a different error class and cannot falsely pass. This teaches an atomic database boundary without claiming end-to-end distributed exactly-once delivery.</p>
 <h4 id="solution-1--verification-and-transaction-boundary">Verification and transaction boundary<a class="heading-anchor" href="#solution-1--verification-and-transaction-boundary" aria-label="Link to this section">#</a></h4>
 <p>Every answer is materialized into a temporary answer table and compared with a literal expected row set, including column names, NULL values and deterministic order. The assertion function rejects both false and unknown Boolean results, so a NULL comparison cannot silently pass. Each exercise rolls back to its own savepoint, ensuring mutations used for one boundary case do not alter the next. The final ROLLBACK removes the full fixture. Read the first error if a contract fails; a later row count or command tag cannot repair an earlier failed assertion.</p></div>

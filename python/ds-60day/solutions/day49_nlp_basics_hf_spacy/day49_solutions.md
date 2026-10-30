@@ -74,8 +74,12 @@ else:
         per_device_train_batch_size=8,
         per_device_eval_batch_size=16,
         logging_steps=5,
-        report_to="none", use_cpu=True, dataloader_num_workers=0,
-        save_strategy="no", seed=49, data_seed=49,
+        report_to="none",
+        use_cpu=True,
+        dataloader_num_workers=0,
+        save_strategy="no",
+        seed=49,
+        data_seed=49,
     )
     trainer = Trainer(
         model=model,
@@ -146,7 +150,9 @@ else:
 
     weighted_model = AutoModelForSequenceClassification.from_pretrained(
         model_dir,
-        num_labels=2, local_files_only=True, use_safetensors=True,
+        num_labels=2,
+        local_files_only=True,
+        use_safetensors=True,
     )
     trainer_weighted = WeightedTrainer(
         model=weighted_model,

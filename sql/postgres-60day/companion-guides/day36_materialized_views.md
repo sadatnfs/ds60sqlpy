@@ -97,13 +97,17 @@ These worked excerpts come from `sql/postgres-60day/day36_materialized_views.sql
 
 ```sql
 CREATE MATERIALIZED VIEW mv_category_month_revenue AS
-SELECT p.category,
-       date_trunc('month', o.order_date)::date AS month,
-       SUM(oi.unit_price*oi.quantity*(1-oi.discount)) AS revenue
-FROM order_items oi
-JOIN products p ON p.product_id = oi.product_id
-JOIN orders o ON o.order_id = oi.order_id
-GROUP BY p.category, date_trunc('month', o.order_date);
+SELECT
+  p.category,
+  date_trunc('month', o.order_date)::date AS month,
+  SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS revenue
+FROM
+  order_items oi
+  JOIN products p ON p.product_id = oi.product_id
+  JOIN orders o ON o.order_id = oi.order_id
+GROUP BY
+  p.category,
+  date_trunc('month', o.order_date);
 ```
 
 **How to read it:** Example 1 is data definition language (DDL). `psql` prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.
@@ -113,7 +117,14 @@ GROUP BY p.category, date_trunc('month', o.order_date);
 ### Example 2
 
 ```sql
-SELECT * FROM mv_category_month_revenue ORDER BY month DESC, revenue DESC LIMIT 50;
+SELECT
+  *
+FROM
+  mv_category_month_revenue
+ORDER BY
+  month DESC,
+  revenue DESC
+LIMIT 50;
 ```
 
 **How to read it:** Example 2: Start with `mv_category_month_revenue` in `FROM`/`JOIN`. The final `SELECT` displays `*`. `ORDER BY` determines presentation order and the final `LIMIT 50` caps displayed rows. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.

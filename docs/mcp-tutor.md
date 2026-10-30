@@ -72,11 +72,7 @@ For example, the command/argument portion of a client's configuration is:
 ```json
 {
   "command": "ABSOLUTE_REPOSITORY_PATH/.venv/bin/python",
-  "args": [
-    "ABSOLUTE_REPOSITORY_PATH/scripts/mcp_server.py",
-    "--repo",
-    "ABSOLUTE_REPOSITORY_PATH"
-  ]
+  "args": ["ABSOLUTE_REPOSITORY_PATH/scripts/mcp_server.py", "--repo", "ABSOLUTE_REPOSITORY_PATH"]
 }
 ```
 
@@ -140,7 +136,7 @@ exercise, grade your explanation, or infer mastery from a page view.
 with exactly the same query, track, and limit. For example:
 
 ```json
-{"query": "pandas", "track": "python", "limit": 10}
+{ "query": "pandas", "track": "python", "limit": 10 }
 ```
 
 Follow-up requests add `"cursor": "THE_RETURNED_CURSOR"` to those same filters.

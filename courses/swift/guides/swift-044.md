@@ -45,17 +45,17 @@ A textual state remains meaningful when a visual marker is unavailable.
 ```swift
 import Foundation
 
-
-
 @main
 struct LessonMain {
-    static func main() async throws {
-        do {
-            func accessibilityText(title: String, complete: Bool) -> String { "\(title), \(complete ? "complete" : "incomplete")" }
-            precondition(accessibilityText(title: "Read", complete: true) == "Read, complete")
-        }
-        print("swift-044: passed")
+  static func main() async throws {
+    do {
+      func accessibilityText(title: String, complete: Bool) -> String {
+        "\(title), \(complete ? "complete" : "incomplete")"
+      }
+      precondition(accessibilityText(title: "Read", complete: true) == "Read, complete")
     }
+    print("swift-044: passed")
+  }
 }
 ```
 
@@ -68,19 +68,17 @@ Saved work and navigation should not break when a learner changes language.
 ```swift
 import Foundation
 
-
-
 @main
 struct LessonMain {
-    static func main() async throws {
-        do {
-            let identity = "lesson-one"
-            let titles = ["en": "Read", "fr": "Lire"]
-            precondition(titles["en"] != titles["fr"])
-            precondition(identity == "lesson-one")
-        }
-        print("swift-044: passed")
+  static func main() async throws {
+    do {
+      let identity = "lesson-one"
+      let titles = ["en": "Read", "fr": "Lire"]
+      precondition(titles["en"] != titles["fr"])
+      precondition(identity == "lesson-one")
     }
+    print("swift-044: passed")
+  }
 }
 ```
 

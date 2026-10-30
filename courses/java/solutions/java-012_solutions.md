@@ -23,8 +23,8 @@ Task: Sum `List.of(1, 2, 3)` and `List.of(1.5, 2.5)` through List<?extends Numbe
 The method needs only to readNumber values, so an extends bound accepts both integer and double lists without permitting unsafe insertion.
 
 ```java
-assert sum(List.of(1,2,3))==6.0;
-assert sum(List.of(1.5,2.5))==4.0;
+assert sum(List.of(1, 2, 3)) == 6.0;
+assert sum(List.of(1.5, 2.5)) == 4.0;
 ```
 
 **Expected:** sums 6.0 and 4.0.
@@ -38,8 +38,9 @@ Task: Append integers1,2 to a List<Number> through List<?superInteger>.
 A Number list can safely receiveInteger values. Reading through thesuper-bounded reference offers less precise type information because the actual list may contain other supertypes.
 
 ```java
-List<Number> numbers=new ArrayList<>(); addTwo(numbers);
-assert numbers.equals(List.of(1,2));
+List<Number> numbers = new ArrayList<>();
+addTwo(numbers);
+assert numbers.equals(List.of(1, 2));
 ```
 
 **Expected:** listcontains1,2.
@@ -53,8 +54,9 @@ Task: CopyList<Integer> intoList<Number> with a bounded generic method.
 The same type parameter links the producer and consumer. It permits safe widening without an unchecked cast.
 
 ```java
-List<Number> destination=new ArrayList<>(); copy(List.of(3,4),destination);
-assert destination.equals(List.of(3,4));
+List<Number> destination = new ArrayList<>();
+copy(List.of(3, 4), destination);
+assert destination.equals(List.of(3, 4));
 ```
 
 **Expected:** destinationcontains3,4.
@@ -68,7 +70,8 @@ Task: Callfirst on a String list and assign directly toString.
 The generic signature carries the element type to the return value. A rawObject return would force callers to cast and shift failures to runtime.
 
 ```java
-String value=first(List.of("alpha","beta")); assert value.equals("alpha");
+String value = first(List.of("alpha", "beta"));
+assert value.equals("alpha");
 ```
 
 **Expected:** result alpha.
@@ -82,8 +85,12 @@ Task: Callfirst on an empty list and require a named failure.
 Type safety does not establish nonemptiness. A separate value-level precondition is still needed for an operation that requires an element.
 
 ```java
-boolean empty=false;
-try { first(List.of()); } catch(NoSuchElementException expected){empty=true;}
+boolean empty = false;
+try {
+  first(List.of());
+} catch (NoSuchElementException expected) {
+  empty = true;
+}
 assert empty;
 ```
 
@@ -98,7 +105,8 @@ Task: Compare runtime classes of ArrayList<String> and ArrayList<Integer>;explai
 Erasure describes runtime representation. It does not repeal the compiler rule thatList<Integer> cannot be assigned toList<Number>. Do not use raw casts to bypass that rule.
 
 ```java
-var strings=new ArrayList<String>(); var integers=new ArrayList<Integer>();
+var strings = new ArrayList<String>();
+var integers = new ArrayList<Integer>();
 assert strings.getClass().equals(integers.getClass());
 assert strings.isEmpty() && integers.isEmpty();
 ```

@@ -23,9 +23,13 @@ The question is: Initialize seed7 decoder and evaluate IDs2,5,7,3 at once.
 The reference recomputes the complete context without relying on cached state. It provides a separate path for checking the incremental implementation.
 
 ```python
-torch.manual_seed(7); model=TinyDecoder(); model.eval(); ids=torch.tensor([[2,5,7,3]])
-with torch.no_grad(): full,_=model(ids)
-assert tuple(full.shape)==(1,4,16)
+torch.manual_seed(7)
+model = TinyDecoder()
+model.eval()
+ids = torch.tensor([[2, 5, 7, 3]])
+with torch.no_grad():
+    full, _ = model(ids)
+assert tuple(full.shape) == (1, 4, 16)
 ```
 
 **Expected:** logits shape(1,4,16).
@@ -39,12 +43,14 @@ The question is: Carry returned K/V through four one-token calls and concatenate
 Both key/value history and position offset must be correct. A cache with valid tensor shapes can still produce wrong logits if positions restart at zero.
 
 ```python
-cache=None; outputs=[]
+cache = None
+outputs = []
 with torch.no_grad():
     for i in range(4):
-        logits,cache=model(ids[:,i:i+1],cache); outputs.append(logits)
-incremental=torch.cat(outputs,dim=1)
-torch.testing.assert_close(incremental,full,atol=1e-6,rtol=0)
+        logits, cache = model(ids[:, i : i + 1], cache)
+        outputs.append(logits)
+incremental = torch.cat(outputs, dim=1)
+torch.testing.assert_close(incremental, full, atol=1e-6, rtol=0)
 ```
 
 **Expected:** incremental logits match full within 1e-6.
@@ -58,7 +64,7 @@ The question is: Check final cache token count and per-head width.
 The time dimension grows with consumed tokens. The head and feature dimensions are fixed by the model and should not grow during a request.
 
 ```python
-assert tuple(cache['k'].shape)==tuple(cache['v'].shape)==(1,2,4,16)
+assert tuple(cache["k"].shape) == tuple(cache["v"].shape) == (1, 2, 4, 16)
 ```
 
 **Expected:** cache shape(1,2,4,16).
@@ -72,14 +78,22 @@ The question is: Associate the cache with requestA and modelv1; reject requestB.
 The numerical decoder cannot infer which person or request owns a tensor. Ownership belongs at the caller boundary and must be tested explicitly.
 
 ```python
-owned={'request':'A','model':'v1','state':cache}
-def acquire(record,request,version):
-    if record['request']!=request or record['model']!=version: raise ValueError('foreign cache')
-    return record['state']
-assert acquire(owned,'A','v1') is cache
-try: acquire(owned,'B','v1')
-except ValueError: pass
-else: raise AssertionError('cross-request cache accepted')
+owned = {"request": "A", "model": "v1", "state": cache}
+
+
+def acquire(record, request, version):
+    if record["request"] != request or record["model"] != version:
+        raise ValueError("foreign cache")
+    return record["state"]
+
+
+assert acquire(owned, "A", "v1") is cache
+try:
+    acquire(owned, "B", "v1")
+except ValueError:
+    pass
+else:
+    raise AssertionError("cross-request cache accepted")
 ```
 
 **Expected:** ValueError for foreign request.
@@ -93,8 +107,9 @@ The question is: Run token 2 with no cache and compare with the first full-prefi
 An empty cache resets both context and position offset. Clearing only metadata while retaining tensors would not restore a fresh request.
 
 ```python
-with torch.no_grad(): fresh,_=model(torch.tensor([[2]]),None)
-torch.testing.assert_close(fresh,full[:,:1],atol=1e-6,rtol=0)
+with torch.no_grad():
+    fresh, _ = model(torch.tensor([[2]]), None)
+torch.testing.assert_close(fresh, full[:, :1], atol=1e-6, rtol=0)
 ```
 
 **Expected:** logits match the original first position.
@@ -108,9 +123,12 @@ The question is: Attempt to use the v1-owned cache with versionv2.
 Keys and values were computed using specific weights and tokenization. Reusing them after either changes can produce inconsistent inference even if the dimensions remain compatible.
 
 ```python
-try: acquire(owned,'A','v2')
-except ValueError: pass
-else: raise AssertionError('stale cache accepted')
+try:
+    acquire(owned, "A", "v2")
+except ValueError:
+    pass
+else:
+    raise AssertionError("stale cache accepted")
 ```
 
 **Expected:** ValueError for stale version.

@@ -53,6 +53,7 @@ The application should report a safe readiness fact.
 
 ```python
 from pathlib import Path
+
 value = Path("/run/secrets/demo").read_text().strip()
 if not value:
     raise ValueError("demo secret is empty")

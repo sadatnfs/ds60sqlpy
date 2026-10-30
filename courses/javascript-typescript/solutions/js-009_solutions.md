@@ -60,7 +60,11 @@ Task: Try quantity 0, quantity 1.5 and negative price.
 A numeric runtime type does not establish a positive integer or nonnegative cent amount. The validator makes those domain rules explicit.
 
 ```javascript
-for (const raw of [{ id: 'A', quantity: 0, priceCents: 2 }, { id: 'A', quantity: 1.5, priceCents: 2 }, { id: 'A', quantity: 1, priceCents: -1 }]) {
+for (const raw of [
+  { id: 'A', quantity: 0, priceCents: 2 },
+  { id: 'A', quantity: 1.5, priceCents: 2 },
+  { id: 'A', quantity: 1, priceCents: -1 },
+]) {
   assert.throws(() => validateOrder(raw), RangeError);
 }
 ```

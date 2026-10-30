@@ -45,8 +45,8 @@ The final audit returns exact event IDs, net cents and state counts. Each part c
 ### Worked example 1
 
 ```scala
-val first = Paid("p1",100L)
-val second = Paid("p2",100L)
+val first = Paid("p1", 100L)
+val second = Paid("p2", 100L)
 assert(first != second)
 assert(first.cents == second.cents)
 val revised = first.copy(cents = 125L)
@@ -60,13 +60,13 @@ Structural equality includes identity, so equal cents do not collapse two events
 
 ```scala
 def describe(event: Event): String = event match {
-  case Paid(id,amount) => s"paid:$id:$amount"
-  case Voided(id,reason) => s"voided:$id:$reason"
-  case Refunded(id,amount) => s"refunded:$id:$amount"
+  case Paid(id, amount)     => s"paid:$id:$amount"
+  case Voided(id, reason)   => s"voided:$id:$reason"
+  case Refunded(id, amount) => s"refunded:$id:$amount"
 }
-assert(describe(Refunded("r1",25L)) == "refunded:r1:25")
-assert(describe(Voided("v1","duplicate")) == "voided:v1:duplicate")
-println(describe(Paid("p1",0L)))
+assert(describe(Refunded("r1", 25L)) == "refunded:r1:25")
+assert(describe(Voided("v1", "duplicate")) == "voided:v1:duplicate")
+println(describe(Paid("p1", 0L)))
 ```
 
 Every case returns a String, so the match is itself a String-valued expression. Each pattern binds only fields available in that state. The refund and void assertions ensure that completeness is tested rather than inferred from a successful paid example.

@@ -328,7 +328,7 @@ scale <span class="syntax-operator">=</span> <span class="syntax-number">2.0</sp
 
 <span class="syntax-keyword">def</span> <span class="syntax-function">objective</span><span class="syntax-punctuation">(</span>first<span class="syntax-punctuation">,</span> second<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     prediction <span class="syntax-operator">=</span> x <span class="syntax-operator">@</span> <span class="syntax-punctuation">(</span>w <span class="syntax-operator">+</span> scale <span class="syntax-operator">*</span> first <span class="syntax-operator">@</span> second<span class="syntax-punctuation">)</span>
-    <span class="syntax-keyword">return</span> np<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span>prediction <span class="syntax-operator">*</span><span class="syntax-operator">*</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> np<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span>prediction<span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
 
 
 prediction <span class="syntax-operator">=</span> x <span class="syntax-operator">@</span> <span class="syntax-punctuation">(</span>w <span class="syntax-operator">+</span> scale <span class="syntax-operator">*</span> a <span class="syntax-operator">@</span> b<span class="syntax-punctuation">)</span>

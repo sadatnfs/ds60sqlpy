@@ -55,7 +55,7 @@ services:
     mem_limit: 1536m
     cpus: 1
     depends_on:
-      master: {condition: service_healthy}
+      master: { condition: service_healthy }
     healthcheck:
       test: [CMD, python3, /integration/service.py, health, --host, worker1]
       interval: 2s
@@ -68,7 +68,7 @@ services:
     mem_limit: 1536m
     cpus: 1
     depends_on:
-      master: {condition: service_healthy}
+      master: { condition: service_healthy }
     healthcheck:
       test: [CMD, python3, /integration/service.py, health, --host, worker2]
       interval: 2s
@@ -81,8 +81,8 @@ services:
     mem_limit: 2048m
     cpus: 1
     depends_on:
-      worker1: {condition: service_healthy}
-      worker2: {condition: service_healthy}
+      worker1: { condition: service_healthy }
+      worker2: { condition: service_healthy }
     volumes:
       - ${INTEGRATION_DIRECTORY:?}:/integration:ro
       - ${PROBE_DIRECTORY:?}:/probe:ro

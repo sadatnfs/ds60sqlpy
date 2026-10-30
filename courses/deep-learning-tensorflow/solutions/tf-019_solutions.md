@@ -23,9 +23,10 @@ The question is: Apply kernel[[1,0],[0,-1]] to the image1..9 arranged3x3.
 Every patch has a bottom-right value four greater than its top-left value. The equal outputs are an arithmetic property of this ramp image, not a generic property of convolution.
 
 ```python
-image=tf.reshape(tf.range(1,10,dtype=tf.float32),(1,3,3,1)); kernel=tf.reshape(tf.constant([1.,0.,0.,-1.]),(2,2,1,1))
-out=tf.nn.conv2d(image,kernel,strides=1,padding='VALID')
-np.testing.assert_array_equal(out.numpy().reshape(2,2),np.full((2,2),-4))
+image = tf.reshape(tf.range(1, 10, dtype=tf.float32), (1, 3, 3, 1))
+kernel = tf.reshape(tf.constant([1.0, 0.0, 0.0, -1.0]), (2, 2, 1, 1))
+out = tf.nn.conv2d(image, kernel, strides=1, padding="VALID")
+np.testing.assert_array_equal(out.numpy().reshape(2, 2), np.full((2, 2), -4))
 ```
 
 **Expected:** all four outputs-4.
@@ -39,8 +40,9 @@ The question is: Reverse both spatial axes and repeat the calculation.
 Kernel orientation distinguishes cross-correlation from mathematical convolution. A symmetric kernel would hide this difference, which is why the asymmetric diagonal kernel is useful.
 
 ```python
-rot=tf.reverse(kernel,axis=[0,1]); changed=tf.nn.conv2d(image,rot,strides=1,padding='VALID')
-np.testing.assert_array_equal(changed.numpy().reshape(2,2),np.full((2,2),4))
+rot = tf.reverse(kernel, axis=[0, 1])
+changed = tf.nn.conv2d(image, rot, strides=1, padding="VALID")
+np.testing.assert_array_equal(changed.numpy().reshape(2, 2), np.full((2, 2), 4))
 ```
 
 **Expected:** all outputs+4.
@@ -54,8 +56,8 @@ The question is: Compare VALID stride1 and stride2.
 A larger stride visits fewer legal patch starts. Shape arithmetic is a useful first check before interpreting any learned filter values.
 
 ```python
-assert tuple(out.shape)==(1,2,2,1)
-assert tuple(tf.nn.conv2d(image,kernel,strides=2,padding='VALID').shape)==(1,1,1,1)
+assert tuple(out.shape) == (1, 2, 2, 1)
+assert tuple(tf.nn.conv2d(image, kernel, strides=2, padding="VALID").shape) == (1, 1, 1, 1)
 ```
 
 **Expected:** shapes(1,2,2,1) and(1,1,1,1).
@@ -69,9 +71,10 @@ The question is: Add10 to the top-left image pixel and inspect which output chan
 The top-left pixel belongs only to the top-left valid patch. This controlled perturbation directly tests the local receptive field.
 
 ```python
-changed_image=image.numpy().copy(); changed_image[0,0,0,0]+=10
-delta=tf.nn.conv2d(changed_image,kernel,strides=1,padding='VALID').numpy()-out.numpy()
-np.testing.assert_array_equal(delta.reshape(2,2),[[10,0],[0,0]])
+changed_image = image.numpy().copy()
+changed_image[0, 0, 0, 0] += 10
+delta = tf.nn.conv2d(changed_image, kernel, strides=1, padding="VALID").numpy() - out.numpy()
+np.testing.assert_array_equal(delta.reshape(2, 2), [[10, 0], [0, 0]])
 ```
 
 **Expected:** only output[0,0] increases10.
@@ -85,8 +88,9 @@ The question is: Construct a bias-free Conv2D layer with2 filters of size2x2 on 
 Each output channel has its own four kernel coefficients. Reusing the layer at more spatial locations increases computation but does not create a separate weight set for each location.
 
 ```python
-layer=tf.keras.layers.Conv2D(2,2,use_bias=False); layer(image)
-assert layer.count_params()==8
+layer = tf.keras.layers.Conv2D(2, 2, use_bias=False)
+layer(image)
+assert layer.count_params() == 8
 ```
 
 **Expected:** 8 trainable scalars regardless of image height.
@@ -100,8 +104,8 @@ The question is: Add100 to every pixel and compare outputs under the zero-sum ke
 The kernel coefficients sum to zero, so a constant offset cancels. This invariance belongs to this kernel; a general learned kernel need not preserve it.
 
 ```python
-offset=tf.nn.conv2d(image+100,kernel,strides=1,padding='VALID')
-np.testing.assert_array_equal(offset.numpy(),out.numpy())
+offset = tf.nn.conv2d(image + 100, kernel, strides=1, padding="VALID")
+np.testing.assert_array_equal(offset.numpy(), out.numpy())
 ```
 
 **Expected:** output unchanged.

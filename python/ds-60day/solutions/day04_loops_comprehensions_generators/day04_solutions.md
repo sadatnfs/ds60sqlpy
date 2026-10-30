@@ -166,8 +166,8 @@ Trace iteration boundaries and laziness. Prefer a clear loop when a comprehensio
 
 ```python
 stream = (n * n for n in range(4))
-first = next(stream)        # Consumes 0 ** 2.
-remaining = list(stream)    # Continues at 1; it does not restart.
+first = next(stream)  # Consumes 0 ** 2.
+remaining = list(stream)  # Continues at 1; it does not restart.
 assert first == 0
 assert remaining == [1, 4, 9]
 
@@ -194,14 +194,14 @@ def batched(items: Iterable[T], size: int) -> Iterator[list[T]]:
         batch.append(item)
         if len(batch) == size:
             yield batch
-            batch = []      # New list: already-yielded batches stay unchanged.
+            batch = []  # New list: already-yielded batches stay unchanged.
     if batch:
-        yield batch         # Preserve the final partial batch.
+        yield batch  # Preserve the final partial batch.
 
 
 values = [3, -1, -2, 4]
 non_negative = [value for value in values if value >= 0]
-assert values == [3, -1, -2, 4]   # The input was not mutated mid-iteration.
+assert values == [3, -1, -2, 4]  # The input was not mutated mid-iteration.
 assert non_negative == [3, 4]
 
 
@@ -219,7 +219,5 @@ except ValueError as error:
     assert "size must be positive" in str(error)
 else:
     raise AssertionError("zero batch size should raise")
-assert [list(evens_through(n)) for n in (-1, 0, 1, 2, 3)] == [
-    [], [0], [0], [0, 2], [0, 2]
-]
+assert [list(evens_through(n)) for n in (-1, 0, 1, 2, 3)] == [[], [0], [0], [0, 2], [0, 2]]
 ```

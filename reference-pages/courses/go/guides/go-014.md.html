@@ -255,8 +255,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		<span class="syntax-punctuation">}</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The outputs are 0, 4 and 10.</p>
 <p>A wrong implementation that only returns its input fails the outside cases; one that always returns an endpoint fails the interior case.</p>
 <h4 id="worked-example-2-include-exact-endpoints">Worked example 2: Include exact endpoints<a class="heading-anchor" href="#worked-example-2-include-exact-endpoints" aria-label="Link to this section">#</a></h4>
@@ -306,8 +305,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>clamp<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span> <span class="syntax-operator">&amp;&amp;</span> clamp<span class="syntax-punctuation">(</span><span class="syntax-number">10</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;endpoints&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Both endpoints are preserved.</p>
 <p>Endpoint tests distinguish inclusive boundaries from off-by-one policies. They should be named in the API contract.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>

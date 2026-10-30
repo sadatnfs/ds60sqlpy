@@ -28,7 +28,7 @@ assert jax.tree.structure(p) == jax.tree.structure(g)
 for a, b in zip(jax.tree.leaves(p), jax.tree.leaves(g)):
     assert a.shape == b.shape
     assert bool(jnp.isfinite(b).all())
-assert sum(float(jnp.vdot(x, x)) for x in jax.tree.leaves(g)) > 0.
+assert sum(float(jnp.vdot(x, x)) for x in jax.tree.leaves(g)) > 0.0
 ```
 
 ## Exercise 3: Check one compiled update
@@ -54,7 +54,7 @@ The numerical value is an observation to report, not a threshold tuned on these 
 p = train()
 value = objective(p, heldout_x, heldout_y)
 assert heldout_x.shape[0] == 2
-assert bool(jnp.isfinite(value)) and float(value) >= 0.
+assert bool(jnp.isfinite(value)) and float(value) >= 0.0
 ```
 
 ## Exercise 5: Separate training from inference

@@ -105,18 +105,25 @@ These worked excerpts come from `sql/postgres-60day/day16_window_functions_funda
 
 ```sql
 WITH category_totals AS (
-  SELECT p.category,
-         SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS revenue
-  FROM order_items oi
-  JOIN products p ON p.product_id = oi.product_id
-  GROUP BY p.category
+  SELECT
+    p.category,
+    SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS revenue
+  FROM
+    order_items oi
+    JOIN products p ON p.product_id = oi.product_id
+  GROUP BY
+    p.category
 )
-SELECT category,
-       ROUND(revenue, 2) AS category_revenue,
-       ROUND(SUM(revenue) OVER (), 2) AS total_revenue,
-       ROUND(revenue / NULLIF(SUM(revenue) OVER (), 0), 4) AS category_share
-FROM category_totals
-ORDER BY category_revenue DESC, category;
+SELECT
+  category,
+  ROUND(revenue, 2) AS category_revenue,
+  ROUND(SUM(revenue) OVER (), 2) AS total_revenue,
+  ROUND(revenue / NULLIF (SUM(revenue) OVER (), 0), 4) AS category_share
+FROM
+  category_totals
+ORDER BY
+  category_revenue DESC,
+  category;
 ```
 
 **How to read it:** Example 1: Start with `order_items`, and `products` in `FROM`/`JOIN`; let `GROUP BY` collapse rows to its grouping keys; let each `OVER` expression calculate across related rows without collapsing them. The final `SELECT` displays `category`, `category_revenue`, `total_revenue`, and `category_share`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
@@ -126,14 +133,19 @@ ORDER BY category_revenue DESC, category;
 ### Example 2
 
 ```sql
-SELECT o.order_id,
-       o.customer_id,
-       o.order_date,
-       o.total_amount,
-       ROUND(AVG(o.total_amount) OVER (PARTITION BY o.customer_id),2) AS avg_customer_order,
-       COUNT(*) OVER (PARTITION BY o.customer_id) AS orders_per_customer
-FROM orders o
-ORDER BY o.customer_id, o.order_date, o.order_id
+SELECT
+  o.order_id,
+  o.customer_id,
+  o.order_date,
+  o.total_amount,
+  ROUND(AVG(o.total_amount) OVER (PARTITION BY o.customer_id), 2) AS avg_customer_order,
+  COUNT(*) OVER (PARTITION BY o.customer_id) AS orders_per_customer
+FROM
+  orders o
+ORDER BY
+  o.customer_id,
+  o.order_date,
+  o.order_id
 LIMIT 100;
 ```
 

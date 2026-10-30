@@ -107,7 +107,9 @@ historical execution without an actual source-bound receipt.
 
 ```scala
 val evaluation = PythonBridge.evaluateShared(
-  observations, specification, artifactJson,
+  observations,
+  specification,
+  artifactJson,
   """{"parameters":[2,0]}""",
   """{"reduction":"sum"}"""
 )

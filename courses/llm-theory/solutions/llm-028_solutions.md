@@ -23,9 +23,13 @@ The question is: Use train sequences[1,2,3,4],[1,2,4,3] and holdout[1,3,2,4] wit
 The literal corpus prevents hidden downloads and makes every target visible. Document identity is separate from token identity because repeated tokens are expected across splits.
 
 ```python
-import hashlib,json
-docs=[[1,2,3,4],[1,2,4,3]]; held=[1,3,2,4]; split={'train':['a','b'],'test':['c']}; digest=hashlib.sha256(json.dumps(split,sort_keys=True).encode()).hexdigest()
-assert len(docs)==2 and len(held)-1==3 and len(digest)==64
+import hashlib, json
+
+docs = [[1, 2, 3, 4], [1, 2, 4, 3]]
+held = [1, 3, 2, 4]
+split = {"train": ["a", "b"], "test": ["c"]}
+digest = hashlib.sha256(json.dumps(split, sort_keys=True).encode()).hexdigest()
+assert len(docs) == 2 and len(held) - 1 == 3 and len(digest) == 64
 ```
 
 **Expected:** train2 documents;holdout1;context3.
@@ -39,10 +43,23 @@ The question is: Initialize seed11 and train20 Adam(.01) updates on the two trai
 The budget and architecture are fixed before held-out evaluation. Training loss is retained as diagnostic evidence rather than a substitute for a test score.
 
 ```python
-torch.manual_seed(11); model=TinyDecoder(); opt=torch.optim.Adam(model.parameters(),lr=.01); batch=torch.tensor(docs); curve=[]
+torch.manual_seed(11)
+model = TinyDecoder()
+opt = torch.optim.Adam(model.parameters(), lr=0.01)
+batch = torch.tensor(docs)
+curve = []
 for _ in range(20):
-    opt.zero_grad(set_to_none=True); logits,_=model(batch[:,:-1]); loss=F.cross_entropy(logits.reshape(-1,16),batch[:,1:].reshape(-1)); loss.backward(); opt.step(); curve.append(loss.item())
-assert len(curve)==20 and np.isfinite(curve).all() and sum(p.numel() for p in model.parameters())<50000
+    opt.zero_grad(set_to_none=True)
+    logits, _ = model(batch[:, :-1])
+    loss = F.cross_entropy(logits.reshape(-1, 16), batch[:, 1:].reshape(-1))
+    loss.backward()
+    opt.step()
+    curve.append(loss.item())
+assert (
+    len(curve) == 20
+    and np.isfinite(curve).all()
+    and sum(p.numel() for p in model.parameters()) < 50000
+)
 ```
 
 **Expected:** 20 finite losses;parameter count below50000.
@@ -56,11 +73,13 @@ The question is: Build16x16 transition counts from training documents and add-on
 The baseline uses the same vocabulary as the neural model. Changing vocabulary size would change the smoothing denominator and make the comparison less direct.
 
 ```python
-counts=np.zeros((16,16))
+counts = np.zeros((16, 16))
 for doc in docs:
-    for a,b in zip(doc[:-1],doc[1:]): counts[a,b]+=1
-prob=(counts+1)/(counts.sum(1,keepdims=True)+16)
-assert counts.sum()==6; np.testing.assert_allclose(prob.sum(1),1,atol=1e-12,rtol=0)
+    for a, b in zip(doc[:-1], doc[1:]):
+        counts[a, b] += 1
+prob = (counts + 1) / (counts.sum(1, keepdims=True) + 16)
+assert counts.sum() == 6
+np.testing.assert_allclose(prob.sum(1), 1, atol=1e-12, rtol=0)
 ```
 
 **Expected:** total6 observed transitions; every row sums1.
@@ -74,10 +93,13 @@ The question is: Compute both mean losses on the three held-out target events.
 The lesson does not promise that a tiny trained transformer beats the count model. The observed comparison is the result, including when it is unfavorable.
 
 ```python
-model.eval(); sequence=torch.tensor([held])
-with torch.no_grad(): z,_=model(sequence[:,:-1]); neural=F.cross_entropy(z.reshape(-1,16),sequence[:,1:].reshape(-1)).item()
-baseline=-np.mean([np.log(prob[a,b]) for a,b in zip(held[:-1],held[1:])])
-assert np.isfinite([neural,baseline]).all() and len(held)-1==3
+model.eval()
+sequence = torch.tensor([held])
+with torch.no_grad():
+    z, _ = model(sequence[:, :-1])
+    neural = F.cross_entropy(z.reshape(-1, 16), sequence[:, 1:].reshape(-1)).item()
+baseline = -np.mean([np.log(prob[a, b]) for a, b in zip(held[:-1], held[1:])])
+assert np.isfinite([neural, baseline]).all() and len(held) - 1 == 3
 ```
 
 **Expected:** both finite; denominator3; no required winner.
@@ -92,8 +114,9 @@ Training should not weaken the architecture information boundary. Testing after 
 
 ```python
 with torch.no_grad():
-    full,_=model(sequence[:,:-1]); prefix,_=model(sequence[:,:2])
-torch.testing.assert_close(prefix,full[:,:2],atol=1e-6,rtol=0)
+    full, _ = model(sequence[:, :-1])
+    prefix, _ = model(sequence[:, :2])
+torch.testing.assert_close(prefix, full[:, :2], atol=1e-6, rtol=0)
 ```
 
 **Expected:** prefix agreement within 1e-6.
@@ -107,9 +130,19 @@ The question is: Hash ordered parameter bytes and build a report with3 held-out 
 Hashes identify this run state but do not prove the experiment is valid. The report must retain the actual split and failure analysis alongside those fingerprints.
 
 ```python
-model_hash=hashlib.sha256(b''.join(p.detach().numpy().tobytes() for p in model.parameters())).hexdigest()
-report={'model_hash':model_hash,'split_hash':digest,'updates':20,'targets':3,'neural_loss':neural,'baseline_loss':float(baseline),'limit':'One authored held-out document.'}
-assert len(model_hash)==64 and report['targets']==3 and report['updates']==20
+model_hash = hashlib.sha256(
+    b"".join(p.detach().numpy().tobytes() for p in model.parameters())
+).hexdigest()
+report = {
+    "model_hash": model_hash,
+    "split_hash": digest,
+    "updates": 20,
+    "targets": 3,
+    "neural_loss": neural,
+    "baseline_loss": float(baseline),
+    "limit": "One authored held-out document.",
+}
+assert len(model_hash) == 64 and report["targets"] == 3 and report["updates"] == 20
 ```
 
 **Expected:** two64-character hashes and explicit tiny-corpus limitation.

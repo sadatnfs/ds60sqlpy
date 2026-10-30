@@ -218,17 +218,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> hello-route
 <span class="syntax-tag">spec</span><span class="syntax-punctuation">:</span>
   <span class="syntax-tag">parentRefs</span><span class="syntax-punctuation">:</span>
-  <span class="syntax-punctuation">-</span> <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> lesson-gateway
+    <span class="syntax-punctuation">-</span> <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> lesson-gateway
   <span class="syntax-tag">hostnames</span><span class="syntax-punctuation">:</span>
-  <span class="syntax-punctuation">-</span> lesson.local
+    <span class="syntax-punctuation">-</span> lesson.local
   <span class="syntax-tag">rules</span><span class="syntax-punctuation">:</span>
-  <span class="syntax-punctuation">-</span> <span class="syntax-tag">matches</span><span class="syntax-punctuation">:</span>
-    <span class="syntax-punctuation">-</span> <span class="syntax-tag">path</span><span class="syntax-punctuation">:</span>
-        <span class="syntax-tag">type</span><span class="syntax-punctuation">:</span> PathPrefix
-        <span class="syntax-tag">value</span><span class="syntax-punctuation">:</span> /version
-    <span class="syntax-tag">backendRefs</span><span class="syntax-punctuation">:</span>
-    <span class="syntax-punctuation">-</span> <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> hello
-      <span class="syntax-tag">port</span><span class="syntax-punctuation">:</span> 8080</code></pre>
+    <span class="syntax-punctuation">-</span> <span class="syntax-tag">matches</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-punctuation">-</span> <span class="syntax-tag">path</span><span class="syntax-punctuation">:</span>
+            <span class="syntax-tag">type</span><span class="syntax-punctuation">:</span> PathPrefix
+            <span class="syntax-tag">value</span><span class="syntax-punctuation">:</span> /version
+      <span class="syntax-tag">backendRefs</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-punctuation">-</span> <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> hello
+          <span class="syntax-tag">port</span><span class="syntax-punctuation">:</span> 8080</code></pre>
 <p><strong>Expected:</strong> The route attaches to lesson-gateway for lesson.local and forwards /version to hello:8080.</p>
 <h4 id="worked-example-2-compare-accepted-and-delivered">Worked example 2: Compare accepted and delivered<a class="heading-anchor" href="#worked-example-2-compare-accepted-and-delivered" aria-label="Link to this section">#</a></h4>
 <p>Synthetic status:Accepted=True, ResolvedRefs=True for the current generation. A matching client still receives503 because the backend has no ready endpoints.</p>

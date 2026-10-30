@@ -111,7 +111,7 @@ Run A defines visit and prints north within one process. Run B deliberately omit
 
 ```python
 run_a_source = '#%%\nvisit = "north"\nprint(visit)\n'
-run_b_source = '#%%\nprint(visit)\n'
+run_b_source = "#%%\nprint(visit)\n"
 run_c_source = '#%%\nvisit = "south"\nprint(visit)\n'
 print("Run A, B, and repaired B are separate submissions.")
 print("Expected: north; then NameError for visit; then south.")
@@ -134,7 +134,10 @@ import importlib.util
 
 print("math:", importlib.util.find_spec("math") is not None)
 print("numpy:", importlib.util.find_spec("numpy") is not None)
-print("intentionally absent:", importlib.util.find_spec("lesson_day01_package_that_does_not_exist") is not None)
+print(
+    "intentionally absent:",
+    importlib.util.find_spec("lesson_day01_package_that_does_not_exist") is not None,
+)
 assert importlib.util.find_spec("math") is not None
 assert importlib.util.find_spec("lesson_day01_package_that_does_not_exist") is None
 ```

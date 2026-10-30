@@ -235,7 +235,9 @@ assert<span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation
 <h3 id="exercise-5-observe-strict-module-function-calls">Exercise 5: Observe strict module function calls<a class="heading-anchor" href="#exercise-5-observe-strict-module-function-calls" aria-label="Link to this section">#</a></h3>
 <p>Task: Call an ordinary function without a receiver and inspect this.</p>
 <p>ES modules use strict semantics. The callsite determines this for an ordinary function; it is not automatically the global object.</p>
-<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">function</span> receiver<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">return</span> <span class="syntax-keyword">this</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">function</span> receiver<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">return</span> <span class="syntax-keyword">this</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
 assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>receiver<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">undefined</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> this is undefined.</p>
 <p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>

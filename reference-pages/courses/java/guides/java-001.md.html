@@ -219,13 +219,12 @@ java -ea Main</code></pre>
 
 <span class="syntax-keyword">public</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Main</span> <span class="syntax-punctuation">{</span>
 
-    <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span>
-        String message <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Hello, Java</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
-        System<span class="syntax-punctuation">.</span><span class="syntax-attribute">out</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">println</span><span class="syntax-punctuation">(</span>message<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-        <span class="syntax-keyword">assert</span> message<span class="syntax-punctuation">.</span><span class="syntax-attribute">equals</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Hello, Java</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-    <span class="syntax-punctuation">}</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+  <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span>
+    String message <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Hello, Java</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
+    System<span class="syntax-punctuation">.</span><span class="syntax-attribute">out</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">println</span><span class="syntax-punctuation">(</span>message<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">assert</span> message<span class="syntax-punctuation">.</span><span class="syntax-attribute">equals</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Hello, Java</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected:</strong> one line Hello, Java.</p>
 <h4 id="example-b-evaluate-before-printing">Example B: Evaluate before printing<a class="heading-anchor" href="#example-b-evaluate-before-printing" aria-label="Link to this section">#</a></h4>
 <p>The numeric addition happens before concatenation because it is assigned first. Mixing strings and numbers in one expression can change which plus operators mean concatenation.</p>
@@ -233,18 +232,17 @@ java -ea Main</code></pre>
 
 <span class="syntax-keyword">public</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Main</span> <span class="syntax-punctuation">{</span>
 
-    <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span>
-        String message <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Hello, Java</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
-        System<span class="syntax-punctuation">.</span><span class="syntax-attribute">out</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">println</span><span class="syntax-punctuation">(</span>message<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-        <span class="syntax-keyword">assert</span> message<span class="syntax-punctuation">.</span><span class="syntax-attribute">equals</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Hello, Java</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span>
+    String message <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Hello, Java</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
+    System<span class="syntax-punctuation">.</span><span class="syntax-attribute">out</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">println</span><span class="syntax-punctuation">(</span>message<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">assert</span> message<span class="syntax-punctuation">.</span><span class="syntax-attribute">equals</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Hello, Java</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 
-        <span class="syntax-keyword">int</span> total <span class="syntax-operator">=</span> <span class="syntax-number">2</span> <span class="syntax-operator">+</span> <span class="syntax-number">3</span><span class="syntax-punctuation">;</span>
-        String line <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">total=</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">+</span> total<span class="syntax-punctuation">;</span>
-        <span class="syntax-keyword">assert</span> total <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">5</span><span class="syntax-punctuation">;</span>
-        <span class="syntax-keyword">assert</span> line<span class="syntax-punctuation">.</span><span class="syntax-attribute">equals</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">total=5</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-    <span class="syntax-punctuation">}</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+    <span class="syntax-keyword">int</span> total <span class="syntax-operator">=</span> <span class="syntax-number">2</span> <span class="syntax-operator">+</span> <span class="syntax-number">3</span><span class="syntax-punctuation">;</span>
+    String line <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">total=</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">+</span> total<span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">assert</span> total <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">5</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">assert</span> line<span class="syntax-punctuation">.</span><span class="syntax-attribute">equals</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">total=5</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected:</strong> integer5 and text total=5.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
 <p>Read the source from the entry point and name each value before executing it. Identify which operations create new values, which mutate existing state and which can fail. Predict the first observable output or assertion result. For a compile-time failure, explain which source rule is violated before discussing runtime state: a program that did not compile never reached its main method. Keep normal, boundary and invalid inputs separate so each check has a clear purpose.</p>

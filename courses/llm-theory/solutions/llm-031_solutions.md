@@ -23,8 +23,10 @@ The question is: Use sequence[1,2,5,6,3], where1,2 are prompt and5,6,3 answer.
 The first answer token5 is a target at position1 in the shifted array. Masking by unshifted input positions would introduce an off-by-one error.
 
 ```python
-sequence=torch.tensor([[1,2,5,6,3]]); targets=sequence[:,1:]; answer=torch.tensor([[False,True,True,True]])
-assert targets.tolist()==[[2,5,6,3]] and int(answer.sum())==3
+sequence = torch.tensor([[1, 2, 5, 6, 3]])
+targets = sequence[:, 1:]
+answer = torch.tensor([[False, True, True, True]])
+assert targets.tolist() == [[2, 5, 6, 3]] and int(answer.sum()) == 3
 ```
 
 **Expected:** targets[2,5,6,3];mask[False,True,True,True].
@@ -38,9 +40,10 @@ The question is: Use zero vocabulary8 logits and replace prompt targets with -10
 Uniform logits make each target loss identical. The mean stayslog8, but the active count differs from full-sequence training and affects summed objectives.
 
 ```python
-logits=torch.zeros((1,4,8)); masked=targets.masked_fill(~answer,-100)
-loss=F.cross_entropy(logits.reshape(-1,8),masked.reshape(-1),ignore_index=-100)
-np.testing.assert_allclose(loss.item(),np.log(8),atol=1e-6,rtol=0)
+logits = torch.zeros((1, 4, 8))
+masked = targets.masked_fill(~answer, -100)
+loss = F.cross_entropy(logits.reshape(-1, 8), masked.reshape(-1), ignore_index=-100)
+np.testing.assert_allclose(loss.item(), np.log(8), atol=1e-6, rtol=0)
 ```
 
 **Expected:** 3 active targets;meanlog8.
@@ -54,9 +57,13 @@ The question is: Calculate full-sequence and answer-only summed losses.
 Comparing unlabelled totals would confuse different numbers of supervised events with different model quality. Report the denominator alongside any mean.
 
 ```python
-full=F.cross_entropy(logits.reshape(-1,8),targets.reshape(-1),reduction='sum')
-answer_sum=F.cross_entropy(logits.reshape(-1,8),masked.reshape(-1),ignore_index=-100,reduction='sum')
-np.testing.assert_allclose([full.item(),answer_sum.item()],[4*np.log(8),3*np.log(8)],atol=1e-6,rtol=0)
+full = F.cross_entropy(logits.reshape(-1, 8), targets.reshape(-1), reduction="sum")
+answer_sum = F.cross_entropy(
+    logits.reshape(-1, 8), masked.reshape(-1), ignore_index=-100, reduction="sum"
+)
+np.testing.assert_allclose(
+    [full.item(), answer_sum.item()], [4 * np.log(8), 3 * np.log(8)], atol=1e-6, rtol=0
+)
 ```
 
 **Expected:** 4log8 versus3log8.
@@ -70,8 +77,11 @@ The question is: Backpropagate answer-only loss and examine the first logit posi
 The prompt remains context for later predictions even though its own target event is ignored. Excluding its loss is not the same as removing prompt input tokens.
 
 ```python
-v=logits.clone().requires_grad_(); F.cross_entropy(v.reshape(-1,8),masked.reshape(-1),ignore_index=-100).backward()
-assert torch.count_nonzero(v.grad[:,0]).item()==0 and torch.count_nonzero(v.grad[:,1:]).item()>0
+v = logits.clone().requires_grad_()
+F.cross_entropy(v.reshape(-1, 8), masked.reshape(-1), ignore_index=-100).backward()
+assert (
+    torch.count_nonzero(v.grad[:, 0]).item() == 0 and torch.count_nonzero(v.grad[:, 1:]).item() > 0
+)
 ```
 
 **Expected:** first-position gradient all zero;answer gradients nonzero.
@@ -85,7 +95,8 @@ The question is: Assign two paraphrased prompts to familyT and split them across
 Different surface wording can preserve the same task template. Grouped evaluation tests transfer beyond that family rather than rewarding memorization of a familiar form.
 
 ```python
-family={'p1':'T','p2':'T'}; assert {family['p1']} & {family['p2']}=={'T'}
+family = {"p1": "T", "p2": "T"}
+assert {family["p1"]} & {family["p2"]} == {"T"}
 ```
 
 **Expected:** family intersectionT.
@@ -99,11 +110,14 @@ The question is: Set an all-false answer mask and check the denominator before t
 A record with no supervised answer should not contribute an invented zero loss. Handle it as a data-quality failure or an explicitly excluded record.
 
 ```python
-empty=torch.zeros((1,4),dtype=torch.bool)
+empty = torch.zeros((1, 4), dtype=torch.bool)
 try:
-    if int(empty.sum())==0: raise ValueError('answer targets required')
-except ValueError: pass
-else: raise AssertionError('empty answer accepted')
+    if int(empty.sum()) == 0:
+        raise ValueError("answer targets required")
+except ValueError:
+    pass
+else:
+    raise AssertionError("empty answer accepted")
 ```
 
 **Expected:** no active answer targets; explicitValueError.

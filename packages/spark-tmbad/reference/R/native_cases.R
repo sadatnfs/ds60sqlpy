@@ -177,8 +177,10 @@ reference_growth_case <- function(engine, seed) {
     ),
     uncertainty = "new-group observation/latent moments; population-parameter uncertainty excluded",
     metrics = metrics,
-    fixture = list(training = data.frame(group = group, time = time, y = y),
-      future_time = future_time, heldout_future_y = future_y, truth = truth)
+    fixture = list(
+      training = data.frame(group = group, time = time, y = y),
+      future_time = future_time, heldout_future_y = future_y, truth = truth
+    )
   )
 }
 
@@ -257,7 +259,9 @@ reference_panel_case <- function(engine, seed) {
     fit_time_maximum = max(training_time), forecast_time_minimum = min(future_time),
     provenance = "Original synthetic panel inspired by AFModel's scientific topics; no operational code or data reused",
     metrics = metrics,
-    fixture = list(training = data.frame(group = group, time = time, x = x, y = y),
-      future_time = future_time, future_x = future_x, heldout_future_y = future_y, truth = truth)
+    fixture = list(
+      training = data.frame(group = group, time = time, x = x, y = y),
+      future_time = future_time, future_x = future_x, heldout_future_y = future_y, truth = truth
+    )
   ))
 }

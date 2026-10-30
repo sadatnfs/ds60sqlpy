@@ -30,8 +30,14 @@ The executor is synchronous; the registered reaction is not. The intermediate as
 
 ```javascript
 const trace = [];
-const pending = new Promise(resolve => { trace.push('executor'); resolve(3); });
-const observed = pending.then(value => { trace.push('reaction'); return value; });
+const pending = new Promise((resolve) => {
+  trace.push('executor');
+  resolve(3);
+});
+const observed = pending.then((value) => {
+  trace.push('reaction');
+  return value;
+});
 trace.push('sync');
 assert.deepEqual(trace, ['executor', 'sync']);
 assert.equal(await observed, 3);
@@ -50,9 +56,11 @@ Throwing inside a reaction rejects the Promise returned by then. catch is a reje
 
 ```javascript
 const result = await Promise.resolve(4)
-  .then(value => value * 2)
-  .then(value => { throw new Error(`bad value ${value}`); })
-  .catch(error => error.message);
+  .then((value) => value * 2)
+  .then((value) => {
+    throw new Error(`bad value ${value}`);
+  })
+  .catch((error) => error.message);
 assert.equal(result, 'bad value 8');
 ```
 
@@ -69,8 +77,12 @@ Completion order and result indexing are separate. all associates each result wi
 ```javascript
 let resolveFirst;
 let resolveSecond;
-const first = new Promise(resolve => { resolveFirst = resolve; });
-const second = new Promise(resolve => { resolveSecond = resolve; });
+const first = new Promise((resolve) => {
+  resolveFirst = resolve;
+});
+const second = new Promise((resolve) => {
+  resolveSecond = resolve;
+});
 const result = Promise.all([first, second]);
 resolveSecond('second');
 resolveFirst('first');
@@ -108,7 +120,12 @@ A selection combinator is not a cancellation protocol. If the losing task owns a
 ```javascript
 let finish;
 const trace = [];
-const slow = new Promise(resolve => { finish = resolve; }).then(value => { trace.push(value); return value; });
+const slow = new Promise((resolve) => {
+  finish = resolve;
+}).then((value) => {
+  trace.push(value);
+  return value;
+});
 assert.equal(await Promise.race([Promise.resolve('fast'), slow]), 'fast');
 finish('late');
 assert.equal(await slow, 'late');

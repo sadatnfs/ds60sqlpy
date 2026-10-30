@@ -172,7 +172,7 @@ Retrieved text can contain instructions such as “ignore previous rules.” The
 request builder serializes every hit as JSON with:
 
 ```json
-{"document_id":"course-db","text":"...","trust":"untrusted_document_data"}
+{ "document_id": "course-db", "text": "...", "trust": "untrusted_document_data" }
 ```
 
 The system boundary states that document text is data, citations must come from

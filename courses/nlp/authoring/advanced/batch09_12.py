@@ -94,9 +94,12 @@ Inspect false positives, false negatives, unknown-token rates and performance by
 
 ```python
 import numpy as np
-x=np.array([2.,1.]);w=np.array([2.,-1.]);z=x@w-.5
-p=np.exp(-np.logaddexp(0.,-z))
-print(z,p)
+
+x = np.array([2.0, 1.0])
+w = np.array([2.0, -1.0])
+z = x @ w - 0.5
+p = np.exp(-np.logaddexp(0.0, -z))
+print(z, p)
 ```
 
 Expected: 2.5 and approximately 0.92414. The vector order is part of the contract.""",
@@ -106,8 +109,9 @@ Expected: 2.5 and approximately 0.92414. The vector order is part of the contrac
             """Probabilities [0.2,0.4,0.8] yield [false,false,true] at threshold 0.5 and [false,true,true] at 0.3. No retraining is needed to change the action threshold. For labels [1,0,1,0], probabilities [0.9,0.9,0.1,0.1] have Brier score 0.41; the less extreme [0.6,0.6,0.4,0.4] score 0.26. The second array is better on these four labels, but this does not establish population calibration.
 
 ```python
-p=np.array([.9,.9,.1,.1]);y=np.array([1,0,1,0])
-print(np.mean((p-y)**2))
+p = np.array([0.9, 0.9, 0.1, 0.1])
+y = np.array([1, 0, 1, 0])
+print(np.mean((p - y) ** 2))
 ```
 
 Expected: 0.41. Retain labels and probabilities together so the denominator and error units are explicit.""",

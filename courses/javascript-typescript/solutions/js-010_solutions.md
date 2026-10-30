@@ -29,12 +29,15 @@ Task: Import a mutable counter and its increment function, then inspect the coun
 The importer receives a binding view. Copying count into a local number would instead preserve the value read at that moment. The distinction becomes visible only after the exporter changes state.
 
 ```javascript
-await withModules({ 'counter.mjs': 'export let count = 0; export function increment() { count += 1; }' }, async directory => {
-  const module = await import(pathToFileURL(join(directory, 'counter.mjs')).href);
-  assert.equal(module.count, 0);
-  module.increment();
-  assert.equal(module.count, 1);
-});
+await withModules(
+  { 'counter.mjs': 'export let count = 0; export function increment() { count += 1; }' },
+  async (directory) => {
+    const module = await import(pathToFileURL(join(directory, 'counter.mjs')).href);
+    assert.equal(module.count, 0);
+    module.increment();
+    assert.equal(module.count, 1);
+  },
+);
 ```
 
 **Expected:** count changes from 0 to 1 through the imported namespace.
@@ -48,10 +51,16 @@ Task: Create a main module importing twice from ./math.mjs, then call its export
 The relative path is resolved from the importing file, not from the process working directory. Naming the .mjs extension makes the loader contract explicit.
 
 ```javascript
-await withModules({ 'math.mjs': 'export const twice = value => 2 * value;', 'main.mjs': "import { twice } from './math.mjs'; export const answer = twice(4);" }, async directory => {
-  const module = await import(pathToFileURL(join(directory, 'main.mjs')).href);
-  assert.equal(module.answer, 8);
-});
+await withModules(
+  {
+    'math.mjs': 'export const twice = value => 2 * value;',
+    'main.mjs': "import { twice } from './math.mjs'; export const answer = twice(4);",
+  },
+  async (directory) => {
+    const module = await import(pathToFileURL(join(directory, 'main.mjs')).href);
+    assert.equal(module.answer, 8);
+  },
+);
 ```
 
 **Expected:** answer equals 8.
@@ -65,7 +74,7 @@ Task: Import one URL twice and compare the namespace and exported object.
 A module is not a factory that automatically resets on each import. For independent instances, export a factory function and call it explicitly.
 
 ```javascript
-await withModules({ 'state.mjs': 'export const state = { visits: 0 };' }, async directory => {
+await withModules({ 'state.mjs': 'export const state = { visits: 0 };' }, async (directory) => {
   const url = pathToFileURL(join(directory, 'state.mjs')).href;
   const first = await import(url);
   const second = await import(url);
@@ -85,7 +94,7 @@ Task: Import a .cjs file exporting an object through its default binding.
 The default binding is the intentional CommonJS export-object boundary here. This example does not depend on heuristic named-export detection.
 
 ```javascript
-await withModules({ 'legacy.cjs': "module.exports = { label: 'legacy' };" }, async directory => {
+await withModules({ 'legacy.cjs': "module.exports = { label: 'legacy' };" }, async (directory) => {
   const module = await import(pathToFileURL(join(directory, 'legacy.cjs')).href);
   assert.equal(module.default.label, 'legacy');
 });
@@ -102,8 +111,11 @@ Task: Import a module with a nonexistent relative dependency and preserve the lo
 Missing dependency resolution is a loader failure before useful module evaluation. Catching every import error and returning an empty object would disguise a broken dependency graph.
 
 ```javascript
-await withModules({ 'broken.mjs': "import './missing.mjs';" }, async directory => {
-  await assert.rejects(import(pathToFileURL(join(directory, 'broken.mjs')).href), error => error.code === 'ERR_MODULE_NOT_FOUND');
+await withModules({ 'broken.mjs': "import './missing.mjs';" }, async (directory) => {
+  await assert.rejects(
+    import(pathToFileURL(join(directory, 'broken.mjs')).href),
+    (error) => error.code === 'ERR_MODULE_NOT_FOUND',
+  );
 });
 ```
 
@@ -118,9 +130,11 @@ Task: Attempt to assign an exported binding from the importer.
 Live does not mean writable from every importer. The exporter owns assignment to its binding. Expose a deliberate operation when mutation is part of the public contract.
 
 ```javascript
-await withModules({ 'fixed.mjs': 'export let value = 3;' }, async directory => {
+await withModules({ 'fixed.mjs': 'export let value = 3;' }, async (directory) => {
   const module = await import(pathToFileURL(join(directory, 'fixed.mjs')).href);
-  assert.throws(() => { module.value = 9; }, TypeError);
+  assert.throws(() => {
+    module.value = 9;
+  }, TypeError);
   assert.equal(module.value, 3);
 });
 ```

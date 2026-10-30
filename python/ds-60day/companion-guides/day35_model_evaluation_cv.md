@@ -153,8 +153,7 @@ y_pred = np.array([1, 0, 1, 0, 1, 0, 0, 0])
 tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
 precision = precision_score(y_true, y_pred)
 recall = recall_score(y_true, y_pred)
-print({"tn": tn, "fp": fp, "fn": fn, "tp": tp,
-       "precision": precision, "recall": recall})
+print({"tn": tn, "fp": fp, "fn": fn, "tp": tp, "precision": precision, "recall": recall})
 assert precision == tp / (tp + fp)
 assert recall == tp / (tp + fn)
 ```

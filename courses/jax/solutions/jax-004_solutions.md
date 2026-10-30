@@ -9,8 +9,8 @@ Replay means identical inputs. It does not mean feeding the first result into th
 **Expected:** Both returned states are (5,1).
 
 ```python
-left = transition(initial, 5.)
-right = transition(initial, 5.)
+left = transition(initial, 5.0)
+right = transition(initial, 5.0)
 close(left[0], right[0])
 assert int(left[1]) == int(right[1]) == 1
 ```
@@ -23,11 +23,11 @@ Each next transition consumes the previous returned state.
 
 ```python
 state = initial
-for value in [1., 3., 8.]:
+for value in [1.0, 3.0, 8.0]:
     state = transition(state, value)
-close(state[0], 12.)
+close(state[0], 12.0)
 assert int(state[1]) == 3
-close(mean_of(state), 4.)
+close(mean_of(state), 4.0)
 ```
 
 ## Exercise 3: Refuse an empty mean
@@ -42,7 +42,7 @@ try:
 except ValueError:
     pass
 else:
-    raise AssertionError('empty mean accepted')
+    raise AssertionError("empty mean accepted")
 ```
 
 ## Exercise 4: Extend a saved state
@@ -52,8 +52,8 @@ Continuation requires the actual state, not only the previous displayed mean.
 **Expected:** Total 32, count 4, mean 8.
 
 ```python
-state = transition((jnp.float64(12.), jnp.int64(3)), 20.)
-close(mean_of(state), 8.)
+state = transition((jnp.float64(12.0), jnp.int64(3)), 20.0)
+close(mean_of(state), 8.0)
 ```
 
 ## Exercise 5: Check order-independent totals
@@ -64,9 +64,9 @@ The mathematical aggregation is order-independent; larger floating reductions ca
 
 ```python
 state = initial
-for value in [8., 3., 1.]:
+for value in [8.0, 3.0, 1.0]:
     state = transition(state, value)
-close(state[0], 12.)
+close(state[0], 12.0)
 assert int(state[1]) == 3
 ```
 
@@ -77,7 +77,7 @@ The pair retains enough information for this objective. Variance would require a
 **Expected:** Total 20, count 6, mean 10/3.
 
 ```python
-groups = [(6., 2), (9., 3), (5., 1)]
+groups = [(6.0, 2), (9.0, 3), (5.0, 1)]
 close(sum(a for a, n in groups) / sum(n for a, n in groups), 10 / 3)
 ```
 

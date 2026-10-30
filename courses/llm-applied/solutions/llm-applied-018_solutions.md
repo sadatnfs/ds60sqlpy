@@ -51,8 +51,13 @@ The question is: Create a seed 31 decoder and copy its state into full and adapt
 Independent model objects prevent one optimizer from changing the other candidate. Equal initial state is stronger than merely reusing the same architecture name.
 
 ```python
-torch.manual_seed(31); base=TinyDecoder(); full=TinyDecoder(); adapted=TinyDecoder(); full.load_state_dict(base.state_dict()); adapted.load_state_dict(base.state_dict())
-assert all(torch.equal(a,b) for a,b in zip(full.parameters(),adapted.parameters()))
+torch.manual_seed(31)
+base = TinyDecoder()
+full = TinyDecoder()
+adapted = TinyDecoder()
+full.load_state_dict(base.state_dict())
+adapted.load_state_dict(base.state_dict())
+assert all(torch.equal(a, b) for a, b in zip(full.parameters(), adapted.parameters()))
 ```
 
 **Expected:** all initial base parameters equal.
@@ -66,12 +71,18 @@ The question is: Freeze the adapted model, replace its output layer withrank2LoR
 ZeroB preserves the original function. The trainable count follows32*2+2*16, which is specific to this output-head placement.
 
 ```python
-for p in adapted.parameters(): p.requires_grad_(False)
-adapted.output=LoRAHead(adapted.output,rank=2,alpha=2)
-sequence=torch.tensor([[1,2,5,3],[1,4,6,3]]); inputs=sequence[:,:-1]; labels=sequence[:,1:].clone(); labels[:,0]=-100
-assert sum(p.numel() for p in adapted.parameters() if p.requires_grad)==96
+for p in adapted.parameters():
+    p.requires_grad_(False)
+adapted.output = LoRAHead(adapted.output, rank=2, alpha=2)
+sequence = torch.tensor([[1, 2, 5, 3], [1, 4, 6, 3]])
+inputs = sequence[:, :-1]
+labels = sequence[:, 1:].clone()
+labels[:, 0] = -100
+assert sum(p.numel() for p in adapted.parameters() if p.requires_grad) == 96
 with torch.no_grad():
-    a,_=base(inputs); b,_=adapted(inputs); torch.testing.assert_close(a,b,atol=1e-6,rtol=0)
+    a, _ = base(inputs)
+    b, _ = adapted(inputs)
+    torch.testing.assert_close(a, b, atol=1e-6, rtol=0)
 ```
 
 **Expected:** 96 trainable adapter entries; initial logits match base.
@@ -85,13 +96,19 @@ The question is: Run20 full-SFT updates at.01 and20 adapter updates at.03 on the
 The rates are declared fixture settings, not tuned on the holdout. Equal step counts do not imply equal compute or equal optimization difficulty, so resource claims require measurement.
 
 ```python
-frozen={name:p.detach().clone() for name,p in adapted.named_parameters() if not p.requires_grad}; curves={}
-for name,model,rate in [('full',full,.01),('adapter',adapted,.03)]:
-    opt=torch.optim.Adam([p for p in model.parameters() if p.requires_grad],lr=rate); curve=[]
+frozen = {name: p.detach().clone() for name, p in adapted.named_parameters() if not p.requires_grad}
+curves = {}
+for name, model, rate in [("full", full, 0.01), ("adapter", adapted, 0.03)]:
+    opt = torch.optim.Adam([p for p in model.parameters() if p.requires_grad], lr=rate)
+    curve = []
     for _ in range(20):
-        opt.zero_grad(set_to_none=True); loss=objective(model,inputs,labels); curve.append(loss.item()); loss.backward(); opt.step()
-    curves[name]=curve
-    assert np.isfinite(curve).all() and curve[-1]<curve[0]
+        opt.zero_grad(set_to_none=True)
+        loss = objective(model, inputs, labels)
+        curve.append(loss.item())
+        loss.backward()
+        opt.step()
+    curves[name] = curve
+    assert np.isfinite(curve).all() and curve[-1] < curve[0]
 ```
 
 **Expected:** both training losses decrease; all logged values finite.
@@ -105,7 +122,11 @@ The question is: Compare every frozen adapted-model parameter against its saved 
 The check covers embeddings, attention, feed-forward and the base output weight. Inspecting onlyrequires_grad flags would miss an accidental explicit assignment.
 
 ```python
-assert all(torch.equal(parameter.detach(),frozen[name]) for name,parameter in adapted.named_parameters() if not parameter.requires_grad)
+assert all(
+    torch.equal(parameter.detach(), frozen[name])
+    for name, parameter in adapted.named_parameters()
+    if not parameter.requires_grad
+)
 ```
 
 **Expected:** all frozen tensors exactly equal.
@@ -119,11 +140,15 @@ The question is: Evaluate prompt[7, 2] with answer[5, 3] for both candidates usi
 A held-out comparison is an observation, not a test that must favor the adapter. One literal prompt remains too little evidence for a broad domain-assistant decision.
 
 ```python
-held=torch.tensor([[7,2,5,3]]); held_labels=held[:,1:].clone(); held_labels[:,0]=-100; results={}
-for name,model in [('full',full),('adapter',adapted)]:
+held = torch.tensor([[7, 2, 5, 3]])
+held_labels = held[:, 1:].clone()
+held_labels[:, 0] = -100
+results = {}
+for name, model in [("full", full), ("adapter", adapted)]:
     model.eval()
-    with torch.no_grad(): results[name]=objective(model,held[:,:-1],held_labels).item()
-assert set(results)=={'full','adapter'} and np.isfinite(list(results.values())).all()
+    with torch.no_grad():
+        results[name] = objective(model, held[:, :-1], held_labels).item()
+assert set(results) == {"full", "adapter"} and np.isfinite(list(results.values())).all()
 ```
 
 **Expected:** two finite held-out losses; no predetermined winner.
@@ -137,8 +162,18 @@ The question is: Build a report with trainable counts, update budgets, target mo
 The report makes the comparison reproducible and prevents a parameter-count result from being overstated as universal quality or memory evidence.
 
 ```python
-report={'adapter_trainable':96,'full_trainable':sum(p.numel() for p in full.parameters()),'steps':{'full':20,'adapter':20},'target_module':'output projection only','scope':'literal-token teaching task','heldout':results}
-assert report['full_trainable']>report['adapter_trainable'] and report['steps']=={'full':20,'adapter':20}
+report = {
+    "adapter_trainable": 96,
+    "full_trainable": sum(p.numel() for p in full.parameters()),
+    "steps": {"full": 20, "adapter": 20},
+    "target_module": "output projection only",
+    "scope": "literal-token teaching task",
+    "heldout": results,
+}
+assert report["full_trainable"] > report["adapter_trainable"] and report["steps"] == {
+    "full": 20,
+    "adapter": 20,
+}
 ```
 
 **Expected:** adapter 96 entries; 20 updates each; scope literal-token task.

@@ -76,9 +76,13 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-anchor=torch.tensor([1.,0.],dtype=torch.float64); positive=torch.tensor([1.,1.],dtype=torch.float64); negative=torch.tensor([0.,1.],dtype=torch.float64)
-assert torch.dot(anchor,positive).item()==1 and torch.dot(anchor,negative).item()==0
-np.testing.assert_allclose(F.cosine_similarity(anchor,positive,dim=0).item(),1/np.sqrt(2),atol=1e-12,rtol=0)
+anchor = torch.tensor([1.0, 0.0], dtype=torch.float64)
+positive = torch.tensor([1.0, 1.0], dtype=torch.float64)
+negative = torch.tensor([0.0, 1.0], dtype=torch.float64)
+assert torch.dot(anchor, positive).item() == 1 and torch.dot(anchor, negative).item() == 0
+np.testing.assert_allclose(
+    F.cosine_similarity(anchor, positive, dim=0).item(), 1 / np.sqrt(2), atol=1e-12, rtol=0
+)
 ```
 
 **Expected:** dots 1, 0; cosines 1/sqrt 2, 0.
@@ -88,9 +92,14 @@ np.testing.assert_allclose(F.cosine_similarity(anchor,positive,dim=0).item(),1/n
 Normalization removes positive scale from this comparison. A model trained with unnormalized dot products may intentionally use magnitude, so normalization is a modeling choice.
 
 ```python
-scaled=10*positive
-assert torch.dot(anchor,scaled).item()==10
-torch.testing.assert_close(F.cosine_similarity(anchor,scaled,dim=0),F.cosine_similarity(anchor,positive,dim=0),atol=1e-12,rtol=0)
+scaled = 10 * positive
+assert torch.dot(anchor, scaled).item() == 10
+torch.testing.assert_close(
+    F.cosine_similarity(anchor, scaled, dim=0),
+    F.cosine_similarity(anchor, positive, dim=0),
+    atol=1e-12,
+    rtol=0,
+)
 ```
 
 **Expected:** dot becomes 10; cosine unchanged.
@@ -100,8 +109,10 @@ torch.testing.assert_close(F.cosine_similarity(anchor,scaled,dim=0),F.cosine_sim
 The loss depends on the relative score advantage. It does not verify whether the supplied positive and negative labels are semantically correct.
 
 ```python
-logits=torch.tensor([[1.,0.]],dtype=torch.float64)
-np.testing.assert_allclose(F.cross_entropy(logits,torch.tensor([0])).item(),np.log1p(np.exp(-1)),atol=1e-12,rtol=0)
+logits = torch.tensor([[1.0, 0.0]], dtype=torch.float64)
+np.testing.assert_allclose(
+    F.cross_entropy(logits, torch.tensor([0])).item(), np.log1p(np.exp(-1)), atol=1e-12, rtol=0
+)
 ```
 
 **Expected:** cross entropy \(\log(1+\exp(-1))\).

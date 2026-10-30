@@ -460,17 +460,30 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
 <p>Run these in the complete learner file so the temporary fixture and transaction are present. The fixture values are fixed; the examples never depend on the current clock. Predict each result before running it.</p>
 <h5 id="guide--example-1-watch-a-predicate-narrow-the-identities">Example 1: Watch a predicate narrow the identities<a class="heading-anchor" href="#guide--example-1-watch-a-predicate-narrow-the-identities" aria-label="Link to this section">#</a></h5>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> task_id<span class="syntax-punctuation">,</span> team<span class="syntax-punctuation">,</span> status<span class="syntax-punctuation">,</span> effort
-<span class="syntax-keyword">FROM</span> start_tasks
-<span class="syntax-keyword">WHERE</span> status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;open&#x27;</span>
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> task_id<span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  task_id<span class="syntax-punctuation">,</span>
+  team<span class="syntax-punctuation">,</span>
+  status<span class="syntax-punctuation">,</span>
+  effort
+<span class="syntax-keyword">FROM</span>
+  start_tasks
+<span class="syntax-keyword">WHERE</span>
+  status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;open&#x27;</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  task_id<span class="syntax-punctuation">;</span></code></pre>
 <p>Start with all six task identities. The status condition keeps 1,3,4,5, including the task with unknown effort because this predicate does not inspect effort. If your prediction omitted ID 3, you added an unstated assumption. Check this stage before introducing an effort threshold. The output is one open task per task_id, not one team.</p>
 <p><strong>Expected:</strong> Four rows, columns task_id, team, status, effort; IDs 1,3,4,5. ID 3 still has NULL effort.</p>
 <h5 id="guide--example-2-compute-a-label-without-using-it-too-early">Example 2: Compute a label without using it too early<a class="heading-anchor" href="#guide--example-2-compute-a-label-without-using-it-too-early" aria-label="Link to this section">#</a></h5>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> task_id<span class="syntax-punctuation">,</span> effort <span class="syntax-operator">*</span> <span class="syntax-number">2</span> <span class="syntax-keyword">AS</span> doubled_effort
-<span class="syntax-keyword">FROM</span> start_tasks
-<span class="syntax-keyword">WHERE</span> effort <span class="syntax-operator">*</span> <span class="syntax-number">2</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">6</span>
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> doubled_effort <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> task_id<span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  task_id<span class="syntax-punctuation">,</span>
+  effort <span class="syntax-operator">*</span> <span class="syntax-number">2</span> <span class="syntax-keyword">AS</span> doubled_effort
+<span class="syntax-keyword">FROM</span>
+  start_tasks
+<span class="syntax-keyword">WHERE</span>
+  effort <span class="syntax-operator">*</span> <span class="syntax-number">2</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">6</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  doubled_effort <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span>
+  task_id<span class="syntax-punctuation">;</span></code></pre>
 <p>The filter repeats the arithmetic because doubled_effort is an output name unavailable to WHERE at this query level. ORDER BY can use the alias. The unknown effort yields an unknown comparison and does not qualify. The expression does not alter stored effort. Sorting ties by task_id makes the two doubled values of 6 appear in a declared order.</p>
 <p><strong>Expected:</strong> Three rows with columns task_id, doubled_effort: (2,10), (4,6), (5,6).</p>
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
@@ -707,37 +720,93 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <p>The code below is the answer for each numbered prompt, followed by its reasoning. Inspect the first discrepancy in your own transcript before reading a different answer. A solution is one defensible implementation of this contract; an alternative is valid if its identities, values, missingness, ordering, and transaction behavior match. Tests constrain the actual returned relation, rather than assuming a familiar-looking query must be right.</p>
 <h4 id="solution-1--exercise-solutions">Exercise solutions<a class="heading-anchor" href="#solution-1--exercise-solutions" aria-label="Link to this section">#</a></h4>
 <h4 id="solution-1--exercise-1-build-a-checkpoint">Exercise 1: Build a checkpoint<a class="heading-anchor" href="#solution-1--exercise-1-build-a-checkpoint" aria-label="Link to this section">#</a></h4>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> task_id<span class="syntax-punctuation">,</span> team<span class="syntax-punctuation">,</span> status<span class="syntax-punctuation">,</span> effort <span class="syntax-keyword">FROM</span> start_tasks <span class="syntax-keyword">WHERE</span> team <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;Red&#x27;</span> <span class="syntax-keyword">AND</span> status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;open&#x27;</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> task_id<span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  task_id<span class="syntax-punctuation">,</span>
+  team<span class="syntax-punctuation">,</span>
+  status<span class="syntax-punctuation">,</span>
+  effort
+<span class="syntax-keyword">FROM</span>
+  start_tasks
+<span class="syntax-keyword">WHERE</span>
+  team <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;Red&#x27;</span>
+  <span class="syntax-keyword">AND</span> status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;open&#x27;</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  task_id<span class="syntax-punctuation">;</span></code></pre>
 <p>The team filter leaves three candidate tasks, then the status condition removes the closed task 2. Writing both restrictions in one WHERE does not remove the value of reasoning through them separately. Both returned tasks belong to Red and remain open, and their efforts are 2 and 3. The verification checks exact task identities rather than only the row count, because two incorrect rows could satisfy a count of two. Keep intermediate predictions in your own notes. If the final list differs, inspect the first filter by itself before adding more conditions or changing the projection.</p>
 <p><strong>Inputs/evidence:</strong> For sql-start-03 Exercise 1, Return Red open tasks with task_id, team, status, effort. First predict all Red IDs and then the IDs remaining after the open restriction.</p>
 <p><strong>Expected result/shape:</strong> For sql-start-03 Exercise 1, Two task rows with columns task_id, team, status, effort; final ORDER BY task_id: IDs 1 and 5. The Red-only checkpoint has IDs 1,2,5.</p>
 <p><strong>Verify:</strong> For sql-start-03 Exercise 1, Inspect the Red-only stage IDs 1,2,5, then confirm only 1,5 remain after the status filter. Task 2 is the closed negative control.</p>
 <h4 id="solution-1--exercise-2-repair-alias-scope">Exercise 2: Repair alias scope<a class="heading-anchor" href="#solution-1--exercise-2-repair-alias-scope" aria-label="Link to this section">#</a></h4>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> task_id<span class="syntax-punctuation">,</span> effort <span class="syntax-operator">*</span> <span class="syntax-number">2</span> <span class="syntax-keyword">AS</span> doubled_effort <span class="syntax-keyword">FROM</span> start_tasks <span class="syntax-keyword">WHERE</span> effort <span class="syntax-operator">*</span> <span class="syntax-number">2</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">6</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> task_id<span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  task_id<span class="syntax-punctuation">,</span>
+  effort <span class="syntax-operator">*</span> <span class="syntax-number">2</span> <span class="syntax-keyword">AS</span> doubled_effort
+<span class="syntax-keyword">FROM</span>
+  start_tasks
+<span class="syntax-keyword">WHERE</span>
+  effort <span class="syntax-operator">*</span> <span class="syntax-number">2</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">6</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  task_id<span class="syntax-punctuation">;</span></code></pre>
 <p>Repeating the arithmetic keeps the predicate within the names available from FROM. SELECT then exposes the derived heading for presentation. The original error is a name-resolution problem, not evidence that the expression or threshold is invalid. IDs 4 and 5 sit exactly at the doubled threshold and must remain because the comparison is inclusive. The missing effort does not qualify. The assertion verifies both the identities and calculated values; fixing the error alone would be insufficient if the repair accidentally changed &gt;= to &gt;. A later lesson will introduce an intermediate query when repeating a longer expression becomes difficult to maintain.</p>
 <p><strong>Inputs/evidence:</strong> For sql-start-03 Exercise 2, Repair SELECT task_id, effort * 2 AS doubled_effort FROM start_tasks WHERE doubled_effort &gt;= 6. Return task_id, doubled_effort in ascending task_id order without introducing a subquery.</p>
 <p><strong>Expected result/shape:</strong> For sql-start-03 Exercise 2, Three task rows, columns task_id, doubled_effort; final ORDER BY task_id: (2,10),(4,6),(5,6). The original same-level alias reference produces undefined_column, SQLSTATE 42703.</p>
 <p><strong>Verify:</strong> For sql-start-03 Exercise 2, Inspect pairs (2,10),(4,6),(5,6), preserving both inclusive boundary values of 6. The original alias attempt reports undefined_column SQLSTATE 42703.</p>
 <h4 id="solution-1--exercise-3-repair-boolean-grouping">Exercise 3: Repair Boolean grouping<a class="heading-anchor" href="#solution-1--exercise-3-repair-boolean-grouping" aria-label="Link to this section">#</a></h4>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> task_id<span class="syntax-punctuation">,</span> team<span class="syntax-punctuation">,</span> status <span class="syntax-keyword">FROM</span> start_tasks <span class="syntax-keyword">WHERE</span> team <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;Red&#x27;</span> <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span>status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;open&#x27;</span> <span class="syntax-keyword">OR</span> status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;blocked&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> task_id<span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  task_id<span class="syntax-punctuation">,</span>
+  team<span class="syntax-punctuation">,</span>
+  status
+<span class="syntax-keyword">FROM</span>
+  start_tasks
+<span class="syntax-keyword">WHERE</span>
+  team <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;Red&#x27;</span>
+  <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span>status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;open&#x27;</span>
+    <span class="syntax-keyword">OR</span> status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;blocked&#x27;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  task_id<span class="syntax-punctuation">;</span></code></pre>
 <p>The parentheses make the status alternatives one unit that is combined with the team requirement. Under SQL precedence the original means either a Red open task or any blocked task, so task 6 slips in despite its Blue team. This is a semantic error because PostgreSQL can parse and execute the original successfully. Use a row that differs on the team boundary as a negative control. The assertion requires precisely tasks 1 and 5; merely testing that at least one Red open task appears would fail to catch the extra Blue result. Parentheses document the question and make later edits easier to review.</p>
 <p><strong>Inputs/evidence:</strong> For sql-start-03 Exercise 3, Return Red tasks whose status is open or blocked, with task_id, team, status. Diagnose the unparenthesized predicate team = &#x27;Red&#x27; AND status = &#x27;open&#x27; OR status = &#x27;blocked&#x27;.</p>
 <p><strong>Expected result/shape:</strong> For sql-start-03 Exercise 3, Two task rows with columns task_id, team, status; final ORDER BY task_id: IDs 1 and 5. The faulty predicate also returns Blue blocked task 6.</p>
 <p><strong>Verify:</strong> For sql-start-03 Exercise 3, Trace Blue blocked task 6 through the faulty and repaired predicates. It appears only before grouping the status alternatives; the repaired IDs are 1,5.</p>
 <h4 id="solution-1--exercise-4-separate-spelling-from-meaning">Exercise 4: Separate spelling from meaning<a class="heading-anchor" href="#solution-1--exercise-4-separate-spelling-from-meaning" aria-label="Link to this section">#</a></h4>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> task_id<span class="syntax-punctuation">,</span> effort <span class="syntax-keyword">FROM</span> start_tasks <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> task_id<span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  task_id<span class="syntax-punctuation">,</span>
+  effort
+<span class="syntax-keyword">FROM</span>
+  start_tasks
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  task_id<span class="syntax-punctuation">;</span></code></pre>
 <p>The table defines effort, so effrot cannot be resolved as an input column. The correct repair changes the identifier, not the data or the environment. Quoting the misspelling would still name a nonexistent column. Once repaired, no WHERE clause should be invented: the question asks for every task. The assertion checks all six IDs and the count of present measurements, so accidentally filtering unknown effort is visible. In a real psql transcript the first error provides the code and position; capture that evidence instead of summarizing the whole run as broken. Re-execute the complete file after fixing the first error so transaction state is clean.</p>
 <p><strong>Inputs/evidence:</strong> For sql-start-03 Exercise 4, Diagnose SELECT task_id, effrot FROM start_tasks and repair it to return task_id, effort for every task. State the error category before changing code.</p>
 <p><strong>Expected result/shape:</strong> For sql-start-03 Exercise 4, Six rows with columns task_id, effort; final ORDER BY task_id. The misspelled input name produces undefined_column, SQLSTATE 42703; the corrected result includes ID 3 with NULL effort.</p>
 <p><strong>Verify:</strong> For sql-start-03 Exercise 4, Capture undefined_column SQLSTATE 42703 for the misspelling in a separate attempted run, then inspect six corrected task identities and the retained NULL effort at ID 3.</p>
 <h4 id="solution-1--exercise-5-debug-a-threshold-boundary">Exercise 5: Debug a threshold boundary<a class="heading-anchor" href="#solution-1--exercise-5-debug-a-threshold-boundary" aria-label="Link to this section">#</a></h4>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> task_id<span class="syntax-punctuation">,</span> effort <span class="syntax-keyword">FROM</span> start_tasks <span class="syntax-keyword">WHERE</span> status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;open&#x27;</span> <span class="syntax-keyword">AND</span> effort <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">3</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> task_id<span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  task_id<span class="syntax-punctuation">,</span>
+  effort
+<span class="syntax-keyword">FROM</span>
+  start_tasks
+<span class="syntax-keyword">WHERE</span>
+  status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;open&#x27;</span>
+  <span class="syntax-keyword">AND</span> effort <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">3</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  task_id<span class="syntax-punctuation">;</span></code></pre>
 <p>The phrase at least translates to an inclusive comparison. The fixture deliberately places two open tasks exactly at 3, so a strict comparison fails visibly. The closed task with effort 5 is excluded by status even though its effort is high enough. The missing open effort produces unknown and is excluded by the measurement comparison, without any special zero replacement. The assertion tests the exact identities and values, which catches both a threshold error and forgetting the status filter. This kind of boundary fixture is usually more informative than adding dozens of ordinary rows that all satisfy both the correct and incorrect predicates.</p>
 <p><strong>Inputs/evidence:</strong> For sql-start-03 Exercise 5, Return open tasks with known effort at least 3, projecting task_id, effort. Explain the difference between &gt;= 3 and &gt; 3 on this fixture.</p>
 <p><strong>Expected result/shape:</strong> For sql-start-03 Exercise 5, Two task rows, columns task_id, effort; final ORDER BY task_id: (4,3),(5,3). The strict &gt; 3 version returns zero rows; missing effort does not qualify.</p>
 <p><strong>Verify:</strong> For sql-start-03 Exercise 5, Require IDs 4 and 5 with effort 3. Independently try the strict comparison and observe zero qualifying open rows; closed ID 2 remains excluded in either case.</p>
 <h4 id="solution-1--exercise-6-combine-a-small-reporting-contract">Exercise 6: Combine a small reporting contract<a class="heading-anchor" href="#solution-1--exercise-6-combine-a-small-reporting-contract" aria-label="Link to this section">#</a></h4>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> task_id<span class="syntax-punctuation">,</span> team<span class="syntax-punctuation">,</span> effort <span class="syntax-keyword">FROM</span> start_tasks <span class="syntax-keyword">WHERE</span> status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;open&#x27;</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> effort <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span> task_id <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  task_id<span class="syntax-punctuation">,</span>
+  team<span class="syntax-punctuation">,</span>
+  effort
+<span class="syntax-keyword">FROM</span>
+  start_tasks
+<span class="syntax-keyword">WHERE</span>
+  status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;open&#x27;</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  effort <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span>
+  task_id
+<span class="syntax-keyword">LIMIT</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span></code></pre>
 <p>FROM introduces tasks, WHERE keeps only open ones, SELECT chooses three output fields, ORDER BY defines a complete ranking, and LIMIT takes the first two. The largest effort anywhere in the table belongs to closed task 2, so ranking the whole table before applying eligibility would answer the wrong question. Unknown effort is explicitly placed last. Task_id resolves the tie between tasks 4 and 5. The assertion verifies the selected identities in their final ranking order. Finish by explaining the query without reading it back word for word: one open task per row, sorted by known effort with an identity tie-breaker, capped at two.</p>
 <p><strong>Inputs/evidence:</strong> For sql-start-03 Exercise 6, Return the first two open tasks ranked by largest effort, keeping unknown effort last, with task_id, team, effort. Explain every clause and its logical role.</p>
 <p><strong>Expected result/shape:</strong> For sql-start-03 Exercise 6, Two task rows, columns task_id, team, effort; final ORDER BY effort DESC NULLS LAST, task_id: IDs 4 and 5, both effort 3. ID 3 is unknown, and closed task 2 is ineligible.</p>

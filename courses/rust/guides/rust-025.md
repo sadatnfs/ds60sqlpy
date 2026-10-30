@@ -43,13 +43,15 @@ Read the operations in dependency order. Record which values exist before each l
 The unique process-based fixture name and create_new avoid overwriting an existing file.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         use std::io::{Read, Write};
         let path = std::env::temp_dir().join(format!("rust-lesson-{}-a.txt", std::process::id()));
-        let mut file = std::fs::OpenOptions::new().write(true).read(true).create_new(true).open(&path)?;
+        let mut file = std::fs::OpenOptions::new()
+            .write(true)
+            .read(true)
+            .create_new(true)
+            .open(&path)?;
         file.write_all("café".as_bytes())?;
         drop(file);
         let mut actual = String::new();
@@ -69,8 +71,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 A byte buffer is not automatically text, and lossy decoding is a separate policy.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let valid = String::from_utf8(vec![0x63, 0x61, 0x66, 0xc3, 0xa9])?;

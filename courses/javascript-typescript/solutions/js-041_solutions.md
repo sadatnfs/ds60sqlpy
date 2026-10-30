@@ -31,9 +31,21 @@ Task: Decode rows for groups A and B from three-byte chunks and aggregate their 
 Chunk boundaries are independent of JSON record boundaries. The pipeline carries partial decoder and line state instead of parsing each chunk as a complete row.
 
 ```typescript
-const text = [{ group: 'A', value: 2 }, { group: 'B', value: 4 }, { group: 'A', value: 3 }].map(row => JSON.stringify(row)).join('\n');
+const text = [
+  { group: 'A', value: 2 },
+  { group: 'B', value: 4 },
+  { group: 'A', value: 3 },
+]
+  .map((row) => JSON.stringify(row))
+  .join('\n');
 const result = await analyze(chunks(text, 3));
-assert.deepEqual([...result.groups], [['A', { count: 2, sum: 5 }], ['B', { count: 1, sum: 4 }]]);
+assert.deepEqual(
+  [...result.groups],
+  [
+    ['A', { count: 2, sum: 5 }],
+    ['B', { count: 1, sum: 4 }],
+  ],
+);
 assert.equal(result.accepted, 3);
 assert.deepEqual(result.rejected, []);
 ```
@@ -52,7 +64,10 @@ Rejected values never enter the aggregate. The diagnostic identifies where and w
 const text = '{"group":"A","value":2}\n{broken\n{"group":"A","value":"wrong"}\n';
 const result = await analyze(chunks(text, 2));
 assert.equal(result.accepted, 1);
-assert.deepEqual(result.rejected, [{ line: 2, code: 'json' }, { line: 3, code: 'schema' }]);
+assert.deepEqual(result.rejected, [
+  { line: 2, code: 'json' },
+  { line: 3, code: 'schema' },
+]);
 assert.deepEqual(result.groups.get('A'), { count: 1, sum: 2 });
 ```
 

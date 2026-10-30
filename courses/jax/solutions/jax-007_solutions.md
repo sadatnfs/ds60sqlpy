@@ -9,7 +9,7 @@ Moving halfway to the optimum halves the gradient magnitude for this quadratic.
 **Expected:** -28/3.
 
 ```python
-close(jax.grad(loss)(1.), -28 / 3)
+close(jax.grad(loss)(1.0), -28 / 3)
 ```
 
 ## Exercise 2: Use a central difference
@@ -19,9 +19,9 @@ Both perturbed losses must recompute the full expression from their own weight.
 **Expected:** Agreement within absolute 1e-8.
 
 ```python
-w, h = .7, 1e-5
+w, h = 0.7, 1e-5
 numerical = (loss(w + h) - loss(w - h)) / (2 * h)
-close(numerical, jax.grad(loss)(w), atol=1e-8, rtol=0.)
+close(numerical, jax.grad(loss)(w), atol=1e-8, rtol=0.0)
 ```
 
 ## Exercise 3: Change the reduction
@@ -32,7 +32,7 @@ A sum gives each of the three observations its full contribution without dividin
 
 ```python
 summed = lambda w: jnp.sum((w * x - y) ** 2)
-close(jax.grad(summed)(0.), -56.)
+close(jax.grad(summed)(0.0), -56.0)
 ```
 
 ## Exercise 4: Inspect the optimum
@@ -42,9 +42,9 @@ This exact fixture has an algebraic zero-residual solution; a general fitted mod
 **Expected:** Both zero.
 
 ```python
-value, gradient = jax.value_and_grad(loss)(2.)
-close(value, 0.)
-close(gradient, 0.)
+value, gradient = jax.value_and_grad(loss)(2.0)
+close(value, 0.0)
+close(gradient, 0.0)
 ```
 
 ## Exercise 5: Differentiate a parameter tree
@@ -55,10 +55,12 @@ The bias derivative averages two times each residual, while the weight derivativ
 
 ```python
 def affine_loss(p):
-    return jnp.mean((p['weight'] * x + p['bias'] - y) ** 2)
-g = jax.grad(affine_loss)({'weight': jnp.float64(0.), 'bias': jnp.float64(0.)})
-close(g['weight'], -56 / 3)
-close(g['bias'], -8.)
+    return jnp.mean((p["weight"] * x + p["bias"] - y) ** 2)
+
+
+g = jax.grad(affine_loss)({"weight": jnp.float64(0.0), "bias": jnp.float64(0.0)})
+close(g["weight"], -56 / 3)
+close(g["bias"], -8.0)
 ```
 
 ## Exercise 6: Choose a scalar objective
@@ -70,12 +72,12 @@ The repair chooses a mathematical objective. It is not merely making an error me
 ```python
 vector_loss = lambda w: (w * x - y) ** 2
 try:
-    jax.grad(vector_loss)(0.)
+    jax.grad(vector_loss)(0.0)
 except TypeError:
     pass
 else:
-    raise AssertionError('vector objective accepted')
-close(jax.grad(lambda w: vector_loss(w).mean())(0.), -56 / 3)
+    raise AssertionError("vector objective accepted")
+close(jax.grad(lambda w: vector_loss(w).mean())(0.0), -56 / 3)
 ```
 
 ## Scope of this evidence

@@ -58,8 +58,8 @@ The question is: Use prompt IDs[1, 2] and answer IDs[5, 6, 3].
 The first answer token5 is predicted at the second input position. Masking based on input positions alone would easily exclude this target by mistake.
 
 ```python
-inputs,labels=prepare([1,2],[5,6,3],10)
-assert inputs==[1,2,5,6] and labels==[-100,5,6,3] and sum(x!=-100 for x in labels)==3
+inputs, labels = prepare([1, 2], [5, 6, 3], 10)
+assert inputs == [1, 2, 5, 6] and labels == [-100, 5, 6, 3] and sum(x != -100 for x in labels) == 3
 ```
 
 **Expected:** inputs[1, 2, 5, 6]; labels[-100, 5, 6, 3]; 3 active targets.
@@ -73,8 +73,8 @@ The question is: Change prompt IDs to[8, 9] while retaining the answer; inspect 
 The model sees the prompt through its forward computation even though prompt-prediction events are excluded from the supervised objective.
 
 ```python
-other_inputs,other_labels=prepare([8,9],[5,6,3],10)
-assert other_inputs[:2]==[8,9] and other_labels==labels
+other_inputs, other_labels = prepare([8, 9], [5, 6, 3], 10)
+assert other_inputs[:2] == [8, 9] and other_labels == labels
 ```
 
 **Expected:** prompt inputs change; answer labels remain5, 6, 3.
@@ -88,9 +88,12 @@ The question is: Prepare a record with prompt[1, 2] and no answer tokens.
 A mean loss over no supervised events is undefined. Silently retaining such rows can make a data pipeline appear larger without providing learning signal.
 
 ```python
-try: prepare([1,2],[],10)
-except ValueError: pass
-else: raise AssertionError('empty supervised answer accepted')
+try:
+    prepare([1, 2], [], 10)
+except ValueError:
+    pass
+else:
+    raise AssertionError("empty supervised answer accepted")
 ```
 
 **Expected:** ValueError for no answer targets.
@@ -104,9 +107,12 @@ The question is: Use a context limit2 for a prompt oflength2 and answerlength3.
 Truncation policy must be checked after constructing the aligned labels. A record can remain syntactically nonempty while losing all supervised content.
 
 ```python
-try: prepare([1,2],[5,6,3],2)
-except ValueError: pass
-else: raise AssertionError('answer removed by truncation')
+try:
+    prepare([1, 2], [5, 6, 3], 2)
+except ValueError:
+    pass
+else:
+    raise AssertionError("answer removed by truncation")
 ```
 
 **Expected:** ValueError because truncation removes every answer target.
@@ -120,8 +126,9 @@ The question is: Assign two formatting variants tofamilyF and test that they can
 A model can memorize a template or answer pattern. Grouped evaluation measures transfer beyond the exact family used to construct training examples.
 
 ```python
-train_families={'F'}; test_families={'F','G'}
-assert train_families&test_families=={'F'}
+train_families = {"F"}
+test_families = {"F", "G"}
+assert train_families & test_families == {"F"}
 ```
 
 **Expected:** family intersectionF is a leak.
@@ -135,8 +142,13 @@ The question is: Mark a target answer as unsupported by its cited source and app
 A correct tensor mask cannot make a fabricated target trustworthy. Data governance and numerical correctness are independent prerequisites for adaptation.
 
 ```python
-record={'inputs':inputs,'labels':labels,'source_supported':False,'annotation_reviewed':True}
-accepted=record['source_supported'] and record['annotation_reviewed']
+record = {
+    "inputs": inputs,
+    "labels": labels,
+    "source_supported": False,
+    "annotation_reviewed": True,
+}
+accepted = record["source_supported"] and record["annotation_reviewed"]
 assert not accepted
 ```
 

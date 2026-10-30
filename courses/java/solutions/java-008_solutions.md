@@ -38,7 +38,9 @@ Task: Create an Order from a mutable list,then append to the original list.
 Without the copy, a caller could change the record observed value after construction. Final component references alone would not prevent that mutation.
 
 ```java
-List<String> supplied = new ArrayList<>(List.of("x")); Order copied = new Order("B", supplied); supplied.add("y");
+List<String> supplied = new ArrayList<>(List.of("x"));
+Order copied = new Order("B", supplied);
+supplied.add("y");
 assert copied.items().equals(List.of("x"));
 ```
 
@@ -69,7 +71,11 @@ A syntactically valid String can still violate a domain invariant. Validate afte
 
 ```java
 boolean blank = false;
-try { new Order("  ", List.of("x")); } catch (IllegalArgumentException expected) { blank = true; }
+try {
+  new Order("  ", List.of("x"));
+} catch (IllegalArgumentException expected) {
+  blank = true;
+}
 assert blank;
 ```
 
@@ -85,7 +91,11 @@ The accessor returns the owned unmodifiable list. If its elements were mutable o
 
 ```java
 boolean protectedItems = false;
-try { order.items().add("z"); } catch (UnsupportedOperationException expected) { protectedItems = true; }
+try {
+  order.items().add("z");
+} catch (UnsupportedOperationException expected) {
+  protectedItems = true;
+}
 assert protectedItems;
 ```
 
@@ -101,7 +111,11 @@ The constructor usesList.copyOf, whose null policy is explicit. An alternative d
 
 ```java
 boolean nullItem = false;
-try { new Order("C", Arrays.asList("x", null)); } catch (NullPointerException expected) { nullItem = true; }
+try {
+  new Order("C", Arrays.asList("x", null));
+} catch (NullPointerException expected) {
+  nullItem = true;
+}
 assert nullItem;
 ```
 

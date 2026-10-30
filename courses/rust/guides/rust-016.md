@@ -43,7 +43,31 @@ Read the operations in dependency order. Record which values exist before each l
 Duplicate identities accumulate only after their values are admitted.
 
 ```rust
-fn import_rows(lines: &[&str]) -> (std::collections::BTreeMap<String, u32>, usize) { let mut totals = std::collections::BTreeMap::new(); let mut rejected = 0; for line in lines { let Some((name, quantity)) = line.split_once(',') else { rejected += 1; continue; }; let Ok(quantity) = quantity.parse::<u32>() else { rejected += 1; continue; }; if name.trim().is_empty() { rejected += 1; continue; } let previous: u32 = *totals.get(name).unwrap_or(&0); let Some(total) = previous.checked_add(quantity) else { rejected += 1; continue; }; totals.insert(name.to_owned(), total); } (totals, rejected) }
+fn import_rows(lines: &[&str]) -> (std::collections::BTreeMap<String, u32>, usize) {
+    let mut totals = std::collections::BTreeMap::new();
+    let mut rejected = 0;
+    for line in lines {
+        let Some((name, quantity)) = line.split_once(',') else {
+            rejected += 1;
+            continue;
+        };
+        let Ok(quantity) = quantity.parse::<u32>() else {
+            rejected += 1;
+            continue;
+        };
+        if name.trim().is_empty() {
+            rejected += 1;
+            continue;
+        }
+        let previous: u32 = *totals.get(name).unwrap_or(&0);
+        let Some(total) = previous.checked_add(quantity) else {
+            rejected += 1;
+            continue;
+        };
+        totals.insert(name.to_owned(), total);
+    }
+    (totals, rejected)
+}
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
@@ -64,7 +88,31 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 This preserves absence, zero and rejection as different meanings.
 
 ```rust
-fn import_rows(lines: &[&str]) -> (std::collections::BTreeMap<String, u32>, usize) { let mut totals = std::collections::BTreeMap::new(); let mut rejected = 0; for line in lines { let Some((name, quantity)) = line.split_once(',') else { rejected += 1; continue; }; let Ok(quantity) = quantity.parse::<u32>() else { rejected += 1; continue; }; if name.trim().is_empty() { rejected += 1; continue; } let previous: u32 = *totals.get(name).unwrap_or(&0); let Some(total) = previous.checked_add(quantity) else { rejected += 1; continue; }; totals.insert(name.to_owned(), total); } (totals, rejected) }
+fn import_rows(lines: &[&str]) -> (std::collections::BTreeMap<String, u32>, usize) {
+    let mut totals = std::collections::BTreeMap::new();
+    let mut rejected = 0;
+    for line in lines {
+        let Some((name, quantity)) = line.split_once(',') else {
+            rejected += 1;
+            continue;
+        };
+        let Ok(quantity) = quantity.parse::<u32>() else {
+            rejected += 1;
+            continue;
+        };
+        if name.trim().is_empty() {
+            rejected += 1;
+            continue;
+        }
+        let previous: u32 = *totals.get(name).unwrap_or(&0);
+        let Some(total) = previous.checked_add(quantity) else {
+            rejected += 1;
+            continue;
+        };
+        totals.insert(name.to_owned(), total);
+    }
+    (totals, rejected)
+}
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {

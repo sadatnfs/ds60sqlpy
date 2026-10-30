@@ -81,11 +81,14 @@ executable companion when you want a self-contained check.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT c.customer_id,
-       c.attributes ->> 'channel' AS channel,
-       c.attributes ->> 'referrer' AS referrer
-FROM customers AS c
-ORDER BY c.customer_id;
+SELECT
+  c.customer_id,
+  c.attributes ->> 'channel' AS channel,
+  c.attributes ->> 'referrer' AS referrer
+FROM
+  customers AS c
+ORDER BY
+  c.customer_id;
 ```
 
 **Expected shape:** One row per customer.
@@ -118,12 +121,16 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT c.customer_id,
-       c.full_name,
-       c.attributes
-FROM customers AS c
-WHERE c.attributes @> '{"channel": "mobile"}'::jsonb
-ORDER BY c.customer_id;
+SELECT
+  c.customer_id,
+  c.full_name,
+  c.attributes
+FROM
+  customers AS c
+WHERE
+  c.attributes @> '{"channel": "mobile"}'::jsonb
+ORDER BY
+  c.customer_id;
 ```
 
 **Expected shape:** Customer rows whose channel is mobile.
@@ -155,10 +162,12 @@ cardinality contract.
 - `FILTER (WHERE ...)`: limits one aggregate without removing rows needed by neighboring aggregates.
 
 ```sql
-SELECT COUNT(*) FILTER (WHERE e.metadata ? 'device') AS has_device_key,
-       COUNT(*) FILTER (WHERE NOT e.metadata ? 'device') AS missing_device_key,
-       COUNT(*) AS all_events
-FROM events AS e;
+SELECT
+  COUNT(*) FILTER (WHERE e.metadata ? 'device') AS has_device_key,
+  COUNT(*) FILTER (WHERE NOT e.metadata ? 'device') AS missing_device_key,
+  COUNT(*) AS all_events
+FROM
+  events AS e;
 ```
 
 **Expected shape:** One summary row.
@@ -193,17 +202,25 @@ cardinality contract.
 
 ```sql
 WITH event_counts AS (
-  SELECT e.customer_id,
-         e.event_type,
-         COUNT(*) AS event_count
-  FROM events AS e
-  GROUP BY e.customer_id, e.event_type
+  SELECT
+    e.customer_id,
+    e.event_type,
+    COUNT(*) AS event_count
+  FROM
+    events AS e
+  GROUP BY
+    e.customer_id,
+    e.event_type
 )
-SELECT customer_id,
-       jsonb_object_agg(event_type, event_count ORDER BY event_type) AS counts_by_type
-FROM event_counts
-GROUP BY customer_id
-ORDER BY customer_id;
+SELECT
+  customer_id,
+  jsonb_object_agg(event_type, event_count ORDER BY event_type) AS counts_by_type
+FROM
+  event_counts
+GROUP BY
+  customer_id
+ORDER BY
+  customer_id;
 ```
 
 **Expected shape:** One row per customer with events.
@@ -235,11 +252,14 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT xd.doc_id,
-       ((xpath('string(/order/id)', xd.payload))[1])::text::integer AS order_id,
-       ((xpath('string(/order/status)', xd.payload))[1])::text AS order_status
-FROM xml_docs AS xd
-ORDER BY xd.doc_id;
+SELECT
+  xd.doc_id,
+  ((xpath('string(/order/id)', xd.payload))[1])::text::integer AS order_id,
+  ((xpath('string(/order/status)', xd.payload))[1])::text AS order_status
+FROM
+  xml_docs AS xd
+ORDER BY
+  xd.doc_id;
 ```
 
 **Expected shape:** One row per XML document.
@@ -274,19 +294,21 @@ cardinality contract.
 - pattern predicate: matches text according to the chosen operator; escaping and case sensitivity are intentional semantics.
 
 ```sql
-WITH payloads(payload) AS (
-  VALUES
-    ('{"amount": "12.50"}'::jsonb),
+WITH payloads (
+  payload
+) AS (
+  VALUES ('{"amount": "12.50"}'::jsonb),
     ('{"amount": "bad"}'::jsonb),
-    ('{}'::jsonb)
-)
-SELECT payload,
-       CASE
-         WHEN payload ->> 'amount' ~ '^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)$'
-           THEN (payload ->> 'amount')::numeric
-         ELSE NULL
-       END AS safe_amount
-FROM payloads;
+    ('{}'::jsonb))
+SELECT
+  payload,
+  CASE WHEN payload ->> 'amount' ~ '^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)$' THEN
+    (payload ->> 'amount')::numeric
+  ELSE
+    NULL
+  END AS safe_amount
+FROM
+  payloads;
 ```
 
 **Expected shape:** One row per sample payload.

@@ -424,6 +424,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Late binding:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span>read<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> read <span class="syntax-operator">in</span> late<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
     <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Definition defaults:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span>read<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> read <span class="syntax-operator">in</span> early<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
 
+
 worked_binding<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> The late-bound functions produce <code>[&#x27;blue&#x27;, &#x27;blue&#x27;]</code>; the defaults produce <code>[&#x27;red&#x27;, &#x27;blue&#x27;]</code>. If both results match, inspect whether the supposed late-bound function is actually being called within the loop, before <code>label</code> changes. Moving a call can conceal the bug without fixing the stored callback.</p>
 <h5 id="guide--a-wrapper-observes-both-the-success-and-failure-route">A wrapper observes both the success and failure route<a class="heading-anchor" href="#guide--a-wrapper-observes-both-the-success-and-failure-route" aria-label="Link to this section">#</a></h5>
@@ -431,6 +432,8 @@ worked_binding<span class="syntax-punctuation">(</span><span class="syntax-punct
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> functools <span class="syntax-keyword">import</span> wraps
 
 events <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+
+
 <span class="syntax-keyword">def</span> <span class="syntax-function">announce</span><span class="syntax-punctuation">(</span>function<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-decorator">@wraps</span><span class="syntax-punctuation">(</span>function<span class="syntax-punctuation">)</span>
     <span class="syntax-keyword">def</span> <span class="syntax-function">wrapper</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span>args<span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-operator">*</span>kwargs<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
@@ -439,12 +442,15 @@ events <span class="syntax-operator">=</span> <span class="syntax-punctuation">[
             <span class="syntax-keyword">return</span> function<span class="syntax-punctuation">(</span><span class="syntax-operator">*</span>args<span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-operator">*</span>kwargs<span class="syntax-punctuation">)</span>
         <span class="syntax-keyword">finally</span><span class="syntax-punctuation">:</span>
             events<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">after</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+
     <span class="syntax-keyword">return</span> wrapper
+
 
 <span class="syntax-decorator">@announce</span>
 <span class="syntax-keyword">def</span> <span class="syntax-function">reciprocal</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-string">&quot;&quot;&quot;Return one divided by value.&quot;&quot;&quot;</span>
     <span class="syntax-keyword">return</span> <span class="syntax-number">1</span> <span class="syntax-operator">/</span> value
+
 
 <span class="syntax-keyword">assert</span> reciprocal<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0.5</span>
 <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>

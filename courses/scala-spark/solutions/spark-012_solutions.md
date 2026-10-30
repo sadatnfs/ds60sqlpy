@@ -11,14 +11,16 @@ Return ordered field triples(name, simpleString, nullable) for a DataFrame. Chec
 **Expected:** The triples are(event_id, bigint, false),(team, string, true),(amount_cents, bigint, true).
 
 ```scala
-def schemaFields(frame: DataFrame): Seq[(String,String,Boolean)] = {
-  frame.schema.fields.map(field => (field.name,field.dataType.simpleString,field.nullable)).toSeq
+def schemaFields(frame: DataFrame): Seq[(String, String, Boolean)] = {
+  frame.schema.fields.map(field => (field.name, field.dataType.simpleString, field.nullable)).toSeq
 }
 ```
 
 ```python
 def schema_fields(frame):
-    return [(field.name, field.dataType.simpleString(), field.nullable) for field in frame.schema.fields]
+    return [
+        (field.name, field.dataType.simpleString(), field.nullable) for field in frame.schema.fields
+    ]
 ```
 
 Field type and nullability are independent parts of the declared schema. A sample with only small integers does not justify inferring Int when the contract requires Long, and a missing amount must not force an approximate numeric representation. Comparing the complete field list also catches accidental column reordering or renamed fields before downstream positional Row access can misinterpret them.
@@ -55,7 +57,8 @@ Return ordered event IDs while collecting at most limit+1 rows, with 0<=limit<=2
 ```scala
 def boundedIds(frame: DataFrame, limit: Int): Seq[Long] = {
   require(limit >= 0 && limit <= 20, "driver ID budget outside 0..20")
-  val rows = frame.select("event_id").orderBy("event_id").limit(limit + 1).collect().map(_.getLong(0)).toSeq
+  val rows =
+    frame.select("event_id").orderBy("event_id").limit(limit + 1).collect().map(_.getLong(0)).toSeq
   require(rows.size <= limit, "driver ID result exceeds budget")
   rows
 }
@@ -65,7 +68,10 @@ def boundedIds(frame: DataFrame, limit: Int): Seq[Long] = {
 def bounded_ids(frame, limit):
     if isinstance(limit, bool) or not isinstance(limit, int) or not 0 <= limit <= 20:
         raise ValueError("driver ID budget outside 0..20")
-    rows = [row.event_id for row in frame.select("event_id").orderBy("event_id").limit(limit + 1).collect()]
+    rows = [
+        row.event_id
+        for row in frame.select("event_id").orderBy("event_id").limit(limit + 1).collect()
+    ]
     if len(rows) > limit:
         raise ValueError("driver ID result exceeds budget")
     return rows
@@ -103,16 +109,23 @@ Return ordered triples(event_id, optional team, optional amount) for this bounde
 **Expected:** Every version yields (1, A,0),(2, B, NULL),(3, A,25),(4, B,40). Physical placement does not change identity, NULL state or value.
 
 ```scala
-def canonical(frame: DataFrame): Seq[(Long,Option[String],Option[Long])] = {
-  frame.select("event_id","team","amount_cents").orderBy("event_id").collect().toSeq.map { row =>
-    (row.getLong(0),if (row.isNullAt(1)) None else Some(row.getString(1)),if (row.isNullAt(2)) None else Some(row.getLong(2)))
+def canonical(frame: DataFrame): Seq[(Long, Option[String], Option[Long])] = {
+  frame.select("event_id", "team", "amount_cents").orderBy("event_id").collect().toSeq.map { row =>
+    (
+      row.getLong(0),
+      if (row.isNullAt(1)) None else Some(row.getString(1)),
+      if (row.isNullAt(2)) None else Some(row.getLong(2))
+    )
   }
 }
 ```
 
 ```python
 def canonical(frame):
-    return [tuple(row) for row in frame.select("event_id", "team", "amount_cents").orderBy("event_id").collect()]
+    return [
+        tuple(row)
+        for row in frame.select("event_id", "team", "amount_cents").orderBy("event_id").collect()
+    ]
 ```
 
 Repartitioning changes physical organization and can change arrival order, so raw collection order is not the invariant. The unique event ID supplies a complete canonical order for this tiny result. Scala checks NULL before typed extraction; Python receives None through the Row interface. This establishes logical parity across the tested local partition changes without claiming any performance improvement.
@@ -126,27 +139,35 @@ Return master, timezone, shuffle-partition, ANSI, AQE, UI, driver-binding and Sp
 **Expected:** Master local[2], UTC, two shuffle partitions, ANSI true, AQE false, UI false, both driver addresses 127.0.0.1, and Spark version 4.0.1.
 
 ```scala
-def settings(spark: SparkSession): Map[String,String] = {
-  Map("master" -> spark.sparkContext.master,
-   "timezone" -> spark.conf.get("spark.sql.session.timeZone"),
-   "shuffle" -> spark.conf.get("spark.sql.shuffle.partitions"),
-   "ansi" -> spark.conf.get("spark.sql.ansi.enabled"),
-   "adaptive" -> spark.conf.get("spark.sql.adaptive.enabled"),
-   "ui" -> spark.sparkContext.getConf.get("spark.ui.enabled"),
-   "driver_host" -> spark.sparkContext.getConf.get("spark.driver.host"),
-   "driver_bind" -> spark.sparkContext.getConf.get("spark.driver.bindAddress"),
-   "spark_version" -> spark.version)
+def settings(spark: SparkSession): Map[String, String] = {
+  Map(
+    "master" -> spark.sparkContext.master,
+    "timezone" -> spark.conf.get("spark.sql.session.timeZone"),
+    "shuffle" -> spark.conf.get("spark.sql.shuffle.partitions"),
+    "ansi" -> spark.conf.get("spark.sql.ansi.enabled"),
+    "adaptive" -> spark.conf.get("spark.sql.adaptive.enabled"),
+    "ui" -> spark.sparkContext.getConf.get("spark.ui.enabled"),
+    "driver_host" -> spark.sparkContext.getConf.get("spark.driver.host"),
+    "driver_bind" -> spark.sparkContext.getConf.get("spark.driver.bindAddress"),
+    "spark_version" -> spark.version
+  )
 }
 ```
 
 ```python
 def settings(spark):
     context = spark.sparkContext.getConf()
-    return {"master": spark.sparkContext.master, "timezone": spark.conf.get("spark.sql.session.timeZone"),
-            "shuffle": spark.conf.get("spark.sql.shuffle.partitions"), "ansi": spark.conf.get("spark.sql.ansi.enabled"),
-            "adaptive": spark.conf.get("spark.sql.adaptive.enabled"), "ui": context.get("spark.ui.enabled"),
-            "driver_host": context.get("spark.driver.host"), "driver_bind": context.get("spark.driver.bindAddress"),
-            "spark_version": spark.version}
+    return {
+        "master": spark.sparkContext.master,
+        "timezone": spark.conf.get("spark.sql.session.timeZone"),
+        "shuffle": spark.conf.get("spark.sql.shuffle.partitions"),
+        "ansi": spark.conf.get("spark.sql.ansi.enabled"),
+        "adaptive": spark.conf.get("spark.sql.adaptive.enabled"),
+        "ui": context.get("spark.ui.enabled"),
+        "driver_host": context.get("spark.driver.host"),
+        "driver_bind": context.get("spark.driver.bindAddress"),
+        "spark_version": spark.version,
+    }
 ```
 
 Actual readback can detect an unexpected reused or differently configured session, while source builder text only states intent. The version assertion deliberately targets the prepared worker rather than the older design proposal. The finally block stops this owned session after checks or failures; process and descendant cleanup remain separately observed worker responsibilities. Matching settings does not replace any of the row and schema assertions.

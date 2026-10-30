@@ -53,10 +53,12 @@ Passing one does not imply the others pass.
 ```python
 from dataclasses import dataclass
 
+
 @dataclass(frozen=True)
 class Metrics:
     rows: int
     positive_rate: float
+
 
 def summarize_labels(labels: list[int]) -> Metrics:
     """Return count and positive rate for nonempty binary labels."""
@@ -170,6 +172,7 @@ rather than something to overlook.
 def legacy_total(rows):
     return round(sum(float(row["price"]) * int(row["units"]) for row in rows), 2)
 
+
 sample = [
     {"price": "1.25", "units": "2"},
     {"price": "0.50", "units": "3"},
@@ -191,6 +194,7 @@ Example A instead of reading it as unrelated syntax.
 ```python
 from decimal import Decimal, InvalidOperation
 
+
 def line_total(price_text, units_text):
     try:
         price = Decimal(price_text)
@@ -200,6 +204,7 @@ def line_total(price_text, units_text):
     if price < 0 or units < 0:
         raise ValueError("price and units must be nonnegative")
     return price * units
+
 
 assert line_total("1.25", "2") == Decimal("2.50")
 try:

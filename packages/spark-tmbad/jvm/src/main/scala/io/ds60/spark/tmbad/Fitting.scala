@@ -201,7 +201,15 @@ private[tmbad] final class SharedObjective private (
         "Native candidate rejected after complete partition/ledger validation: " + rejected
           .mkString(",")
       )
-    val result = GlobalEvaluation(loss.value, gradient.map(_.value).toVector, count, units, weight.value, ledger, partitions)
+    val result = GlobalEvaluation(
+      loss.value,
+      gradient.map(_.value).toVector,
+      count,
+      units,
+      weight.value,
+      ledger,
+      partitions
+    )
     latest = Some(result)
     result
   }
@@ -209,7 +217,8 @@ private[tmbad] final class SharedObjective private (
     val raw = evaluateRaw(theta)
     val denominator = if (options.reduction == "weighted_mean") raw.weight else 1.0
     val penalized = raw.value / denominator + GlobalPenalty.value(theta, options.l2Strength)
-    val score = theta.indices.map(i => raw.gradient(i) / denominator + options.l2Strength * theta(i)).toVector
+    val score =
+      theta.indices.map(i => raw.gradient(i) / denominator + options.l2Strength * theta(i)).toVector
     require(penalized.isFinite && score.forall(_.isFinite), "Global reduction/penalty is nonfinite")
     latest = Some(raw.copy(value = penalized, gradient = score))
     Optimizer.Evaluation(penalized, score)
@@ -258,7 +267,7 @@ private[tmbad] object ModelDocument {
       options: FitOptions,
       fit: Optimizer.Result,
       accounting: GlobalEvaluation,
-    targetJson: Option[String] = None
+      targetJson: Option[String] = None
   ): String = {
     val document = Json.obj()
     document
@@ -460,11 +469,31 @@ private[tmbad] object Fitting {
     try {
       options.extension match {
         case None =>
-          val result = Optimizer.minimize(objective.evaluate, options.initial, options.optimizer, Some(model.bounds))
-          ModelDocument.create(model, artifact.artifact, spec, options, result, objective.accounting)
+          val result = Optimizer.minimize(
+            objective.evaluate,
+            options.initial,
+            options.optimizer,
+            Some(model.bounds)
+          )
+          ModelDocument.create(
+            model,
+            artifact.artifact,
+            spec,
+            options,
+            result,
+            objective.accounting
+          )
         case Some(settings) =>
           val (result, accounting, target) = FitTarget.solve(objective.evaluateRaw, settings)
-          ModelDocument.create(model, artifact.artifact, spec, options, result, accounting, Some(target))
+          ModelDocument.create(
+            model,
+            artifact.artifact,
+            spec,
+            options,
+            result,
+            accounting,
+            Some(target)
+          )
       }
     } finally objective.close()
   }
@@ -500,7 +529,14 @@ private[tmbad] object Fitting {
         worker.finish()
         val result = sums.summary(0, model, artifact.artifact)
         require(result.weight > 0, "Independent fit has zero effective likelihood weight")
-        val value = GlobalEvaluation(result.loss, result.gradient, result.rows, result.units, result.weight, result.ledger)
+        val value = GlobalEvaluation(
+          result.loss,
+          result.gradient,
+          result.rows,
+          result.units,
+          result.weight,
+          result.ledger
+        )
         accounting = Some(value)
         value
       } catch {
@@ -515,11 +551,14 @@ private[tmbad] object Fitting {
           val raw = evaluateRaw(theta)
           val denominator = if (options.reduction == "weighted_mean") raw.weight else 1.0
           val value = raw.value / denominator + GlobalPenalty.value(theta, options.l2Strength)
-          val gradient = theta.indices.map(i => raw.gradient(i) / denominator + options.l2Strength * theta(i)).toVector
+          val gradient = theta.indices
+            .map(i => raw.gradient(i) / denominator + options.l2Strength * theta(i))
+            .toVector
           accounting = Some(raw.copy(value = value, gradient = gradient))
           Optimizer.Evaluation(value, gradient)
         }
-        val fit = Optimizer.minimize(evaluate, options.initial, options.optimizer, Some(model.bounds))
+        val fit =
+          Optimizer.minimize(evaluate, options.initial, options.optimizer, Some(model.bounds))
         ModelDocument.create(model, artifact.artifact, spec, options, fit, accounting.get)
       case Some(settings) =>
         val (fit, accepted, target) = FitTarget.solve(evaluateRaw, settings)

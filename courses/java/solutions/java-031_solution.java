@@ -81,7 +81,7 @@ public class Main {
     }
     assert targetFailure;
 
-    // Exercise 5: Reject missing class andmethod contracts
+    // Exercise 5: Reject missing class and method contracts
     boolean missingClass = false,
       missingMethod = false;
     try {

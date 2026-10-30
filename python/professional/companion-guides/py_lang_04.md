@@ -104,15 +104,18 @@ once to own a fresh loop. The final tuple follows the stored task list.
 ```python
 import asyncio
 
+
 async def ordered_demo():
     async def calculate(value):
         await asyncio.sleep(0)
         return value * 10
+
     async with asyncio.TaskGroup() as group:
         tasks = [group.create_task(calculate(value)) for value in (3, 1)]
     result = tuple(task.result() for task in tasks)
     assert result == (30, 10)
     return result
+
 
 print("Input-order results:", asyncio.run(ordered_demo()))
 ```
@@ -133,10 +136,12 @@ with startup on a busy machine and make a missing cleanup look intermittent.
 ```python
 import asyncio
 
+
 async def cancellation_demo():
     ready = asyncio.Event()
     never = asyncio.Event()
     events = []
+
     async def worker():
         events.append("open")
         try:
@@ -144,6 +149,7 @@ async def cancellation_demo():
             await never.wait()
         finally:
             events.append("close")
+
     task = asyncio.create_task(worker())
     await ready.wait()
     task.cancel()
@@ -156,6 +162,7 @@ async def cancellation_demo():
     assert task.cancelled()
     assert events == ["open", "close"]
     return events
+
 
 print("Awaited cancellation:", asyncio.run(cancellation_demo()))
 ```

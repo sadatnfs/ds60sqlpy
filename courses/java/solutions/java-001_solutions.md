@@ -91,8 +91,12 @@ The source is well typed and can compile, but the operation fails at runtime. Ca
 
 ```java
 boolean dividedByZero = false;
-try { int zero = 0; int ignored = 10 / zero; }
-catch (ArithmeticException expected) { dividedByZero = true; }
+try {
+  int zero = 0;
+  int ignored = 10 / zero;
+} catch (ArithmeticException expected) {
+  dividedByZero = true;
+}
 assert dividedByZero;
 ```
 
@@ -110,13 +114,30 @@ The compiler checks an intentionally invalid source and returns a structured dia
 var compiler = javax.tools.ToolProvider.getSystemJavaCompiler();
 assert compiler != null : "A JDK compiler is required";
 var diagnostics = new javax.tools.DiagnosticCollector<javax.tools.JavaFileObject>();
-var source = new javax.tools.SimpleJavaFileObject(java.net.URI.create("string:///Broken.java"), javax.tools.JavaFileObject.Kind.SOURCE) {
-    public CharSequence getCharContent(boolean ignore) { return "class Broken { int f() { return 1 } }"; }
+var source = new javax.tools.SimpleJavaFileObject(
+  java.net.URI.create("string:///Broken.java"),
+  javax.tools.JavaFileObject.Kind.SOURCE
+) {
+  public CharSequence getCharContent(boolean ignore) {
+    return "class Broken { int f() { return 1 } }";
+  }
 };
 try (var files = compiler.getStandardFileManager(diagnostics, null, null)) {
-    boolean compiled = compiler.getTask(null, files, diagnostics, List.of("-proc:none", "--release", "21"), null, List.of(source)).call();
-    assert !compiled;
-    assert diagnostics.getDiagnostics().stream().anyMatch(d -> d.getKind() == javax.tools.Diagnostic.Kind.ERROR);
+  boolean compiled = compiler
+    .getTask(
+      null,
+      files,
+      diagnostics,
+      List.of("-proc:none", "--release", "21"),
+      null,
+      List.of(source)
+    )
+    .call();
+  assert !compiled;
+  assert diagnostics
+    .getDiagnostics()
+    .stream()
+    .anyMatch(d -> d.getKind() == javax.tools.Diagnostic.Kind.ERROR);
 }
 ```
 

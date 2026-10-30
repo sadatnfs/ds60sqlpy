@@ -34,7 +34,7 @@ public class Main {
     long elapsed = System.nanoTime() - start;
     assert checksum == 10_010_000L && elapsed >= 0;
 
-    // Exercise 4: Record andread an actualJFR event
+    // Exercise 4: Record and read an actualJFR event
     var root = java.nio.file.Files.createTempDirectory("ds60-jfr-");
     var file = root.resolve("fixture.jfr");
     try {

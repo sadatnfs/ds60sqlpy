@@ -119,29 +119,53 @@ The output grain is one row per group. Counts remain beside means so a one-recor
 ```python
 import math
 from collections import defaultdict
-def dispatch(request,rows):
-    if not isinstance(request,dict) or set(request)!={'operation','group_by','value'}: raise ValueError('exact tool fields required')
-    if request!={'operation':'group_mean','group_by':'group','value':'value'}: raise ValueError('operation or columns not allowed')
-    if not 1<=len(rows)<=20: raise ValueError('row budget1..20 required')
-    if len({row['id'] for row in rows})!=len(rows): raise ValueError('duplicate row ID')
-    groups=defaultdict(list)
+
+
+def dispatch(request, rows):
+    if not isinstance(request, dict) or set(request) != {"operation", "group_by", "value"}:
+        raise ValueError("exact tool fields required")
+    if request != {"operation": "group_mean", "group_by": "group", "value": "value"}:
+        raise ValueError("operation or columns not allowed")
+    if not 1 <= len(rows) <= 20:
+        raise ValueError("row budget1..20 required")
+    if len({row["id"] for row in rows}) != len(rows):
+        raise ValueError("duplicate row ID")
+    groups = defaultdict(list)
     for row in rows:
-        if set(row)!={'id','group','value'} or not isinstance(row['id'],str) or not isinstance(row['group'],str): raise ValueError('row schema')
-        value=row['value']
-        if type(value) not in (int,float): raise TypeError('numeric value required')
-        if not math.isfinite(value): raise ValueError('finite value required')
-        groups[row['group']].append(value)
-    result=[]
-    for key,values in sorted(groups.items()):
-        scale=max(abs(value) for value in values)
-        mean=0.0 if scale==0 else scale*(math.fsum(value/scale for value in values)/len(values))
-        if not math.isfinite(mean): raise ValueError('finite group mean required')
-        result.append({'group':key,'count':len(values),'mean':mean})
+        if (
+            set(row) != {"id", "group", "value"}
+            or not isinstance(row["id"], str)
+            or not isinstance(row["group"], str)
+        ):
+            raise ValueError("row schema")
+        value = row["value"]
+        if type(value) not in (int, float):
+            raise TypeError("numeric value required")
+        if not math.isfinite(value):
+            raise ValueError("finite value required")
+        groups[row["group"]].append(value)
+    result = []
+    for key, values in sorted(groups.items()):
+        scale = max(abs(value) for value in values)
+        mean = (
+            0.0
+            if scale == 0
+            else scale * (math.fsum(value / scale for value in values) / len(values))
+        )
+        if not math.isfinite(mean):
+            raise ValueError("finite group mean required")
+        result.append({"group": key, "count": len(values), "mean": mean})
     return result
-rows=[{'id':'a1','group':'A','value':1.},{'id':'a2','group':'A','value':3.},{'id':'b1','group':'B','value':10.}]
-request={'operation':'group_mean','group_by':'group','value':'value'}
-result=dispatch(request,rows)
-assert result==[{'group':'A','count':2,'mean':2.},{'group':'B','count':1,'mean':10.}]
+
+
+rows = [
+    {"id": "a1", "group": "A", "value": 1.0},
+    {"id": "a2", "group": "A", "value": 3.0},
+    {"id": "b1", "group": "B", "value": 10.0},
+]
+request = {"operation": "group_mean", "group_by": "group", "value": "value"}
+result = dispatch(request, rows)
+assert result == [{"group": "A", "count": 2, "mean": 2.0}, {"group": "B", "count": 1, "mean": 10.0}]
 ```
 
 **Expected:** A count 2 mean 2; B count 1 mean 10.
@@ -151,10 +175,16 @@ assert result==[{'group':'A','count':2,'mean':2.},{'group':'B','count':1,'mean':
 The dispatcher never interprets arbitrary text as code or SQL. A production SQL adapter would need a separate reviewed query template and target boundary.
 
 ```python
-for proposal in [{'operation':'run_sql','group_by':'group','value':'value'},{**request,'query':'DROP TABLE anything'}]:
-    try: dispatch(proposal,rows)
-    except ValueError: pass
-    else: raise AssertionError('unbounded operation accepted')
+for proposal in [
+    {"operation": "run_sql", "group_by": "group", "value": "value"},
+    {**request, "query": "DROP TABLE anything"},
+]:
+    try:
+        dispatch(proposal, rows)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("unbounded operation accepted")
 ```
 
 **Expected:** ValueError before any computation.
@@ -164,15 +194,19 @@ for proposal in [{'operation':'run_sql','group_by':'group','value':'value'},{**r
 Silently dropping or coercing these values would change the denominator or meaning. A different missingness policy must be explicitly designed and reported.
 
 ```python
-for bad in [True,float('nan'),None]:
-    changed=[dict(r) for r in rows]; changed[0]['value']=bad
-    try: dispatch(request,changed)
-    except (TypeError,ValueError): pass
-    else: raise AssertionError('invalid numeric value accepted')
-huge=[{'id':'h1','group':'A','value':1e308},{'id':'h2','group':'A','value':1e308}]
-assert dispatch(request,huge)==[{'group':'A','count':2,'mean':1e308}]
-huge[1]['value']=-1e308
-assert dispatch(request,huge)[0]['mean']==0.0
+for bad in [True, float("nan"), None]:
+    changed = [dict(r) for r in rows]
+    changed[0]["value"] = bad
+    try:
+        dispatch(request, changed)
+    except (TypeError, ValueError):
+        pass
+    else:
+        raise AssertionError("invalid numeric value accepted")
+huge = [{"id": "h1", "group": "A", "value": 1e308}, {"id": "h2", "group": "A", "value": 1e308}]
+assert dispatch(request, huge) == [{"group": "A", "count": 2, "mean": 1e308}]
+huge[1]["value"] = -1e308
+assert dispatch(request, huge)[0]["mean"] == 0.0
 ```
 
 **Expected:** invalid rows are rejected; equal 1e308 values have finite mean 1e308 and opposite values have mean 0.

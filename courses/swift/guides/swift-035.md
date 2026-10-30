@@ -45,18 +45,16 @@ Scoped access limits the lifetime reasoning to one visible closure.
 ```swift
 import Foundation
 
-
-
 @main
 struct LessonMain {
-    static func main() async throws {
-        do {
-            let values = [2, 3, 4]
-            let total = values.withUnsafeBufferPointer { buffer in buffer.reduce(0, +) }
-            precondition(total == 9)
-        }
-        print("swift-035: passed")
+  static func main() async throws {
+    do {
+      let values = [2, 3, 4]
+      let total = values.withUnsafeBufferPointer { buffer in buffer.reduce(0, +) }
+      precondition(total == 9)
     }
+    print("swift-035: passed")
+  }
 }
 ```
 
@@ -69,18 +67,16 @@ No base-address dereference is needed, avoiding assumptions about a pointer for 
 ```swift
 import Foundation
 
-
-
 @main
 struct LessonMain {
-    static func main() async throws {
-        do {
-            let values: [Int] = []
-            let count = values.withUnsafeBufferPointer { buffer in buffer.count }
-            precondition(count == 0)
-        }
-        print("swift-035: passed")
+  static func main() async throws {
+    do {
+      let values: [Int] = []
+      let count = values.withUnsafeBufferPointer { buffer in buffer.count }
+      precondition(count == 0)
     }
+    print("swift-035: passed")
+  }
 }
 ```
 

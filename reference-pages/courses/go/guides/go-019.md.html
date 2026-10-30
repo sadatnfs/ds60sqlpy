@@ -241,8 +241,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>err <span class="syntax-operator">==</span> <span class="syntax-keyword">nil</span> <span class="syntax-operator">&amp;&amp;</span> c<span class="syntax-punctuation">.</span>Name <span class="syntax-operator">==</span> <span class="syntax-string">&quot;sample&quot;</span> <span class="syntax-operator">&amp;&amp;</span> c<span class="syntax-punctuation">.</span>Count <span class="syntax-operator">==</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;typed JSON&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The fields become sample and 3.</p>
 <p>Field names follow tags rather than an accidental presentation format. Parsing success still leaves count-range and name rules to domain validation.</p>
 <h4 id="worked-example-2-reject-an-unknown-property">Worked example 2: Reject an unknown property<a class="heading-anchor" href="#worked-example-2-reject-an-unknown-property" aria-label="Link to this section">#</a></h4>
@@ -282,8 +281,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>d<span class="syntax-punctuation">.</span>Decode<span class="syntax-punctuation">(</span><span class="syntax-operator">&amp;</span>c<span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> <span class="syntax-keyword">nil</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;unknown field&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Decoding returns an error.</p>
 <p>Strict rejection catches misspelled configuration keys instead of silently ignoring a learner or operator mistake.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>

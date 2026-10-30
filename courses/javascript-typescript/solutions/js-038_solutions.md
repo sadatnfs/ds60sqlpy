@@ -103,7 +103,11 @@ function negativeTypeCheck(envelope: Envelope): void {
   void envelope.data.total;
 }
 void negativeTypeCheck;
-assert.equal(decodeReply(handle({ method: 'POST', path: '/sum', requestId: 'R6', body: { a: 0, b: 0 } })).status, 200);
+assert.equal(
+  decodeReply(handle({ method: 'POST', path: '/sum', requestId: 'R6', body: { a: 0, b: 0 } }))
+    .status,
+  200,
+);
 ```
 
 **Expected:** expected compiler error; correctly narrowed success remains usable.
@@ -117,7 +121,12 @@ Task: Include a secret-looking extra field in an invalid request.
 An error response is another output boundary. Generic domain diagnostics can be useful without reflecting arbitrary request content into logs or clients.
 
 ```typescript
-const reply = handle({ method: 'POST', path: '/sum', requestId: 'R7', body: { a: 1, b: 2, token: 'fixture-secret-value' } });
+const reply = handle({
+  method: 'POST',
+  path: '/sum',
+  requestId: 'R7',
+  body: { a: 1, b: 2, token: 'fixture-secret-value' },
+});
 assert.equal(reply.status, 400);
 assert.equal(JSON.stringify(reply).includes('fixture-secret-value'), false);
 ```

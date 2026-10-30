@@ -9,9 +9,9 @@ The penalty applies to both coefficients in this contract, so compare against th
 **Expected:** A finite changed coefficient vector with zero penalized gradient.
 
 ```python
-weight = solve(design, targets, mask, .1)
-assert not np.allclose(np.asarray(weight), [1., 2.])
-close(jax.grad(objective)(weight, design, targets, mask, .1), [0., 0.])
+weight = solve(design, targets, mask, 0.1)
+assert not np.allclose(np.asarray(weight), [1.0, 2.0])
+close(jax.grad(objective)(weight, design, targets, mask, 0.1), [0.0, 0.0])
 ```
 
 ## Exercise 2: Preserve row identity under permutation
@@ -21,7 +21,7 @@ The sum objective is invariant to consistent row reordering.
 **Expected:** Unchanged coefficients.
 
 ```python
-close(solve(design[::-1], targets[::-1], mask[::-1], 0.), [1., 2.])
+close(solve(design[::-1], targets[::-1], mask[::-1], 0.0), [1.0, 2.0])
 ```
 
 ## Exercise 3: Reject an empty population
@@ -32,11 +32,11 @@ The component refuses an undefined empirical mean before entering the numerical 
 
 ```python
 try:
-    admit(design, targets, jnp.zeros(3, dtype=bool), 0.)
+    admit(design, targets, jnp.zeros(3, dtype=bool), 0.0)
 except ValueError:
     pass
 else:
-    raise AssertionError('empty population admitted')
+    raise AssertionError("empty population admitted")
 ```
 
 ## Exercise 4: Reject an invalid penalty
@@ -47,11 +47,11 @@ A negative value would change the optimization problem and can destroy the inten
 
 ```python
 try:
-    admit(design, targets, mask, -.1)
+    admit(design, targets, mask, -0.1)
 except ValueError:
     pass
 else:
-    raise AssertionError('negative penalty admitted')
+    raise AssertionError("negative penalty admitted")
 ```
 
 ## Exercise 5: Check transformation parity
@@ -61,7 +61,7 @@ The compiled function receives the numerical representation after host admission
 **Expected:** Matching coefficients.
 
 ```python
-close(jax.jit(solve)(design, targets, mask, .1), solve(design, targets, mask, .1))
+close(jax.jit(solve)(design, targets, mask, 0.1), solve(design, targets, mask, 0.1))
 ```
 
 ## Exercise 6: Transfer the target rule
@@ -71,7 +71,7 @@ Changing the known affine rule provides a new oracle that is not satisfied by ha
 **Expected:** Weights [2,3].
 
 ```python
-close(solve(design, jnp.array([2., 5., 8.]), mask, 0.), [2., 3.])
+close(solve(design, jnp.array([2.0, 5.0, 8.0]), mask, 0.0), [2.0, 3.0])
 ```
 
 ## Scope of this evidence

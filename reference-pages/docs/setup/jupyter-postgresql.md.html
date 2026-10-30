@@ -218,7 +218,10 @@ uv run --no-sync python -m ipykernel install --user --name ds60sqlpy --display-n
 <pre class="highlighted-code"><code class="language-bash">mkdir -p <span class="syntax-string">&quot;</span>$HOME<span class="syntax-string">/.config/ds60</span><span class="syntax-string">&quot;</span>
 chmod <span class="syntax-number">700</span> <span class="syntax-string">&quot;</span>$HOME<span class="syntax-string">/.config/ds60</span><span class="syntax-string">&quot;</span>
 <span class="syntax-builtin">export</span> PGPASSFILE<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span>$HOME<span class="syntax-string">/.config/ds60/postgresql.pass</span><span class="syntax-string">&quot;</span>
-<span class="syntax-operator">(</span><span class="syntax-builtin">umask</span> <span class="syntax-number">077</span><span class="syntax-punctuation">;</span> touch <span class="syntax-string">&quot;</span>$PGPASSFILE<span class="syntax-string">&quot;</span><span class="syntax-operator">)</span>
+<span class="syntax-operator">(</span>
+  <span class="syntax-builtin">umask</span> <span class="syntax-number">077</span>
+  touch <span class="syntax-string">&quot;</span>$PGPASSFILE<span class="syntax-string">&quot;</span>
+<span class="syntax-operator">)</span>
 chmod <span class="syntax-number">600</span> <span class="syntax-string">&quot;</span>$PGPASSFILE<span class="syntax-string">&quot;</span></code></pre>
 <p>Open that file in your text editor and add this one-line format, replacing <code>PORT</code> with the same actual port and <code>YOUR_PASSWORD</code> with the password for your local learning role. Do not paste the real line into the notebook or terminal command history. Retain any unrelated existing entries rather than replacing the whole file.</p>
 <pre class="highlighted-code"><code class="language-text">127.0.0.1:PORT:advanced_sql_training:admin:YOUR_PASSWORD</code></pre>

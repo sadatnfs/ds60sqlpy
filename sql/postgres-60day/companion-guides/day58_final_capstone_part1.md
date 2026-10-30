@@ -98,9 +98,9 @@ These worked excerpts come from `sql/postgres-60day/day58_final_capstone_part1.s
 ```sql
 CREATE TEMP TABLE stg_customers_raw (
   full_name TEXT,
-  email     TEXT,
-  country   TEXT,
-  segment   TEXT,
+  email TEXT,
+  country TEXT,
+  segment TEXT,
   created_at TEXT,
   attributes TEXT
 );
@@ -113,7 +113,7 @@ CREATE TEMP TABLE stg_customers_raw (
 ### Example 2
 
 ```sql
-INSERT INTO stg_customers_raw(full_name, email, country, segment, created_at, attributes)
+INSERT INTO stg_customers_raw (full_name, email, country, segment, created_at, attributes)
 VALUES
   ('  Customer 501  ', 'CUSTOMER501@EXAMPLE.COM ', ' us ', ' GOLD ', '2025/01/03 10:00', '{"channel":"Web","referrer":"SEO"}'),
   ('Customer 502', 'customer-502@example.com', 'GB', NULL, '03-01-2025', '{"channel":"mobile","referrer":"email"}'),

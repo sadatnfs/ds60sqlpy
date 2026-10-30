@@ -52,9 +52,7 @@ def read_records(path: Path) -> list[dict[str, object]]:
     return payload
 
 
-def select_records(
-    records: list[dict[str, object]], *, limit: int
-) -> list[dict[str, object]]:
+def select_records(records: list[dict[str, object]], *, limit: int) -> list[dict[str, object]]:
     if limit < 0:
         raise ValueError("limit must be non-negative")
     return records[:limit]
@@ -268,7 +266,7 @@ def main(argv: list[str] | None = None) -> int:
         ensure_writable_output(args.out, overwrite=args.overwrite)
         # read -> clean -> summarize -> write belongs here.
     except (FileNotFoundError, FileExistsError, ValueError) as error:
-        print(f"error: {error}")   # One user-facing boundary translation.
+        print(f"error: {error}")  # One user-facing boundary translation.
         return 2
     return 0
 

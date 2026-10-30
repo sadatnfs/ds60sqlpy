@@ -433,39 +433,65 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These worked excerpts come from <code>sql/postgres-60day/day24_recursive_ctes.sql</code>. Use <strong>Whole SQL lesson (psql)</strong> in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared <code>psql</code> routes are described above.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> <span class="syntax-keyword">RECURSIVE</span> org <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span>
-         e<span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span>
-         e<span class="syntax-punctuation">.</span>manager_id<span class="syntax-punctuation">,</span>
-         <span class="syntax-number">1</span> <span class="syntax-keyword">AS</span> depth<span class="syntax-punctuation">,</span>
-         <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span>e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">]</span> <span class="syntax-keyword">AS</span> path
-  <span class="syntax-keyword">FROM</span> employees e
-  <span class="syntax-keyword">WHERE</span> e<span class="syntax-punctuation">.</span>manager_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span>
+  <span class="syntax-keyword">SELECT</span>
+    e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span>
+    e<span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span>
+    e<span class="syntax-punctuation">.</span>manager_id<span class="syntax-punctuation">,</span>
+    <span class="syntax-number">1</span> <span class="syntax-keyword">AS</span> depth<span class="syntax-punctuation">,</span>
+    <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span>e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">]</span> <span class="syntax-keyword">AS</span> path
+  <span class="syntax-keyword">FROM</span>
+    employees e
+  <span class="syntax-keyword">WHERE</span>
+    e<span class="syntax-punctuation">.</span>manager_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span>
   <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span>
-  <span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span>
-         e<span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span>
-         e<span class="syntax-punctuation">.</span>manager_id<span class="syntax-punctuation">,</span>
-         o<span class="syntax-punctuation">.</span>depth <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span>
-         o<span class="syntax-punctuation">.</span>path <span class="syntax-operator">|</span><span class="syntax-operator">|</span> e<span class="syntax-punctuation">.</span>employee_id
-  <span class="syntax-keyword">FROM</span> employees e
-  <span class="syntax-keyword">JOIN</span> org o <span class="syntax-keyword">ON</span> e<span class="syntax-punctuation">.</span>manager_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>employee_id
-  <span class="syntax-comment">-- A path is evidence of traversal and a guard against malformed cycles.</span>
-  <span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">NOT</span> e<span class="syntax-punctuation">.</span>employee_id <span class="syntax-operator">=</span> <span class="syntax-keyword">ANY</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>path<span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> employee_id<span class="syntax-punctuation">,</span> full_name<span class="syntax-punctuation">,</span> manager_id<span class="syntax-punctuation">,</span> depth<span class="syntax-punctuation">,</span> path
-<span class="syntax-keyword">FROM</span> org
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> depth<span class="syntax-punctuation">,</span> full_name<span class="syntax-punctuation">,</span> employee_id
+  <span class="syntax-keyword">SELECT</span>
+    e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span>
+    e<span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span>
+    e<span class="syntax-punctuation">.</span>manager_id<span class="syntax-punctuation">,</span>
+    o<span class="syntax-punctuation">.</span>depth <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span>
+    o<span class="syntax-punctuation">.</span>path <span class="syntax-operator">|</span><span class="syntax-operator">|</span> e<span class="syntax-punctuation">.</span>employee_id
+  <span class="syntax-keyword">FROM</span>
+    employees e
+    <span class="syntax-keyword">JOIN</span> org o <span class="syntax-keyword">ON</span> e<span class="syntax-punctuation">.</span>manager_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>employee_id
+    <span class="syntax-comment">-- A path is evidence of traversal and a guard against malformed cycles.</span>
+  <span class="syntax-keyword">WHERE</span>
+    <span class="syntax-keyword">NOT</span> e<span class="syntax-punctuation">.</span>employee_id <span class="syntax-operator">=</span> <span class="syntax-keyword">ANY</span> <span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>path<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span>
+  employee_id<span class="syntax-punctuation">,</span>
+  full_name<span class="syntax-punctuation">,</span>
+  manager_id<span class="syntax-punctuation">,</span>
+  depth<span class="syntax-punctuation">,</span>
+  path
+<span class="syntax-keyword">FROM</span>
+  org
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  depth<span class="syntax-punctuation">,</span>
+  full_name<span class="syntax-punctuation">,</span>
+  employee_id
 <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">100</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 1: Start with <code>employees</code>, and <code>org</code> in <code>FROM</code>/<code>JOIN</code>; let <code>WHERE</code> remove nonqualifying rows; append branches with <code>UNION ALL</code> (duplicates are retained). The final <code>SELECT</code> displays <code>employee_id</code>, <code>full_name</code>, <code>manager_id</code>, <code>depth</code>, and <code>path</code>. <code>ORDER BY</code> determines presentation order and the final <code>LIMIT 100</code> caps displayed rows. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 1 returns one row per <code>employee_id</code>, and <code>manager_id</code>, capped at 100 rows with columns <code>employee_id</code>, <code>full_name</code>, <code>manager_id</code>, <code>depth</code>, and <code>path</code> from <code>employees</code>, and <code>org</code>. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an <code>ORDER BY</code>, and inspect <code>NULL</code> only for columns this example can produce.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> <span class="syntax-keyword">RECURSIVE</span> months <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_DATE</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> m<span class="syntax-punctuation">,</span> <span class="syntax-number">1</span> <span class="syntax-keyword">AS</span> n
+  <span class="syntax-keyword">SELECT</span>
+    date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_DATE</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> m<span class="syntax-punctuation">,</span>
+    <span class="syntax-number">1</span> <span class="syntax-keyword">AS</span> n
   <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span>
-  <span class="syntax-keyword">SELECT</span> <span class="syntax-punctuation">(</span>m <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;1 month&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span><span class="syntax-punctuation">,</span> n<span class="syntax-operator">+</span><span class="syntax-number">1</span> <span class="syntax-keyword">FROM</span> months <span class="syntax-keyword">WHERE</span> n <span class="syntax-operator">&lt;</span> <span class="syntax-number">12</span>
+  <span class="syntax-keyword">SELECT</span>
+    <span class="syntax-punctuation">(</span>m <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;1 month&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span><span class="syntax-punctuation">,</span>
+    n <span class="syntax-operator">+</span> <span class="syntax-number">1</span>
+  <span class="syntax-keyword">FROM</span>
+    months
+  <span class="syntax-keyword">WHERE</span>
+    n <span class="syntax-operator">&lt;</span> <span class="syntax-number">12</span>
 <span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> m <span class="syntax-keyword">AS</span> month_start<span class="syntax-punctuation">,</span> n <span class="syntax-keyword">AS</span> step
-<span class="syntax-keyword">FROM</span> months
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> month_start<span class="syntax-punctuation">;</span></code></pre>
+<span class="syntax-keyword">SELECT</span>
+  m <span class="syntax-keyword">AS</span> month_start<span class="syntax-punctuation">,</span>
+  n <span class="syntax-keyword">AS</span> step
+<span class="syntax-keyword">FROM</span>
+  months
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  month_start<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 2: Start with <code>months</code> in <code>FROM</code>/<code>JOIN</code>; let <code>WHERE</code> remove nonqualifying rows; append branches with <code>UNION ALL</code> (duplicates are retained). The final <code>SELECT</code> displays <code>month_start</code>, and <code>step</code>. <code>ORDER BY</code> determines presentation order. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 2 returns one row per <code>month_start</code> with columns <code>month_start</code>, and <code>step</code> from <code>months</code>. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an <code>ORDER BY</code>, and inspect <code>NULL</code> only for columns this example can produce.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -806,29 +832,37 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> <span class="syntax-keyword">RECURSIVE</span> reports <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> manager<span class="syntax-punctuation">.</span>employee_id <span class="syntax-keyword">AS</span> manager_id<span class="syntax-punctuation">,</span>
-         report<span class="syntax-punctuation">.</span>employee_id <span class="syntax-keyword">AS</span> report_id<span class="syntax-punctuation">,</span>
-         <span class="syntax-number">1</span> <span class="syntax-keyword">AS</span> depth<span class="syntax-punctuation">,</span>
-         <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span>manager<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span> report<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">]</span> <span class="syntax-keyword">AS</span> path
-  <span class="syntax-keyword">FROM</span> employees <span class="syntax-keyword">AS</span> manager
-  <span class="syntax-keyword">JOIN</span> employees <span class="syntax-keyword">AS</span> report
-    <span class="syntax-keyword">ON</span> report<span class="syntax-punctuation">.</span>manager_id <span class="syntax-operator">=</span> manager<span class="syntax-punctuation">.</span>employee_id
-  <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span>
-  <span class="syntax-keyword">SELECT</span> r<span class="syntax-punctuation">.</span>manager_id<span class="syntax-punctuation">,</span>
-         report<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span>
-         r<span class="syntax-punctuation">.</span>depth <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span>
-         r<span class="syntax-punctuation">.</span>path <span class="syntax-operator">|</span><span class="syntax-operator">|</span> report<span class="syntax-punctuation">.</span>employee_id
-  <span class="syntax-keyword">FROM</span> reports <span class="syntax-keyword">AS</span> r
-  <span class="syntax-keyword">JOIN</span> employees <span class="syntax-keyword">AS</span> report
-    <span class="syntax-keyword">ON</span> report<span class="syntax-punctuation">.</span>manager_id <span class="syntax-operator">=</span> r<span class="syntax-punctuation">.</span>report_id
-  <span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">NOT</span> report<span class="syntax-punctuation">.</span>employee_id <span class="syntax-operator">=</span> <span class="syntax-keyword">ANY</span><span class="syntax-punctuation">(</span>r<span class="syntax-punctuation">.</span>path<span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> manager_id<span class="syntax-punctuation">,</span>
-       report_id<span class="syntax-punctuation">,</span>
-       depth<span class="syntax-punctuation">,</span>
-       path
-<span class="syntax-keyword">FROM</span> reports
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> manager_id<span class="syntax-punctuation">,</span> depth<span class="syntax-punctuation">,</span> report_id<span class="syntax-punctuation">;</span></code></pre>
+  <span class="syntax-keyword">SELECT</span>
+    manager<span class="syntax-punctuation">.</span>employee_id <span class="syntax-keyword">AS</span> manager_id<span class="syntax-punctuation">,</span>
+    report<span class="syntax-punctuation">.</span>employee_id <span class="syntax-keyword">AS</span> report_id<span class="syntax-punctuation">,</span>
+    <span class="syntax-number">1</span> <span class="syntax-keyword">AS</span> depth<span class="syntax-punctuation">,</span>
+    <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span>manager<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span>
+    report<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">]</span> <span class="syntax-keyword">AS</span> path
+  <span class="syntax-keyword">FROM</span>
+    employees <span class="syntax-keyword">AS</span> manager
+    <span class="syntax-keyword">JOIN</span> employees <span class="syntax-keyword">AS</span> report <span class="syntax-keyword">ON</span> report<span class="syntax-punctuation">.</span>manager_id <span class="syntax-operator">=</span> manager<span class="syntax-punctuation">.</span>employee_id
+<span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span>
+<span class="syntax-keyword">SELECT</span>
+  r<span class="syntax-punctuation">.</span>manager_id<span class="syntax-punctuation">,</span>
+  report<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span>
+  r<span class="syntax-punctuation">.</span>depth <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span>
+  r<span class="syntax-punctuation">.</span>path <span class="syntax-operator">|</span><span class="syntax-operator">|</span> report<span class="syntax-punctuation">.</span>employee_id
+<span class="syntax-keyword">FROM</span>
+  reports <span class="syntax-keyword">AS</span> r
+  <span class="syntax-keyword">JOIN</span> employees <span class="syntax-keyword">AS</span> report <span class="syntax-keyword">ON</span> report<span class="syntax-punctuation">.</span>manager_id <span class="syntax-operator">=</span> r<span class="syntax-punctuation">.</span>report_id
+  <span class="syntax-keyword">WHERE</span>
+    <span class="syntax-keyword">NOT</span> report<span class="syntax-punctuation">.</span>employee_id <span class="syntax-operator">=</span> <span class="syntax-keyword">ANY</span> <span class="syntax-punctuation">(</span>r<span class="syntax-punctuation">.</span>path<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span>
+  manager_id<span class="syntax-punctuation">,</span>
+  report_id<span class="syntax-punctuation">,</span>
+  depth<span class="syntax-punctuation">,</span>
+  path
+<span class="syntax-keyword">FROM</span>
+  reports
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  manager_id<span class="syntax-punctuation">,</span>
+  depth<span class="syntax-punctuation">,</span>
+  report_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One row per ancestor-descendant pair.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
@@ -853,15 +887,22 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><code>WHERE</code>: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</li>
 <li>set operation: combines compatible result shapes; the presence or absence of <code>ALL</code> controls duplicate preservation.</li>
 </ul>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> <span class="syntax-keyword">RECURSIVE</span> numbers<span class="syntax-punctuation">(</span>n<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> <span class="syntax-keyword">RECURSIVE</span> numbers <span class="syntax-punctuation">(</span>
+  n
+<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
   <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
   <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span>
-  <span class="syntax-keyword">SELECT</span> n <span class="syntax-operator">+</span> <span class="syntax-number">1</span>
-  <span class="syntax-keyword">FROM</span> numbers
-  <span class="syntax-keyword">WHERE</span> n <span class="syntax-operator">&lt;</span> <span class="syntax-number">100</span>
+  <span class="syntax-keyword">SELECT</span>
+    n <span class="syntax-operator">+</span> <span class="syntax-number">1</span>
+  <span class="syntax-keyword">FROM</span>
+    numbers
+  <span class="syntax-keyword">WHERE</span>
+    n <span class="syntax-operator">&lt;</span> <span class="syntax-number">100</span>
 <span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>n<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> sum_1_to_100
-<span class="syntax-keyword">FROM</span> numbers<span class="syntax-punctuation">;</span></code></pre>
+<span class="syntax-keyword">SELECT</span>
+  <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>n<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> sum_1_to_100
+<span class="syntax-keyword">FROM</span>
+  numbers<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> Exactly one row with 5050.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
@@ -887,16 +928,28 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li>time normalization: makes reporting boundaries explicit; UTC is applied before deriving calendar buckets where required.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> <span class="syntax-keyword">RECURSIVE</span> months<span class="syntax-punctuation">(</span>month_start<span class="syntax-punctuation">,</span> step<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_DATE</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> <span class="syntax-keyword">RECURSIVE</span> months <span class="syntax-punctuation">(</span>
+  month_start<span class="syntax-punctuation">,</span>
+  step
+<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span>
+    date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_DATE</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-number">1</span>
   <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span>
-  <span class="syntax-keyword">SELECT</span> <span class="syntax-punctuation">(</span>month_start <span class="syntax-operator">-</span> <span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;1 month&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span><span class="syntax-punctuation">,</span> step <span class="syntax-operator">+</span> <span class="syntax-number">1</span>
-  <span class="syntax-keyword">FROM</span> months
-  <span class="syntax-keyword">WHERE</span> step <span class="syntax-operator">&lt;</span> <span class="syntax-number">12</span>
+  <span class="syntax-keyword">SELECT</span>
+    <span class="syntax-punctuation">(</span>month_start <span class="syntax-operator">-</span> <span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;1 month&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span><span class="syntax-punctuation">,</span>
+    step <span class="syntax-operator">+</span> <span class="syntax-number">1</span>
+  <span class="syntax-keyword">FROM</span>
+    months
+  <span class="syntax-keyword">WHERE</span>
+    step <span class="syntax-operator">&lt;</span> <span class="syntax-number">12</span>
 <span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> month_start
-<span class="syntax-keyword">FROM</span> months
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> month_start<span class="syntax-punctuation">;</span></code></pre>
+<span class="syntax-keyword">SELECT</span>
+  month_start
+<span class="syntax-keyword">FROM</span>
+  months
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  month_start<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> Exactly 12 chronological month rows.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-3">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-3" aria-label="Link to this section">#</a></h5>
@@ -923,21 +976,35 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li>set operation: combines compatible result shapes; the presence or absence of <code>ALL</code> controls duplicate preservation.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> <span class="syntax-keyword">RECURSIVE</span> edges<span class="syntax-punctuation">(</span><span class="syntax-keyword">source</span><span class="syntax-punctuation">,</span> destination<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> walk<span class="syntax-punctuation">(</span>node<span class="syntax-punctuation">,</span> path<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> <span class="syntax-keyword">RECURSIVE</span> edges <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">source</span><span class="syntax-punctuation">,</span>
+  destination
+<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+walk <span class="syntax-punctuation">(</span>
+  node<span class="syntax-punctuation">,</span> path
+<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
   <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
   <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span>
-  <span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>destination<span class="syntax-punctuation">,</span>
-         w<span class="syntax-punctuation">.</span>path <span class="syntax-operator">|</span><span class="syntax-operator">|</span> e<span class="syntax-punctuation">.</span>destination
-  <span class="syntax-keyword">FROM</span> walk <span class="syntax-keyword">AS</span> w
-  <span class="syntax-keyword">JOIN</span> edges <span class="syntax-keyword">AS</span> e
-    <span class="syntax-keyword">ON</span> e<span class="syntax-punctuation">.</span><span class="syntax-keyword">source</span> <span class="syntax-operator">=</span> w<span class="syntax-punctuation">.</span>node
-  <span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">NOT</span> e<span class="syntax-punctuation">.</span>destination <span class="syntax-operator">=</span> <span class="syntax-keyword">ANY</span><span class="syntax-punctuation">(</span>w<span class="syntax-punctuation">.</span>path<span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> node<span class="syntax-punctuation">,</span> path
-<span class="syntax-keyword">FROM</span> walk
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> array_length<span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> path<span class="syntax-punctuation">;</span></code></pre>
+  <span class="syntax-keyword">SELECT</span>
+    e<span class="syntax-punctuation">.</span>destination<span class="syntax-punctuation">,</span> w<span class="syntax-punctuation">.</span>path <span class="syntax-operator">|</span><span class="syntax-operator">|</span> e<span class="syntax-punctuation">.</span>destination
+  <span class="syntax-keyword">FROM</span>
+    walk <span class="syntax-keyword">AS</span> w
+    <span class="syntax-keyword">JOIN</span> edges <span class="syntax-keyword">AS</span> e <span class="syntax-keyword">ON</span> e<span class="syntax-punctuation">.</span><span class="syntax-keyword">source</span> <span class="syntax-operator">=</span> w<span class="syntax-punctuation">.</span>node
+  <span class="syntax-keyword">WHERE</span>
+    <span class="syntax-keyword">NOT</span> e<span class="syntax-punctuation">.</span>destination <span class="syntax-operator">=</span> <span class="syntax-keyword">ANY</span> <span class="syntax-punctuation">(</span>w<span class="syntax-punctuation">.</span>path<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span>
+  node<span class="syntax-punctuation">,</span>
+  path
+<span class="syntax-keyword">FROM</span>
+  walk
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  array_length<span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+  path<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> Finite paths starting from node 1; no repeated node inside a path.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-4">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-4" aria-label="Link to this section">#</a></h5>
@@ -964,29 +1031,38 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> <span class="syntax-keyword">RECURSIVE</span> ancestors <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>employee_id <span class="syntax-keyword">AS</span> origin_employee_id<span class="syntax-punctuation">,</span>
-         e<span class="syntax-punctuation">.</span>manager_id <span class="syntax-keyword">AS</span> ancestor_id<span class="syntax-punctuation">,</span>
-         <span class="syntax-number">1</span> <span class="syntax-keyword">AS</span> depth<span class="syntax-punctuation">,</span>
-         <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span>e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">]</span> <span class="syntax-keyword">AS</span> path
-  <span class="syntax-keyword">FROM</span> employees <span class="syntax-keyword">AS</span> e
-  <span class="syntax-keyword">WHERE</span> e<span class="syntax-punctuation">.</span>manager_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span>
+  <span class="syntax-keyword">SELECT</span>
+    e<span class="syntax-punctuation">.</span>employee_id <span class="syntax-keyword">AS</span> origin_employee_id<span class="syntax-punctuation">,</span>
+    e<span class="syntax-punctuation">.</span>manager_id <span class="syntax-keyword">AS</span> ancestor_id<span class="syntax-punctuation">,</span>
+    <span class="syntax-number">1</span> <span class="syntax-keyword">AS</span> depth<span class="syntax-punctuation">,</span>
+    <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span>e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">]</span> <span class="syntax-keyword">AS</span> path
+  <span class="syntax-keyword">FROM</span>
+    employees <span class="syntax-keyword">AS</span> e
+  <span class="syntax-keyword">WHERE</span>
+    e<span class="syntax-punctuation">.</span>manager_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span>
   <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span>
-  <span class="syntax-keyword">SELECT</span> a<span class="syntax-punctuation">.</span>origin_employee_id<span class="syntax-punctuation">,</span>
-         manager<span class="syntax-punctuation">.</span>manager_id<span class="syntax-punctuation">,</span>
-         a<span class="syntax-punctuation">.</span>depth <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span>
-         a<span class="syntax-punctuation">.</span>path <span class="syntax-operator">|</span><span class="syntax-operator">|</span> manager<span class="syntax-punctuation">.</span>employee_id
-  <span class="syntax-keyword">FROM</span> ancestors <span class="syntax-keyword">AS</span> a
-  <span class="syntax-keyword">JOIN</span> employees <span class="syntax-keyword">AS</span> manager
-    <span class="syntax-keyword">ON</span> manager<span class="syntax-punctuation">.</span>employee_id <span class="syntax-operator">=</span> a<span class="syntax-punctuation">.</span>ancestor_id
-  <span class="syntax-keyword">WHERE</span> manager<span class="syntax-punctuation">.</span>manager_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span>
-    <span class="syntax-keyword">AND</span> <span class="syntax-keyword">NOT</span> manager<span class="syntax-punctuation">.</span>employee_id <span class="syntax-operator">=</span> <span class="syntax-keyword">ANY</span><span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">.</span>path<span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> origin_employee_id<span class="syntax-punctuation">,</span>
-       ancestor_id<span class="syntax-punctuation">,</span>
-       depth
-<span class="syntax-keyword">FROM</span> ancestors
-<span class="syntax-keyword">WHERE</span> ancestor_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span>
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> origin_employee_id<span class="syntax-punctuation">,</span> depth<span class="syntax-punctuation">;</span></code></pre>
+  <span class="syntax-keyword">SELECT</span>
+    a<span class="syntax-punctuation">.</span>origin_employee_id<span class="syntax-punctuation">,</span>
+    manager<span class="syntax-punctuation">.</span>manager_id<span class="syntax-punctuation">,</span>
+    a<span class="syntax-punctuation">.</span>depth <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span>
+    a<span class="syntax-punctuation">.</span>path <span class="syntax-operator">|</span><span class="syntax-operator">|</span> manager<span class="syntax-punctuation">.</span>employee_id
+  <span class="syntax-keyword">FROM</span>
+    ancestors <span class="syntax-keyword">AS</span> a
+    <span class="syntax-keyword">JOIN</span> employees <span class="syntax-keyword">AS</span> manager <span class="syntax-keyword">ON</span> manager<span class="syntax-punctuation">.</span>employee_id <span class="syntax-operator">=</span> a<span class="syntax-punctuation">.</span>ancestor_id
+  <span class="syntax-keyword">WHERE</span>
+    manager<span class="syntax-punctuation">.</span>manager_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span>
+    <span class="syntax-keyword">AND</span> <span class="syntax-keyword">NOT</span> manager<span class="syntax-punctuation">.</span>employee_id <span class="syntax-operator">=</span> <span class="syntax-keyword">ANY</span> <span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">.</span>path<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span>
+  origin_employee_id<span class="syntax-punctuation">,</span>
+  ancestor_id<span class="syntax-punctuation">,</span>
+  depth
+<span class="syntax-keyword">FROM</span>
+  ancestors
+<span class="syntax-keyword">WHERE</span>
+  ancestor_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  origin_employee_id<span class="syntax-punctuation">,</span>
+  depth<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One row per employee-ancestor relation.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-5">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-5" aria-label="Link to this section">#</a></h5>
@@ -1014,27 +1090,35 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> <span class="syntax-keyword">RECURSIVE</span> organization <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span>
-         e<span class="syntax-punctuation">.</span>manager_id<span class="syntax-punctuation">,</span>
-         <span class="syntax-number">0</span> <span class="syntax-keyword">AS</span> depth<span class="syntax-punctuation">,</span>
-         <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span>e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">]</span> <span class="syntax-keyword">AS</span> path
-  <span class="syntax-keyword">FROM</span> employees <span class="syntax-keyword">AS</span> e
-  <span class="syntax-keyword">WHERE</span> e<span class="syntax-punctuation">.</span>manager_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span>
+  <span class="syntax-keyword">SELECT</span>
+    e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span>
+    e<span class="syntax-punctuation">.</span>manager_id<span class="syntax-punctuation">,</span>
+    <span class="syntax-number">0</span> <span class="syntax-keyword">AS</span> depth<span class="syntax-punctuation">,</span>
+    <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span>e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">]</span> <span class="syntax-keyword">AS</span> path
+  <span class="syntax-keyword">FROM</span>
+    employees <span class="syntax-keyword">AS</span> e
+  <span class="syntax-keyword">WHERE</span>
+    e<span class="syntax-punctuation">.</span>manager_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span>
   <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span>
-  <span class="syntax-keyword">SELECT</span> child<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span>
-         child<span class="syntax-punctuation">.</span>manager_id<span class="syntax-punctuation">,</span>
-         parent<span class="syntax-punctuation">.</span>depth <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span>
-         parent<span class="syntax-punctuation">.</span>path <span class="syntax-operator">|</span><span class="syntax-operator">|</span> child<span class="syntax-punctuation">.</span>employee_id
-  <span class="syntax-keyword">FROM</span> organization <span class="syntax-keyword">AS</span> parent
-  <span class="syntax-keyword">JOIN</span> employees <span class="syntax-keyword">AS</span> child
-    <span class="syntax-keyword">ON</span> child<span class="syntax-punctuation">.</span>manager_id <span class="syntax-operator">=</span> parent<span class="syntax-punctuation">.</span>employee_id
-  <span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">NOT</span> child<span class="syntax-punctuation">.</span>employee_id <span class="syntax-operator">=</span> <span class="syntax-keyword">ANY</span><span class="syntax-punctuation">(</span>parent<span class="syntax-punctuation">.</span>path<span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> depth<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> employee_count
-<span class="syntax-keyword">FROM</span> organization
-<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> depth
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> depth<span class="syntax-punctuation">;</span></code></pre>
+  <span class="syntax-keyword">SELECT</span>
+    child<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span>
+    child<span class="syntax-punctuation">.</span>manager_id<span class="syntax-punctuation">,</span>
+    parent<span class="syntax-punctuation">.</span>depth <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span>
+    parent<span class="syntax-punctuation">.</span>path <span class="syntax-operator">|</span><span class="syntax-operator">|</span> child<span class="syntax-punctuation">.</span>employee_id
+  <span class="syntax-keyword">FROM</span>
+    organization <span class="syntax-keyword">AS</span> parent
+    <span class="syntax-keyword">JOIN</span> employees <span class="syntax-keyword">AS</span> child <span class="syntax-keyword">ON</span> child<span class="syntax-punctuation">.</span>manager_id <span class="syntax-operator">=</span> parent<span class="syntax-punctuation">.</span>employee_id
+  <span class="syntax-keyword">WHERE</span>
+    <span class="syntax-keyword">NOT</span> child<span class="syntax-punctuation">.</span>employee_id <span class="syntax-operator">=</span> <span class="syntax-keyword">ANY</span> <span class="syntax-punctuation">(</span>parent<span class="syntax-punctuation">.</span>path<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span>
+  depth<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> employee_count
+<span class="syntax-keyword">FROM</span>
+  organization
+<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+  depth
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  depth<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One row per observed depth.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-6">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-6" aria-label="Link to this section">#</a></h5>

@@ -23,8 +23,10 @@ The question is: Compute L1 and squared L2 sums for weights[1,-2].
 The name L2 can mean a norm or a squared penalty in different contexts. This exercise explicitly uses the sum of squares, avoiding an unexplained square root or half factor.
 
 ```python
-w=tf.constant([1.,-2.]); l1=float(tf.reduce_sum(tf.abs(w))); l2=float(tf.reduce_sum(w*w))
-assert (l1,l2)==(3.,5.)
+w = tf.constant([1.0, -2.0])
+l1 = float(tf.reduce_sum(tf.abs(w)))
+l2 = float(tf.reduce_sum(w * w))
+assert (l1, l2) == (3.0, 5.0)
 ```
 
 **Expected:** \(L_{1}=3\); squaredL2=5.
@@ -38,8 +40,12 @@ The question is: Apply dropout.5 twice to ones with training=False.
 Evaluation removes the random masking behavior. Testing repeated calls establishes this local contract without making claims about other random components in a full pipeline.
 
 ```python
-layer=tf.keras.layers.Dropout(.5); x=tf.ones((4,8)); a=layer(x,training=False); b=layer(x,training=False)
-np.testing.assert_array_equal(a.numpy(),x.numpy()); np.testing.assert_array_equal(b.numpy(),x.numpy())
+layer = tf.keras.layers.Dropout(0.5)
+x = tf.ones((4, 8))
+a = layer(x, training=False)
+b = layer(x, training=False)
+np.testing.assert_array_equal(a.numpy(), x.numpy())
+np.testing.assert_array_equal(b.numpy(), x.numpy())
 ```
 
 **Expected:** both outputs equal the input.
@@ -53,8 +59,8 @@ The question is: Call the same dropout layer with training=True and examine allo
 The retained activations are scaled to keep their expectation unchanged. A finite fixture may coincidentally keep or drop many values; requiring an exact mask would overconstrain the test.
 
 ```python
-train=layer(x,training=True).numpy()
-assert train.shape==(4,8) and set(np.unique(train))<={0.,2.}
+train = layer(x, training=True).numpy()
+assert train.shape == (4, 8) and set(np.unique(train)) <= {0.0, 2.0}
 ```
 
 **Expected:** shape(4,8), values only0 or2.
@@ -68,8 +74,10 @@ The question is: Combine data loss2 with coefficient.1 times squaredL2 and repor
 Logging only the total makes it hard to distinguish predictive error from a changing regularization cost. The coefficient is part of the objective definition.
 
 ```python
-data_loss=2.; coefficient=.1; penalty=coefficient*l2
-assert penalty==.5 and data_loss+penalty==2.5
+data_loss = 2.0
+coefficient = 0.1
+penalty = coefficient * l2
+assert penalty == 0.5 and data_loss + penalty == 2.5
 ```
 
 **Expected:** data2, penalty.5, total2.5.
@@ -83,9 +91,10 @@ The question is: Differentiate.1*sum(w²) at[1,-2].
 The derivative is2*lambda*w under the stated convention. A half-scaled penalty would have a different gradient, so a coefficient cannot be copied blindly between definitions.
 
 ```python
-v=tf.Variable([1.,-2.])
-with tf.GradientTape() as tape: penalty=.1*tf.reduce_sum(v*v)
-np.testing.assert_allclose(tape.gradient(penalty,v).numpy(),[.2,-.4],atol=1e-6,rtol=0)
+v = tf.Variable([1.0, -2.0])
+with tf.GradientTape() as tape:
+    penalty = 0.1 * tf.reduce_sum(v * v)
+np.testing.assert_allclose(tape.gradient(penalty, v).numpy(), [0.2, -0.4], atol=1e-6, rtol=0)
 ```
 
 **Expected:** gradient[.2,-.4].
@@ -99,8 +108,8 @@ The question is: Double both weights and compare the new penalties with the orig
 The different scaling explains why the penalties discourage large coefficients differently. This arithmetic does not establish which choice will work better on an unseen dataset.
 
 ```python
-assert float(tf.reduce_sum(tf.abs(2*w)))==6
-assert float(tf.reduce_sum((2*w)**2))==20
+assert float(tf.reduce_sum(tf.abs(2 * w))) == 6
+assert float(tf.reduce_sum((2 * w) ** 2)) == 20
 ```
 
 **Expected:** L1 doubles to6; squaredL2 quadruples to20.

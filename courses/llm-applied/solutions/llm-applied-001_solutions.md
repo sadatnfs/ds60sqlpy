@@ -54,8 +54,14 @@ The question is: Describe a request for the current conversion-rate definition r
 A definition can change after training, so its identity and version should remain inspectable outside model weights. Retrieval is a way to supply that evidence, not a guarantee the answer will use it faithfully.
 
 ```python
-task={'exact_computation':False,'fresh_evidence':True,'citation_required':True,'stable_behavior_gap':False,'governed_examples':0}
-assert choose(task)==('retrieval','current cited evidence')
+task = {
+    "exact_computation": False,
+    "fresh_evidence": True,
+    "citation_required": True,
+    "stable_behavior_gap": False,
+    "governed_examples": 0,
+}
+assert choose(task) == ("retrieval", "current cited evidence")
 ```
 
 **Expected:** route retrieval; reason current cited evidence.
@@ -69,8 +75,14 @@ The question is: Describe a request to sum validated purchase amounts and return
 The assistant may explain the result, but the arithmetic should be performed by a bounded deterministic function. A fluent estimate is not an acceptable substitute for an exact total.
 
 ```python
-task={'exact_computation':True,'fresh_evidence':False,'citation_required':False,'stable_behavior_gap':False,'governed_examples':0}
-assert choose(task)==('deterministic_tool','exact computation')
+task = {
+    "exact_computation": True,
+    "fresh_evidence": False,
+    "citation_required": False,
+    "stable_behavior_gap": False,
+    "governed_examples": 0,
+}
+assert choose(task) == ("deterministic_tool", "exact computation")
 ```
 
 **Expected:** route deterministic_tool; reason exact computation.
@@ -84,9 +96,16 @@ The question is: Describe a stable schema-formatting gap with zero governed exam
 The example count 120 exceeds the helper's teaching admission threshold100; neither number is a universal sample-size recommendation. A real decision needs learning curves, label quality and held-out task evidence.
 
 ```python
-task={'exact_computation':False,'fresh_evidence':False,'citation_required':False,'stable_behavior_gap':True,'governed_examples':0}
-assert choose(task)[0]=='measure_baseline'
-task['governed_examples']=120; assert choose(task)[0]=='adaptation_candidate'
+task = {
+    "exact_computation": False,
+    "fresh_evidence": False,
+    "citation_required": False,
+    "stable_behavior_gap": True,
+    "governed_examples": 0,
+}
+assert choose(task)[0] == "measure_baseline"
+task["governed_examples"] = 120
+assert choose(task)[0] == "adaptation_candidate"
 ```
 
 **Expected:** first measure_baseline; then adaptation_candidate.
@@ -100,10 +119,19 @@ The question is: A task needs current policy citations and a stable response sch
 Fine-tuning a response style does not remove the need for current evidence. Separate stage metrics make it possible to diagnose a retrieval failure independently of a formatting failure.
 
 ```python
-task={'exact_computation':False,'fresh_evidence':True,'citation_required':True,'stable_behavior_gap':True,'governed_examples':120}
-assert choose(task)[0]=='retrieval'
-architecture={'knowledge':'versioned retrieval','format':'prompt baseline, then measured adapter if needed'}
-assert architecture['knowledge']=='versioned retrieval'
+task = {
+    "exact_computation": False,
+    "fresh_evidence": True,
+    "citation_required": True,
+    "stable_behavior_gap": True,
+    "governed_examples": 120,
+}
+assert choose(task)[0] == "retrieval"
+architecture = {
+    "knowledge": "versioned retrieval",
+    "format": "prompt baseline, then measured adapter if needed",
+}
+assert architecture["knowledge"] == "versioned retrieval"
 ```
 
 **Expected:** retrieval remains required; format adaptation is separate.
@@ -117,8 +145,8 @@ The question is: Mark restricted facts as requiring an access policy and reject 
 Model weights are not a record-level permission system. Per-user access decisions must happen before evidence reaches the answer context and must also govern caches and logs.
 
 ```python
-policy={'access_control':'external pre-retrieval filter','weights_are_acl':False}
-assert not policy['weights_are_acl'] and 'pre-retrieval' in policy['access_control']
+policy = {"access_control": "external pre-retrieval filter", "weights_are_acl": False}
+assert not policy["weights_are_acl"] and "pre-retrieval" in policy["access_control"]
 ```
 
 **Expected:** authorization remains an external gate.
@@ -132,8 +160,13 @@ The question is: Define an assistant for study-design extraction with fields ass
 A task contract turns “expert assistant” into something testable. The unsupported-field rate catches confident invented values that a schema-validity metric alone would miss.
 
 ```python
-contract={'fields':['assignment_unit','outcome','status'],'unknown_policy':'explicit unknown','split_unit':'study family','metric':'field exact match plus unsupported-field rate'}
-assert contract['split_unit']=='study family' and 'unsupported' in contract['metric']
+contract = {
+    "fields": ["assignment_unit", "outcome", "status"],
+    "unknown_policy": "explicit unknown",
+    "split_unit": "study family",
+    "metric": "field exact match plus unsupported-field rate",
+}
+assert contract["split_unit"] == "study family" and "unsupported" in contract["metric"]
 ```
 
 **Expected:** contract has exact fields, an abstention policy and a family split.

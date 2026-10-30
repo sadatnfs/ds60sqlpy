@@ -31,7 +31,7 @@ If a stream-like input produces no output after a counting pass, inspect whether
 ## Worked example 1
 
 ```cpp
-auto out=keep_positive(std::vector<int>{-1,0,2,2});
+auto out = keep_positive(std::vector<int>{-1, 0, 2, 2});
 ```
 
 Expected: The owned result is [2, 2], retaining multiplicity after the temporary input dies.

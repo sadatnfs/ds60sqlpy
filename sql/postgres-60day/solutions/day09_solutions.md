@@ -82,16 +82,22 @@ executable companion when you want a self-contained check.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT c.customer_id,
-       c.full_name
-FROM customers AS c
-WHERE EXISTS (
-  SELECT 1
-  FROM orders AS o
-  WHERE o.customer_id = c.customer_id
-    AND o.status = 'delivered'
-)
-ORDER BY c.customer_id;
+SELECT
+  c.customer_id,
+  c.full_name
+FROM
+  customers AS c
+WHERE
+  EXISTS (
+    SELECT
+      1
+    FROM
+      orders AS o
+    WHERE
+      o.customer_id = c.customer_id
+      AND o.status = 'delivered')
+ORDER BY
+  c.customer_id;
 ```
 
 **Expected shape:** One row per qualifying customer.
@@ -124,16 +130,22 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT p.product_id,
-       p.name,
-       p.category
-FROM products AS p
-WHERE NOT EXISTS (
-  SELECT 1
-  FROM order_items AS oi
-  WHERE oi.product_id = p.product_id
-)
-ORDER BY p.product_id;
+SELECT
+  p.product_id,
+  p.name,
+  p.category
+FROM
+  products AS p
+WHERE
+  NOT EXISTS (
+    SELECT
+      1
+    FROM
+      order_items AS oi
+    WHERE
+      oi.product_id = p.product_id)
+ORDER BY
+  p.product_id;
 ```
 
 **Expected shape:** One row per unsold product.
@@ -166,16 +178,24 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT o.order_id,
-       o.customer_id,
-       o.total_amount
-FROM orders AS o
-WHERE o.total_amount > (
-  SELECT AVG(peer.total_amount)
-  FROM orders AS peer
-  WHERE peer.customer_id = o.customer_id
-)
-ORDER BY o.customer_id, o.total_amount DESC, o.order_id;
+SELECT
+  o.order_id,
+  o.customer_id,
+  o.total_amount
+FROM
+  orders AS o
+WHERE
+  o.total_amount > (
+    SELECT
+      AVG(peer.total_amount)
+    FROM
+      orders AS peer
+    WHERE
+      peer.customer_id = o.customer_id)
+ORDER BY
+  o.customer_id,
+  o.total_amount DESC,
+  o.order_id;
 ```
 
 **Expected shape:** Order rows above their own customer average.
@@ -208,15 +228,21 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT c.customer_id,
-       c.full_name
-FROM customers AS c
-WHERE NOT EXISTS (
-  SELECT 1
-  FROM orders AS o
-  WHERE o.customer_id = c.customer_id
-)
-ORDER BY c.customer_id;
+SELECT
+  c.customer_id,
+  c.full_name
+FROM
+  customers AS c
+WHERE
+  NOT EXISTS (
+    SELECT
+      1
+    FROM
+      orders AS o
+    WHERE
+      o.customer_id = c.customer_id)
+ORDER BY
+  c.customer_id;
 ```
 
 **Expected shape:** One row per customer with no order.
@@ -250,18 +276,26 @@ cardinality contract.
 - `LIMIT`: is applied after ordering and is meaningful only when the query first defines which rows come first.
 
 ```sql
-SELECT o.order_id,
-       o.customer_id,
-       o.order_date
-FROM orders AS o
-WHERE o.order_id = (
-  SELECT candidate.order_id
-  FROM orders AS candidate
-  WHERE candidate.customer_id = o.customer_id
-  ORDER BY candidate.order_date DESC, candidate.order_id DESC
-  LIMIT 1
-)
-ORDER BY o.customer_id;
+SELECT
+  o.order_id,
+  o.customer_id,
+  o.order_date
+FROM
+  orders AS o
+WHERE
+  o.order_id = (
+    SELECT
+      candidate.order_id
+    FROM
+      orders AS candidate
+    WHERE
+      candidate.customer_id = o.customer_id
+    ORDER BY
+      candidate.order_date DESC,
+      candidate.order_id DESC
+    LIMIT 1)
+ORDER BY
+  o.customer_id;
 ```
 
 **Expected shape:** At most one deterministic order per customer.
@@ -294,24 +328,35 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT c.customer_id,
-       c.full_name
-FROM customers AS c
-WHERE EXISTS (
-  SELECT 1 FROM orders AS any_order
-  WHERE any_order.customer_id = c.customer_id
-)
+SELECT
+  c.customer_id,
+  c.full_name
+FROM
+  customers AS c
+WHERE
+  EXISTS (
+    SELECT
+      1
+    FROM
+      orders AS any_order
+    WHERE
+      any_order.customer_id = c.customer_id)
   AND NOT EXISTS (
-    SELECT 1
-    FROM orders AS o
-    WHERE o.customer_id = c.customer_id
+    SELECT
+      1
+    FROM
+      orders AS o
+    WHERE
+      o.customer_id = c.customer_id
       AND NOT EXISTS (
-        SELECT 1
-        FROM payments AS p
-        WHERE p.order_id = o.order_id
-      )
-  )
-ORDER BY c.customer_id;
+        SELECT
+          1
+        FROM
+          payments AS p
+        WHERE
+          p.order_id = o.order_id))
+  ORDER BY
+    c.customer_id;
 ```
 
 **Expected shape:** One row per customer satisfying the universal condition.

@@ -23,8 +23,21 @@ rather than assuming a familiar-looking query must be right.
 ## Exercise 1: Disprove summary equality
 
 ```sql
-SELECT 'source' AS origin, count(*) AS row_count, sum(amount) AS amount_total FROM quality_source
-UNION ALL SELECT 'target', count(*), sum(amount) FROM quality_target ORDER BY origin;
+SELECT
+  'source' AS origin,
+  count(*) AS row_count,
+  sum(amount) AS amount_total
+FROM
+  quality_source
+UNION ALL
+SELECT
+  'target',
+  count(*),
+  sum(amount)
+FROM
+  quality_target
+ORDER BY
+  origin;
 ```
 
 Each input has a valid unique invoice key and four rows. The summary loses invoice identity and attribute distribution, so it cannot distinguish the target's ten-unit reduction on invoice 2 from its larger replacement invoice. This is a deliberate negative control for the idea that one matching number proves correctness. The assertion checks that the deceptive equality actually exists; a counterexample with different totals would not demonstrate this failure mode. Retain the summary in a real test suite because it is cheap and useful, but phrase its conclusion narrowly: counts and aggregate amounts match. The next exercise adds row-level evidence needed for a stronger statement.
@@ -38,13 +51,26 @@ Each input has a valid unique invoice key and four rows. The summary loses invoi
 ## Exercise 2: Report keyed mismatches in both directions
 
 ```sql
-SELECT COALESCE(s.invoice_id,t.invoice_id) AS invoice_id,
-       s.amount AS source_amount, t.amount AS target_amount,
-       CASE WHEN s.invoice_id IS NULL THEN 'missing_source'
-            WHEN t.invoice_id IS NULL THEN 'missing_target' ELSE 'changed' END AS difference_kind
-FROM quality_source AS s FULL OUTER JOIN quality_target AS t USING (invoice_id)
-WHERE s.invoice_id IS NULL OR t.invoice_id IS NULL OR s.amount IS DISTINCT FROM t.amount
-ORDER BY invoice_id;
+SELECT
+  COALESCE(s.invoice_id, t.invoice_id) AS invoice_id,
+  s.amount AS source_amount,
+  t.amount AS target_amount,
+  CASE WHEN s.invoice_id IS NULL THEN
+    'missing_source'
+  WHEN t.invoice_id IS NULL THEN
+    'missing_target'
+  ELSE
+    'changed'
+  END AS difference_kind
+FROM
+  quality_source AS s
+  FULL OUTER JOIN quality_target AS t USING (invoice_id)
+WHERE
+  s.invoice_id IS NULL
+  OR t.invoice_id IS NULL
+  OR s.amount IS DISTINCT FROM t.amount
+ORDER BY
+  invoice_id;
 ```
 
 FULL OUTER JOIN retains all keys, so neither missing side disappears before diagnosis. COALESCE chooses the available identity for the output without replacing a measurement. The CASE tests source and target key presence first because a present amount could be NULL. Only matched keys reach the changed classification. The WHERE condition includes missing keys and NULL-safe attribute differences. The assertion checks both the three identities and their classification order, so a query that notices only changed invoice 2 cannot pass. This keyed method depends on the declared primary keys; if an upstream staging extract lacks that guarantee, validate uniqueness before interpreting its join as one diagnostic row per invoice.
@@ -58,14 +84,43 @@ FULL OUTER JOIN retains all keys, so neither missing side disappears before diag
 ## Exercise 3: Preserve duplicate multiplicity
 
 ```sql
-SELECT 'sent_only' AS direction, invoice_id, amount FROM (
- SELECT invoice_id,amount FROM quality_sent EXCEPT ALL SELECT invoice_id,amount FROM quality_received
-) AS missing
+SELECT
+  'sent_only' AS direction,
+  invoice_id,
+  amount
+FROM (
+  SELECT
+    invoice_id,
+    amount
+  FROM
+    quality_sent
+  EXCEPT ALL
+  SELECT
+    invoice_id,
+    amount
+  FROM
+    quality_received) AS missing
 UNION ALL
-SELECT 'received_only', invoice_id, amount FROM (
- SELECT invoice_id,amount FROM quality_received EXCEPT ALL SELECT invoice_id,amount FROM quality_sent
-) AS extra
-ORDER BY direction,invoice_id,amount;
+SELECT
+  'received_only',
+  invoice_id,
+  amount
+FROM (
+  SELECT
+    invoice_id,
+    amount
+  FROM
+    quality_received
+  EXCEPT ALL
+  SELECT
+    invoice_id,
+    amount
+  FROM
+    quality_sent) AS extra
+ORDER BY
+  direction,
+  invoice_id,
+  amount;
 ```
 
 The sent bag contains two occurrences of invoice 1 and one of invoice 2; the received bag has the opposite multiplicities. Their distinct sets are equal, but one invoice-1 occurrence is missing and one invoice-2 occurrence is extra. EXCEPT ALL subtracts occurrence counts while ordinary EXCEPT would collapse them. Labeling direction prevents a reader from confusing missing with extra. UNION ALL preserves every diagnostic occurrence. The assertion verifies two total rows and one of each precise value and direction. Do not claim the output tuple is a unique event identity: repeated unmatched occurrences can legitimately share every selected value. Real occurrence identity requires a separately supplied delivery key.
@@ -79,11 +134,34 @@ The sent bag contains two occurrences of invoice 1 and one of invoice 2; the rec
 ## Exercise 4: Repair independent-child fanout
 
 ```sql
-WITH lines AS (SELECT order_id,sum(amount) AS line_total FROM quality_lines GROUP BY order_id),
-attempts AS (SELECT order_id,sum(amount) AS attempted_total FROM quality_attempts GROUP BY order_id)
-SELECT o.order_id,COALESCE(l.line_total,0) AS line_total,COALESCE(a.attempted_total,0) AS attempted_total
-FROM quality_orders AS o LEFT JOIN lines AS l USING(order_id) LEFT JOIN attempts AS a USING(order_id)
-ORDER BY o.order_id;
+WITH lines AS (
+  SELECT
+    order_id,
+    sum(amount) AS line_total
+  FROM
+    quality_lines
+  GROUP BY
+    order_id
+),
+attempts AS (
+  SELECT
+    order_id,
+    sum(amount) AS attempted_total
+  FROM
+    quality_attempts
+  GROUP BY
+    order_id
+)
+SELECT
+  o.order_id,
+  COALESCE(l.line_total, 0) AS line_total,
+  COALESCE(a.attempted_total, 0) AS attempted_total
+FROM
+  quality_orders AS o
+  LEFT JOIN lines AS l USING (order_id)
+  LEFT JOIN attempts AS a USING (order_id)
+ORDER BY
+  o.order_id;
 ```
 
 Each CTE establishes uniqueness by order_id before the join. LEFT joins retain order 3, whose lack of child rows is explicitly displayed as zero for these additive metrics. Order 1 has 100 in lines and 200 in attempts because two attempts are separate facts, not a duplicated order value. A naive joined sum repeats each line once per attempt. SUM(DISTINCT amount) is not a valid generic repair because separate legitimate lines can share a price. The assertion tests all parent identities and both independent totals, making a plausible-looking single metric insufficient. Add source child sums as independent controls when transferring the pattern to more child collections.
@@ -97,9 +175,27 @@ Each CTE establishes uniqueness by order_id before the join. LEFT joins retain o
 ## Exercise 5: Detect a missingness transition
 
 ```sql
-WITH s(invoice_id,amount) AS (VALUES (6,NULL::numeric)), t(invoice_id,amount) AS (VALUES (6,0::numeric))
-SELECT s.invoice_id,s.amount AS source_amount,t.amount AS target_amount
-FROM s JOIN t USING(invoice_id) WHERE s.amount IS DISTINCT FROM t.amount ORDER BY s.invoice_id;
+WITH s (
+  invoice_id,
+  amount
+) AS (
+  VALUES (6, NULL::numeric)
+),
+t (
+  invoice_id, amount
+) AS (
+  VALUES (6, 0::numeric))
+SELECT
+  s.invoice_id,
+  s.amount AS source_amount,
+  t.amount AS target_amount
+FROM
+  s
+  JOIN t USING (invoice_id)
+WHERE
+  s.amount IS DISTINCT FROM t.amount
+ORDER BY
+  s.invoice_id;
 ```
 
 The identity matches, so the difference concerns the value's state rather than a missing invoice. IS DISTINCT FROM treats unknown and known zero as different, while ordinary inequality would yield unknown and fail the filter. COALESCE(amount,0) on both sides would incorrectly make the rows equal. The assertion explicitly requires a NULL source amount and zero target amount, which protects the diagnostic semantics. Financial or measurement reconciliation must declare whether missingness matters instead of inheriting a display fallback from another report. This example does not assert that every domain should reject such a transition; it demonstrates the equality policy the exercise explicitly chose.
@@ -113,7 +209,17 @@ The identity matches, so the difference concerns the value's state rather than a
 ## Exercise 6: Gate a keyed comparison on valid identity
 
 ```sql
-SELECT invoice_id,count(*) AS occurrences FROM quality_sent GROUP BY invoice_id HAVING count(*)>1 ORDER BY invoice_id;
+SELECT
+  invoice_id,
+  count(*) AS occurrences
+FROM
+  quality_sent
+GROUP BY
+  invoice_id
+HAVING
+  count(*) > 1
+ORDER BY
+  invoice_id;
 ```
 
 GROUP BY collects occurrences by the proposed key and HAVING retains keys with more than one occurrence. This diagnostic has one row per invalid invoice key, even though its input bag intentionally has no uniqueness guarantee. Finding invoice 1 twice invalidates the premise needed for a one-to-one keyed comparison. Stop that comparison and either repair upstream data under an approved rule or choose a bag contract when repeated records are meaningful. Blind DISTINCT would decide the policy without evidence. The assertion verifies exactly invoice 1 with multiplicity two. A useful publication gate requires this diagnostic to be empty before applying keyed equality, then checks both missing keys and attribute differences.

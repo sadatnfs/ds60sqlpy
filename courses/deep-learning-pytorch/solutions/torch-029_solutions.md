@@ -56,7 +56,8 @@ The question is: Exponentiate float32 logits 1000, 999 directly.
 The underlying probabilities are well defined. The failure comes from an unstable intermediate representation, not an impossible classification task.
 
 ```python
-logits=torch.tensor([1000.,999.],dtype=torch.float32); naive=torch.exp(logits)
+logits = torch.tensor([1000.0, 999.0], dtype=torch.float32)
+naive = torch.exp(logits)
 assert torch.isinf(naive).all()
 ```
 
@@ -71,8 +72,8 @@ The question is: Use target 0 with the same logits.
 The meaningful score difference is one. The stable combined objective avoids constructing enormous raw exponential values.
 
 ```python
-stable=F.cross_entropy(logits[None,:],torch.tensor([0]))
-np.testing.assert_allclose(stable.item(),np.log1p(np.exp(-1)),atol=1e-6,rtol=0)
+stable = F.cross_entropy(logits[None, :], torch.tensor([0]))
+np.testing.assert_allclose(stable.item(), np.log1p(np.exp(-1)), atol=1e-6, rtol=0)
 ```
 
 **Expected:** loss \(\log(1+\exp(-1))\) within 1e-6.
@@ -86,7 +87,9 @@ The question is: Compare softmax 1000, 999 with softmax 0, -1.
 A common logit shift cancels from the normalizer. This property is useful for detecting wrong-axis or inconsistent-clipping implementations.
 
 ```python
-torch.testing.assert_close(torch.softmax(logits,0),torch.softmax(torch.tensor([0.,-1.]),0),atol=1e-6,rtol=0)
+torch.testing.assert_close(
+    torch.softmax(logits, 0), torch.softmax(torch.tensor([0.0, -1.0]), 0), atol=1e-6, rtol=0
+)
 ```
 
 **Expected:** probabilities match within 1e-6.
@@ -100,8 +103,10 @@ The question is: Differentiate the target 0 loss with respect to both logits.
 The derivative is probability minus the target indicator. Its components sum to zero because both distributions have total mass one.
 
 ```python
-values=logits.clone().requires_grad_(); F.cross_entropy(values[None,:],torch.tensor([0])).backward()
-assert torch.isfinite(values.grad).all(); np.testing.assert_allclose(values.grad.sum().item(),0,atol=1e-6,rtol=0)
+values = logits.clone().requires_grad_()
+F.cross_entropy(values[None, :], torch.tensor([0])).backward()
+assert torch.isfinite(values.grad).all()
+np.testing.assert_allclose(values.grad.sum().item(), 0, atol=1e-6, rtol=0)
 ```
 
 **Expected:** finite gradients summing approximately 0.
@@ -115,8 +120,8 @@ The question is: Inspect float16 and bfloat 16 maximum values and float32 epsilo
 bfloat 16 has a wider exponent range but fewer fraction bits than float16. Range alone does not determine accuracy or backend support.
 
 ```python
-assert torch.finfo(torch.bfloat16).max>torch.finfo(torch.float16).max
-assert torch.finfo(torch.float32).eps>0
+assert torch.finfo(torch.bfloat16).max > torch.finfo(torch.float16).max
+assert torch.finfo(torch.float32).eps > 0
 ```
 
 **Expected:** bfloat 16 range exceeds float16; float32 epsilon positive.
@@ -130,12 +135,18 @@ The question is: Pass aN aN logit through an explicit finite-input validator.
 Stable algebra protects particular finite inputs from avoidable overflow. It does not turn aN aN source into a meaningful probability model.
 
 ```python
-def checked_loss(value,target):
-    if not bool(torch.isfinite(value).all()): raise ValueError('finite logits required')
-    return F.cross_entropy(value,target)
-try: checked_loss(torch.tensor([[0.,float('nan')]]),torch.tensor([0]))
-except ValueError: pass
-else: raise AssertionError('NaN logits accepted')
+def checked_loss(value, target):
+    if not bool(torch.isfinite(value).all()):
+        raise ValueError("finite logits required")
+    return F.cross_entropy(value, target)
+
+
+try:
+    checked_loss(torch.tensor([[0.0, float("nan")]]), torch.tensor([0]))
+except ValueError:
+    pass
+else:
+    raise AssertionError("NaN logits accepted")
 ```
 
 **Expected:** ValueError before loss evaluation.

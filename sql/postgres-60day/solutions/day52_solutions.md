@@ -108,21 +108,23 @@ The temporal join is:
 ```sql
 SET search_path TO dwh, training, public;
 
-SELECT p.payment_id,
-       p.order_id,
-       dd.date_key,
-       dc.customer_sk,
-       p.amount,
-       p.method
-FROM training.payments p
-JOIN training.orders o USING (order_id)
-JOIN dim_date dd ON dd.date_actual = p.payment_date::date
-JOIN dim_customer dc
-  ON dc.customer_id = o.customer_id
- AND p.payment_date::date >= dc.valid_from
- AND p.payment_date::date <= COALESCE(dc.valid_to, 'infinity'::date)
-ORDER BY p.payment_id
-LIMIT 20;
+SELECT
+  p.payment_id,
+  p.order_id,
+  dd.date_key,
+  dc.customer_sk,
+  p.amount,
+  p.method
+FROM
+  training.payments p
+  JOIN training.orders o USING (order_id)
+  JOIN dim_date dd ON dd.date_actual = p.payment_date::date
+  JOIN dim_customer dc ON dc.customer_id = o.customer_id
+    AND p.payment_date::date >= dc.valid_from
+    AND p.payment_date::date <= COALESCE(dc.valid_to, 'infinity'::date)
+  ORDER BY
+    p.payment_id
+  LIMIT 20;
 ```
 
 After running the solution, verify source-to-fact completeness:
@@ -130,11 +132,29 @@ After running the solution, verify source-to-fact completeness:
 ```sql
 SET search_path TO dwh, training, public;
 
-SELECT (SELECT COUNT(*) FROM dim_country) AS countries,
-       (SELECT COUNT(*) FROM fact_payments) AS fact_payment_rows,
-       (SELECT COUNT(*) FROM training.payments) AS source_payment_rows,
-       (SELECT COUNT(*) FROM dim_customer WHERE country_sk IS NULL)
-         AS customers_without_country_key;
+SELECT
+  (
+    SELECT
+      COUNT(*)
+    FROM
+      dim_country) AS countries,
+  (
+    SELECT
+      COUNT(*)
+    FROM
+      fact_payments) AS fact_payment_rows,
+  (
+    SELECT
+      COUNT(*)
+    FROM
+      training.payments) AS source_payment_rows,
+  (
+    SELECT
+      COUNT(*)
+    FROM
+      dim_customer
+    WHERE
+      country_sk IS NULL) AS customers_without_country_key;
 ```
 
 The two payment counts must match and `customers_without_country_key` must be

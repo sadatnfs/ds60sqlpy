@@ -64,34 +64,57 @@ The complete source creates the owned local session described above, then constr
 import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
-import java.nio.file.{Files,Path,Paths,StandardOpenOption,StandardCopyOption}
+import java.nio.file.{Files, Path, Paths, StandardOpenOption, StandardCopyOption}
 import java.nio.charset.StandardCharsets
 import java.util.UUID
 import scala.jdk.CollectionConverters._
-import org.apache.spark.sql.streaming.{StreamingQuery,Trigger}
+import org.apache.spark.sql.streaming.{StreamingQuery, Trigger}
 import scala.collection.mutable.ArrayBuffer
 
-require(spark.version == "4.0.1","Prepared Spark4.0.1 required")
-spark.conf.set("spark.sql.streaming.stopTimeout","5000")
-ownedRoot=Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(),"spark-035-")
-val input=ownedRoot.resolve("input");val checkpoint=ownedRoot.resolve("checkpoint");val output=ownedRoot.resolve("output")
-publishFile(ownedRoot,input,"batch-01.json",Seq("""{"id":1,"cents":100}""","""{"id":2,"cents":200}"""))
+require(spark.version == "4.0.1", "Prepared Spark4.0.1 required")
+spark.conf.set("spark.sql.streaming.stopTimeout", "5000")
+ownedRoot = Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(), "spark-035-")
+val input = ownedRoot.resolve("input"); val checkpoint = ownedRoot.resolve("checkpoint");
+val output = ownedRoot.resolve("output")
+publishFile(
+  ownedRoot,
+  input,
+  "batch-01.json",
+  Seq("""{"id":1,"cents":100}""", """{"id":2,"cents":200}""")
+)
 ```
 
 ```python
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 from pathlib import Path
 import tempfile
 import shutil
 import json
 import uuid
 
-if spark.version!="4.0.1":raise ValueError("Prepared Spark4.0.1 required")
-spark.conf.set("spark.sql.streaming.stopTimeout","5000")
-owned_root=Path(tempfile.mkdtemp(prefix="spark-035-",dir=Path.cwd()))
-input_path=owned_root/"input";checkpoint=owned_root/"checkpoint";output=owned_root/"output"
-publish_file(owned_root,input_path,"batch-01.json",['{"id":1,"cents":100}','{"id":2,"cents":200}'])
+if spark.version != "4.0.1":
+    raise ValueError("Prepared Spark4.0.1 required")
+spark.conf.set("spark.sql.streaming.stopTimeout", "5000")
+owned_root = Path(tempfile.mkdtemp(prefix="spark-035-", dir=Path.cwd()))
+input_path = owned_root / "input"
+checkpoint = owned_root / "checkpoint"
+output = owned_root / "output"
+publish_file(
+    owned_root, input_path, "batch-01.json", ['{"id":1,"cents":100}', '{"id":2,"cents":200}']
+)
 ```
 
 ## Worked example / walkthrough
@@ -99,17 +122,36 @@ publish_file(owned_root,input_path,"batch-01.json",['{"id":1,"cents":100}','{"id
 ### Worked example 1
 
 ```scala
-val demoInput=ownedRoot.resolve("demo-input")
-publishFile(ownedRoot,demoInput,"batch-01.json",Seq("""{"id":1,"cents":100}""","""{"id":2,"cents":200}"""))
-val demoFirst=runParquet(spark,demoInput,ownedRoot.resolve("demo-checkpoint"),ownedRoot.resolve("demo-output"))
-assert(demoFirst.inputRows==2L && bag(spark,ownedRoot.resolve("demo-output"))==Seq("1:100","2:200"))
+val demoInput = ownedRoot.resolve("demo-input")
+publishFile(
+  ownedRoot,
+  demoInput,
+  "batch-01.json",
+  Seq("""{"id":1,"cents":100}""", """{"id":2,"cents":200}""")
+)
+val demoFirst = runParquet(
+  spark,
+  demoInput,
+  ownedRoot.resolve("demo-checkpoint"),
+  ownedRoot.resolve("demo-output")
+)
+assert(
+  demoFirst.inputRows == 2L && bag(spark, ownedRoot.resolve("demo-output")) == Seq("1:100", "2:200")
+)
 ```
 
 ```python
-demo_input=owned_root/"demo-input"
-publish_file(owned_root,demo_input,"batch-01.json",['{"id":1,"cents":100}','{"id":2,"cents":200}'])
-demo_first=run_parquet(spark,demo_input,owned_root/"demo-checkpoint",owned_root/"demo-output")
-assert demo_first["input_rows"]==2 and bag(spark,owned_root/"demo-output")==["1:100","2:200"]
+demo_input = owned_root / "demo-input"
+publish_file(
+    owned_root, demo_input, "batch-01.json", ['{"id":1,"cents":100}', '{"id":2,"cents":200}']
+)
+demo_first = run_parquet(
+    spark, demo_input, owned_root / "demo-checkpoint", owned_root / "demo-output"
+)
+assert demo_first["input_rows"] == 2 and bag(spark, owned_root / "demo-output") == [
+    "1:100",
+    "2:200",
+]
 ```
 
 The first finite query processes exactly the two supplied occurrences. The expected bag is independent of partition/file order, and completion is established through awaitTermination rather than a delay.
@@ -117,16 +159,42 @@ The first finite query processes exactly the two supplied occurrences. The expec
 ### Worked example 2
 
 ```scala
-val demoInput=ownedRoot.resolve("demo-input")
-publishFile(ownedRoot,demoInput,"batch-02.json",Seq("""{"id":2,"cents":200}""","""{"id":3,"cents":300}"""))
-val demoSecond=runParquet(spark,demoInput,ownedRoot.resolve("demo-checkpoint"),ownedRoot.resolve("demo-output"))
-assert(demoSecond.inputRows==2L && bag(spark,ownedRoot.resolve("demo-output"))==Seq("1:100","2:200","2:200","3:300"))
+val demoInput = ownedRoot.resolve("demo-input")
+publishFile(
+  ownedRoot,
+  demoInput,
+  "batch-02.json",
+  Seq("""{"id":2,"cents":200}""", """{"id":3,"cents":300}""")
+)
+val demoSecond = runParquet(
+  spark,
+  demoInput,
+  ownedRoot.resolve("demo-checkpoint"),
+  ownedRoot.resolve("demo-output")
+)
+assert(
+  demoSecond.inputRows == 2L && bag(spark, ownedRoot.resolve("demo-output")) == Seq(
+    "1:100",
+    "2:200",
+    "2:200",
+    "3:300"
+  )
+)
 ```
 
 ```python
-publish_file(owned_root,demo_input,"batch-02.json",['{"id":2,"cents":200}','{"id":3,"cents":300}'])
-demo_second=run_parquet(spark,demo_input,owned_root/"demo-checkpoint",owned_root/"demo-output")
-assert demo_second["input_rows"]==2 and bag(spark,owned_root/"demo-output")==["1:100","2:200","2:200","3:300"]
+publish_file(
+    owned_root, demo_input, "batch-02.json", ['{"id":2,"cents":200}', '{"id":3,"cents":300}']
+)
+demo_second = run_parquet(
+    spark, demo_input, owned_root / "demo-checkpoint", owned_root / "demo-output"
+)
+assert demo_second["input_rows"] == 2 and bag(spark, owned_root / "demo-output") == [
+    "1:100",
+    "2:200",
+    "2:200",
+    "3:300",
+]
 ```
 
 The repeated business ID is retained because it arrived in a new source file. Offset recovery prevents rereadingFileA as fresh input;it is not an event-ID deduplication rule.

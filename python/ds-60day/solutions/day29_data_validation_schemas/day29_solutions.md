@@ -76,13 +76,15 @@ schema = pa.DataFrameSchema(
     },
     strict=True,
 )
-valid = pd.DataFrame({
-    "order_id": [100, 101],
-    "quantity": [0, 1],
-    "price": [0.0, 9_999.99],
-    "status": ["closed", "open"],
-    "note": [None, "priority"],
-})
+valid = pd.DataFrame(
+    {
+        "order_id": [100, 101],
+        "quantity": [0, 1],
+        "price": [0.0, 9_999.99],
+        "status": ["closed", "open"],
+        "note": [None, "priority"],
+    }
+)
 assert schema.validate(valid).shape == (2, 5)
 
 invalid_fixtures = {
@@ -112,9 +114,7 @@ for expected_evidence, invalid in invalid_fixtures.items():
         else:
             assert expected_evidence in evidence
     else:
-        raise AssertionError(
-            f"{expected_evidence} fixture should fail validation"
-        )
+        raise AssertionError(f"{expected_evidence} fixture should fail validation")
 ```
 
 The valid fixture includes the exact inclusive lower boundaries and a
@@ -138,12 +138,8 @@ def clean_day18(raw_frame: pd.DataFrame) -> pd.DataFrame:
     result = raw_frame.copy()
     result.columns = [column.strip().lower() for column in result]
     result["name"] = result["name"].astype("string").str.strip()
-    result["quantity"] = pd.to_numeric(
-        result["quantity"], errors="coerce"
-    ).astype("Int64")
-    result["event_time"] = pd.to_datetime(
-        result["event_time"], errors="coerce", utc=True
-    )
+    result["quantity"] = pd.to_numeric(result["quantity"], errors="coerce").astype("Int64")
+    result["event_time"] = pd.to_datetime(result["event_time"], errors="coerce", utc=True)
     return result.drop_duplicates().reset_index(drop=True)
 
 
@@ -277,17 +273,15 @@ ORDER_SCHEMA = pa.DataFrameSchema(
     coerce=True,
 )
 
-valid = pd.DataFrame(
-    {"order_id": [1], "quantity": ["2"], "price": [4.5], "status": ["paid"]}
-)
+valid = pd.DataFrame({"order_id": [1], "quantity": ["2"], "price": [4.5], "status": ["paid"]})
 checked = ORDER_SCHEMA.validate(valid, lazy=True)
 assert checked.loc[0, "quantity"] == 2
 
 invalid = pd.DataFrame(
     {
-        "order_id": [1, 1],       # Duplicate key.
-        "quantity": [-1, 2],      # Range violation.
-        "price": [1.0, None],     # Null violation.
+        "order_id": [1, 1],  # Duplicate key.
+        "quantity": [-1, 2],  # Range violation.
+        "price": [1.0, None],  # Null violation.
         "status": ["unknown", "paid"],  # Category violation.
     }
 )

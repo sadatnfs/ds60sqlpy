@@ -29,7 +29,10 @@ Field equality does not establish object identity. A domain needing value-based 
 ```javascript
 const first = { id: 1 };
 const second = { id: 1 };
-const map = new Map([[first, 'a'], [second, 'b']]);
+const map = new Map([
+  [first, 'a'],
+  [second, 'b'],
+]);
 assert.equal(map.size, 2);
 assert.equal(map.get(first), 'a');
 assert.equal(map.get(second), 'b');
@@ -65,7 +68,13 @@ A Set would retain only membership and lose the two red observations. The accumu
 ```javascript
 const counts = new Map();
 for (const value of ['red', 'blue', 'red']) counts.set(value, (counts.get(value) ?? 0) + 1);
-assert.deepEqual([...counts], [['red', 2], ['blue', 1]]);
+assert.deepEqual(
+  [...counts],
+  [
+    ['red', 2],
+    ['blue', 1],
+  ],
+);
 ```
 
 **Expected:** red 2, blue 1.
@@ -97,10 +106,14 @@ Task: Insert a, b, update a, then delete and reinsert a.
 The order reflects insertion history. If a report requires sorted keys, sort them rather than depending on this history accidentally.
 
 ```javascript
-const map = new Map([['a', 1], ['b', 2]]);
+const map = new Map([
+  ['a', 1],
+  ['b', 2],
+]);
 map.set('a', 3);
 assert.deepEqual([...map.keys()], ['a', 'b']);
-map.delete('a'); map.set('a', 4);
+map.delete('a');
+map.set('a', 4);
 assert.deepEqual([...map.keys()], ['b', 'a']);
 ```
 

@@ -47,11 +47,14 @@ The question is: Create a bias-free 2-to-2 identity Linear base and disable its 
 The identity fixture isolates ownership. A learned base would have different values but should obey the same freeze contract.
 
 ```python
-base=nn.Linear(2,2,bias=False)
-with torch.no_grad(): base.weight.copy_(torch.eye(2))
-for parameter in base.parameters(): parameter.requires_grad_(False); parameter.grad=None
-x=torch.tensor([[1.,0.],[0.,1.],[1.,1.]])
-assert torch.equal(base(x),x) and not any(p.requires_grad for p in base.parameters())
+base = nn.Linear(2, 2, bias=False)
+with torch.no_grad():
+    base.weight.copy_(torch.eye(2))
+for parameter in base.parameters():
+    parameter.requires_grad_(False)
+    parameter.grad = None
+x = torch.tensor([[1.0, 0.0], [0.0, 1.0], [1.0, 1.0]])
+assert torch.equal(base(x), x) and not any(p.requires_grad for p in base.parameters())
 ```
 
 **Expected:** base output equals input; all base parameters frozen.
@@ -65,11 +68,18 @@ The question is: Attach a zero-initialized 2-to-1head and take one SGD.1step tow
 The optimizer receives only head parameters. The direct snapshot check proves preservation rather than trusting a flag alone.
 
 ```python
-head=nn.Linear(2,1,bias=False)
-with torch.no_grad(): head.weight.zero_()
-base_before=base.weight.detach().clone(); head_before=head.weight.detach().clone(); target=torch.tensor([[1.],[2.],[3.]])
-optimizer=torch.optim.SGD(head.parameters(),lr=.1); optimizer.zero_grad(set_to_none=True); loss=(head(base(x))-target).square().mean(); loss.backward(); optimizer.step()
-assert not torch.equal(head.weight,head_before) and torch.equal(base.weight,base_before)
+head = nn.Linear(2, 1, bias=False)
+with torch.no_grad():
+    head.weight.zero_()
+base_before = base.weight.detach().clone()
+head_before = head.weight.detach().clone()
+target = torch.tensor([[1.0], [2.0], [3.0]])
+optimizer = torch.optim.SGD(head.parameters(), lr=0.1)
+optimizer.zero_grad(set_to_none=True)
+loss = (head(base(x)) - target).square().mean()
+loss.backward()
+optimizer.step()
+assert not torch.equal(head.weight, head_before) and torch.equal(base.weight, base_before)
 ```
 
 **Expected:** head changes; base remains exact identity.
@@ -97,10 +107,13 @@ The question is: Freeze BatchNorm affine parameters but call it in train mode on
 `requires_grad` controls parameter differentiation, not forward-time buffer updates. A frozen representation can still drift through training-mode normalization state.
 
 ```python
-normalizer=nn.BatchNorm1d(2,momentum=.5)
-for parameter in normalizer.parameters(): parameter.requires_grad_(False)
-before=normalizer.running_mean.clone(); normalizer.train(); normalizer(torch.tensor([[1.,3.],[3.,5.]]))
-assert not torch.equal(before,normalizer.running_mean)
+normalizer = nn.BatchNorm1d(2, momentum=0.5)
+for parameter in normalizer.parameters():
+    parameter.requires_grad_(False)
+before = normalizer.running_mean.clone()
+normalizer.train()
+normalizer(torch.tensor([[1.0, 3.0], [3.0, 5.0]]))
+assert not torch.equal(before, normalizer.running_mean)
 ```
 
 **Expected:** running mean changes.
@@ -114,8 +127,10 @@ The question is: Switch that BatchNorm to eval and call a different batch.
 The mode transition addresses a separate state mechanism. It should be part of the transfer design when the base is intended to remain fixed.
 
 ```python
-normalizer.eval(); fixed=normalizer.running_mean.clone(); normalizer(torch.tensor([[100.,200.]]))
-assert torch.equal(fixed,normalizer.running_mean)
+normalizer.eval()
+fixed = normalizer.running_mean.clone()
+normalizer(torch.tensor([[100.0, 200.0]]))
+assert torch.equal(fixed, normalizer.running_mean)
 ```
 
 **Expected:** running mean remains unchanged.
@@ -129,10 +144,13 @@ The question is: Enable base gradients, create a new optimizer over base+head, a
 The new optimizer makes membership and state policy explicit. Reusing an old optimizer without adding the base would leave the unfreeze flag ineffective for updates.
 
 ```python
-for parameter in base.parameters(): parameter.requires_grad_(True)
-combined=torch.optim.SGD(list(base.parameters())+list(head.parameters()),lr=.01); combined.zero_grad(set_to_none=True)
-(head(base(x))-target).square().mean().backward(); combined.step()
-assert not torch.equal(base.weight,base_before)
+for parameter in base.parameters():
+    parameter.requires_grad_(True)
+combined = torch.optim.SGD(list(base.parameters()) + list(head.parameters()), lr=0.01)
+combined.zero_grad(set_to_none=True)
+(head(base(x)) - target).square().mean().backward()
+combined.step()
+assert not torch.equal(base.weight, base_before)
 ```
 
 **Expected:** base weight now changes.

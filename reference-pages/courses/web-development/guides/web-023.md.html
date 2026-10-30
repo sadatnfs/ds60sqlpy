@@ -209,12 +209,28 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-a-useful-print-view">Worked example 1: A useful print view<a class="heading-anchor" href="#worked-example-1-a-useful-print-view" aria-label="Link to this section">#</a></h4>
 <p>Hide actions while retaining the document.</p>
-<pre class="highlighted-code"><code class="language-css"><span class="syntax-punctuation">@</span><span class="syntax-keyword">media</span> <span class="syntax-tag">print</span> <span class="syntax-punctuation">{</span> <span class="syntax-tag">nav</span><span class="syntax-operator">,</span> <span class="syntax-tag">button</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">display</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">none</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span> <span class="syntax-tag">body</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">color</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">black</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">background</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">white</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span> <span class="syntax-punctuation">}</span></code></pre>
+<pre class="highlighted-code"><code class="language-css"><span class="syntax-punctuation">@</span><span class="syntax-keyword">media</span> <span class="syntax-tag">print</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-tag">nav</span><span class="syntax-operator">,</span>
+  <span class="syntax-tag">button</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">display</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">none</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
+  <span class="syntax-tag">body</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">color</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">black</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">background</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">white</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected observation:</strong> The article remains while interactive controls are removed.</p>
 <h4 id="worked-example-2-optional-layout-enhancement">Worked example 2: Optional layout enhancement<a class="heading-anchor" href="#worked-example-2-optional-layout-enhancement" aria-label="Link to this section">#</a></h4>
 <p>The fallback remains a readable block layout.</p>
-<pre class="highlighted-code"><code class="language-css"><span class="syntax-punctuation">.</span><span class="syntax-class">cards</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">display</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">block</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
-<span class="syntax-punctuation">@</span><span class="syntax-keyword">supports</span> <span class="syntax-operator">(</span><span class="syntax-tag">display</span><span class="syntax-operator">:</span> <span class="syntax-tag">grid</span><span class="syntax-operator">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-punctuation">.</span><span class="syntax-class">cards</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">display</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">grid</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">gap</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-keyword">rem</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span> <span class="syntax-punctuation">}</span></code></pre>
+<pre class="highlighted-code"><code class="language-css"><span class="syntax-punctuation">.</span><span class="syntax-class">cards</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">display</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">block</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">@</span><span class="syntax-keyword">supports</span> <span class="syntax-operator">(</span><span class="syntax-tag">display</span><span class="syntax-operator">:</span> <span class="syntax-tag">grid</span><span class="syntax-operator">)</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-punctuation">.</span><span class="syntax-class">cards</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">display</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">grid</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">gap</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-keyword">rem</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected observation:</strong> Supported environments use Grid; others keep the content.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-identify-content-that-must-survive-when-scripts-fail">Exercise 1: Identify content that must survive when scripts fail.<a class="heading-anchor" href="#exercise-1-identify-content-that-must-survive-when-scripts-fail" aria-label="Link to this section">#</a></h4>

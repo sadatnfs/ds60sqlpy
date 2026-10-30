@@ -503,8 +503,7 @@ files <span class="syntax-operator">=</span> <span class="syntax-punctuation">[<
 <span class="syntax-punctuation">]</span>
 ignore_patterns <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">.env</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">.venv/*</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
 included <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>
-    path <span class="syntax-keyword">for</span> path <span class="syntax-operator">in</span> files
-    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">any</span><span class="syntax-punctuation">(</span>fnmatch<span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">,</span> pattern<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> pattern <span class="syntax-operator">in</span> ignore_patterns<span class="syntax-punctuation">)</span>
+    path <span class="syntax-keyword">for</span> path <span class="syntax-operator">in</span> files <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">any</span><span class="syntax-punctuation">(</span>fnmatch<span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">,</span> pattern<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> pattern <span class="syntax-operator">in</span> ignore_patterns<span class="syntax-punctuation">)</span>
 <span class="syntax-punctuation">]</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>included<span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">assert</span> <span class="syntax-string">&quot;</span><span class="syntax-string">.env</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">not</span> <span class="syntax-operator">in</span> included <span class="syntax-operator">and</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">any</span><span class="syntax-punctuation">(</span>p<span class="syntax-operator">.</span>startswith<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">.venv/</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> p <span class="syntax-operator">in</span> included<span class="syntax-punctuation">)</span></code></pre>
@@ -515,13 +514,9 @@ included <span class="syntax-operator">=</span> <span class="syntax-punctuation"
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">probe</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> process_running<span class="syntax-punctuation">,</span> model_loaded<span class="syntax-punctuation">,</span> dependency_ready<span class="syntax-punctuation">,</span> draining<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span>
         <span class="syntax-string">&quot;</span><span class="syntax-string">healthy</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> process_running<span class="syntax-punctuation">,</span>
-        <span class="syntax-string">&quot;</span><span class="syntax-string">ready</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">(</span>
-            process_running
-            <span class="syntax-operator">and</span> model_loaded
-            <span class="syntax-operator">and</span> dependency_ready
-            <span class="syntax-operator">and</span> <span class="syntax-operator">not</span> draining
-        <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">ready</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">(</span>process_running <span class="syntax-operator">and</span> model_loaded <span class="syntax-operator">and</span> dependency_ready <span class="syntax-operator">and</span> <span class="syntax-operator">not</span> draining<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
     <span class="syntax-punctuation">}</span>
+
 
 during_dependency_outage <span class="syntax-operator">=</span> probe<span class="syntax-punctuation">(</span>
     process_running<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span>
@@ -925,11 +920,13 @@ docker run --rm -p <span class="syntax-number">8000</span>:8000 ds-60day-api</co
 
 app <span class="syntax-operator">=</span> FastAPI<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 
+
 <span class="syntax-keyword">class</span> <span class="syntax-class">Payload</span><span class="syntax-punctuation">(</span>BaseModel<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     x<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span>
     y<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span>
 
-<span class="syntax-decorator">@app</span><span class="syntax-operator">.</span>post<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">/predict</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+
+<span class="syntax-decorator">@app</span><span class="syntax-operator">.</span>post<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">/predict</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">def</span> <span class="syntax-function">predict</span><span class="syntax-punctuation">(</span>payload<span class="syntax-punctuation">:</span> Payload<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
     <span class="syntax-comment"># placeholder: sum as a toy &#x27;model&#x27;</span>
     <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">pred</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> payload<span class="syntax-operator">.</span>x <span class="syntax-operator">+</span> payload<span class="syntax-operator">.</span>y<span class="syntax-punctuation">}</span></code></pre>
@@ -956,7 +953,7 @@ docker run -p <span class="syntax-number">8000</span>:8000 ds-fastapi:latest</co
 <pre class="highlighted-code"><code class="language-dockerfile"><span class="syntax-comment"># Add this before CMD. Python is already present in python:3.12-slim, so the</span>
 <span class="syntax-comment"># check needs no curl package and uses no shell-specific operators.</span>
 <span class="syntax-keyword">HEALTHCHECK</span> --interval<span class="syntax-operator">=</span>30s --timeout<span class="syntax-operator">=</span>3s --start-period<span class="syntax-operator">=</span>10s --retries<span class="syntax-operator">=</span><span class="syntax-number">3</span> <span class="syntax-string">\</span>
-  CMD <span class="syntax-operator">[</span><span class="syntax-string">&quot;python&quot;</span>, <span class="syntax-string">&quot;-c&quot;</span>, <span class="syntax-string">&quot;import urllib.request; urllib.request.urlopen(&#x27;http://127.0.0.1:8000/health&#x27;, timeout=2).read()&quot;</span><span class="syntax-operator">]</span></code></pre>
+    CMD <span class="syntax-operator">[</span><span class="syntax-string">&quot;python&quot;</span>, <span class="syntax-string">&quot;-c&quot;</span>, <span class="syntax-string">&quot;import urllib.request; urllib.request.urlopen(&#x27;http://127.0.0.1:8000/health&#x27;, timeout=2).read()&quot;</span><span class="syntax-operator">]</span></code></pre>
 <p>Explanation</p>
 <ul>
 <li>During the start period, failed probes do not count toward the retry threshold</li>
@@ -987,7 +984,7 @@ docker run -p <span class="syntax-number">8000</span>:8000 ds-fastapi:latest</co
 <span class="syntax-keyword">USER</span> <span class="syntax-string">appuser</span>
 <span class="syntax-keyword">EXPOSE</span> <span class="syntax-string">8000</span>
 <span class="syntax-keyword">HEALTHCHECK</span> --interval<span class="syntax-operator">=</span>30s --timeout<span class="syntax-operator">=</span>3s --start-period<span class="syntax-operator">=</span>10s --retries<span class="syntax-operator">=</span><span class="syntax-number">3</span> <span class="syntax-string">\</span>
-  CMD <span class="syntax-operator">[</span><span class="syntax-string">&quot;python&quot;</span>, <span class="syntax-string">&quot;-c&quot;</span>, <span class="syntax-string">&quot;import urllib.request; urllib.request.urlopen(&#x27;http://127.0.0.1:8000/health&#x27;, timeout=2).read()&quot;</span><span class="syntax-operator">]</span>
+    CMD <span class="syntax-operator">[</span><span class="syntax-string">&quot;python&quot;</span>, <span class="syntax-string">&quot;-c&quot;</span>, <span class="syntax-string">&quot;import urllib.request; urllib.request.urlopen(&#x27;http://127.0.0.1:8000/health&#x27;, timeout=2).read()&quot;</span><span class="syntax-operator">]</span>
 <span class="syntax-keyword">CMD</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;uvicorn&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;app:app&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;--host&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;0.0.0.0&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;--port&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;8000&quot;</span><span class="syntax-punctuation">]</span></code></pre>
 <p>Notes</p>
 <ul>
@@ -1127,7 +1124,7 @@ docker run -p <span class="syntax-number">8000</span>:8000 ds-fastapi:latest</co
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><pre class="highlighted-code"><code class="language-dockerfile"><span class="syntax-comment"># Add this before CMD. Python is already present in python:3.12-slim, so the</span>
 <span class="syntax-comment"># check needs no curl package and uses no shell-specific operators.</span>
 <span class="syntax-keyword">HEALTHCHECK</span> --interval<span class="syntax-operator">=</span>30s --timeout<span class="syntax-operator">=</span>3s --start-period<span class="syntax-operator">=</span>10s --retries<span class="syntax-operator">=</span><span class="syntax-number">3</span> <span class="syntax-string">\</span>
-  CMD <span class="syntax-operator">[</span><span class="syntax-string">&quot;python&quot;</span>, <span class="syntax-string">&quot;-c&quot;</span>, <span class="syntax-string">&quot;import urllib.request; urllib.request.urlopen(&#x27;http://127.0.0.1:8000/health&#x27;, timeout=2).read()&quot;</span><span class="syntax-operator">]</span></code></pre>
+    CMD <span class="syntax-operator">[</span><span class="syntax-string">&quot;python&quot;</span>, <span class="syntax-string">&quot;-c&quot;</span>, <span class="syntax-string">&quot;import urllib.request; urllib.request.urlopen(&#x27;http://127.0.0.1:8000/health&#x27;, timeout=2).read()&quot;</span><span class="syntax-operator">]</span></code></pre>
 <p>Explanation</p>
 <ul>
 <li>During the start period, failed probes do not count toward the retry threshold</li>
@@ -1158,7 +1155,7 @@ docker run -p <span class="syntax-number">8000</span>:8000 ds-fastapi:latest</co
 <span class="syntax-keyword">USER</span> <span class="syntax-string">appuser</span>
 <span class="syntax-keyword">EXPOSE</span> <span class="syntax-string">8000</span>
 <span class="syntax-keyword">HEALTHCHECK</span> --interval<span class="syntax-operator">=</span>30s --timeout<span class="syntax-operator">=</span>3s --start-period<span class="syntax-operator">=</span>10s --retries<span class="syntax-operator">=</span><span class="syntax-number">3</span> <span class="syntax-string">\</span>
-  CMD <span class="syntax-operator">[</span><span class="syntax-string">&quot;python&quot;</span>, <span class="syntax-string">&quot;-c&quot;</span>, <span class="syntax-string">&quot;import urllib.request; urllib.request.urlopen(&#x27;http://127.0.0.1:8000/health&#x27;, timeout=2).read()&quot;</span><span class="syntax-operator">]</span>
+    CMD <span class="syntax-operator">[</span><span class="syntax-string">&quot;python&quot;</span>, <span class="syntax-string">&quot;-c&quot;</span>, <span class="syntax-string">&quot;import urllib.request; urllib.request.urlopen(&#x27;http://127.0.0.1:8000/health&#x27;, timeout=2).read()&quot;</span><span class="syntax-operator">]</span>
 <span class="syntax-keyword">CMD</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;uvicorn&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;app:app&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;--host&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;0.0.0.0&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;--port&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;8000&quot;</span><span class="syntax-punctuation">]</span></code></pre>
 <p>Notes</p>
 <ul>

@@ -121,17 +121,34 @@ Conflicting sources need a policy too. A newer version may supersede an older on
 The answer is a controlled source extract. It demonstrates citation construction without claiming that a model inferred the definition independently.
 
 ```python
+def extractive_answer(document, start, end, claim_id):
+    if document is None:
+        return {"status": "unknown", "claims": [], "citations": [], "reason": "missing evidence"}
+    if not 0 <= start < end <= len(document["text"]):
+        raise ValueError("valid nonempty source span required")
+    return {
+        "status": "answered",
+        "claims": [{"id": claim_id, "quote": document["text"][start:end]}],
+        "citations": [
+            {
+                "document_id": document["id"],
+                "version": document["version"],
+                "start": start,
+                "end": end,
+            }
+        ],
+    }
 
-def extractive_answer(document,start,end,claim_id):
-    if document is None: return {'status':'unknown','claims':[],'citations':[],'reason':'missing evidence'}
-    if not 0<=start<end<=len(document['text']): raise ValueError('valid nonempty source span required')
-    return {'status':'answered','claims':[{'id':claim_id,'quote':document['text'][start:end]}],
-            'citations':[{'document_id':document['id'],'version':document['version'],'start':start,'end':end}]}
-text='Conversion rate equals purchases divided by eligible visits. Exclude test accounts.'
-document={'id':'metric-v1','version':1,'text':text}; end=text.index('.')+1
-answer=extractive_answer(document,0,end,'conversion-definition')
-assert answer['status']=='answered' and len(answer['claims'])==1
-assert text[answer['citations'][0]['start']:answer['citations'][0]['end']]==answer['claims'][0]['quote']
+
+text = "Conversion rate equals purchases divided by eligible visits. Exclude test accounts."
+document = {"id": "metric-v1", "version": 1, "text": text}
+end = text.index(".") + 1
+answer = extractive_answer(document, 0, end, "conversion-definition")
+assert answer["status"] == "answered" and len(answer["claims"]) == 1
+assert (
+    text[answer["citations"][0]["start"] : answer["citations"][0]["end"]]
+    == answer["claims"][0]["quote"]
+)
 ```
 
 **Expected:** status answered; one claim; citation slices the exact sentence.
@@ -141,8 +158,8 @@ assert text[answer['citations'][0]['start']:answer['citations'][0]['end']]==answ
 A document ID alone would still look valid. Comparing the exact source slice detects a citation that no longer matches its claimed quote.
 
 ```python
-bad={'quote':'Conversion rate is always one.'}
-assert text[0:end]!=bad['quote']
+bad = {"quote": "Conversion rate is always one."}
+assert text[0:end] != bad["quote"]
 ```
 
 **Expected:** citation integrity check returns False.
@@ -152,8 +169,8 @@ assert text[0:end]!=bad['quote']
 An empty evidence set should not be converted into a confident answer from unrelated top-ranked text. The unknown result is a successful execution of the declared policy.
 
 ```python
-unknown=extractive_answer(None,0,0,'comet-period')
-assert unknown=={'status':'unknown','claims':[],'citations':[],'reason':'missing evidence'}
+unknown = extractive_answer(None, 0, 0, "comet-period")
+assert unknown == {"status": "unknown", "claims": [], "citations": [], "reason": "missing evidence"}
 ```
 
 **Expected:** status unknown; claims empty; reason missing evidence.

@@ -125,16 +125,19 @@ root shape, array type, range, units and business identity before projection.
 ### Worked case 1: Choose item grain or preserve document grain
 
 ```sql
-SELECT d.document_id, j.item_no, j.sku, j.qty, j.unit_price
-FROM j17_documents AS d
-CROSS JOIN JSON_TABLE(d.payload, '$.items[*]'
-  COLUMNS (
-    item_no FOR ORDINALITY,
-    sku text PATH '$.sku',
-    qty integer PATH '$.qty' DEFAULT 1 ON EMPTY ERROR ON ERROR,
-    unit_price numeric(10,2) PATH '$.price' ERROR ON EMPTY ERROR ON ERROR
-  )) AS j
-ORDER BY d.document_id, j.item_no;
+SELECT
+  d.document_id,
+  j.item_no,
+  j.sku,
+  j.qty,
+  j.unit_price
+FROM
+  j17_documents AS d
+  CROSS JOIN JSON_TABLE (d.payload, '$.items[*]' COLUMNS (item_no FOR ORDINALITY, sku text PATH '$.sku', qty integer PATH '$.qty' DEFAULT 1 ON EMPTY ERROR ON ERROR, unit_price numeric(10, 2)
+  PATH '$.price' ERROR ON EMPTY ERROR ON ERROR)) AS j
+ORDER BY
+  d.document_id,
+  j.item_no;
 ```
 
 The actual result has two rows: document one's P and Q. The output grain is one
@@ -143,16 +146,19 @@ not produce cross-joined child rows. A document disappearing from this item
 relation does not mean it was absent from the input table.
 
 ```sql
-SELECT d.document_id, j.item_no, j.sku, j.qty, j.unit_price
-FROM j17_documents AS d
-LEFT JOIN LATERAL JSON_TABLE(d.payload, '$.items[*]'
-  COLUMNS (
-    item_no FOR ORDINALITY,
-    sku text PATH '$.sku',
-    qty integer PATH '$.qty' DEFAULT 1 ON EMPTY ERROR ON ERROR,
-    unit_price numeric(10,2) PATH '$.price' ERROR ON EMPTY ERROR ON ERROR
-  )) AS j ON true
-ORDER BY d.document_id, j.item_no;
+SELECT
+  d.document_id,
+  j.item_no,
+  j.sku,
+  j.qty,
+  j.unit_price
+FROM
+  j17_documents AS d
+  LEFT JOIN LATERAL JSON_TABLE (d.payload, '$.items[*]' COLUMNS (item_no FOR ORDINALITY, sku text PATH '$.sku', qty integer PATH '$.qty' DEFAULT 1 ON EMPTY ERROR ON ERROR, unit_price numeric(10, 2)
+  PATH '$.price' ERROR ON EMPTY ERROR ON ERROR)) AS j ON true
+ORDER BY
+  d.document_id,
+  j.item_no;
 ```
 
 The LEFT form produces four rows: two actual items and one null-extended row
@@ -169,14 +175,14 @@ durable external item identifier across versions.
 ### Worked case 2: Missing, null and malformed values have different policies
 
 ```sql
-SELECT j.item_no, j.qty, j.qty_present
-FROM JSON_TABLE('{"items":[{"qty":null},{}]}', '$.items[*]'
-  COLUMNS (
-    item_no FOR ORDINALITY,
-    qty integer PATH '$.qty' DEFAULT 1 ON EMPTY ERROR ON ERROR,
-    qty_present boolean EXISTS PATH '$.qty'
-  )) AS j
-ORDER BY j.item_no;
+SELECT
+  j.item_no,
+  j.qty,
+  j.qty_present
+FROM
+  JSON_TABLE ('{"items":[{"qty":null},{}]}', '$.items[*]' COLUMNS (item_no FOR ORDINALITY, qty integer PATH '$.qty' DEFAULT 1 ON EMPTY ERROR ON ERROR, qty_present boolean EXISTS PATH '$.qty')) AS j
+ORDER BY
+  j.item_no;
 ```
 
 The result is `(1,NULL,true)` followed by `(2,1,false)`. The first field exists

@@ -9,7 +9,7 @@ The derivative belongs to the discretized recurrence, not directly to the contin
 **Expected:** -0.9^9.
 
 ```python
-close(jax.grad(simulate)(1.), -(.9 ** 9))
+close(jax.grad(simulate)(1.0), -(0.9**9))
 ```
 
 ## Exercise 2: Compare continuous sensitivity
@@ -19,9 +19,9 @@ A disagreement here is expected discretization error rather than an autodiff def
 **Expected:** Continuous -exp(-1), different from the ten-step derivative.
 
 ```python
-continuous = -math.exp(-1.)
-discrete = float(jax.grad(simulate)(1.))
-assert not np.isclose(continuous, discrete, atol=1e-4, rtol=0.)
+continuous = -math.exp(-1.0)
+discrete = float(jax.grad(simulate)(1.0))
+assert not np.isclose(continuous, discrete, atol=1e-4, rtol=0.0)
 ```
 
 ## Exercise 3: Refine the derivative
@@ -31,9 +31,9 @@ Derivative convergence should be examined separately from value convergence.
 **Expected:** The twenty-step derivative is closer to the continuous derivative.
 
 ```python
-exact = -math.exp(-1.)
-a = abs(float(jax.grad(lambda k: simulate(k, steps=10))(1.)) - exact)
-b = abs(float(jax.grad(lambda k: simulate(k, steps=20))(1.)) - exact)
+exact = -math.exp(-1.0)
+a = abs(float(jax.grad(lambda k: simulate(k, steps=10))(1.0)) - exact)
+b = abs(float(jax.grad(lambda k: simulate(k, steps=20))(1.0)) - exact)
 assert b < a
 ```
 
@@ -44,7 +44,7 @@ The transition multiplier becomes one, so no decay occurs.
 **Expected:** The state remains three.
 
 ```python
-close(simulate(0., initial=3.), 3.)
+close(simulate(0.0, initial=3.0), 3.0)
 ```
 
 ## Exercise 5: Differentiate the initial state
@@ -54,7 +54,7 @@ This linear system scales every initial perturbation by the complete discrete de
 **Expected:** 0.9^10.
 
 ```python
-close(jax.grad(lambda initial: simulate(1., initial=initial))(2.), .9 ** 10)
+close(jax.grad(lambda initial: simulate(1.0, initial=initial))(2.0), 0.9**10)
 ```
 
 ## Exercise 6: Inspect an unstable numerical regime
@@ -64,8 +64,8 @@ The large step leaves the intended stable positive-decay regime. A finite result
 **Expected:** -2, despite positive continuous decay exp(-3).
 
 ```python
-close(simulate(3., steps=1), -2.)
-assert math.exp(-3.) > 0.
+close(simulate(3.0, steps=1), -2.0)
+assert math.exp(-3.0) > 0.0
 ```
 
 ## Scope of this evidence

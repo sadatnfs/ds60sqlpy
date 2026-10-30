@@ -105,9 +105,19 @@ A calendar spine distinguishes an empty cohort from a cohort containing only pen
 ### Example 1
 
 ```sql
-WITH activity(event_id,user_id) AS (VALUES(1,10),(2,10),(3,20))
-SELECT 'observed_activity' AS metric_id,count(*) AS event_count,count(DISTINCT user_id) AS active_users
-FROM activity;
+WITH activity (
+  event_id,
+  user_id
+) AS (
+  VALUES (1, 10),
+    (2, 10),
+    (3, 20))
+SELECT
+  'observed_activity' AS metric_id,
+  count(*) AS event_count,
+  count(DISTINCT user_id) AS active_users
+FROM
+  activity;
 ```
 
 The one-row output has metric_id, event_count, active_users with values observed_activity,3,2. Two events belong to the same user, so counting events would overstate the number of active people. The identifier used by COUNT DISTINCT must match the denominator's entity grain.
@@ -115,13 +125,21 @@ The one-row output has metric_id, event_count, active_users with values observed
 ### Example 2
 
 ```sql
-WITH instants(position,at) AS (VALUES
- (1,TIMESTAMPTZ '2026-01-08T00:00Z'),
- (2,TIMESTAMPTZ '2026-01-08T12:00Z'),
- (3,TIMESTAMPTZ '2026-01-09T00:00Z'))
-SELECT position,at>=TIMESTAMPTZ '2026-01-08T00:00Z'
- AND at<TIMESTAMPTZ '2026-01-09T00:00Z' AS in_window
-FROM instants ORDER BY position;
+WITH instants (
+  position,
+  at
+) AS (
+  VALUES (1, TIMESTAMPTZ '2026-01-08T00:00Z'),
+    (2, TIMESTAMPTZ '2026-01-08T12:00Z'),
+    (3, TIMESTAMPTZ '2026-01-09T00:00Z'))
+SELECT
+  position,
+  at >= TIMESTAMPTZ '2026-01-08T00:00Z'
+    AND at < TIMESTAMPTZ '2026-01-09T00:00Z' AS in_window
+  FROM
+    instants
+  ORDER BY
+    position;
 ```
 
 One row per position returns in_window true, true, false. The start is included and the exact end is excluded, preventing adjacent daily windows from both owning one instant. This fixture establishes the boundary policy before the cohort query introduces aggregation.

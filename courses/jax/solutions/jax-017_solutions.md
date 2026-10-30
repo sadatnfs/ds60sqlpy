@@ -11,7 +11,7 @@ Saving before any update would not exercise retained history.
 ```python
 state = prepared_state()
 assert int(state[3]) == 2
-assert float(state[1]) != 0.
+assert float(state[1]) != 0.0
 ```
 
 ## Exercise 2: Replay from the same root
@@ -33,7 +33,7 @@ This isolates representation correctness from continuation arithmetic.
 ```python
 state = prepared_state()
 with tempfile.TemporaryDirectory() as directory:
-    path = Path(directory) / 'state.npz'
+    path = Path(directory) / "state.npz"
     save_state(path, state)
     restored = load_state(path)
     compare(state, restored)
@@ -48,9 +48,11 @@ A changed stream is a distinct continuation even if two rounded scalar outputs h
 
 ```python
 state = prepared_state()
-other = (state[0], state[1], jax.random.key(999, impl='threefry2x32'), state[3])
+other = (state[0], state[1], jax.random.key(999, impl="threefry2x32"), state[3])
 a, b = next_state(state), next_state(other)
-assert not np.array_equal(np.asarray(jax.random.key_data(a[2])), np.asarray(jax.random.key_data(b[2])))
+assert not np.array_equal(
+    np.asarray(jax.random.key_data(a[2])), np.asarray(jax.random.key_data(b[2]))
+)
 ```
 
 ## Exercise 5: Check owned cleanup
@@ -61,7 +63,7 @@ The demonstration owns and removes its temporary artifact. It does not delete an
 
 ```python
 with tempfile.TemporaryDirectory() as directory:
-    path = Path(directory) / 'state.npz'
+    path = Path(directory) / "state.npz"
     save_state(path, prepared_state())
     assert path.is_file()
 assert not path.exists()
@@ -76,7 +78,7 @@ The stored state supports repeated application of the same declared transition.
 ```python
 state = prepared_state()
 with tempfile.TemporaryDirectory() as directory:
-    path = Path(directory) / 'state.npz'
+    path = Path(directory) / "state.npz"
     save_state(path, state)
     restored = load_state(path)
     left, right = next_state(next_state(state)), next_state(next_state(restored))

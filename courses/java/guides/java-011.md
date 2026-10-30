@@ -49,19 +49,36 @@ The lookup uses logical equality rather than reference identity. A record suppli
 import java.util.*;
 
 public class Main {
-    record Point(int x,int y) { }
-    record Person(String id,int age) { }
-    static final class MutableKey {
-        int value; MutableKey(int value){this.value=value;}
-        public int hashCode(){return value;}
-        public boolean equals(Object other){return other instanceof MutableKey key && key.value==value;}
-    }
-    public static void main(String[] args) throws Exception {
-        Point a=new Point(0,0), b=new Point(0,0); Map<Point,String> map=new HashMap<>(); map.put(a,"origin");
-        assert a.equals(b) && a.hashCode()==b.hashCode() && map.get(b).equals("origin");
-    }
-}
 
+  record Point(int x, int y) {}
+
+  record Person(String id, int age) {}
+
+  static final class MutableKey {
+
+    int value;
+
+    MutableKey(int value) {
+      this.value = value;
+    }
+
+    public int hashCode() {
+      return value;
+    }
+
+    public boolean equals(Object other) {
+      return other instanceof MutableKey key && key.value == value;
+    }
+  }
+
+  public static void main(String[] args) throws Exception {
+    Point a = new Point(0, 0),
+      b = new Point(0, 0);
+    Map<Point, String> map = new HashMap<>();
+    map.put(a, "origin");
+    assert a.equals(b) && a.hashCode() == b.hashCode() && map.get(b).equals("origin");
+  }
+}
 ```
 
 **Expected:** lookup with the other returns origin; hashes equal.
@@ -74,23 +91,42 @@ The secondary key makes equal-age ordering explicit. Without it, a presentation 
 import java.util.*;
 
 public class Main {
-    record Point(int x,int y) { }
-    record Person(String id,int age) { }
-    static final class MutableKey {
-        int value; MutableKey(int value){this.value=value;}
-        public int hashCode(){return value;}
-        public boolean equals(Object other){return other instanceof MutableKey key && key.value==value;}
-    }
-    public static void main(String[] args) throws Exception {
-        Point a=new Point(0,0), b=new Point(0,0); Map<Point,String> map=new HashMap<>(); map.put(a,"origin");
-        assert a.equals(b) && a.hashCode()==b.hashCode() && map.get(b).equals("origin");
 
-        List<Person> people=new ArrayList<>(List.of(new Person("b",20),new Person("a",20),new Person("c",18)));
-        people.sort(Comparator.comparingInt(Person::age).thenComparing(Person::id));
-        assert people.stream().map(Person::id).toList().equals(List.of("c","a","b"));
+  record Point(int x, int y) {}
+
+  record Person(String id, int age) {}
+
+  static final class MutableKey {
+
+    int value;
+
+    MutableKey(int value) {
+      this.value = value;
     }
+
+    public int hashCode() {
+      return value;
+    }
+
+    public boolean equals(Object other) {
+      return other instanceof MutableKey key && key.value == value;
+    }
+  }
+
+  public static void main(String[] args) throws Exception {
+    Point a = new Point(0, 0),
+      b = new Point(0, 0);
+    Map<Point, String> map = new HashMap<>();
+    map.put(a, "origin");
+    assert a.equals(b) && a.hashCode() == b.hashCode() && map.get(b).equals("origin");
+
+    List<Person> people = new ArrayList<>(
+      List.of(new Person("b", 20), new Person("a", 20), new Person("c", 18))
+    );
+    people.sort(Comparator.comparingInt(Person::age).thenComparing(Person::id));
+    assert people.stream().map(Person::id).toList().equals(List.of("c", "a", "b"));
+  }
 }
-
 ```
 
 **Expected:** IDs c,a,b.

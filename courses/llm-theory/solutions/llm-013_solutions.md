@@ -23,8 +23,11 @@ The question is: Shift IDs[2,5,7,3] into input and label arrays.
 There are three target events in a four-token sequence. The final token has no next token unless an explicit end marker is included in the original sequence.
 
 ```python
-ids=np.array([2,5,7,3]); inputs=ids[:-1]; labels=ids[1:]
-np.testing.assert_array_equal(inputs,[2,5,7]); np.testing.assert_array_equal(labels,[5,7,3])
+ids = np.array([2, 5, 7, 3])
+inputs = ids[:-1]
+labels = ids[1:]
+np.testing.assert_array_equal(inputs, [2, 5, 7])
+np.testing.assert_array_equal(labels, [5, 7, 3])
 ```
 
 **Expected:** inputs[2,5,7],labels[5,7,3].
@@ -38,7 +41,8 @@ The question is: Compare copied-input labels with the proper shifted targets.
 A model trained to reproduce its current token is not being tested on next-token prediction. A causal mask allows the current input, so it cannot detect this objective error.
 
 ```python
-copied=inputs.copy(); assert np.count_nonzero(copied!=labels)==3
+copied = inputs.copy()
+assert np.count_nonzero(copied != labels) == 3
 ```
 
 **Expected:** all three copied labels differ from the target fixture.
@@ -53,8 +57,10 @@ File identity is not content identity. Exact hashing catches byte-identical dupl
 
 ```python
 import hashlib
-train={'a':'alpha beta'}; valid={'copy':'alpha beta'}
-hash_text=lambda text:hashlib.sha256(text.encode()).hexdigest()
+
+train = {"a": "alpha beta"}
+valid = {"copy": "alpha beta"}
+hash_text = lambda text: hashlib.sha256(text.encode()).hexdigest()
 assert {hash_text(t) for t in train.values()} & {hash_text(t) for t in valid.values()}
 ```
 
@@ -69,8 +75,8 @@ The question is: Assign documentsa andb to familyF across train and validation.
 Known source families can catch related material that hashes differently. The grouping policy should be frozen before outcome inspection.
 
 ```python
-families={'a':'F','b':'F','c':'G'}
-assert {families['a']} & {families['b']}=={'F'}
+families = {"a": "F", "b": "F", "c": "G"}
+assert {families["a"]} & {families["b"]} == {"F"}
 ```
 
 **Expected:** family intersection containsF.
@@ -84,8 +90,10 @@ The question is: Fit a vocabulary from training words alpha,beta and encode vali
 A vocabulary update during validation changes the fitted representation. Unknown-token handling must be an explicit frozen policy.
 
 ```python
-vocab={'alpha':0,'beta':1}; before=dict(vocab); unknown=vocab.get('gamma',-1)
-assert unknown==-1 and vocab==before
+vocab = {"alpha": 0, "beta": 1}
+before = dict(vocab)
+unknown = vocab.get("gamma", -1)
+assert unknown == -1 and vocab == before
 ```
 
 **Expected:** vocabulary remains alpha,beta; gamma is unknown.
@@ -99,9 +107,9 @@ The question is: Count targets across documents of lengths4 and2 without creatin
 Concatenating documents without a boundary policy invents a transition from the end of one source to the start of another. Per-document pairing preserves the declared prediction unit.
 
 ```python
-documents=[[2,5,7,3],[8,3]]
-pairs=[(a,b) for doc in documents for a,b in zip(doc[:-1],doc[1:])]
-assert len(pairs)==4 and (3,8) not in pairs
+documents = [[2, 5, 7, 3], [8, 3]]
+pairs = [(a, b) for doc in documents for a, b in zip(doc[:-1], doc[1:])]
+assert len(pairs) == 4 and (3, 8) not in pairs
 ```
 
 **Expected:** \(3+1=4\) targets, not5.

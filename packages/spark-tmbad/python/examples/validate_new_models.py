@@ -47,9 +47,7 @@ def close(actual, expected):
         type(actual) in (int, float)
         and math.isfinite(actual)
         and math.isfinite(expected)
-        and math.isclose(
-            actual, expected, rel_tol=RELATIVE_TOLERANCE, abs_tol=ABSOLUTE_TOLERANCE
-        ),
+        and math.isclose(actual, expected, rel_tol=RELATIVE_TOLERANCE, abs_tol=ABSOLUTE_TOLERANCE),
         f"Expected {expected!r}, received {actual!r}",
     )
 
@@ -64,10 +62,7 @@ def selected_cases(rows_path, gaussian_path):
             case
             for case in rows["results"]
             if case["family"] == family
-            and (
-                case["case"] == "weighted_baseline"
-                or case["case"].startswith("changed_")
-            )
+            and (case["case"] == "weighted_baseline" or case["case"].startswith("changed_"))
         ]
         require(len(matches) == 2, f"Expected baseline and changed point for {family}")
         require(
@@ -76,12 +71,8 @@ def selected_cases(rows_path, gaussian_path):
         )
         for case in matches:
             result.append((family, case, sha256(rows_path)))
-    require(
-        len(gaussian["results"]) == 2, "Expected two exact Gaussian conditioning cases"
-    )
-    result.extend(
-        (CORRELATED, case, sha256(gaussian_path)) for case in gaussian["results"]
-    )
+    require(len(gaussian["results"]) == 2, "Expected two exact Gaussian conditioning cases")
+    result.extend((CORRELATED, case, sha256(gaussian_path)) for case in gaussian["results"])
     return result
 
 
@@ -99,19 +90,13 @@ def fixture_rows(model_id, case):
     else:
         fields = ROW_FIELDS[model_id]
         training = []
-        for i, (row, weight) in enumerate(
-            zip(case["rows"], case["weights"], strict=True)
-        ):
+        for i, (row, weight) in enumerate(zip(case["rows"], case["weights"], strict=True)):
             require(len(row) == len(fields), "Reference training shape differs")
-            training.append(
-                {"row_id": i, **dict(zip(fields, row, strict=True)), "weight": weight}
-            )
+            training.append({"row_id": i, **dict(zip(fields, row, strict=True)), "weight": weight})
         future = []
         for i, row in enumerate(case["future"]):
             require(len(row) == len(fields) - 1, "Reference future shape differs")
-            future.append(
-                {"row_id": 100 + i, **dict(zip(fields[:-1], row, strict=True))}
-            )
+            future.append({"row_id": 100 + i, **dict(zip(fields[:-1], row, strict=True))})
     require(all("y" not in row for row in future), "Future fixture contains a response")
     return training, future
 
@@ -153,14 +138,10 @@ def fixture_sql(rows):
         )
         return repr(value)
 
-    values = ",".join(
-        "(" + ",".join(literal(row[key]) for key in fields) + ")" for row in rows
-    )
+    values = ",".join("(" + ",".join(literal(row[key]) for key in fields) + ")" for row in rows)
     expressions = []
     for key in fields:
-        kind = (
-            "BIGINT" if key == "row_id" else "STRING" if key == "series" else "DOUBLE"
-        )
+        kind = "BIGINT" if key == "row_id" else "STRING" if key == "series" else "DOUBLE"
         expressions.append(f"CAST(`{key}` AS {kind}) AS `{key}`")
     return (
         "SELECT "
@@ -182,13 +163,9 @@ def descriptor_check(runtime, model_id):
         "Prepared factorization differs",
     )
     require(not descriptor["ordered"], "These fixtures do not assert a temporal order")
-    expected_targets = (
-        {"existing_group", "new_group"} if model_id == CORRELATED else {"response"}
-    )
+    expected_targets = {"existing_group", "new_group"} if model_id == CORRELATED else {"response"}
     for operation in ("predict", "forecast"):
-        require(
-            set(descriptor[operation]) == expected_targets, "Prepared targets differ"
-        )
+        require(set(descriptor[operation]) == expected_targets, "Prepared targets differ")
         for target in expected_targets:
             require(
                 descriptor[operation][target]["columns"] == MOMENT_COLUMNS,
@@ -199,8 +176,7 @@ def descriptor_check(runtime, model_id):
                 "Future target needs unexpected fields",
             )
             require(
-                descriptor[operation][target]["needs_history"]
-                == (target == "existing_group"),
+                descriptor[operation][target]["needs_history"] == (target == "existing_group"),
                 "Prepared conditioning contract differs",
             )
     return descriptor
@@ -252,18 +228,14 @@ def run_case(api, spark, model_id, case, reference_sha):
     )
     # Reverse the mapping insertion order to verify named coordinate resolution.
     named = dict(
-        reversed(
-            list(zip(descriptor["parameter_names"], case["parameters"], strict=True))
-        )
+        reversed(list(zip(descriptor["parameter_names"], case["parameters"], strict=True)))
     )
     evaluation = api.evaluate_shared(training, spec, named)
     require(
         "fit" not in evaluation and "converged" not in evaluation,
         "Evaluation claims a fit",
     )
-    require(
-        evaluation["row_count"] == len(training_rows), "Evaluation row ledger differs"
-    )
+    require(evaluation["row_count"] == len(training_rows), "Evaluation row ledger differs")
     require(
         evaluation["unit_count"] == (1 if groups else 0),
         "Evaluation unit ledger differs",
@@ -273,9 +245,7 @@ def run_case(api, spark, model_id, case, reference_sha):
         "Evaluation weight mass differs from the exact fixture weights",
     )
     close(evaluation["loss_components"]["data_sum"], case["value"])
-    for actual, expected in zip(
-        evaluation["data_gradient_sum"], case["gradient"], strict=True
-    ):
+    for actual, expected in zip(evaluation["data_gradient_sum"], case["gradient"], strict=True):
         close(actual, expected)
     point = PreparedParameters.from_parameters(
         api.runtime,
@@ -325,18 +295,14 @@ def run_case(api, spark, model_id, case, reference_sha):
             options={
                 "target": target,
                 "future_columns": {name: name for name in fields[:-1]},
-                "history_columns": {name: name for name in fields}
-                if conditional
-                else {},
+                "history_columns": {name: name for name in fields} if conditional else {},
                 "output_prefix": "declared_",
             },
         )
         forecast = check_output(
             forecast, point, expected, expected_ids, evaluation["parameter_digest"]
         )
-        outputs.append(
-            {"target": target, "prediction": prediction, "forecast": forecast}
-        )
+        outputs.append({"target": target, "prediction": prediction, "forecast": forecast})
     return {
         "model_id": model_id,
         "case": case["case"],

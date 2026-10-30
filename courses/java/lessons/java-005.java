@@ -3,8 +3,8 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     // Exercise 1: Copy array storage
-    // Copy array1,2,3,mutate the copy and compare the original.
-    // Expected: original starts1;copy starts9.
+    // Copy array 1,2,3,mutate the copy and compare the original.
+    // Expected: original starts 1; copy starts 9.
 
     // Exercise 2: Count text units
     // Inspect stringA followed by an emoji.

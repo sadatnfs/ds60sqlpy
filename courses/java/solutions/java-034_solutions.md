@@ -27,7 +27,14 @@ Task: Compute 3 items at 125 cents and check the zero/negative quantity policy.
 The core arithmetic needsno repository or clock. Isolating it makes domain boundaries and overflow behavior easy to check.
 
 ```java
-assert total(3,125)==375;boolean invalid=false;try{total(0,125);}catch(IllegalArgumentException expected){invalid=true;}assert invalid;
+assert total(3, 125) == 375;
+boolean invalid = false;
+try {
+  total(0, 125);
+} catch (IllegalArgumentException expected) {
+  invalid = true;
+}
+assert invalid;
 ```
 
 **Expected:** 375 cents; nonpositive quantity rejected.
@@ -41,10 +48,15 @@ Task: Inject a fixedcatalog,clock and audit list,and request twoitems.
 A fixed clock removes timing nondeterminism. The audit event is a local test double,not a message sent to another person or service.
 
 ```java
-List<String> audit=new ArrayList<>();var instant=java.time.Instant.parse("2026-01-01T00:00:00Z");
-Catalog catalog=id -> id.equals("item-a")?java.util.OptionalLong.of(125):java.util.OptionalLong.empty();
-Service service=new Service(catalog,() -> instant,audit::add);Quote quote=service.quote("item-a",2);
-assert quote.totalCents()==250 && quote.created().equals(instant) && audit.equals(List.of("quoted:item-a"));
+List<String> audit = new ArrayList<>();
+var instant = java.time.Instant.parse("2026-01-01T00:00:00Z");
+Catalog catalog = id ->
+  id.equals("item-a") ? java.util.OptionalLong.of(125) : java.util.OptionalLong.empty();
+Service service = new Service(catalog, () -> instant, audit::add);
+Quote quote = service.quote("item-a", 2);
+assert quote.totalCents() == 250 &&
+quote.created().equals(instant) &&
+audit.equals(List.of("quoted:item-a"));
 ```
 
 **Expected:** total250,time2026-01-01T00:00:00Z,oneauditevent.
@@ -58,8 +70,13 @@ Task: Requestmissing andinspecttheauditlist.
 A missing item is a domain outcome. It should not silently become a zero-priced quote or produce a misleading success event.
 
 ```java
-boolean missing=false;try{service.quote("missing",2);}catch(NoSuchElementException expected){missing=true;}
-assert missing && audit.size()==1;
+boolean missing = false;
+try {
+  service.quote("missing", 2);
+} catch (NoSuchElementException expected) {
+  missing = true;
+}
+assert missing && audit.size() == 1;
 ```
 
 **Expected:** NoSuchElementException;no additional audit.
@@ -73,8 +90,20 @@ Task: Inject a Catalog thatthrowsIOException.
 An operational failure differs from a valid missing lookup. The service preserves that distinction so a caller can choose retry or error behavior appropriately.
 
 ```java
-List<String> failures=new ArrayList<>();Service unavailable=new Service(id -> {throw new java.io.IOException("catalog unavailable");},() -> instant,failures::add);boolean propagated=false;
-try{unavailable.quote("item-a",1);}catch(java.io.IOException expected){propagated=expected.getMessage().equals("catalog unavailable");}
+List<String> failures = new ArrayList<>();
+Service unavailable = new Service(
+  id -> {
+    throw new java.io.IOException("catalog unavailable");
+  },
+  () -> instant,
+  failures::add
+);
+boolean propagated = false;
+try {
+  unavailable.quote("item-a", 1);
+} catch (java.io.IOException expected) {
+  propagated = expected.getMessage().equals("catalog unavailable");
+}
 assert propagated && failures.isEmpty();
 ```
 
@@ -89,9 +118,22 @@ Task: Use a countingcatalog and request negative quantity.
 Validation ordering is part of the boundary contract. It avoids unnecessary external work and prevents a malformed request from being mistaken for an infrastructure failure.
 
 ```java
-var calls=new java.util.concurrent.atomic.AtomicInteger();Service checked=new Service(id -> {calls.incrementAndGet();return java.util.OptionalLong.of(1);},() -> instant,value -> {});boolean rejected=false;
-try{checked.quote("item-a",-1);}catch(IllegalArgumentException expected){rejected=true;}
-assert rejected && calls.get()==0;
+var calls = new java.util.concurrent.atomic.AtomicInteger();
+Service checked = new Service(
+  id -> {
+    calls.incrementAndGet();
+    return java.util.OptionalLong.of(1);
+  },
+  () -> instant,
+  value -> {}
+);
+boolean rejected = false;
+try {
+  checked.quote("item-a", -1);
+} catch (IllegalArgumentException expected) {
+  rejected = true;
+}
+assert rejected && calls.get() == 0;
 ```
 
 **Expected:** repositorycallcount0.
@@ -105,8 +147,18 @@ Task: UseLong.MAX_VALUEunitprice andquantity2.
 A validly typed integer can still exceed the domain representation. Calculating before emitting a success event keeps side effects aligned with the actual outcome.
 
 ```java
-List<String> overflowAudit=new ArrayList<>();Service expensive=new Service(id -> java.util.OptionalLong.of(Long.MAX_VALUE),() -> instant,overflowAudit::add);boolean overflow=false;
-try{expensive.quote("x",2);}catch(ArithmeticException expected){overflow=true;}
+List<String> overflowAudit = new ArrayList<>();
+Service expensive = new Service(
+  id -> java.util.OptionalLong.of(Long.MAX_VALUE),
+  () -> instant,
+  overflowAudit::add
+);
+boolean overflow = false;
+try {
+  expensive.quote("x", 2);
+} catch (ArithmeticException expected) {
+  overflow = true;
+}
 assert overflow && overflowAudit.isEmpty();
 ```
 

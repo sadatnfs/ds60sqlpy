@@ -29,11 +29,20 @@ Task: Parse an order with two line items and inspect the typed success.
 The successful branch provides a typed value only after all fields pass. The result contains new objects, separating validation from later mutation of the input graph.
 
 ```typescript
-const raw: unknown = { id: 'A', items: [{ sku: 'X', quantity: 2 }, { sku: 'Y', quantity: 3 }] };
+const raw: unknown = {
+  id: 'A',
+  items: [
+    { sku: 'X', quantity: 2 },
+    { sku: 'Y', quantity: 3 },
+  ],
+};
 const result = validateOrder(raw);
 if (!result.ok) throw new Error(result.message);
 assert.equal(result.ok, true);
-assert.equal(result.value.items.reduce((sum, item) => sum + item.quantity, 0), 5);
+assert.equal(
+  result.value.items.reduce((sum, item) => sum + item.quantity, 0),
+  5,
+);
 assert.notEqual(result.value, raw);
 ```
 
@@ -48,7 +57,13 @@ Task: Validate a second item with quantity zero.
 Checking every element prevents a valid first row from legitimizing invalid later rows. A stable path is more useful to the caller than a generic invalid input message.
 
 ```typescript
-const result = validateOrder({ id: 'A', items: [{ sku: 'X', quantity: 2 }, { sku: 'Y', quantity: 0 }] });
+const result = validateOrder({
+  id: 'A',
+  items: [
+    { sku: 'X', quantity: 2 },
+    { sku: 'Y', quantity: 0 },
+  ],
+});
 assert.equal(result.ok, false);
 if (result.ok) throw new Error('expected rejection');
 assert.equal(result.code, 'schema');
@@ -87,7 +102,10 @@ Exact keys and bounded collection sizes are explicit choices of this schema. The
 
 ```typescript
 const extra = validateOrder({ id: 'A', items: [], admin: true });
-const tooMany = validateOrder({ id: 'A', items: Array.from({ length: 21 }, () => ({ sku: 'X', quantity: 1 })) });
+const tooMany = validateOrder({
+  id: 'A',
+  items: Array.from({ length: 21 }, () => ({ sku: 'X', quantity: 1 })),
+});
 assert.equal(extra.ok, false);
 assert.equal(tooMany.ok, false);
 if (extra.ok || tooMany.ok) throw new Error('expected failures');

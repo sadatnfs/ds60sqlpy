@@ -271,8 +271,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>err <span class="syntax-operator">==</span> <span class="syntax-keyword">nil</span> <span class="syntax-operator">&amp;&amp;</span> v <span class="syntax-operator">==</span> <span class="syntax-string">&quot;ready&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;client success&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The client helper returns ready without error.</p>
 <p>The fake isolates policy from the network. A live connection test would establish additional behavior and requires a separate owned target.</p>
 <h4 id="worked-example-2-reject-an-http-failure-status">Worked example 2: Reject an HTTP failure status<a class="heading-anchor" href="#worked-example-2-reject-an-http-failure-status" aria-label="Link to this section">#</a></h4>
@@ -339,8 +338,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>err <span class="syntax-operator">!=</span> <span class="syntax-keyword">nil</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;HTTP status&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The helper returns an error despite transport success.</p>
 <p>Client.Do does not classify every non-2xx response as a transport failure. Application status policy belongs in the consuming code.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>

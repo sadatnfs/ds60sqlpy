@@ -252,8 +252,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>err <span class="syntax-operator">==</span> <span class="syntax-keyword">nil</span> <span class="syntax-operator">&amp;&amp;</span> s<span class="syntax-punctuation">.</span>Value <span class="syntax-operator">==</span> <span class="syntax-number">3</span> <span class="syntax-operator">&amp;&amp;</span> s<span class="syntax-punctuation">.</span>Version <span class="syntax-operator">==</span> <span class="syntax-string">&quot;b&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;current update&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The value changes and token becomes b.</p>
 <p>The new token is selected by the simulated server. A real client must not construct the next resourceVersion itself.</p>
 <h4 id="worked-example-2-reject-a-stale-version">Worked example 2: Reject a stale version<a class="heading-anchor" href="#worked-example-2-reject-a-stale-version" aria-label="Link to this section">#</a></h4>
@@ -302,8 +301,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>errors<span class="syntax-punctuation">.</span>Is<span class="syntax-punctuation">(</span>err<span class="syntax-punctuation">,</span> ErrConflict<span class="syntax-punctuation">)</span> <span class="syntax-operator">&amp;&amp;</span> s<span class="syntax-punctuation">.</span>Value <span class="syntax-operator">==</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;conflict&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Conflict is returned and value stays unchanged.</p>
 <p>The failed write does not overwrite newer state. The error is useful evidence about the caller assumption.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>

@@ -35,7 +35,8 @@ A capacity of 4 with size 0 is not four accessible integers. Use at(index) for a
 ## Worked example 1
 
 ```cpp
-std::vector<int> xs{3,1,3,0}; std::sort(xs.begin(),xs.end());
+std::vector<int> xs{3, 1, 3, 0};
+std::sort(xs.begin(), xs.end());
 ```
 
 Expected: The sorted bag is [0, 1, 3, 3], preserving both threes.
@@ -43,7 +44,8 @@ Expected: The sorted bag is [0, 1, 3, 3], preserving both threes.
 ## Worked example 2
 
 ```cpp
-std::vector<int> xs; auto sum=std::accumulate(xs.begin(),xs.end(),0LL);
+std::vector<int> xs;
+auto sum = std::accumulate(xs.begin(), xs.end(), 0LL);
 ```
 
 Expected: The empty sum is 0, and begin equals end.

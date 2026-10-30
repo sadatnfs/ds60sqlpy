@@ -31,7 +31,7 @@ When the sum is wrong, inspect the first iteration where the invariant fails. Ke
 ## Worked example 1
 
 ```cpp
-assert(nonnegative_sum({4,-2,0,6})==10);
+assert(nonnegative_sum({4, -2, 0, 6}) == 10);
 ```
 
 Expected: The running total is 4, 4, 4, 10.
@@ -39,7 +39,7 @@ Expected: The running total is 4, 4, 4, 10.
 ## Worked example 2
 
 ```cpp
-assert(nonnegative_sum({})==0);
+assert(nonnegative_sum({}) == 0);
 ```
 
 Expected: The body runs zero times; the initial total is the result.

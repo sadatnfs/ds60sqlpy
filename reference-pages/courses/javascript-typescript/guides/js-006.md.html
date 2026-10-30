@@ -216,8 +216,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Property lookup and record schema inspection answer different questions. Accepting inherited fields as request data can violate a boundary contract.</p>
 <pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> strict <span class="syntax-keyword">as</span> assert <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:assert&#x27;</span><span class="syntax-punctuation">;</span>
 
-
-
 <span class="syntax-keyword">export</span> <span class="syntax-keyword">async</span> <span class="syntax-keyword">function</span> verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
   <span class="syntax-comment">// Worked example</span>
   <span class="syntax-punctuation">{</span>
@@ -232,14 +230,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span> checks<span class="syntax-operator">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> status<span class="syntax-operator">:</span> <span class="syntax-string">&quot;passed&quot;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span>
 
-console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-builtin">JSON</span><span class="syntax-punctuation">.</span>stringify<span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-</code></pre>
+console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-builtin">JSON</span><span class="syntax-punctuation">.</span>stringify<span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> kind found by in but not hasOwn; name is own.</p>
 <h4 id="example-b-copy-only-own-enumerable-fields">Example B: Copy only own enumerable fields<a class="heading-anchor" href="#example-b-copy-only-own-enumerable-fields" aria-label="Link to this section">#</a></h4>
 <p>Spread does not reproduce the prototype chain. It copies the declared enumerable own surface, which still may contain mutable nested references.</p>
 <pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">import</span> <span class="syntax-punctuation">{</span> strict <span class="syntax-keyword">as</span> assert <span class="syntax-punctuation">}</span> <span class="syntax-keyword">from</span> <span class="syntax-string">&#x27;node:assert&#x27;</span><span class="syntax-punctuation">;</span>
-
-
 
 <span class="syntax-keyword">export</span> <span class="syntax-keyword">async</span> <span class="syntax-keyword">function</span> verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
   <span class="syntax-comment">// Worked example</span>
@@ -254,8 +249,7 @@ console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuati
   <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span> checks<span class="syntax-operator">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> status<span class="syntax-operator">:</span> <span class="syntax-string">&quot;passed&quot;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span>
 
-console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-builtin">JSON</span><span class="syntax-punctuation">.</span>stringify<span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-</code></pre>
+console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-builtin">JSON</span><span class="syntax-punctuation">.</span>stringify<span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> verify<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> only name copied.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
 <p>Trace the entry point and identify the values that exist before each operation. Distinguish a value from a reference to an object, a returned Promise from its eventual result, and a compile-time type from a runtime check. Write down the first observation that would disprove your explanation. A useful prediction includes an expected value or failure category, not merely a claim that the program should work.</p>

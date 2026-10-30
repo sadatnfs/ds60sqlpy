@@ -43,9 +43,21 @@ Read the operations in dependency order. Record which values exist before each l
 The consumer needs the capability rather than the concrete field layout.
 
 ```rust
-trait Pricer { fn cost(&self, units: u32) -> u32; }
-struct FlatPrice(u32); impl Pricer for FlatPrice { fn cost(&self, units: u32) -> u32 { self.0 * units } }
-struct CappedPrice(u32, u32); impl Pricer for CappedPrice { fn cost(&self, units: u32) -> u32 { (self.0 * units).min(self.1) } }
+trait Pricer {
+    fn cost(&self, units: u32) -> u32;
+}
+struct FlatPrice(u32);
+impl Pricer for FlatPrice {
+    fn cost(&self, units: u32) -> u32 {
+        self.0 * units
+    }
+}
+struct CappedPrice(u32, u32);
+impl Pricer for CappedPrice {
+    fn cost(&self, units: u32) -> u32 {
+        (self.0 * units).min(self.1)
+    }
+}
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
@@ -65,9 +77,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 Both implementations preserve input and output units while varying the rule.
 
 ```rust
-trait Pricer { fn cost(&self, units: u32) -> u32; }
-struct FlatPrice(u32); impl Pricer for FlatPrice { fn cost(&self, units: u32) -> u32 { self.0 * units } }
-struct CappedPrice(u32, u32); impl Pricer for CappedPrice { fn cost(&self, units: u32) -> u32 { (self.0 * units).min(self.1) } }
+trait Pricer {
+    fn cost(&self, units: u32) -> u32;
+}
+struct FlatPrice(u32);
+impl Pricer for FlatPrice {
+    fn cost(&self, units: u32) -> u32 {
+        self.0 * units
+    }
+}
+struct CappedPrice(u32, u32);
+impl Pricer for CappedPrice {
+    fn cost(&self, units: u32) -> u32 {
+        (self.0 * units).min(self.1)
+    }
+}
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {

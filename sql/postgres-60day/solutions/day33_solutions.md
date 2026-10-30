@@ -64,17 +64,24 @@ BEGIN;
 SET LOCAL search_path TO training, public;
 
 DROP INDEX IF EXISTS training.idx_products_category_created_solution;
-CREATE INDEX idx_products_category_created_solution
-  ON products(category, created_at);
 
-EXPLAIN (ANALYZE, BUFFERS)
-SELECT product_id,
-       name,
-       created_at
-FROM products
-WHERE category = 'Electronics'
+CREATE INDEX idx_products_category_created_solution ON products (category, created_at);
+
+EXPLAIN (
+  ANALYZE,
+  BUFFERS
+)
+SELECT
+  product_id,
+  name,
+  created_at
+FROM
+  products
+WHERE
+  category = 'Electronics'
   AND created_at >= CURRENT_TIMESTAMP - interval '6 years'
-ORDER BY created_at DESC;
+ORDER BY
+  created_at DESC;
 
 ROLLBACK;
 ```
@@ -101,18 +108,26 @@ BEGIN;
 SET LOCAL search_path TO training, public;
 
 DROP INDEX IF EXISTS training.idx_orders_high_value_solution;
-CREATE INDEX idx_orders_high_value_solution
-  ON orders(total_amount, order_date)
-  WHERE total_amount > 1000;
 
-EXPLAIN (ANALYZE, BUFFERS)
-SELECT order_id,
-       total_amount,
-       order_date
-FROM orders
-WHERE total_amount > 1000
+CREATE INDEX idx_orders_high_value_solution ON orders (total_amount, order_date)
+WHERE
+  total_amount > 1000;
+
+EXPLAIN (
+  ANALYZE,
+  BUFFERS
+)
+SELECT
+  order_id,
+  total_amount,
+  order_date
+FROM
+  orders
+WHERE
+  total_amount > 1000
   AND order_date >= CURRENT_TIMESTAMP - interval '365 days'
-ORDER BY total_amount DESC;
+ORDER BY
+  total_amount DESC;
 
 ROLLBACK;
 ```

@@ -23,7 +23,9 @@ Task: Construct accounts with 100 and 100 cents,deposit 50 into the first.
 Equal initial values do not mean shared identity. Eachnew expression creates a separate object whose field can evolve independently.
 
 ```java
-Account first = new Account(100); Account second = new Account(100); first.deposit(50);
+Account first = new Account(100);
+Account second = new Account(100);
+first.deposit(50);
 assert first.balance() == 150 && second.balance() == 100;
 ```
 
@@ -38,7 +40,8 @@ Task: Withdraw40 cents from the first account.
 The method validates the amount against current state, then performs one state change. The caller does not calculate and assign a raw field.
 
 ```java
-first.withdraw(40); assert first.balance() == 110;
+first.withdraw(40);
+assert first.balance() == 110;
 ```
 
 **Expected:** balance110.
@@ -53,7 +56,11 @@ Validation precedes mutation. Subtracting first and throwing afterward would lea
 
 ```java
 boolean overdraft = false;
-try { first.withdraw(111); } catch (IllegalArgumentException expected) { overdraft = true; }
+try {
+  first.withdraw(111);
+} catch (IllegalArgumentException expected) {
+  overdraft = true;
+}
 assert overdraft && first.balance() == 110;
 ```
 
@@ -69,7 +76,11 @@ A negative deposit is not silently interpreted as a withdrawal. Each operation h
 
 ```java
 boolean negative = false;
-try { first.deposit(-1); } catch (IllegalArgumentException expected) { negative = true; }
+try {
+  first.deposit(-1);
+} catch (IllegalArgumentException expected) {
+  negative = true;
+}
 assert negative && first.balance() == 110;
 ```
 
@@ -85,7 +96,11 @@ An invariant should hold from the moment an object becomes available. Requiring 
 
 ```java
 boolean invalidStart = false;
-try { new Account(-1); } catch (IllegalArgumentException expected) { invalidStart = true; }
+try {
+  new Account(-1);
+} catch (IllegalArgumentException expected) {
+  invalidStart = true;
+}
 assert invalidStart;
 ```
 
@@ -100,8 +115,13 @@ Task: Create an account atInteger.MAX_VALUE and deposit1.
 The right-hand calculation fails before field assignment, so the prior valid value remains. Overflow is distinct from an ordinary insufficient-funds domain error.
 
 ```java
-Account full = new Account(Integer.MAX_VALUE); boolean overflow = false;
-try { full.deposit(1); } catch (ArithmeticException expected) { overflow = true; }
+Account full = new Account(Integer.MAX_VALUE);
+boolean overflow = false;
+try {
+  full.deposit(1);
+} catch (ArithmeticException expected) {
+  overflow = true;
+}
 assert overflow && full.balance() == Integer.MAX_VALUE;
 ```
 

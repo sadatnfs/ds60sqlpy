@@ -255,8 +255,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>err <span class="syntax-operator">==</span> <span class="syntax-keyword">nil</span> <span class="syntax-operator">&amp;&amp;</span> d<span class="syntax-punctuation">.</span>Spec<span class="syntax-punctuation">.</span>Replicas <span class="syntax-operator">!=</span> <span class="syntax-keyword">nil</span> <span class="syntax-operator">&amp;&amp;</span> <span class="syntax-operator">*</span>d<span class="syntax-punctuation">.</span>Spec<span class="syntax-punctuation">.</span>Replicas <span class="syntax-operator">==</span> <span class="syntax-number">3</span> <span class="syntax-operator">&amp;&amp;</span> d<span class="syntax-punctuation">.</span>Status<span class="syntax-punctuation">.</span>Ready <span class="syntax-operator">==</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;spec status&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Desired is 3 while ready is 2.</p>
 <p>The accepted object and the observed rollout are different evidence. A controller must reconcile the gap.</p>
 <h4 id="worked-example-2-distinguish-omitted-from-explicit-zero">Worked example 2: Distinguish omitted from explicit zero<a class="heading-anchor" href="#worked-example-2-distinguish-omitted-from-explicit-zero" aria-label="Link to this section">#</a></h4>
@@ -308,8 +307,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">.</span>Spec<span class="syntax-punctuation">.</span>Replicas <span class="syntax-operator">==</span> <span class="syntax-keyword">nil</span> <span class="syntax-operator">&amp;&amp;</span> b<span class="syntax-punctuation">.</span>Spec<span class="syntax-punctuation">.</span>Replicas <span class="syntax-operator">!=</span> <span class="syntax-keyword">nil</span> <span class="syntax-operator">&amp;&amp;</span> <span class="syntax-operator">*</span>b<span class="syntax-punctuation">.</span>Spec<span class="syntax-punctuation">.</span>Replicas <span class="syntax-operator">==</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;presence&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Only the explicit zero has a non-nil pointer.</p>
 <p>Defaulting and an intentional scale-to-zero request have different meanings. A plain integer field would lose that distinction before validation.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>

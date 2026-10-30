@@ -23,8 +23,12 @@ The question is: Apply top-p.6 to probabilities[.5,.3,.2].
 Testing the cumulative mass before each token keeps the first token that crosses the threshold. Filtering on cumulative<=p would incorrectly drop it.
 
 ```python
-p=torch.tensor([.5,.3,.2]); sorted_p,order=torch.sort(p,descending=True,stable=True); previous=torch.cumsum(sorted_p,0)-sorted_p; keep=previous<.6
-assert order[keep].tolist()==[0,1]; np.testing.assert_allclose(sorted_p[keep].sum().item(),.8,atol=1e-6,rtol=0)
+p = torch.tensor([0.5, 0.3, 0.2])
+sorted_p, order = torch.sort(p, descending=True, stable=True)
+previous = torch.cumsum(sorted_p, 0) - sorted_p
+keep = previous < 0.6
+assert order[keep].tolist() == [0, 1]
+np.testing.assert_allclose(sorted_p[keep].sum().item(), 0.8, atol=1e-6, rtol=0)
 ```
 
 **Expected:** retained IDs0,1 with original mass.8.
@@ -38,8 +42,9 @@ The question is: Normalize the selected two probabilities before drawing.
 The discarded mass is removed from the candidate set. The remaining entries must sum to one to define the sampling distribution.
 
 ```python
-mass=sorted_p[keep]; normalized=mass/mass.sum()
-np.testing.assert_allclose(normalized.numpy(),[.625,.375],atol=1e-6,rtol=0)
+mass = sorted_p[keep]
+normalized = mass / mass.sum()
+np.testing.assert_allclose(normalized.numpy(), [0.625, 0.375], atol=1e-6, rtol=0)
 ```
 
 **Expected:** probabilities.625,.375.
@@ -53,9 +58,11 @@ The question is: Draw8 tokens with two independently seeded CPU generators.
 The seed establishes repeatability in the current runtime. The test does not hardcode a random sequence that might change across implementations.
 
 ```python
-g1=torch.Generator().manual_seed(7); g2=torch.Generator().manual_seed(7)
-a=torch.multinomial(normalized,8,replacement=True,generator=g1); b=torch.multinomial(normalized,8,replacement=True,generator=g2)
-assert torch.equal(a,b) and set(a.tolist())<={0,1}
+g1 = torch.Generator().manual_seed(7)
+g2 = torch.Generator().manual_seed(7)
+a = torch.multinomial(normalized, 8, replacement=True, generator=g1)
+b = torch.multinomial(normalized, 8, replacement=True, generator=g2)
+assert torch.equal(a, b) and set(a.tolist()) <= {0, 1}
 ```
 
 **Expected:** draw sequences match and contain only0,1.
@@ -69,11 +76,12 @@ The question is: Consume proposed tokens2,3,9,4 with EOS9 and cap5.
 EOS terminates the sequence immediately. A later iteration could accidentally append content after the end marker, so the stopping location matters.
 
 ```python
-generated=[]
-for token in [2,3,9,4]:
+generated = []
+for token in [2, 3, 9, 4]:
     generated.append(token)
-    if token==9 or len(generated)>=5: break
-assert generated==[2,3,9]
+    if token == 9 or len(generated) >= 5:
+        break
+assert generated == [2, 3, 9]
 ```
 
 **Expected:** generated2,3,9;4 is never consumed.
@@ -87,11 +95,12 @@ The question is: Consume an endless repeated token 2 under cap3.
 A model is not guaranteed to emit EOS. A separate token cap provides a deterministic work bound even when the distribution keeps preferring continuation.
 
 ```python
-generated=[]
+generated = []
 for _ in range(100):
-    if len(generated)>=3: break
+    if len(generated) >= 3:
+        break
     generated.append(2)
-assert generated==[2,2,2]
+assert generated == [2, 2, 2]
 ```
 
 **Expected:** exactly3 generated tokens.
@@ -105,9 +114,10 @@ The question is: Handle temperature0 with argmax rather than division.
 Greedy decoding has a valid definition at zero temperature as a separate policy. Evaluating \(\frac{\mathrm{logits}}{0}\) first would create invalid values before that policy could act.
 
 ```python
-logits=torch.tensor([2.,1.,0.]); temperature=0
-choice=int(logits.argmax()) if temperature==0 else -1
-assert choice==0 and torch.isfinite(logits).all()
+logits = torch.tensor([2.0, 1.0, 0.0])
+temperature = 0
+choice = int(logits.argmax()) if temperature == 0 else -1
+assert choice == 0 and torch.isfinite(logits).all()
 ```
 
 **Expected:** token0 and finite untouched logits.

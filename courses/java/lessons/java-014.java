@@ -3,7 +3,7 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     // Exercise 1: Filter and sum
-    // Keep even values from1,2,3,4 and sum their squares.
+    // Keep even values from 1,2,3,4 and sum their squares.
     // Expected: 20.
 
     // Exercise 2: Observe laziness with an explicit terminal
@@ -11,7 +11,7 @@ public class Main {
     // Expected: counter0 before terminal and3 after.
 
     // Exercise 3: Group with a collector
-    // Count red,blue,red withgroupingBy andcounting.
+    // Count red,blue,red withgroupingBy and counting.
     // Expected: red2L,blue1L.
 
     // Exercise 4: Reject stream reuse
@@ -24,7 +24,7 @@ public class Main {
 
     // Exercise 6: Expose nonassociative subtraction
     // Compare(10-3)-2 with10-(3-2),then use an associative sum for a parallel fixture.
-    // Expected: 5 versus9;parallel sum5050.
+    // Expected: 5 versus 9; parallel sum 5050.
     System.out.println("Implement and check the six exercises in your saved copy.");
   }
 }

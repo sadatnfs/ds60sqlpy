@@ -209,7 +209,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-scope-a-read">Worked example 1: Scope a read<a class="heading-anchor" href="#worked-example-1-scope-a-read" aria-label="Link to this section">#</a></h4>
 <p>The owner comes from trusted server identity context.</p>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> title <span class="syntax-keyword">FROM</span> notes <span class="syntax-keyword">WHERE</span> id <span class="syntax-operator">=</span> <span class="syntax-punctuation">:</span>id <span class="syntax-keyword">AND</span> owner_id <span class="syntax-operator">=</span> <span class="syntax-punctuation">:</span>actor_id<span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  title
+<span class="syntax-keyword">FROM</span>
+  notes
+<span class="syntax-keyword">WHERE</span>
+  id <span class="syntax-operator">=</span> <span class="syntax-punctuation">:</span>id
+  <span class="syntax-keyword">AND</span> owner_id <span class="syntax-operator">=</span> <span class="syntax-punctuation">:</span>actor_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected observation:</strong> A record belonging to another actor is not returned.</p>
 <h4 id="worked-example-2-separate-input-roles">Worked example 2: Separate input roles<a class="heading-anchor" href="#worked-example-2-separate-input-roles" aria-label="Link to this section">#</a></h4>
 <p>A requested object is untrusted input; actor identity has a different origin.</p>

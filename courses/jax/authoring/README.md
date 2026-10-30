@@ -7,3 +7,14 @@ Run `python courses/jax/authoring/build.py` to refresh this subject only, or add
 Every executable reference is a complete `main.py`-compatible program with a main guard, independent assertions and declared precision. The guides show the first two explained cases with their common setup; the six practice cases in the reference remain separate from the answer-free learner scaffold. Reading-only optional systems chapters use written traces and separate explained answers.
 
 Use `tests/test_jax_lessons.py` for static, generation and mathematics checks. Actual JAX execution is opt-in in the prepared JAX environment and must also be qualified in the packaged worker. Device/kernel correctness, profiling, distributed operation and learner-state persistence are separate evidence.
+
+## Canonical displayed code
+
+Both generation and `--check` pass every Markdown artifact through the shared
+guarded `canonical_markdown` hook before writing or comparing it. Use the prepared
+Core authoring environment with pinned Ruff 0.16.0. Both Python formatting paths
+use that interpreter through `sys.executable -m ruff`; no separate PATH executable
+is assumed. The existing standalone Python formatting step remains in place. The shared formatter verifies Python syntax,
+literal values and ordered comments while preserving prose, TeX and fence
+identities. Missing prepared tools or a genuine formatting error fail explicitly;
+the generator never installs a dependency or executes JAX examples.

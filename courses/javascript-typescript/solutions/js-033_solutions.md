@@ -31,9 +31,12 @@ Task: Sum integers 1 through 10000 in a worker and inspect its thread id.
 The result came through an actual worker message. The tiny workload illustrates mechanics and may be slower than a direct loop because startup costs dominate.
 
 ```javascript
-const result = await runWorker(`const { parentPort, workerData, threadId } = require('node:worker_threads');
+const result = await runWorker(
+  `const { parentPort, workerData, threadId } = require('node:worker_threads');
 let sum = 0; for (let value = 1; value <= workerData; value += 1) sum += value;
-parentPort.postMessage({ sum, threadId });`, 10000);
+parentPort.postMessage({ sum, threadId });`,
+  10000,
+);
 assert.equal(result.sum, 50005000);
 assert.ok(result.threadId > 0);
 ```
@@ -50,8 +53,12 @@ The sender loses access because ownership moved. Treating a detached buffer as s
 
 ```javascript
 const buffer = Uint8Array.from([1, 2, 3]).buffer;
-const result = await runWorker(`const { parentPort, workerData } = require('node:worker_threads');
-const bytes = new Uint8Array(workerData); bytes[0] = 9; parentPort.postMessage([...bytes]);`, buffer, [buffer]);
+const result = await runWorker(
+  `const { parentPort, workerData } = require('node:worker_threads');
+const bytes = new Uint8Array(workerData); bytes[0] = 9; parentPort.postMessage([...bytes]);`,
+  buffer,
+  [buffer],
+);
 assert.equal(buffer.byteLength, 0);
 assert.deepEqual(result, [9, 2, 3]);
 ```
@@ -68,8 +75,11 @@ Ordinary message data is cloned. This prevents accidental aliasing but can add c
 
 ```javascript
 const original = { value: 1 };
-const result = await runWorker(`const { parentPort, workerData } = require('node:worker_threads');
-workerData.value = 9; parentPort.postMessage(workerData.value);`, original);
+const result = await runWorker(
+  `const { parentPort, workerData } = require('node:worker_threads');
+workerData.value = 9; parentPort.postMessage(workerData.value);`,
+  original,
+);
 assert.equal(result, 9);
 assert.equal(original.value, 1);
 ```
@@ -85,7 +95,10 @@ Task: Run an authored worker that throws a fixture error.
 Worker exceptions arrive through the error event. A parent that listens only for messages could wait forever for a result that cannot arrive.
 
 ```javascript
-await assert.rejects(runWorker(`throw new Error('worker fixture failed');`, null), /worker fixture failed/u);
+await assert.rejects(
+  runWorker(`throw new Error('worker fixture failed');`, null),
+  /worker fixture failed/u,
+);
 ```
 
 **Expected:** parent Promise rejects with worker fixture failed.
@@ -99,9 +112,18 @@ Task: Start a worker that reports ready and keeps an interval open, then termina
 A ready message does not close active handles. Explicit termination releases the owned worker and its interval; the test does not leave background work running.
 
 ```javascript
-const worker = new Worker(`const { parentPort } = require('node:worker_threads'); setInterval(() => {}, 1000); parentPort.postMessage('ready');`, { eval: true });
+const worker = new Worker(
+  `const { parentPort } = require('node:worker_threads'); setInterval(() => {}, 1000); parentPort.postMessage('ready');`,
+  { eval: true },
+);
 try {
-  assert.equal(await new Promise((resolve, reject) => { worker.once('message', resolve); worker.once('error', reject); }), 'ready');
+  assert.equal(
+    await new Promise((resolve, reject) => {
+      worker.once('message', resolve);
+      worker.once('error', reject);
+    }),
+    'ready',
+  );
 } finally {
   const code = await worker.terminate();
   assert.equal(typeof code, 'number');
@@ -119,7 +141,13 @@ Task: Try to pass a function through workerData.
 Functions carry executable behavior and closure state, not supported cloneable message data. Define a data protocol and keep worker implementation separate.
 
 ```javascript
-await assert.rejects(runWorker(`const { parentPort } = require('node:worker_threads'); parentPort.postMessage('unused');`, { callback: () => 1 }), error => error.name === 'DataCloneError');
+await assert.rejects(
+  runWorker(
+    `const { parentPort } = require('node:worker_threads'); parentPort.postMessage('unused');`,
+    { callback: () => 1 },
+  ),
+  (error) => error.name === 'DataCloneError',
+);
 ```
 
 **Expected:** DataCloneError before useful worker execution.

@@ -96,18 +96,21 @@ These worked excerpts come from `sql/postgres-60day/day41_complex_aggregations.s
 ### Example 1
 
 ```sql
-SELECT p.category,
-       SUM(oi.quantity)                                                   AS total_qty,
-       SUM(oi.quantity) FILTER (WHERE o.order_date >= now() - interval '30 days') AS qty_30d,
-       SUM(oi.quantity) FILTER (WHERE o.order_date >= now() - interval '90 days') AS qty_90d,
-       ROUND(SUM(oi.unit_price*oi.quantity*(1-oi.discount)),2)           AS revenue,
-       ROUND(SUM(oi.unit_price*oi.quantity*(1-oi.discount))
-             FILTER (WHERE o.order_date >= now() - interval '30 days'),2) AS revenue_30d
-FROM order_items oi
-JOIN products p ON p.product_id = oi.product_id
-JOIN orders o   ON o.order_id = oi.order_id
-GROUP BY p.category
-ORDER BY revenue DESC;
+SELECT
+  p.category,
+  SUM(oi.quantity) AS total_qty,
+  SUM(oi.quantity) FILTER (WHERE o.order_date >= now() - interval '30 days') AS qty_30d,
+  SUM(oi.quantity) FILTER (WHERE o.order_date >= now() - interval '90 days') AS qty_90d,
+  ROUND(SUM(oi.unit_price * oi.quantity * (1 - oi.discount)), 2) AS revenue,
+  ROUND(SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) FILTER (WHERE o.order_date >= now() - interval '30 days'), 2) AS revenue_30d
+FROM
+  order_items oi
+  JOIN products p ON p.product_id = oi.product_id
+  JOIN orders o ON o.order_id = oi.order_id
+GROUP BY
+  p.category
+ORDER BY
+  revenue DESC;
 ```
 
 **How to read it:** Example 1: Start with `order_items`, `products`, and `orders` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows; let `GROUP BY` collapse rows to its grouping keys. The final `SELECT` displays `category`, `total_qty`, `qty_30d`, `qty_90d`, `revenue`, and `revenue_30d`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
@@ -117,14 +120,33 @@ ORDER BY revenue DESC;
 ### Example 2
 
 ```sql
-SELECT c.country,
-       SUM(CASE WHEN o.status IN ('paid','shipped','delivered') THEN 1 ELSE 0 END) AS successful_orders,
-       SUM(CASE WHEN o.status = 'returned' THEN 1 ELSE 0 END)                      AS returned_orders,
-       ROUND(SUM(CASE WHEN o.status <> 'returned' THEN o.total_amount ELSE 0 END),2) AS net_revenue
-FROM orders o
-JOIN customers c ON c.customer_id = o.customer_id
-GROUP BY c.country
-ORDER BY net_revenue DESC;
+SELECT
+  c.country,
+  SUM(
+    CASE WHEN o.status IN ('paid', 'shipped', 'delivered') THEN
+      1
+    ELSE
+      0
+    END) AS successful_orders,
+  SUM(
+    CASE WHEN o.status = 'returned' THEN
+      1
+    ELSE
+      0
+    END) AS returned_orders,
+  ROUND(SUM(
+      CASE WHEN o.status <> 'returned' THEN
+        o.total_amount
+      ELSE
+        0
+      END), 2) AS net_revenue
+FROM
+  orders o
+  JOIN customers c ON c.customer_id = o.customer_id
+GROUP BY
+  c.country
+ORDER BY
+  net_revenue DESC;
 ```
 
 **How to read it:** Example 2: Start with `orders`, and `customers` in `FROM`/`JOIN`; let `GROUP BY` collapse rows to its grouping keys. The final `SELECT` displays `country`, `successful_orders`, `returned_orders`, and `net_revenue`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.

@@ -23,9 +23,13 @@ The question is: Use training points[-2,-1,1,2], labels[0,0,1,1]; hold out[-3,3]
 The toy target is fully specified, so a learner can reason about errors without an opaque dataset. The holdout still has only two observations and cannot support broad conclusions.
 
 ```python
-x=np.array([[-2.],[-1.],[1.],[2.]],dtype='float32'); y=np.array([[0.],[0.],[1.],[1.]],dtype='float32')
-test_x=np.array([[-3.],[3.]],dtype='float32'); test_y=np.array([0,1]); train_ids={'a','b','c','d'}; test_ids={'e','f'}
-assert not train_ids&test_ids and len(test_ids)==2
+x = np.array([[-2.0], [-1.0], [1.0], [2.0]], dtype="float32")
+y = np.array([[0.0], [0.0], [1.0], [1.0]], dtype="float32")
+test_x = np.array([[-3.0], [3.0]], dtype="float32")
+test_y = np.array([0, 1])
+train_ids = {"a", "b", "c", "d"}
+test_ids = {"e", "f"}
+assert not train_ids & test_ids and len(test_ids) == 2
 ```
 
 **Expected:** 4 train and2 test records with no shared IDs.
@@ -39,9 +43,12 @@ The question is: Calculate training mean and standard deviation, then apply them
 The test coordinates never enter the mean or scale calculation. A symmetric result is expected here because the training fixture itself is symmetric.
 
 ```python
-mean=x.mean(0); scale=x.std(0); tx=(x-mean)/scale; vx=(test_x-mean)/scale
-np.testing.assert_allclose(scale,[np.sqrt(2.5)],atol=1e-6,rtol=0)
-assert mean[0]==0 and vx[0,0]==-vx[1,0]
+mean = x.mean(0)
+scale = x.std(0)
+tx = (x - mean) / scale
+vx = (test_x - mean) / scale
+np.testing.assert_allclose(scale, [np.sqrt(2.5)], atol=1e-6, rtol=0)
+assert mean[0] == 0 and vx[0, 0] == -vx[1, 0]
 ```
 
 **Expected:** mean0; scale sqrt2.5; test transformed symmetrically.
@@ -55,11 +62,14 @@ The question is: Initialize one weight 0 and run40 full-batch SGD steps at rate 
 The known sign relation creates a transparent diagnostic. The loop is intentionally bounded and does not tune its step count after viewing held-out predictions.
 
 ```python
-w=tf.Variable([[0.]],dtype=tf.float32)
+w = tf.Variable([[0.0]], dtype=tf.float32)
 for step in range(40):
-    with tf.GradientTape() as tape: loss=tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=y,logits=tf.constant(tx)@w))
-    w.assign_sub(.1*tape.gradient(loss,w))
-assert step+1==40 and float(w[0,0])>0 and np.isfinite(w.numpy()).all()
+    with tf.GradientTape() as tape:
+        loss = tf.reduce_mean(
+            tf.nn.sigmoid_cross_entropy_with_logits(labels=y, logits=tf.constant(tx) @ w)
+        )
+    w.assign_sub(0.1 * tape.gradient(loss, w))
+assert step + 1 == 40 and float(w[0, 0]) > 0 and np.isfinite(w.numpy()).all()
 ```
 
 **Expected:** 40 finite updates and positive final weight.
@@ -73,9 +83,15 @@ The question is: Threshold final test logits at0 and compute all four confusion 
 The sum is a conservation test. Dropping difficult rows or counting a repeated record twice would invalidate the reported metric even if the remaining predictions were correct.
 
 ```python
-pred=(vx@w.numpy()).ravel()>=0; truth=test_y.astype(bool)
-counts={'tp':int(np.sum(pred&truth)),'tn':int(np.sum(~pred&~truth)),'fp':int(np.sum(pred&~truth)),'fn':int(np.sum(~pred&truth))}
-assert counts=={'tp':1,'tn':1,'fp':0,'fn':0} and sum(counts.values())==2
+pred = (vx @ w.numpy()).ravel() >= 0
+truth = test_y.astype(bool)
+counts = {
+    "tp": int(np.sum(pred & truth)),
+    "tn": int(np.sum(~pred & ~truth)),
+    "fp": int(np.sum(pred & ~truth)),
+    "fn": int(np.sum(~pred & truth)),
+}
+assert counts == {"tp": 1, "tn": 1, "fp": 0, "fn": 0} and sum(counts.values()) == 2
 ```
 
 **Expected:** TP1,TN1,FP0,FN0; total2.
@@ -89,8 +105,8 @@ The question is: Predict class0 for every held-out row and report its error coun
 The baseline uses the same held-out observations and decision unit. Its simplicity makes the gain interpretable, but the tiny count leaves substantial uncertainty.
 
 ```python
-baseline=np.zeros(2,dtype=bool)
-assert np.count_nonzero(baseline!=truth)==1 and np.count_nonzero(pred!=truth)==0
+baseline = np.zeros(2, dtype=bool)
+assert np.count_nonzero(baseline != truth) == 1 and np.count_nonzero(pred != truth) == 0
 ```
 
 **Expected:** baseline1 error; model0 on2 records.
@@ -104,9 +120,10 @@ The question is: Assign test groups negative and positive; flip only the positiv
 The aggregate error rate would be one half. Naming the affected group and its denominator preserves the mechanism of the failure and avoids treating two groups as equally reliable.
 
 ```python
-broken=pred.copy(); broken[1]=False
-report={g:(int(broken[i]!=truth[i]),1) for i,g in enumerate(['negative','positive'])}
-assert report=={'negative':(0,1),'positive':(1,1)}
+broken = pred.copy()
+broken[1] = False
+report = {g: (int(broken[i] != truth[i]), 1) for i, g in enumerate(["negative", "positive"])}
+assert report == {"negative": (0, 1), "positive": (1, 1)}
 ```
 
 **Expected:** negative0/1; positive1/1.

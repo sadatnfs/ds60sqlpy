@@ -113,7 +113,7 @@ public class Main {
       );
     }
 
-    // Exercise 4: Inspect declared dependencies andexports
+    // Exercise 4: Inspect declared dependencies and exports
     try (ModuleFixture fixture = new ModuleFixture()) {
       assert fixture.compile() == 0;
       var finder = java.lang.module.ModuleFinder.of(fixture.output);

@@ -64,19 +64,39 @@ These three queries ask for progressively smaller portions of `orders`.
 ```sql
 SET search_path TO training, public;
 
-EXPLAIN (ANALYZE, BUFFERS)
-SELECT order_id, total_amount
-FROM orders;
+EXPLAIN (
+  ANALYZE,
+  BUFFERS
+)
+SELECT
+  order_id,
+  total_amount
+FROM
+  orders;
 
-EXPLAIN (ANALYZE, BUFFERS)
-SELECT order_id, total_amount
-FROM orders
-WHERE total_amount > 500;
+EXPLAIN (
+  ANALYZE,
+  BUFFERS
+)
+SELECT
+  order_id,
+  total_amount
+FROM
+  orders
+WHERE
+  total_amount > 500;
 
-EXPLAIN (ANALYZE, BUFFERS)
-SELECT order_id, total_amount
-FROM orders
-WHERE total_amount > 500
+EXPLAIN (
+  ANALYZE,
+  BUFFERS
+)
+SELECT
+  order_id,
+  total_amount
+FROM
+  orders
+WHERE
+  total_amount > 500
   AND order_date >= CURRENT_TIMESTAMP - interval '30 days';
 ```
 
@@ -104,22 +124,33 @@ adds actual timing, loops, and row counts.
 SET search_path TO training, public;
 
 EXPLAIN
-SELECT c.country,
-       SUM(oi.quantity) AS units
-FROM orders o
-JOIN customers c ON c.customer_id = o.customer_id
-JOIN order_items oi ON oi.order_id = o.order_id
-WHERE o.order_date >= CURRENT_TIMESTAMP - interval '90 days'
-GROUP BY c.country;
+SELECT
+  c.country,
+  SUM(oi.quantity) AS units
+FROM
+  orders o
+  JOIN customers c ON c.customer_id = o.customer_id
+  JOIN order_items oi ON oi.order_id = o.order_id
+WHERE
+  o.order_date >= CURRENT_TIMESTAMP - interval '90 days'
+GROUP BY
+  c.country;
 
-EXPLAIN (ANALYZE, BUFFERS)
-SELECT c.country,
-       SUM(oi.quantity) AS units
-FROM orders o
-JOIN customers c ON c.customer_id = o.customer_id
-JOIN order_items oi ON oi.order_id = o.order_id
-WHERE o.order_date >= CURRENT_TIMESTAMP - interval '90 days'
-GROUP BY c.country;
+EXPLAIN (
+  ANALYZE,
+  BUFFERS
+)
+SELECT
+  c.country,
+  SUM(oi.quantity) AS units
+FROM
+  orders o
+  JOIN customers c ON c.customer_id = o.customer_id
+  JOIN order_items oi ON oi.order_id = o.order_id
+WHERE
+  o.order_date >= CURRENT_TIMESTAMP - interval '90 days'
+GROUP BY
+  c.country;
 ```
 
 For each node, compare estimated `rows` with `actual ... rows`. Large,

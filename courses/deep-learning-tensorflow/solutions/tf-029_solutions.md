@@ -23,8 +23,9 @@ The question is: Exponentiate NumPy logits[1000,999] directly under an explicit 
 The warning is intentionally scoped to a counterexample. Silencing all numerical warnings in a training program would hide unrelated failures.
 
 ```python
-z=np.array([1000.,999.])
-with np.errstate(over='ignore'): naive=np.exp(z)
+z = np.array([1000.0, 999.0])
+with np.errstate(over="ignore"):
+    naive = np.exp(z)
 assert np.isinf(naive).all()
 ```
 
@@ -39,8 +40,10 @@ The question is: Use a logits-aware TensorFlow loss for target0.
 The meaningful quantity is the difference between scores, not their shared offset. The stable form keeps that difference available without constructing enormous exponentials.
 
 ```python
-loss=tf.nn.sparse_softmax_cross_entropy_with_logits(labels=[0],logits=tf.constant([[1000.,999.]]))
-np.testing.assert_allclose(loss.numpy(),[np.logaddexp(0,-1)],atol=1e-6,rtol=0)
+loss = tf.nn.sparse_softmax_cross_entropy_with_logits(
+    labels=[0], logits=tf.constant([[1000.0, 999.0]])
+)
+np.testing.assert_allclose(loss.numpy(), [np.logaddexp(0, -1)], atol=1e-6, rtol=0)
 ```
 
 **Expected:** loss \(\log(1+e^{-1})\) within 1e-6.
@@ -54,7 +57,9 @@ The question is: Compare softmax[1000,999] with softmax[0,-1].
 A common score shift cancels from the normalized distribution. This metamorphic property can catch an implementation that normalizes the wrong axis or clips scores inconsistently.
 
 ```python
-np.testing.assert_allclose(tf.nn.softmax(z).numpy(),tf.nn.softmax([0.,-1.]).numpy(),atol=1e-6,rtol=0)
+np.testing.assert_allclose(
+    tf.nn.softmax(z).numpy(), tf.nn.softmax([0.0, -1.0]).numpy(), atol=1e-6, rtol=0
+)
 ```
 
 **Expected:** probabilities agree within 1e-6.
@@ -68,10 +73,12 @@ The question is: Differentiate the stable target0 loss with respect to both logi
 The derivative of cross entropy is probability minus one-hot target. Its components sum to zero because the probabilities and target each sum to one.
 
 ```python
-v=tf.Variable([[1000.,999.]])
-with tf.GradientTape() as tape: objective=tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(labels=[0],logits=v))
-g=tape.gradient(objective,v).numpy()
-assert np.isfinite(g).all(); np.testing.assert_allclose(g.sum(),0,atol=1e-6,rtol=0)
+v = tf.Variable([[1000.0, 999.0]])
+with tf.GradientTape() as tape:
+    objective = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(labels=[0], logits=v))
+g = tape.gradient(objective, v).numpy()
+assert np.isfinite(g).all()
+np.testing.assert_allclose(g.sum(), 0, atol=1e-6, rtol=0)
 ```
 
 **Expected:** finite gradients summing approximately0.
@@ -85,8 +92,9 @@ The question is: Compare float16 and float64 exponentiation of20.
 A lower-precision type changes range as well as resolution. Hardware support and loss scaling require separate experiments; a dtype cast alone is not evidence of safe mixed-precision training.
 
 ```python
-with np.errstate(over='ignore'): low=np.exp(np.float16(20))
-high=np.exp(np.float64(20))
+with np.errstate(over="ignore"):
+    low = np.exp(np.float16(20))
+high = np.exp(np.float64(20))
 assert np.isinf(low) and np.isfinite(high)
 ```
 
@@ -102,13 +110,20 @@ Maximum subtraction prevents a particular overflow mechanism. It does not turn N
 
 ```python
 def stable(values):
-    values=np.asarray(values,dtype=float)
-    if values.ndim!=1 or not len(values) or not np.isfinite(values).all(): raise ValueError('finite vector')
-    mass=np.exp(values-values.max()); return mass/mass.sum()
-try: stable([0,np.nan])
-except ValueError: pass
-else: raise AssertionError('NaN accepted')
-np.testing.assert_allclose(stable(z).sum(),1,atol=1e-12,rtol=0)
+    values = np.asarray(values, dtype=float)
+    if values.ndim != 1 or not len(values) or not np.isfinite(values).all():
+        raise ValueError("finite vector")
+    mass = np.exp(values - values.max())
+    return mass / mass.sum()
+
+
+try:
+    stable([0, np.nan])
+except ValueError:
+    pass
+else:
+    raise AssertionError("NaN accepted")
+np.testing.assert_allclose(stable(z).sum(), 1, atol=1e-12, rtol=0)
 ```
 
 **Expected:** ValueError for NaN; finite input returns unit mass.

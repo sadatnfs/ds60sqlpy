@@ -46,18 +46,25 @@ The interface preserves units and result meaning while hiding representation.
 import Foundation
 
 protocol Pricer { func cost(units: Int) -> Int }
-struct FlatPrice: Pricer { let unit: Int; func cost(units: Int) -> Int { unit * units } }
-struct CappedPrice: Pricer { let unit: Int; let cap: Int; func cost(units: Int) -> Int { min(unit * units, cap) } }
+struct FlatPrice: Pricer {
+  let unit: Int
+  func cost(units: Int) -> Int { unit * units }
+}
+struct CappedPrice: Pricer {
+  let unit: Int
+  let cap: Int
+  func cost(units: Int) -> Int { min(unit * units, cap) }
+}
 
 @main
 struct LessonMain {
-    static func main() async throws {
-        do {
-            let price: any Pricer = FlatPrice(unit: 3)
-            precondition(price.cost(units: 4) == 12)
-        }
-        print("swift-017: passed")
+  static func main() async throws {
+    do {
+      let price: any Pricer = FlatPrice(unit: 3)
+      precondition(price.cost(units: 4) == 12)
     }
+    print("swift-017: passed")
+  }
 }
 ```
 
@@ -71,18 +78,25 @@ Substitution allows variation within the documented contract, not arbitrary sema
 import Foundation
 
 protocol Pricer { func cost(units: Int) -> Int }
-struct FlatPrice: Pricer { let unit: Int; func cost(units: Int) -> Int { unit * units } }
-struct CappedPrice: Pricer { let unit: Int; let cap: Int; func cost(units: Int) -> Int { min(unit * units, cap) } }
+struct FlatPrice: Pricer {
+  let unit: Int
+  func cost(units: Int) -> Int { unit * units }
+}
+struct CappedPrice: Pricer {
+  let unit: Int
+  let cap: Int
+  func cost(units: Int) -> Int { min(unit * units, cap) }
+}
 
 @main
 struct LessonMain {
-    static func main() async throws {
-        do {
-            let prices: [any Pricer] = [FlatPrice(unit: 3), CappedPrice(unit: 3, cap: 10)]
-            precondition(prices.map { $0.cost(units: 4) } == [12, 10])
-        }
-        print("swift-017: passed")
+  static func main() async throws {
+    do {
+      let prices: [any Pricer] = [FlatPrice(unit: 3), CappedPrice(unit: 3, cap: 10)]
+      precondition(prices.map { $0.cost(units: 4) } == [12, 10])
     }
+    print("swift-017: passed")
+  }
 }
 ```
 

@@ -39,9 +39,13 @@ Task: Sum array2,4,6 while retaining the invariant that sum covers indices below
 The accumulator begins at the additive identity0. Each iteration adds one new element, so no record is skipped or counted twice.
 
 ```java
-int[] values = {2, 4, 6}; int sum = 0;
+int[] values = { 2, 4, 6 };
+int sum = 0;
 List<Integer> prefixes = new ArrayList<>();
-for (int i = 0; i < values.length; i++) { sum += values[i]; prefixes.add(sum); }
+for (int i = 0; i < values.length; i++) {
+  sum += values[i];
+  prefixes.add(sum);
+}
 assert prefixes.equals(List.of(2, 6, 12)) && sum == 12;
 ```
 
@@ -56,8 +60,12 @@ Task: Run the same sum pattern over an emptyint array.
 An empty collection is a valid case for this sum contract. The initial value already represents the result, so no special fabricated element is needed.
 
 ```java
-int emptySum = 0; int iterations = 0;
-for (int value : new int[0]) { emptySum += value; iterations++; }
+int emptySum = 0;
+int iterations = 0;
+for (int value : new int[0]) {
+  emptySum += value;
+  iterations++;
+}
 assert emptySum == 0 && iterations == 0;
 ```
 
@@ -88,8 +96,14 @@ Task: Search3,8,8 for the first8 and stop immediately.
 Without the break, later matches would overwrite the first index. The sentinel-1 represents absence and cannot be mistaken for index0.
 
 ```java
-int[] items = {3, 8, 8}; int found = -1;
-for (int i = 0; i < items.length; i++) { if (items[i] == 8) { found = i; break; } }
+int[] items = { 3, 8, 8 };
+int found = -1;
+for (int i = 0; i < items.length; i++) {
+  if (items[i] == 8) {
+    found = i;
+    break;
+  }
+}
 assert found == 1;
 ```
 
@@ -104,9 +118,15 @@ Task: Compare a loop usingi<=length with the validi<length contract on a one-ele
 The invalid condition reachesindex1 whenlength1. This tiny counterexample localizes the off-by-one error more clearly than a large dataset.
 
 ```java
-boolean failed = false; int[] single = {7};
-try { for (int i = 0; i <= single.length; i++) { int ignored = single[i]; } }
-catch (ArrayIndexOutOfBoundsException expected) { failed = true; }
+boolean failed = false;
+int[] single = { 7 };
+try {
+  for (int i = 0; i <= single.length; i++) {
+    int ignored = single[i];
+  }
+} catch (ArrayIndexOutOfBoundsException expected) {
+  failed = true;
+}
 assert failed;
 ```
 

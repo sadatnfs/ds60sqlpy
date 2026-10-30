@@ -55,19 +55,25 @@ result <- tryCatch(
   error = function(condition) {
     list(
       schema_version = 1L, status = "failed", request = request,
-      error = list(class = class(condition)[1], message = conditionMessage(condition),
-        diagnostics = condition$diagnostics),
+      error = list(
+        class = class(condition)[1], message = conditionMessage(condition),
+        diagnostics = condition$diagnostics
+      ),
       prepared_manifest_sha256 = reference_hash(file.path(prepared, "manifest.json")),
       elapsed_seconds = proc.time()[["elapsed"]] - started
     )
   }
 )
-serialized <- tryCatch(jsonlite::toJSON(result, pretty = TRUE, auto_unbox = TRUE,
-  digits = NA, na = "null", null = "null"), error = function(condition) {
-  result <<- list(schema_version = 1L, status = "failed", request = request,
+serialized <- tryCatch(jsonlite::toJSON(result,
+  pretty = TRUE, auto_unbox = TRUE,
+  digits = NA, na = "null", null = "null"
+), error = function(condition) {
+  result <<- list(
+    schema_version = 1L, status = "failed", request = request,
     error = list(class = "reference_serialization_error", message = conditionMessage(condition)),
     prepared_manifest_sha256 = reference_hash(file.path(prepared, "manifest.json")),
-    elapsed_seconds = proc.time()[["elapsed"]] - started)
+    elapsed_seconds = proc.time()[["elapsed"]] - started
+  )
   jsonlite::toJSON(result, pretty = TRUE, auto_unbox = TRUE, digits = NA, na = "null", null = "null")
 })
 writeLines(serialized, file.path(output, "result.json"), useBytes = TRUE)

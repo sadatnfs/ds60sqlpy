@@ -78,9 +78,23 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-x=torch.tensor([[0.,0.,0.],[1.,0.,0.],[0.,1.,0.],[0.,0.,1.],[1.,1.,1.],[2.,1.,1.]],dtype=torch.float64)
-y=x@torch.tensor([[2.],[-1.],[1.]],dtype=torch.float64); train=[0,1,2,3]; test=[4,5]
-torch.testing.assert_close(y[:,0],torch.tensor([0.,2.,-1.,1.,2.,4.],dtype=torch.float64),atol=0,rtol=0)
+x = torch.tensor(
+    [
+        [0.0, 0.0, 0.0],
+        [1.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0],
+        [0.0, 0.0, 1.0],
+        [1.0, 1.0, 1.0],
+        [2.0, 1.0, 1.0],
+    ],
+    dtype=torch.float64,
+)
+y = x @ torch.tensor([[2.0], [-1.0], [1.0]], dtype=torch.float64)
+train = [0, 1, 2, 3]
+test = [4, 5]
+torch.testing.assert_close(
+    y[:, 0], torch.tensor([0.0, 2.0, -1.0, 1.0, 2.0, 4.0], dtype=torch.float64), atol=0, rtol=0
+)
 ```
 
 **Expected:** targets 0, 2, -1, 1, 2, 4.
@@ -90,8 +104,9 @@ torch.testing.assert_close(y[:,0],torch.tensor([0.,2.,-1.,1.,2.,4.],dtype=torch.
 The baseline receives the same assessment rows as the model, but its constant is fitted only on training targets.
 
 ```python
-mean=y[train].mean(); baseline=((y[test]-mean)**2).mean()
-assert mean.item()==.5 and baseline.item()==7.25
+mean = y[train].mean()
+baseline = ((y[test] - mean) ** 2).mean()
+assert mean.item() == 0.5 and baseline.item() == 7.25
 ```
 
 **Expected:** mean.5; holdout MSE 7.25.
@@ -101,15 +116,22 @@ assert mean.item()==.5 and baseline.item()==7.25
 The fixed budget is decided before assessment. A successful decrease demonstrates fitting on exposed data, not generalization by itself.
 
 ```python
-model=nn.Linear(3,1,bias=False,dtype=torch.float64)
-with torch.no_grad(): model.weight.zero_()
-optimizer=torch.optim.SGD(model.parameters(),lr=.1); initial=((model(x[train])-y[train])**2).mean().item(); curve=[]
+model = nn.Linear(3, 1, bias=False, dtype=torch.float64)
+with torch.no_grad():
+    model.weight.zero_()
+optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
+initial = ((model(x[train]) - y[train]) ** 2).mean().item()
+curve = []
 for _ in range(100):
-    optimizer.zero_grad(set_to_none=True); loss=((model(x[train])-y[train])**2).mean(); curve.append(loss.item()); loss.backward(); optimizer.step()
-assert len(curve)==100 and np.isfinite(curve).all() and curve[-1]<initial
-expected_weight=torch.tensor([[2.,-1.,1.]],dtype=torch.float64)*(1-.95**100)
-torch.testing.assert_close(model.weight,expected_weight,atol=1e-12,rtol=0)
-np.testing.assert_allclose([curve[0],curve[-1]],[1.5,1.5*.95**198],atol=1e-12,rtol=0)
+    optimizer.zero_grad(set_to_none=True)
+    loss = ((model(x[train]) - y[train]) ** 2).mean()
+    curve.append(loss.item())
+    loss.backward()
+    optimizer.step()
+assert len(curve) == 100 and np.isfinite(curve).all() and curve[-1] < initial
+expected_weight = torch.tensor([[2.0, -1.0, 1.0]], dtype=torch.float64) * (1 - 0.95**100)
+torch.testing.assert_close(model.weight, expected_weight, atol=1e-12, rtol=0)
+np.testing.assert_allclose([curve[0], curve[-1]], [1.5, 1.5 * 0.95**198], atol=1e-12, rtol=0)
 ```
 
 **Expected:** 100 finite updates; training loss decreases.

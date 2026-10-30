@@ -107,7 +107,7 @@ The question is: Run the three-token four-feature fixture through two causal hea
 This check exercises real score normalization and value mixing, extending the earlier tokenwise-only prefix check. The analytic row-one expectation is an independent oracle for head identity and the softmax axis. Prefix equality then checks the visibility boundary.
 
 ```python
-values = np.array([[1., 0., 1., 1.], [0., 1., 1., 0.], [1., 1., 0., 1.]])
+values = np.array([[1.0, 0.0, 1.0, 1.0], [0.0, 1.0, 1.0, 0.0], [1.0, 1.0, 0.0, 1.0]])
 output, weights = multihead(values, heads=2, causal=True)
 a = np.exp(1 / np.sqrt(2))
 np.testing.assert_allclose(weights[0, 1, :2], [1 / (1 + a), a / (1 + a)], atol=1e-12, rtol=0)
@@ -136,7 +136,7 @@ for values, count in [(np.zeros((2, 5)), 2), (np.zeros((2, 4)), 0), (np.zeros((0
     except ValueError:
         pass
     else:
-        raise AssertionError('invalid head layout accepted')
+        raise AssertionError("invalid head layout accepted")
 ```
 
 **Expected:** each invalid layout raises ValueError before reshape.

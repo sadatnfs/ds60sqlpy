@@ -37,7 +37,13 @@ For Dockerfile examples, create a file named `Dockerfile` in a scratch project. 
 The package and versions are illustrative.
 
 ```json
-{"component":"example-library","installed":"1.0","fixed":"1.1","artifact":"specific image digest","status":"requires review"}
+{
+  "component": "example-library",
+  "installed": "1.0",
+  "fixed": "1.1",
+  "artifact": "specific image digest",
+  "status": "requires review"
+}
 ```
 
 **Expected observation:** The record is input to a patch decision, not proof of exploitation or a completed fix.

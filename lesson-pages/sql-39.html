@@ -432,19 +432,38 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
 <p>These worked excerpts come from <code>sql/postgres-60day/day39_locks_deadlocks.sql</code>. Use <strong>Whole SQL lesson (psql)</strong> in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared <code>psql</code> routes are described above.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> pid<span class="syntax-punctuation">,</span> locktype<span class="syntax-punctuation">,</span> relation<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>regclass<span class="syntax-punctuation">,</span> <span class="syntax-keyword">mode</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">granted</span>
-<span class="syntax-keyword">FROM</span> pg_locks
-<span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> pg_class <span class="syntax-keyword">ON</span> pg_locks<span class="syntax-punctuation">.</span>relation <span class="syntax-operator">=</span> pg_class<span class="syntax-punctuation">.</span>oid
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">granted</span> <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> relation<span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  pid<span class="syntax-punctuation">,</span>
+  locktype<span class="syntax-punctuation">,</span>
+  relation<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>regclass<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">mode</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">granted</span>
+<span class="syntax-keyword">FROM</span>
+  pg_locks
+  <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> pg_class <span class="syntax-keyword">ON</span> pg_locks<span class="syntax-punctuation">.</span>relation <span class="syntax-operator">=</span> pg_class<span class="syntax-punctuation">.</span>oid
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  <span class="syntax-keyword">granted</span> <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span>
+  relation<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 1: Start with <code>pg_locks</code>, and <code>pg_class</code> in <code>FROM</code>/<code>JOIN</code>. The final <code>SELECT</code> displays <code>pid</code>, <code>locktype</code>, <code>regclass</code>, <code>mode</code>, and <code>granted</code>. <code>ORDER BY</code> determines presentation order. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 1 returns one row per <code>pid</code> with columns <code>pid</code>, <code>locktype</code>, <code>regclass</code>, <code>mode</code>, and <code>granted</code> from <code>pg_locks</code>, and <code>pg_class</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> to_lock <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> order_id <span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">WHERE</span> total_amount <span class="syntax-operator">&gt;</span> <span class="syntax-number">900</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> order_id <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">5</span>
+  <span class="syntax-keyword">SELECT</span>
+    order_id
+  <span class="syntax-keyword">FROM</span>
+    orders
+  <span class="syntax-keyword">WHERE</span>
+    total_amount <span class="syntax-operator">&gt;</span> <span class="syntax-number">900</span>
+  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+    order_id
+  <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">5</span>
 <span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> orders o
-<span class="syntax-keyword">JOIN</span> to_lock t <span class="syntax-keyword">ON</span> t<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>order_id
-<span class="syntax-keyword">FOR</span> <span class="syntax-keyword">UPDATE</span><span class="syntax-punctuation">;</span></code></pre>
+<span class="syntax-keyword">SELECT</span>
+  <span class="syntax-operator">*</span>
+<span class="syntax-keyword">FROM</span>
+  orders o
+  <span class="syntax-keyword">JOIN</span> to_lock t <span class="syntax-keyword">ON</span> t<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>order_id
+  <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">UPDATE</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 2 is a data-changing CTE chain, not a displayed query result. The CTEs <code>to_lock</code> determine the affected rows before the final write to the columns written in the final <code>SELECT</code>. Read the command tag for the affected-row count, then use a separate <code>SELECT</code> to prove the lesson invariant; a successful command tag alone does not prove historical correctness.</p>
 <p><strong>Expected result/shape:</strong> Example 2 prints a DML command tag for <code>orders</code>. Capture the target key set at <code>order_id</code> grain before the write, compare it with affected/returned keys, and use a follow-up <code>SELECT</code> to prove the before/after invariant and transaction cleanup.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -731,18 +750,24 @@ SELECT order_id FROM orders WHERE order_id = 2 FOR UPDATE;</code></pre>
 SET total_amount = total_amount
 WHERE order_id = 2;</code></pre>
 <p>Before completing the cycle, run this safe diagnostic in a third session:</p>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> a<span class="syntax-punctuation">.</span>pid<span class="syntax-punctuation">,</span>
-       a<span class="syntax-punctuation">.</span><span class="syntax-keyword">state</span><span class="syntax-punctuation">,</span>
-       l<span class="syntax-punctuation">.</span>locktype<span class="syntax-punctuation">,</span>
-       l<span class="syntax-punctuation">.</span>relation<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>regclass <span class="syntax-keyword">AS</span> relation<span class="syntax-punctuation">,</span>
-       l<span class="syntax-punctuation">.</span><span class="syntax-keyword">mode</span><span class="syntax-punctuation">,</span>
-       l<span class="syntax-punctuation">.</span><span class="syntax-keyword">granted</span><span class="syntax-punctuation">,</span>
-       pg_blocking_pids<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">.</span>pid<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> blocking_pids
-<span class="syntax-keyword">FROM</span> pg_stat_activity a
-<span class="syntax-keyword">JOIN</span> pg_locks l <span class="syntax-keyword">ON</span> l<span class="syntax-punctuation">.</span>pid <span class="syntax-operator">=</span> a<span class="syntax-punctuation">.</span>pid
-<span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">cardinality</span><span class="syntax-punctuation">(</span>pg_blocking_pids<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">.</span>pid<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span>
-   <span class="syntax-keyword">OR</span> <span class="syntax-keyword">NOT</span> l<span class="syntax-punctuation">.</span><span class="syntax-keyword">granted</span>
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> a<span class="syntax-punctuation">.</span>pid<span class="syntax-punctuation">,</span> l<span class="syntax-punctuation">.</span><span class="syntax-keyword">granted</span><span class="syntax-punctuation">,</span> l<span class="syntax-punctuation">.</span>locktype<span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  a<span class="syntax-punctuation">.</span>pid<span class="syntax-punctuation">,</span>
+  a<span class="syntax-punctuation">.</span><span class="syntax-keyword">state</span><span class="syntax-punctuation">,</span>
+  l<span class="syntax-punctuation">.</span>locktype<span class="syntax-punctuation">,</span>
+  l<span class="syntax-punctuation">.</span>relation<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>regclass <span class="syntax-keyword">AS</span> relation<span class="syntax-punctuation">,</span>
+  l<span class="syntax-punctuation">.</span><span class="syntax-keyword">mode</span><span class="syntax-punctuation">,</span>
+  l<span class="syntax-punctuation">.</span><span class="syntax-keyword">granted</span><span class="syntax-punctuation">,</span>
+  pg_blocking_pids <span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">.</span>pid<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> blocking_pids
+<span class="syntax-keyword">FROM</span>
+  pg_stat_activity a
+  <span class="syntax-keyword">JOIN</span> pg_locks l <span class="syntax-keyword">ON</span> l<span class="syntax-punctuation">.</span>pid <span class="syntax-operator">=</span> a<span class="syntax-punctuation">.</span>pid
+<span class="syntax-keyword">WHERE</span>
+  <span class="syntax-keyword">cardinality</span><span class="syntax-punctuation">(</span>pg_blocking_pids <span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">.</span>pid<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span>
+  <span class="syntax-keyword">OR</span> <span class="syntax-keyword">NOT</span> l<span class="syntax-punctuation">.</span><span class="syntax-keyword">granted</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  a<span class="syntax-punctuation">.</span>pid<span class="syntax-punctuation">,</span>
+  l<span class="syntax-punctuation">.</span><span class="syntax-keyword">granted</span><span class="syntax-punctuation">,</span>
+  l<span class="syntax-punctuation">.</span>locktype<span class="syntax-punctuation">;</span></code></pre>
 <p>Then Session B completes the cycle:</p>
 <pre class="highlighted-code"><code class="language-text">UPDATE training.orders
 SET total_amount = total_amount
@@ -762,13 +787,18 @@ WHERE order_id = 1;</code></pre>
 <p>Every worker must acquire the same set of row locks in the same order:</p>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span>
 <span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
+
 <span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> lock_timeout <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;5s&#x27;</span><span class="syntax-punctuation">;</span>
 
-<span class="syntax-keyword">SELECT</span> order_id<span class="syntax-punctuation">,</span>
-       total_amount
-<span class="syntax-keyword">FROM</span> orders
-<span class="syntax-keyword">WHERE</span> order_id <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> order_id
+<span class="syntax-keyword">SELECT</span>
+  order_id<span class="syntax-punctuation">,</span>
+  total_amount
+<span class="syntax-keyword">FROM</span>
+  orders
+<span class="syntax-keyword">WHERE</span>
+  order_id <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  order_id
 <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">UPDATE</span><span class="syntax-punctuation">;</span>
 
 <span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></code></pre>
@@ -787,14 +817,19 @@ WHERE order_id = 1;</code></pre>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span>
 <span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
-<span class="syntax-keyword">SELECT</span> order_id<span class="syntax-punctuation">,</span>
-       order_date<span class="syntax-punctuation">,</span>
-       status
-<span class="syntax-keyword">FROM</span> orders
-<span class="syntax-keyword">WHERE</span> status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;placed&#x27;</span>
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> order_id
+<span class="syntax-keyword">SELECT</span>
+  order_id<span class="syntax-punctuation">,</span>
+  order_date<span class="syntax-punctuation">,</span>
+  status
+<span class="syntax-keyword">FROM</span>
+  orders
+<span class="syntax-keyword">WHERE</span>
+  status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;placed&#x27;</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  order_id
 <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">5</span>
-<span class="syntax-keyword">FOR</span> <span class="syntax-keyword">UPDATE</span> SKIP LOCKED<span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">FOR</span> <span class="syntax-keyword">UPDATE</span>
+  SKIP LOCKED<span class="syntax-punctuation">;</span>
 
 <span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></code></pre>
 <p>To see queue behavior, keep the first session open before <code>ROLLBACK</code> and run the same <code>SELECT</code> in Session B. B skips A&#x27;s locked rows and can claim a different batch.</p>

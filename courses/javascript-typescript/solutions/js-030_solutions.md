@@ -31,11 +31,17 @@ Task: Save the snippet as HTML and submit name Ada and quantity 2, then try an i
 Native constraints stop many invalid user submissions before the submit handler. The explicit domain check still defines the accepted state and protects alternate invocation paths.
 
 ```html
-<!doctype html><html lang='en'><meta charset='utf-8'><title>Local form</title>
-<form id='form'><label>Name <input name='name' required maxlength='40'></label>
-<label>Quantity <input name='quantity' type='number' min='1' max='20' step='1' required></label>
-<button>Apply</button></form><p role='status' id='status'>No accepted state</p>
-<script>
+<!doctype html>
+<html lang='en'
+  ><meta charset='utf-8' /><title>Local form</title>
+  <form id='form'
+    ><label>Name <input name='name' required maxlength='40' /></label>
+    <label
+      >Quantity <input name='quantity' type='number' min='1' max='20' step='1' required
+    /></label>
+    <button>Apply</button></form
+  ><p role='status' id='status'>No accepted state</p>
+  <script>
 const form = document.querySelector('#form');
 const status = document.querySelector('#status');
 form.addEventListener('submit', event => {
@@ -46,7 +52,8 @@ form.addEventListener('submit', event => {
   if (!name || !Number.isInteger(quantity) || quantity < 1 || quantity > 20) return;
   status.textContent = `${name}: ${quantity}`;
 });
-</script></html>
+</script></html
+>
 ```
 
 **Expected:** valid output Ada: 2; invalid input produces no accepted state.
@@ -60,9 +67,12 @@ Task: Run this standalone snippet on a loopback HTTP origin and activate Save.
 A successful state update and a successful storage operation are separate observations. The interface reports the actual persistence outcome without hiding failure behind a local display update.
 
 ```html
-<!doctype html><html lang='en'><meta charset='utf-8'><title>Storage boundary</title>
-<button id='save' type='button'>Save tiny draft</button><p id='status' role='status'>Not saved</p>
-<script>
+<!doctype html>
+<html lang='en'
+  ><meta charset='utf-8' /><title>Storage boundary</title>
+  <button id='save' type='button'>Save tiny draft</button
+  ><p id='status' role='status'>Not saved</p>
+  <script>
 const key = 'ds60-js030-demo';
 document.querySelector('#save').addEventListener('click', () => {
   try {
@@ -72,7 +82,8 @@ document.querySelector('#save').addEventListener('click', () => {
     document.querySelector('#status').textContent = 'Storage unavailable; draft is not persisted';
   }
 });
-</script></html>
+</script></html
+>
 ```
 
 **Expected:** either Saved or a visible Storage unavailable message, never an invented success.

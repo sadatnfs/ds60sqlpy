@@ -23,10 +23,12 @@ The question is: Use vocabularyA,B,C and documentsABAB,AC; count transitions wit
 The end of ABAB is not linked to the start of AC. Counts describe the specified training corpus, not all concatenations of its files.
 
 ```python
-docs=[[0,1,0,1],[0,2]]; counts=np.zeros((3,3),dtype=int)
+docs = [[0, 1, 0, 1], [0, 2]]
+counts = np.zeros((3, 3), dtype=int)
 for doc in docs:
-    for a,b in zip(doc[:-1],doc[1:]): counts[a,b]+=1
-assert counts[0,1]==2 and counts[1,0]==1 and counts[0,2]==1 and counts.sum()==4
+    for a, b in zip(doc[:-1], doc[1:]):
+        counts[a, b] += 1
+assert counts[0, 1] == 2 and counts[1, 0] == 1 and counts[0, 2] == 1 and counts.sum() == 4
 ```
 
 **Expected:** AtoB2,BtoA1,AtoC1; total4.
@@ -40,9 +42,9 @@ The question is: Apply add-one smoothing to the count matrix.
 Smoothing adds three pseudocounts to each denominator because there are three possible next tokens. Adding one only to the numerator would create excess probability mass.
 
 ```python
-prob=(counts+1)/(counts.sum(1,keepdims=True)+3)
-np.testing.assert_allclose(prob.sum(1),1,atol=1e-12,rtol=0)
-np.testing.assert_allclose(prob[2],[1/3]*3,atol=1e-12,rtol=0)
+prob = (counts + 1) / (counts.sum(1, keepdims=True) + 3)
+np.testing.assert_allclose(prob.sum(1), 1, atol=1e-12, rtol=0)
+np.testing.assert_allclose(prob[2], [1 / 3] * 3, atol=1e-12, rtol=0)
 ```
 
 **Expected:** row sums1; unseen C context is uniform.
@@ -56,8 +58,11 @@ The question is: Evaluate held-out sequenceA,C,B using the frozen table.
 The two transition probabilities are \(p(C\mid A)=2/6=1/3\) and \(p(B\mid C)=1/3\). Their negative log probabilities sum to \(-\log(1/3)-\log(1/3)=2\log 3\). Dividing this total negative log likelihood by two active targets gives mean loss \(\log 3\).
 
 ```python
-saved=counts.copy(); held=[0,2,1]; nll=-sum(np.log(prob[a,b]) for a,b in zip(held[:-1],held[1:]))
-np.testing.assert_allclose(nll,2*np.log(3),atol=1e-12,rtol=0); assert len(held)-1==2
+saved = counts.copy()
+held = [0, 2, 1]
+nll = -sum(np.log(prob[a, b]) for a, b in zip(held[:-1], held[1:]))
+np.testing.assert_allclose(nll, 2 * np.log(3), atol=1e-12, rtol=0)
+assert len(held) - 1 == 2
 ```
 
 **Expected:** 2 targets; NLL log3+log3.
@@ -71,7 +76,7 @@ The question is: Compare the count matrix before and after scoring.
 An evaluation helper should read fitted state without updating it. This identity check catches a stateful scorer that accidentally treats every observed transition as training data.
 
 ```python
-np.testing.assert_array_equal(counts,saved)
+np.testing.assert_array_equal(counts, saved)
 ```
 
 **Expected:** counts unchanged exactly.
@@ -85,9 +90,13 @@ The question is: For zero-score attention values2,4,8 calculate prefix means and
 This arithmetic verifies the simple information boundary independently of the baseline. A count model and an attention mechanism answer different architectural questions.
 
 ```python
-values=np.array([2.,4.,8.]); out=np.array([values[:i+1].mean() for i in range(3)])
-np.testing.assert_allclose(out,[2,3,14/3],atol=1e-12,rtol=0)
-for cut in range(1,4): np.testing.assert_allclose(out[:cut],[values[:i+1].mean() for i in range(cut)],atol=1e-12,rtol=0)
+values = np.array([2.0, 4.0, 8.0])
+out = np.array([values[: i + 1].mean() for i in range(3)])
+np.testing.assert_allclose(out, [2, 3, 14 / 3], atol=1e-12, rtol=0)
+for cut in range(1, 4):
+    np.testing.assert_allclose(
+        out[:cut], [values[: i + 1].mean() for i in range(cut)], atol=1e-12, rtol=0
+    )
 ```
 
 **Expected:** outputs2,3,14/3.
@@ -101,8 +110,17 @@ The question is: Create a report with vocabulary size3,2 held-out targets and a 
 A complete report can be modest. Counts, denominator and limitations let a reviewer understand exactly what the model was asked to do and what the result cannot establish.
 
 ```python
-report={'vocabulary':3,'targets':2,'mean_nll':float(nll/2),'limitation':'Tiny authored corpus; unseen tasks remain untested.'}
-assert np.isfinite(report['mean_nll']) and report['targets']==2 and 'untested' in report['limitation']
+report = {
+    "vocabulary": 3,
+    "targets": 2,
+    "mean_nll": float(nll / 2),
+    "limitation": "Tiny authored corpus; unseen tasks remain untested.",
+}
+assert (
+    np.isfinite(report["mean_nll"])
+    and report["targets"] == 2
+    and "untested" in report["limitation"]
+)
 ```
 
 **Expected:** report includes finite meanNLL and no broad competence claim.

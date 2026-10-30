@@ -31,7 +31,7 @@ If the original vector changed after filtering, inspect whether the code actuall
 ## Worked example 1
 
 ```cpp
-auto view=xs|std::views::filter([](int x){return x>=0;});
+auto view = xs | std::views::filter([](int x) { return x >= 0; });
 ```
 
 Expected: For [-1, 0, 3], traversal yields 0 and 3.
@@ -39,7 +39,7 @@ Expected: For [-1, 0, 3], traversal yields 0 and 3.
 ## Worked example 2
 
 ```cpp
-std::ranges::sort(scores,{},&Score::points);
+std::ranges::sort(scores, {}, &Score::points);
 ```
 
 Expected: Records order by points while carrying their original IDs.

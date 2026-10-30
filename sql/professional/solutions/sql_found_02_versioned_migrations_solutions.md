@@ -68,12 +68,15 @@ The manifest must order by version explicitly:
 
 ```sql
 SELECT
-    sm.migration_id,
-    sm.migration_name,
-    sm.content_tag
-FROM pro_migration_lab.schema_migrations AS sm
-WHERE sm.migration_id BETWEEN 1 AND 5
-ORDER BY sm.migration_id;
+  sm.migration_id,
+  sm.migration_name,
+  sm.content_tag
+FROM
+  pro_migration_lab.schema_migrations AS sm
+WHERE
+  sm.migration_id BETWEEN 1 AND 5
+ORDER BY
+  sm.migration_id;
 ```
 
 The solution also compares `array_agg(... ORDER BY migration_id)` with

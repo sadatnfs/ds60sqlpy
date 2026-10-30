@@ -3,15 +3,15 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     // Exercise 1: Normalize at construction
-    // Create an Order with idspaceAspace and itemx.
-    // Expected: idA and items[x].
+    // Create an Order with ID " A " and item x.
+    // Expected: ID A and items[x].
 
     // Exercise 2: Copy caller-owned collections
     // Create an Order from a mutable list,then append to the original list.
     // Expected: record retains its original single item.
 
     // Exercise 3: Use value equality
-    // Construct another Order with normalizedA and itemx.
+    // Construct another Order with normalizedA and item x.
     // Expected: equals true and equalhashCode.
 
     // Exercise 4: Reject blank identity
@@ -23,8 +23,8 @@ public class Main {
     // Expected: UnsupportedOperationException.
 
     // Exercise 6: Reject null collection members
-    // Try creating an Order whose items containsnull.
-    // Expected: NullPointerException from the declaredcopy policy.
+    // Try creating an Order whose items contains null.
+    // Expected: NullPointerException from the declared copy policy.
     System.out.println("Implement and check the six exercises in your saved copy.");
   }
 }

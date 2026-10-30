@@ -43,8 +43,6 @@ Read the operations in dependency order. Record which values exist before each l
 This metadata kernel supports reasoning; the real Cargo fixture supplies build evidence.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let policy = ["edition=2024", "locked", "offline-after-preparation"];
@@ -63,8 +61,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 Release accounting should retain a failed check instead of substituting an older successful result.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let checks = [true, true, false];

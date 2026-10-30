@@ -3,12 +3,12 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     // Exercise 1: Represent a missing lookup
-    // Look up knowna andunknownb in a fixed map throughOptional.
-    // Expected: a present with7;b empty.
+    // Look up known a and unknown b in a fixed map through Optional.
+    // Expected: a present with 7; b empty.
 
     // Exercise 2: Transform only present values
-    // Map the known value todouble and apply the same mapping toempty.
-    // Expected: 14 andempty.
+    // Map the known value to double and apply the same mapping to empty.
+    // Expected: 14 and empty.
 
     // Exercise 3: Compare eager and lazy fallback
     // Use a counter-producing fallback withorElse andorElseGet on a present value.
@@ -16,14 +16,14 @@ public class Main {
 
     // Exercise 4: Reject malformed lookup input
     // Validate an empty identifier before consulting the map.
-    // Expected: IllegalArgumentException rather thanempty.
+    // Expected: IllegalArgumentException rather than empty.
 
     // Exercise 5: Flatten a nullable transformation
     // Parse an optional numeric string through a helper returningOptional<Integer>.
     // Expected: valid12 present;badtext empty under this declared parser policy.
 
     // Exercise 6: Expose unsafeget
-    // Callget onempty and catchNoSuchElementException.
+    // Callget on empty and catchNoSuchElementException.
     // Expected: specific absence failure.
     System.out.println("Implement and check the six exercises in your saved copy.");
   }

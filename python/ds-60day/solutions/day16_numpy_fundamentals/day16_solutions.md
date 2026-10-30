@@ -163,7 +163,7 @@ matrix = np.array([[1, 2, 3], [10, 20, 30]])
 offset = np.array([100, 200, 300])
 assert (matrix + offset).tolist() == [[101, 202, 303], [110, 220, 330]]
 assert matrix.sum(axis=0).tolist() == [11, 22, 33]  # Reduce rows.
-assert matrix.sum(axis=1).tolist() == [6, 60]       # Reduce columns.
+assert matrix.sum(axis=1).tolist() == [6, 60]  # Reduce columns.
 ```
 
 ### Shared implementation for Exercises 6–8: Stable standardization, copies, and dtype choice
@@ -185,7 +185,7 @@ assert np.allclose(standardized[:, 1], 0)
 
 working = sample[:, :1].copy()
 working[:] = -1
-assert sample[0, 0] == 1       # Copy protects the original.
+assert sample[0, 0] == 1  # Copy protects the original.
 
 small = np.array([120], dtype=np.int8)
 overflowed = small + np.array([20], dtype=np.int8)

@@ -20,10 +20,10 @@ from pathlib import Path
 X, y = load_iris(return_X_y=True)
 Xtr, Xte, ytr, yte = train_test_split(X, y, random_state=42)
 clf = LogisticRegression(max_iter=1000).fit(Xtr, ytr)
-print({'test_acc': clf.score(Xte, yte)})
-artifact_dir = Path('artifacts/day44')
+print({"test_acc": clf.score(Xte, yte)})
+artifact_dir = Path("artifacts/day44")
 artifact_dir.mkdir(parents=True, exist_ok=True)
-model_path = artifact_dir / 'model.joblib'
+model_path = artifact_dir / "model.joblib"
 joblib.dump(clf, model_path)
 
 # Reload & quick sanity
@@ -48,18 +48,20 @@ from pydantic import BaseModel, Field
 
 app = FastAPI()
 artifact_dir = Path(__file__).resolve().parent
-model = joblib.load(artifact_dir / 'model.joblib')
-CLASS_NAMES = ['setosa', 'versicolor', 'virginica']
+model = joblib.load(artifact_dir / "model.joblib")
+CLASS_NAMES = ["setosa", "versicolor", "virginica"]
+
 
 class IrisFeatures(BaseModel):
     # exactly 4 numeric features (sepal length/width, petal length/width)
     features: Annotated[list[float], Field(min_length=4, max_length=4)]
 
-@app.post('/predict')
+
+@app.post("/predict")
 def predict(data: IrisFeatures):
     X = np.array([data.features], dtype=float)
     pred = int(model.predict(X).tolist()[0])
-    return {'prediction': pred, 'class_name': CLASS_NAMES[pred]}
+    return {"prediction": pred, "class_name": CLASS_NAMES[pred]}
 ```
 Run the server in a terminal:
 ```bash

@@ -101,27 +101,41 @@ These worked excerpts come from `sql/postgres-60day/day24_recursive_ctes.sql`. U
 
 ```sql
 WITH RECURSIVE org AS (
-  SELECT e.employee_id,
-         e.full_name,
-         e.manager_id,
-         1 AS depth,
-         ARRAY[e.employee_id] AS path
-  FROM employees e
-  WHERE e.manager_id IS NULL
+  SELECT
+    e.employee_id,
+    e.full_name,
+    e.manager_id,
+    1 AS depth,
+    ARRAY[e.employee_id] AS path
+  FROM
+    employees e
+  WHERE
+    e.manager_id IS NULL
   UNION ALL
-  SELECT e.employee_id,
-         e.full_name,
-         e.manager_id,
-         o.depth + 1,
-         o.path || e.employee_id
-  FROM employees e
-  JOIN org o ON e.manager_id = o.employee_id
-  -- A path is evidence of traversal and a guard against malformed cycles.
-  WHERE NOT e.employee_id = ANY(o.path)
-)
-SELECT employee_id, full_name, manager_id, depth, path
-FROM org
-ORDER BY depth, full_name, employee_id
+  SELECT
+    e.employee_id,
+    e.full_name,
+    e.manager_id,
+    o.depth + 1,
+    o.path || e.employee_id
+  FROM
+    employees e
+    JOIN org o ON e.manager_id = o.employee_id
+    -- A path is evidence of traversal and a guard against malformed cycles.
+  WHERE
+    NOT e.employee_id = ANY (o.path))
+SELECT
+  employee_id,
+  full_name,
+  manager_id,
+  depth,
+  path
+FROM
+  org
+ORDER BY
+  depth,
+  full_name,
+  employee_id
 LIMIT 100;
 ```
 
@@ -133,13 +147,25 @@ LIMIT 100;
 
 ```sql
 WITH RECURSIVE months AS (
-  SELECT date_trunc('month', CURRENT_DATE)::date AS m, 1 AS n
+  SELECT
+    date_trunc('month', CURRENT_DATE)::date AS m,
+    1 AS n
   UNION ALL
-  SELECT (m - interval '1 month')::date, n+1 FROM months WHERE n < 12
+  SELECT
+    (m - interval '1 month')::date,
+    n + 1
+  FROM
+    months
+  WHERE
+    n < 12
 )
-SELECT m AS month_start, n AS step
-FROM months
-ORDER BY month_start;
+SELECT
+  m AS month_start,
+  n AS step
+FROM
+  months
+ORDER BY
+  month_start;
 ```
 
 **How to read it:** Example 2: Start with `months` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows; append branches with `UNION ALL` (duplicates are retained). The final `SELECT` displays `month_start`, and `step`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.

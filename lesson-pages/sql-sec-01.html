@@ -437,28 +437,25 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
 <p>These worked excerpts come from <code>sql/professional/lessons/sql_sec_01_roles_privileges_rls.sql</code>. Use <strong>Whole SQL lesson (psql)</strong> in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared <code>psql</code> routes are described above.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>
-    <span class="syntax-punctuation">(</span>
-        <span class="syntax-keyword">SELECT</span> r<span class="syntax-punctuation">.</span>rolsuper <span class="syntax-keyword">OR</span> r<span class="syntax-punctuation">.</span>rolcreaterole
-        <span class="syntax-keyword">FROM</span> pg_catalog<span class="syntax-punctuation">.</span>pg_roles <span class="syntax-keyword">AS</span> r
-        <span class="syntax-keyword">WHERE</span> r<span class="syntax-punctuation">.</span>rolname <span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_USER</span>
-    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
-    <span class="syntax-keyword">false</span>
-<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> ds60_can_manage_roles
-<span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>
+    <span class="syntax-keyword">SELECT</span>
+      r<span class="syntax-punctuation">.</span>rolsuper
+      <span class="syntax-keyword">OR</span> r<span class="syntax-punctuation">.</span>rolcreaterole
+    <span class="syntax-keyword">FROM</span> pg_catalog<span class="syntax-punctuation">.</span>pg_roles <span class="syntax-keyword">AS</span> r
+    <span class="syntax-keyword">WHERE</span>
+      r<span class="syntax-punctuation">.</span>rolname <span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_USER</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> ds60_can_manage_roles<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 1: Start with <code>pg_catalog.pg_roles</code> in <code>FROM</code>/<code>JOIN</code>; let <code>WHERE</code> remove nonqualifying rows. The final <code>SELECT</code> displays <code>rolcreaterole</code>. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 1 returns one row per <code>rolcreaterole</code> with columns <code>rolcreaterole</code> from <code>pg_catalog.pg_roles</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">EXISTS</span> <span class="syntax-punctuation">(</span>
-        <span class="syntax-keyword">SELECT</span> <span class="syntax-number">1</span>
-        <span class="syntax-keyword">FROM</span> pg_catalog<span class="syntax-punctuation">.</span>pg_roles <span class="syntax-keyword">AS</span> r
-        <span class="syntax-keyword">WHERE</span> r<span class="syntax-punctuation">.</span>rolname <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span>
-            <span class="syntax-string">&#x27;ds60_sec_owner&#x27;</span><span class="syntax-punctuation">,</span>
-            <span class="syntax-string">&#x27;ds60_sec_north&#x27;</span><span class="syntax-punctuation">,</span>
-            <span class="syntax-string">&#x27;ds60_sec_south&#x27;</span>
-        <span class="syntax-punctuation">)</span>
-    <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> ds60_role_names_available
-<span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">EXISTS</span> <span class="syntax-punctuation">(</span>
+    <span class="syntax-keyword">SELECT</span>
+      <span class="syntax-number">1</span>
+    <span class="syntax-keyword">FROM</span>
+      pg_catalog<span class="syntax-punctuation">.</span>pg_roles <span class="syntax-keyword">AS</span> r
+    <span class="syntax-keyword">WHERE</span>
+      r<span class="syntax-punctuation">.</span>rolname <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;ds60_sec_owner&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;ds60_sec_north&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;ds60_sec_south&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> ds60_role_names_available<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 2: Start with <code>pg_catalog.pg_roles</code> in <code>FROM</code>/<code>JOIN</code>; let <code>WHERE</code> remove nonqualifying rows. The final <code>SELECT</code> displays the columns written in the final <code>SELECT</code>. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 2 returns one row per the primary/business key of <code>pg_catalog.pg_roles</code> from <code>pg_catalog.pg_roles</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -1106,11 +1103,9 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 </ul>
 <h4 id="solution-1--exercise-2-read-only-auditor">Exercise 2: Read-only auditor<a class="heading-anchor" href="#solution-1--exercise-2-read-only-auditor" aria-label="Link to this section">#</a></h4>
 <p>The solution creates a NOLOGIN <code>ds60_sec_auditor</code>, grants schema <code>USAGE</code>, lets the owner&#x27;s default privileges grant future table <code>SELECT</code>, and adds:</p>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">CREATE</span> POLICY auditor_read
-<span class="syntax-keyword">ON</span> pro_security_lab<span class="syntax-punctuation">.</span>documents
-<span class="syntax-keyword">FOR</span> <span class="syntax-keyword">SELECT</span>
-<span class="syntax-keyword">TO</span> ds60_sec_auditor
-<span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">true</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">CREATE</span> POLICY auditor_read <span class="syntax-keyword">ON</span> pro_security_lab<span class="syntax-punctuation">.</span>documents
+  <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">TO</span> ds60_sec_auditor
+  <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">true</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p>The auditor sees both seeded rows because the policy deliberately spans both tenants. It has no insert, update, delete, or sequence grant. An exception test proves an insert is denied. The policy does not create a write privilege.</p>
 <p>In a real system, an all-tenant auditor is a sensitive role. Its membership, login path, logging, export controls, and retention policy need review beyond this SQL lesson.</p>
 <h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
@@ -1121,8 +1116,9 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 </ul>
 <h4 id="solution-1--exercise-3-owner-specific-default-privileges">Exercise 3: Owner-specific default privileges<a class="heading-anchor" href="#solution-1--exercise-3-owner-specific-default-privileges" aria-label="Link to this section">#</a></h4>
 <p><code>audit_notes</code> is created by <code>ds60_sec_owner</code> after:</p>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">ALTER</span> <span class="syntax-keyword">DEFAULT</span> <span class="syntax-keyword">PRIVILEGES</span> <span class="syntax-keyword">IN</span> <span class="syntax-keyword">SCHEMA</span> pro_security_lab
-    <span class="syntax-keyword">GRANT</span> <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">ON</span> TABLES <span class="syntax-keyword">TO</span> ds60_sec_auditor<span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">ALTER</span> <span class="syntax-keyword">DEFAULT</span> <span class="syntax-keyword">PRIVILEGES</span> <span class="syntax-keyword">IN</span> <span class="syntax-keyword">SCHEMA</span> pro_security_lab <span class="syntax-keyword">GRANT</span>
+<span class="syntax-keyword">SELECT</span>
+  <span class="syntax-keyword">ON</span> TABLES <span class="syntax-keyword">TO</span> ds60_sec_auditor<span class="syntax-punctuation">;</span></code></pre>
 <p>The assertion confirms auditor <code>SELECT</code> arrived automatically. If another role created the table, that other role&#x27;s defaults would apply. Existing tables are unchanged by <code>ALTER DEFAULT PRIVILEGES</code>; use an explicit <code>GRANT</code> for them.</p>
 <h5 id="solution-1--reasoning-and-verification-3">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-3" aria-label="Link to this section">#</a></h5>
 <ul>

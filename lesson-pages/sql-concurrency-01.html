@@ -461,20 +461,49 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Run these in the complete learner file so the temporary fixture and transaction are present. The fixture values are fixed; the examples never depend on the current clock. Predict each result before running it.</p>
 <h5 id="guide--example-1-guard-an-update-and-inspect-its-result">Example 1: Guard an update and inspect its result<a class="heading-anchor" href="#guide--example-1-guard-an-update-and-inspect-its-result" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-sql">SAVEPOINT worked_success<span class="syntax-punctuation">;</span>
-<span class="syntax-keyword">UPDATE</span> concurrency_stock
-<span class="syntax-keyword">SET</span> available<span class="syntax-operator">=</span>available<span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-keyword">version</span><span class="syntax-operator">+</span><span class="syntax-number">1</span>
-<span class="syntax-keyword">WHERE</span> sku<span class="syntax-operator">=</span><span class="syntax-string">&#x27;A&#x27;</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-number">1</span> <span class="syntax-keyword">AND</span> available<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span><span class="syntax-number">2</span>
-RETURNING sku<span class="syntax-punctuation">,</span>available<span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span><span class="syntax-punctuation">;</span>
+
+<span class="syntax-keyword">UPDATE</span>
+  concurrency_stock
+<span class="syntax-keyword">SET</span>
+  available <span class="syntax-operator">=</span> available <span class="syntax-operator">-</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">version</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">version</span> <span class="syntax-operator">+</span> <span class="syntax-number">1</span>
+<span class="syntax-keyword">WHERE</span>
+  sku <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;A&#x27;</span>
+  <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span>
+  <span class="syntax-keyword">AND</span> available <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">2</span>
+RETURNING
+  sku<span class="syntax-punctuation">,</span>
+  available<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">version</span><span class="syntax-punctuation">;</span>
+
 <span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT worked_success<span class="syntax-punctuation">;</span>
+
 RELEASE SAVEPOINT worked_success<span class="syntax-punctuation">;</span></code></pre>
 <p>The returned row is A with stock 3 and version 2. The savepoint is a local experiment boundary; rolling back to it restores A to stock 5 and version 1 for later examples. The output grain is one successfully updated SKU. No returned row means no row met all preconditions. This demonstration is deterministic and does not involve another connection.</p>
 <p><strong>Expected:</strong> One updated row, columns sku, available, version: (A,3,2). After rollback the fixture is (A,5,1).</p>
 <h5 id="guide--example-2-a-stale-expectation-does-not-write">Example 2: A stale expectation does not write<a class="heading-anchor" href="#guide--example-2-a-stale-expectation-does-not-write" aria-label="Link to this section">#</a></h5>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">UPDATE</span> concurrency_stock
-<span class="syntax-keyword">SET</span> available<span class="syntax-operator">=</span>available<span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-keyword">version</span><span class="syntax-operator">+</span><span class="syntax-number">1</span>
-<span class="syntax-keyword">WHERE</span> sku<span class="syntax-operator">=</span><span class="syntax-string">&#x27;A&#x27;</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-number">99</span> <span class="syntax-keyword">AND</span> available<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span><span class="syntax-number">1</span>
-RETURNING sku<span class="syntax-punctuation">,</span>available<span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span><span class="syntax-punctuation">;</span>
-<span class="syntax-keyword">SELECT</span> sku<span class="syntax-punctuation">,</span>available<span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span> <span class="syntax-keyword">FROM</span> concurrency_stock <span class="syntax-keyword">WHERE</span> sku<span class="syntax-operator">=</span><span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">UPDATE</span>
+  concurrency_stock
+<span class="syntax-keyword">SET</span>
+  available <span class="syntax-operator">=</span> available <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">version</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">version</span> <span class="syntax-operator">+</span> <span class="syntax-number">1</span>
+<span class="syntax-keyword">WHERE</span>
+  sku <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;A&#x27;</span>
+  <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span> <span class="syntax-operator">=</span> <span class="syntax-number">99</span>
+  <span class="syntax-keyword">AND</span> available <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span>
+RETURNING
+  sku<span class="syntax-punctuation">,</span>
+  available<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">version</span><span class="syntax-punctuation">;</span>
+
+<span class="syntax-keyword">SELECT</span>
+  sku<span class="syntax-punctuation">,</span>
+  available<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">version</span>
+<span class="syntax-keyword">FROM</span>
+  concurrency_stock
+<span class="syntax-keyword">WHERE</span>
+  sku <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">;</span></code></pre>
 <p>No row matches version 99, so PostgreSQL reports UPDATE 0 and RETURNING contains no rows. The following SELECT proves the stock and version stayed unchanged. An application that reports success merely because the statement raised no exception would mislead the user. Do not immediately remove the version condition to make the update succeed; that deletes the protection instead of handling the conflict.</p>
 <p><strong>Expected:</strong> Zero updated rows, then one inspected row (A,5,1), columns sku, available, version.</p>
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
@@ -530,19 +559,45 @@ RETURNING sku<span class="syntax-punctuation">,</span>available<span class="synt
 <p>In A, establish a view and leave the transaction open:</p>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">BEGIN</span> <span class="syntax-keyword">ISOLATION</span> <span class="syntax-keyword">LEVEL</span> <span class="syntax-keyword">READ</span> <span class="syntax-keyword">COMMITTED</span><span class="syntax-punctuation">;</span>
 <span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> statement_timeout <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;10s&#x27;</span><span class="syntax-punctuation">;</span>
-<span class="syntax-keyword">SELECT</span> sku<span class="syntax-punctuation">,</span>available<span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span> <span class="syntax-keyword">FROM</span> sql_concurrency_live<span class="syntax-punctuation">.</span>stock <span class="syntax-keyword">WHERE</span> sku<span class="syntax-operator">=</span><span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">;</span></code></pre>
+
+<span class="syntax-keyword">SELECT</span>
+  sku<span class="syntax-punctuation">,</span>
+  available<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">version</span>
+<span class="syntax-keyword">FROM</span>
+  sql_concurrency_live<span class="syntax-punctuation">.</span>stock
+<span class="syntax-keyword">WHERE</span>
+  sku <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">;</span></code></pre>
 <p>Expect <code>(A,5,1)</code>. In B, make and commit one guarded write:</p>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span>
 <span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> lock_timeout <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;2s&#x27;</span><span class="syntax-punctuation">;</span>
+
 <span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> statement_timeout <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;10s&#x27;</span><span class="syntax-punctuation">;</span>
-<span class="syntax-keyword">UPDATE</span> sql_concurrency_live<span class="syntax-punctuation">.</span>stock
-<span class="syntax-keyword">SET</span> available<span class="syntax-operator">=</span>available<span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-keyword">version</span><span class="syntax-operator">+</span><span class="syntax-number">1</span>
-<span class="syntax-keyword">WHERE</span> sku<span class="syntax-operator">=</span><span class="syntax-string">&#x27;A&#x27;</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-number">1</span> <span class="syntax-keyword">AND</span> available<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span><span class="syntax-number">1</span>
-RETURNING sku<span class="syntax-punctuation">,</span>available<span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span><span class="syntax-punctuation">;</span>
+
+<span class="syntax-keyword">UPDATE</span>
+  sql_concurrency_live<span class="syntax-punctuation">.</span>stock
+<span class="syntax-keyword">SET</span>
+  available <span class="syntax-operator">=</span> available <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">version</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">version</span> <span class="syntax-operator">+</span> <span class="syntax-number">1</span>
+<span class="syntax-keyword">WHERE</span>
+  sku <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;A&#x27;</span>
+  <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span>
+  <span class="syntax-keyword">AND</span> available <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span>
+RETURNING
+  sku<span class="syntax-punctuation">,</span>
+  available<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">version</span><span class="syntax-punctuation">;</span>
+
 <span class="syntax-keyword">COMMIT</span><span class="syntax-punctuation">;</span></code></pre>
 <p>B returns <code>(A,4,2)</code>. In A, run the same SELECT again, then <code>ROLLBACK</code>. The second READ COMMITTED statement now shows <code>(A,4,2)</code>. Record session, isolation, action order, both A results, and B&#x27;s commit. This transcript is visibility evidence; the single-session default script is not.</p>
 <p>For a contrasting run, reset only the fixture row in B using the following statement when both previous transactions have ended:</p>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">UPDATE</span> sql_concurrency_live<span class="syntax-punctuation">.</span>stock <span class="syntax-keyword">SET</span> available<span class="syntax-operator">=</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-number">1</span> <span class="syntax-keyword">WHERE</span> sku<span class="syntax-operator">=</span><span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">UPDATE</span>
+  sql_concurrency_live<span class="syntax-punctuation">.</span>stock
+<span class="syntax-keyword">SET</span>
+  available <span class="syntax-operator">=</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">version</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span>
+<span class="syntax-keyword">WHERE</span>
+  sku <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">;</span></code></pre>
 <p>This reset is fixture preparation only. It deliberately resets the version and must never be copied into an application write path. Repeat A&#x27;s sequence with <code>BEGIN ISOLATION LEVEL REPEATABLE READ;</code>. Run A&#x27;s first SELECT before B updates and commits. A&#x27;s second SELECT remains <code>(A,5,1)</code> within that transaction; after A rolls back, a new SELECT shows <code>(A,4,2)</code>. If A had not established its first snapshot before B&#x27;s commit, it could instead establish the later view, which is why action order belongs in the evidence. This lab observes reads; it does not reproduce a serialization failure or deadlock. Do not add timing sleeps to substitute for the explicit checkpoints.</p>
 <p>Finally issue <code>ROLLBACK;</code> in both terminals to release any forgotten transaction, quit both with <code>\q</code>, and run:</p>
 <pre class="highlighted-code"><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/fixtures/concurrency/cleanup.sql</code></pre>
@@ -757,50 +812,140 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 <p>The code below is the answer for each numbered prompt, followed by its reasoning. Inspect the first discrepancy in your own transcript before reading a different answer. A solution is one defensible implementation of this contract; an alternative is valid if its identities, values, missingness, ordering, and transaction behavior match. Tests constrain the actual returned relation, rather than assuming a familiar-looking query must be right.</p>
 <h4 id="solution-1--exercise-solutions">Exercise solutions<a class="heading-anchor" href="#solution-1--exercise-solutions" aria-label="Link to this section">#</a></h4>
 <h4 id="solution-1--exercise-1-perform-a-guarded-reservation">Exercise 1: Perform a guarded reservation<a class="heading-anchor" href="#solution-1--exercise-1-perform-a-guarded-reservation" aria-label="Link to this section">#</a></h4>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">UPDATE</span> concurrency_stock <span class="syntax-keyword">SET</span> available<span class="syntax-operator">=</span>available<span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-keyword">version</span><span class="syntax-operator">+</span><span class="syntax-number">1</span>
-<span class="syntax-keyword">WHERE</span> sku<span class="syntax-operator">=</span><span class="syntax-string">&#x27;A&#x27;</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-number">1</span> <span class="syntax-keyword">AND</span> available<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span><span class="syntax-number">2</span> RETURNING sku<span class="syntax-punctuation">,</span>available<span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span><span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">UPDATE</span>
+  concurrency_stock
+<span class="syntax-keyword">SET</span>
+  available <span class="syntax-operator">=</span> available <span class="syntax-operator">-</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">version</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">version</span> <span class="syntax-operator">+</span> <span class="syntax-number">1</span>
+<span class="syntax-keyword">WHERE</span>
+  sku <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;A&#x27;</span>
+  <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span>
+  <span class="syntax-keyword">AND</span> available <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">2</span>
+RETURNING
+  sku<span class="syntax-punctuation">,</span>
+  available<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">version</span><span class="syntax-punctuation">;</span></code></pre>
 <p>The UPDATE selects a unique SKU and checks both expectations in the same statement that changes the values. It increments the version so an earlier reader cannot reuse version 1 after this reservation succeeds. RETURNING supplies direct evidence of the row that changed. The exercise wrapper uses a savepoint so subsequent independent questions start from the same fixture. The assertion checks the returned state and the script separately confirms rollback restoration. A preceding SELECT without a guarded write would leave a time gap during which its observation could become stale. No timing claim follows here because this is still a single-session operation.</p>
 <p><strong>Inputs/evidence:</strong> For sql-concurrency-01 Exercise 1, Inside a savepoint, reserve two A units using expected version 1 and a nonnegative-capacity predicate. Return sku, available, version, then roll back the attempt.</p>
 <p><strong>Expected result/shape:</strong> For sql-concurrency-01 Exercise 1, One updated SKU row, columns sku, available, version: (A,3,2). After savepoint rollback, A is (A,5,1). No final ORDER BY is needed for the unique sku update.</p>
 <p><strong>Verify:</strong> For sql-concurrency-01 Exercise 1, Inspect RETURNING (A,3,2), then inspect restored A state (5,1) after savepoint rollback. A successful command tag alone does not establish the version and capacity outcome.</p>
 <h4 id="solution-1--exercise-2-reject-a-stale-expected-version">Exercise 2: Reject a stale expected version<a class="heading-anchor" href="#solution-1--exercise-2-reject-a-stale-expected-version" aria-label="Link to this section">#</a></h4>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">UPDATE</span> concurrency_stock <span class="syntax-keyword">SET</span> available<span class="syntax-operator">=</span>available<span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-keyword">version</span><span class="syntax-operator">+</span><span class="syntax-number">1</span>
-<span class="syntax-keyword">WHERE</span> sku<span class="syntax-operator">=</span><span class="syntax-string">&#x27;A&#x27;</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-number">99</span> <span class="syntax-keyword">AND</span> available<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span><span class="syntax-number">1</span> RETURNING sku<span class="syntax-punctuation">,</span>available<span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span><span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">UPDATE</span>
+  concurrency_stock
+<span class="syntax-keyword">SET</span>
+  available <span class="syntax-operator">=</span> available <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">version</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">version</span> <span class="syntax-operator">+</span> <span class="syntax-number">1</span>
+<span class="syntax-keyword">WHERE</span>
+  sku <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;A&#x27;</span>
+  <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span> <span class="syntax-operator">=</span> <span class="syntax-number">99</span>
+  <span class="syntax-keyword">AND</span> available <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span>
+RETURNING
+  sku<span class="syntax-punctuation">,</span>
+  available<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">version</span><span class="syntax-punctuation">;</span></code></pre>
 <p>Version 99 does not match the current row, so no mutation occurs. This is intentionally a successful SQL statement with an unsuccessful business precondition. Keep those two outcomes distinct in application code and learner evidence. The assertion checks both the empty RETURNING relation and the unchanged stored state. Removing the version condition would make the statement affect a row while destroying the protection the caller requested. A caller can reread to investigate, but must decide whether the original business intent remains valid before retrying. Under actual concurrent stronger-isolation execution an exception may be another possible outcome; this deterministic stale-version example makes no claim that all conflicts are reported as zero rows.</p>
 <p><strong>Inputs/evidence:</strong> For sql-concurrency-01 Exercise 2, Try reserving one A unit with expected version 99. Return sku, available, version for any successful update and inspect the row afterward.</p>
 <p><strong>Expected result/shape:</strong> For sql-concurrency-01 Exercise 2, Zero returned rows with columns sku, available, version. A remains available 5 and version 1; SQL execution itself succeeds with UPDATE 0.</p>
 <p><strong>Verify:</strong> For sql-concurrency-01 Exercise 2, Require zero RETURNING rows and unchanged A state available=5,version=1. Removing the version condition would discard the requested stale-write protection.</p>
 <h4 id="solution-1--exercise-3-reject-insufficient-capacity-independently">Exercise 3: Reject insufficient capacity independently<a class="heading-anchor" href="#solution-1--exercise-3-reject-insufficient-capacity-independently" aria-label="Link to this section">#</a></h4>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">UPDATE</span> concurrency_stock <span class="syntax-keyword">SET</span> available<span class="syntax-operator">=</span>available<span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-keyword">version</span><span class="syntax-operator">+</span><span class="syntax-number">1</span>
-<span class="syntax-keyword">WHERE</span> sku<span class="syntax-operator">=</span><span class="syntax-string">&#x27;B&#x27;</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-number">1</span> <span class="syntax-keyword">AND</span> available<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span><span class="syntax-number">2</span> RETURNING sku<span class="syntax-punctuation">,</span>available<span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span><span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">UPDATE</span>
+  concurrency_stock
+<span class="syntax-keyword">SET</span>
+  available <span class="syntax-operator">=</span> available <span class="syntax-operator">-</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">version</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">version</span> <span class="syntax-operator">+</span> <span class="syntax-number">1</span>
+<span class="syntax-keyword">WHERE</span>
+  sku <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;B&#x27;</span>
+  <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span>
+  <span class="syntax-keyword">AND</span> available <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">2</span>
+RETURNING
+  sku<span class="syntax-punctuation">,</span>
+  available<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">version</span><span class="syntax-punctuation">;</span></code></pre>
 <p>The version precondition is satisfied, but available &gt;= 2 is false for B&#x27;s one unit. Both predicates belong to the atomic update condition, so stock never becomes negative and the version does not advance. The CHECK constraint is an additional invariant guard; the ordinary business shortage should be handled without intentionally violating it. The assertion verifies an empty result and the unchanged B row. A zero-row outcome alone does not identify which precondition failed, so the caller may need an explicit follow-up read and a conflict policy. Keep that diagnostic read separate from a claim that the earlier attempt succeeded.</p>
 <p><strong>Inputs/evidence:</strong> For sql-concurrency-01 Exercise 3, Try reserving two B units with correct expected version 1. Return sku, available, version on success and inspect B afterward.</p>
 <p><strong>Expected result/shape:</strong> For sql-concurrency-01 Exercise 3, Zero returned rows, columns sku, available, version. B remains (B,1,1), proving the capacity condition can fail even with a current version.</p>
 <p><strong>Verify:</strong> For sql-concurrency-01 Exercise 3, Require zero RETURNING rows and unchanged B state available=1,version=1. The current version and failed capacity distinguish this outcome from the stale-version case.</p>
 <h4 id="solution-1--exercise-4-model-two-callers-sharing-an-old-version">Exercise 4: Model two callers sharing an old version<a class="heading-anchor" href="#solution-1--exercise-4-model-two-callers-sharing-an-old-version" aria-label="Link to this section">#</a></h4>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> model_trace<span class="syntax-punctuation">(</span>caller <span class="syntax-builtin">text</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span>affected_rows <span class="syntax-builtin">bigint</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> model_trace <span class="syntax-punctuation">(</span>
+  caller <span class="syntax-builtin">text</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span>
+  affected_rows <span class="syntax-builtin">bigint</span>
+<span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span>
+
 <span class="syntax-keyword">WITH</span> changed <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">UPDATE</span> concurrency_stock <span class="syntax-keyword">SET</span> available<span class="syntax-operator">=</span>available<span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-keyword">version</span><span class="syntax-operator">+</span><span class="syntax-number">1</span>
-  <span class="syntax-keyword">WHERE</span> sku<span class="syntax-operator">=</span><span class="syntax-string">&#x27;A&#x27;</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-number">1</span> <span class="syntax-keyword">AND</span> available<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span><span class="syntax-number">2</span> RETURNING sku
-<span class="syntax-punctuation">)</span> <span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> model_trace <span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;One&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> changed<span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">UPDATE</span>
+    concurrency_stock
+  <span class="syntax-keyword">SET</span>
+    available <span class="syntax-operator">=</span> available <span class="syntax-operator">-</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">version</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">version</span> <span class="syntax-operator">+</span> <span class="syntax-number">1</span>
+  <span class="syntax-keyword">WHERE</span>
+    sku <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;A&#x27;</span>
+    <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span>
+    <span class="syntax-keyword">AND</span> available <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">2</span>
+  RETURNING
+    sku<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> model_trace
+<span class="syntax-keyword">SELECT</span>
+  <span class="syntax-string">&#x27;One&#x27;</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">FROM</span>
+  changed<span class="syntax-punctuation">;</span>
+
 <span class="syntax-keyword">WITH</span> changed <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">UPDATE</span> concurrency_stock <span class="syntax-keyword">SET</span> available<span class="syntax-operator">=</span>available<span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-keyword">version</span><span class="syntax-operator">+</span><span class="syntax-number">1</span>
-  <span class="syntax-keyword">WHERE</span> sku<span class="syntax-operator">=</span><span class="syntax-string">&#x27;A&#x27;</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-number">1</span> <span class="syntax-keyword">AND</span> available<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span><span class="syntax-number">1</span> RETURNING sku
-<span class="syntax-punctuation">)</span> <span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> model_trace <span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;Two&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> changed<span class="syntax-punctuation">;</span>
-<span class="syntax-keyword">SELECT</span> caller<span class="syntax-punctuation">,</span>affected_rows <span class="syntax-keyword">FROM</span> model_trace <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> caller<span class="syntax-punctuation">;</span></code></pre>
+  <span class="syntax-keyword">UPDATE</span>
+    concurrency_stock
+  <span class="syntax-keyword">SET</span>
+    available <span class="syntax-operator">=</span> available <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">version</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">version</span> <span class="syntax-operator">+</span> <span class="syntax-number">1</span>
+  <span class="syntax-keyword">WHERE</span>
+    sku <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;A&#x27;</span>
+    <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span>
+    <span class="syntax-keyword">AND</span> available <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span>
+  RETURNING
+    sku<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> model_trace
+<span class="syntax-keyword">SELECT</span>
+  <span class="syntax-string">&#x27;Two&#x27;</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">FROM</span>
+  changed<span class="syntax-punctuation">;</span>
+
+<span class="syntax-keyword">SELECT</span>
+  caller<span class="syntax-punctuation">,</span>
+  affected_rows
+<span class="syntax-keyword">FROM</span>
+  model_trace
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  caller<span class="syntax-punctuation">;</span></code></pre>
 <p>The first caller&#x27;s successful write advances version 1 to 2. A distinct second statement with the old version then finds no matching row. The solution executes two statements and captures their RETURNING counts into a temporary trace table, avoiding ambiguous attempts to update the same row twice inside one SQL statement. The assertion expects One to affect one row and Two none. This models the conflict contract but does not reproduce simultaneous transactions or show how long a writer waits. The optional lab is the source of actual multi-session evidence. Rollback to the surrounding savepoint removes both the modeled mutation and trace objects before the next exercise.</p>
 <p><strong>Inputs/evidence:</strong> For sql-concurrency-01 Exercise 4, Inside one savepoint, apply caller One reserving two A units at version 1, then caller Two reserving one A unit with the same old version. Return caller, affected_rows from both attempts.</p>
 <p><strong>Expected result/shape:</strong> For sql-concurrency-01 Exercise 4, Two model-trace rows keyed by caller, columns caller, affected_rows; final ORDER BY caller: One affects 1, Two affects 0. A is temporarily (A,3,2), then rollback restores the fixture. This is a sequential model, not a concurrent trace.</p>
 <p><strong>Verify:</strong> For sql-concurrency-01 Exercise 4, Inspect trace One=1 affected row and Two=0, plus temporary A state (3,2). Rollback restores (5,1). Label the result a sequential model rather than a concurrent execution trace.</p>
 <h4 id="solution-1--exercise-5-verify-a-no-change-read-result">Exercise 5: Verify a no-change read result<a class="heading-anchor" href="#solution-1--exercise-5-verify-a-no-change-read-result" aria-label="Link to this section">#</a></h4>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> sku<span class="syntax-punctuation">,</span>available<span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span> <span class="syntax-keyword">FROM</span> concurrency_stock <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> sku<span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  sku<span class="syntax-punctuation">,</span>
+  available<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">version</span>
+<span class="syntax-keyword">FROM</span>
+  concurrency_stock
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  sku<span class="syntax-punctuation">;</span></code></pre>
 <p>This read confirms that the independent exercise wrappers restored the local fixture to its initial state. It does not show whether another session could see the row before or after a commit. The assertion checks both rows and their versions so accidental persistence from a previous exercise becomes visible. To make an isolation claim, run the optional two-session sequence and preserve the actual SELECT output before and after the other session commits. Merely selecting current_setting for an isolation level would show a configuration, not an observed anomaly or consistency guarantee. Keep those evidence tiers separate when explaining your result to another engineer.</p>
 <p><strong>Inputs/evidence:</strong> For sql-concurrency-01 Exercise 5, Return sku, available, version for both initial stock rows, ordered by sku. State what a single-session read proves and what a two-session isolation claim additionally needs.</p>
 <p><strong>Expected result/shape:</strong> For sql-concurrency-01 Exercise 5, Two SKU rows, columns sku, available, version; final ORDER BY sku: (A,5,1),(B,1,1). A genuine isolation trace also needs session names, isolation level, ordered statements, commit boundary, and observations.</p>
 <p><strong>Verify:</strong> For sql-concurrency-01 Exercise 5, Inspect initial rows (A,5,1),(B,1,1). A separate isolation claim requires actual A-session reads, B-session write/commit order, and the selected isolation level from the optional lab.</p>
 <h4 id="solution-1--exercise-6-transfer-the-guard-to-an-atomic-replenishment">Exercise 6: Transfer the guard to an atomic replenishment<a class="heading-anchor" href="#solution-1--exercise-6-transfer-the-guard-to-an-atomic-replenishment" aria-label="Link to this section">#</a></h4>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">UPDATE</span> concurrency_stock <span class="syntax-keyword">SET</span> available<span class="syntax-operator">=</span>available<span class="syntax-operator">+</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-keyword">version</span><span class="syntax-operator">+</span><span class="syntax-number">1</span>
-<span class="syntax-keyword">WHERE</span> sku<span class="syntax-operator">=</span><span class="syntax-string">&#x27;B&#x27;</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span><span class="syntax-operator">=</span><span class="syntax-number">1</span> RETURNING sku<span class="syntax-punctuation">,</span>available<span class="syntax-punctuation">,</span><span class="syntax-keyword">version</span><span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">UPDATE</span>
+  concurrency_stock
+<span class="syntax-keyword">SET</span>
+  available <span class="syntax-operator">=</span> available <span class="syntax-operator">+</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">version</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">version</span> <span class="syntax-operator">+</span> <span class="syntax-number">1</span>
+<span class="syntax-keyword">WHERE</span>
+  sku <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;B&#x27;</span>
+  <span class="syntax-keyword">AND</span> <span class="syntax-keyword">version</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span>
+RETURNING
+  sku<span class="syntax-punctuation">,</span>
+  available<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">version</span><span class="syntax-punctuation">;</span></code></pre>
 <p>Replenishment changes the state just as reservation does, so it must advance the version. Otherwise an old reader could still act on the former version while using outdated capacity information. The first update returns B with four units and version 2. Repeating the old version precondition affects no rows. The solution captures that second RETURNING count as a negative control before rolling back the exercise. This does not make arbitrary retries idempotent after an unknown commit result: a retried caller needs a durable operation identity to know whether the first intent already committed. The version guard prevents a stale conditional write, while idempotency solves a related but different recovery question.</p>
 <p><strong>Inputs/evidence:</strong> For sql-concurrency-01 Exercise 6, Inside a savepoint, add three B units using expected version 1, increment version, and return sku, available, version. Then retry the same old expectation and prove it affects zero rows.</p>
 <p><strong>Expected result/shape:</strong> For sql-concurrency-01 Exercise 6, One initial updated SKU row, columns sku, available, version: (B,4,2). A second attempt using version 1 returns zero rows. Rollback leaves B at (B,1,1).</p>

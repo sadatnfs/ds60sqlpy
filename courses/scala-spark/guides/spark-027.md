@@ -60,21 +60,109 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 import org.apache.spark.storage.StorageLevel
 
-val schema = StructType(Seq(StructField("entity_id",LongType,false),StructField("segment",StringType,true),StructField("amount",LongType,true)))
-val source = spark.createDataFrame(spark.sparkContext.parallelize(Seq(Row(1L,"a",10L),Row(1L,"a",10L),Row(2L,"a",null),Row(3L,"b",0L),Row(4L,"b",20L),Row(4L,"b",20L),Row(5L,null,5L),Row(6L,"c",-5L)),2),schema)
-val goldenSchema = StructType(Seq(StructField("entity_id",LongType,false),StructField("segment",StringType,true),StructField("doubled",LongType,true)))
-val golden = spark.createDataFrame(spark.sparkContext.parallelize(Seq(Row(1L,"a",20L),Row(1L,"a",20L),Row(2L,"a",null),Row(3L,"b",0L),Row(4L,"b",40L),Row(4L,"b",40L),Row(5L,null,10L)),2),goldenSchema)
+val schema = StructType(
+  Seq(
+    StructField("entity_id", LongType, false),
+    StructField("segment", StringType, true),
+    StructField("amount", LongType, true)
+  )
+)
+val source = spark.createDataFrame(
+  spark.sparkContext.parallelize(
+    Seq(
+      Row(1L, "a", 10L),
+      Row(1L, "a", 10L),
+      Row(2L, "a", null),
+      Row(3L, "b", 0L),
+      Row(4L, "b", 20L),
+      Row(4L, "b", 20L),
+      Row(5L, null, 5L),
+      Row(6L, "c", -5L)
+    ),
+    2
+  ),
+  schema
+)
+val goldenSchema = StructType(
+  Seq(
+    StructField("entity_id", LongType, false),
+    StructField("segment", StringType, true),
+    StructField("doubled", LongType, true)
+  )
+)
+val golden = spark.createDataFrame(
+  spark.sparkContext.parallelize(
+    Seq(
+      Row(1L, "a", 20L),
+      Row(1L, "a", 20L),
+      Row(2L, "a", null),
+      Row(3L, "b", 0L),
+      Row(4L, "b", 40L),
+      Row(4L, "b", 40L),
+      Row(5L, null, 10L)
+    ),
+    2
+  ),
+  goldenSchema
+)
 ```
 
 ```python
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 from pyspark import StorageLevel
 
-schema = StructType([StructField("entity_id",LongType(),False),StructField("segment",StringType(),True),StructField("amount",LongType(),True)])
-source = spark.createDataFrame([(1,"a",10),(1,"a",10),(2,"a",None),(3,"b",0),(4,"b",20),(4,"b",20),(5,None,5),(6,"c",-5)],schema=schema)
-golden_schema = StructType([StructField("entity_id",LongType(),False),StructField("segment",StringType(),True),StructField("doubled",LongType(),True)])
-golden = spark.createDataFrame([(1,"a",20),(1,"a",20),(2,"a",None),(3,"b",0),(4,"b",40),(4,"b",40),(5,None,10)],schema=golden_schema)
+schema = StructType(
+    [
+        StructField("entity_id", LongType(), False),
+        StructField("segment", StringType(), True),
+        StructField("amount", LongType(), True),
+    ]
+)
+source = spark.createDataFrame(
+    [
+        (1, "a", 10),
+        (1, "a", 10),
+        (2, "a", None),
+        (3, "b", 0),
+        (4, "b", 20),
+        (4, "b", 20),
+        (5, None, 5),
+        (6, "c", -5),
+    ],
+    schema=schema,
+)
+golden_schema = StructType(
+    [
+        StructField("entity_id", LongType(), False),
+        StructField("segment", StringType(), True),
+        StructField("doubled", LongType(), True),
+    ]
+)
+golden = spark.createDataFrame(
+    [
+        (1, "a", 20),
+        (1, "a", 20),
+        (2, "a", None),
+        (3, "b", 0),
+        (4, "b", 40),
+        (4, "b", 40),
+        (5, None, 10),
+    ],
+    schema=golden_schema,
+)
 ```
 
 ## Worked example / walkthrough
@@ -82,13 +170,17 @@ golden = spark.createDataFrame([(1,"a",20),(1,"a",20),(2,"a",None),(3,"b",0),(4,
 ### Worked example 1
 
 ```scala
-assert(source.count() == 8L && source.select("entity_id","segment","amount").distinct().count() == 6L)
+assert(
+  source.count() == 8L && source.select("entity_id", "segment", "amount").distinct().count() == 6L
+)
 assert(golden.count() == 7L && golden.agg(sum("doubled")).first().getLong(0) == 130L)
 println("Golden bag contains duplicates and unknown values deliberately")
 ```
 
 ```python
-assert source.count() == 8 and source.select("entity_id","segment","amount").distinct().count() == 6
+assert (
+    source.count() == 8 and source.select("entity_id", "segment", "amount").distinct().count() == 6
+)
 assert golden.count() == 7 and golden.agg(F.sum("doubled")).first()[0] == 130
 print("Golden bag contains duplicates and unknown values deliberately")
 ```

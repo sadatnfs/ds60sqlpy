@@ -130,14 +130,14 @@ updates explicit rather than assuming the engine infers an intended sync policy.
 
 ```sql
 MERGE INTO w17_stock AS t
-USING w17_feed AS s ON t.sku = s.sku
-WHEN MATCHED AND s.source_version > t.source_version THEN
-  UPDATE SET quantity = s.quantity, source_version = s.source_version
-WHEN NOT MATCHED BY SOURCE THEN DELETE
-WHEN NOT MATCHED BY TARGET THEN
-  INSERT (sku, quantity, source_version)
-  VALUES (s.sku, s.quantity, s.source_version)
-RETURNING merge_action() AS action, t.sku, t.quantity, t.source_version;
+  USING w17_feed AS s ON t.sku = s.sku
+  WHEN MATCHED AND s.source_version > t.source_version THEN
+    UPDATE SET quantity = s.quantity, source_version = s.source_version
+  WHEN NOT MATCHED BY SOURCE THEN
+    DELETE
+  WHEN NOT MATCHED BY TARGET THEN
+    INSERT (sku, quantity, source_version) VALUES (s.sku, s.quantity, s.source_version) RETURNING
+  merge_action () AS action, t.sku, t.quantity, t.source_version;
 ```
 
 The actual changed-row output contains A as UPDATE, C as INSERT and Z as DELETE.
@@ -156,12 +156,18 @@ Completeness needs evidence from the source system and its identity rules.
 
 ```sql
 INSERT INTO w17_stock AS t (sku, quantity, source_version)
-VALUES ('A', 14, 3), ('B', 999, 1), ('D', 4, 1)
-ON CONFLICT (sku) DO UPDATE
-SET quantity = excluded.quantity,
+VALUES
+  ('A', 14, 3),
+  ('B', 999, 1),
+  ('D', 4, 1)
+ON CONFLICT (sku)
+  DO UPDATE SET
+    quantity = excluded.quantity,
     source_version = excluded.source_version
-WHERE excluded.source_version > t.source_version
-RETURNING sku, quantity, source_version;
+  WHERE
+    excluded.source_version > t.source_version
+  RETURNING
+    sku, quantity, source_version;
 ```
 
 `excluded` describes the proposed values for a uniqueness conflict. A advances to

@@ -23,8 +23,14 @@ Task: Use Pricing references to identity and half-price implementations on 100 c
 The caller invokes the same method name while the concrete behavior differs. The shared nonnegative-input contract keeps both implementations substitutable.
 
 ```java
-Pricing regular = amount -> { requireNonnegative(amount); return amount; };
-Pricing half = amount -> { requireNonnegative(amount); return amount / 2; };
+Pricing regular = amount -> {
+  requireNonnegative(amount);
+  return amount;
+};
+Pricing half = amount -> {
+  requireNonnegative(amount);
+  return amount / 2;
+};
 assert regular.price(100) == 100 && half.price(100) == 50;
 ```
 
@@ -69,9 +75,13 @@ A caller should not need to know the concrete type to predict whether a domain i
 
 ```java
 for (Pricing policy : List.of(regular, half, withFee)) {
-    boolean rejected = false;
-    try { policy.price(-1); } catch (IllegalArgumentException expected) { rejected = true; }
-    assert rejected;
+  boolean rejected = false;
+  try {
+    policy.price(-1);
+  } catch (IllegalArgumentException expected) {
+    rejected = true;
+  }
+  assert rejected;
 }
 ```
 
@@ -102,9 +112,18 @@ Task: Construct a fee wrapper with a negative fee or null delegate.
 A composed object must establish its own valid state at construction. Deferring a null failure until the first pricing call makes the error harder to locate.
 
 ```java
-boolean feeRejected=false, delegateRejected=false;
-try { new Fee(regular,-1); } catch(IllegalArgumentException expected) { feeRejected=true; }
-try { new Fee(null,1); } catch(NullPointerException expected) { delegateRejected=true; }
+boolean feeRejected = false,
+  delegateRejected = false;
+try {
+  new Fee(regular, -1);
+} catch (IllegalArgumentException expected) {
+  feeRejected = true;
+}
+try {
+  new Fee(null, 1);
+} catch (NullPointerException expected) {
+  delegateRejected = true;
+}
 assert feeRejected && delegateRejected;
 ```
 

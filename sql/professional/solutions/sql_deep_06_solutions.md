@@ -15,11 +15,22 @@ Return event_id, user_id, reason for events with an unknown user or occurrence b
 **Verify:** For sql-deep-06 Exercise 1, compare event and user identities before counting activity; classify orphan, pre-signup and not-yet-available evidence separately so invalid rows cannot enter the numerator.
 
 ```sql
-SELECT e.event_id,e.user_id,
- CASE WHEN u.user_id IS NULL THEN 'unknown_user' ELSE 'before_signup' END AS reason
-FROM deep6_events AS e LEFT JOIN deep6_users AS u ON u.user_id=e.user_id
-WHERE u.user_id IS NULL OR e.occurred_at<u.signup_at
-ORDER BY e.event_id;
+SELECT
+  e.event_id,
+  e.user_id,
+  CASE WHEN u.user_id IS NULL THEN
+    'unknown_user'
+  ELSE
+    'before_signup'
+  END AS reason
+FROM
+  deep6_events AS e
+  LEFT JOIN deep6_users AS u ON u.user_id = e.user_id
+WHERE
+  u.user_id IS NULL
+  OR e.occurred_at < u.signup_at
+ORDER BY
+  e.event_id;
 ```
 
 The left join preserves orphan events that an inner join would erase before the quality report. Key absence is classified before a timestamp comparison because the unknown user has no signup time to compare. These defects are intentionally retained in the teaching fixture, but a real publication needs a documented repair or exclusion policy and a gate. A final rate that looks reasonable does not validate its source relationships.
@@ -35,10 +46,15 @@ As of January 10 UTC, return user_id, cohort_day, eligible for each user. A day 
 **Verify:** For sql-deep-06 Exercise 2, check both event-time maturity and availability-time eligibility at the report cutoff; explain why passing only one clock is insufficient.
 
 ```sql
-SELECT user_id,signup_at::date AS cohort_day,
- observed_through>=signup_at+INTERVAL '8 days'
- AND TIMESTAMPTZ '2026-01-10T00:00Z'>=signup_at+INTERVAL '8 days' AS eligible
-FROM deep6_users ORDER BY user_id;
+SELECT
+  user_id,
+  signup_at::date AS cohort_day,
+  observed_through >= signup_at + INTERVAL '8 days'
+  AND TIMESTAMPTZ '2026-01-10T00:00Z' >= signup_at + INTERVAL '8 days' AS eligible
+FROM
+  deep6_users
+ORDER BY
+  user_id;
 ```
 
 Eligibility concerns the end of the entire outcome window, not merely reaching its start. Both elapsed follow-up and trustworthy observation coverage are required. The equality case is deliberate: coverage through the exclusive endpoint completes all times inside the window. The watermark is a source contract that must be credible in real systems; writing this comparison does not independently prove ingestion completeness.
@@ -55,22 +71,44 @@ Return user_id, eligible, `day7_retained` from a user-level label CTE. Use EXIST
 
 ```sql
 WITH eligibility AS (
- SELECT u.*,u.signup_at::date AS cohort_day,
-        u.signup_at+INTERVAL '7 days' AS window_start,
-        u.signup_at+INTERVAL '8 days' AS window_end,
-        u.observed_through>=u.signup_at+INTERVAL '8 days'
-        AND TIMESTAMPTZ '2026-01-10T00:00Z'>=u.signup_at+INTERVAL '8 days' AS eligible
- FROM deep6_users AS u
-), labels AS (
- SELECT e.user_id,e.cohort_day,e.eligible,
- CASE WHEN e.eligible THEN EXISTS(
-  SELECT 1 FROM deep6_events AS a WHERE a.user_id=e.user_id
-   AND a.occurred_at>=e.window_start AND a.occurred_at<e.window_end
-   AND a.available_at<=TIMESTAMPTZ '2026-01-10T00:00Z'
- ) END AS retained
- FROM eligibility AS e
+  SELECT
+    u.*,
+    u.signup_at::date AS cohort_day,
+    u.signup_at + INTERVAL '7 days' AS window_start,
+    u.signup_at + INTERVAL '8 days' AS window_end,
+    u.observed_through >= u.signup_at + INTERVAL '8 days'
+    AND TIMESTAMPTZ '2026-01-10T00:00Z' >= u.signup_at + INTERVAL '8 days' AS eligible
+  FROM
+    deep6_users AS u
+),
+labels AS (
+  SELECT
+    e.user_id,
+    e.cohort_day,
+    e.eligible,
+    CASE WHEN e.eligible THEN
+      EXISTS (
+        SELECT
+          1
+        FROM
+          deep6_events AS a
+        WHERE
+          a.user_id = e.user_id
+          AND a.occurred_at >= e.window_start
+          AND a.occurred_at < e.window_end
+          AND a.available_at <= TIMESTAMPTZ '2026-01-10T00:00Z')
+    END AS retained
+  FROM
+    eligibility AS e
 )
-SELECT user_id,eligible,retained AS day7_retained FROM labels ORDER BY user_id;
+SELECT
+  user_id,
+  eligible,
+  retained AS day7_retained
+FROM
+  labels
+ORDER BY
+  user_id;
 ```
 
 The eligibility CTE defines the window and denominator at user grain before the event lookup. EXISTS produces a Boolean regardless of how many qualifying events occur, preventing activity volume from multiplying retained users. CASE preserves pending follow-up as NULL rather than false. The availability filter enforces historical knowledge, while the half-open occurrence filter enforces the outcome definition; both clocks are necessary.
@@ -87,26 +125,48 @@ Aggregate user labels to cohort_day, total_users, eligible_users, retained_users
 
 ```sql
 WITH eligibility AS (
- SELECT u.*,u.signup_at::date AS cohort_day,
-        u.signup_at+INTERVAL '7 days' AS window_start,
-        u.signup_at+INTERVAL '8 days' AS window_end,
-        u.observed_through>=u.signup_at+INTERVAL '8 days'
-        AND TIMESTAMPTZ '2026-01-10T00:00Z'>=u.signup_at+INTERVAL '8 days' AS eligible
- FROM deep6_users AS u
-), labels AS (
- SELECT e.user_id,e.cohort_day,e.eligible,
- CASE WHEN e.eligible THEN EXISTS(
-  SELECT 1 FROM deep6_events AS a WHERE a.user_id=e.user_id
-   AND a.occurred_at>=e.window_start AND a.occurred_at<e.window_end
-   AND a.available_at<=TIMESTAMPTZ '2026-01-10T00:00Z'
- ) END AS retained
- FROM eligibility AS e
+  SELECT
+    u.*,
+    u.signup_at::date AS cohort_day,
+    u.signup_at + INTERVAL '7 days' AS window_start,
+    u.signup_at + INTERVAL '8 days' AS window_end,
+    u.observed_through >= u.signup_at + INTERVAL '8 days'
+    AND TIMESTAMPTZ '2026-01-10T00:00Z' >= u.signup_at + INTERVAL '8 days' AS eligible
+  FROM
+    deep6_users AS u
+),
+labels AS (
+  SELECT
+    e.user_id,
+    e.cohort_day,
+    e.eligible,
+    CASE WHEN e.eligible THEN
+      EXISTS (
+        SELECT
+          1
+        FROM
+          deep6_events AS a
+        WHERE
+          a.user_id = e.user_id
+          AND a.occurred_at >= e.window_start
+          AND a.occurred_at < e.window_end
+          AND a.available_at <= TIMESTAMPTZ '2026-01-10T00:00Z')
+    END AS retained
+  FROM
+    eligibility AS e
 )
-SELECT cohort_day,count(*) AS total_users,
- count(*) FILTER(WHERE eligible) AS eligible_users,
- count(*) FILTER(WHERE retained) AS retained_users,
- (count(*) FILTER(WHERE retained))::numeric/NULLIF(count(*) FILTER(WHERE eligible),0) AS retention_rate
-FROM labels GROUP BY cohort_day ORDER BY cohort_day;
+SELECT
+  cohort_day,
+  count(*) AS total_users,
+  count(*) FILTER (WHERE eligible) AS eligible_users,
+  count(*) FILTER (WHERE retained) AS retained_users,
+  (count(*) FILTER (WHERE retained))::numeric / NULLIF (count(*) FILTER (WHERE eligible), 0) AS retention_rate
+FROM
+  labels
+GROUP BY
+  cohort_day
+ORDER BY
+  cohort_day;
 ```
 
 The aggregation starts from one row per user, so a retained person contributes exactly one numerator count. FILTER separates total population, completed follow-up and positive outcomes explicitly. NULLIF preserves an undefined zero-denominator rate for January 9, rather than reporting zero retention for people whose window has not matured. The result is a defined historical observation summary, not by itself a causal claim about product changes.
@@ -122,12 +182,18 @@ Return event_id, user_id, event_before_cutoff, available_by_cutoff for events oc
 **Verify:** For sql-deep-06 Exercise 5, compare each record availability timestamp with the historical prediction cutoff even when its event timestamp is earlier; identify late-arriving evidence that would leak future knowledge.
 
 ```sql
-SELECT event_id,user_id,occurred_at<=TIMESTAMPTZ '2026-01-10T00:00Z' AS event_before_cutoff,
- available_at<=TIMESTAMPTZ '2026-01-10T00:00Z' AS available_by_cutoff
-FROM deep6_events
-WHERE occurred_at<=TIMESTAMPTZ '2026-01-10T00:00Z'
- AND available_at>TIMESTAMPTZ '2026-01-10T00:00Z'
-ORDER BY event_id;
+SELECT
+  event_id,
+  user_id,
+  occurred_at <= TIMESTAMPTZ '2026-01-10T00:00Z' AS event_before_cutoff,
+  available_at <= TIMESTAMPTZ '2026-01-10T00:00Z' AS available_by_cutoff
+FROM
+  deep6_events
+WHERE
+  occurred_at <= TIMESTAMPTZ '2026-01-10T00:00Z'
+  AND available_at > TIMESTAMPTZ '2026-01-10T00:00Z'
+ORDER BY
+  event_id;
 ```
 
 A later warehouse extract can contain records that describe an earlier period but were unavailable to the original decision. Filtering only occurrence time would leak that later knowledge into a replay or model feature. This diagnostic isolates late availability from genuinely future events, which require a different exclusion reason. Retaining both timestamps and dataset versions is necessary to reproduce historical evidence accurately.
@@ -144,31 +210,69 @@ Create a daily cohort spine for January 1 throughJanuary 10 and left-join the co
 
 ```sql
 WITH eligibility AS (
- SELECT u.*,u.signup_at::date AS cohort_day,
-        u.signup_at+INTERVAL '7 days' AS window_start,
-        u.signup_at+INTERVAL '8 days' AS window_end,
-        u.observed_through>=u.signup_at+INTERVAL '8 days'
-        AND TIMESTAMPTZ '2026-01-10T00:00Z'>=u.signup_at+INTERVAL '8 days' AS eligible
- FROM deep6_users AS u
-), labels AS (
- SELECT e.user_id,e.cohort_day,e.eligible,
- CASE WHEN e.eligible THEN EXISTS(
-  SELECT 1 FROM deep6_events AS a WHERE a.user_id=e.user_id
-   AND a.occurred_at>=e.window_start AND a.occurred_at<e.window_end
-   AND a.available_at<=TIMESTAMPTZ '2026-01-10T00:00Z'
- ) END AS retained
- FROM eligibility AS e
-), summary AS (
- SELECT cohort_day,count(*) AS total_users,count(*) FILTER(WHERE eligible) AS eligible_users,
- count(*) FILTER(WHERE retained) AS retained_users FROM labels GROUP BY cohort_day
-), spine AS (
- SELECT day::date AS cohort_day FROM generate_series(DATE '2026-01-01',DATE '2026-01-10',INTERVAL '1 day') AS day
+  SELECT
+    u.*,
+    u.signup_at::date AS cohort_day,
+    u.signup_at + INTERVAL '7 days' AS window_start,
+    u.signup_at + INTERVAL '8 days' AS window_end,
+    u.observed_through >= u.signup_at + INTERVAL '8 days'
+    AND TIMESTAMPTZ '2026-01-10T00:00Z' >= u.signup_at + INTERVAL '8 days' AS eligible
+  FROM
+    deep6_users AS u
+),
+labels AS (
+  SELECT
+    e.user_id,
+    e.cohort_day,
+    e.eligible,
+    CASE WHEN e.eligible THEN
+      EXISTS (
+        SELECT
+          1
+        FROM
+          deep6_events AS a
+        WHERE
+          a.user_id = e.user_id
+          AND a.occurred_at >= e.window_start
+          AND a.occurred_at < e.window_end
+          AND a.available_at <= TIMESTAMPTZ '2026-01-10T00:00Z')
+    END AS retained
+  FROM
+    eligibility AS e
+),
+summary AS (
+  SELECT
+    cohort_day,
+    count(*) AS total_users,
+    count(*) FILTER (WHERE eligible) AS eligible_users,
+    count(*) FILTER (WHERE retained) AS retained_users
+FROM
+  labels
+GROUP BY
+  cohort_day
+),
+spine AS (
+  SELECT
+    day::date AS cohort_day
+  FROM
+    generate_series(DATE '2026-01-01', DATE '2026-01-10', INTERVAL '1 day') AS day
 )
-SELECT s.cohort_day,
- CASE WHEN m.total_users IS NULL THEN 'empty' WHEN m.eligible_users=0 THEN 'pending_only' ELSE 'has_eligible' END AS cohort_state,
- COALESCE(m.eligible_users,0) AS eligible_users,
- m.retained_users::numeric/NULLIF(m.eligible_users,0) AS retention_rate
-FROM spine AS s LEFT JOIN summary AS m ON m.cohort_day=s.cohort_day ORDER BY s.cohort_day;
+SELECT
+  s.cohort_day,
+  CASE WHEN m.total_users IS NULL THEN
+    'empty'
+  WHEN m.eligible_users = 0 THEN
+    'pending_only'
+  ELSE
+    'has_eligible'
+  END AS cohort_state,
+  COALESCE(m.eligible_users, 0) AS eligible_users,
+  m.retained_users::numeric / NULLIF (m.eligible_users, 0) AS retention_rate
+FROM
+  spine AS s
+  LEFT JOIN summary AS m ON m.cohort_day = s.cohort_day
+ORDER BY
+  s.cohort_day;
 ```
 
 The spine defines the reporting domain independently of observed data, so dates without signups do not vanish. The left join preserves their absence as a NULL summary, which is distinguishable from a real cohort whose eligible count is zero. Coalescing only the count makes the table convenient without inventing a zero retention rate. This separation prevents dashboards from presenting no data, pending follow-up and observed nonretention as the same state.

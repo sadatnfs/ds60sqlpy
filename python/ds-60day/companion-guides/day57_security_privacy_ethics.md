@@ -52,6 +52,7 @@ PHONE = re.compile(
     r"(?:\(\d{3}\)|\d{3})[-.\s]?\d{3}[-.\s]?\d{4}"
 )
 
+
 def detected_kinds(text: str) -> set[str]:
     kinds: set[str] = set()
     if EMAIL.search(text):

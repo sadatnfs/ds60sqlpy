@@ -119,13 +119,26 @@ A definition can change after training, so its identity and version should remai
 
 ```python
 import numpy as np
+
+
 def choose(task):
-    if task['exact_computation']: return 'deterministic_tool','exact computation'
-    if task['fresh_evidence'] or task['citation_required']: return 'retrieval','current cited evidence'
-    if task['stable_behavior_gap'] and task['governed_examples']>=100: return 'adaptation_candidate','stable measured behavior'
-    return 'measure_baseline','prompt and evaluation first'
-task={'exact_computation':False,'fresh_evidence':True,'citation_required':True,'stable_behavior_gap':False,'governed_examples':0}
-assert choose(task)==('retrieval','current cited evidence')
+    if task["exact_computation"]:
+        return "deterministic_tool", "exact computation"
+    if task["fresh_evidence"] or task["citation_required"]:
+        return "retrieval", "current cited evidence"
+    if task["stable_behavior_gap"] and task["governed_examples"] >= 100:
+        return "adaptation_candidate", "stable measured behavior"
+    return "measure_baseline", "prompt and evaluation first"
+
+
+task = {
+    "exact_computation": False,
+    "fresh_evidence": True,
+    "citation_required": True,
+    "stable_behavior_gap": False,
+    "governed_examples": 0,
+}
+assert choose(task) == ("retrieval", "current cited evidence")
 ```
 
 **Expected:** route retrieval; reason current cited evidence.
@@ -135,8 +148,14 @@ assert choose(task)==('retrieval','current cited evidence')
 The assistant may explain the result, but the arithmetic should be performed by a bounded deterministic function. A fluent estimate is not an acceptable substitute for an exact total.
 
 ```python
-task={'exact_computation':True,'fresh_evidence':False,'citation_required':False,'stable_behavior_gap':False,'governed_examples':0}
-assert choose(task)==('deterministic_tool','exact computation')
+task = {
+    "exact_computation": True,
+    "fresh_evidence": False,
+    "citation_required": False,
+    "stable_behavior_gap": False,
+    "governed_examples": 0,
+}
+assert choose(task) == ("deterministic_tool", "exact computation")
 ```
 
 **Expected:** route deterministic_tool; reason exact computation.
@@ -146,9 +165,16 @@ assert choose(task)==('deterministic_tool','exact computation')
 The example count 120 exceeds the helper's teaching admission threshold 100; neither number is a universal sample-size recommendation. A real decision needs learning curves, label quality and held-out task evidence.
 
 ```python
-task={'exact_computation':False,'fresh_evidence':False,'citation_required':False,'stable_behavior_gap':True,'governed_examples':0}
-assert choose(task)[0]=='measure_baseline'
-task['governed_examples']=120; assert choose(task)[0]=='adaptation_candidate'
+task = {
+    "exact_computation": False,
+    "fresh_evidence": False,
+    "citation_required": False,
+    "stable_behavior_gap": True,
+    "governed_examples": 0,
+}
+assert choose(task)[0] == "measure_baseline"
+task["governed_examples"] = 120
+assert choose(task)[0] == "adaptation_candidate"
 ```
 
 **Expected:** first measure_baseline; then adaptation_candidate.

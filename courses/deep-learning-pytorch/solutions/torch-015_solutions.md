@@ -45,11 +45,11 @@ The question is: Load five paired ID/value records with batch size 2 and no shuf
 The loader preserves the final singleton by default. The ID conservation check catches missing or duplicated records that value-only statistics may hide.
 
 ```python
-dataset=torch.utils.data.TensorDataset(torch.arange(5),torch.arange(1,6,dtype=torch.float32))
-loader=torch.utils.data.DataLoader(dataset,batch_size=2,shuffle=False,num_workers=0)
-batches=list(loader)
-assert [len(ids) for ids,values in batches]==[2,2,1]
-assert torch.cat([ids for ids,values in batches]).tolist()==[0,1,2,3,4]
+dataset = torch.utils.data.TensorDataset(torch.arange(5), torch.arange(1, 6, dtype=torch.float32))
+loader = torch.utils.data.DataLoader(dataset, batch_size=2, shuffle=False, num_workers=0)
+batches = list(loader)
+assert [len(ids) for ids, values in batches] == [2, 2, 1]
+assert torch.cat([ids for ids, values in batches]).tolist() == [0, 1, 2, 3, 4]
 ```
 
 **Expected:** sizes 2, 2, 1 and IDs 0..4 exactly once.
@@ -63,8 +63,8 @@ The question is: Set drop_last True on the same fixture.
 The policy changes the effective epoch population. It may be useful for fixed shapes, but it must not be described as an identical traversal.
 
 ```python
-dropped=list(torch.utils.data.DataLoader(dataset,batch_size=2,drop_last=True,num_workers=0))
-assert len(dropped)==2 and torch.cat([ids for ids,values in dropped]).tolist()==[0,1,2,3]
+dropped = list(torch.utils.data.DataLoader(dataset, batch_size=2, drop_last=True, num_workers=0))
+assert len(dropped) == 2 and torch.cat([ids for ids, values in dropped]).tolist() == [0, 1, 2, 3]
 ```
 
 **Expected:** two batches; ID 4 omitted.
@@ -79,10 +79,14 @@ A new generator recreates the starting state. Reusing one already-consumed gener
 
 ```python
 def order(seed):
-    generator=torch.Generator().manual_seed(seed)
-    batches=torch.utils.data.DataLoader(dataset,batch_size=2,shuffle=True,generator=generator,num_workers=0)
-    return torch.cat([ids for ids,values in batches]).tolist()
-assert order(7)==order(7) and sorted(order(7))==list(range(5))
+    generator = torch.Generator().manual_seed(seed)
+    batches = torch.utils.data.DataLoader(
+        dataset, batch_size=2, shuffle=True, generator=generator, num_workers=0
+    )
+    return torch.cat([ids for ids, values in batches]).tolist()
+
+
+assert order(7) == order(7) and sorted(order(7)) == list(range(5))
 ```
 
 **Expected:** same permutation; all five IDs retained.
@@ -96,8 +100,8 @@ The question is: Pad sequences[2, 3] and[4] with zero while keeping lengths.
 Padding equalizes storage without inventing a valid token. Length metadata is needed for recurrent packing or loss masking later.
 
 ```python
-padded,lengths=collate([[2,3],[4]])
-assert padded.tolist()==[[2,3],[4,0]] and lengths.tolist()==[2,1]
+padded, lengths = collate([[2, 3], [4]])
+assert padded.tolist() == [[2, 3], [4, 0]] and lengths.tolist() == [2, 1]
 ```
 
 **Expected:** batch[[2, 3], [4, 0]] and lengths 2, 1.
@@ -111,9 +115,11 @@ The question is: Load values=2*IDs with shuffling and check each batch.
 Sampling one joint dataset keeps the components together. Two independently shuffled loaders would not preserve the pairing.
 
 ```python
-paired=torch.utils.data.TensorDataset(torch.arange(6),2*torch.arange(6))
-for ids,targets in torch.utils.data.DataLoader(paired,batch_size=2,shuffle=True,generator=torch.Generator().manual_seed(9),num_workers=0):
-    assert torch.equal(targets,2*ids)
+paired = torch.utils.data.TensorDataset(torch.arange(6), 2 * torch.arange(6))
+for ids, targets in torch.utils.data.DataLoader(
+    paired, batch_size=2, shuffle=True, generator=torch.Generator().manual_seed(9), num_workers=0
+):
+    assert torch.equal(targets, 2 * ids)
 ```
 
 **Expected:** every target equals twice its ID.
@@ -127,13 +133,19 @@ The question is: Pass an empty sequence and floating, Boolean, negative or overf
 Some applications can represent empty sequences, but this lesson's recurrent contract cannot. Rejecting the case early keeps an undefined loss denominator from appearing later.
 
 ```python
-try: collate([[],[1]])
-except ValueError: pass
-else: raise AssertionError('empty sequence accepted')
-for invalid in [[[2.7]],[[True]],[[-1]],[[2**63]]]:
-    try: collate(invalid)
-    except ValueError: pass
-    else: raise AssertionError('invalid token ID accepted')
+try:
+    collate([[], [1]])
+except ValueError:
+    pass
+else:
+    raise AssertionError("empty sequence accepted")
+for invalid in [[[2.7]], [[True]], [[-1]], [[2**63]]]:
+    try:
+        collate(invalid)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("invalid token ID accepted")
 ```
 
 **Expected:** ValueError before padding; token IDs must be nonnegative int64 integers.

@@ -105,8 +105,17 @@ The executable reference uses temporary tables and single-session sequences to v
 ### Example 1
 
 ```sql
-SELECT job_id,status,(status='ready') AS ready_predicate,(status<>'done') AS broad_predicate
-FROM deep5_jobs WHERE job_id IN(1,5,7) ORDER BY job_id;
+SELECT
+  job_id,
+  status,
+  (status = 'ready') AS ready_predicate,
+  (status <> 'done') AS broad_predicate
+FROM
+  deep5_jobs
+WHERE
+  job_id IN (1, 5, 7)
+ORDER BY
+  job_id;
 ```
 
 One row per job_id projects both predicates. Ready job 1 satisfies both, blocked job 5 satisfies only the broad predicate, and unknown-status job 7 yields NULL for both comparisons. The blocked row disproves the claim that not-done implies ready, independently of any physical query plan.
@@ -114,9 +123,17 @@ One row per job_id projects both predicates. Ready job 1 satisfies both, blocked
 ### Example 2
 
 ```sql
-SELECT job_id,priority FROM deep5_jobs
-WHERE tenant_id=1 AND status='ready'
-ORDER BY priority DESC,job_id;
+SELECT
+  job_id,
+  priority
+FROM
+  deep5_jobs
+WHERE
+  tenant_id = 1
+  AND status = 'ready'
+ORDER BY
+  priority DESC,
+  job_id;
 ```
 
 The result grain is one eligible job with columns job_id and priority. IDs 1,3,6 appear with priorities 10,5,5; job_id resolves the equal-priority tie. This is a read-only ordered candidate list, not a claim that these jobs were locked or assigned to a worker.

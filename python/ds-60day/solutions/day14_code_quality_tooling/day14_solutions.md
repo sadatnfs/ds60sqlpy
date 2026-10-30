@@ -138,8 +138,8 @@ Use formatter, linter, type checker, and tests as complementary evidence. Read a
 ```python
 def display(value: str | None) -> str:
     if value is None:
-        return "missing"      # Here value is None.
-    return value.upper()      # Here mypy narrows value to str.
+        return "missing"  # Here value is None.
+    return value.upper()  # Here mypy narrows value to str.
 ```
 
 ### Shared implementation for Exercises 5–7: Validate boundaries instead of silencing them
@@ -161,8 +161,7 @@ def load_string_map(path: str | Path) -> dict[str, str]:
     # Runtime validation earns a precise return type.
     if not isinstance(decoded, dict):
         raise ValueError("expected a JSON object")
-    if not all(isinstance(key, str) and isinstance(value, str)
-               for key, value in decoded.items()):
+    if not all(isinstance(key, str) and isinstance(value, str) for key, value in decoded.items()):
         raise ValueError("expected string keys and string values")
     return decoded
 ```

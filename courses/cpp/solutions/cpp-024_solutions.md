@@ -31,7 +31,7 @@ If a property passes for a wrong implementation, construct a concrete case that 
 ## Worked example 1
 
 ```cpp
-assert((reversed({1,2,3})==std::vector<int>{3,2,1}));
+assert((reversed({1, 2, 3}) == std::vector<int>{3, 2, 1}));
 ```
 
 Expected: The independent golden example fixes the intended meaning of reversal.
@@ -39,7 +39,8 @@ Expected: The independent golden example fixes the intended meaning of reversal.
 ## Worked example 2
 
 ```cpp
-assert(reversed(reversed(std::vector<int>{-1,2}))==std::vector<int>({-1,2}));
+assert(reversed(reversed(std::vector<int>{-1, 2})) ==
+       std::vector<int>({-1, 2}));
 ```
 
 Expected: Applying reversal twice restores the original sequence.

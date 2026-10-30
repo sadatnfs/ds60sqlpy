@@ -86,22 +86,31 @@ executable companion when you want a self-contained check.
 
 ```sql
 WITH monthly AS (
-  SELECT date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date AS month_start,
-         SUM(o.total_amount) AS revenue
-  FROM orders AS o
-  GROUP BY date_trunc('month', o.order_date AT TIME ZONE 'UTC')
-), compared AS (
-  SELECT month_start,
-         revenue,
-         LAG(revenue) OVER (ORDER BY month_start) AS previous_revenue
-  FROM monthly
+  SELECT
+    date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date AS month_start,
+    SUM(o.total_amount) AS revenue
+  FROM
+    orders AS o
+  GROUP BY
+    date_trunc('month', o.order_date AT TIME ZONE 'UTC')
+),
+compared AS (
+  SELECT
+    month_start,
+    revenue,
+    LAG(revenue) OVER (ORDER BY month_start) AS previous_revenue
+  FROM
+    monthly
 )
-SELECT month_start,
-       ROUND(revenue, 2) AS revenue,
-       ROUND(previous_revenue, 2) AS previous_revenue,
-       ROUND(revenue - previous_revenue, 2) AS change
-FROM compared
-ORDER BY month_start;
+SELECT
+  month_start,
+  ROUND(revenue, 2) AS revenue,
+  ROUND(previous_revenue, 2) AS previous_revenue,
+  ROUND(revenue - previous_revenue, 2) AS change
+FROM
+  compared
+ORDER BY
+  month_start;
 ```
 
 **Expected shape:** One row per observed month.
@@ -140,24 +149,29 @@ cardinality contract.
 
 ```sql
 WITH category_month AS (
-  SELECT date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date AS month_start,
-         p.category,
-         SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS revenue
-  FROM orders AS o
-  JOIN order_items AS oi
-    ON oi.order_id = o.order_id
-  JOIN products AS p
-    ON p.product_id = oi.product_id
-  GROUP BY date_trunc('month', o.order_date AT TIME ZONE 'UTC'), p.category
+  SELECT
+    date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date AS month_start,
+    p.category,
+    SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS revenue
+  FROM
+    orders AS o
+    JOIN order_items AS oi ON oi.order_id = o.order_id
+    JOIN products AS p ON p.product_id = oi.product_id
+  GROUP BY
+    date_trunc('month', o.order_date AT TIME ZONE 'UTC'),
+    p.category
 )
-SELECT month_start,
-       category,
-       ROUND(revenue, 2) AS revenue,
-       DENSE_RANK() OVER (
-         PARTITION BY month_start ORDER BY revenue DESC
-       ) AS revenue_rank
-FROM category_month
-ORDER BY month_start, revenue_rank, category;
+SELECT
+  month_start,
+  category,
+  ROUND(revenue, 2) AS revenue,
+  DENSE_RANK() OVER (PARTITION BY month_start ORDER BY revenue DESC) AS revenue_rank
+FROM
+  category_month
+ORDER BY
+  month_start,
+  revenue_rank,
+  category;
 ```
 
 **Expected shape:** One row per observed month/category.
@@ -197,24 +211,38 @@ cardinality contract.
 
 ```sql
 WITH category_month AS (
-  SELECT date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date AS month_start,
-         p.category,
-         SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS revenue
-  FROM orders AS o
-  JOIN order_items AS oi ON oi.order_id = o.order_id
-  JOIN products AS p ON p.product_id = oi.product_id
-  GROUP BY date_trunc('month', o.order_date AT TIME ZONE 'UTC'), p.category
-), ranked AS (
-  SELECT category_month.*,
-         DENSE_RANK() OVER (
-           PARTITION BY month_start ORDER BY revenue DESC
-         ) AS revenue_rank
-  FROM category_month
+  SELECT
+    date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date AS month_start,
+    p.category,
+    SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS revenue
+  FROM
+    orders AS o
+    JOIN order_items AS oi ON oi.order_id = o.order_id
+    JOIN products AS p ON p.product_id = oi.product_id
+  GROUP BY
+    date_trunc('month', o.order_date AT TIME ZONE 'UTC'),
+    p.category
+),
+ranked AS (
+  SELECT
+    category_month.*,
+    DENSE_RANK() OVER (PARTITION BY month_start ORDER BY revenue DESC) AS revenue_rank
+  FROM
+    category_month
 )
-SELECT month_start, category, ROUND(revenue, 2) AS revenue, revenue_rank
-FROM ranked
-WHERE revenue_rank <= 3
-ORDER BY month_start, revenue_rank, category;
+SELECT
+  month_start,
+  category,
+  ROUND(revenue, 2) AS revenue,
+  revenue_rank
+FROM
+  ranked
+WHERE
+  revenue_rank <= 3
+ORDER BY
+  month_start,
+  revenue_rank,
+  category;
 ```
 
 **Expected shape:** Top three revenue ranks for each observed month.
@@ -255,27 +283,29 @@ cardinality contract.
 
 ```sql
 WITH category_month AS (
-  SELECT date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date AS month_start,
-         p.category,
-         SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS revenue
-  FROM orders AS o
-  JOIN order_items AS oi ON oi.order_id = o.order_id
-  JOIN products AS p ON p.product_id = oi.product_id
-  GROUP BY date_trunc('month', o.order_date AT TIME ZONE 'UTC'), p.category
+  SELECT
+    date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date AS month_start,
+    p.category,
+    SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS revenue
+  FROM
+    orders AS o
+    JOIN order_items AS oi ON oi.order_id = o.order_id
+    JOIN products AS p ON p.product_id = oi.product_id
+  GROUP BY
+    date_trunc('month', o.order_date AT TIME ZONE 'UTC'),
+    p.category
 )
-SELECT month_start,
-       category,
-       ROUND(revenue, 2) AS revenue,
-       ROUND(
-         SUM(revenue) OVER (
-           PARTITION BY month_start
-           ORDER BY revenue DESC, category
-           ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
-         ) / NULLIF(SUM(revenue) OVER (PARTITION BY month_start), 0),
-         4
-       ) AS cumulative_revenue_share
-FROM category_month
-ORDER BY month_start, revenue DESC, category;
+SELECT
+  month_start,
+  category,
+  ROUND(revenue, 2) AS revenue,
+  ROUND(SUM(revenue) OVER (PARTITION BY month_start ORDER BY revenue DESC, category ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) / NULLIF (SUM(revenue) OVER (PARTITION BY month_start), 0), 4) AS cumulative_revenue_share
+FROM
+  category_month
+ORDER BY
+  month_start,
+  revenue DESC,
+  category;
 ```
 
 **Expected shape:** One row per month/category with final share equal to one.
@@ -315,34 +345,42 @@ cardinality contract.
 
 ```sql
 WITH bounds AS (
-  SELECT MIN(date_trunc('month', o.order_date AT TIME ZONE 'UTC'))::date AS first_month,
-         MAX(date_trunc('month', o.order_date AT TIME ZONE 'UTC'))::date AS last_month
-  FROM orders AS o
-), calendar AS (
-  SELECT generate_series(first_month, last_month, INTERVAL '1 month')::date AS month_start
-  FROM bounds
-), monthly AS (
-  SELECT date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date AS month_start,
-         SUM(o.total_amount) AS revenue
-  FROM orders AS o
-  GROUP BY date_trunc('month', o.order_date AT TIME ZONE 'UTC')
-), dense AS (
-  SELECT c.month_start,
-         COALESCE(m.revenue, 0) AS revenue
-  FROM calendar AS c
-  LEFT JOIN monthly AS m USING (month_start)
-)
-SELECT month_start,
-       ROUND(revenue, 2) AS revenue,
-       ROUND(
-         AVG(revenue) OVER (
-           ORDER BY month_start
-           ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
-         ),
-         2
-       ) AS moving_3_month_average
-FROM dense
-ORDER BY month_start;
+  SELECT
+    MIN(date_trunc('month', o.order_date AT TIME ZONE 'UTC'))::date AS first_month,
+    MAX(date_trunc('month', o.order_date AT TIME ZONE 'UTC'))::date AS last_month
+  FROM
+    orders AS o
+),
+calendar AS (
+  SELECT
+    generate_series(first_month, last_month, INTERVAL '1 month')::date AS month_start
+  FROM
+    bounds
+),
+monthly AS (
+  SELECT
+    date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date AS month_start,
+    SUM(o.total_amount) AS revenue
+  FROM
+    orders AS o
+  GROUP BY
+    date_trunc('month', o.order_date AT TIME ZONE 'UTC')
+),
+dense AS (
+  SELECT
+    c.month_start,
+    COALESCE(m.revenue, 0) AS revenue
+  FROM
+    calendar AS c
+    LEFT JOIN monthly AS m USING (month_start))
+SELECT
+  month_start,
+  ROUND(revenue, 2) AS revenue,
+  ROUND(AVG(revenue) OVER (ORDER BY month_start ROWS BETWEEN 2 PRECEDING AND CURRENT ROW), 2) AS moving_3_month_average
+FROM
+  dense
+ORDER BY
+  month_start;
 ```
 
 **Expected shape:** A continuous chronological month series.
@@ -382,29 +420,39 @@ cardinality contract.
 
 ```sql
 WITH monthly AS (
-  SELECT date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date AS month_start,
-         SUM(o.total_amount) AS revenue
-  FROM orders AS o
-  GROUP BY date_trunc('month', o.order_date AT TIME ZONE 'UTC')
-), running AS (
-  SELECT month_start,
-         SUM(revenue) OVER (
-           ORDER BY month_start
-           ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
-         ) AS cumulative_revenue
-  FROM monthly
-), final AS (
-  SELECT cumulative_revenue
-  FROM running
-  ORDER BY month_start DESC
+  SELECT
+    date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date AS month_start,
+    SUM(o.total_amount) AS revenue
+  FROM
+    orders AS o
+  GROUP BY
+    date_trunc('month', o.order_date AT TIME ZONE 'UTC')
+),
+running AS (
+  SELECT
+    month_start,
+    SUM(revenue) OVER (ORDER BY month_start ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS cumulative_revenue
+  FROM
+    monthly
+),
+final AS (
+  SELECT
+    cumulative_revenue
+  FROM
+    running
+  ORDER BY
+    month_start DESC
   LIMIT 1
 )
-SELECT ROUND(final.cumulative_revenue, 2) AS final_cumulative,
-       ROUND(SUM(o.total_amount), 2) AS independent_total,
-       ROUND(final.cumulative_revenue - SUM(o.total_amount), 2) AS difference
-FROM final
-CROSS JOIN orders AS o
-GROUP BY final.cumulative_revenue;
+SELECT
+  ROUND(final.cumulative_revenue, 2) AS final_cumulative,
+  ROUND(SUM(o.total_amount), 2) AS independent_total,
+  ROUND(final.cumulative_revenue - SUM(o.total_amount), 2) AS difference
+FROM
+  final
+  CROSS JOIN orders AS o
+GROUP BY
+  final.cumulative_revenue;
 ```
 
 **Expected shape:** One row with zero difference.

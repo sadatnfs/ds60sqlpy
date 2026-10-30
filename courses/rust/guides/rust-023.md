@@ -43,7 +43,11 @@ Read the operations in dependency order. Record which values exist before each l
 The implementation details remain behind its named boundary.
 
 ```rust
-mod domain { pub fn double(value: i32) -> i32 { value * 2 } }
+mod domain {
+    pub fn double(value: i32) -> i32 {
+        value * 2
+    }
+}
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
@@ -62,7 +66,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 Use changes name resolution, not execution or data ownership.
 
 ```rust
-mod domain { pub fn double(value: i32) -> i32 { value * 2 } }
+mod domain {
+    pub fn double(value: i32) -> i32 {
+        value * 2
+    }
+}
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {

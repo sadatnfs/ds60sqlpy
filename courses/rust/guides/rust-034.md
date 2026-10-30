@@ -43,8 +43,6 @@ Read the operations in dependency order. Record which values exist before each l
 The safety proof is tied to the pointer origin and exact length, not merely to the pointer being non-null.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let values = [2_i32, 3, 4];
@@ -65,8 +63,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 Unsafe should be justified by a real boundary, not used because pointer syntax appears advanced.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let values = [2, 3, 4];

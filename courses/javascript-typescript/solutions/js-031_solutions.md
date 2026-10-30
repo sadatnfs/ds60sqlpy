@@ -31,14 +31,18 @@ Task: Save the snippet and inspect the resulting DOM and visible title.
 The suspicious-looking string is a local inert test value. textContent preserves it as characters, so the browser does not create the image or interpret its event attribute.
 
 ```html
-<!doctype html><html lang='en'><meta charset='utf-8'><title>Literal text</title>
-<p id='title'></p><p id='status' role='status'></p>
-<script>
+<!doctype html>
+<html lang='en'
+  ><meta charset='utf-8' /><title>Literal text</title>
+  <p id='title'></p
+  ><p id='status' role='status'></p>
+  <script>
 const input = '<img src=x onerror=alert(1)>';
 const title = document.querySelector('#title');
 title.textContent = input;
 document.querySelector('#status').textContent = `Image elements: ${title.querySelectorAll('img').length}`;
-</script></html>
+</script></html
+>
 ```
 
 **Expected:** the angle-bracket text is visible; no img element is created.
@@ -52,8 +56,11 @@ Task: Use a same-origin relative link and reject a javascript URL under the show
 The policy acts on parsed components rather than textual resemblance. Serve this example over loopback HTTP; a file origin does not satisfy its HTTP navigation contract.
 
 ```html
-<!doctype html><html lang='en'><meta charset='utf-8'><title>URL policy</title><pre id='result'></pre>
-<script>
+<!doctype html>
+<html lang='en'
+  ><meta charset='utf-8' /><title>URL policy</title
+  ><pre id='result'></pre>
+  <script>
 function localLink(text) {
   const url = new URL(text, location.href);
   if (!['http:', 'https:'].includes(url.protocol) || url.origin !== location.origin || url.username || url.password) throw new Error('Local HTTP link required');
@@ -64,7 +71,8 @@ try { result.textContent = `Accepted: ${localLink('./help.html').pathname}`; }
 catch (error) { result.textContent = error.message; }
 try { localLink('javascript:alert(1)'); }
 catch { result.textContent += '\nRejected javascript URL'; }
-</script></html>
+</script></html
+>
 ```
 
 **Expected:** local help is accepted; javascript: is rejected.
@@ -78,8 +86,11 @@ Task: Inspect the reference HTML and load its external script and stylesheet und
 The policy permits only the local resource categories the fixture requires. It is a second layer around correct DOM code, not a substitute for that code.
 
 ```html
-<meta http-equiv='Content-Security-Policy' content="default-src 'none'; script-src 'self'; style-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
-<link rel='stylesheet' href='style.css'>
+<meta
+  http-equiv='Content-Security-Policy'
+  content="default-src 'none'; script-src 'self'; style-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'"
+/>
+<link rel='stylesheet' href='style.css' />
 <script src='app.js' defer></script>
 ```
 

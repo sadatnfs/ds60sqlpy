@@ -142,6 +142,7 @@ import sys
 
 first = json
 import json as second
+
 (first is second, sys.modules["json"] is first)
 ```
 
@@ -209,6 +210,7 @@ demo/
 # demo/formatters.py
 def title(text: str) -> str:
     return text.strip().title()
+
 
 # demo/__main__.py
 from demo.formatters import title

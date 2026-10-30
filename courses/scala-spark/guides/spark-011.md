@@ -53,21 +53,35 @@ import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 
-val schema = StructType(Seq(
-  StructField("event_id",LongType,false),
-  StructField("amount_cents",LongType,true)))
-val rows = Seq(Row(1L,0L),Row(2L,20L),Row(3L,null),Row(4L,20L))
-val raw = spark.createDataFrame(spark.sparkContext.parallelize(rows,2),schema)
+val schema = StructType(
+  Seq(StructField("event_id", LongType, false), StructField("amount_cents", LongType, true))
+)
+val rows = Seq(Row(1L, 0L), Row(2L, 20L), Row(3L, null), Row(4L, 20L))
+val raw = spark.createDataFrame(spark.sparkContext.parallelize(rows, 2), schema)
 ```
 
 ```python
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 
-schema = StructType([
-    StructField("event_id", LongType(), False),
-    StructField("amount_cents", LongType(), True),
-])
+schema = StructType(
+    [
+        StructField("event_id", LongType(), False),
+        StructField("amount_cents", LongType(), True),
+    ]
+)
 raw = spark.createDataFrame([(1, 0), (2, 20), (3, None), (4, 20)], schema=schema)
 ```
 
@@ -79,7 +93,15 @@ raw = spark.createDataFrame([(1, 0), (2, 20), (3, None), (4, 20)], schema=schema
 val driverValue: Boolean = 3 > 1
 val predicate: Column = col("amount_cents") > lit(10L)
 assert(driverValue)
-assert(raw.filter(predicate).select("event_id").orderBy("event_id").collect().map(_.getLong(0)).toSeq == Seq(2L,4L))
+assert(
+  raw
+    .filter(predicate)
+    .select("event_id")
+    .orderBy("event_id")
+    .collect()
+    .map(_.getLong(0))
+    .toSeq == Seq(2L, 4L)
+)
 println("A Column describes row-wise engine work")
 ```
 
@@ -87,7 +109,9 @@ println("A Column describes row-wise engine work")
 driver_value = 3 > 1
 predicate = F.col("amount_cents") > F.lit(10)
 assert driver_value is True
-assert [row.event_id for row in raw.filter(predicate).select("event_id").orderBy("event_id").collect()] == [2, 4]
+assert [
+    row.event_id for row in raw.filter(predicate).select("event_id").orderBy("event_id").collect()
+] == [2, 4]
 print("A Column describes row-wise engine work")
 ```
 
@@ -96,15 +120,22 @@ The driver Boolean is immediately available, while the Column is passed into fil
 ### Worked example 2
 
 ```scala
-val missing = raw.filter(col("amount_cents").isNull).select("event_id").collect().map(_.getLong(0)).toSeq
-val zero = raw.filter(col("amount_cents") === lit(0L)).select("event_id").collect().map(_.getLong(0)).toSeq
+val missing =
+  raw.filter(col("amount_cents").isNull).select("event_id").collect().map(_.getLong(0)).toSeq
+val zero =
+  raw.filter(col("amount_cents") === lit(0L)).select("event_id").collect().map(_.getLong(0)).toSeq
 assert(missing == Seq(3L) && zero == Seq(1L))
 println("Missing amount and observed zero are different rows")
 ```
 
 ```python
-missing = [row.event_id for row in raw.filter(F.col("amount_cents").isNull()).select("event_id").collect()]
-zero = [row.event_id for row in raw.filter(F.col("amount_cents") == F.lit(0)).select("event_id").collect()]
+missing = [
+    row.event_id for row in raw.filter(F.col("amount_cents").isNull()).select("event_id").collect()
+]
+zero = [
+    row.event_id
+    for row in raw.filter(F.col("amount_cents") == F.lit(0)).select("event_id").collect()
+]
 assert missing == [3] and zero == [1]
 print("Missing amount and observed zero are different rows")
 ```

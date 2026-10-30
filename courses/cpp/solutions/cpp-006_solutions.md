@@ -31,7 +31,7 @@ When a malformed suffix is accepted, print or inspect the consumed-character cou
 ## Worked example 1
 
 ```cpp
-assert(parse_int("42")==42);
+assert(parse_int("42") == 42);
 ```
 
 Expected: All two characters are consumed, yielding 42.

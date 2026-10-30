@@ -74,7 +74,10 @@ These commands create the private path without truncating an existing file:
 mkdir -p "$HOME/.config/ds60"
 chmod 700 "$HOME/.config/ds60"
 export PGPASSFILE="$HOME/.config/ds60/postgresql.pass"
-(umask 077; touch "$PGPASSFILE")
+(
+  umask 077
+  touch "$PGPASSFILE"
+)
 chmod 600 "$PGPASSFILE"
 ```
 

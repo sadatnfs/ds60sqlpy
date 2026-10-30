@@ -9,8 +9,8 @@ The header establishes policy before arrays exist; explicit dtype assertions mak
 **Expected:** The requested two distinct dtypes are retained under the declared X64 policy.
 
 ```python
-assert jnp.array([1.], dtype=jnp.float32).dtype == jnp.float32
-assert jnp.array([1.], dtype=jnp.float64).dtype == jnp.float64
+assert jnp.array([1.0], dtype=jnp.float32).dtype == jnp.float32
+assert jnp.array([1.0], dtype=jnp.float64).dtype == jnp.float64
 ```
 
 ## Exercise 2: Calculate epsilon
@@ -20,8 +20,8 @@ Epsilon describes spacing near one, not constant spacing over the whole number l
 **Expected:** 2^-23 and 2^-52.
 
 ```python
-assert float(jnp.finfo(jnp.float32).eps) == 2. ** -23
-assert float(jnp.finfo(jnp.float64).eps) == 2. ** -52
+assert float(jnp.finfo(jnp.float32).eps) == 2.0**-23
+assert float(jnp.finfo(jnp.float64).eps) == 2.0**-52
 ```
 
 ## Exercise 3: Use an absolute bound
@@ -31,7 +31,7 @@ Near zero, the relative term contributes no useful allowance.
 **Expected:** The explicit absolute-error check passes.
 
 ```python
-close(jnp.float64(1e-12), 0., atol=2e-12, rtol=0.)
+close(jnp.float64(1e-12), 0.0, atol=2e-12, rtol=0.0)
 ```
 
 ## Exercise 4: Keep counts exact
@@ -53,11 +53,11 @@ Adding a common offset changes log-normalization by that offset, while normalize
 **Expected:** The values differ by exactly 1000 within tolerance.
 
 ```python
-scores = jnp.array([0., math.log(3.)])
+scores = jnp.array([0.0, math.log(3.0)])
 a = jax.scipy.special.logsumexp(scores)
-b = jax.scipy.special.logsumexp(scores + 1000.)
-close(a, math.log(4.))
-close(b - a, 1000.)
+b = jax.scipy.special.logsumexp(scores + 1000.0)
+close(a, math.log(4.0))
+close(b - a, 1000.0)
 ```
 
 ## Exercise 6: Recognize invalid data

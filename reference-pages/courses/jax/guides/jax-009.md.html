@@ -214,13 +214,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Each column is a direction of change in the gradient. The cross terms agree because this polynomial is smooth.</p>
 <p><strong>Expected:</strong> [[2,1],[1,4]], symmetric.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-string">&quot;&quot;&quot;Small offline JAX mechanism investigation; CPU evidence only.&quot;&quot;&quot;</span>
+
 <span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
 
 <span class="syntax-keyword">import</span> math
 <span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 <span class="syntax-keyword">import</span> jax
 <span class="syntax-keyword">import</span> jax.numpy <span class="syntax-keyword">as</span> jnp
-
 
 
 <span class="syntax-comment"># Choose precision before creating arrays; the usual JAX default is 32 bit.</span>
@@ -230,12 +230,14 @@ jax<span class="syntax-operator">.</span>config<span class="syntax-operator">.</
 <span class="syntax-keyword">def</span> <span class="syntax-function">close</span><span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-10</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">1e-10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span>atol<span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span>rtol<span class="syntax-punctuation">)</span>
 
+
 <span class="syntax-keyword">def</span> <span class="syntax-function">quadratic</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     a<span class="syntax-punctuation">,</span> b <span class="syntax-operator">=</span> value
     <span class="syntax-keyword">return</span> a <span class="syntax-operator">*</span> a <span class="syntax-operator">+</span> a <span class="syntax-operator">*</span> b <span class="syntax-operator">+</span> <span class="syntax-number">2</span> <span class="syntax-operator">*</span> b <span class="syntax-operator">*</span> b
 
-point <span class="syntax-operator">=</span> jnp<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
-expected_hessian <span class="syntax-operator">=</span> jnp<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+
+point <span class="syntax-operator">=</span> jnp<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+expected_hessian <span class="syntax-operator">=</span> jnp<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
@@ -244,7 +246,7 @@ expected_hessian <span class="syntax-operator">=</span> jnp<span class="syntax-o
     close<span class="syntax-punctuation">(</span>hessian<span class="syntax-punctuation">,</span> expected_hessian<span class="syntax-punctuation">)</span>
     close<span class="syntax-punctuation">(</span>hessian<span class="syntax-punctuation">,</span> hessian<span class="syntax-operator">.</span>T<span class="syntax-punctuation">)</span>
 
-    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">jax-009</span><span class="syntax-string">&#x27;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">: 1 asserted cases passed</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">jax-009</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&quot;</span><span class="syntax-string">: 1 asserted cases passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
@@ -254,13 +256,13 @@ expected_hessian <span class="syntax-operator">=</span> jnp<span class="syntax-o
 <p>The product asks one linear-map question rather than requesting every Hessian entry.</p>
 <p><strong>Expected:</strong> [3,-2], matching H times the direction.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-string">&quot;&quot;&quot;Small offline JAX mechanism investigation; CPU evidence only.&quot;&quot;&quot;</span>
+
 <span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
 
 <span class="syntax-keyword">import</span> math
 <span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 <span class="syntax-keyword">import</span> jax
 <span class="syntax-keyword">import</span> jax.numpy <span class="syntax-keyword">as</span> jnp
-
 
 
 <span class="syntax-comment"># Choose precision before creating arrays; the usual JAX default is 32 bit.</span>
@@ -270,22 +272,24 @@ jax<span class="syntax-operator">.</span>config<span class="syntax-operator">.</
 <span class="syntax-keyword">def</span> <span class="syntax-function">close</span><span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-10</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">1e-10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span>atol<span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span>rtol<span class="syntax-punctuation">)</span>
 
+
 <span class="syntax-keyword">def</span> <span class="syntax-function">quadratic</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     a<span class="syntax-punctuation">,</span> b <span class="syntax-operator">=</span> value
     <span class="syntax-keyword">return</span> a <span class="syntax-operator">*</span> a <span class="syntax-operator">+</span> a <span class="syntax-operator">*</span> b <span class="syntax-operator">+</span> <span class="syntax-number">2</span> <span class="syntax-operator">*</span> b <span class="syntax-operator">*</span> b
 
-point <span class="syntax-operator">=</span> jnp<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
-expected_hessian <span class="syntax-operator">=</span> jnp<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+
+point <span class="syntax-operator">=</span> jnp<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+expected_hessian <span class="syntax-operator">=</span> jnp<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-comment"># Case 1: Ask only for the needed product</span>
-    direction <span class="syntax-operator">=</span> jnp<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    direction <span class="syntax-operator">=</span> jnp<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
     product <span class="syntax-operator">=</span> jax<span class="syntax-operator">.</span>jvp<span class="syntax-punctuation">(</span>jax<span class="syntax-operator">.</span>grad<span class="syntax-punctuation">(</span>quadratic<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span>point<span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span>direction<span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span>
-    close<span class="syntax-punctuation">(</span>product<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3.</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">2.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    close<span class="syntax-punctuation">(</span>product<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3.0</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
     close<span class="syntax-punctuation">(</span>product<span class="syntax-punctuation">,</span> expected_hessian <span class="syntax-operator">@</span> direction<span class="syntax-punctuation">)</span>
 
-    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">jax-009</span><span class="syntax-string">&#x27;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">: 1 asserted cases passed</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">jax-009</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&quot;</span><span class="syntax-string">: 1 asserted cases passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>

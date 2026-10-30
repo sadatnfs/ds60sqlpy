@@ -163,8 +163,9 @@ y = 3.0 + 2.0 * x
 coef, residuals, rank, singular_values = np.linalg.lstsq(X, y, rcond=None)
 condition = np.linalg.cond(X)
 max_prediction_error = np.max(np.abs(X @ coef - y))
-print({"rank": rank, "condition": condition,
-       "coef": coef, "prediction_error": max_prediction_error})
+print(
+    {"rank": rank, "condition": condition, "coef": coef, "prediction_error": max_prediction_error}
+)
 ```
 
 **Expected observation:** The condition number is huge and individual duplicate-feature coefficients are not trustworthy even though predictions are accurate.

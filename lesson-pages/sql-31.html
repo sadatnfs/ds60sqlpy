@@ -432,11 +432,26 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
 <p>These worked excerpts come from <code>sql/postgres-60day/day31_explain_analyze.sql</code>. Use <strong>Whole SQL lesson (psql)</strong> in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared <code>psql</code> routes are described above.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>total_amount <span class="syntax-keyword">FROM</span> orders o <span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>total_amount <span class="syntax-operator">&gt;</span> <span class="syntax-number">500</span><span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">EXPLAIN</span>
+<span class="syntax-keyword">SELECT</span>
+  o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span>
+  o<span class="syntax-punctuation">.</span>total_amount
+<span class="syntax-keyword">FROM</span>
+  orders o
+<span class="syntax-keyword">WHERE</span>
+  o<span class="syntax-punctuation">.</span>total_amount <span class="syntax-operator">&gt;</span> <span class="syntax-number">500</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 1 returns plan rows rather than business rows. The node tree is evidence about one execution strategy; it does not replace a correctness check on the underlying query.</p>
 <p><strong>Expected result/shape:</strong> Example 1 prints a plan tree, not business rows. Run the underlying <code>SELECT</code> separately and reconcile its <code>order_id</code> key set and row count over <code>orders</code>; then compare node estimates, actual rows × loops, buffers, and timing without requiring one fixed plan.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-keyword">ANALYZE</span> <span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>total_amount <span class="syntax-keyword">FROM</span> orders o <span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>total_amount <span class="syntax-operator">&gt;</span> <span class="syntax-number">500</span> <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">100</span><span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-keyword">ANALYZE</span>
+<span class="syntax-keyword">SELECT</span>
+  o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span>
+  o<span class="syntax-punctuation">.</span>total_amount
+<span class="syntax-keyword">FROM</span>
+  orders o
+<span class="syntax-keyword">WHERE</span>
+  o<span class="syntax-punctuation">.</span>total_amount <span class="syntax-operator">&gt;</span> <span class="syntax-number">500</span>
+<span class="syntax-keyword">LIMIT</span> <span class="syntax-number">100</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 2 returns plan rows rather than business rows. The node tree is evidence about one execution strategy; it does not replace a correctness check on the underlying query.</p>
 <p><strong>Expected result/shape:</strong> Example 2 prints a plan tree, not business rows. Run the underlying <code>SELECT</code> separately and reconcile its <code>order_id</code> key set and row count over <code>orders</code>; then compare node estimates, actual rows × loops, buffers, and timing without requiring one fixed plan.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -703,19 +718,39 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <p>These three queries ask for progressively smaller portions of <code>orders</code>.</p>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
-<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span> BUFFERS<span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> order_id<span class="syntax-punctuation">,</span> total_amount
-<span class="syntax-keyword">FROM</span> orders<span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span>
+  BUFFERS
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span>
+  order_id<span class="syntax-punctuation">,</span>
+  total_amount
+<span class="syntax-keyword">FROM</span>
+  orders<span class="syntax-punctuation">;</span>
 
-<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span> BUFFERS<span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> order_id<span class="syntax-punctuation">,</span> total_amount
-<span class="syntax-keyword">FROM</span> orders
-<span class="syntax-keyword">WHERE</span> total_amount <span class="syntax-operator">&gt;</span> <span class="syntax-number">500</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span>
+  BUFFERS
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span>
+  order_id<span class="syntax-punctuation">,</span>
+  total_amount
+<span class="syntax-keyword">FROM</span>
+  orders
+<span class="syntax-keyword">WHERE</span>
+  total_amount <span class="syntax-operator">&gt;</span> <span class="syntax-number">500</span><span class="syntax-punctuation">;</span>
 
-<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span> BUFFERS<span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> order_id<span class="syntax-punctuation">,</span> total_amount
-<span class="syntax-keyword">FROM</span> orders
-<span class="syntax-keyword">WHERE</span> total_amount <span class="syntax-operator">&gt;</span> <span class="syntax-number">500</span>
+<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span>
+  BUFFERS
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span>
+  order_id<span class="syntax-punctuation">,</span>
+  total_amount
+<span class="syntax-keyword">FROM</span>
+  orders
+<span class="syntax-keyword">WHERE</span>
+  total_amount <span class="syntax-operator">&gt;</span> <span class="syntax-number">500</span>
   <span class="syntax-keyword">AND</span> order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;30 days&#x27;</span><span class="syntax-punctuation">;</span></code></pre>
 <p>Compare <code>rows=</code> on each plan node and the top-level actual row count. A more selective predicate returns fewer rows, but it does not guarantee an index scan: the setup table is small and PostgreSQL can reasonably prefer a sequential scan.</p>
 <h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
@@ -733,22 +768,33 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
 <span class="syntax-keyword">EXPLAIN</span>
-<span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>quantity<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> units
-<span class="syntax-keyword">FROM</span> orders o
-<span class="syntax-keyword">JOIN</span> customers <span class="syntax-keyword">c</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>customer_id
-<span class="syntax-keyword">JOIN</span> order_items oi <span class="syntax-keyword">ON</span> oi<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>order_id
-<span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;90 days&#x27;</span>
-<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">SELECT</span>
+  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>quantity<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> units
+<span class="syntax-keyword">FROM</span>
+  orders o
+  <span class="syntax-keyword">JOIN</span> customers <span class="syntax-keyword">c</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>customer_id
+  <span class="syntax-keyword">JOIN</span> order_items oi <span class="syntax-keyword">ON</span> oi<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>order_id
+<span class="syntax-keyword">WHERE</span>
+  o<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;90 days&#x27;</span>
+<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">;</span>
 
-<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span> BUFFERS<span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>quantity<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> units
-<span class="syntax-keyword">FROM</span> orders o
-<span class="syntax-keyword">JOIN</span> customers <span class="syntax-keyword">c</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>customer_id
-<span class="syntax-keyword">JOIN</span> order_items oi <span class="syntax-keyword">ON</span> oi<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>order_id
-<span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;90 days&#x27;</span>
-<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">;</span></code></pre>
+<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span>
+  BUFFERS
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span>
+  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>quantity<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> units
+<span class="syntax-keyword">FROM</span>
+  orders o
+  <span class="syntax-keyword">JOIN</span> customers <span class="syntax-keyword">c</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>customer_id
+  <span class="syntax-keyword">JOIN</span> order_items oi <span class="syntax-keyword">ON</span> oi<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>order_id
+<span class="syntax-keyword">WHERE</span>
+  o<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;90 days&#x27;</span>
+<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">;</span></code></pre>
 <p>For each node, compare estimated <code>rows</code> with <code>actual ... rows</code>. Large, repeatable discrepancies can indicate stale statistics or correlated columns that ordinary statistics do not model well.</p>
 <h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
 <ul>

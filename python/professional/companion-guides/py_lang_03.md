@@ -103,10 +103,13 @@ generator. This fixture has three bounded values and no files or remote data.
 
 ```python
 pulled = []
+
+
 def measured():
     for value in (3, 5, 8):
         pulled.append(value)
         yield value
+
 
 stream = measured()
 assert pulled == []
@@ -135,6 +138,8 @@ exercise you will replace that model with a real local `StringIO` stream.
 from contextlib import closing
 
 events = []
+
+
 def owned_letters():
     events.append("open")
     try:
@@ -142,6 +147,7 @@ def owned_letters():
         yield "b"
     finally:
         events.append("close")
+
 
 with closing(owned_letters()) as letters:
     assert next(letters) == "a"

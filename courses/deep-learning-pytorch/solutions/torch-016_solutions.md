@@ -52,10 +52,11 @@ The question is: Use inputs 00, 01, 10, 11 and two rectified differences.
 Each hidden unit detects one direction of difference. ReLU prevents positive and negative contributions from cancelling.
 
 ```python
-x=torch.tensor([[0.,0.],[0.,1.],[1.,0.],[1.,1.]])
-w=torch.tensor([[1.,-1.],[-1.,1.]])
-h=F.relu(x@w); output=h.sum(1)
-assert output.tolist()==[0.,1.,1.,0.]
+x = torch.tensor([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]])
+w = torch.tensor([[1.0, -1.0], [-1.0, 1.0]])
+h = F.relu(x @ w)
+output = h.sum(1)
+assert output.tolist() == [0.0, 1.0, 1.0, 0.0]
 ```
 
 **Expected:** outputs 0, 1, 1, 0.
@@ -69,7 +70,7 @@ The question is: Sum the raw difference features without ReLU.
 The two columns are opposites, so a linear sum cancels. Adding more linear layers would not create the piecewise behavior needed for XOR.
 
 ```python
-assert (x@w).sum(1).tolist()==[0.,0.,0.,0.]
+assert (x @ w).sum(1).tolist() == [0.0, 0.0, 0.0, 0.0]
 ```
 
 **Expected:** all four outputs 0.
@@ -83,14 +84,16 @@ The question is: Set a 2-to-2 bias-free Linear weight to W.T, then check a separ
 The XOR matrix is symmetric, so that fixture alone cannot detect a missing transpose. The separate asymmetric matrix makes the two orientations produce different outputs and checks the Linear storage convention independently.
 
 ```python
-layer=nn.Linear(2,2,bias=False)
-with torch.no_grad(): layer.weight.copy_(w.T)
-torch.testing.assert_close(F.relu(layer(x)),h,atol=0,rtol=0)
-asymmetric=torch.tensor([[1.,2.],[3.,4.]])
-probe=nn.Linear(2,2,bias=False)
-with torch.no_grad(): probe.weight.copy_(asymmetric.T)
-torch.testing.assert_close(probe(x),x@asymmetric,atol=0,rtol=0)
-assert not torch.equal(x@asymmetric,x@asymmetric.T)
+layer = nn.Linear(2, 2, bias=False)
+with torch.no_grad():
+    layer.weight.copy_(w.T)
+torch.testing.assert_close(F.relu(layer(x)), h, atol=0, rtol=0)
+asymmetric = torch.tensor([[1.0, 2.0], [3.0, 4.0]])
+probe = nn.Linear(2, 2, bias=False)
+with torch.no_grad():
+    probe.weight.copy_(asymmetric.T)
+torch.testing.assert_close(probe(x), x @ asymmetric, atol=0, rtol=0)
+assert not torch.equal(x @ asymmetric, x @ asymmetric.T)
 ```
 
 **Expected:** module features equal manual features; the asymmetric probe distinguishes the two orientations.
@@ -104,8 +107,9 @@ The question is: Differentiate ReLU at-2 and 2.
 An inactive unit receives no derivative from these inputs. This is a connected zero, so adding retain_grad or detach would not repair the learning condition.
 
 ```python
-z=torch.tensor([-2.,2.],requires_grad=True); F.relu(z).sum().backward()
-assert z.grad.tolist()==[0.,1.]
+z = torch.tensor([-2.0, 2.0], requires_grad=True)
+F.relu(z).sum().backward()
+assert z.grad.tolist() == [0.0, 1.0]
 ```
 
 **Expected:** gradients 0 and 1.
@@ -119,9 +123,11 @@ The question is: Initialize both stored Linear rows identically and compare thei
 Separate parameter objects do not guarantee different representations. Initialization and training data must break unhelpful symmetries when the task requires distinct features.
 
 ```python
-symmetric=nn.Linear(2,2,bias=False)
-with torch.no_grad(): symmetric.weight.copy_(torch.tensor([[1.,2.],[1.,2.]]))
-features=symmetric(x); torch.testing.assert_close(features[:,0],features[:,1],atol=0,rtol=0)
+symmetric = nn.Linear(2, 2, bias=False)
+with torch.no_grad():
+    symmetric.weight.copy_(torch.tensor([[1.0, 2.0], [1.0, 2.0]]))
+features = symmetric(x)
+torch.testing.assert_close(features[:, 0], features[:, 1], atol=0, rtol=0)
 ```
 
 **Expected:** two unit outputs match on every row.
@@ -135,8 +141,8 @@ The question is: Evaluate the fixed construction at(.2, .8) and(.8, .2).
 The architecture computes a continuous function outside the binary fixture. Calling every output XOR would hide the input-domain assumption.
 
 ```python
-points=torch.tensor([[.2,.8],[.8,.2]])
-torch.testing.assert_close(F.relu(points@w).sum(1),torch.tensor([.6,.6]),atol=1e-6,rtol=0)
+points = torch.tensor([[0.2, 0.8], [0.8, 0.2]])
+torch.testing.assert_close(F.relu(points @ w).sum(1), torch.tensor([0.6, 0.6]), atol=1e-6, rtol=0)
 ```
 
 **Expected:** both.6; the function is absolute difference.

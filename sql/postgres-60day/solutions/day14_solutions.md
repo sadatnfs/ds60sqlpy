@@ -82,13 +82,17 @@ executable companion when you want a self-contained check.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT p.product_id,
-       p.price,
-       p.cost,
-       p.price - p.cost AS margin_amount,
-       ROUND((p.price - p.cost) / NULLIF(p.price, 0), 4) AS margin_rate
-FROM products AS p
-ORDER BY margin_rate DESC NULLS LAST, p.product_id;
+SELECT
+  p.product_id,
+  p.price,
+  p.cost,
+  p.price - p.cost AS margin_amount,
+  ROUND((p.price - p.cost) / NULLIF (p.price, 0), 4) AS margin_rate
+FROM
+  products AS p
+ORDER BY
+  margin_rate DESC NULLS LAST,
+  p.product_id;
 ```
 
 **Expected shape:** One row per product.
@@ -122,13 +126,19 @@ cardinality contract.
 - pattern predicate: matches text according to the chosen operator; escaping and case sensitivity are intentional semantics.
 
 ```sql
-SELECT raw_value,
-       CASE
-         WHEN btrim(raw_value) ~ '^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)$'
-           THEN btrim(raw_value)::numeric
-         ELSE NULL
-       END AS parsed_numeric
-FROM (VALUES ('42'), (' 3.14 '), ('-0.5'), ('many'), ('')) AS sample(raw_value);
+SELECT
+  raw_value,
+  CASE WHEN btrim(raw_value) ~ '^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)$' THEN
+    btrim(raw_value)::numeric
+  ELSE
+    NULL
+  END AS parsed_numeric
+FROM (
+  VALUES ('42'),
+    (' 3.14 '),
+    ('-0.5'),
+    ('many'),
+    ('')) AS sample (raw_value);
 ```
 
 **Expected shape:** One row per sample text.
@@ -161,11 +171,15 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT oi.order_id,
-       ROUND(SUM(oi.unit_price * oi.quantity * (1 - oi.discount)), 2) AS net_order_revenue
-FROM order_items AS oi
-GROUP BY oi.order_id
-ORDER BY oi.order_id;
+SELECT
+  oi.order_id,
+  ROUND(SUM(oi.unit_price * oi.quantity * (1 - oi.discount)), 2) AS net_order_revenue
+FROM
+  order_items AS oi
+GROUP BY
+  oi.order_id
+ORDER BY
+  oi.order_id;
 ```
 
 **Expected shape:** One row per order.
@@ -195,8 +209,9 @@ cardinality contract.
 - `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
 
 ```sql
-SELECT 1 / 4 AS integer_division,
-       1::numeric / 4 AS numeric_division;
+SELECT
+  1 / 4 AS integer_division,
+  1::numeric / 4 AS numeric_division;
 ```
 
 **Expected shape:** One row showing 0 and 0.25.
@@ -228,11 +243,10 @@ cardinality contract.
 - `NULLIF`: turns a prohibited denominator into NULL so division reports unknown instead of raising an error.
 
 ```sql
-SELECT ROUND(
-         SUM(p.amount) / NULLIF(COUNT(DISTINCT p.order_id), 0),
-         2
-       ) AS average_paid_amount_per_order
-FROM payments AS p;
+SELECT
+  ROUND(SUM(p.amount) / NULLIF (COUNT(DISTINCT p.order_id), 0), 2) AS average_paid_amount_per_order
+FROM
+  payments AS p;
 ```
 
 **Expected shape:** Exactly one summary row.
@@ -263,12 +277,12 @@ cardinality contract.
 - `FROM`: establishes the starting relation and therefore the initial row grain.
 
 ```sql
-SELECT SUM(ROUND(oi.unit_price * oi.quantity * (1 - oi.discount), 2)) AS sum_of_rounded_lines,
-       ROUND(SUM(oi.unit_price * oi.quantity * (1 - oi.discount)), 2) AS rounded_exact_total,
-       SUM(ROUND(oi.unit_price * oi.quantity * (1 - oi.discount), 2))
-         - ROUND(SUM(oi.unit_price * oi.quantity * (1 - oi.discount)), 2)
-         AS rounding_difference
-FROM order_items AS oi;
+SELECT
+  SUM(ROUND(oi.unit_price * oi.quantity * (1 - oi.discount), 2)) AS sum_of_rounded_lines,
+  ROUND(SUM(oi.unit_price * oi.quantity * (1 - oi.discount)), 2) AS rounded_exact_total,
+  SUM(ROUND(oi.unit_price * oi.quantity * (1 - oi.discount), 2)) - ROUND(SUM(oi.unit_price * oi.quantity * (1 - oi.discount)), 2) AS rounding_difference
+FROM
+  order_items AS oi;
 ```
 
 **Expected shape:** One row with two totals and their signed difference.

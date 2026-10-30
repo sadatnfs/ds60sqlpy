@@ -101,7 +101,8 @@ CREATE TABLE big_events (
   event_time TIMESTAMPTZ NOT NULL,
   customer_id INT,
   payload JSONB
-) PARTITION BY RANGE (event_time);
+)
+PARTITION BY RANGE (event_time);
 ```
 
 **How to read it:** Example 1 is data definition language (DDL). `psql` prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.
@@ -112,7 +113,7 @@ CREATE TABLE big_events (
 
 ```sql
 CREATE TABLE big_events_2025_01 PARTITION OF big_events
-  FOR VALUES FROM ('2025-01-01 00:00:00+00') TO ('2025-02-01 00:00:00+00');
+FOR VALUES FROM ('2025-01-01 00:00:00+00') TO ('2025-02-01 00:00:00+00');
 ```
 
 **How to read it:** Example 2 is data definition language (DDL). `psql` prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.

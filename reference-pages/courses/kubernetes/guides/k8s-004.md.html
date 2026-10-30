@@ -217,14 +217,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-tag">metadata</span><span class="syntax-punctuation">:</span>
   <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> lesson-reader
 <span class="syntax-tag">rules</span><span class="syntax-punctuation">:</span>
-<span class="syntax-punctuation">-</span> <span class="syntax-tag">apiGroups</span><span class="syntax-punctuation">:</span>
-  <span class="syntax-punctuation">-</span> apps
-  <span class="syntax-tag">resources</span><span class="syntax-punctuation">:</span>
-  <span class="syntax-punctuation">-</span> deployments
-  <span class="syntax-tag">resourceNames</span><span class="syntax-punctuation">:</span>
-  <span class="syntax-punctuation">-</span> hello
-  <span class="syntax-tag">verbs</span><span class="syntax-punctuation">:</span>
-  <span class="syntax-punctuation">-</span> get</code></pre>
+  <span class="syntax-punctuation">-</span> <span class="syntax-tag">apiGroups</span><span class="syntax-punctuation">:</span>
+      <span class="syntax-punctuation">-</span> apps
+    <span class="syntax-tag">resources</span><span class="syntax-punctuation">:</span>
+      <span class="syntax-punctuation">-</span> deployments
+    <span class="syntax-tag">resourceNames</span><span class="syntax-punctuation">:</span>
+      <span class="syntax-punctuation">-</span> hello
+    <span class="syntax-tag">verbs</span><span class="syntax-punctuation">:</span>
+      <span class="syntax-punctuation">-</span> get</code></pre>
 <p><strong>Expected:</strong> The only listed action is get on apps/Deployment hello in the binding namespace.</p>
 <h4 id="worked-example-2-reject-a-same-name-replacement">Worked example 2: Reject a same-name replacement<a class="heading-anchor" href="#worked-example-2-reject-a-same-name-replacement" aria-label="Link to this section">#</a></h4>
 <p>Synthetic receipt: namespace lesson-a, UID ns-1, owner owner-a. Fresh observation: namespace lesson-a, UID ns-2, owner owner-a. The name and label match, but the UID does not.</p>

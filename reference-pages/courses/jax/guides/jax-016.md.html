@@ -214,13 +214,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The inverse keep factor applies only to retained values; the realized mean need not equal one for 16 draws.</p>
 <p><strong>Expected:</strong> Every output is either zero or two.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-string">&quot;&quot;&quot;Small offline JAX mechanism investigation; CPU evidence only.&quot;&quot;&quot;</span>
+
 <span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
 
 <span class="syntax-keyword">import</span> math
 <span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 <span class="syntax-keyword">import</span> jax
 <span class="syntax-keyword">import</span> jax.numpy <span class="syntax-keyword">as</span> jnp
-
 
 
 <span class="syntax-comment"># Choose precision before creating arrays; the usual JAX default is 32 bit.</span>
@@ -230,16 +230,18 @@ jax<span class="syntax-operator">.</span>config<span class="syntax-operator">.</
 <span class="syntax-keyword">def</span> <span class="syntax-function">close</span><span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-10</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">1e-10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span>atol<span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span>rtol<span class="syntax-punctuation">)</span>
 
+
 <span class="syntax-keyword">def</span> <span class="syntax-function">validate_keep</span><span class="syntax-punctuation">(</span>keep<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
-    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> math<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>keep<span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> <span class="syntax-number">0.</span> <span class="syntax-operator">&lt;</span> keep <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">1.</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> math<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>keep<span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> <span class="syntax-number">0.0</span> <span class="syntax-operator">&lt;</span> keep <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">:</span>
         <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">keep probability must be in (0,1]</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 
 
-<span class="syntax-keyword">def</span> <span class="syntax-function">dropout</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> key<span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> training<span class="syntax-punctuation">,</span> keep<span class="syntax-operator">=</span><span class="syntax-number">.5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+<span class="syntax-keyword">def</span> <span class="syntax-function">dropout</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> key<span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> training<span class="syntax-punctuation">,</span> keep<span class="syntax-operator">=</span><span class="syntax-number">0.5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> training<span class="syntax-punctuation">:</span>
         <span class="syntax-keyword">return</span> values
     mask <span class="syntax-operator">=</span> jax<span class="syntax-operator">.</span>random<span class="syntax-operator">.</span>bernoulli<span class="syntax-punctuation">(</span>key<span class="syntax-punctuation">,</span> keep<span class="syntax-punctuation">,</span> values<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">)</span>
-    <span class="syntax-keyword">return</span> jnp<span class="syntax-operator">.</span>where<span class="syntax-punctuation">(</span>mask<span class="syntax-punctuation">,</span> values <span class="syntax-operator">/</span> keep<span class="syntax-punctuation">,</span> <span class="syntax-number">0.</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> jnp<span class="syntax-operator">.</span>where<span class="syntax-punctuation">(</span>mask<span class="syntax-punctuation">,</span> values <span class="syntax-operator">/</span> keep<span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">)</span>
+
 
 values <span class="syntax-operator">=</span> jnp<span class="syntax-operator">.</span>ones<span class="syntax-punctuation">(</span><span class="syntax-number">16</span><span class="syntax-punctuation">)</span>
 key <span class="syntax-operator">=</span> jax<span class="syntax-operator">.</span>random<span class="syntax-operator">.</span>key<span class="syntax-punctuation">(</span><span class="syntax-number">41</span><span class="syntax-punctuation">)</span>
@@ -247,11 +249,11 @@ key <span class="syntax-operator">=</span> jax<span class="syntax-operator">.</s
 
 <span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-comment"># Case 1: Inspect a training mask</span>
-    validate_keep<span class="syntax-punctuation">(</span><span class="syntax-number">.5</span><span class="syntax-punctuation">)</span>
-    result <span class="syntax-operator">=</span> dropout<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> key<span class="syntax-punctuation">,</span> training<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> keep<span class="syntax-operator">=</span><span class="syntax-number">.5</span><span class="syntax-punctuation">)</span>
-    <span class="syntax-keyword">assert</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">(</span>jnp<span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>result <span class="syntax-operator">==</span> <span class="syntax-number">0.</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">|</span> <span class="syntax-punctuation">(</span>result <span class="syntax-operator">==</span> <span class="syntax-number">2.</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    validate_keep<span class="syntax-punctuation">(</span><span class="syntax-number">0.5</span><span class="syntax-punctuation">)</span>
+    result <span class="syntax-operator">=</span> dropout<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> key<span class="syntax-punctuation">,</span> training<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> keep<span class="syntax-operator">=</span><span class="syntax-number">0.5</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">(</span>jnp<span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>result <span class="syntax-operator">==</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">|</span> <span class="syntax-punctuation">(</span>result <span class="syntax-operator">==</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
 
-    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">jax-016</span><span class="syntax-string">&#x27;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">: 1 asserted cases passed</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">jax-016</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&quot;</span><span class="syntax-string">: 1 asserted cases passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
@@ -261,13 +263,13 @@ key <span class="syntax-operator">=</span> jax<span class="syntax-operator">.</s
 <p>The evaluation branch ignores random sampling under this convention.</p>
 <p><strong>Expected:</strong> Both outputs equal the input exactly.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-string">&quot;&quot;&quot;Small offline JAX mechanism investigation; CPU evidence only.&quot;&quot;&quot;</span>
+
 <span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
 
 <span class="syntax-keyword">import</span> math
 <span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 <span class="syntax-keyword">import</span> jax
 <span class="syntax-keyword">import</span> jax.numpy <span class="syntax-keyword">as</span> jnp
-
 
 
 <span class="syntax-comment"># Choose precision before creating arrays; the usual JAX default is 32 bit.</span>
@@ -277,16 +279,18 @@ jax<span class="syntax-operator">.</span>config<span class="syntax-operator">.</
 <span class="syntax-keyword">def</span> <span class="syntax-function">close</span><span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-10</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">1e-10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span>atol<span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span>rtol<span class="syntax-punctuation">)</span>
 
+
 <span class="syntax-keyword">def</span> <span class="syntax-function">validate_keep</span><span class="syntax-punctuation">(</span>keep<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
-    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> math<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>keep<span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> <span class="syntax-number">0.</span> <span class="syntax-operator">&lt;</span> keep <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">1.</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> math<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>keep<span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> <span class="syntax-number">0.0</span> <span class="syntax-operator">&lt;</span> keep <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">:</span>
         <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">keep probability must be in (0,1]</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 
 
-<span class="syntax-keyword">def</span> <span class="syntax-function">dropout</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> key<span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> training<span class="syntax-punctuation">,</span> keep<span class="syntax-operator">=</span><span class="syntax-number">.5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+<span class="syntax-keyword">def</span> <span class="syntax-function">dropout</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> key<span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> training<span class="syntax-punctuation">,</span> keep<span class="syntax-operator">=</span><span class="syntax-number">0.5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> training<span class="syntax-punctuation">:</span>
         <span class="syntax-keyword">return</span> values
     mask <span class="syntax-operator">=</span> jax<span class="syntax-operator">.</span>random<span class="syntax-operator">.</span>bernoulli<span class="syntax-punctuation">(</span>key<span class="syntax-punctuation">,</span> keep<span class="syntax-punctuation">,</span> values<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">)</span>
-    <span class="syntax-keyword">return</span> jnp<span class="syntax-operator">.</span>where<span class="syntax-punctuation">(</span>mask<span class="syntax-punctuation">,</span> values <span class="syntax-operator">/</span> keep<span class="syntax-punctuation">,</span> <span class="syntax-number">0.</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> jnp<span class="syntax-operator">.</span>where<span class="syntax-punctuation">(</span>mask<span class="syntax-punctuation">,</span> values <span class="syntax-operator">/</span> keep<span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">)</span>
+
 
 values <span class="syntax-operator">=</span> jnp<span class="syntax-operator">.</span>ones<span class="syntax-punctuation">(</span><span class="syntax-number">16</span><span class="syntax-punctuation">)</span>
 key <span class="syntax-operator">=</span> jax<span class="syntax-operator">.</span>random<span class="syntax-operator">.</span>key<span class="syntax-punctuation">(</span><span class="syntax-number">41</span><span class="syntax-punctuation">)</span>
@@ -297,7 +301,7 @@ key <span class="syntax-operator">=</span> jax<span class="syntax-operator">.</s
     close<span class="syntax-punctuation">(</span>dropout<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> key<span class="syntax-punctuation">,</span> training<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> values<span class="syntax-punctuation">)</span>
     close<span class="syntax-punctuation">(</span>dropout<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> jax<span class="syntax-operator">.</span>random<span class="syntax-operator">.</span>key<span class="syntax-punctuation">(</span><span class="syntax-number">99</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> training<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> values<span class="syntax-punctuation">)</span>
 
-    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">jax-016</span><span class="syntax-string">&#x27;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">: 1 asserted cases passed</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">jax-016</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&quot;</span><span class="syntax-string">: 1 asserted cases passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>

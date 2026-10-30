@@ -432,19 +432,31 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
 <p>These worked excerpts come from <code>sql/postgres-60day/day29_pattern_matching.sql</code>. Use <strong>Whole SQL lesson (psql)</strong> in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared <code>psql</code> routes are described above.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span> full_name<span class="syntax-punctuation">,</span> email
-<span class="syntax-keyword">FROM</span> customers
-<span class="syntax-keyword">WHERE</span> email <span class="syntax-keyword">ILIKE</span> <span class="syntax-string">&#x27;%@example.com&#x27;</span> <span class="syntax-keyword">ESCAPE</span> <span class="syntax-string">&#x27;\&#x27;</span>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  customer_id<span class="syntax-punctuation">,</span>
+  full_name<span class="syntax-punctuation">,</span>
+  email
+<span class="syntax-keyword">FROM</span>
+  customers
+<span class="syntax-keyword">WHERE</span>
+  email <span class="syntax-keyword">ILIKE</span> <span class="syntax-string">&#x27;%@example.com&#x27;</span> <span class="syntax-keyword">ESCAPE</span> <span class="syntax-string">&#x27;\&#x27;</span>
   <span class="syntax-keyword">AND</span> full_name <span class="syntax-keyword">ILIKE</span> <span class="syntax-string">&#x27;customer %&#x27;</span> <span class="syntax-keyword">ESCAPE</span> <span class="syntax-string">&#x27;\&#x27;</span>
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> customer_id
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  customer_id
 <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">20</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 1: Start with <code>customers</code> in <code>FROM</code>/<code>JOIN</code>; let <code>WHERE</code> remove nonqualifying rows. The final <code>SELECT</code> displays <code>customer_id</code>, <code>full_name</code>, and <code>email</code>. <code>ORDER BY</code> determines presentation order and the final <code>LIMIT 20</code> caps displayed rows. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 1 returns one row per <code>customer_id</code>, capped at 20 rows with columns <code>customer_id</code>, <code>full_name</code>, and <code>email</code> from <code>customers</code>. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an <code>ORDER BY</code>, and inspect <code>NULL</code> only for columns this example can produce.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> product_id<span class="syntax-punctuation">,</span> name<span class="syntax-punctuation">,</span> category
-<span class="syntax-keyword">FROM</span> products
-<span class="syntax-keyword">WHERE</span> name <span class="syntax-operator">~</span> <span class="syntax-string">&#x27;^Product [0-9]{2,3}$&#x27;</span>
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> product_id
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  product_id<span class="syntax-punctuation">,</span>
+  name<span class="syntax-punctuation">,</span>
+  category
+<span class="syntax-keyword">FROM</span>
+  products
+<span class="syntax-keyword">WHERE</span>
+  name <span class="syntax-operator">~</span> <span class="syntax-string">&#x27;^Product [0-9]{2,3}$&#x27;</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  product_id
 <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">20</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 2: Start with <code>products</code> in <code>FROM</code>/<code>JOIN</code>; let <code>WHERE</code> remove nonqualifying rows. The final <code>SELECT</code> displays <code>product_id</code>, <code>name</code>, and <code>category</code>. <code>ORDER BY</code> determines presentation order and the final <code>LIMIT 20</code> caps displayed rows. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 2 returns one row per <code>product_id</code>, and <code>category</code>, capped at 20 rows with columns <code>product_id</code>, <code>name</code>, and <code>category</code> from <code>products</code>. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an <code>ORDER BY</code>, and inspect <code>NULL</code> only for columns this example can produce.</p>
@@ -762,11 +774,15 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li>pattern predicate: matches text according to the chosen operator; escaping and case sensitivity are intentional semantics.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name
-<span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span>
-<span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">ILIKE</span> <span class="syntax-string">&#x27;Customer 1%&#x27;</span>
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name
+<span class="syntax-keyword">FROM</span>
+  customers <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span>
+<span class="syntax-keyword">WHERE</span>
+  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">ILIKE</span> <span class="syntax-string">&#x27;Customer 1%&#x27;</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> Matching customer rows in stable ID order.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
@@ -790,11 +806,15 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li>pattern predicate: matches text according to the chosen operator; escaping and case sensitivity are intentional semantics.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>email
-<span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span>
-<span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>email <span class="syntax-operator">~</span> <span class="syntax-string">&#x27;^customer[0-9]+@example[.]com$&#x27;</span>
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>email
+<span class="syntax-keyword">FROM</span>
+  customers <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span>
+<span class="syntax-keyword">WHERE</span>
+  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>email <span class="syntax-operator">~</span> <span class="syntax-string">&#x27;^customer[0-9]+@example[.]com$&#x27;</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> Only matching non-null email rows.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
@@ -818,11 +838,15 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li>pattern predicate: matches text according to the chosen operator; escaping and case sensitivity are intentional semantics.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>event_id<span class="syntax-punctuation">,</span>
-       e<span class="syntax-punctuation">.</span>metadata <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;path&#x27;</span> <span class="syntax-keyword">AS</span> path
-<span class="syntax-keyword">FROM</span> events <span class="syntax-keyword">AS</span> e
-<span class="syntax-keyword">WHERE</span> e<span class="syntax-punctuation">.</span>metadata <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;path&#x27;</span> <span class="syntax-keyword">LIKE</span> <span class="syntax-string">&#x27;/p/%&#x27;</span>
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>event_id<span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  e<span class="syntax-punctuation">.</span>event_id<span class="syntax-punctuation">,</span>
+  e<span class="syntax-punctuation">.</span>metadata <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;path&#x27;</span> <span class="syntax-keyword">AS</span> path
+<span class="syntax-keyword">FROM</span>
+  events <span class="syntax-keyword">AS</span> e
+<span class="syntax-keyword">WHERE</span>
+  e<span class="syntax-punctuation">.</span>metadata <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;path&#x27;</span> <span class="syntax-keyword">LIKE</span> <span class="syntax-string">&#x27;/p/%&#x27;</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  e<span class="syntax-punctuation">.</span>event_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> Events whose path begins <code>/p/</code>.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-3">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-3" aria-label="Link to this section">#</a></h5>
@@ -847,11 +871,17 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li>pattern predicate: matches text according to the chosen operator; escaping and case sensitivity are intentional semantics.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> value
-<span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;100%&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;a_b&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;plain&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> sample<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">WHERE</span> value <span class="syntax-keyword">LIKE</span> <span class="syntax-string">&#x27;%\%%&#x27;</span> <span class="syntax-keyword">ESCAPE</span> <span class="syntax-string">&#x27;\&#x27;</span>
-   <span class="syntax-keyword">OR</span> value <span class="syntax-keyword">LIKE</span> <span class="syntax-string">&#x27;%\_%&#x27;</span> <span class="syntax-keyword">ESCAPE</span> <span class="syntax-string">&#x27;\&#x27;</span>
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> value<span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  value
+<span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;100%&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;a_b&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;plain&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> sample <span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">WHERE</span>
+  value <span class="syntax-keyword">LIKE</span> <span class="syntax-string">&#x27;%\%%&#x27;</span> <span class="syntax-keyword">ESCAPE</span> <span class="syntax-string">&#x27;\&#x27;</span>
+    <span class="syntax-keyword">OR</span> value <span class="syntax-keyword">LIKE</span> <span class="syntax-string">&#x27;%\_%&#x27;</span> <span class="syntax-keyword">ESCAPE</span> <span class="syntax-string">&#x27;\&#x27;</span>
+  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+    value<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> Only the two rows containing the requested literal symbols.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-4">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-4" aria-label="Link to this section">#</a></h5>
@@ -875,11 +905,15 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li>pattern predicate: matches text according to the chosen operator; escaping and case sensitivity are intentional semantics.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">substring</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">FROM</span> <span class="syntax-string">&#x27;^Customer ([0-9]+)$&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">integer</span> <span class="syntax-keyword">AS</span> name_number
-<span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span>
-<span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name <span class="syntax-operator">~</span> <span class="syntax-string">&#x27;^Customer [0-9]+$&#x27;</span>
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">substring</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">FROM</span> <span class="syntax-string">&#x27;^Customer ([0-9]+)$&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">integer</span> <span class="syntax-keyword">AS</span> name_number
+<span class="syntax-keyword">FROM</span>
+  customers <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span>
+<span class="syntax-keyword">WHERE</span>
+  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name <span class="syntax-operator">~</span> <span class="syntax-string">&#x27;^Customer [0-9]+$&#x27;</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One row per valid course customer name.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-5">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-5" aria-label="Link to this section">#</a></h5>
@@ -903,16 +937,22 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li>pattern predicate: matches text according to the chosen operator; escaping and case sensitivity are intentional semantics.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>email<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">CASE</span>
-         <span class="syntax-keyword">WHEN</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>email <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;missing&#x27;</span>
-         <span class="syntax-keyword">WHEN</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>email <span class="syntax-operator">~</span><span class="syntax-operator">*</span> <span class="syntax-string">&#x27;^[a-z0-9._%+-]+@example[.]com$&#x27;</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;course_example&#x27;</span>
-         <span class="syntax-keyword">WHEN</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>email <span class="syntax-operator">~</span><span class="syntax-operator">*</span> <span class="syntax-string">&#x27;^[a-z0-9._%+-]+@[a-z0-9.-]+[.][a-z]{2,}$&#x27;</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;other_valid_looking&#x27;</span>
-         <span class="syntax-keyword">ELSE</span> <span class="syntax-string">&#x27;malformed&#x27;</span>
-       <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> email_class
-<span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span>
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>email<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>email <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">THEN</span>
+    <span class="syntax-string">&#x27;missing&#x27;</span>
+  <span class="syntax-keyword">WHEN</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>email <span class="syntax-operator">~</span><span class="syntax-operator">*</span> <span class="syntax-string">&#x27;^[a-z0-9._%+-]+@example[.]com$&#x27;</span> <span class="syntax-keyword">THEN</span>
+    <span class="syntax-string">&#x27;course_example&#x27;</span>
+  <span class="syntax-keyword">WHEN</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>email <span class="syntax-operator">~</span><span class="syntax-operator">*</span> <span class="syntax-string">&#x27;^[a-z0-9._%+-]+@[a-z0-9.-]+[.][a-z]{2,}$&#x27;</span> <span class="syntax-keyword">THEN</span>
+    <span class="syntax-string">&#x27;other_valid_looking&#x27;</span>
+  <span class="syntax-keyword">ELSE</span>
+    <span class="syntax-string">&#x27;malformed&#x27;</span>
+  <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> email_class
+<span class="syntax-keyword">FROM</span>
+  customers <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> One row per customer with one classification.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-6">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-6" aria-label="Link to this section">#</a></h5>

@@ -151,8 +151,12 @@ values = pd.Series(np.tile([10, 12, 11, 14, 15, 13, 9], 4), index=index)
 horizon, season = 7, 7
 train, test = values.iloc[:-horizon], values.iloc[-horizon:]
 forecast = pd.Series(train.iloc[-season:].to_numpy(), index=test.index)
-print({"mae": mean_absolute_error(test, forecast),
-       "forecast_index_matches": forecast.index.equals(test.index)})
+print(
+    {
+        "mae": mean_absolute_error(test, forecast),
+        "forecast_index_matches": forecast.index.equals(test.index),
+    }
+)
 assert mean_absolute_error(test, forecast) == 0.0
 ```
 
@@ -169,11 +173,13 @@ Example A instead of reading it as unrelated syntax.
 import pandas as pd
 
 series = pd.Series([10.0, 20.0, 30.0, 40.0, 50.0], name="value")
-features = pd.DataFrame({
-    "target": series,
-    "lag_1": series.shift(1),
-    "trailing_mean_2": series.shift(1).rolling(2).mean(),
-})
+features = pd.DataFrame(
+    {
+        "target": series,
+        "lag_1": series.shift(1),
+        "trailing_mean_2": series.shift(1).rolling(2).mean(),
+    }
+)
 print(features)
 assert features.loc[3, "trailing_mean_2"] == 25.0
 ```

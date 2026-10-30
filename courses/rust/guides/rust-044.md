@@ -43,8 +43,6 @@ Read the operations in dependency order. Record which values exist before each l
 The raw coefficient alone does not state the decimal amount.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         use arrow::array::{Array, Decimal128Array};
@@ -65,8 +63,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 The logical type prevents a consumer from legitimately treating the same coefficient as seconds without conversion.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         use arrow::array::{Array, TimestampMillisecondArray};

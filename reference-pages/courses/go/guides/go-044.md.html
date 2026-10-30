@@ -251,8 +251,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>allowed<span class="syntax-punctuation">(</span>rule<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;lesson&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;pods&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;get&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;read&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The request is admitted by the local rule model.</p>
 <p>The rule expresses resource and namespace scope in addition to the verb. Matching only one component would overgrant access.</p>
 <h4 id="worked-example-2-reject-an-unneeded-mutation">Worked example 2: Reject an unneeded mutation<a class="heading-anchor" href="#worked-example-2-reject-an-unneeded-mutation" aria-label="Link to this section">#</a></h4>
@@ -299,8 +298,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span><span class="syntax-punctuation">!</span>allowed<span class="syntax-punctuation">(</span>rule<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;lesson&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;pods&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;delete&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;mutation&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The request is rejected.</p>
 <p>A read-oriented controller should not inherit deletion authority merely for convenience.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>

@@ -31,7 +31,8 @@ A view that worked once can still be dangling. Inspect owner scope and reallocat
 ## Worked example 1
 
 ```cpp
-std::vector<int> xs{2,4,6}; assert(sum_view(std::span<const int>(xs).subspan(1,2))==10);
+std::vector<int> xs{2, 4, 6};
+assert(sum_view(std::span<const int>(xs).subspan(1, 2)) == 10);
 ```
 
 Expected: The view of positions 1 and 2 sums to 10.
@@ -39,7 +40,8 @@ Expected: The view of positions 1 and 2 sums to 10.
 ## Worked example 2
 
 ```cpp
-std::string text="alpha"; std::string_view prefix(text.data(),2);
+std::string text = "alpha";
+std::string_view prefix(text.data(), 2);
 ```
 
 Expected: The borrowed prefix is al while text remains alive and stable.

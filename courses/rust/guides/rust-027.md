@@ -43,12 +43,13 @@ Read the operations in dependency order. Record which values exist before each l
 The scope guarantees the worker cannot outlive the owner of the borrowed vector.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let values = vec![2, 3, 4];
-        let total = std::thread::scope(|scope| { let handle = scope.spawn(|| values.iter().sum::<i32>()); handle.join().expect("fixture worker") });
+        let total = std::thread::scope(|scope| {
+            let handle = scope.spawn(|| values.iter().sum::<i32>());
+            handle.join().expect("fixture worker")
+        });
         assert_eq!(total, 9);
         assert_eq!(values.len(), 3);
     }
@@ -64,11 +65,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 No shared writable accumulator is needed for this decomposition.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
-        let total = std::thread::scope(|scope| { let left = scope.spawn(|| 2 + 3); let right = scope.spawn(|| 4 + 5); left.join().unwrap() + right.join().unwrap() });
+        let total = std::thread::scope(|scope| {
+            let left = scope.spawn(|| 2 + 3);
+            let right = scope.spawn(|| 4 + 5);
+            left.join().unwrap() + right.join().unwrap()
+        });
         assert_eq!(total, 14);
     }
     println!("rust-027: passed");

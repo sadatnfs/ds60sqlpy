@@ -23,9 +23,17 @@ The question is: Set a bias-free Dense weight to2 and predict on 1,3.
 A known fixed weight avoids making serialization success depend on a stochastic training result. The input shape and dtype are part of the inference contract.
 
 ```python
-model=tf.keras.Sequential([tf.keras.Input(shape=(1,)),tf.keras.layers.Dense(1,use_bias=False,kernel_initializer=tf.keras.initializers.Constant(2.))])
-x=np.array([[1.],[3.]],dtype='float32'); expected=model(x).numpy()
-np.testing.assert_array_equal(expected,[[2],[6]])
+model = tf.keras.Sequential(
+    [
+        tf.keras.Input(shape=(1,)),
+        tf.keras.layers.Dense(
+            1, use_bias=False, kernel_initializer=tf.keras.initializers.Constant(2.0)
+        ),
+    ]
+)
+x = np.array([[1.0], [3.0]], dtype="float32")
+expected = model(x).numpy()
+np.testing.assert_array_equal(expected, [[2], [6]])
 ```
 
 **Expected:** predictions2,6.
@@ -39,9 +47,12 @@ The question is: Save and reload the model in a temporary directory.
 Reconstruction must use the saved artifact rather than another reference to the original model object. File existence alone does not establish that deserialization works.
 
 ```python
-temporary=tempfile.TemporaryDirectory(); folder=Path(temporary.name); keras_path=folder/'model.keras'; model.save(keras_path)
-loaded=tf.keras.models.load_model(keras_path)
-np.testing.assert_allclose(loaded(x).numpy(),expected,atol=1e-6,rtol=0)
+temporary = tempfile.TemporaryDirectory()
+folder = Path(temporary.name)
+keras_path = folder / "model.keras"
+model.save(keras_path)
+loaded = tf.keras.models.load_model(keras_path)
+np.testing.assert_allclose(loaded(x).numpy(), expected, atol=1e-6, rtol=0)
 ```
 
 **Expected:** reloaded predictions match within 1e-6.
@@ -55,9 +66,10 @@ The question is: Call model.export into a different temporary subdirectory and l
 The export exposes inference behavior. Treating it as interchangeable with a resumable training object would overstate what the endpoint contains.
 
 ```python
-export_path=folder/'inference'; model.export(export_path)
-exported=tf.saved_model.load(str(export_path))
-np.testing.assert_allclose(exported.serve(tf.constant(x)).numpy(),expected,atol=1e-6,rtol=0)
+export_path = folder / "inference"
+model.export(export_path)
+exported = tf.saved_model.load(str(export_path))
+np.testing.assert_allclose(exported.serve(tf.constant(x)).numpy(), expected, atol=1e-6, rtol=0)
 ```
 
 **Expected:** serve returns the same predictions.
@@ -71,7 +83,7 @@ The question is: Load the .keras model and exported endpoint in a child interpre
 The child cannot reuse live model state from the parent. Keep the object returned by tf.saved_model.load in a named variable while calling serve: the exported function references resource variables owned by that object. Chaining load(...).serve(...) can let the owner disappear before its variables are used. Prediction parity therefore depends on both reconstructed state and correct object lifetime, not only a readable file.
 
 ```python
-program=textwrap.dedent("""
+program = textwrap.dedent("""
 import json,sys,tensorflow as tf
 x=tf.constant([[1.],[3.]])
 a=tf.keras.models.load_model(sys.argv[1])(x).numpy().tolist()
@@ -80,10 +92,18 @@ b=exported.serve(x).numpy().tolist()
 print(json.dumps([a,b]))
 """)
 compile(program, "checkpoint-child", "exec")
-result=subprocess.run([sys.executable,'-c',program,str(keras_path),str(export_path)],capture_output=True,text=True,check=False,timeout=60)
-if result.returncode: raise RuntimeError('child process failed: '+result.stderr)
-a,b=json.loads(result.stdout.strip().splitlines()[-1])
-np.testing.assert_allclose(a,expected,atol=1e-6,rtol=0); np.testing.assert_allclose(b,expected,atol=1e-6,rtol=0)
+result = subprocess.run(
+    [sys.executable, "-c", program, str(keras_path), str(export_path)],
+    capture_output=True,
+    text=True,
+    check=False,
+    timeout=60,
+)
+if result.returncode:
+    raise RuntimeError("child process failed: " + result.stderr)
+a, b = json.loads(result.stdout.strip().splitlines()[-1])
+np.testing.assert_allclose(a, expected, atol=1e-6, rtol=0)
+np.testing.assert_allclose(b, expected, atol=1e-6, rtol=0)
 ```
 
 **Expected:** both child outputs[[2],[6]].
@@ -97,8 +117,9 @@ The question is: Use three valid rows instead of two with the restored model.
 The feature width stays fixed while batch length varies. This confirms the intended leading-axis flexibility, not support for arbitrary feature dimensions.
 
 ```python
-new=loaded(np.array([[0.],[2.],[4.]],dtype='float32')).numpy()
-assert new.shape==(3,1); np.testing.assert_array_equal(new[:,0],[0,4,8])
+new = loaded(np.array([[0.0], [2.0], [4.0]], dtype="float32")).numpy()
+assert new.shape == (3, 1)
+np.testing.assert_array_equal(new[:, 0], [0, 4, 8])
 ```
 
 **Expected:** output shape(3,1), predictions0,4,8.
@@ -112,7 +133,8 @@ The question is: Clean the temporary directory and check both artifacts are abse
 The example has no persistent model output by design. A real release should choose an explicit learner-owned artifact destination and retain a rollback version instead.
 
 ```python
-temporary.cleanup(); assert not folder.exists()
+temporary.cleanup()
+assert not folder.exists()
 ```
 
 **Expected:** temporary directory absent.

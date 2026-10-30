@@ -33,7 +33,8 @@ If a consumer compiles only inside the library source tree, inspect public inclu
 ## Worked example 1
 
 ```cpp
-auto r=parse_record("7,125"); assert(r->id==7 && r->cents==125);
+auto r = parse_record("7,125");
+assert(r->id == 7 && r->cents == 125);
 ```
 
 Expected: The library produces an owned record with exact fields.

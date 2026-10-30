@@ -56,9 +56,16 @@ The question is: Use zero 3-by-2 queries/keys and values 2, 0; 0, 2; 6, 6.
 Each query averages its allowed values. The fixture exposes the meaning of both axes and the included diagonal.
 
 ```python
-q=torch.zeros((3,2),dtype=torch.float64); v=torch.tensor([[2.,0.],[0.,2.],[6.,6.]],dtype=torch.float64); allowed=torch.ones((3,3),dtype=torch.bool).tril()
-out=attention(q,q,v,allowed)
-torch.testing.assert_close(out,torch.tensor([[2.,0.],[1.,1.],[8/3,8/3]],dtype=torch.float64),atol=1e-12,rtol=0)
+q = torch.zeros((3, 2), dtype=torch.float64)
+v = torch.tensor([[2.0, 0.0], [0.0, 2.0], [6.0, 6.0]], dtype=torch.float64)
+allowed = torch.ones((3, 3), dtype=torch.bool).tril()
+out = attention(q, q, v, allowed)
+torch.testing.assert_close(
+    out,
+    torch.tensor([[2.0, 0.0], [1.0, 1.0], [8 / 3, 8 / 3]], dtype=torch.float64),
+    atol=1e-12,
+    rtol=0,
+)
 ```
 
 **Expected:** outputs 2, 0; 1, 1; \(\frac{8}{3}\), \(\frac{8}{3}\).
@@ -72,9 +79,13 @@ The question is: Change only the third value to 100, 200.
 The causal boundary is verified through behavior. A zeroed future weight plot would not detect every wrong normalization or upstream leak.
 
 ```python
-future=v.clone(); future[2]=torch.tensor([100.,200.]); changed=attention(q,q,future,allowed)
-torch.testing.assert_close(changed[:2],out[:2],atol=1e-12,rtol=0)
-torch.testing.assert_close(changed[2],torch.tensor([34.,202/3],dtype=torch.float64),atol=1e-12,rtol=0)
+future = v.clone()
+future[2] = torch.tensor([100.0, 200.0])
+changed = attention(q, q, future, allowed)
+torch.testing.assert_close(changed[:2], out[:2], atol=1e-12, rtol=0)
+torch.testing.assert_close(
+    changed[2], torch.tensor([34.0, 202 / 3], dtype=torch.float64), atol=1e-12, rtol=0
+)
 ```
 
 **Expected:** first two rows unchanged; last 34, \(\frac{202}{3}\).
@@ -88,8 +99,15 @@ The question is: Use \(Q=K\) rows 1, 0; 0, 1; 1, 1 and compare cuts 1..3.
 Nonuniform scores exercise query-key arithmetic and scaling. The checker rebuilds the computation on the shorter inputs.
 
 ```python
-non=torch.tensor([[1.,0.],[0.,1.],[1.,1.]],dtype=torch.float64); full=attention(non,non,v,allowed)
-for cut in range(1,4): torch.testing.assert_close(attention(non[:cut],non[:cut],v[:cut],allowed[:cut,:cut]),full[:cut],atol=1e-12,rtol=0)
+non = torch.tensor([[1.0, 0.0], [0.0, 1.0], [1.0, 1.0]], dtype=torch.float64)
+full = attention(non, non, v, allowed)
+for cut in range(1, 4):
+    torch.testing.assert_close(
+        attention(non[:cut], non[:cut], v[:cut], allowed[:cut, :cut]),
+        full[:cut],
+        atol=1e-12,
+        rtol=0,
+    )
 ```
 
 **Expected:** all prefix outputs match within 1e-12.
@@ -103,10 +121,14 @@ The question is: Set the second allowed row to False.
 Different kernels may return zero for fully masked rows, but this course contract rejects a query with no legal probability support. The policy is explicit and portable.
 
 ```python
-empty=allowed.clone(); empty[1]=False
-try: attention(q,q,v,empty)
-except ValueError: pass
-else: raise AssertionError('undefined row accepted')
+empty = allowed.clone()
+empty[1] = False
+try:
+    attention(q, q, v, empty)
+except ValueError:
+    pass
+else:
+    raise AssertionError("undefined row accepted")
 ```
 
 **Expected:** ValueError before the attention call.
@@ -120,8 +142,8 @@ The question is: Invert the allowed matrix to obtain a forbidden mask for APIs u
 Do not pass this inverted mask to functional SDPA under its boolean allowed convention. The translation depends on the exact API parameter.
 
 ```python
-forbidden=~allowed
-assert forbidden[0].tolist()==[False,True,True]
+forbidden = ~allowed
+assert forbidden[0].tolist() == [False, True, True]
 ```
 
 **Expected:** first forbidden row False, True, True.
@@ -135,8 +157,8 @@ The question is: Repeat functional attention with `dropout_p=0` and compare exac
 The helper fixes `dropout_p=0`, so its behavior is independent of the mode of any surrounding module. A training wrapper must pass its chosen probability explicitly.
 
 ```python
-again=attention(q,q,v,allowed)
-torch.testing.assert_close(again,out,atol=0,rtol=0)
+again = attention(q, q, v, allowed)
+torch.testing.assert_close(again, out, atol=0, rtol=0)
 ```
 
 **Expected:** repeated evaluation matches.

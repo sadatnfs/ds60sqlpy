@@ -100,11 +100,19 @@ These worked excerpts come from `sql/postgres-60day/day04_outer_joins.sql`. Use 
 ### Example 1
 
 ```sql
-SELECT c.customer_id, c.full_name, COUNT(o.order_id) AS orders
-FROM customers c
-LEFT JOIN orders o ON o.customer_id = c.customer_id
-GROUP BY c.customer_id, c.full_name
-ORDER BY orders ASC, c.customer_id
+SELECT
+  c.customer_id,
+  c.full_name,
+  COUNT(o.order_id) AS orders
+FROM
+  customers c
+  LEFT JOIN orders o ON o.customer_id = c.customer_id
+GROUP BY
+  c.customer_id,
+  c.full_name
+ORDER BY
+  orders ASC,
+  c.customer_id
 LIMIT 25;
 ```
 
@@ -115,11 +123,19 @@ LIMIT 25;
 ### Example 2
 
 ```sql
-SELECT p.product_id, p.name, COALESCE(SUM(oi.quantity),0) AS sold_qty
-FROM order_items oi
-RIGHT JOIN products p ON p.product_id = oi.product_id
-GROUP BY p.product_id, p.name
-ORDER BY sold_qty ASC, p.product_id
+SELECT
+  p.product_id,
+  p.name,
+  COALESCE(SUM(oi.quantity), 0) AS sold_qty
+FROM
+  order_items oi
+  RIGHT JOIN products p ON p.product_id = oi.product_id
+GROUP BY
+  p.product_id,
+  p.name
+ORDER BY
+  sold_qty ASC,
+  p.product_id
 LIMIT 25;
 ```
 

@@ -31,16 +31,19 @@ Task: Open the complete snippet, activate Add twice by pointer and once by keybo
 The browser supplies native button activation. The script handles click once rather than separately counting keydown and click, which could double-count keyboard use.
 
 ```html
-<!doctype html><html lang='en'><meta charset='utf-8'><title>Counter</title>
-<button type='button' id='add'>Add one</button>
-<p role='status' id='count'>Count: 0</p>
-<script>
+<!doctype html>
+<html lang='en'
+  ><meta charset='utf-8' /><title>Counter</title>
+  <button type='button' id='add'>Add one</button>
+  <p role='status' id='count'>Count: 0</p>
+  <script>
 const button = document.querySelector('#add');
 const output = document.querySelector('#count');
 if (!(button instanceof HTMLButtonElement) || !(output instanceof HTMLElement)) throw new Error('required controls missing');
 let count = 0;
 button.addEventListener('click', () => { count += 1; output.textContent = `Count: ${count}`; });
-</script></html>
+</script></html
+>
 ```
 
 **Expected:** count 3; button remains keyboard reachable.
@@ -54,10 +57,16 @@ Task: Click the nested word inside the list button in the snippet.
 The listener belongs to the list, but the original target can be a child inside the button. Delegation checks both the matching action and its containment in the component.
 
 ```html
-<!doctype html><html lang='en'><meta charset='utf-8'><title>Delegation</title>
-<ul id='list'><li><button type='button' data-id='A'><span>Choose A</span></button></li></ul>
-<p id='result' role='status'>No selection</p>
-<script>
+<!doctype html>
+<html lang='en'
+  ><meta charset='utf-8' /><title>Delegation</title>
+  <ul id='list'
+    ><li
+      ><button type='button' data-id='A'><span>Choose A</span></button></li
+    ></ul
+  >
+  <p id='result' role='status'>No selection</p>
+  <script>
 const list = document.querySelector('#list');
 const output = document.querySelector('#result');
 if (!(list instanceof HTMLUListElement) || !(output instanceof HTMLElement)) throw new Error('required nodes missing');
@@ -67,7 +76,8 @@ list.addEventListener('click', event => {
   if (!(button instanceof HTMLButtonElement) || !list.contains(button)) return;
   output.textContent = `Selected ${button.dataset.id}; target ${event.target.tagName}; currentTarget ${event.currentTarget.tagName}`;
 });
-</script></html>
+</script></html
+>
 ```
 
 **Expected:** selected A; target SPAN and currentTarget UL.

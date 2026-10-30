@@ -72,10 +72,13 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-residual=torch.tensor([1.,-1.,2.],dtype=torch.float64); zero=torch.zeros_like(residual)
-assert F.mse_loss(residual,zero,reduction='sum').item()==6
-assert F.mse_loss(residual,zero,reduction='mean').item()==2
-torch.testing.assert_close(F.mse_loss(residual,zero,reduction='none'),torch.tensor([1.,1.,4.],dtype=torch.float64))
+residual = torch.tensor([1.0, -1.0, 2.0], dtype=torch.float64)
+zero = torch.zeros_like(residual)
+assert F.mse_loss(residual, zero, reduction="sum").item() == 6
+assert F.mse_loss(residual, zero, reduction="mean").item() == 2
+torch.testing.assert_close(
+    F.mse_loss(residual, zero, reduction="none"), torch.tensor([1.0, 1.0, 4.0], dtype=torch.float64)
+)
 ```
 
 **Expected:** squared entries 1, 1, 4; sum 6; mean 2.
@@ -85,9 +88,9 @@ torch.testing.assert_close(F.mse_loss(residual,zero,reduction='none'),torch.tens
 Duplicating observations does not create new information, but it changes a sum objective. This matters when comparing updates across batch sizes.
 
 ```python
-duplicated=residual.repeat(2)
-assert F.mse_loss(duplicated,torch.zeros_like(duplicated),reduction='sum').item()==12
-assert F.mse_loss(duplicated,torch.zeros_like(duplicated),reduction='mean').item()==2
+duplicated = residual.repeat(2)
+assert F.mse_loss(duplicated, torch.zeros_like(duplicated), reduction="sum").item() == 12
+assert F.mse_loss(duplicated, torch.zeros_like(duplicated), reduction="mean").item() == 2
 ```
 
 **Expected:** sum 12; mean 2.
@@ -97,9 +100,11 @@ assert F.mse_loss(duplicated,torch.zeros_like(duplicated),reduction='mean').item
 The reduction scales every derivative by the same factor. A learning-rate comparison that ignores this can mistake an objective change for optimizer behavior.
 
 ```python
-a=residual.clone().requires_grad_(); gsum=torch.autograd.grad((a*a).sum(),a)[0]
-b=residual.clone().requires_grad_(); gmean=torch.autograd.grad((b*b).mean(),b)[0]
-torch.testing.assert_close(gsum,3*gmean,atol=1e-12,rtol=0)
+a = residual.clone().requires_grad_()
+gsum = torch.autograd.grad((a * a).sum(), a)[0]
+b = residual.clone().requires_grad_()
+gmean = torch.autograd.grad((b * b).mean(), b)[0]
+torch.testing.assert_close(gsum, 3 * gmean, atol=1e-12, rtol=0)
 ```
 
 **Expected:** sum gradient equals 3 times mean gradient.

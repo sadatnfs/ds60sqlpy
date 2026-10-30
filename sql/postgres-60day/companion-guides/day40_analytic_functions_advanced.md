@@ -101,18 +101,24 @@ These worked excerpts come from `sql/postgres-60day/day40_analytic_functions_adv
 
 ```sql
 WITH daily AS (
-  SELECT date_trunc('day', o.order_date) AS d,
-         SUM(o.total_amount) AS revenue
-  FROM orders o
-  GROUP BY 1
+  SELECT
+    date_trunc('day', o.order_date) AS d,
+    SUM(o.total_amount) AS revenue
+  FROM
+    orders o
+  GROUP BY
+    1
 )
-SELECT d,
-       revenue,
-       ROUND(AVG(revenue)  OVER (ORDER BY d ROWS BETWEEN 14 PRECEDING AND CURRENT ROW),2) AS ma15,
-       ROUND(STDDEV_SAMP(revenue) OVER (ORDER BY d ROWS BETWEEN 14 PRECEDING AND CURRENT ROW),2) AS sd15,
-       ROUND(VAR_POP(revenue)      OVER (ORDER BY d ROWS BETWEEN 14 PRECEDING AND CURRENT ROW),2) AS var15
-FROM daily
-ORDER BY d DESC
+SELECT
+  d,
+  revenue,
+  ROUND(AVG(revenue) OVER (ORDER BY d ROWS BETWEEN 14 PRECEDING AND CURRENT ROW), 2) AS ma15,
+  ROUND(STDDEV_SAMP(revenue) OVER (ORDER BY d ROWS BETWEEN 14 PRECEDING AND CURRENT ROW), 2) AS sd15,
+  ROUND(VAR_POP(revenue) OVER (ORDER BY d ROWS BETWEEN 14 PRECEDING AND CURRENT ROW), 2) AS var15
+FROM
+  daily
+ORDER BY
+  d DESC
 LIMIT 60;
 ```
 
@@ -124,17 +130,23 @@ LIMIT 60;
 
 ```sql
 WITH monthly AS (
-  SELECT date_trunc('month', o.order_date) AS m,
-         o.total_amount AS amt
-  FROM orders o
+  SELECT
+    date_trunc('month', o.order_date) AS m,
+    o.total_amount AS amt
+  FROM
+    orders o
 )
-SELECT m,
-       PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY amt) AS p50,
-       PERCENTILE_CONT(0.9) WITHIN GROUP (ORDER BY amt) AS p90,
-       PERCENTILE_CONT(0.99) WITHIN GROUP (ORDER BY amt) AS p99
-FROM monthly
-GROUP BY m
-ORDER BY m DESC
+SELECT
+  m,
+  PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY amt) AS p50,
+  PERCENTILE_CONT(0.9) WITHIN GROUP (ORDER BY amt) AS p90,
+  PERCENTILE_CONT(0.99) WITHIN GROUP (ORDER BY amt) AS p99
+FROM
+  monthly
+GROUP BY
+  m
+ORDER BY
+  m DESC
 LIMIT 12;
 ```
 

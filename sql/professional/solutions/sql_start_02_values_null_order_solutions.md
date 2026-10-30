@@ -23,7 +23,14 @@ rather than assuming a familiar-looking query must be right.
 ## Exercise 1: Inspect missingness
 
 ```sql
-SELECT shipment_id, weight, weight IS NULL AS is_missing FROM start_shipments ORDER BY shipment_id;
+SELECT
+  shipment_id,
+  weight,
+  weight IS NULL AS is_missing
+FROM
+  start_shipments
+ORDER BY
+  shipment_id;
 ```
 
 IS NULL asks about the marker itself, so it produces a definite Boolean for every shipment. Equality against NULL would return unknown instead of answering that question. Keeping shipment_id visible ties each Boolean to a real source fact. The known zero for ID 1 is present and therefore not missing. The assertion compares the identities of rows marked missing with the fixed fixture expectation. This is a stronger check than merely counting two missing values, because the wrong pair of rows could otherwise pass. Nothing in the query changes the source values; it is an inspection tool for building the later filter.
@@ -37,7 +44,15 @@ IS NULL asks about the marker itself, so it produces a definite Boolean for ever
 ## Exercise 2: Compare a complement with missingness
 
 ```sql
-SELECT shipment_id, weight FROM start_shipments WHERE NOT (weight > 0) ORDER BY shipment_id;
+SELECT
+  shipment_id,
+  weight
+FROM
+  start_shipments
+WHERE
+  NOT (weight > 0)
+ORDER BY
+  shipment_id;
 ```
 
 WHERE retains only true. For ID 1 the inner comparison is false, so NOT turns it true. For IDs 3 and 4 the inner comparison is true and NOT turns it false. For IDs 2 and 5 the unknown input stays unknown, which WHERE excludes. This explains why a positive filter and its negation need not partition all rows when missing values are possible. The check requires precisely ID 1. If the business asks for every shipment that is not known to be positive, it needs an explicitly different predicate that includes missing values, rather than assuming ordinary negation already does that.
@@ -51,7 +66,16 @@ WHERE retains only true. For ID 1 the inner comparison is false, so NOT turns it
 ## Exercise 3: Keep unknown and zero as separate categories
 
 ```sql
-SELECT shipment_id, weight FROM start_shipments WHERE weight = 0 OR weight IS NULL ORDER BY shipment_id;
+SELECT
+  shipment_id,
+  weight
+FROM
+  start_shipments
+WHERE
+  weight = 0
+  OR weight IS NULL
+ORDER BY
+  shipment_id;
 ```
 
 The OR joins two separate eligibility rules while the projection preserves the original measurement. ID 1 satisfies the equality comparison, and IDs 2 and 5 satisfy IS NULL. No imputation is needed just to select them. Replacing the displayed weight with zero would erase the difference the exercise is teaching. The assertion checks both the identities and the fact that two returned measurements remain unknown. This pattern is useful when routing zero and missing values to review while still allowing a reviewer to distinguish their causes. If the policy later treats the two categories differently, the original information remains available.
@@ -65,7 +89,15 @@ The OR joins two separate eligibility rules while the projection preserves the o
 ## Exercise 4: Specify every ordering decision
 
 ```sql
-SELECT shipment_id, weight FROM start_shipments ORDER BY weight DESC NULLS LAST, shipment_id LIMIT 2;
+SELECT
+  shipment_id,
+  weight
+FROM
+  start_shipments
+ORDER BY
+  weight DESC NULLS LAST,
+  shipment_id
+LIMIT 2;
 ```
 
 The sort places known large values first, then orders equal measurements by shipment_id. LIMIT restricts the already ordered result to two rows. NULLS LAST prevents unknown measurements from taking the leading positions under the chosen policy, but it is not a filter. Here two known maximum weights exist, so IDs 3 and 4 are returned. If the limit exceeded the number of known values, the query would eventually include unknowns; add IS NOT NULL when that is forbidden by the question. The assertion checks the ordered identity sequence, which captures both tie-breaking and selection rather than just checking that each weight is 5.
@@ -79,7 +111,14 @@ The sort places known large values first, then orders equal measurements by ship
 ## Exercise 5: Debug an empty text display policy
 
 ```sql
-SELECT shipment_id, label, COALESCE(NULLIF(label, ''), '(unlabeled)') AS display_label FROM start_shipments ORDER BY shipment_id;
+SELECT
+  shipment_id,
+  label,
+  COALESCE(NULLIF (label, ''), '(unlabeled)') AS display_label
+FROM
+  start_shipments
+ORDER BY
+  shipment_id;
 ```
 
 NULLIF compares label with the empty string and produces NULL only when they are equal. COALESCE then uses the fallback for either a converted empty string or an originally missing label. A present label such as ready or hold passes through. The original label is also selected so the display policy remains distinguishable from stored data. COALESCE alone does not treat empty text as missing. The assertion compares all five final labels rather than checking only one successful replacement. Whitespace-only labels would still pass through this specific policy; trimming them would be a separate normalization decision that should be stated and tested.
@@ -93,11 +132,19 @@ NULLIF compares label with the empty string and produces NULL only when they are
 ## Exercise 6: Transfer to a NULL-safe change detector
 
 ```sql
-SELECT shipment_id, old_weight, new_weight
-FROM (VALUES (10, NULL::numeric, NULL::numeric), (11, 0, NULL),
-             (12, 5, 5), (13, NULL, 0)) AS changes(shipment_id, old_weight, new_weight)
-WHERE old_weight IS DISTINCT FROM new_weight
-ORDER BY shipment_id;
+SELECT
+  shipment_id,
+  old_weight,
+  new_weight
+FROM (
+  VALUES (10, NULL::numeric, NULL::numeric),
+    (11, 0, NULL),
+    (12, 5, 5),
+    (13, NULL, 0)) AS changes (shipment_id, old_weight, new_weight)
+WHERE
+  old_weight IS DISTINCT FROM new_weight
+ORDER BY
+  shipment_id;
 ```
 
 The VALUES input names both versions explicitly and casts the initially unknown measurements to numeric. IS DISTINCT FROM tests whether the two states differ, treating a pair of NULLs as equal for this comparison. It catches known-to-unknown and unknown-to-known transitions that ordinary inequality would leave unknown. It does not invent a replacement weight. The output grain remains one changed shipment identified by shipment_id. The assertion checks IDs 11 and 13, so the unchanged known value and unchanged missing pair are both negative controls. This technique becomes useful for reconciliation and update detection later, but its meaning is already inspectable with these four rows.

@@ -45,9 +45,10 @@ The question is: Differentiate \({\left(w-2\right)}^{2}\) at \(w=0\) using `auto
 The analytic derivative provides an oracle independent of autograd. The negative sign means increasing w locally decreases the loss.
 
 ```python
-w=torch.tensor(0.,dtype=torch.float64,requires_grad=True); loss=(w-2)**2
-gradient=torch.autograd.grad(loss,w)[0]
-assert gradient.item()==-4 and loss.item()==4
+w = torch.tensor(0.0, dtype=torch.float64, requires_grad=True)
+loss = (w - 2) ** 2
+gradient = torch.autograd.grad(loss, w)[0]
+assert gradient.item() == -4 and loss.item() == 4
 ```
 
 **Expected:** derivative -4; loss 4.
@@ -61,9 +62,9 @@ The question is: Use \(h\in\{0.1, 0.01, 0.001\}\) at \(w=0\) and compare each sl
 The quadratic central difference is especially clean. This does not imply every function or every step size achieves the same tolerance.
 
 ```python
-for h in [.1,.01,.001]:
-    slope=central(lambda value:(value-2)**2,0.,h)
-    np.testing.assert_allclose(slope,-4,atol=1e-10,rtol=0)
+for h in [0.1, 0.01, 0.001]:
+    slope = central(lambda value: (value - 2) ** 2, 0.0, h)
+    np.testing.assert_allclose(slope, -4, atol=1e-10, rtol=0)
 ```
 
 **Expected:** all agree within 1e-10.
@@ -77,9 +78,9 @@ The question is: Use learning rate \(\eta=0.1\) and gradient \(-4\) at \(w=0\).
 The update includes direction, step size and old state. Treating the gradient as the parameter would implement a different algorithm.
 
 ```python
-updated=0.-.1*gradient.item()
-np.testing.assert_allclose(updated,.4,atol=1e-12,rtol=0)
-assert updated!=gradient.item()
+updated = 0.0 - 0.1 * gradient.item()
+np.testing.assert_allclose(updated, 0.4, atol=1e-12, rtol=0)
+assert updated != gradient.item()
 ```
 
 **Expected:** new parameter \(w=0.4\); the supplied gradient is \(-4\).
@@ -93,9 +94,10 @@ The question is: Differentiate the same objective at \(w=2\).
 A zero derivative is a numerical result on a connected graph. It must not be confused with a missing gradient path.
 
 ```python
-optimum=torch.tensor(2.,dtype=torch.float64,requires_grad=True)
-value=(optimum-2)**2; derivative=torch.autograd.grad(value,optimum)[0]
-assert value.item()==0 and derivative.item()==0
+optimum = torch.tensor(2.0, dtype=torch.float64, requires_grad=True)
+value = (optimum - 2) ** 2
+derivative = torch.autograd.grad(value, optimum)[0]
+assert value.item() == 0 and derivative.item() == 0
 ```
 
 **Expected:** gradient 0 and loss 0.
@@ -109,7 +111,7 @@ The question is: Check that `autograd.grad` did not accumulate into the `leaf.gr
 PyTorch offers both returned-gradient and accumulating-backward interfaces. Knowing which one is used prevents stale or missing update state.
 
 ```python
-assert w.grad is None and gradient.item()==-4
+assert w.grad is None and gradient.item() == -4
 ```
 
 **Expected:** `w.grad` is None despite a returned derivative.
@@ -123,13 +125,19 @@ The question is: Pass \(h=0\), negative h and a function returning infinity to t
 Validation distinguishes an unusable numerical check from a disagreement with the analytic derivative. Widening a tolerance cannot repair undefined input.
 
 ```python
-for function,h in [(lambda x:x*x,0),(lambda x:x*x,-.1),(lambda x:float('inf'),.1)]:
-    try: central(function,0.,h)
-    except ValueError: pass
-    else: raise AssertionError('invalid derivative probe accepted')
-try: central(lambda value:0.0,float('nan'),.1)
-except ValueError: pass
-else: raise AssertionError('nonfinite probe point accepted')
+for function, h in [(lambda x: x * x, 0), (lambda x: x * x, -0.1), (lambda x: float("inf"), 0.1)]:
+    try:
+        central(function, 0.0, h)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("invalid derivative probe accepted")
+try:
+    central(lambda value: 0.0, float("nan"), 0.1)
+except ValueError:
+    pass
+else:
+    raise AssertionError("nonfinite probe point accepted")
 ```
 
 **Expected:** all raise ValueError.

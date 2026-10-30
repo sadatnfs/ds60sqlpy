@@ -50,13 +50,12 @@ import java.util.*;
 
 public class Main {
 
-    public static void main(String[] args) throws Exception {
-        String text = null;
-        boolean nonempty = text != null && !text.isEmpty();
-        assert !nonempty;
-    }
+  public static void main(String[] args) throws Exception {
+    String text = null;
+    boolean nonempty = text != null && !text.isEmpty();
+    assert !nonempty;
+  }
 }
-
 ```
 
 **Expected:** condition false with no NullPointerException.
@@ -70,18 +69,21 @@ import java.util.*;
 
 public class Main {
 
-    public static void main(String[] args) throws Exception {
-        String text = null;
-        boolean nonempty = text != null && !text.isEmpty();
-        assert !nonempty;
+  public static void main(String[] args) throws Exception {
+    String text = null;
+    boolean nonempty = text != null && !text.isEmpty();
+    assert !nonempty;
 
-        int[] values = {2, 4, 6}; int sum = 0;
-        List<Integer> prefixes = new ArrayList<>();
-        for (int i = 0; i < values.length; i++) { sum += values[i]; prefixes.add(sum); }
-        assert prefixes.equals(List.of(2, 6, 12)) && sum == 12;
+    int[] values = { 2, 4, 6 };
+    int sum = 0;
+    List<Integer> prefixes = new ArrayList<>();
+    for (int i = 0; i < values.length; i++) {
+      sum += values[i];
+      prefixes.add(sum);
     }
+    assert prefixes.equals(List.of(2, 6, 12)) && sum == 12;
+  }
 }
-
 ```
 
 **Expected:** prefix sums2,6,12;final12.

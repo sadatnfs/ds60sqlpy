@@ -101,23 +101,41 @@ These worked excerpts come from `sql/postgres-60day/day26_ctes_with_windows.sql`
 
 ```sql
 WITH line AS (
-  SELECT o.order_id, o.customer_id, o.order_date,
-         SUM(oi.unit_price*oi.quantity*(1-oi.discount)) AS order_total
-  FROM orders o
-  JOIN order_items oi ON oi.order_id = o.order_id
-  GROUP BY o.order_id, o.customer_id, o.order_date
-), ranked AS (
-  SELECT line.*,
-         RANK() OVER (
-           PARTITION BY customer_id
-           ORDER BY order_total DESC
-         ) AS rnk
-  FROM line
+  SELECT
+    o.order_id,
+    o.customer_id,
+    o.order_date,
+    SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS order_total
+  FROM
+    orders o
+    JOIN order_items oi ON oi.order_id = o.order_id
+  GROUP BY
+    o.order_id,
+    o.customer_id,
+    o.order_date
+),
+ranked AS (
+  SELECT
+    line.*,
+    RANK() OVER (PARTITION BY customer_id ORDER BY order_total DESC) AS rnk
+  FROM
+    line
 )
-SELECT customer_id, order_id, order_date, order_total, rnk
-FROM ranked
-WHERE rnk <= 3
-ORDER BY customer_id, rnk, order_total DESC, order_id;
+SELECT
+  customer_id,
+  order_id,
+  order_date,
+  order_total,
+  rnk
+FROM
+  ranked
+WHERE
+  rnk <= 3
+ORDER BY
+  customer_id,
+  rnk,
+  order_total DESC,
+  order_id;
 ```
 
 **How to read it:** Example 1: Start with `orders`, and `order_items` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows; let `GROUP BY` collapse rows to its grouping keys; let each `OVER` expression calculate across related rows without collapsing them. The final `SELECT` displays `customer_id`, `order_id`, `order_date`, `order_total`, and `rnk`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
@@ -128,25 +146,43 @@ ORDER BY customer_id, rnk, order_total DESC, order_id;
 
 ```sql
 -- The same topic query shown as a plan instead of business rows.
-EXPLAIN (COSTS OFF)
-WITH line AS (
-  SELECT o.order_id, o.customer_id, o.order_date,
-         SUM(oi.unit_price*oi.quantity*(1-oi.discount)) AS order_total
-  FROM orders o
-  JOIN order_items oi ON oi.order_id = o.order_id
-  GROUP BY o.order_id, o.customer_id, o.order_date
-), ranked AS (
-  SELECT line.*,
-         RANK() OVER (
-           PARTITION BY customer_id
-           ORDER BY order_total DESC
-         ) AS rnk
-  FROM line
+EXPLAIN (
+  COSTS OFF
+) WITH line AS (
+  SELECT
+    o.order_id,
+    o.customer_id,
+    o.order_date,
+    SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS order_total
+  FROM
+    orders o
+    JOIN order_items oi ON oi.order_id = o.order_id
+  GROUP BY
+    o.order_id,
+    o.customer_id,
+    o.order_date),
+  ranked AS (
+    SELECT
+      line.*,
+      RANK() OVER (PARTITION BY customer_id ORDER BY order_total DESC) AS rnk
+    FROM
+      line
 )
-SELECT customer_id, order_id, order_date, order_total, rnk
-FROM ranked
-WHERE rnk <= 3
-ORDER BY customer_id, rnk, order_total DESC, order_id;
+  SELECT
+    customer_id,
+    order_id,
+    order_date,
+    order_total,
+    rnk
+  FROM
+    ranked
+  WHERE
+    rnk <= 3
+  ORDER BY
+    customer_id,
+    rnk,
+    order_total DESC,
+    order_id;
 ```
 
 **How to read it:** Example 2 is executed by `psql` as part of the complete lesson. Expected notices are evidence; an unexpected error stops the script.

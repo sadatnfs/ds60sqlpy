@@ -39,7 +39,8 @@ Expected: The owner receives explicit evidence that the worker reached the named
 ## Worked example 2
 
 ```cpp
-t.join(); assert(count==200);
+t.join();
+assert(count == 200);
 ```
 
 Expected: Two sets of 100 atomic increments must total 200 in each trial.

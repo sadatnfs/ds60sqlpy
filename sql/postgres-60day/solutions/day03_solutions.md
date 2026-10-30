@@ -82,16 +82,19 @@ executable companion when you want a self-contained check.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT o.order_id,
-       o.order_date,
-       o.total_amount,
-       c.customer_id,
-       c.full_name,
-       c.country
-FROM orders AS o
-JOIN customers AS c
-  ON c.customer_id = o.customer_id
-ORDER BY o.order_date DESC, o.order_id DESC;
+SELECT
+  o.order_id,
+  o.order_date,
+  o.total_amount,
+  c.customer_id,
+  c.full_name,
+  c.country
+FROM
+  orders AS o
+  JOIN customers AS c ON c.customer_id = o.customer_id
+ORDER BY
+  o.order_date DESC,
+  o.order_id DESC;
 ```
 
 **Expected shape:** One row per order.
@@ -124,17 +127,20 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT oi.order_item_id,
-       oi.order_id,
-       p.product_id,
-       p.name,
-       p.category,
-       oi.quantity,
-       ROUND(oi.unit_price * oi.quantity * (1 - oi.discount), 2) AS line_revenue
-FROM order_items AS oi
-JOIN products AS p
-  ON p.product_id = oi.product_id
-ORDER BY oi.order_id, oi.order_item_id;
+SELECT
+  oi.order_item_id,
+  oi.order_id,
+  p.product_id,
+  p.name,
+  p.category,
+  oi.quantity,
+  ROUND(oi.unit_price * oi.quantity * (1 - oi.discount), 2) AS line_revenue
+FROM
+  order_items AS oi
+  JOIN products AS p ON p.product_id = oi.product_id
+ORDER BY
+  oi.order_id,
+  oi.order_item_id;
 ```
 
 **Expected shape:** One row per order item.
@@ -167,19 +173,21 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT p.payment_id,
-       p.payment_date,
-       p.amount,
-       p.method,
-       o.order_id,
-       o.status,
-       c.full_name
-FROM payments AS p
-JOIN orders AS o
-  ON o.order_id = p.order_id
-JOIN customers AS c
-  ON c.customer_id = o.customer_id
-ORDER BY p.payment_date DESC, p.payment_id DESC;
+SELECT
+  p.payment_id,
+  p.payment_date,
+  p.amount,
+  p.method,
+  o.order_id,
+  o.status,
+  c.full_name
+FROM
+  payments AS p
+  JOIN orders AS o ON o.order_id = p.order_id
+  JOIN customers AS c ON c.customer_id = o.customer_id
+ORDER BY
+  p.payment_date DESC,
+  p.payment_id DESC;
 ```
 
 **Expected shape:** One row per payment.
@@ -216,25 +224,33 @@ cardinality contract.
 
 ```sql
 WITH item_totals AS (
-  SELECT oi.order_id,
-         SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS item_total
-  FROM order_items AS oi
-  GROUP BY oi.order_id
-), payment_totals AS (
-  SELECT p.order_id,
-         SUM(p.amount) AS paid_total
-  FROM payments AS p
-  GROUP BY p.order_id
+  SELECT
+    oi.order_id,
+    SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS item_total
+  FROM
+    order_items AS oi
+  GROUP BY
+    oi.order_id
+),
+payment_totals AS (
+  SELECT
+    p.order_id,
+    SUM(p.amount) AS paid_total
+  FROM
+    payments AS p
+  GROUP BY
+    p.order_id
 )
-SELECT o.order_id,
-       ROUND(it.item_total, 2) AS item_total,
-       ROUND(COALESCE(pt.paid_total, 0), 2) AS paid_total
-FROM orders AS o
-JOIN item_totals AS it
-  ON it.order_id = o.order_id
-LEFT JOIN payment_totals AS pt
-  ON pt.order_id = o.order_id
-ORDER BY o.order_id;
+SELECT
+  o.order_id,
+  ROUND(it.item_total, 2) AS item_total,
+  ROUND(COALESCE(pt.paid_total, 0), 2) AS paid_total
+FROM
+  orders AS o
+  JOIN item_totals AS it ON it.order_id = o.order_id
+  LEFT JOIN payment_totals AS pt ON pt.order_id = o.order_id
+ORDER BY
+  o.order_id;
 ```
 
 **Expected shape:** One row per order; no six-row multiplication.
@@ -266,11 +282,12 @@ cardinality contract.
 - `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input's grain must agree.
 
 ```sql
-SELECT COUNT(*) AS joined_rows,
-       COUNT(DISTINCT o.order_id) AS distinct_orders
-FROM orders AS o
-JOIN customers AS c
-  ON c.customer_id = o.customer_id;
+SELECT
+  COUNT(*) AS joined_rows,
+  COUNT(DISTINCT o.order_id) AS distinct_orders
+FROM
+  orders AS o
+  JOIN customers AS c ON c.customer_id = o.customer_id;
 ```
 
 **Expected shape:** Exactly one customer match per order.
@@ -304,15 +321,18 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT c.country,
-       ROUND(SUM(oi.unit_price * oi.quantity * (1 - oi.discount)), 2) AS net_revenue
-FROM order_items AS oi
-JOIN orders AS o
-  ON o.order_id = oi.order_id
-JOIN customers AS c
-  ON c.customer_id = o.customer_id
-GROUP BY c.country
-ORDER BY net_revenue DESC, c.country;
+SELECT
+  c.country,
+  ROUND(SUM(oi.unit_price * oi.quantity * (1 - oi.discount)), 2) AS net_revenue
+FROM
+  order_items AS oi
+  JOIN orders AS o ON o.order_id = oi.order_id
+  JOIN customers AS c ON c.customer_id = o.customer_id
+GROUP BY
+  c.country
+ORDER BY
+  net_revenue DESC,
+  c.country;
 ```
 
 **Expected shape:** One row per country represented by an order.

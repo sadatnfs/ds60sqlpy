@@ -27,8 +27,10 @@ Task: Summarize group A over amounts 10,20 and group B over 5.
 The domain result has one object per requested group. It is checked independently of HTTP formatting and status handling.
 
 ```java
-Repository repository=() -> List.of(new Row("a1","A",10),new Row("a2","A",20),new Row("b1","B",5));
-assert summarize(repository,"A").equals(new Summary("A",2,30));assert summarize(repository,"B").equals(new Summary("B",1,5));
+Repository repository = () ->
+  List.of(new Row("a1", "A", 10), new Row("a2", "A", 20), new Row("b1", "B", 5));
+assert summarize(repository, "A").equals(new Summary("A", 2, 30));
+assert summarize(repository, "B").equals(new Summary("B", 1, 5));
 ```
 
 **Expected:** A count 2, total 30; B count 1, total 5.
@@ -42,9 +44,13 @@ Task: GET/summary?group=Afromtheownedserver.
 The exact body check fixes the public schema and integer representation. The source counts remain independently known.
 
 ```java
-try(DataServer server=new DataServer(repository);var client=java.net.http.HttpClient.newHttpClient()) {
-    var response=send(client,server.uri("/summary?group=A"),"GET");
-    assert response.statusCode()==200 && response.body().equals("{\"group\":\"A\",\"count\":2,\"total\":30}");
+try (
+  DataServer server = new DataServer(repository);
+  var client = java.net.http.HttpClient.newHttpClient()
+) {
+  var response = send(client, server.uri("/summary?group=A"), "GET");
+  assert response.statusCode() == 200 &&
+  response.body().equals("{\"group\":\"A\",\"count\":2,\"total\":30}");
 }
 ```
 
@@ -59,8 +65,12 @@ Task: GETgroupC,which passes syntax buthasnorecords.
 A valid but absent domain identity differs from malformed input. Keeping the status distinction helps clients respond appropriately.
 
 ```java
-try(DataServer server=new DataServer(repository);var client=java.net.http.HttpClient.newHttpClient()) {
-    var response=send(client,server.uri("/summary?group=C"),"GET");assert response.statusCode()==404 && response.body().contains("not_found");
+try (
+  DataServer server = new DataServer(repository);
+  var client = java.net.http.HttpClient.newHttpClient()
+) {
+  var response = send(client, server.uri("/summary?group=C"), "GET");
+  assert response.statusCode() == 404 && response.body().contains("not_found");
 }
 ```
 
@@ -75,9 +85,12 @@ Task: Send duplicate group parameters andalowercasegroup.
 The adapter refuses to guess which duplicate value wins. A broader query grammar would need an explicit parser and validation policy.
 
 ```java
-try(DataServer server=new DataServer(repository);var client=java.net.http.HttpClient.newHttpClient()) {
-    assert send(client,server.uri("/summary?group=A&group=B"),"GET").statusCode()==400;
-    assert send(client,server.uri("/summary?group=a"),"GET").statusCode()==400;
+try (
+  DataServer server = new DataServer(repository);
+  var client = java.net.http.HttpClient.newHttpClient()
+) {
+  assert send(client, server.uri("/summary?group=A&group=B"), "GET").statusCode() == 400;
+  assert send(client, server.uri("/summary?group=a"), "GET").statusCode() == 400;
 }
 ```
 
@@ -92,9 +105,12 @@ Task: POST to the summary route andGET/summary-extra.
 The underlying server uses prefix contexts,so theadaptermustenforceitsownexactpathcontract. No write operation is exposed.
 
 ```java
-try(DataServer server=new DataServer(repository);var client=java.net.http.HttpClient.newHttpClient()) {
-    assert send(client,server.uri("/summary?group=A"),"POST").statusCode()==405;
-    assert send(client,server.uri("/summary-extra?group=A"),"GET").statusCode()==404;
+try (
+  DataServer server = new DataServer(repository);
+  var client = java.net.http.HttpClient.newHttpClient()
+) {
+  assert send(client, server.uri("/summary?group=A"), "POST").statusCode() == 405;
+  assert send(client, server.uri("/summary-extra?group=A"), "GET").statusCode() == 404;
 }
 ```
 
@@ -109,8 +125,10 @@ Task: Comparetherepositorybefore/afterrequests and close the server.
 The read-onlyservice should not mutate its storage. Thefixture owns the listener and does not leave a background deployment running.
 
 ```java
-List<Row> before=repository.rows();DataServer server=new DataServer(repository);server.close();
-assert server.closed && repository.rows().equals(before) && repository.rows().size()==3;
+List<Row> before = repository.rows();
+DataServer server = new DataServer(repository);
+server.close();
+assert server.closed && repository.rows().equals(before) && repository.rows().size() == 3;
 ```
 
 **Expected:** 3 unchanged records; closed flag true.

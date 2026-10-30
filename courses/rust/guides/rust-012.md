@@ -43,8 +43,24 @@ Read the operations in dependency order. Record which values exist before each l
 The method owns both the affordability check and the subtraction.
 
 ```rust
-struct Inventory { stock: u32 }
-impl Inventory { fn new(stock: u32) -> Self { Self { stock } } fn stock(&self) -> u32 { self.stock } fn reserve(&mut self, amount: u32) -> bool { if amount > self.stock { return false; } self.stock -= amount; true } }
+struct Inventory {
+    stock: u32,
+}
+impl Inventory {
+    fn new(stock: u32) -> Self {
+        Self { stock }
+    }
+    fn stock(&self) -> u32 {
+        self.stock
+    }
+    fn reserve(&mut self, amount: u32) -> bool {
+        if amount > self.stock {
+            return false;
+        }
+        self.stock -= amount;
+        true
+    }
+}
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
@@ -64,8 +80,24 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 Validation occurs before changing state, preserving the prior valid value.
 
 ```rust
-struct Inventory { stock: u32 }
-impl Inventory { fn new(stock: u32) -> Self { Self { stock } } fn stock(&self) -> u32 { self.stock } fn reserve(&mut self, amount: u32) -> bool { if amount > self.stock { return false; } self.stock -= amount; true } }
+struct Inventory {
+    stock: u32,
+}
+impl Inventory {
+    fn new(stock: u32) -> Self {
+        Self { stock }
+    }
+    fn stock(&self) -> u32 {
+        self.stock
+    }
+    fn reserve(&mut self, amount: u32) -> bool {
+        if amount > self.stock {
+            return false;
+        }
+        self.stock -= amount;
+        true
+    }
+}
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {

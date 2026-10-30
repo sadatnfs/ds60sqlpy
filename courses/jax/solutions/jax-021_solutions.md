@@ -10,8 +10,8 @@ Shared base draws prevent random resampling from contaminating the numerical der
 
 ```python
 h = 1e-5
-finite = (sample_objective(2. + h, 3., noise) - sample_objective(2. - h, 3., noise)) / (2 * h)
-close(finite, jax.grad(sample_objective)(2., 3., noise), atol=1e-7, rtol=0.)
+finite = (sample_objective(2.0 + h, 3.0, noise) - sample_objective(2.0 - h, 3.0, noise)) / (2 * h)
+close(finite, jax.grad(sample_objective)(2.0, 3.0, noise), atol=1e-7, rtol=0.0)
 ```
 
 ## Exercise 2: Parameterize a positive scale
@@ -21,8 +21,8 @@ The chain rule multiplies the scale derivative six by the current scale three.
 **Expected:** Derivative 18.
 
 ```python
-function = lambda log_scale: sample_objective(2., jnp.exp(log_scale), control)
-close(jax.grad(function)(math.log(3.)), 18.)
+function = lambda log_scale: sample_objective(2.0, jnp.exp(log_scale), control)
+close(jax.grad(function)(math.log(3.0)), 18.0)
 ```
 
 ## Exercise 3: Check a zero-mean population formula
@@ -32,8 +32,8 @@ Symmetry makes the authored sample's first moment zero.
 **Expected:** Objective four and mean derivative zero.
 
 ```python
-close(sample_objective(0., 2., control), 4.)
-close(jax.grad(sample_objective)(0., 2., control), 0.)
+close(sample_objective(0.0, 2.0, control), 4.0)
+close(jax.grad(sample_objective)(0.0, 2.0, control), 0.0)
 ```
 
 ## Exercise 4: Retain the Monte Carlo count
@@ -43,11 +43,11 @@ The usual variance-over-count expression assumes the declared independent sampli
 **Expected:** A finite nonnegative SE with N=1024 explicitly retained.
 
 ```python
-draws = (2. + 3. * noise) ** 2
+draws = (2.0 + 3.0 * noise) ** 2
 count = draws.size
 se = jnp.sqrt(jnp.var(draws, ddof=1) / count)
 assert count == 1024
-assert bool(jnp.isfinite(se)) and float(se) >= 0.
+assert bool(jnp.isfinite(se)) and float(se) >= 0.0
 ```
 
 ## Exercise 5: Vectorize parameter comparisons
@@ -57,8 +57,8 @@ Sharing draws defines a controlled comparison of parameter settings.
 **Expected:** [9,10,13].
 
 ```python
-values = jax.vmap(lambda mean: sample_objective(mean, 3., control))(jnp.array([0., 1., 2.]))
-close(values, [9., 10., 13.])
+values = jax.vmap(lambda mean: sample_objective(mean, 3.0, control))(jnp.array([0.0, 1.0, 2.0]))
+close(values, [9.0, 10.0, 13.0])
 ```
 
 ## Exercise 6: Replay the sampled input
@@ -70,7 +70,7 @@ The complete random-operation contract supports replay.
 ```python
 again = jax.random.normal(jax.random.key(61), (1024,), dtype=jnp.float64)
 close(again, noise)
-close(sample_objective(2., 3., again), sample_objective(2., 3., noise))
+close(sample_objective(2.0, 3.0, again), sample_objective(2.0, 3.0, noise))
 ```
 
 ## Scope of this evidence

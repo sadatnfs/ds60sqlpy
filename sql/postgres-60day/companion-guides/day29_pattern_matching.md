@@ -100,11 +100,17 @@ These worked excerpts come from `sql/postgres-60day/day29_pattern_matching.sql`.
 ### Example 1
 
 ```sql
-SELECT customer_id, full_name, email
-FROM customers
-WHERE email ILIKE '%@example.com' ESCAPE '\'
+SELECT
+  customer_id,
+  full_name,
+  email
+FROM
+  customers
+WHERE
+  email ILIKE '%@example.com' ESCAPE '\'
   AND full_name ILIKE 'customer %' ESCAPE '\'
-ORDER BY customer_id
+ORDER BY
+  customer_id
 LIMIT 20;
 ```
 
@@ -115,10 +121,16 @@ LIMIT 20;
 ### Example 2
 
 ```sql
-SELECT product_id, name, category
-FROM products
-WHERE name ~ '^Product [0-9]{2,3}$'
-ORDER BY product_id
+SELECT
+  product_id,
+  name,
+  category
+FROM
+  products
+WHERE
+  name ~ '^Product [0-9]{2,3}$'
+ORDER BY
+  product_id
 LIMIT 20;
 ```
 

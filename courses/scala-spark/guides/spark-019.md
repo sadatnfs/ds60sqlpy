@@ -56,17 +56,72 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.expressions.Window
 
-val schema = StructType(Seq(StructField("event_id",LongType,false),StructField("entity",StringType,false),StructField("time_text",StringType,true),StructField("amount",LongType,false)))
-val events = spark.createDataFrame(spark.sparkContext.parallelize(Seq(Row(1L,"A","2024-01-01 00:00:00",10L),Row(2L,"A","2024-01-01 00:01:00",20L),Row(3L,"A","2024-01-01 00:01:00",30L),Row(4L,"B","2024-01-01 00:00:00",40L),Row(5L,"B","2024-01-01 00:02:00",50L),Row(6L,"B","2024-01-01 00:02:00",60L),Row(7L,"C",null,70L),Row(8L,"C","2024-01-01 00:01:00",80L)),2),schema).withColumn("event_time",to_timestamp(col("time_text")))
+val schema = StructType(
+  Seq(
+    StructField("event_id", LongType, false),
+    StructField("entity", StringType, false),
+    StructField("time_text", StringType, true),
+    StructField("amount", LongType, false)
+  )
+)
+val events = spark
+  .createDataFrame(
+    spark.sparkContext.parallelize(
+      Seq(
+        Row(1L, "A", "2024-01-01 00:00:00", 10L),
+        Row(2L, "A", "2024-01-01 00:01:00", 20L),
+        Row(3L, "A", "2024-01-01 00:01:00", 30L),
+        Row(4L, "B", "2024-01-01 00:00:00", 40L),
+        Row(5L, "B", "2024-01-01 00:02:00", 50L),
+        Row(6L, "B", "2024-01-01 00:02:00", 60L),
+        Row(7L, "C", null, 70L),
+        Row(8L, "C", "2024-01-01 00:01:00", 80L)
+      ),
+      2
+    ),
+    schema
+  )
+  .withColumn("event_time", to_timestamp(col("time_text")))
 ```
 
 ```python
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 from pyspark.sql import Window
 
-schema = StructType([StructField("event_id",LongType(),False),StructField("entity",StringType(),False),StructField("time_text",StringType(),True),StructField("amount",LongType(),False)])
-events = spark.createDataFrame([(1,"A","2024-01-01 00:00:00",10),(2,"A","2024-01-01 00:01:00",20),(3,"A","2024-01-01 00:01:00",30),(4,"B","2024-01-01 00:00:00",40),(5,"B","2024-01-01 00:02:00",50),(6,"B","2024-01-01 00:02:00",60),(7,"C",None,70),(8,"C","2024-01-01 00:01:00",80)],schema=schema).withColumn("event_time",F.to_timestamp("time_text"))
+schema = StructType(
+    [
+        StructField("event_id", LongType(), False),
+        StructField("entity", StringType(), False),
+        StructField("time_text", StringType(), True),
+        StructField("amount", LongType(), False),
+    ]
+)
+events = spark.createDataFrame(
+    [
+        (1, "A", "2024-01-01 00:00:00", 10),
+        (2, "A", "2024-01-01 00:01:00", 20),
+        (3, "A", "2024-01-01 00:01:00", 30),
+        (4, "B", "2024-01-01 00:00:00", 40),
+        (5, "B", "2024-01-01 00:02:00", 50),
+        (6, "B", "2024-01-01 00:02:00", 60),
+        (7, "C", None, 70),
+        (8, "C", "2024-01-01 00:01:00", 80),
+    ],
+    schema=schema,
+).withColumn("event_time", F.to_timestamp("time_text"))
 ```
 
 ## Worked example / walkthrough
@@ -80,7 +135,7 @@ println("Three event identities share only two timestamp values")
 ```
 
 ```python
-group = events.filter(F.col("entity")=="A")
+group = events.filter(F.col("entity") == "A")
 assert group.count() == 3 and group.select("event_time").distinct().count() == 2
 print("Three event identities share only two timestamp values")
 ```

@@ -49,20 +49,46 @@ The expected outputs are literal contract examples. They do not call clamp or du
 import java.util.*;
 
 public class Main {
-    static int clamp(int value,int lower,int upper){if(lower>upper)throw new IllegalArgumentException("invalid bounds");return Math.max(lower,Math.min(value,upper));}
-    static int brokenClamp(int value,int lower,int upper){return value<lower?upper:Math.min(value,upper);}
-    @FunctionalInterface interface Action{void run() throws Exception;}
-    static void expect(Class<? extends Throwable> type,Action action){
-        try{action.run();}catch(Throwable error){if(type.isInstance(error))return;throw new AssertionError("wrong exception",error);}
-        throw new AssertionError("expected "+type.getSimpleName());
-    }
-    static int[] reverse(int[] values){int[] result=values.clone();for(int i=0,j=result.length-1;i<j;i++,j--){int temporary=result[i];result[i]=result[j];result[j]=temporary;}return result;}
-    public static void main(String[] args) throws Exception {
-        int[][] cases={{-2,0},{0,0},{3,3},{9,5}};
-        for(int[] row:cases) assert clamp(row[0],0,5)==row[1];
-    }
-}
 
+  static int clamp(int value, int lower, int upper) {
+    if (lower > upper) throw new IllegalArgumentException("invalid bounds");
+    return Math.max(lower, Math.min(value, upper));
+  }
+
+  static int brokenClamp(int value, int lower, int upper) {
+    return value < lower ? upper : Math.min(value, upper);
+  }
+
+  @FunctionalInterface
+  interface Action {
+    void run() throws Exception;
+  }
+
+  static void expect(Class<? extends Throwable> type, Action action) {
+    try {
+      action.run();
+    } catch (Throwable error) {
+      if (type.isInstance(error)) return;
+      throw new AssertionError("wrong exception", error);
+    }
+    throw new AssertionError("expected " + type.getSimpleName());
+  }
+
+  static int[] reverse(int[] values) {
+    int[] result = values.clone();
+    for (int i = 0, j = result.length - 1; i < j; i++, j--) {
+      int temporary = result[i];
+      result[i] = result[j];
+      result[j] = temporary;
+    }
+    return result;
+  }
+
+  public static void main(String[] args) throws Exception {
+    int[][] cases = { { -2, 0 }, { 0, 0 }, { 3, 3 }, { 9, 5 } };
+    for (int[] row : cases) assert clamp(row[0], 0, 5) == row[1];
+  }
+}
 ```
 
 **Expected:** outputs 0,0,3,5.
@@ -75,22 +101,48 @@ An invalid interval is different from a value outside a valid interval. The test
 import java.util.*;
 
 public class Main {
-    static int clamp(int value,int lower,int upper){if(lower>upper)throw new IllegalArgumentException("invalid bounds");return Math.max(lower,Math.min(value,upper));}
-    static int brokenClamp(int value,int lower,int upper){return value<lower?upper:Math.min(value,upper);}
-    @FunctionalInterface interface Action{void run() throws Exception;}
-    static void expect(Class<? extends Throwable> type,Action action){
-        try{action.run();}catch(Throwable error){if(type.isInstance(error))return;throw new AssertionError("wrong exception",error);}
-        throw new AssertionError("expected "+type.getSimpleName());
-    }
-    static int[] reverse(int[] values){int[] result=values.clone();for(int i=0,j=result.length-1;i<j;i++,j--){int temporary=result[i];result[i]=result[j];result[j]=temporary;}return result;}
-    public static void main(String[] args) throws Exception {
-        int[][] cases={{-2,0},{0,0},{3,3},{9,5}};
-        for(int[] row:cases) assert clamp(row[0],0,5)==row[1];
 
-        expect(IllegalArgumentException.class,() -> clamp(3,5,2));
+  static int clamp(int value, int lower, int upper) {
+    if (lower > upper) throw new IllegalArgumentException("invalid bounds");
+    return Math.max(lower, Math.min(value, upper));
+  }
+
+  static int brokenClamp(int value, int lower, int upper) {
+    return value < lower ? upper : Math.min(value, upper);
+  }
+
+  @FunctionalInterface
+  interface Action {
+    void run() throws Exception;
+  }
+
+  static void expect(Class<? extends Throwable> type, Action action) {
+    try {
+      action.run();
+    } catch (Throwable error) {
+      if (type.isInstance(error)) return;
+      throw new AssertionError("wrong exception", error);
     }
+    throw new AssertionError("expected " + type.getSimpleName());
+  }
+
+  static int[] reverse(int[] values) {
+    int[] result = values.clone();
+    for (int i = 0, j = result.length - 1; i < j; i++, j--) {
+      int temporary = result[i];
+      result[i] = result[j];
+      result[j] = temporary;
+    }
+    return result;
+  }
+
+  public static void main(String[] args) throws Exception {
+    int[][] cases = { { -2, 0 }, { 0, 0 }, { 3, 3 }, { 9, 5 } };
+    for (int[] row : cases) assert clamp(row[0], 0, 5) == row[1];
+
+    expect(IllegalArgumentException.class, () -> clamp(3, 5, 2));
+  }
 }
-
 ```
 
 **Expected:** exception observed.

@@ -24,9 +24,12 @@ Explicit encoding avoids dependence on platform defaults. The round trip tests b
 
 ```java
 withTemp(root -> {
-    var path = root.resolve("text.txt"); String text = "Café 🙂";
-    java.nio.file.Files.writeString(path,text,java.nio.charset.StandardCharsets.UTF_8);
-    assert java.nio.file.Files.readString(path,java.nio.charset.StandardCharsets.UTF_8).equals(text);
+  var path = root.resolve("text.txt");
+  String text = "Café 🙂";
+  java.nio.file.Files.writeString(path, text, java.nio.charset.StandardCharsets.UTF_8);
+  assert java.nio.file.Files.readString(path, java.nio.charset.StandardCharsets.UTF_8).equals(
+    text
+  );
 });
 ```
 
@@ -42,8 +45,9 @@ Constructing a Path does not create a file. Keeping those actions separate preve
 
 ```java
 withTemp(root -> {
-    var missing = root.resolve("missing.txt");
-    assert missing.getFileName().toString().equals("missing.txt") && !java.nio.file.Files.exists(missing);
+  var missing = root.resolve("missing.txt");
+  assert missing.getFileName().toString().equals("missing.txt") &&
+  !java.nio.file.Files.exists(missing);
 });
 ```
 
@@ -59,8 +63,11 @@ The stream can hold a directory resource until closed. A terminal operation alon
 
 ```java
 withTemp(root -> {
-    java.nio.file.Files.writeString(root.resolve("a.txt"),"a"); java.nio.file.Files.writeString(root.resolve("b.txt"),"b");
-    try(var entries = java.nio.file.Files.list(root)) { assert entries.count() == 2; }
+  java.nio.file.Files.writeString(root.resolve("a.txt"), "a");
+  java.nio.file.Files.writeString(root.resolve("b.txt"), "b");
+  try (var entries = java.nio.file.Files.list(root)) {
+    assert entries.count() == 2;
+  }
 });
 ```
 
@@ -76,14 +83,22 @@ The branch reports a capability limit rather than silently weakening the contrac
 
 ```java
 withTemp(root -> {
-    var target=root.resolve("target.txt"); var staged=root.resolve("staged.txt");
-    java.nio.file.Files.writeString(target,"old"); java.nio.file.Files.writeString(staged,"new");
-    try {
-        java.nio.file.Files.move(staged,target,java.nio.file.StandardCopyOption.ATOMIC_MOVE,java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-        assert java.nio.file.Files.readString(target).equals("new") && !java.nio.file.Files.exists(staged);
-    } catch(java.nio.file.AtomicMoveNotSupportedException expected) {
-        assert java.nio.file.Files.readString(target).equals("old");
-    }
+  var target = root.resolve("target.txt");
+  var staged = root.resolve("staged.txt");
+  java.nio.file.Files.writeString(target, "old");
+  java.nio.file.Files.writeString(staged, "new");
+  try {
+    java.nio.file.Files.move(
+      staged,
+      target,
+      java.nio.file.StandardCopyOption.ATOMIC_MOVE,
+      java.nio.file.StandardCopyOption.REPLACE_EXISTING
+    );
+    assert java.nio.file.Files.readString(target).equals("new") &&
+    !java.nio.file.Files.exists(staged);
+  } catch (java.nio.file.AtomicMoveNotSupportedException expected) {
+    assert java.nio.file.Files.readString(target).equals("old");
+  }
 });
 ```
 
@@ -99,8 +114,8 @@ Lexical containment is useful but does not resolve symlinks. A security-sensitiv
 
 ```java
 withTemp(root -> {
-    var candidate=root.resolve("../outside").normalize();
-    assert !candidate.startsWith(root.normalize());
+  var candidate = root.resolve("../outside").normalize();
+  assert !candidate.startsWith(root.normalize());
 });
 ```
 
@@ -115,10 +130,17 @@ Task: Throw inside the owned temporary scope and confirm the directory is remove
 Cleanup should run on both paths while preserving the primary failure. It must remain confined to the directory this exercise created.
 
 ```java
-final java.nio.file.Path[] created={null}; boolean propagated=false;
-try { withTemp(root -> { created[0]=root; throw new java.io.IOException("fixture failure"); }); }
-catch(java.io.IOException expected) { propagated=expected.getMessage().equals("fixture failure"); }
-assert propagated && created[0]!=null && !java.nio.file.Files.exists(created[0]);
+final java.nio.file.Path[] created = { null };
+boolean propagated = false;
+try {
+  withTemp(root -> {
+    created[0] = root;
+    throw new java.io.IOException("fixture failure");
+  });
+} catch (java.io.IOException expected) {
+  propagated = expected.getMessage().equals("fixture failure");
+}
+assert propagated && created[0] != null && !java.nio.file.Files.exists(created[0]);
 ```
 
 **Expected:** original exception propagated; owned directory absent.

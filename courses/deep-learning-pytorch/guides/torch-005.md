@@ -75,15 +75,23 @@ import numpy as np
 import torch
 from torch import nn
 from torch.nn import functional as F
-def central(function,value,h):
-    if not np.isfinite(value): raise ValueError('finite probe point required')
-    if not np.isfinite(h) or h<=0: raise ValueError('positive finite step required')
-    left,right=function(value-h),function(value+h)
-    if not np.isfinite([left,right]).all(): raise ValueError('finite probe values required')
-    return (right-left)/(2*h)
-w=torch.tensor(0.,dtype=torch.float64,requires_grad=True); loss=(w-2)**2
-gradient=torch.autograd.grad(loss,w)[0]
-assert gradient.item()==-4 and loss.item()==4
+
+
+def central(function, value, h):
+    if not np.isfinite(value):
+        raise ValueError("finite probe point required")
+    if not np.isfinite(h) or h <= 0:
+        raise ValueError("positive finite step required")
+    left, right = function(value - h), function(value + h)
+    if not np.isfinite([left, right]).all():
+        raise ValueError("finite probe values required")
+    return (right - left) / (2 * h)
+
+
+w = torch.tensor(0.0, dtype=torch.float64, requires_grad=True)
+loss = (w - 2) ** 2
+gradient = torch.autograd.grad(loss, w)[0]
+assert gradient.item() == -4 and loss.item() == 4
 ```
 
 **Expected:** derivative -4; loss 4.
@@ -93,9 +101,9 @@ assert gradient.item()==-4 and loss.item()==4
 The quadratic central difference is especially clean. This does not imply every function or every step size achieves the same tolerance.
 
 ```python
-for h in [.1,.01,.001]:
-    slope=central(lambda value:(value-2)**2,0.,h)
-    np.testing.assert_allclose(slope,-4,atol=1e-10,rtol=0)
+for h in [0.1, 0.01, 0.001]:
+    slope = central(lambda value: (value - 2) ** 2, 0.0, h)
+    np.testing.assert_allclose(slope, -4, atol=1e-10, rtol=0)
 ```
 
 **Expected:** all agree within 1e-10.
@@ -105,9 +113,9 @@ for h in [.1,.01,.001]:
 The update includes direction, step size and old state. Treating the gradient as the parameter would implement a different algorithm.
 
 ```python
-updated=0.-.1*gradient.item()
-np.testing.assert_allclose(updated,.4,atol=1e-12,rtol=0)
-assert updated!=gradient.item()
+updated = 0.0 - 0.1 * gradient.item()
+np.testing.assert_allclose(updated, 0.4, atol=1e-12, rtol=0)
+assert updated != gradient.item()
 ```
 
 **Expected:** new parameter \(w=0.4\); the supplied gradient is \(-4\).

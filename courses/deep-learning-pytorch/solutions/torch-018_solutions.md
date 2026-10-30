@@ -63,9 +63,12 @@ The question is: Apply BatchNorm momentum.5 to rows 1, 3 and 3, 5.
 The batch mean is 2, 4 and the new-statistic weight is.5. The result is not yet the full batch mean.
 
 ```python
-bn=nn.BatchNorm1d(2,momentum=.5); x=torch.tensor([[1.,3.],[3.,5.]])
-bn.train(); bn(x)
-torch.testing.assert_close(bn.running_mean,torch.tensor([1.,2.]),atol=1e-6,rtol=0); assert bn.num_batches_tracked.item()==1
+bn = nn.BatchNorm1d(2, momentum=0.5)
+x = torch.tensor([[1.0, 3.0], [3.0, 5.0]])
+bn.train()
+bn(x)
+torch.testing.assert_close(bn.running_mean, torch.tensor([1.0, 2.0]), atol=1e-6, rtol=0)
+assert bn.num_batches_tracked.item() == 1
 ```
 
 **Expected:** running mean 1, 2; batch counter 1.
@@ -79,8 +82,11 @@ The question is: Call the trained layer in eval mode on 100, 200.
 Evaluation must not adapt to assessment batch composition. A forgotten eval call can mutate state and change predictions based on neighboring records.
 
 ```python
-before=bn.running_mean.clone(); count=bn.num_batches_tracked.clone(); bn.eval(); bn(torch.tensor([[100.,200.]]))
-assert torch.equal(before,bn.running_mean) and torch.equal(count,bn.num_batches_tracked)
+before = bn.running_mean.clone()
+count = bn.num_batches_tracked.clone()
+bn.eval()
+bn(torch.tensor([[100.0, 200.0]]))
+assert torch.equal(before, bn.running_mean) and torch.equal(count, bn.num_batches_tracked)
 ```
 
 **Expected:** running mean and batch counter unchanged.
@@ -94,8 +100,10 @@ The question is: Normalize 1, 3alone and beside 100, 200.
 LayerNorm uses only the current row's features in this configuration. A sequence-wide or batch-wide reduction would fail the perturbation test.
 
 ```python
-ln=nn.LayerNorm(2); alone=ln(torch.tensor([[1.,3.]])); together=ln(torch.tensor([[1.,3.],[100.,200.]]))
-torch.testing.assert_close(alone[0],together[0],atol=1e-6,rtol=0)
+ln = nn.LayerNorm(2)
+alone = ln(torch.tensor([[1.0, 3.0]]))
+together = ln(torch.tensor([[1.0, 3.0], [100.0, 200.0]]))
+torch.testing.assert_close(alone[0], together[0], atol=1e-6, rtol=0)
 ```
 
 **Expected:** first row matches within 1e-6.
@@ -109,8 +117,11 @@ The question is: From initial running variance 1, use batch values 1, 3whose unb
 Forward training normalization uses a biased variance estimate, but the running variance update uses an unbiased one. Comparing only the layer title would miss this detail.
 
 ```python
-torch.testing.assert_close(bn.running_var,torch.tensor([1.5,1.5]),atol=1e-6,rtol=0)
-assert x.var(0,correction=0).tolist()==[1.,1.] and x.var(0,correction=1).tolist()==[2.,2.]
+torch.testing.assert_close(bn.running_var, torch.tensor([1.5, 1.5]), atol=1e-6, rtol=0)
+assert x.var(0, correction=0).tolist() == [1.0, 1.0] and x.var(0, correction=1).tolist() == [
+    2.0,
+    2.0,
+]
 ```
 
 **Expected:** running variance 1.5 for each feature.
@@ -124,8 +135,10 @@ The question is: Compute updates with old mean 0, batch mean 10 and PyTorch mome
 To match a PyTorch new-statistic coefficient.1, the Keras old-statistic retention coefficient would be.9. Equal argument names are not enough evidence of equivalence.
 
 ```python
-old,batch=0.,10.; torch_update=(1-.1)*old+.1*batch; keras_update=.1*old+(1-.1)*batch
-assert torch_update==1 and keras_update==9
+old, batch = 0.0, 10.0
+torch_update = (1 - 0.1) * old + 0.1 * batch
+keras_update = 0.1 * old + (1 - 0.1) * batch
+assert torch_update == 1 and keras_update == 9
 ```
 
 **Expected:** PyTorch 1; Keras 9 under their respective conventions.
@@ -139,8 +152,9 @@ The question is: Apply LayerNorm to 5, 5 and inspect finiteness.
 Epsilon avoids division by zero and the centered numerator is zero. Learned affine offsets would need to be included in a general expected value.
 
 ```python
-constant=ln(torch.tensor([[5.,5.]])); assert torch.isfinite(constant).all()
-torch.testing.assert_close(constant,torch.zeros((1,2)),atol=1e-6,rtol=0)
+constant = ln(torch.tensor([[5.0, 5.0]]))
+assert torch.isfinite(constant).all()
+torch.testing.assert_close(constant, torch.zeros((1, 2)), atol=1e-6, rtol=0)
 ```
 
 **Expected:** finite zeros with default affine initialization.

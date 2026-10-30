@@ -122,12 +122,8 @@ queries = list(range(900, 1_100))
 expected = contains_with_list(values, queries)
 assert contains_with_set(values, queries) == expected
 
-list_trials = repeat(
-    lambda: contains_with_list(values, queries), repeat=5, number=100
-)
-set_trials = repeat(
-    lambda: contains_with_set(values, queries), repeat=5, number=100
-)
+list_trials = repeat(lambda: contains_with_list(values, queries), repeat=5, number=100)
+set_trials = repeat(lambda: contains_with_set(values, queries), repeat=5, number=100)
 assert len(list_trials) == len(set_trials) == 5
 ```
 

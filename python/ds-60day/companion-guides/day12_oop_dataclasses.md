@@ -118,6 +118,7 @@ identify which line creates each intermediate object.
 ```python
 from dataclasses import dataclass
 
+
 @dataclass
 class LineItem:
     name: str
@@ -130,6 +131,7 @@ class LineItem:
 
     def subtotal(self) -> float:
         return self.unit_price * self.quantity
+
 
 item = LineItem("notebook", 4.5, 3)
 (item, item.subtotal())
@@ -210,6 +212,7 @@ of them as blank-code prompts:
 
 ```python
 from dataclasses import dataclass
+
 
 @dataclass(frozen=True, slots=True)
 class Temperature:

@@ -11,8 +11,8 @@ Return ordered(key, n) counts for the fact relation. Derive total population and
 **Expected:** Key 0 has 9000; keys 1..10 each 100. Total 10000 and hot fraction 0.9.
 
 ```scala
-def keyFrequencies(facts: DataFrame): Seq[(Long,Long)] = {
-  facts.groupBy("key").count().collect().toSeq.map(r => (r.getLong(0),r.getLong(1))).sortBy(_._1)
+def keyFrequencies(facts: DataFrame): Seq[(Long, Long)] = {
+  facts.groupBy("key").count().collect().toSeq.map(r => (r.getLong(0), r.getLong(1))).sortBy(_._1)
 }
 ```
 
@@ -33,15 +33,15 @@ Build an inner join with AQE disabled and broadcasting thresholds disabled, retu
 
 ```scala
 def baselineJoin(facts: DataFrame, dimension: DataFrame): DataFrame = {
-  facts.sparkSession.conf.set("spark.sql.adaptive.enabled","false")
-  facts.join(dimension,Seq("key"),"inner").select("fact_id","key","amount","factor")
+  facts.sparkSession.conf.set("spark.sql.adaptive.enabled", "false")
+  facts.join(dimension, Seq("key"), "inner").select("fact_id", "key", "amount", "factor")
 }
 ```
 
 ```python
 def baseline_join(facts, dimension):
-    facts.sparkSession.conf.set("spark.sql.adaptive.enabled","false")
-    return facts.join(dimension,on="key",how="inner").select("fact_id","key","amount","factor")
+    facts.sparkSession.conf.set("spark.sql.adaptive.enabled", "false")
+    return facts.join(dimension, on="key", how="inner").select("fact_id", "key", "amount", "factor")
 ```
 
 The complete relation establishes identity and measure conservation before physical changes. Broadcasting is disabled to expose the shuffle-skew mechanism for teaching; this is not a claim that disabling broadcast is best for this small dimension. The same projection must be retained in every comparison so helper fields cannot conceal a changed output grain.
@@ -57,22 +57,29 @@ Build a freshAQE-enabled join with skew handling enabled, coalescing disabled, s
 ```scala
 def adaptiveJoin(facts: DataFrame, dimension: DataFrame): DataFrame = {
   val conf = facts.sparkSession.conf
-  conf.set("spark.sql.adaptive.enabled","true")
-  conf.set("spark.sql.adaptive.skewJoin.enabled","true")
-  conf.set("spark.sql.adaptive.coalescePartitions.enabled","false")
-  conf.set("spark.sql.adaptive.skewJoin.skewedPartitionFactor","2")
-  conf.set("spark.sql.adaptive.skewJoin.skewedPartitionThresholdInBytes","1024")
-  conf.set("spark.sql.adaptive.advisoryPartitionSizeInBytes","16384")
-  facts.join(dimension,Seq("key"),"inner").select("fact_id","key","amount","factor")
+  conf.set("spark.sql.adaptive.enabled", "true")
+  conf.set("spark.sql.adaptive.skewJoin.enabled", "true")
+  conf.set("spark.sql.adaptive.coalescePartitions.enabled", "false")
+  conf.set("spark.sql.adaptive.skewJoin.skewedPartitionFactor", "2")
+  conf.set("spark.sql.adaptive.skewJoin.skewedPartitionThresholdInBytes", "1024")
+  conf.set("spark.sql.adaptive.advisoryPartitionSizeInBytes", "16384")
+  facts.join(dimension, Seq("key"), "inner").select("fact_id", "key", "amount", "factor")
 }
 ```
 
 ```python
 def adaptive_join(facts, dimension):
     conf = facts.sparkSession.conf
-    for key,value in {"spark.sql.adaptive.enabled":"true","spark.sql.adaptive.skewJoin.enabled":"true","spark.sql.adaptive.coalescePartitions.enabled":"false","spark.sql.adaptive.skewJoin.skewedPartitionFactor":"2","spark.sql.adaptive.skewJoin.skewedPartitionThresholdInBytes":"1024","spark.sql.adaptive.advisoryPartitionSizeInBytes":"16384"}.items():
-        conf.set(key,value)
-    return facts.join(dimension,on="key",how="inner").select("fact_id","key","amount","factor")
+    for key, value in {
+        "spark.sql.adaptive.enabled": "true",
+        "spark.sql.adaptive.skewJoin.enabled": "true",
+        "spark.sql.adaptive.coalescePartitions.enabled": "false",
+        "spark.sql.adaptive.skewJoin.skewedPartitionFactor": "2",
+        "spark.sql.adaptive.skewJoin.skewedPartitionThresholdInBytes": "1024",
+        "spark.sql.adaptive.advisoryPartitionSizeInBytes": "16384",
+    }.items():
+        conf.set(key, value)
+    return facts.join(dimension, on="key", how="inner").select("fact_id", "key", "amount", "factor")
 ```
 
 Materializing the same DataFrame lets the reader inspect the final adaptive decision rather than a fresh initial plan from another query. Small thresholds make this a bounded experiment but do not guarantee a particular split. Full-result parity remains mandatory whether the adaptive mechanism changes the physical shape or leaves it unchanged.
@@ -87,13 +94,19 @@ Add salt=fact_id modulo 4 only for key 0 and salt 0 otherwise. WithAQE disabled,
 
 ```scala
 def saltFacts(facts: DataFrame): DataFrame = {
-  facts.withColumn("salt",when(col("key") === 0L,pmod(col("fact_id"),lit(4L))).otherwise(lit(0L)))
+  facts.withColumn(
+    "salt",
+    when(col("key") === 0L, pmod(col("fact_id"), lit(4L))).otherwise(lit(0L))
+  )
 }
 ```
 
 ```python
 def salt_facts(facts):
-    return facts.withColumn("salt",F.when(F.col("key")==0,F.pmod("fact_id",F.lit(4))).otherwise(F.lit(0)).cast("long"))
+    return facts.withColumn(
+        "salt",
+        F.when(F.col("key") == 0, F.pmod("fact_id", F.lit(4))).otherwise(F.lit(0)).cast("long"),
+    )
 ```
 
 The helper divides logical hot-key membership without duplicating facts. Exact bucket counts follow from consecutive fixture identities and a fixed modulo rule. Physical partition loads are observed separately because hash placement can merge multiple salted buckets. Row counts are a useful skew proxy here, but not a substitute for bytes, memory or duration metrics.
@@ -108,13 +121,28 @@ Expand dimension key 0 to salts 0,1,2,3 and every other dimension key to salt 0.
 
 ```scala
 def expandDimension(dimension: DataFrame): DataFrame = {
-  dimension.withColumn("salts",when(col("key") === 0L,array(lit(0L),lit(1L),lit(2L),lit(3L))).otherwise(array(lit(0L)))).withColumn("salt",explode(col("salts"))).drop("salts")
+  dimension
+    .withColumn(
+      "salts",
+      when(col("key") === 0L, array(lit(0L), lit(1L), lit(2L), lit(3L))).otherwise(array(lit(0L)))
+    )
+    .withColumn("salt", explode(col("salts")))
+    .drop("salts")
 }
 ```
 
 ```python
 def expand_dimension(dimension):
-    return dimension.withColumn("salts",F.when(F.col("key")==0,F.array(*[F.lit(i).cast("long") for i in range(4)])).otherwise(F.array(F.lit(0).cast("long")))).withColumn("salt",F.explode("salts")).drop("salts")
+    return (
+        dimension.withColumn(
+            "salts",
+            F.when(
+                F.col("key") == 0, F.array(*[F.lit(i).cast("long") for i in range(4)])
+            ).otherwise(F.array(F.lit(0).cast("long"))),
+        )
+        .withColumn("salt", F.explode("salts"))
+        .drop("salts")
+    )
 ```
 
 Replication creates a match for every hot fact salt while preserving one dimension record per composite key. The original key is intentionally no longer unique on the expanded relation, so validating only that old key would misunderstand the new join contract. Replicating the small side is a cost of salting and must be budgeted rather than treated as free.
@@ -129,13 +157,15 @@ Join salted facts to the expanded dimension on key and salt, then project only f
 
 ```scala
 def saltedJoin(facts: DataFrame, dimension: DataFrame): DataFrame = {
-  facts.join(dimension,Seq("key","salt"),"inner").select("fact_id","key","amount","factor")
+  facts.join(dimension, Seq("key", "salt"), "inner").select("fact_id", "key", "amount", "factor")
 }
 ```
 
 ```python
 def salted_join(facts, dimension):
-    return facts.join(dimension,on=["key","salt"],how="inner").select("fact_id","key","amount","factor")
+    return facts.join(dimension, on=["key", "salt"], how="inner").select(
+        "fact_id", "key", "amount", "factor"
+    )
 ```
 
 Projecting away salt restores the declared business schema while the full bag comparison proves the helper strategy did not alter any fact occurrence or factor. The final plan explains how the salted relation is executed. Performance remains a separate question: dimension replication, additional expressions and hash collisions can offset the potential benefit of splitting a hot key.

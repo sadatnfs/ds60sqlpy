@@ -43,8 +43,6 @@ Read the operations in dependency order. Record which values exist before each l
 Borrowing reads the existing storage without transferring its lifetime responsibility.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let owned = String::from("pear");
@@ -64,8 +62,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 The optional slicing API makes invalid boundaries observable without panicking.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let text = "é";

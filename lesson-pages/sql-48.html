@@ -433,36 +433,71 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These worked excerpts come from <code>sql/postgres-60day/day48_project1_ecommerce_part3.sql</code>. Use <strong>Whole SQL lesson (psql)</strong> in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared <code>psql</code> routes are described above.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> items <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> order_id<span class="syntax-punctuation">,</span> product_id <span class="syntax-keyword">FROM</span> order_items <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> order_id<span class="syntax-punctuation">,</span> product_id
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> pairs <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> a<span class="syntax-punctuation">.</span>product_id <span class="syntax-keyword">AS</span> p1<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">.</span>product_id <span class="syntax-keyword">AS</span> p2<span class="syntax-punctuation">,</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> together
-  <span class="syntax-keyword">FROM</span> items a
-  <span class="syntax-keyword">JOIN</span> items b <span class="syntax-keyword">ON</span> a<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> b<span class="syntax-punctuation">.</span>order_id <span class="syntax-keyword">AND</span> a<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">&lt;</span> b<span class="syntax-punctuation">.</span>product_id
-  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> a<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">.</span>product_id
+  <span class="syntax-keyword">SELECT</span>
+    order_id<span class="syntax-punctuation">,</span>
+    product_id
+  <span class="syntax-keyword">FROM</span>
+    order_items
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+    order_id<span class="syntax-punctuation">,</span>
+    product_id
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+pairs <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span>
+    a<span class="syntax-punctuation">.</span>product_id <span class="syntax-keyword">AS</span> p1<span class="syntax-punctuation">,</span>
+    b<span class="syntax-punctuation">.</span>product_id <span class="syntax-keyword">AS</span> p2<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> together
+  <span class="syntax-keyword">FROM</span>
+    items a
+    <span class="syntax-keyword">JOIN</span> items b <span class="syntax-keyword">ON</span> a<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> b<span class="syntax-punctuation">.</span>order_id
+      <span class="syntax-keyword">AND</span> a<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">&lt;</span> b<span class="syntax-punctuation">.</span>product_id
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+    a<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span>
+    b<span class="syntax-punctuation">.</span>product_id
 <span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> p1<span class="syntax-punctuation">.</span>name <span class="syntax-keyword">AS</span> product_a<span class="syntax-punctuation">,</span> p2<span class="syntax-punctuation">.</span>name <span class="syntax-keyword">AS</span> product_b<span class="syntax-punctuation">,</span> together
-<span class="syntax-keyword">FROM</span> pairs
-<span class="syntax-keyword">JOIN</span> products p1 <span class="syntax-keyword">ON</span> p1<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> pairs<span class="syntax-punctuation">.</span>p1
-<span class="syntax-keyword">JOIN</span> products p2 <span class="syntax-keyword">ON</span> p2<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> pairs<span class="syntax-punctuation">.</span>p2
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> together <span class="syntax-keyword">DESC</span>
+<span class="syntax-keyword">SELECT</span>
+  p1<span class="syntax-punctuation">.</span>name <span class="syntax-keyword">AS</span> product_a<span class="syntax-punctuation">,</span>
+  p2<span class="syntax-punctuation">.</span>name <span class="syntax-keyword">AS</span> product_b<span class="syntax-punctuation">,</span>
+  together
+<span class="syntax-keyword">FROM</span>
+  pairs
+  <span class="syntax-keyword">JOIN</span> products p1 <span class="syntax-keyword">ON</span> p1<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> pairs<span class="syntax-punctuation">.</span>p1
+  <span class="syntax-keyword">JOIN</span> products p2 <span class="syntax-keyword">ON</span> p2<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> pairs<span class="syntax-punctuation">.</span>p2
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  together <span class="syntax-keyword">DESC</span>
 <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">50</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 1: Start with <code>order_items</code>, and <code>products</code> in <code>FROM</code>/<code>JOIN</code>; let <code>GROUP BY</code> collapse rows to its grouping keys. The final <code>SELECT</code> displays <code>product_a</code>, <code>product_b</code>, and <code>together</code>. <code>ORDER BY</code> determines presentation order and the final <code>LIMIT 50</code> caps displayed rows. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 1 returns one grouped row per <code>order_id</code>, and <code>product_id</code>, capped at 50 rows with columns <code>order_id</code>, <code>product_id</code>, <code>p1</code>, <code>p2</code>, <code>together</code>, and <code>product_a</code> from <code>order_items</code>, and <code>products</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> ev <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> e<span class="syntax-punctuation">.</span>event_time<span class="syntax-punctuation">,</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>metadata<span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">&gt;</span><span class="syntax-string">&#x27;campaign&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;none&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> campaign
-  <span class="syntax-keyword">FROM</span> events e
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> first_last <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span>
-         <span class="syntax-punctuation">(</span>ARRAY_AGG<span class="syntax-punctuation">(</span>campaign <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> event_time <span class="syntax-keyword">ASC</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">AS</span> first_touch<span class="syntax-punctuation">,</span>
-         <span class="syntax-punctuation">(</span>ARRAY_AGG<span class="syntax-punctuation">(</span>campaign <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> event_time <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">AS</span> last_touch
-  <span class="syntax-keyword">FROM</span> ev
-  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> customer_id
+  <span class="syntax-keyword">SELECT</span>
+    e<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+    e<span class="syntax-punctuation">.</span>event_time<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>metadata <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;campaign&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;none&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> campaign
+  <span class="syntax-keyword">FROM</span>
+    events e
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+first_last <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span>
+    customer_id<span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">(</span>ARRAY_AGG<span class="syntax-punctuation">(</span>campaign <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> event_time <span class="syntax-keyword">ASC</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">AS</span> first_touch<span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">(</span>ARRAY_AGG<span class="syntax-punctuation">(</span>campaign <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> event_time <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">AS</span> last_touch
+  <span class="syntax-keyword">FROM</span>
+    ev
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+    customer_id
 <span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> first_touch<span class="syntax-punctuation">,</span> last_touch<span class="syntax-punctuation">,</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">FROM</span> first_last
-<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> first_touch<span class="syntax-punctuation">,</span> last_touch
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">DESC</span>
+<span class="syntax-keyword">SELECT</span>
+  first_touch<span class="syntax-punctuation">,</span>
+  last_touch<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">FROM</span>
+  first_last
+<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+  first_touch<span class="syntax-punctuation">,</span>
+  last_touch
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">DESC</span>
 <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">50</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 2: Start with <code>events</code> in <code>FROM</code>/<code>JOIN</code>; let <code>GROUP BY</code> collapse rows to its grouping keys. The final <code>SELECT</code> displays <code>first_touch</code>, and <code>last_touch</code>. <code>ORDER BY</code> determines presentation order and the final <code>LIMIT 50</code> caps displayed rows. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 2 returns one grouped row per <code>customer_id</code>, capped at 50 rows with columns <code>customer_id</code>, <code>event_time</code>, <code>campaign</code>, <code>first_touch</code>, and <code>last_touch</code> from <code>events</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.</p>
@@ -761,28 +796,38 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
 <span class="syntax-keyword">WITH</span> purchases <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> event_id <span class="syntax-keyword">AS</span> purchase_event_id<span class="syntax-punctuation">,</span>
-         customer_id<span class="syntax-punctuation">,</span>
-         event_time <span class="syntax-keyword">AS</span> purchase_time
-  <span class="syntax-keyword">FROM</span> events
-  <span class="syntax-keyword">WHERE</span> event_type <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;purchase&#x27;</span>
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> qualifying_touches <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> p<span class="syntax-punctuation">.</span>purchase_event_id<span class="syntax-punctuation">,</span>
-         p<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>t<span class="syntax-punctuation">.</span>metadata<span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">&gt;</span><span class="syntax-string">&#x27;campaign&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;none&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> campaign
-  <span class="syntax-keyword">FROM</span> purchases p
-  <span class="syntax-keyword">JOIN</span> events t
-    <span class="syntax-keyword">ON</span> t<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> p<span class="syntax-punctuation">.</span>customer_id
-   <span class="syntax-keyword">AND</span> t<span class="syntax-punctuation">.</span>event_type <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;purchase&#x27;</span>
-   <span class="syntax-keyword">AND</span> t<span class="syntax-punctuation">.</span>event_time <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> p<span class="syntax-punctuation">.</span>purchase_time <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;7 days&#x27;</span>
-   <span class="syntax-keyword">AND</span> t<span class="syntax-punctuation">.</span>event_time <span class="syntax-operator">&lt;</span> p<span class="syntax-punctuation">.</span>purchase_time
+  <span class="syntax-keyword">SELECT</span>
+    event_id <span class="syntax-keyword">AS</span> purchase_event_id<span class="syntax-punctuation">,</span>
+    customer_id<span class="syntax-punctuation">,</span>
+    event_time <span class="syntax-keyword">AS</span> purchase_time
+  <span class="syntax-keyword">FROM</span>
+    events
+  <span class="syntax-keyword">WHERE</span>
+    event_type <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;purchase&#x27;</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+qualifying_touches <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span>
+    p<span class="syntax-punctuation">.</span>purchase_event_id<span class="syntax-punctuation">,</span>
+    p<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>t<span class="syntax-punctuation">.</span>metadata <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;campaign&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;none&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> campaign
+  <span class="syntax-keyword">FROM</span>
+    purchases p
+    <span class="syntax-keyword">JOIN</span> events t <span class="syntax-keyword">ON</span> t<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> p<span class="syntax-punctuation">.</span>customer_id
+      <span class="syntax-keyword">AND</span> t<span class="syntax-punctuation">.</span>event_type <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;purchase&#x27;</span>
+      <span class="syntax-keyword">AND</span> t<span class="syntax-punctuation">.</span>event_time <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> p<span class="syntax-punctuation">.</span>purchase_time <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;7 days&#x27;</span>
+      <span class="syntax-keyword">AND</span> t<span class="syntax-punctuation">.</span>event_time <span class="syntax-operator">&lt;</span> p<span class="syntax-punctuation">.</span>purchase_time
 <span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> campaign<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> purchase_event_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> assisted_conversions<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> customer_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> assisted_customers
-<span class="syntax-keyword">FROM</span> qualifying_touches
-<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> campaign
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> assisted_conversions <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> campaign<span class="syntax-punctuation">;</span></code></pre>
+  <span class="syntax-keyword">SELECT</span>
+    campaign<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> purchase_event_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> assisted_conversions<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> customer_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> assisted_customers
+  <span class="syntax-keyword">FROM</span>
+    qualifying_touches
+<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+  campaign
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  assisted_conversions <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span>
+  campaign<span class="syntax-punctuation">;</span></code></pre>
 <p>Expected grain: one row per campaign. A purchase can appear under several campaigns, so <code>assisted_conversions</code> is not additive across rows.</p>
 <h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -798,33 +843,45 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
 <span class="syntax-keyword">WITH</span> purchases <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> event_id <span class="syntax-keyword">AS</span> purchase_event_id<span class="syntax-punctuation">,</span>
-         customer_id<span class="syntax-punctuation">,</span>
-         event_time <span class="syntax-keyword">AS</span> purchase_time
-  <span class="syntax-keyword">FROM</span> events
-  <span class="syntax-keyword">WHERE</span> event_type <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;purchase&#x27;</span>
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> campaign_touches <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span>
+    event_id <span class="syntax-keyword">AS</span> purchase_event_id<span class="syntax-punctuation">,</span>
+    customer_id<span class="syntax-punctuation">,</span>
+    event_time <span class="syntax-keyword">AS</span> purchase_time
+  <span class="syntax-keyword">FROM</span>
+    events
+  <span class="syntax-keyword">WHERE</span>
+    event_type <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;purchase&#x27;</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+campaign_touches <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
   <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span>
-         p<span class="syntax-punctuation">.</span>purchase_event_id<span class="syntax-punctuation">,</span>
-         p<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>t<span class="syntax-punctuation">.</span>metadata<span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">&gt;</span><span class="syntax-string">&#x27;campaign&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;none&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> campaign
-  <span class="syntax-keyword">FROM</span> purchases p
-  <span class="syntax-keyword">JOIN</span> events t
-    <span class="syntax-keyword">ON</span> t<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> p<span class="syntax-punctuation">.</span>customer_id
-   <span class="syntax-keyword">AND</span> t<span class="syntax-punctuation">.</span>event_type <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;purchase&#x27;</span>
-   <span class="syntax-keyword">AND</span> t<span class="syntax-punctuation">.</span>event_time <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> p<span class="syntax-punctuation">.</span>purchase_time <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;7 days&#x27;</span>
-   <span class="syntax-keyword">AND</span> t<span class="syntax-punctuation">.</span>event_time <span class="syntax-operator">&lt;</span> p<span class="syntax-punctuation">.</span>purchase_time
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> credited <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span>
-         <span class="syntax-number">1</span><span class="syntax-punctuation">.</span><span class="syntax-number">0</span> <span class="syntax-operator">/</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> purchase_event_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> fractional_credit
-  <span class="syntax-keyword">FROM</span> campaign_touches
+    p<span class="syntax-punctuation">.</span>purchase_event_id<span class="syntax-punctuation">,</span>
+    p<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>t<span class="syntax-punctuation">.</span>metadata <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;campaign&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;none&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> campaign
+  <span class="syntax-keyword">FROM</span>
+    purchases p
+    <span class="syntax-keyword">JOIN</span> events t <span class="syntax-keyword">ON</span> t<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> p<span class="syntax-punctuation">.</span>customer_id
+      <span class="syntax-keyword">AND</span> t<span class="syntax-punctuation">.</span>event_type <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;purchase&#x27;</span>
+      <span class="syntax-keyword">AND</span> t<span class="syntax-punctuation">.</span>event_time <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> p<span class="syntax-punctuation">.</span>purchase_time <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;7 days&#x27;</span>
+      <span class="syntax-keyword">AND</span> t<span class="syntax-punctuation">.</span>event_time <span class="syntax-operator">&lt;</span> p<span class="syntax-punctuation">.</span>purchase_time
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+credited <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span>
+    <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-number">1</span><span class="syntax-punctuation">.</span><span class="syntax-number">0</span> <span class="syntax-operator">/</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> purchase_event_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> fractional_credit
+<span class="syntax-keyword">FROM</span>
+  campaign_touches
 <span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> campaign<span class="syntax-punctuation">,</span>
-       ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>fractional_credit<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> attributed_conversions<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> purchase_event_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> touched_conversions
-<span class="syntax-keyword">FROM</span> credited
-<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> campaign
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> attributed_conversions <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> campaign<span class="syntax-punctuation">;</span></code></pre>
+<span class="syntax-keyword">SELECT</span>
+  campaign<span class="syntax-punctuation">,</span>
+  ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>fractional_credit<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> attributed_conversions<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">DISTINCT</span> purchase_event_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> touched_conversions
+<span class="syntax-keyword">FROM</span>
+  credited
+<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+  campaign
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  attributed_conversions <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span>
+  campaign<span class="syntax-punctuation">;</span></code></pre>
 <p>For every purchase that has at least one qualifying campaign, credits across its distinct campaigns sum to 1.</p>
 <h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
 <ul>

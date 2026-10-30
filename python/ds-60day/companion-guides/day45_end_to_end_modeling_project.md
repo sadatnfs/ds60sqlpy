@@ -166,13 +166,11 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
 X, y = load_breast_cancer(return_X_y=True)
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, stratify=y, random_state=4501
-)
+X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, random_state=4501)
 baseline = DummyClassifier(strategy="prior").fit(X_train, y_train)
-candidate = make_pipeline(
-    StandardScaler(), LogisticRegression(max_iter=2_000)
-).fit(X_train, y_train)
+candidate = make_pipeline(StandardScaler(), LogisticRegression(max_iter=2_000)).fit(
+    X_train, y_train
+)
 scores = {
     "baseline": roc_auc_score(y_test, baseline.predict_proba(X_test)[:, 1]),
     "candidate": roc_auc_score(y_test, candidate.predict_proba(X_test)[:, 1]),
@@ -203,8 +201,7 @@ evidence = {
 gates = {
     "quality": evidence["data_contract_passed"] and evidence["tests_passed"],
     "performance": (
-        evidence["candidate_auc"] - evidence["baseline_auc"]
-        >= evidence["minimum_improvement"]
+        evidence["candidate_auc"] - evidence["baseline_auc"] >= evidence["minimum_improvement"]
     ),
     "delivery": evidence["artifact_reloaded"] and evidence["limitations_documented"],
 }

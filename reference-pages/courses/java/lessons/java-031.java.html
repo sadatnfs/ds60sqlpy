@@ -198,29 +198,29 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 1: Inspect a retained annotation</span></span>
-<span class="source-line">    <span class="syntax-comment">// ReadVersion on the knownFriendly provider.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: version2.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Read Version on the known Friendly provider.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: version 2.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 2: Invoke a known public method reflectively</span></span>
-<span class="source-line">    <span class="syntax-comment">// Findgreet(String) andinvoke it withAda.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Findgreet(String) and invoke it with Ada.</span></span>
 <span class="source-line">    <span class="syntax-comment">// Expected: Hello, Ada.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 3: Load a real local service descriptor</span></span>
-<span class="source-line">    <span class="syntax-comment">// Create the temporaryMETA-INF/services entry anddiscoverGreeting providers.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: oneFriendly provider withversion2 andworkinggreet.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Create the temporaryMETA-INF/services entry and discover Greeting providers.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: oneFriendly provider with version 2 andworkinggreet.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 4: Preserve a reflected target failure</span></span>
-<span class="source-line">    <span class="syntax-comment">// Invokegreet withblanktext andinspectInvocationTargetException cause.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Invokegreet with blank text and inspect InvocationTargetException cause.</span></span>
 <span class="source-line">    <span class="syntax-comment">// Expected: causeIllegalArgumentException.</span></span>
 <span class="source-line"></span>
-<span class="source-line">    <span class="syntax-comment">// Exercise 5: Reject missing class andmethod contracts</span></span>
-<span class="source-line">    <span class="syntax-comment">// Look up an absent class andan unsupportedgreet(int)signature.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: ClassNotFoundException andNoSuchMethodException.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Exercise 5: Reject missing class and method contracts</span></span>
+<span class="source-line">    <span class="syntax-comment">// Look up an absent class and an unsupportedgreet(int)signature.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: ClassNotFoundException and NoSuchMethodException.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 6: Treat provider metadata as a policy input</span></span>
-<span class="source-line">    <span class="syntax-comment">// Accept provider versions1..2 andreject a hypotheticalversion3 under the currentconsumer</span></span>
+<span class="source-line">    <span class="syntax-comment">// Accept provider versions1..2 and reject a hypotheticalversion3 under the current consumer</span></span>
 <span class="source-line">    <span class="syntax-comment">// contract.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: version2accepted;version3rejected.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: version 2 accepted;version 3 rejected.</span></span>
 <span class="source-line">    System<span class="syntax-punctuation">.</span><span class="syntax-attribute">out</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">println</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement and check the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line">  <span class="syntax-punctuation">}</span></span>
 <span class="source-line"><span class="syntax-punctuation">}</span></span>

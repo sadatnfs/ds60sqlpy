@@ -43,7 +43,9 @@ Read the operations in dependency order. Record which values exist before each l
 The function moves its chosen result, preserving the concrete type rather than returning an untyped object.
 
 ```rust
-fn larger<T: Ord>(left: T, right: T) -> T { if left >= right { left } else { right } }
+fn larger<T: Ord>(left: T, right: T) -> T {
+    if left >= right { left } else { right }
+}
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
@@ -62,7 +64,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 The consumer knows which values the iterator yields and chooses a compatible aggregation.
 
 ```rust
-fn larger<T: Ord>(left: T, right: T) -> T { if left >= right { left } else { right } }
+fn larger<T: Ord>(left: T, right: T) -> T {
+    if left >= right { left } else { right }
+}
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {

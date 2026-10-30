@@ -92,7 +92,7 @@ public class Main {
       assert balance(connection, 1) == 100 && balance(connection, 2) == 50;
     }
 
-    // Exercise 4: Commit andread from a second session
+    // Exercise 4: Commit and read from a second session
     try (java.sql.Connection connection = database()) {
       connection.setAutoCommit(false);
       change(connection, 1, -10);
@@ -105,7 +105,7 @@ public class Main {
       }
     }
 
-    // Exercise 5: Handle a constraint failure androllback
+    // Exercise 5: Handle a constraint failure and rollback
     try (java.sql.Connection connection = database()) {
       connection.setAutoCommit(false);
       boolean constraint = false;

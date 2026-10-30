@@ -49,9 +49,15 @@ The question is: Use groups A, A, B with truth 1, 1, 0 and prediction 1, 0, 0.
 Counts keep the evidence visible. Equal rates with different denominators do not imply equal uncertainty.
 
 ```python
-truth=torch.tensor([1,1,0]); prediction=torch.tensor([1,0,0]); groups=['A','A','B']; errors=prediction!=truth
-report={group:(int(errors[torch.tensor([g==group for g in groups])].sum()),groups.count(group)) for group in ['A','B']}
-assert report=={'A':(1,2),'B':(0,1)}
+truth = torch.tensor([1, 1, 0])
+prediction = torch.tensor([1, 0, 0])
+groups = ["A", "A", "B"]
+errors = prediction != truth
+report = {
+    group: (int(errors[torch.tensor([g == group for g in groups])].sum()), groups.count(group))
+    for group in ["A", "B"]
+}
+assert report == {"A": (1, 2), "B": (0, 1)}
 ```
 
 **Expected:** A1/2errors; B0/1.
@@ -65,8 +71,8 @@ The question is: Repeat correct record c five times and compare row count with u
 Repeated rows can bias a metric without adding independent cases. Identity validation belongs before aggregation.
 
 ```python
-ids=['a','b','c']+['c']*5
-assert len(ids)==8 and len(set(ids))==3
+ids = ["a", "b", "c"] + ["c"] * 5
+assert len(ids) == 8 and len(set(ids)) == 3
 ```
 
 **Expected:** 8rows but 3 unique IDs.
@@ -80,8 +86,10 @@ The question is: Classify \(x\ge 0\) at base 1 after shifts-.1, -.9, -1.1.
 The last shift crosses the defined boundary. Whether that counts as a robustness failure depends on the intended label semantics.
 
 ```python
-base=torch.tensor(1.); shifts=torch.tensor([-.1,-.9,-1.1]); changed=(base+shifts>=0).long()
-assert changed.tolist()==[1,1,0]
+base = torch.tensor(1.0)
+shifts = torch.tensor([-0.1, -0.9, -1.1])
+changed = (base + shifts >= 0).long()
+assert changed.tolist() == [1, 1, 0]
 ```
 
 **Expected:** labels 1, 1, 0.
@@ -95,9 +103,10 @@ The question is: Use 9 minor passes and 1 severe failure.
 A high aggregate cannot override a predeclared critical-failure gate. Report both frequency and consequence.
 
 ```python
-passed=torch.tensor([True]*9+[False]); severe=torch.tensor([False]*9+[True])
-np.testing.assert_allclose(passed.float().mean().item(),.9,atol=1e-6,rtol=0)
-assert int((~passed&severe).sum())==1
+passed = torch.tensor([True] * 9 + [False])
+severe = torch.tensor([False] * 9 + [True])
+np.testing.assert_allclose(passed.float().mean().item(), 0.9, atol=1e-6, rtol=0)
+assert int((~passed & severe).sum()) == 1
 ```
 
 **Expected:** overall pass rate.9; severe failure count 1.
@@ -111,8 +120,11 @@ The question is: Define a rate helper with count 0.
 Absence of observations is not a perfect score. Keeping None visible prevents an untested group from looking validated.
 
 ```python
-def rate(errors,count): return None if count==0 else errors/count
-assert rate(0,0) is None and rate(0,1)==0
+def rate(errors, count):
+    return None if count == 0 else errors / count
+
+
+assert rate(0, 0) is None and rate(0, 1) == 0
 ```
 
 **Expected:** None for untested; 0for zero errors in one case.
@@ -126,8 +138,13 @@ The question is: Record 3 unique units, synthetic teaching use and untested futu
 The card organizes evidence and limits; it does not create evidence merely by being complete. A production decision needs representative tests and appropriate privacy analysis.
 
 ```python
-card={'unique_units':3,'use':'synthetic teaching','untested':['future population','private-data behavior'],'differential_privacy_established':False}
-assert card['unique_units']==3 and not card['differential_privacy_established']
+card = {
+    "unique_units": 3,
+    "use": "synthetic teaching",
+    "untested": ["future population", "private-data behavior"],
+    "differential_privacy_established": False,
+}
+assert card["unique_units"] == 3 and not card["differential_privacy_established"]
 ```
 
 **Expected:** card explicitly has no privacy guarantee.

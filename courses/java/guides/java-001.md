@@ -50,13 +50,12 @@ import java.util.*;
 
 public class Main {
 
-    public static void main(String[] args) throws Exception {
-        String message = "Hello, Java";
-        System.out.println(message);
-        assert message.equals("Hello, Java");
-    }
+  public static void main(String[] args) throws Exception {
+    String message = "Hello, Java";
+    System.out.println(message);
+    assert message.equals("Hello, Java");
+  }
 }
-
 ```
 
 **Expected:** one line Hello, Java.
@@ -70,18 +69,17 @@ import java.util.*;
 
 public class Main {
 
-    public static void main(String[] args) throws Exception {
-        String message = "Hello, Java";
-        System.out.println(message);
-        assert message.equals("Hello, Java");
+  public static void main(String[] args) throws Exception {
+    String message = "Hello, Java";
+    System.out.println(message);
+    assert message.equals("Hello, Java");
 
-        int total = 2 + 3;
-        String line = "total=" + total;
-        assert total == 5;
-        assert line.equals("total=5");
-    }
+    int total = 2 + 3;
+    String line = "total=" + total;
+    assert total == 5;
+    assert line.equals("total=5");
+  }
 }
-
 ```
 
 **Expected:** integer5 and text total=5.

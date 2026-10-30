@@ -23,10 +23,13 @@ The question is: Hash two identical snippets and one paraphrase in the same fami
 The paraphrase remains related despite a different hash. This is why content hashing and family metadata address different contamination mechanisms.
 
 ```python
-import hashlib,json
-hash_text=lambda t:hashlib.sha256(t.encode('utf-8')).hexdigest()
-a=hash_text('red square'); copy=hash_text('red square'); para=hash_text('square colored red')
-assert a==copy and a!=para
+import hashlib, json
+
+hash_text = lambda t: hashlib.sha256(t.encode("utf-8")).hexdigest()
+a = hash_text("red square")
+copy = hash_text("red square")
+para = hash_text("square colored red")
+assert a == copy and a != para
 ```
 
 **Expected:** identical texts share a hash; paraphrase differs.
@@ -40,9 +43,10 @@ The question is: Use documentsa,a2 inF andb inG,c inH; mapF train,G validation,H
 The assignment is made once per family. Sampling rows independently would permit related versions to cross the boundary.
 
 ```python
-family={'a':'F','a2':'F','b':'G','c':'H'}; policy={'F':'train','G':'validation','H':'test'}
-manifest={doc:policy[group] for doc,group in family.items()}
-assert manifest=={'a':'train','a2':'train','b':'validation','c':'test'}
+family = {"a": "F", "a2": "F", "b": "G", "c": "H"}
+policy = {"F": "train", "G": "validation", "H": "test"}
+manifest = {doc: policy[group] for doc, group in family.items()}
+assert manifest == {"a": "train", "a2": "train", "b": "validation", "c": "test"}
 ```
 
 **Expected:** a and a2 both train.
@@ -56,8 +60,12 @@ The question is: Construct family sets for train,validation,test and compare pai
 Checking only train versus test misses validation contamination, which can affect model or prompt selection before final testing.
 
 ```python
-sets={part:{family[d] for d,p in manifest.items() if p==part} for part in policy.values()}
-assert not sets['train']&sets['validation'] and not sets['train']&sets['test'] and not sets['validation']&sets['test']
+sets = {part: {family[d] for d, p in manifest.items() if p == part} for part in policy.values()}
+assert (
+    not sets["train"] & sets["validation"]
+    and not sets["train"] & sets["test"]
+    and not sets["validation"] & sets["test"]
+)
 ```
 
 **Expected:** all three intersections empty.
@@ -71,9 +79,11 @@ The question is: Movea2 into validation and rerun the family intersection.
 A negative control proves the audit detects the intended failure. A test suite containing only clean partitions can pass even when a checker always returns success.
 
 ```python
-bad=dict(manifest); bad['a2']='validation'
-train={family[d] for d,p in bad.items() if p=='train'}; valid={family[d] for d,p in bad.items() if p=='validation'}
-assert train&valid=={'F'}
+bad = dict(manifest)
+bad["a2"] = "validation"
+train = {family[d] for d, p in bad.items() if p == "train"}
+valid = {family[d] for d, p in bad.items() if p == "validation"}
+assert train & valid == {"F"}
 ```
 
 **Expected:** train/validation intersectionF.
@@ -87,9 +97,10 @@ The question is: Hash canonical manifest JSON before and after computing an eval
 Evaluation should read partition state. The digest reveals mutation but must accompany the actual manifest so a reviewer can inspect its content.
 
 ```python
-payload=lambda:json.dumps(manifest,sort_keys=True,separators=(',',':')).encode(); before=hashlib.sha256(payload()).hexdigest()
-summary={'test_documents':sum(p=='test' for p in manifest.values())}
-assert summary['test_documents']==1 and hashlib.sha256(payload()).hexdigest()==before
+payload = lambda: json.dumps(manifest, sort_keys=True, separators=(",", ":")).encode()
+before = hashlib.sha256(payload()).hexdigest()
+summary = {"test_documents": sum(p == "test" for p in manifest.values())}
+assert summary["test_documents"] == 1 and hashlib.sha256(payload()).hexdigest() == before
 ```
 
 **Expected:** hash unchanged.
@@ -103,8 +114,8 @@ The question is: Compare raw hashes for red square and red square followed by a 
 Neither policy is universally correct. The lesson requires the policy to be stated before deduplication and splitting so identity rules cannot be tuned to a desired result.
 
 ```python
-assert hash_text('red square')!=hash_text('red square ')
-assert hash_text('red square'.strip())==hash_text('red square '.strip())
+assert hash_text("red square") != hash_text("red square ")
+assert hash_text("red square".strip()) == hash_text("red square ".strip())
 ```
 
 **Expected:** raw hashes differ; stripped hashes match.

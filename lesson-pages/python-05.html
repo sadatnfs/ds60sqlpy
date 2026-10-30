@@ -439,6 +439,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
         <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">values must not be empty</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
     <span class="syntax-keyword">return</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span>
 
+
 mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation</strong></p>
 <pre class="highlighted-code"><code class="language-text">`5.0`. Empty input follows a deliberate exception path instead of dividing by zero accidentally.</code></pre>
@@ -449,6 +450,7 @@ mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[<
     <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-number">0</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> rate <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">:</span>
         <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">rate must be between 0 and 1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
     <span class="syntax-keyword">return</span> price <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span> <span class="syntax-operator">-</span> rate<span class="syntax-punctuation">)</span>
+
 
 discounted<span class="syntax-punctuation">(</span><span class="syntax-number">80.0</span><span class="syntax-punctuation">,</span> rate<span class="syntax-operator">=</span><span class="syntax-number">0.25</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation</strong></p>
@@ -903,7 +905,7 @@ label <span class="syntax-operator">=</span> <span class="syntax-string">&quot;<
 
 
 <span class="syntax-keyword">def</span> <span class="syntax-function">local_label</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span>
-    label <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">local</span><span class="syntax-string">&quot;</span>          <span class="syntax-comment"># This is a distinct local binding.</span>
+    label <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">local</span><span class="syntax-string">&quot;</span>  <span class="syntax-comment"># This is a distinct local binding.</span>
     <span class="syntax-keyword">return</span> label
 
 

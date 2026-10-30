@@ -432,11 +432,24 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
 <p>These worked excerpts come from <code>sql/postgres-60day/day35_avoiding_pitfalls.sql</code>. Use <strong>Whole SQL lesson (psql)</strong> in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared <code>psql</code> routes are described above.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-keyword">ANALYZE</span> <span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">WHERE</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;day&#x27;</span><span class="syntax-punctuation">,</span> order_date<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;day&#x27;</span><span class="syntax-punctuation">,</span> now<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-keyword">ANALYZE</span>
+<span class="syntax-keyword">SELECT</span>
+  <span class="syntax-operator">*</span>
+<span class="syntax-keyword">FROM</span>
+  orders
+<span class="syntax-keyword">WHERE</span>
+  date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;day&#x27;</span><span class="syntax-punctuation">,</span> order_date<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;day&#x27;</span><span class="syntax-punctuation">,</span> now<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 1 returns plan rows rather than business rows. The node tree is evidence about one execution strategy; it does not replace a correctness check on the underlying query.</p>
 <p><strong>Expected result/shape:</strong> Example 1 prints a plan tree, not business rows. Run the underlying <code>SELECT</code> separately and reconcile its the primary/business key of <code>orders</code> key set and row count over <code>orders</code>; then compare node estimates, actual rows × loops, buffers, and timing without requiring one fixed plan.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-keyword">ANALYZE</span> <span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">WHERE</span> order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;day&#x27;</span><span class="syntax-punctuation">,</span> now<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AND</span> order_date <span class="syntax-operator">&lt;</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;day&#x27;</span><span class="syntax-punctuation">,</span> now<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">+</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;1 day&#x27;</span><span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-keyword">ANALYZE</span>
+<span class="syntax-keyword">SELECT</span>
+  <span class="syntax-operator">*</span>
+<span class="syntax-keyword">FROM</span>
+  orders
+<span class="syntax-keyword">WHERE</span>
+  order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;day&#x27;</span><span class="syntax-punctuation">,</span> now<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-keyword">AND</span> order_date <span class="syntax-operator">&lt;</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;day&#x27;</span><span class="syntax-punctuation">,</span> now<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">+</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;1 day&#x27;</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 2 returns plan rows rather than business rows. The node tree is evidence about one execution strategy; it does not replace a correctness check on the underlying query.</p>
 <p><strong>Expected result/shape:</strong> Example 2 prints a plan tree, not business rows. Run the underlying <code>SELECT</code> separately and reconcile its the primary/business key of <code>orders</code> key set and row count over <code>orders</code>; then compare node estimates, actual rows × loops, buffers, and timing without requiring one fixed plan.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -711,40 +724,76 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
 <span class="syntax-comment">-- 1. One calendar day</span>
-<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span> BUFFERS<span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> order_id
-<span class="syntax-keyword">FROM</span> orders
-<span class="syntax-keyword">WHERE</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;day&#x27;</span><span class="syntax-punctuation">,</span> order_date<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;day&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span>
+  BUFFERS
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span>
+  order_id
+<span class="syntax-keyword">FROM</span>
+  orders
+<span class="syntax-keyword">WHERE</span>
+  date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;day&#x27;</span><span class="syntax-punctuation">,</span> order_date<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;day&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 
-<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span> BUFFERS<span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> order_id
-<span class="syntax-keyword">FROM</span> orders
-<span class="syntax-keyword">WHERE</span> order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;day&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span>
+  BUFFERS
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span>
+  order_id
+<span class="syntax-keyword">FROM</span>
+  orders
+<span class="syntax-keyword">WHERE</span>
+  order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;day&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span><span class="syntax-punctuation">)</span>
   <span class="syntax-keyword">AND</span> order_date <span class="syntax-operator">&lt;</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;day&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">+</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;1 day&#x27;</span><span class="syntax-punctuation">;</span>
 
 <span class="syntax-comment">-- 2. Current calendar year</span>
-<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span> BUFFERS<span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> order_id
-<span class="syntax-keyword">FROM</span> orders
-<span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">EXTRACT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">year</span> <span class="syntax-keyword">FROM</span> order_date<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">EXTRACT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">year</span> <span class="syntax-keyword">FROM</span> <span class="syntax-keyword">CURRENT_DATE</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span>
+  BUFFERS
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span>
+  order_id
+<span class="syntax-keyword">FROM</span>
+  orders
+<span class="syntax-keyword">WHERE</span>
+  <span class="syntax-keyword">EXTRACT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">year</span> <span class="syntax-keyword">FROM</span> order_date<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">EXTRACT</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">year</span> <span class="syntax-keyword">FROM</span> <span class="syntax-keyword">CURRENT_DATE</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 
-<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span> BUFFERS<span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> order_id
-<span class="syntax-keyword">FROM</span> orders
-<span class="syntax-keyword">WHERE</span> order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;year&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_DATE</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span>
+  BUFFERS
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span>
+  order_id
+<span class="syntax-keyword">FROM</span>
+  orders
+<span class="syntax-keyword">WHERE</span>
+  order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;year&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_DATE</span><span class="syntax-punctuation">)</span>
   <span class="syntax-keyword">AND</span> order_date <span class="syntax-operator">&lt;</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;year&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_DATE</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">+</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;1 year&#x27;</span><span class="syntax-punctuation">;</span>
 
 <span class="syntax-comment">-- 3. Last seven calendar dates, including today</span>
-<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span> BUFFERS<span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> order_id
-<span class="syntax-keyword">FROM</span> orders
-<span class="syntax-keyword">WHERE</span> order_date<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_DATE</span> <span class="syntax-operator">-</span> <span class="syntax-number">6</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span>
+  BUFFERS
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span>
+  order_id
+<span class="syntax-keyword">FROM</span>
+  orders
+<span class="syntax-keyword">WHERE</span>
+  order_date<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_DATE</span> <span class="syntax-operator">-</span><span class="syntax-number">6</span><span class="syntax-punctuation">;</span>
 
-<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span> BUFFERS<span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> order_id
-<span class="syntax-keyword">FROM</span> orders
-<span class="syntax-keyword">WHERE</span> order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">CURRENT_DATE</span> <span class="syntax-operator">-</span> <span class="syntax-number">6</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>timestamptz
-  <span class="syntax-keyword">AND</span> order_date <span class="syntax-operator">&lt;</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">CURRENT_DATE</span> <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>timestamptz<span class="syntax-punctuation">;</span></code></pre>
+<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span>
+  BUFFERS
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span>
+  order_id
+<span class="syntax-keyword">FROM</span>
+  orders
+<span class="syntax-keyword">WHERE</span>
+  order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">CURRENT_DATE</span> <span class="syntax-operator">-</span><span class="syntax-number">6</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>timestamptz
+  <span class="syntax-keyword">AND</span> order_date <span class="syntax-operator">&lt;</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">CURRENT_DATE</span> <span class="syntax-operator">+</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>timestamptz<span class="syntax-punctuation">;</span></code></pre>
 <p>Expected result sets within each pair are equivalent under the session time zone. Plan nodes can remain sequential scans because the dataset is small or because the demonstration index from Day 32 was rolled back.</p>
 <h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -759,26 +808,40 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <h4 id="solution-1--exercise-2-replace-a-per-customer-correlated-aggregate">Exercise 2: Replace a per-customer correlated aggregate<a class="heading-anchor" href="#solution-1--exercise-2-replace-a-per-customer-correlated-aggregate" aria-label="Link to this section">#</a></h4>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
-<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span> BUFFERS<span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
-       <span class="syntax-punctuation">(</span>
-         <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span>
-         <span class="syntax-keyword">FROM</span> orders o
-         <span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id
-       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> lifetime_revenue
-<span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">c</span><span class="syntax-punctuation">;</span>
-
-<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span> BUFFERS<span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">WITH</span> order_totals <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> lifetime_revenue
-  <span class="syntax-keyword">FROM</span> orders
-  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> customer_id
+<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span>
+  BUFFERS
 <span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
-       ot<span class="syntax-punctuation">.</span>lifetime_revenue
-<span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">c</span>
-<span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> order_totals ot <span class="syntax-keyword">ON</span> ot<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">;</span></code></pre>
+<span class="syntax-keyword">SELECT</span>
+  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+  <span class="syntax-punctuation">(</span>
+    <span class="syntax-keyword">SELECT</span>
+      <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">FROM</span>
+      orders o
+    <span class="syntax-keyword">WHERE</span>
+      o<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> lifetime_revenue
+<span class="syntax-keyword">FROM</span>
+  customers <span class="syntax-keyword">c</span><span class="syntax-punctuation">;</span>
+
+<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span>
+  BUFFERS
+<span class="syntax-punctuation">)</span> <span class="syntax-keyword">WITH</span> order_totals <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span>
+    customer_id<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> lifetime_revenue
+  <span class="syntax-keyword">FROM</span>
+    orders
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+    customer_id
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span>
+  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+  ot<span class="syntax-punctuation">.</span>lifetime_revenue
+<span class="syntax-keyword">FROM</span>
+  customers <span class="syntax-keyword">c</span>
+  <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> order_totals ot <span class="syntax-keyword">ON</span> ot<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">;</span></code></pre>
 <p>Expected shape: one row per customer in both forms. The <code>LEFT JOIN</code> is required to retain customers with no orders; changing it to an inner join would alter the answer.</p>
 <h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
 <ul>

@@ -58,19 +58,23 @@ into a task adds serialization, logging, and coordination overhead.
 ```python
 from prefect import flow, task
 
+
 @task
 def load_numbers(limit: int) -> list[int]:
     return list(range(limit))
 
+
 @task
 def summarize(values: list[int]) -> dict[str, int]:
     return {"rows": len(values), "total": sum(values)}
+
 
 @flow(log_prints=True)
 def summary_flow(limit: int = 10) -> dict[str, int]:
     result = summarize(load_numbers(limit))
     print(result)
     return result
+
 
 if __name__ == "__main__":
     summary_flow(limit=10)
@@ -200,11 +204,14 @@ Example A instead of reading it as unrelated syntax.
 class TemporaryUnavailable(RuntimeError):
     pass
 
+
 class InvalidInput(ValueError):
     pass
 
+
 def should_retry(error):
     return isinstance(error, (TemporaryUnavailable, TimeoutError))
+
 
 cases = [TemporaryUnavailable("later"), TimeoutError(), InvalidInput("bad row")]
 decisions = [should_retry(error) for error in cases]

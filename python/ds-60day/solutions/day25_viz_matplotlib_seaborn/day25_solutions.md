@@ -54,9 +54,7 @@ source = pd.DataFrame(
     }
 )
 values = source["duration_minutes"]
-category_counts = (
-    source["segment"].value_counts().reindex(["new", "returning"])
-)
+category_counts = source["segment"].value_counts().reindex(["new", "returning"])
 
 distribution_fig, distribution_ax = plt.subplots(figsize=(5, 3))
 distribution_ax.hist(values, bins=4, edgecolor="black")
@@ -196,9 +194,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 
-def plot_distribution(
-    values: pd.Series, *, ax: plt.Axes, title: str, units: str
-) -> plt.Axes:
+def plot_distribution(values: pd.Series, *, ax: plt.Axes, title: str, units: str) -> plt.Axes:
     """Draw a bounded histogram on caller-owned axes."""
 
     observed = values.dropna()

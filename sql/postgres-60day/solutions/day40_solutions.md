@@ -62,33 +62,33 @@ aggregates. The answers define the input grain before computing statistics.
 SET search_path TO training, public;
 
 WITH daily AS (
-  SELECT date_trunc('day', order_date)::date AS order_day,
-         SUM(total_amount) AS revenue
-  FROM orders
-  GROUP BY date_trunc('day', order_date)
-), rolling AS (
-  SELECT order_day,
-         revenue,
-         AVG(revenue) OVER (
-           ORDER BY order_day
-           ROWS BETWEEN 14 PRECEDING AND CURRENT ROW
-         ) AS avg15,
-         STDDEV_SAMP(revenue) OVER (
-           ORDER BY order_day
-           ROWS BETWEEN 14 PRECEDING AND CURRENT ROW
-         ) AS sd15
-  FROM daily
+  SELECT
+    date_trunc('day', order_date)::date AS order_day,
+    SUM(total_amount) AS revenue
+  FROM
+    orders
+  GROUP BY
+    date_trunc('day', order_date)
+),
+rolling AS (
+  SELECT
+    order_day,
+    revenue,
+    AVG(revenue) OVER (ORDER BY order_day ROWS BETWEEN 14 PRECEDING AND CURRENT ROW) AS avg15,
+    STDDEV_SAMP(revenue) OVER (ORDER BY order_day ROWS BETWEEN 14 PRECEDING AND CURRENT ROW) AS sd15
+  FROM
+    daily
 )
-SELECT order_day,
-       ROUND(revenue, 2) AS revenue,
-       ROUND(avg15, 2) AS avg15,
-       ROUND(sd15, 2) AS sd15,
-       ROUND(
-         (revenue - avg15) / NULLIF(sd15, 0),
-         4
-       ) AS z_score
-FROM rolling
-ORDER BY order_day;
+SELECT
+  order_day,
+  ROUND(revenue, 2) AS revenue,
+  ROUND(avg15, 2) AS avg15,
+  ROUND(sd15, 2) AS sd15,
+  ROUND((revenue - avg15) / NULLIF (sd15, 0), 4) AS z_score
+FROM
+  rolling
+ORDER BY
+  order_day;
 ```
 
 Expected shape: one row per day with orders. A positive z-score is above the
@@ -119,32 +119,28 @@ the whole order total for every category would double-count mixed orders.
 SET search_path TO training, public;
 
 WITH category_order_values AS (
-  SELECT p.category,
-         oi.order_id,
-         SUM(
-           oi.unit_price * oi.quantity * (1 - oi.discount)
-         ) AS category_order_value
-  FROM order_items oi
-  JOIN products p ON p.product_id = oi.product_id
-  GROUP BY p.category, oi.order_id
+  SELECT
+    p.category,
+    oi.order_id,
+    SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS category_order_value
+  FROM
+    order_items oi
+    JOIN products p ON p.product_id = oi.product_id
+  GROUP BY
+    p.category,
+    oi.order_id
 )
-SELECT category,
-       ROUND(
-         PERCENTILE_CONT(0.5) WITHIN GROUP (
-           ORDER BY category_order_value
-         )::numeric,
-         2
-       ) AS p50_order_value,
-       ROUND(
-         PERCENTILE_CONT(0.9) WITHIN GROUP (
-           ORDER BY category_order_value
-         )::numeric,
-         2
-       ) AS p90_order_value,
-       COUNT(*) AS category_orders
-FROM category_order_values
-GROUP BY category
-ORDER BY category;
+SELECT
+  category,
+  ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY category_order_value)::numeric, 2) AS p50_order_value,
+  ROUND(PERCENTILE_CONT(0.9) WITHIN GROUP (ORDER BY category_order_value)::numeric, 2) AS p90_order_value,
+  COUNT(*) AS category_orders
+FROM
+  category_order_values
+GROUP BY
+  category
+ORDER BY
+  category;
 ```
 
 Expected shape: one row per sold category. `PERCENTILE_CONT` can interpolate

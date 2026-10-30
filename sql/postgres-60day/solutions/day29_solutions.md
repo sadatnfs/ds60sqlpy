@@ -83,11 +83,15 @@ executable companion when you want a self-contained check.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT c.customer_id,
-       c.full_name
-FROM customers AS c
-WHERE c.full_name ILIKE 'Customer 1%'
-ORDER BY c.customer_id;
+SELECT
+  c.customer_id,
+  c.full_name
+FROM
+  customers AS c
+WHERE
+  c.full_name ILIKE 'Customer 1%'
+ORDER BY
+  c.customer_id;
 ```
 
 **Expected shape:** Matching customer rows in stable ID order.
@@ -121,11 +125,15 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT c.customer_id,
-       c.email
-FROM customers AS c
-WHERE c.email ~ '^customer[0-9]+@example[.]com$'
-ORDER BY c.customer_id;
+SELECT
+  c.customer_id,
+  c.email
+FROM
+  customers AS c
+WHERE
+  c.email ~ '^customer[0-9]+@example[.]com$'
+ORDER BY
+  c.customer_id;
 ```
 
 **Expected shape:** Only matching non-null email rows.
@@ -159,11 +167,15 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT e.event_id,
-       e.metadata ->> 'path' AS path
-FROM events AS e
-WHERE e.metadata ->> 'path' LIKE '/p/%'
-ORDER BY e.event_id;
+SELECT
+  e.event_id,
+  e.metadata ->> 'path' AS path
+FROM
+  events AS e
+WHERE
+  e.metadata ->> 'path' LIKE '/p/%'
+ORDER BY
+  e.event_id;
 ```
 
 **Expected shape:** Events whose path begins `/p/`.
@@ -198,11 +210,17 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT value
-FROM (VALUES ('100%'), ('a_b'), ('plain')) AS sample(value)
-WHERE value LIKE '%\%%' ESCAPE '\'
-   OR value LIKE '%\_%' ESCAPE '\'
-ORDER BY value;
+SELECT
+  value
+FROM (
+  VALUES ('100%'),
+    ('a_b'),
+    ('plain')) AS sample (value)
+WHERE
+  value LIKE '%\%%' ESCAPE '\'
+    OR value LIKE '%\_%' ESCAPE '\'
+  ORDER BY
+    value;
 ```
 
 **Expected shape:** Only the two rows containing the requested literal symbols.
@@ -236,11 +254,15 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT c.customer_id,
-       substring(c.full_name FROM '^Customer ([0-9]+)$')::integer AS name_number
-FROM customers AS c
-WHERE c.full_name ~ '^Customer [0-9]+$'
-ORDER BY c.customer_id;
+SELECT
+  c.customer_id,
+  substring(c.full_name FROM '^Customer ([0-9]+)$')::integer AS name_number
+FROM
+  customers AS c
+WHERE
+  c.full_name ~ '^Customer [0-9]+$'
+ORDER BY
+  c.customer_id;
 ```
 
 **Expected shape:** One row per valid course customer name.
@@ -274,16 +296,22 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT c.customer_id,
-       c.email,
-       CASE
-         WHEN c.email IS NULL THEN 'missing'
-         WHEN c.email ~* '^[a-z0-9._%+-]+@example[.]com$' THEN 'course_example'
-         WHEN c.email ~* '^[a-z0-9._%+-]+@[a-z0-9.-]+[.][a-z]{2,}$' THEN 'other_valid_looking'
-         ELSE 'malformed'
-       END AS email_class
-FROM customers AS c
-ORDER BY c.customer_id;
+SELECT
+  c.customer_id,
+  c.email,
+  CASE WHEN c.email IS NULL THEN
+    'missing'
+  WHEN c.email ~* '^[a-z0-9._%+-]+@example[.]com$' THEN
+    'course_example'
+  WHEN c.email ~* '^[a-z0-9._%+-]+@[a-z0-9.-]+[.][a-z]{2,}$' THEN
+    'other_valid_looking'
+  ELSE
+    'malformed'
+  END AS email_class
+FROM
+  customers AS c
+ORDER BY
+  c.customer_id;
 ```
 
 **Expected shape:** One row per customer with one classification.

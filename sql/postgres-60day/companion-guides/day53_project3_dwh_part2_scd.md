@@ -99,12 +99,19 @@ These worked excerpts come from `sql/postgres-60day/day53_project3_dwh_part2_scd
 
 ```sql
 CREATE TEMP TABLE changed_customers AS
-SELECT c.customer_id,
-       c.full_name,
-       c.country,
-       CASE WHEN c.segment = 'platinum' THEN 'gold' ELSE 'platinum' END AS segment
-FROM training.customers c
-ORDER BY c.customer_id
+SELECT
+  c.customer_id,
+  c.full_name,
+  c.country,
+  CASE WHEN c.segment = 'platinum' THEN
+    'gold'
+  ELSE
+    'platinum'
+  END AS segment
+FROM
+  training.customers c
+ORDER BY
+  c.customer_id
 LIMIT 10;
 ```
 
@@ -116,31 +123,51 @@ LIMIT 10;
 
 ```sql
 WITH current_dim AS (
-  SELECT dc.*
-  FROM dim_customer dc
-  WHERE dc.is_current
-), diffs AS (
-  SELECT s.customer_id,
-         s.full_name,
-         s.country,
-         s.segment
-  FROM changed_customers s
-  JOIN current_dim dc ON dc.customer_id = s.customer_id
-  WHERE coalesce(s.full_name,'') <> coalesce(dc.full_name,'')
-     OR coalesce(s.country,'')   <> coalesce(dc.country,'')
-     OR coalesce(s.segment,'')   <> coalesce(dc.segment,'')
-), closed AS (
-  UPDATE dim_customer dc
-  SET valid_to = CURRENT_DATE - 1,
-      is_current = FALSE
-  FROM diffs d
-  WHERE dc.customer_id = d.customer_id
+  SELECT
+    dc.*
+  FROM
+    dim_customer dc
+  WHERE
+    dc.is_current
+),
+diffs AS (
+  SELECT
+    s.customer_id,
+    s.full_name,
+    s.country,
+    s.segment
+  FROM
+    changed_customers s
+    JOIN current_dim dc ON dc.customer_id = s.customer_id
+  WHERE
+    coalesce(s.full_name, '') <> coalesce(dc.full_name, '')
+    OR coalesce(s.country, '') <> coalesce(dc.country, '')
+    OR coalesce(s.segment, '') <> coalesce(dc.segment, '')
+),
+closed AS (
+  UPDATE
+    dim_customer dc
+  SET
+    valid_to = CURRENT_DATE -1,
+    is_current = FALSE
+  FROM
+    diffs d
+  WHERE
+    dc.customer_id = d.customer_id
     AND dc.is_current
-  RETURNING dc.customer_id
-)
-INSERT INTO dim_customer(customer_id, full_name, country, segment, valid_from, valid_to, is_current)
-SELECT d.customer_id, d.full_name, d.country, d.segment, CURRENT_DATE, NULL, TRUE
-FROM diffs d;
+  RETURNING
+    dc.customer_id)
+INSERT INTO dim_customer (customer_id, full_name, country, segment, valid_from, valid_to, is_current)
+SELECT
+  d.customer_id,
+  d.full_name,
+  d.country,
+  d.segment,
+  CURRENT_DATE,
+  NULL,
+  TRUE
+FROM
+  diffs d;
 ```
 
 **How to read it:** Example 2 is a data-changing CTE chain, not a displayed query result. The CTEs `current_dim`, `diffs`, and `closed` identify changed customers, close each former current row, and insert one successor into `dim_customer`. Read the command tag for the inserted-row count, then verify one current version per customer and non-overlapping validity periods; a successful command tag alone does not prove Type-2 history is correct.

@@ -22,7 +22,7 @@ The cast belongs to an operand, so floating arithmetic occurs before the result 
 
 ```cpp
 #include <iostream>
-int main(){ std::cout << 7/2 << " " << static_cast<double>(7)/2 << "\n"; }
+int main() { std::cout << 7 / 2 << " " << static_cast<double>(7) / 2 << "\n"; }
 ```
 
 **Expected:** 3 3.5 followed by newline.
@@ -34,7 +34,14 @@ The source never turns the negative value into an unsigned size. The fixture is 
 ```cpp
 #include <cstddef>
 #include <iostream>
-int main(){ const long long count=-1; if(count<0){std::cout<<"rejected\n"; return 0;} return 1; }
+int main() {
+  const long long count = -1;
+  if (count < 0) {
+    std::cout << "rejected\n";
+    return 0;
+  }
+  return 1;
+}
 ```
 
 **Expected:** rejected followed by newline; exit 0 means the intended rejection branch was observed.

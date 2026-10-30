@@ -59,26 +59,23 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Buffers;
 
-internal static class Program
-{
-    private static void Check(bool condition, string reason)
+internal static class Program {
+  private static void Check(bool condition, string reason) {
+    if (!condition)
+      throw new InvalidOperationException(reason);
+  }
+
+  private static async Task Main() {
     {
-        if (!condition) throw new InvalidOperationException(reason);
+      var values = new List<int> { 1, 2 };
+      var query = values.Where(value => value > 1);
+      values.Add(3);
+      Check(query.SequenceEqual(new[] { 2, 3 }),
+            "query sees later source state");
     }
-
-    private static async Task Main()
-    {
-        {
-            var values = new List<int> { 1, 2 };
-            var query = values.Where(value => value > 1);
-            values.Add(3);
-            Check(query.SequenceEqual(new[] { 2, 3 }), "query sees later source state");
-        }
-        Console.WriteLine("csharp-020: passed");
-        await Task.CompletedTask;
-    }
-
-
+    Console.WriteLine("csharp-020: passed");
+    await Task.CompletedTask;
+  }
 }
 ```
 
@@ -105,27 +102,24 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Buffers;
 
-internal static class Program
-{
-    private static void Check(bool condition, string reason)
+internal static class Program {
+  private static void Check(bool condition, string reason) {
+    if (!condition)
+      throw new InvalidOperationException(reason);
+  }
+
+  private static async Task Main() {
     {
-        if (!condition) throw new InvalidOperationException(reason);
+      var values = new List<int> { 1, 2 };
+      int[] snapshot = values.Where(value => value > 1).ToArray();
+      values.Add(3);
+      Check(snapshot.SequenceEqual(new[] { 2 }), "snapshot remains stable");
+      Check(values.Select(value => value * 10).ToArray().Length == 3,
+            "projection count");
     }
-
-    private static async Task Main()
-    {
-        {
-            var values = new List<int> { 1, 2 };
-            int[] snapshot = values.Where(value => value > 1).ToArray();
-            values.Add(3);
-            Check(snapshot.SequenceEqual(new[] { 2 }), "snapshot remains stable");
-            Check(values.Select(value => value * 10).ToArray().Length == 3, "projection count");
-        }
-        Console.WriteLine("csharp-020: passed");
-        await Task.CompletedTask;
-    }
-
-
+    Console.WriteLine("csharp-020: passed");
+    await Task.CompletedTask;
+  }
 }
 ```
 

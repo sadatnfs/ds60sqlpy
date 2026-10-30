@@ -31,7 +31,7 @@ If a static_assert fails, inspect the compile-time expression and supported valu
 ## Worked example 1
 
 ```cpp
-static_assert(square(4)==16);
+static_assert(square(4) == 16);
 ```
 
 Expected: The compiler validates the expression before an executable exists.
@@ -39,7 +39,8 @@ Expected: The compiler validates the expression before an executable exists.
 ## Worked example 2
 
 ```cpp
-int runtime=5; assert(square(runtime)==25);
+int runtime = 5;
+assert(square(runtime) == 25);
 ```
 
 Expected: The same constexpr function may be evaluated during program execution.

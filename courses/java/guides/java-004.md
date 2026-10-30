@@ -49,22 +49,43 @@ The result depends only on the argument and the method changes no external state
 import java.util.*;
 
 public class Main {
-    static int doubleValue(int x) { return Math.multiplyExact(x, 2); }
-    static int positiveArea(int width, int height) {
-        if (width <= 0 || height <= 0) throw new IllegalArgumentException("positive dimensions required");
-        return Math.multiplyExact(width, height);
-    }
-    static void reassignInt(int value) { value = 99; }
-    static void append(List<Integer> values) { values.add(2); }
-    static void replace(List<Integer> values) { values = new ArrayList<>(); }
-    static String describe(int value) { return "int"; }
-    static String describe(long value) { return "long"; }
-    public static void main(String[] args) throws Exception {
-        assert doubleValue(7) == 14;
-        assert doubleValue(0) == 0;
-    }
-}
 
+  static int doubleValue(int x) {
+    return Math.multiplyExact(x, 2);
+  }
+
+  static int positiveArea(int width, int height) {
+    if (width <= 0 || height <= 0) throw new IllegalArgumentException(
+      "positive dimensions required"
+    );
+    return Math.multiplyExact(width, height);
+  }
+
+  static void reassignInt(int value) {
+    value = 99;
+  }
+
+  static void append(List<Integer> values) {
+    values.add(2);
+  }
+
+  static void replace(List<Integer> values) {
+    values = new ArrayList<>();
+  }
+
+  static String describe(int value) {
+    return "int";
+  }
+
+  static String describe(long value) {
+    return "long";
+  }
+
+  public static void main(String[] args) throws Exception {
+    assert doubleValue(7) == 14;
+    assert doubleValue(0) == 0;
+  }
+}
 ```
 
 **Expected:** 14 and 0.
@@ -77,27 +98,52 @@ A zero dimension is rejected because this method models a strictly positive rect
 import java.util.*;
 
 public class Main {
-    static int doubleValue(int x) { return Math.multiplyExact(x, 2); }
-    static int positiveArea(int width, int height) {
-        if (width <= 0 || height <= 0) throw new IllegalArgumentException("positive dimensions required");
-        return Math.multiplyExact(width, height);
-    }
-    static void reassignInt(int value) { value = 99; }
-    static void append(List<Integer> values) { values.add(2); }
-    static void replace(List<Integer> values) { values = new ArrayList<>(); }
-    static String describe(int value) { return "int"; }
-    static String describe(long value) { return "long"; }
-    public static void main(String[] args) throws Exception {
-        assert doubleValue(7) == 14;
-        assert doubleValue(0) == 0;
 
-        assert positiveArea(3, 4) == 12;
-        boolean badArea = false;
-        try { positiveArea(0, 4); } catch (IllegalArgumentException expected) { badArea = true; }
-        assert badArea;
+  static int doubleValue(int x) {
+    return Math.multiplyExact(x, 2);
+  }
+
+  static int positiveArea(int width, int height) {
+    if (width <= 0 || height <= 0) throw new IllegalArgumentException(
+      "positive dimensions required"
+    );
+    return Math.multiplyExact(width, height);
+  }
+
+  static void reassignInt(int value) {
+    value = 99;
+  }
+
+  static void append(List<Integer> values) {
+    values.add(2);
+  }
+
+  static void replace(List<Integer> values) {
+    values = new ArrayList<>();
+  }
+
+  static String describe(int value) {
+    return "int";
+  }
+
+  static String describe(long value) {
+    return "long";
+  }
+
+  public static void main(String[] args) throws Exception {
+    assert doubleValue(7) == 14;
+    assert doubleValue(0) == 0;
+
+    assert positiveArea(3, 4) == 12;
+    boolean badArea = false;
+    try {
+      positiveArea(0, 4);
+    } catch (IllegalArgumentException expected) {
+      badArea = true;
     }
+    assert badArea;
+  }
 }
-
 ```
 
 **Expected:** 3by4 gives12;zero width throwsIllegalArgumentException.

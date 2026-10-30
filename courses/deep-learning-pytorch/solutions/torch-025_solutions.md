@@ -45,9 +45,13 @@ The question is: Use anchor[1, 0], positive[1, 1], negative[0, 1].
 The positive vector is not parallel to the anchor, so its cosine is below one. Equal-looking scalar scores from different similarity definitions need not mean the same relationship.
 
 ```python
-anchor=torch.tensor([1.,0.],dtype=torch.float64); positive=torch.tensor([1.,1.],dtype=torch.float64); negative=torch.tensor([0.,1.],dtype=torch.float64)
-assert torch.dot(anchor,positive).item()==1 and torch.dot(anchor,negative).item()==0
-np.testing.assert_allclose(F.cosine_similarity(anchor,positive,dim=0).item(),1/np.sqrt(2),atol=1e-12,rtol=0)
+anchor = torch.tensor([1.0, 0.0], dtype=torch.float64)
+positive = torch.tensor([1.0, 1.0], dtype=torch.float64)
+negative = torch.tensor([0.0, 1.0], dtype=torch.float64)
+assert torch.dot(anchor, positive).item() == 1 and torch.dot(anchor, negative).item() == 0
+np.testing.assert_allclose(
+    F.cosine_similarity(anchor, positive, dim=0).item(), 1 / np.sqrt(2), atol=1e-12, rtol=0
+)
 ```
 
 **Expected:** dots 1, 0; cosines 1/sqrt 2, 0.
@@ -61,9 +65,14 @@ The question is: Multiply the positive vector by 10 and compare scores.
 Normalization removes positive scale from this comparison. A model trained with unnormalized dot products may intentionally use magnitude, so normalization is a modeling choice.
 
 ```python
-scaled=10*positive
-assert torch.dot(anchor,scaled).item()==10
-torch.testing.assert_close(F.cosine_similarity(anchor,scaled,dim=0),F.cosine_similarity(anchor,positive,dim=0),atol=1e-12,rtol=0)
+scaled = 10 * positive
+assert torch.dot(anchor, scaled).item() == 10
+torch.testing.assert_close(
+    F.cosine_similarity(anchor, scaled, dim=0),
+    F.cosine_similarity(anchor, positive, dim=0),
+    atol=1e-12,
+    rtol=0,
+)
 ```
 
 **Expected:** dot becomes 10; cosine unchanged.
@@ -77,8 +86,10 @@ The question is: Use logits[1, 0] with target 0.
 The loss depends on the relative score advantage. It does not verify whether the supplied positive and negative labels are semantically correct.
 
 ```python
-logits=torch.tensor([[1.,0.]],dtype=torch.float64)
-np.testing.assert_allclose(F.cross_entropy(logits,torch.tensor([0])).item(),np.log1p(np.exp(-1)),atol=1e-12,rtol=0)
+logits = torch.tensor([[1.0, 0.0]], dtype=torch.float64)
+np.testing.assert_allclose(
+    F.cross_entropy(logits, torch.tensor([0])).item(), np.log1p(np.exp(-1)), atol=1e-12, rtol=0
+)
 ```
 
 **Expected:** cross entropy \(\log(1+\exp(-1))\).
@@ -92,10 +103,15 @@ The question is: Create a trainable 2 x2identity projection and back propagate t
 This is an actual gradient path through the representation. It establishes the optimization mechanism, not held-out retrieval quality.
 
 ```python
-projection=nn.Parameter(torch.eye(2,dtype=torch.float64)); query=anchor@projection
-scores=torch.stack([query@positive,query@negative])[None,:]
-F.cross_entropy(scores,torch.tensor([0])).backward()
-assert projection.grad is not None and torch.isfinite(projection.grad).all() and torch.count_nonzero(projection.grad)>0
+projection = nn.Parameter(torch.eye(2, dtype=torch.float64))
+query = anchor @ projection
+scores = torch.stack([query @ positive, query @ negative])[None, :]
+F.cross_entropy(scores, torch.tensor([0])).backward()
+assert (
+    projection.grad is not None
+    and torch.isfinite(projection.grad).all()
+    and torch.count_nonzero(projection.grad) > 0
+)
 ```
 
 **Expected:** finite nonzero projection gradient.
@@ -109,8 +125,8 @@ The question is: Assign the same document ID to positive and negative roles.
 A duplicate can remain contradictory even when its text or vector representation differs. Check source families as well as exact IDs in a realistic corpus.
 
 ```python
-pair={'positive':'doc-a','negative':'doc-a'}
-assert pair['positive']==pair['negative']
+pair = {"positive": "doc-a", "negative": "doc-a"}
+assert pair["positive"] == pair["negative"]
 ```
 
 **Expected:** identity collision detected.
@@ -124,8 +140,9 @@ The question is: Compare softmax[1, 0] at temperatures 1 and.5.
 Temperature changes confidence concentration and gradients. It does not supply additional relevance evidence or guarantee calibration.
 
 ```python
-warm=torch.softmax(logits,dim=1); cool=torch.softmax(logits/.5,dim=1)
-assert cool[0,0]>warm[0,0] and warm.argmax(1).item()==cool.argmax(1).item()==0
+warm = torch.softmax(logits, dim=1)
+cool = torch.softmax(logits / 0.5, dim=1)
+assert cool[0, 0] > warm[0, 0] and warm.argmax(1).item() == cool.argmax(1).item() == 0
 ```
 
 **Expected:** positive probability increases; argmax remains 0.

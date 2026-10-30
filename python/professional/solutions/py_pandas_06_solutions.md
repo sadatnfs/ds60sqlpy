@@ -161,9 +161,12 @@ window of at most 366 calendar days bounds this teaching function. It builds
 all local midnight boundaries before selecting events and resampling.
 
 ```python
-counts = pd.Series(1, index=selected, dtype="int64").resample(
-    "D", closed="left", label="left"
-).sum().reindex(boundaries[:-1], fill_value=0)
+counts = (
+    pd.Series(1, index=selected, dtype="int64")
+    .resample("D", closed="left", label="left")
+    .sum()
+    .reindex(boundaries[:-1], fill_value=0)
+)
 ```
 
 One supplied event row contributes one, even if another event has the same

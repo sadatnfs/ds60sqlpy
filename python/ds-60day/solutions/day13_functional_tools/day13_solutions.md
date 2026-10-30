@@ -47,10 +47,7 @@ from operator import itemgetter
 
 pairs = [("b", 2), ("a", 1), ("b", 3)]
 ordered = sorted(pairs, key=itemgetter(0))
-grouped = {
-    key: [value for _, value in rows]
-    for key, rows in groupby(ordered, key=itemgetter(0))
-}
+grouped = {key: [value for _, value in rows] for key, rows in groupby(ordered, key=itemgetter(0))}
 assert grouped == {"a": [1], "b": [2, 3]}
 ```
 
@@ -181,6 +178,6 @@ assert [function(10) for function in multipliers] == [0, 10, 20]
 
 normalize = lambda text: text.strip().casefold()
 normalized = list(map(normalize, [" A ", " B "]))  # Pure transformation.
-rendered = ", ".join(normalized)                    # Presentation boundary.
+rendered = ", ".join(normalized)  # Presentation boundary.
 assert rendered == "a, b"
 ```

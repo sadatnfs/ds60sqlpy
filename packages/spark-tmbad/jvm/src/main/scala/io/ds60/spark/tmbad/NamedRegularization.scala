@@ -5,10 +5,14 @@ import java.io.{ByteArrayOutputStream, DataOutputStream}
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 
-/** Named coordinate targets. Native/Spark evaluation and JSON admission stay outside this module. */
+/** Named coordinate targets. Native/Spark evaluation and JSON admission stay outside this module.
+  */
 object NamedRegularization {
   final case class Gaussian(name: String, center: Double, precision: Double) extends Serializable {
-    require(center.isFinite && precision.isFinite && precision > 0.0, "Invalid named Gaussian prior")
+    require(
+      center.isFinite && precision.isFinite && precision > 0.0,
+      "Invalid named Gaussian prior"
+    )
   }
   final case class L1(name: String, strength: Double) extends Serializable {
     require(strength.isFinite && strength > 0.0, "Invalid selected L1 strength")
@@ -19,23 +23,37 @@ object NamedRegularization {
 
   final case class Domain(names: Vector[String], lower: Vector[Double], upper: Vector[Double])
       extends Serializable {
-    require(names.nonEmpty && names.size <= 64 && names.distinct.size == names.size,
-      "Expected one to 64 distinct prepared parameter names")
-    require(names.forall(name => name != null && name.nonEmpty &&
-      name.codePointCount(0, name.length) <= 256 && StandardCharsets.UTF_8.newEncoder().canEncode(name)),
-      "Invalid prepared parameter name")
+    require(
+      names.nonEmpty && names.size <= 64 && names.distinct.size == names.size,
+      "Expected one to 64 distinct prepared parameter names"
+    )
+    require(
+      names.forall(name =>
+        name != null && name.nonEmpty &&
+          name.codePointCount(0, name.length) <= 256 && StandardCharsets.UTF_8
+            .newEncoder()
+            .canEncode(name)
+      ),
+      "Invalid prepared parameter name"
+    )
     require(lower.size == names.size && upper.size == names.size, "Bound dimensions differ")
-    require(names.indices.forall { i =>
-      !lower(i).isNaN && !upper(i).isNaN && lower(i) <= upper(i) &&
+    require(
+      names.indices.forall { i =>
+        !lower(i).isNaN && !upper(i).isNaN && lower(i) <= upper(i) &&
         lower(i) != Double.PositiveInfinity && upper(i) != Double.NegativeInfinity
-    }, "Invalid parameter domain")
+      },
+      "Invalid parameter domain"
+    )
 
     def check(point: Vector[Double]): Unit = {
       require(point.size == names.size && point.forall(_.isFinite), "Invalid full parameter vector")
-      require(point.indices.forall(i => point(i) >= lower(i) && point(i) <= upper(i)),
-        "Parameter is outside its native/fixed domain")
+      require(
+        point.indices.forall(i => point(i) >= lower(i) && point(i) <= upper(i)),
+        "Parameter is outside its native/fixed domain"
+      )
     }
-    def clamp(index: Int, value: Double): Double = math.max(lower(index), math.min(upper(index), value))
+    def clamp(index: Int, value: Double): Double =
+      math.max(lower(index), math.min(upper(index), value))
     def equality(index: Int): Boolean = lower(index) == upper(index)
     def freeIndices: Vector[Int] = names.indices.filterNot(equality).toVector
     def impose(values: Vector[Fixed]): Domain = {
@@ -45,8 +63,10 @@ object NamedRegularization {
       values.foreach { fixed =>
         val index = names.indexOf(fixed.name)
         require(index >= 0, "Unknown fixed parameter")
-        require(fixed.value >= lower(index) && fixed.value <= upper(index),
-          "Fixed value is outside the native model domain")
+        require(
+          fixed.value >= lower(index) && fixed.value <= upper(index),
+          "Fixed value is outside the native model domain"
+        )
         lo = lo.updated(index, fixed.value)
         hi = hi.updated(index, fixed.value)
       }
@@ -68,23 +88,29 @@ object NamedRegularization {
     require(likelihoodWeight.isFinite && likelihoodWeight > 0.0, "Invalid likelihood weight mass")
     val denominator: Double = if (reduction == WeightedMean) likelihoodWeight else 1.0
     def checkWeight(observed: Double): Unit = {
-      require(observed.isFinite && observed > 0.0 &&
-        math.abs(observed - likelihoodWeight) <= 1e-12 * likelihoodWeight,
-        "Likelihood weight mass changed after target binding")
+      require(
+        observed.isFinite && observed > 0.0 &&
+          math.abs(observed - likelihoodWeight) <= 1e-12 * likelihoodWeight,
+        "Likelihood weight mass changed after target binding"
+      )
     }
     def positiveStrength(value: Double): Double = {
       require(value.isFinite && value >= 0.0, "Invalid nonnegative target strength")
       val scaled = value / denominator
-      require(scaled.isFinite && (value == 0.0 || scaled > 0.0),
-        "Selected L1 strength is not representable under this reduction; use sum or rescale weights")
+      require(
+        scaled.isFinite && (value == 0.0 || scaled > 0.0),
+        "Selected L1 strength is not representable under this reduction; use sum or rescale weights"
+      )
       scaled
     }
   }
 
   final case class RawEvaluation(value: Double, gradient: Vector[Double], weight: Double)
       extends Serializable {
-    require(value.isFinite && gradient.nonEmpty && gradient.size <= 64 && gradient.forall(_.isFinite),
-      "Raw numerical result is invalid")
+    require(
+      value.isFinite && gradient.nonEmpty && gradient.size <= 64 && gradient.forall(_.isFinite),
+      "Raw numerical result is invalid"
+    )
     require(weight.isFinite && weight > 0.0, "Raw result has invalid effective likelihood weight")
   }
   final case class SmoothEvaluation(
@@ -97,8 +123,10 @@ object NamedRegularization {
       gaussianNormalizer: Double,
       scaling: Scaling
   ) extends Serializable {
-    require(rawValue.isFinite && rawGradient.nonEmpty && rawGradient.forall(_.isFinite),
-      "Smooth target is nonfinite")
+    require(
+      rawValue.isFinite && rawGradient.nonEmpty && rawGradient.forall(_.isFinite),
+      "Smooth target is nonfinite"
+    )
     val value: Double = rawValue / scaling.denominator
     val gradient: Vector[Double] = rawGradient.map(_ / scaling.denominator)
     require(value.isFinite && gradient.forall(_.isFinite), "Reduced smooth target is nonfinite")
@@ -131,7 +159,8 @@ object NamedRegularization {
     val densityMeasure: String = "d_selected_native_optimizer_coordinates"
     val normalization: String = "summed_likelihood_target"
     val l1ConstantConvention: String = "none_penalty_only"
-    private val indexedGaussian = gaussian.map(term => originalDomain.names.indexOf(term.name) -> term)
+    private val indexedGaussian =
+      gaussian.map(term => originalDomain.names.indexOf(term.name) -> term)
     val l1Strength: Vector[Double] = originalDomain.names.map { name =>
       l1.find(_.name == name).map(_.strength).getOrElse(0.0)
     }
@@ -150,8 +179,9 @@ object NamedRegularization {
         val difference = theta(index) - term.center
         // Do not form squares/differences on unselected coordinates. The second
         // expression handles a finite scaled difference when an unscaled one overflows.
-        val scaled = if (difference.isFinite) rootPrecision * difference
-                     else rootPrecision * theta(index) - rootPrecision * term.center
+        val scaled =
+          if (difference.isFinite) rootPrecision * difference
+          else rootPrecision * theta(index) - rootPrecision * term.center
         require(scaled.isFinite, "Gaussian displacement exceeds finite arithmetic")
         quadratic += 0.5 * scaled * scaled
         normalizer += 0.5 * (math.log(2.0 * math.Pi) - math.log(term.precision))
@@ -162,13 +192,23 @@ object NamedRegularization {
       }
       val q = sum(quadratic.result())
       val c = sum(normalizer.result())
-      SmoothEvaluation(sum(Vector(raw.value, q, c)), gradient.toVector, raw.value,
-        raw.gradient, priorGradient.toVector, q, c, scaling)
+      SmoothEvaluation(
+        sum(Vector(raw.value, q, c)),
+        gradient.toVector,
+        raw.value,
+        raw.gradient,
+        priorGradient.toVector,
+        q,
+        c,
+        scaling
+      )
     }
 
     def rawL1Value(theta: Vector[Double]): Double = {
       domain.check(theta)
-      sum(theta.indices.collect { case i if l1Strength(i) > 0.0 => l1Strength(i) * math.abs(theta(i)) })
+      sum(theta.indices.collect {
+        case i if l1Strength(i) > 0.0 => l1Strength(i) * math.abs(theta(i))
+      })
     }
     def composite(current: SmoothEvaluation, theta: Vector[Double]): Double =
       sum(Vector(current.rawValue, rawL1Value(theta))) / current.scaling.denominator
@@ -187,8 +227,10 @@ object NamedRegularization {
     /** Minimum absolute stationarity residual over L1 subgradients and box normal cones. */
     def rawKkt(theta: Vector[Double], rawSmoothGradient: Vector[Double]): Vector[Double] = {
       domain.check(theta)
-      require(rawSmoothGradient.size == theta.size && rawSmoothGradient.forall(_.isFinite),
-        "Invalid smooth gradient for KKT check")
+      require(
+        rawSmoothGradient.size == theta.size && rawSmoothGradient.forall(_.isFinite),
+        "Invalid smooth gradient for KKT check"
+      )
       val intervals = rawL1Subgradients(theta)
       theta.indices.map { i =>
         if (domain.equality(i)) 0.0
@@ -208,10 +250,17 @@ object NamedRegularization {
     }
 
     /** Exact separable proximal map for selected zero-centered L1 plus interval constraints. */
-    def proximal(theta: Vector[Double], gradient: Vector[Double], step: Double,
-                 scaling: Scaling): Option[Vector[Double]] = {
+    def proximal(
+        theta: Vector[Double],
+        gradient: Vector[Double],
+        step: Double,
+        scaling: Scaling
+    ): Option[Vector[Double]] = {
       domain.check(theta)
-      require(gradient.size == theta.size && gradient.forall(_.isFinite), "Invalid proximal gradient")
+      require(
+        gradient.size == theta.size && gradient.forall(_.isFinite),
+        "Invalid proximal gradient"
+      )
       require(step.isFinite && step > 0.0, "Invalid proximal step")
       val values = theta.indices.map { i =>
         if (domain.equality(i)) domain.lower(i)
@@ -222,8 +271,9 @@ object NamedRegularization {
             val threshold = step * scaling.positiveStrength(l1Strength(i))
             // Positive overflow here means a threshold larger than every finite
             // moved value, whose soft-thresholded result is exactly zero.
-            val softened = if (math.abs(moved) <= threshold) 0.0
-                           else math.signum(moved) * (math.abs(moved) - threshold)
+            val softened =
+              if (math.abs(moved) <= threshold) 0.0
+              else math.signum(moved) * (math.abs(moved) - threshold)
             domain.clamp(i, softened)
           }
         }
@@ -258,22 +308,42 @@ object NamedRegularization {
         fixedValue.foreach(term => number(term.value))
       }
       output.close()
-      MessageDigest.getInstance("SHA-256").digest(bytes.toByteArray)
-        .map(byte => f"${byte & 0xff}%02x").mkString
+      MessageDigest
+        .getInstance("SHA-256")
+        .digest(bytes.toByteArray)
+        .map(byte => f"${byte & 0xff}%02x")
+        .mkString
     }
   }
 
-  def prepare(modelDigest: String, domain: Domain, gaussian: Vector[Gaussian], l1: Vector[L1],
-              fixed: Vector[Fixed], legacyL2Strength: Double = 0.0): Plan = {
+  def prepare(
+      modelDigest: String,
+      domain: Domain,
+      gaussian: Vector[Gaussian],
+      l1: Vector[L1],
+      fixed: Vector[Fixed],
+      legacyL2Strength: Double = 0.0
+  ): Plan = {
     require(modelDigest.matches("[a-f0-9]{64}"), "Expected prepared model digest")
     require(legacyL2Strength == 0.0, "Nonzero legacy L2 cannot be mixed with a named target")
-    require(gaussian.map(_.name).distinct.size == gaussian.size &&
-      l1.map(_.name).distinct.size == l1.size, "Duplicate named regularization term")
-    require((gaussian.map(_.name) ++ l1.map(_.name) ++ fixed.map(_.name))
-      .forall(domain.names.contains), "Unknown named target coordinate")
+    require(
+      gaussian.map(_.name).distinct.size == gaussian.size &&
+        l1.map(_.name).distinct.size == l1.size,
+      "Duplicate named regularization term"
+    )
+    require(
+      (gaussian.map(_.name) ++ l1.map(_.name) ++ fixed.map(_.name))
+        .forall(domain.names.contains),
+      "Unknown named target coordinate"
+    )
     val positions = domain.names.zipWithIndex.toMap
-    new Plan(modelDigest, domain, domain.impose(fixed),
-      gaussian.sortBy(term => positions(term.name)), l1.sortBy(term => positions(term.name)),
-      fixed.sortBy(term => positions(term.name)))
+    new Plan(
+      modelDigest,
+      domain,
+      domain.impose(fixed),
+      gaussian.sortBy(term => positions(term.name)),
+      l1.sortBy(term => positions(term.name)),
+      fixed.sortBy(term => positions(term.name))
+    )
   }
 }

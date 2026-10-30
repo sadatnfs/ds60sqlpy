@@ -83,19 +83,20 @@ executable companion when you want a self-contained check.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT o.order_id,
-       o.customer_id,
-       COUNT(*) OVER customer_window AS customer_order_count,
-       ROUND(AVG(o.total_amount) OVER customer_window, 2) AS customer_average,
-       FIRST_VALUE(o.order_date) OVER customer_window AS first_order_date,
-       LAST_VALUE(o.order_date) OVER customer_window AS last_order_date
-FROM orders AS o
-WINDOW customer_window AS (
-  PARTITION BY o.customer_id
-  ORDER BY o.order_date, o.order_id
-  ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
-)
-ORDER BY o.customer_id, o.order_date, o.order_id;
+SELECT
+  o.order_id,
+  o.customer_id,
+  COUNT(*) OVER customer_window AS customer_order_count,
+  ROUND(AVG(o.total_amount) OVER customer_window, 2) AS customer_average,
+  FIRST_VALUE(o.order_date) OVER customer_window AS first_order_date,
+  LAST_VALUE(o.order_date) OVER customer_window AS last_order_date
+FROM
+  orders AS o
+WINDOW customer_window AS (PARTITION BY o.customer_id ORDER BY o.order_date, o.order_id ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)
+ORDER BY
+  o.customer_id,
+  o.order_date,
+  o.order_id;
 ```
 
 **Expected shape:** One row per order.
@@ -130,19 +131,16 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT e.employee_id,
-       e.department_id,
-       e.salary,
-       ROUND(
-         AVG(e.salary) OVER (
-           PARTITION BY e.department_id
-           ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
-           EXCLUDE CURRENT ROW
-         ),
-         2
-       ) AS other_employee_average
-FROM employees AS e
-ORDER BY e.department_id, e.employee_id;
+SELECT
+  e.employee_id,
+  e.department_id,
+  e.salary,
+  ROUND(AVG(e.salary) OVER (PARTITION BY e.department_id ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING EXCLUDE CURRENT ROW), 2) AS other_employee_average
+FROM
+  employees AS e
+ORDER BY
+  e.department_id,
+  e.employee_id;
 ```
 
 **Expected shape:** One row per employee with nullable peer average.
@@ -176,19 +174,20 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT o.order_id,
-       o.customer_id,
-       o.total_amount,
-       ROUND(AVG(o.total_amount) OVER customer_orders, 2) AS customer_average,
-       ROUND(STDDEV_POP(o.total_amount) OVER customer_orders, 2) AS customer_stddev,
-       ROUND(
-         (o.total_amount - AVG(o.total_amount) OVER customer_orders)
-           / NULLIF(STDDEV_POP(o.total_amount) OVER customer_orders, 0),
-         4
-       ) AS customer_z_score
-FROM orders AS o
+SELECT
+  o.order_id,
+  o.customer_id,
+  o.total_amount,
+  ROUND(AVG(o.total_amount) OVER customer_orders, 2) AS customer_average,
+  ROUND(STDDEV_POP(o.total_amount) OVER customer_orders, 2) AS customer_stddev,
+  ROUND((o.total_amount - AVG(o.total_amount) OVER customer_orders) / NULLIF (STDDEV_POP(o.total_amount) OVER customer_orders, 0), 4) AS customer_z_score
+FROM
+  orders AS o
 WINDOW customer_orders AS (PARTITION BY o.customer_id)
-ORDER BY o.customer_id, o.order_date, o.order_id;
+ORDER BY
+  o.customer_id,
+  o.order_date,
+  o.order_id;
 ```
 
 **Expected shape:** One row per order.
@@ -226,32 +225,36 @@ cardinality contract.
 
 ```sql
 WITH sequenced AS (
-  SELECT e.*,
-         LAG(e.event_time) OVER (
-           PARTITION BY e.customer_id
-           ORDER BY e.event_time, e.event_id
-         ) AS previous_event_time
-  FROM events AS e
-), flagged AS (
-  SELECT sequenced.*,
-         CASE
-           WHEN previous_event_time IS NULL
-             OR event_time - previous_event_time > INTERVAL '30 minutes'
-           THEN 1
-           ELSE 0
-         END AS starts_session
-  FROM sequenced
+  SELECT
+    e.*,
+    LAG(e.event_time) OVER (PARTITION BY e.customer_id ORDER BY e.event_time,
+      e.event_id) AS previous_event_time
+  FROM
+    events AS e
+),
+flagged AS (
+  SELECT
+    sequenced.*,
+    CASE WHEN previous_event_time IS NULL
+      OR event_time - previous_event_time > INTERVAL '30 minutes' THEN
+      1
+    ELSE
+      0
+    END AS starts_session
+  FROM
+    sequenced
 )
-SELECT event_id,
-       customer_id,
-       event_time,
-       SUM(starts_session) OVER (
-         PARTITION BY customer_id
-         ORDER BY event_time, event_id
-         ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
-       ) AS session_number
-FROM flagged
-ORDER BY customer_id, event_time, event_id;
+SELECT
+  event_id,
+  customer_id,
+  event_time,
+  SUM(starts_session) OVER (PARTITION BY customer_id ORDER BY event_time, event_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS session_number
+FROM
+  flagged
+ORDER BY
+  customer_id,
+  event_time,
+  event_id;
 ```
 
 **Expected shape:** One row per event with session number starting at one.
@@ -289,29 +292,41 @@ cardinality contract.
 
 ```sql
 WITH order_days AS (
-  SELECT DISTINCT o.customer_id,
-         (o.order_date AT TIME ZONE 'UTC')::date AS order_day
-  FROM orders AS o
-), numbered AS (
-  SELECT customer_id,
-         order_day,
-         ROW_NUMBER() OVER (
-           PARTITION BY customer_id ORDER BY order_day
-         ) AS day_number
-  FROM order_days
-), grouped AS (
-  SELECT customer_id,
-         order_day,
-         order_day - day_number::integer AS island_key
-  FROM numbered
+  SELECT DISTINCT
+    o.customer_id,
+    (o.order_date AT TIME ZONE 'UTC')::date AS order_day
+  FROM
+    orders AS o
+),
+numbered AS (
+  SELECT
+    customer_id,
+    order_day,
+    ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY order_day) AS day_number
+FROM
+  order_days
+),
+grouped AS (
+  SELECT
+    customer_id,
+    order_day,
+    order_day - day_number::integer AS island_key
+  FROM
+    numbered
 )
-SELECT customer_id,
-       MIN(order_day) AS island_start,
-       MAX(order_day) AS island_end,
-       COUNT(*) AS days_in_island
-FROM grouped
-GROUP BY customer_id, island_key
-ORDER BY customer_id, island_start;
+SELECT
+  customer_id,
+  MIN(order_day) AS island_start,
+  MAX(order_day) AS island_end,
+  COUNT(*) AS days_in_island
+FROM
+  grouped
+GROUP BY
+  customer_id,
+  island_key
+ORDER BY
+  customer_id,
+  island_start;
 ```
 
 **Expected shape:** One row per customer/date island.
@@ -349,37 +364,44 @@ cardinality contract.
 
 ```sql
 WITH sequenced AS (
-  SELECT e.*,
-         LAG(e.event_time) OVER (
-           PARTITION BY e.customer_id
-           ORDER BY e.event_time, e.event_id
-         ) AS previous_event_time
-  FROM events AS e
-), flagged AS (
-  SELECT sequenced.*,
-         (
-           previous_event_time IS NULL
-           OR event_time - previous_event_time > INTERVAL '30 minutes'
-         )::integer AS starts_session
-  FROM sequenced
-), assigned AS (
-  SELECT flagged.*,
-         SUM(starts_session) OVER (
-           PARTITION BY customer_id
-           ORDER BY event_time, event_id
-           ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
-         ) AS session_number
-  FROM flagged
+  SELECT
+    e.*,
+    LAG(e.event_time) OVER (PARTITION BY e.customer_id ORDER BY e.event_time,
+      e.event_id) AS previous_event_time
+  FROM
+    events AS e
+),
+flagged AS (
+  SELECT
+    sequenced.*,
+    (previous_event_time IS NULL
+      OR event_time - previous_event_time > INTERVAL '30 minutes')::integer AS starts_session
+  FROM
+    sequenced
+),
+assigned AS (
+  SELECT
+    flagged.*,
+    SUM(starts_session) OVER (PARTITION BY customer_id ORDER BY event_time,
+      event_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS session_number
+FROM
+  flagged
 )
-SELECT customer_id,
-       session_number,
-       MIN(event_time) AS session_start,
-       MAX(event_time) AS session_end,
-       COUNT(*) AS event_count,
-       MAX(event_time) - MIN(event_time) AS session_duration
-FROM assigned
-GROUP BY customer_id, session_number
-ORDER BY customer_id, session_number;
+SELECT
+  customer_id,
+  session_number,
+  MIN(event_time) AS session_start,
+  MAX(event_time) AS session_end,
+  COUNT(*) AS event_count,
+  MAX(event_time) - MIN(event_time) AS session_duration
+FROM
+  assigned
+GROUP BY
+  customer_id,
+  session_number
+ORDER BY
+  customer_id,
+  session_number;
 ```
 
 **Expected shape:** One row per customer session.

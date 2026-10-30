@@ -43,8 +43,16 @@ Read the operations in dependency order. Record which values exist before each l
 The rendering function borrows the state and extracts only the matching payload.
 
 ```rust
-enum Outcome { Ready(u32), Failed(String) }
-fn render(value: &Outcome) -> String { match value { Outcome::Ready(count) => format!("count:{count}"), Outcome::Failed(reason) => format!("error:{reason}") } }
+enum Outcome {
+    Ready(u32),
+    Failed(String),
+}
+fn render(value: &Outcome) -> String {
+    match value {
+        Outcome::Ready(count) => format!("count:{count}"),
+        Outcome::Failed(reason) => format!("error:{reason}"),
+    }
+}
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
@@ -63,8 +71,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 The model cannot simultaneously be both ready and failed.
 
 ```rust
-enum Outcome { Ready(u32), Failed(String) }
-fn render(value: &Outcome) -> String { match value { Outcome::Ready(count) => format!("count:{count}"), Outcome::Failed(reason) => format!("error:{reason}") } }
+enum Outcome {
+    Ready(u32),
+    Failed(String),
+}
+fn render(value: &Outcome) -> String {
+    match value {
+        Outcome::Ready(count) => format!("count:{count}"),
+        Outcome::Failed(reason) => format!("error:{reason}"),
+    }
+}
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {

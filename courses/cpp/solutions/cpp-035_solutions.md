@@ -31,7 +31,8 @@ If a map grows during a supposedly read-only report, search for operator[] on mi
 ## Worked example 1
 
 ```cpp
-for(int x:std::vector<int>{2,3,2,4}) ++counts[x];
+for (int x : std::vector<int>{2, 3, 2, 4})
+  ++counts[x];
 ```
 
 Expected: The index holds 2->2, 3->1, 4->1.
@@ -39,7 +40,7 @@ Expected: The index holds 2->2, 3->1, 4->1.
 ## Worked example 2
 
 ```cpp
-assert(counts.find(9)==counts.end());
+assert(counts.find(9) == counts.end());
 ```
 
 Expected: A non-mutating lookup reports absence without inserting key 9.

@@ -263,8 +263,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
   puts<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Worked example checks passed.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
   <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> After the inner block, the outer remains 3.</p>
 <p>The names are the same but designate distinct objects. Shadowing can be legal while still reducing readability.</p>
 <h4 id="worked-example-2-retain-static-state">Worked example 2: Retain static state<a class="heading-anchor" href="#worked-example-2-retain-static-state" aria-label="Link to this section">#</a></h4>
@@ -319,8 +318,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
   puts<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Worked example checks passed.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
   <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> It returns 1 and then 2.</p>
 <p>The counter is initialized once and survives function returns. This shared state would require synchronization if called concurrently.</p>
 <h3 id="prediction-before-execution">Prediction before execution<a class="heading-anchor" href="#prediction-before-execution" aria-label="Link to this section">#</a></h3>

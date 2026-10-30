@@ -45,18 +45,16 @@ The check establishes a specific observation before the program claims completio
 ```swift
 import Foundation
 
-
-
 @main
 struct LessonMain {
-    static func main() async throws {
-        do {
-            let greeting = "Hello, Swift"
-            precondition(greeting.count == 12)
-            print(greeting)
-        }
-        print("swift-001: passed")
+  static func main() async throws {
+    do {
+      let greeting = "Hello, Swift"
+      precondition(greeting.count == 12)
+      print(greeting)
     }
+    print("swift-001: passed")
+  }
 }
 ```
 
@@ -69,20 +67,18 @@ The second condition rejects the plausible mistake of adding dimensions instead 
 ```swift
 import Foundation
 
-
-
 @main
 struct LessonMain {
-    static func main() async throws {
-        do {
-            let rows = 4
-            let seatsPerRow = 6
-            let seats = rows * seatsPerRow
-            precondition(seats == 24)
-            precondition(seats != rows + seatsPerRow)
-        }
-        print("swift-001: passed")
+  static func main() async throws {
+    do {
+      let rows = 4
+      let seatsPerRow = 6
+      let seats = rows * seatsPerRow
+      precondition(seats == 24)
+      precondition(seats != rows + seatsPerRow)
     }
+    print("swift-001: passed")
+  }
 }
 ```
 

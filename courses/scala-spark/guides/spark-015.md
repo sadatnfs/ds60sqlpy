@@ -51,17 +51,54 @@ import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 
-val schema = StructType(Seq(StructField("event_id",LongType,false),StructField("amount_text",StringType,true)))
-val rows = Seq(Row(1L,"100"),Row(2L,"0"),Row(3L," 25 "),Row(4L,null),Row(5L,"bad"),Row(6L,"9223372036854775808"),Row(7L,"-5"),Row(8L,"50"))
-val raw = spark.createDataFrame(spark.sparkContext.parallelize(rows,2),schema)
+val schema = StructType(
+  Seq(StructField("event_id", LongType, false), StructField("amount_text", StringType, true))
+)
+val rows = Seq(
+  Row(1L, "100"),
+  Row(2L, "0"),
+  Row(3L, " 25 "),
+  Row(4L, null),
+  Row(5L, "bad"),
+  Row(6L, "9223372036854775808"),
+  Row(7L, "-5"),
+  Row(8L, "50")
+)
+val raw = spark.createDataFrame(spark.sparkContext.parallelize(rows, 2), schema)
 ```
 
 ```python
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 
-schema = StructType([StructField("event_id", LongType(), False), StructField("amount_text", StringType(), True)])
-raw = spark.createDataFrame([(1,"100"),(2,"0"),(3," 25 "),(4,None),(5,"bad"),(6,"9223372036854775808"),(7,"-5"),(8,"50")], schema=schema)
+schema = StructType(
+    [StructField("event_id", LongType(), False), StructField("amount_text", StringType(), True)]
+)
+raw = spark.createDataFrame(
+    [
+        (1, "100"),
+        (2, "0"),
+        (3, " 25 "),
+        (4, None),
+        (5, "bad"),
+        (6, "9223372036854775808"),
+        (7, "-5"),
+        (8, "50"),
+    ],
+    schema=schema,
+)
 ```
 
 ## Worked example / walkthrough
@@ -69,14 +106,31 @@ raw = spark.createDataFrame([(1,"100"),(2,"0"),(3," 25 "),(4,None),(5,"bad"),(6,
 ### Worked example 1
 
 ```scala
-val tolerant = raw.select(col("event_id"),expr("try_cast(trim(amount_text) AS BIGINT)").as("parsed_amount"))
-assert(tolerant.filter(col("parsed_amount").isNull).select("event_id").orderBy("event_id").collect().map(_.getLong(0)).toSeq == Seq(4L,5L,6L))
+val tolerant =
+  raw.select(col("event_id"), expr("try_cast(trim(amount_text) AS BIGINT)").as("parsed_amount"))
+assert(
+  tolerant
+    .filter(col("parsed_amount").isNull)
+    .select("event_id")
+    .orderBy("event_id")
+    .collect()
+    .map(_.getLong(0))
+    .toSeq == Seq(4L, 5L, 6L)
+)
 println("Parse NULLs include both source missingness and rejected text")
 ```
 
 ```python
-tolerant = raw.select("event_id", F.expr("try_cast(trim(amount_text) AS BIGINT)").alias("parsed_amount"))
-assert [row.event_id for row in tolerant.filter(F.col("parsed_amount").isNull()).select("event_id").orderBy("event_id").collect()] == [4, 5, 6]
+tolerant = raw.select(
+    "event_id", F.expr("try_cast(trim(amount_text) AS BIGINT)").alias("parsed_amount")
+)
+assert [
+    row.event_id
+    for row in tolerant.filter(F.col("parsed_amount").isNull())
+    .select("event_id")
+    .orderBy("event_id")
+    .collect()
+] == [4, 5, 6]
 print("Parse NULLs include both source missingness and rejected text")
 ```
 
@@ -85,14 +139,18 @@ The parsed column alone cannot distinguish allowed source absence from conversio
 ### Worked example 2
 
 ```scala
-val signed = raw.filter(col("event_id") === lit(7L)).select(expr("try_cast(amount_text AS BIGINT)").as("amount"))
+val signed = raw
+  .filter(col("event_id") === lit(7L))
+  .select(expr("try_cast(amount_text AS BIGINT)").as("amount"))
 assert(signed.first().getLong(0) == -5L)
 assert(spark.conf.get("spark.sql.ansi.enabled") == "true")
 println("A signed integer can be cast-valid while domain-invalid")
 ```
 
 ```python
-signed = raw.filter(F.col("event_id") == F.lit(7)).select(F.expr("try_cast(amount_text AS BIGINT)").alias("amount"))
+signed = raw.filter(F.col("event_id") == F.lit(7)).select(
+    F.expr("try_cast(amount_text AS BIGINT)").alias("amount")
+)
 assert signed.first()[0] == -5
 assert spark.conf.get("spark.sql.ansi.enabled") == "true"
 print("A signed integer can be cast-valid while domain-invalid")

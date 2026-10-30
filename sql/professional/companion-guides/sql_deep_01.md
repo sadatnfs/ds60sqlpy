@@ -105,10 +105,15 @@ The empty requirement set exposes a policy choice. Pure universal logic selects 
 ### Example 1
 
 ```sql
-SELECT 'ordinary_inequality' AS comparison, (NULL::integer <> 2) AS result
+SELECT
+  'ordinary_inequality' AS comparison,
+  (NULL::integer <> 2) AS result
 UNION ALL
-SELECT 'null_safe_distinction', (NULL::integer IS DISTINCT FROM 2)
-ORDER BY comparison;
+SELECT
+  'null_safe_distinction',
+  (NULL::integer IS DISTINCT FROM 2)
+ORDER BY
+  comparison;
 ```
 
 The output grain is one row per named comparison, with columns comparison and result ordered by comparison. ordinary_inequality is NULL while null_safe_distinction is true. The explicit cast gives NULL an integer type. The comparison names are the output identity; the Boolean measure is not a key.
@@ -116,9 +121,10 @@ The output grain is one row per named comparison, with columns comparison and re
 ### Example 2
 
 ```sql
-SELECT 'empty_array' AS case_name,
-       5 < ANY(ARRAY[]::integer[]) AS any_larger,
-       5 < ALL(ARRAY[]::integer[]) AS all_larger;
+SELECT
+  'empty_array' AS case_name,
+  5 < ANY (ARRAY[]::integer[]) AS any_larger,
+  5 < ALL (ARRAY[]::integer[]) AS all_larger;
 ```
 
 The one-row output has case_name, any_larger and all_larger. ANY is false because no comparison succeeds; ALL is true because no comparison fails. The typed empty array is a known collection with zero elements, not an unknown array value. This distinction is the basis of the final requirement-set case.

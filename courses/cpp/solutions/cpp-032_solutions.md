@@ -31,7 +31,8 @@ If an asynchronous error never appears, inspect whether every accepted task has 
 ## Worked example 1
 
 ```cpp
-auto f=std::async(std::launch::async,checked_square,3); assert(f.get()==9);
+auto f = std::async(std::launch::async, checked_square, 3);
+assert(f.get() == 9);
 ```
 
 Expected: The future yields 9 and waits for completion if necessary.
@@ -39,7 +40,7 @@ Expected: The future yields 9 and waits for completion if necessary.
 ## Worked example 2
 
 ```cpp
-auto f=std::async(std::launch::async,checked_square,-1); // get rethrows
+auto f = std::async(std::launch::async, checked_square, -1); // get rethrows
 ```
 
 Expected: The worker failure is observed by the caller through get.

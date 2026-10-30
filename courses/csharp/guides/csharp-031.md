@@ -59,26 +59,22 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Buffers;
 
-internal static class Program
-{
-    private static void Check(bool condition, string reason)
+internal static class Program {
+  private static void Check(bool condition, string reason) {
+    if (!condition)
+      throw new InvalidOperationException(reason);
+  }
+
+  private static async Task Main() {
     {
-        if (!condition) throw new InvalidOperationException(reason);
+      var channel = Channel.CreateBounded<int>(1);
+      Check(channel.Writer.TryWrite(4), "first item admitted");
+      Check(!channel.Writer.TryWrite(5), "capacity reached");
+      Check(await channel.Reader.ReadAsync() == 4, "admitted value retained");
     }
-
-    private static async Task Main()
-    {
-        {
-            var channel = Channel.CreateBounded<int>(1);
-            Check(channel.Writer.TryWrite(4), "first item admitted");
-            Check(!channel.Writer.TryWrite(5), "capacity reached");
-            Check(await channel.Reader.ReadAsync() == 4, "admitted value retained");
-        }
-        Console.WriteLine("csharp-031: passed");
-        await Task.CompletedTask;
-    }
-
-
+    Console.WriteLine("csharp-031: passed");
+    await Task.CompletedTask;
+  }
 }
 ```
 
@@ -105,28 +101,26 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Buffers;
 
-internal static class Program
-{
-    private static void Check(bool condition, string reason)
+internal static class Program {
+  private static void Check(bool condition, string reason) {
+    if (!condition)
+      throw new InvalidOperationException(reason);
+  }
+
+  private static async Task Main() {
     {
-        if (!condition) throw new InvalidOperationException(reason);
+      var channel = Channel.CreateBounded<int>(2);
+      channel.Writer.TryWrite(2);
+      channel.Writer.TryWrite(3);
+      channel.Writer.Complete();
+      int sum = 0;
+      await foreach (int value in channel.Reader.ReadAllAsync()) sum += value;
+      await channel.Reader.Completion;
+      Check(sum == 5 && !channel.Writer.TryWrite(9), "drained and closed");
     }
-
-    private static async Task Main()
-    {
-        {
-            var channel = Channel.CreateBounded<int>(2);
-            channel.Writer.TryWrite(2); channel.Writer.TryWrite(3); channel.Writer.Complete();
-            int sum = 0;
-            await foreach (int value in channel.Reader.ReadAllAsync()) sum += value;
-            await channel.Reader.Completion;
-            Check(sum == 5 && !channel.Writer.TryWrite(9), "drained and closed");
-        }
-        Console.WriteLine("csharp-031: passed");
-        await Task.CompletedTask;
-    }
-
-
+    Console.WriteLine("csharp-031: passed");
+    await Task.CompletedTask;
+  }
 }
 ```
 

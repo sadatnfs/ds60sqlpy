@@ -155,10 +155,7 @@ y = X[:, 0] ** 2 + rng.normal(scale=0.15, size=X.shape[0])
 model = GradientBoostingRegressor(
     n_estimators=40, learning_rate=0.08, max_depth=2, random_state=3901
 ).fit(X, y)
-staged_mse = [
-    np.mean((y - prediction) ** 2)
-    for prediction in model.staged_predict(X)
-]
+staged_mse = [np.mean((y - prediction) ** 2) for prediction in model.staged_predict(X)]
 print({"first": staged_mse[0], "last": staged_mse[-1]})
 assert staged_mse[-1] < staged_mse[0]
 ```
@@ -179,13 +176,10 @@ from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import train_test_split
 
 X, y = load_breast_cancer(return_X_y=True)
-X_train, X_valid, y_train, y_valid = train_test_split(
-    X, y, stratify=y, random_state=3902
-)
+X_train, X_valid, y_train, y_valid = train_test_split(X, y, stratify=y, random_state=3902)
 for rate, rounds in ((0.2, 30), (0.03, 200)):
     model = GradientBoostingClassifier(
-        learning_rate=rate, n_estimators=rounds,
-        max_depth=2, random_state=3902
+        learning_rate=rate, n_estimators=rounds, max_depth=2, random_state=3902
     ).fit(X_train, y_train)
     auc = roc_auc_score(y_valid, model.predict_proba(X_valid)[:, 1])
     print({"learning_rate": rate, "rounds": rounds, "valid_auc": auc})

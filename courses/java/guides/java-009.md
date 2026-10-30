@@ -49,18 +49,33 @@ Leaving the block triggers close even without an explicit call in the body. Owne
 import java.util.*;
 
 public class Main {
-    static final class Probe implements AutoCloseable {
-        private final String name; private final List<String> events; private final boolean fail;
-        Probe(String name, List<String> events, boolean fail) { this.name=name; this.events=events; this.fail=fail; }
-        public void close() throws java.io.IOException { events.add("close"+name); if(fail) throw new java.io.IOException("close"+name); }
-    }
-    public static void main(String[] args) throws Exception {
-        List<String> events = new ArrayList<>();
-        try (Probe resource = new Probe("A", events, false)) { events.add("body"); }
-        assert events.equals(List.of("body", "closeA"));
-    }
-}
 
+  static final class Probe implements AutoCloseable {
+
+    private final String name;
+    private final List<String> events;
+    private final boolean fail;
+
+    Probe(String name, List<String> events, boolean fail) {
+      this.name = name;
+      this.events = events;
+      this.fail = fail;
+    }
+
+    public void close() throws java.io.IOException {
+      events.add("close" + name);
+      if (fail) throw new java.io.IOException("close" + name);
+    }
+  }
+
+  public static void main(String[] args) throws Exception {
+    List<String> events = new ArrayList<>();
+    try (Probe resource = new Probe("A", events, false)) {
+      events.add("body");
+    }
+    assert events.equals(List.of("body", "closeA"));
+  }
+}
 ```
 
 **Expected:** events body, close A.
@@ -73,22 +88,39 @@ Later resources often depend on earlier ones, so reverse closure is deliberate. 
 import java.util.*;
 
 public class Main {
-    static final class Probe implements AutoCloseable {
-        private final String name; private final List<String> events; private final boolean fail;
-        Probe(String name, List<String> events, boolean fail) { this.name=name; this.events=events; this.fail=fail; }
-        public void close() throws java.io.IOException { events.add("close"+name); if(fail) throw new java.io.IOException("close"+name); }
-    }
-    public static void main(String[] args) throws Exception {
-        List<String> events = new ArrayList<>();
-        try (Probe resource = new Probe("A", events, false)) { events.add("body"); }
-        assert events.equals(List.of("body", "closeA"));
 
-        events.clear();
-        try (Probe a = new Probe("A", events, false); Probe b = new Probe("B", events, false)) { events.add("body"); }
-        assert events.equals(List.of("body", "closeB", "closeA"));
+  static final class Probe implements AutoCloseable {
+
+    private final String name;
+    private final List<String> events;
+    private final boolean fail;
+
+    Probe(String name, List<String> events, boolean fail) {
+      this.name = name;
+      this.events = events;
+      this.fail = fail;
     }
+
+    public void close() throws java.io.IOException {
+      events.add("close" + name);
+      if (fail) throw new java.io.IOException("close" + name);
+    }
+  }
+
+  public static void main(String[] args) throws Exception {
+    List<String> events = new ArrayList<>();
+    try (Probe resource = new Probe("A", events, false)) {
+      events.add("body");
+    }
+    assert events.equals(List.of("body", "closeA"));
+
+    events.clear();
+    try (Probe a = new Probe("A", events, false); Probe b = new Probe("B", events, false)) {
+      events.add("body");
+    }
+    assert events.equals(List.of("body", "closeB", "closeA"));
+  }
 }
-
 ```
 
 **Expected:** closeB beforecloseA.

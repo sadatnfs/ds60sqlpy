@@ -213,9 +213,7 @@ Near-unique strings can use the same or more memory.
 ```python
 import pandas as pd
 
-sales = pd.DataFrame(
-    {"region": ["w", "w", "e"], "amount": [10.0, 30.0, 20.0]}
-)
+sales = pd.DataFrame({"region": ["w", "w", "e"], "amount": [10.0, 30.0, 20.0]})
 regional_total = sales.groupby("region")["amount"].transform("sum")
 sales["regional_share"] = sales["amount"].div(regional_total)
 large = sales.query("regional_share >= 0.5")

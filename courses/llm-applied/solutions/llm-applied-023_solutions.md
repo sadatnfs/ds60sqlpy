@@ -51,8 +51,9 @@ The question is: Use fixed UTC now 2026-10-22 and a document published one day e
 The clock is supplied rather than read globally, so the test is reproducible. The result concerns the declared age policy, not the truth of the content.
 
 ```python
-now=datetime(2026,10,22,tzinfo=timezone.utc); published=now-timedelta(days=1)
-assert fresh(published,now,timedelta(days=2))
+now = datetime(2026, 10, 22, tzinfo=timezone.utc)
+published = now - timedelta(days=1)
+assert fresh(published, now, timedelta(days=2))
 ```
 
 **Expected:** fresh True.
@@ -66,8 +67,8 @@ The question is: Test a three-day-old document and a document dated one hour in 
 Future timestamps can indicate clock or metadata errors. Accepting them as indefinitely fresh would conceal that data-quality problem.
 
 ```python
-assert not fresh(now-timedelta(days=3),now,timedelta(days=2))
-assert not fresh(now+timedelta(hours=1),now,timedelta(days=2))
+assert not fresh(now - timedelta(days=3), now, timedelta(days=2))
+assert not fresh(now + timedelta(hours=1), now, timedelta(days=2))
 ```
 
 **Expected:** both fail freshness admission.
@@ -81,12 +82,16 @@ The question is: Consume exactly3 operations, then attempt a fourth.
 The failing request does not perform work first and report the overrun afterward. Real execution also needs bounded duration and cancellation, which this counter does not implement.
 
 ```python
-budget=Budget(3)
-for _ in range(3): budget.consume()
-try: budget.consume()
-except RuntimeError: pass
-else: raise AssertionError('budget exceeded')
-assert budget.used==3
+budget = Budget(3)
+for _ in range(3):
+    budget.consume()
+try:
+    budget.consume()
+except RuntimeError:
+    pass
+else:
+    raise AssertionError("budget exceeded")
+assert budget.used == 3
 ```
 
 **Expected:** used3; fourth raisesRuntimeError before increment.
@@ -100,9 +105,12 @@ The question is: Pass a datetime without timezone information.
 A local wall-clock value cannot be safely compared with a UTC instant without an explicit zone policy. Silent assumptions can shift freshness boundaries.
 
 ```python
-try: fresh(datetime(2026,10,21),now,timedelta(days=2))
-except ValueError: pass
-else: raise AssertionError('naive timestamp accepted')
+try:
+    fresh(datetime(2026, 10, 21), now, timedelta(days=2))
+except ValueError:
+    pass
+else:
+    raise AssertionError("naive timestamp accepted")
 ```
 
 **Expected:** ValueError.
@@ -116,9 +124,20 @@ The question is: Create a trace from metadata plussecret/source_text fields and 
 Observability can leak information if it copies raw inputs indiscriminately. An explicit metadata schema makes the diagnostic surface reviewable.
 
 ```python
-raw={'request_id':'r1','corpus_version':'v2','policy':'public','result':'abstained_stale','secret':'hidden','source_text':'restricted body'}
-trace=trace_record(raw)
-assert set(trace)=={'request_id','corpus_version','policy','result'} and 'secret' not in trace and 'source_text' not in trace
+raw = {
+    "request_id": "r1",
+    "corpus_version": "v2",
+    "policy": "public",
+    "result": "abstained_stale",
+    "secret": "hidden",
+    "source_text": "restricted body",
+}
+trace = trace_record(raw)
+assert (
+    set(trace) == {"request_id", "corpus_version", "policy", "result"}
+    and "secret" not in trace
+    and "source_text" not in trace
+)
 ```
 
 **Expected:** only request_id, corpus_version, policy, result fields retained.
@@ -132,9 +151,12 @@ The question is: Combine authorizedTrue withfreshFalse and require both before a
 Authorization and freshness are independent gates. A permitted but stale source should not be treated as current merely because it is accessible.
 
 ```python
-authorized=True; current=fresh(now-timedelta(days=3),now,timedelta(days=2)); answer_allowed=authorized and current
+authorized = True
+current = fresh(now - timedelta(days=3), now, timedelta(days=2))
+answer_allowed = authorized and current
 assert not answer_allowed
-result={'status':'unknown','reason':'stale evidence'}; assert result['reason']=='stale evidence'
+result = {"status": "unknown", "reason": "stale evidence"}
+assert result["reason"] == "stale evidence"
 ```
 
 **Expected:** answer admission False; reason stale evidence.

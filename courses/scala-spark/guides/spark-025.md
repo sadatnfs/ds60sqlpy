@@ -58,29 +58,65 @@ The complete source creates the owned local session described above, then constr
 import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
-import java.nio.file.{Files,Path,Paths}
+import java.nio.file.{Files, Path, Paths}
 import scala.jdk.CollectionConverters._
 
-ownedRoot = Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(),".ds60-spark-025-")
-val schema = StructType(Seq(StructField("id",LongType,false),StructField("day",StringType,false),StructField("amount",LongType,false),StructField("payload",StringType,false)))
-val source = spark.createDataFrame(spark.sparkContext.parallelize((0L until 2000L).map(id => Row(id,if(id%2L==0L) "even" else "odd",id*7L,"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")),4),schema)
+ownedRoot = Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(), ".ds60-spark-025-")
+val schema = StructType(
+  Seq(
+    StructField("id", LongType, false),
+    StructField("day", StringType, false),
+    StructField("amount", LongType, false),
+    StructField("payload", StringType, false)
+  )
+)
+val source = spark.createDataFrame(
+  spark.sparkContext.parallelize(
+    (0L until 2000L).map(id =>
+      Row(id, if (id % 2L == 0L) "even" else "odd", id * 7L, "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+    ),
+    4
+  ),
+  schema
+)
 val compactPath = ownedRoot.resolve("compact").toString
 val manyPath = ownedRoot.resolve("many").toString
 ```
 
 ```python
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 from pathlib import Path
 import tempfile
 import shutil
 from pyspark.errors import AnalysisException
 
-owned_root = Path(tempfile.mkdtemp(prefix=".ds60-spark-025-",dir=".")).resolve()
-schema = StructType([StructField("id",LongType(),False),StructField("day",StringType(),False),StructField("amount",LongType(),False),StructField("payload",StringType(),False)])
-source = spark.createDataFrame([(i,"even" if i%2==0 else "odd",i*7,"x"*32) for i in range(2000)],schema=schema)
-compact_path = str(owned_root/"compact")
-many_path = str(owned_root/"many")
+owned_root = Path(tempfile.mkdtemp(prefix=".ds60-spark-025-", dir=".")).resolve()
+schema = StructType(
+    [
+        StructField("id", LongType(), False),
+        StructField("day", StringType(), False),
+        StructField("amount", LongType(), False),
+        StructField("payload", StringType(), False),
+    ]
+)
+source = spark.createDataFrame(
+    [(i, "even" if i % 2 == 0 else "odd", i * 7, "x" * 32) for i in range(2000)], schema=schema
+)
+compact_path = str(owned_root / "compact")
+many_path = str(owned_root / "many")
 ```
 
 ## Worked example / walkthrough
@@ -94,7 +130,7 @@ println("Explicit-schema source:2000 rows,total13993000")
 ```
 
 ```python
-assert isinstance(source.schema["id"].dataType,LongType) and source.count() == 2000
+assert isinstance(source.schema["id"].dataType, LongType) and source.count() == 2000
 assert source.agg(F.sum("amount")).first()[0] == 13993000
 print("Explicit-schema source:2000 rows,total13993000")
 ```
@@ -104,15 +140,15 @@ The declared long type and arithmetic total provide an input contract before any
 ### Worked example 2
 
 ```scala
-val ids = (1990L until 2000L).filter(_%2L==0L)
-assert(ids == Seq(1990L,1992L,1994L,1996L,1998L))
+val ids = (1990L until 2000L).filter(_ % 2L == 0L)
+assert(ids == Seq(1990L, 1992L, 1994L, 1996L, 1998L))
 println("Independent filtered identity oracle=" + ids)
 ```
 
 ```python
-ids = [i for i in range(1990,2000) if i%2==0]
-assert ids == [1990,1992,1994,1996,1998]
-print("Independent filtered identity oracle=",ids)
+ids = [i for i in range(1990, 2000) if i % 2 == 0]
+assert ids == [1990, 1992, 1994, 1996, 1998]
+print("Independent filtered identity oracle=", ids)
 ```
 
 The expected filtered population comes directly from the declared even/odd rule and lower bound. It does not depend on the same Spark scan or predicate implementation later used to produce the result.

@@ -433,17 +433,23 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These worked excerpts come from <code>sql/postgres-60day/day45_phase3_optimization_project.sql</code>. Use <strong>Whole SQL lesson (psql)</strong> in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared <code>psql</code> routes are described above.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-keyword">ANALYZE</span>
-<span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span> <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>quantity<span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">c</span>
-<span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">ON</span> o<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id
-<span class="syntax-keyword">JOIN</span> order_items oi <span class="syntax-keyword">ON</span> oi<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>order_id
-<span class="syntax-keyword">WHERE</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;day&#x27;</span><span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;day&#x27;</span><span class="syntax-punctuation">,</span> now<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;180 days&#x27;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-number">2</span> <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span></code></pre>
+<span class="syntax-keyword">SELECT</span>
+  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>quantity<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">FROM</span>
+  customers <span class="syntax-keyword">c</span>
+  <span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">ON</span> o<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id
+  <span class="syntax-keyword">JOIN</span> order_items oi <span class="syntax-keyword">ON</span> oi<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>order_id
+<span class="syntax-keyword">WHERE</span>
+  date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;day&#x27;</span><span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;day&#x27;</span><span class="syntax-punctuation">,</span> now<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;180 days&#x27;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  <span class="syntax-number">2</span> <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 1 returns plan rows rather than business rows. The node tree is evidence about one execution strategy; it does not replace a correctness check on the underlying query.</p>
 <p><strong>Expected result/shape:</strong> Example 1 prints a plan tree, not business rows. Run the underlying <code>SELECT</code> separately and reconcile its <code>country</code> key set and row count over <code>customers</code>, <code>orders</code>, and <code>order_items</code>; then compare node estimates, actual rows × loops, buffers, and timing without requiring one fixed plan.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> <span class="syntax-keyword">IF</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">EXISTS</span> idx_orders_order_date_only <span class="syntax-keyword">ON</span> orders<span class="syntax-punctuation">(</span>order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> <span class="syntax-keyword">IF</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">EXISTS</span> idx_orders_order_date_only <span class="syntax-keyword">ON</span> orders <span class="syntax-punctuation">(</span>order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 2 is data definition language (DDL). <code>psql</code> prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.</p>
 <p><strong>Expected result/shape:</strong> Example 2 must print the expected DDL command tag for <code>idx_orders_order_date_only</code>, and <code>orders</code>. Verify the object in <code>pg_catalog.pg_index</code>, and <code>pg_catalog.pg_indexes</code>, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -741,40 +747,61 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span>
 <span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
-<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span> BUFFERS<span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>
-         <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>quantity<span class="syntax-punctuation">)</span>
-         <span class="syntax-keyword">FROM</span> order_items oi
-         <span class="syntax-keyword">WHERE</span> oi<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>order_id
-       <span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> units
-<span class="syntax-keyword">FROM</span> orders o
-<span class="syntax-keyword">JOIN</span> customers <span class="syntax-keyword">c</span> <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;180 days&#x27;</span>
-<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">;</span>
-
-<span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> idx_orders_recent_customer_solution
-  <span class="syntax-keyword">ON</span> orders<span class="syntax-punctuation">(</span>order_date<span class="syntax-punctuation">,</span> customer_id<span class="syntax-punctuation">,</span> order_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-<span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> idx_order_items_order_quantity_solution
-  <span class="syntax-keyword">ON</span> order_items<span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span> INCLUDE <span class="syntax-punctuation">(</span>quantity<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-
-<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span> BUFFERS<span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">WITH</span> recent_orders <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> order_id<span class="syntax-punctuation">,</span> customer_id
-  <span class="syntax-keyword">FROM</span> orders
-  <span class="syntax-keyword">WHERE</span> order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;180 days&#x27;</span>
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> item_totals <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> oi<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>quantity<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> units
-  <span class="syntax-keyword">FROM</span> order_items oi
-  <span class="syntax-keyword">JOIN</span> recent_orders ro <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span>
-  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> oi<span class="syntax-punctuation">.</span>order_id
+<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span>
+  BUFFERS
 <span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span> <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>it<span class="syntax-punctuation">.</span>units<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> units
-<span class="syntax-keyword">FROM</span> recent_orders ro
-<span class="syntax-keyword">JOIN</span> item_totals it <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">JOIN</span> customers <span class="syntax-keyword">c</span> <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> units <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">SELECT</span>
+  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>
+    <span class="syntax-keyword">SELECT</span>
+      <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>quantity<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">FROM</span> order_items oi
+    <span class="syntax-keyword">WHERE</span>
+      oi<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> units
+<span class="syntax-keyword">FROM</span>
+  orders o
+  <span class="syntax-keyword">JOIN</span> customers <span class="syntax-keyword">c</span> <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">WHERE</span>
+  o<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;180 days&#x27;</span>
+<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">;</span>
+
+<span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> idx_orders_recent_customer_solution <span class="syntax-keyword">ON</span> orders <span class="syntax-punctuation">(</span>order_date<span class="syntax-punctuation">,</span> customer_id<span class="syntax-punctuation">,</span> order_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+
+<span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> idx_order_items_order_quantity_solution <span class="syntax-keyword">ON</span> order_items <span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span> INCLUDE <span class="syntax-punctuation">(</span>quantity<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+
+<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span>
+  BUFFERS
+<span class="syntax-punctuation">)</span> <span class="syntax-keyword">WITH</span> recent_orders <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span>
+    order_id<span class="syntax-punctuation">,</span>
+    customer_id
+  <span class="syntax-keyword">FROM</span>
+    orders
+  <span class="syntax-keyword">WHERE</span>
+    order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;180 days&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> item_totals <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+    <span class="syntax-keyword">SELECT</span>
+      oi<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span>
+      <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>quantity<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> units
+    <span class="syntax-keyword">FROM</span>
+      order_items oi
+      <span class="syntax-keyword">JOIN</span> recent_orders ro <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+      oi<span class="syntax-punctuation">.</span>order_id
+<span class="syntax-punctuation">)</span>
+  <span class="syntax-keyword">SELECT</span>
+    <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>it<span class="syntax-punctuation">.</span>units<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> units
+<span class="syntax-keyword">FROM</span>
+  recent_orders ro
+  <span class="syntax-keyword">JOIN</span> item_totals it <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span>
+  <span class="syntax-keyword">JOIN</span> customers <span class="syntax-keyword">c</span> <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  units <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span>
 
 <span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></code></pre>
 <p>Both statements should return the same country-to-units result. Compare:</p>

@@ -113,24 +113,38 @@ The local tokenizer lowercases and retains ASCII letter/digit runs. It will spli
 Only one document contains the query term. The result is a lexical match, and answer relevance still requires inspecting the actual content.
 
 ```python
-import math,re
+import math, re
 from collections import Counter
-def tokens(text): return re.findall(r'[a-z0-9]+',text.lower())
-def bm25(query,documents,k1=1.2,b=.75):
-    if not documents: return []
-    bags={key:Counter(tokens(text)) for key,text in documents.items()}; lengths={key:sum(v.values()) for key,v in bags.items()}
-    average=sum(lengths.values())/len(lengths); terms=set(tokens(query)); scored=[]
-    for key,bag in bags.items():
-        score=0.
+
+
+def tokens(text):
+    return re.findall(r"[a-z0-9]+", text.lower())
+
+
+def bm25(query, documents, k1=1.2, b=0.75):
+    if not documents:
+        return []
+    bags = {key: Counter(tokens(text)) for key, text in documents.items()}
+    lengths = {key: sum(v.values()) for key, v in bags.items()}
+    average = sum(lengths.values()) / len(lengths)
+    terms = set(tokens(query))
+    scored = []
+    for key, bag in bags.items():
+        score = 0.0
         for term in terms:
-            tf=bag[term]
-            if not tf: continue
-            df=sum(term in other for other in bags.values()); idf=math.log(1+(len(bags)-df+.5)/(df+.5))
-            score+=idf*tf*(k1+1)/(tf+k1*(1-b+b*lengths[key]/average))
-        scored.append((key,score))
-    return sorted(scored,key=lambda row:(-row[1],row[0]))
-docs={'a':'account randomization','b':'visit counts','c':'account outcomes'}; scores=bm25('randomization',docs)
-assert scores[0][0]=='a' and scores[0][1]>0 and all(score==0 for _,score in scores[1:])
+            tf = bag[term]
+            if not tf:
+                continue
+            df = sum(term in other for other in bags.values())
+            idf = math.log(1 + (len(bags) - df + 0.5) / (df + 0.5))
+            score += idf * tf * (k1 + 1) / (tf + k1 * (1 - b + b * lengths[key] / average))
+        scored.append((key, score))
+    return sorted(scored, key=lambda row: (-row[1], row[0]))
+
+
+docs = {"a": "account randomization", "b": "visit counts", "c": "account outcomes"}
+scores = bm25("randomization", docs)
+assert scores[0][0] == "a" and scores[0][1] > 0 and all(score == 0 for _, score in scores[1:])
 ```
 
 **Expected:** a ranks first with a positive score; the other scores are 0.
@@ -140,8 +154,9 @@ assert scores[0][0]=='a' and scores[0][1]>0 and all(score==0 for _,score in scor
 Document frequency counts documents, not total token occurrences. A term repeated many times in one source still appears in only one document for this calculation.
 
 ```python
-rare=math.log(1+(3-1+.5)/(1+.5)); common=math.log(1+(3-2+.5)/(2+.5))
-assert rare>common>0
+rare = math.log(1 + (3 - 1 + 0.5) / (1 + 0.5))
+common = math.log(1 + (3 - 2 + 0.5) / (2 + 0.5))
+assert rare > common > 0
 ```
 
 **Expected:** the rarer term has larger IDF.
@@ -151,9 +166,10 @@ assert rare>common>0
 The denominator grows with term frequency, creating diminishing returns. This reduces the effect of repeated terms without treating repetition as irrelevant.
 
 ```python
-k1=1.2; contribution=lambda tf:tf*(k1+1)/(tf+k1)
-a,b,c=[contribution(n) for n in [1,2,10]]
-assert a<b<c and c<10*a
+k1 = 1.2
+contribution = lambda tf: tf * (k1 + 1) / (tf + k1)
+a, b, c = [contribution(n) for n in [1, 2, 10]]
+assert a < b < c and c < 10 * a
 ```
 
 **Expected:** scores increase, but 10 occurrences yield less than 10 times the single-occurrence score.

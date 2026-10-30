@@ -31,7 +31,7 @@ If the counter is sometimes below2000, inspect whether every increment is one at
 ## Worked example 1
 
 ```cpp
-count.fetch_add(1,std::memory_order_relaxed);
+count.fetch_add(1, std::memory_order_relaxed);
 ```
 
 Expected: Each increment is indivisible; two workers making 1000 increments produce 2000 after join.
@@ -39,7 +39,8 @@ Expected: Each increment is indivisible; two workers making 1000 increments prod
 ## Worked example 2
 
 ```cpp
-payload=7; ready.store(true,std::memory_order_release);
+payload = 7;
+ready.store(true, std::memory_order_release);
 ```
 
 Expected: An acquire load observing this store can safely read the preceding payload write.

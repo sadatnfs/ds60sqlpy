@@ -31,7 +31,9 @@ If raw integers slip into a Cents API unexpectedly, inspect implicit constructor
 ## Worked example 1
 
 ```cpp
-Cents price{125}; Cents discount{25}; assert((discount+Cents{100})==price);
+Cents price{125};
+Cents discount{25};
+assert((discount + Cents{100}) == price);
 ```
 
 Expected: The API retains cents units and produces 125 cents.
@@ -39,7 +41,7 @@ Expected: The API retains cents units and produces 125 cents.
 ## Worked example 2
 
 ```cpp
-assert((Cents{125}+Cents{0})==Cents{125});
+assert((Cents{125} + Cents{0}) == Cents{125});
 ```
 
 Expected: Zero is the addition identity for this bounded domain.

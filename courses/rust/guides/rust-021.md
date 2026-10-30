@@ -43,12 +43,16 @@ Read the operations in dependency order. Record which values exist before each l
 The scope makes the exclusive captured access visible.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let mut count = 0;
-        { let mut add = |value| { count += value; }; add(2); add(3); }
+        {
+            let mut add = |value| {
+                count += value;
+            };
+            add(2);
+            add(3);
+        }
         assert_eq!(count, 5);
     }
     println!("rust-021: passed");
@@ -63,8 +67,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 Returning the owned capture makes this closure consuming rather than indefinitely repeatable.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let text = String::from("owned");

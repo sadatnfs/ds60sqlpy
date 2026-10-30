@@ -20,7 +20,7 @@ Owned Python web service lab, Linux Docker on any supported host (Windows: WSL 2
   ./workshop logs     Follow the owned application/worker logs
 Initial settings: WORKSHOP_PROJECT=ds60-python-web
 WORKSHOP_FLASK_PORT=18761 WORKSHOP_FASTAPI_PORT=18762 WORKSHOP_DJANGO_PORT=18763
-WORKSHOP_BASE_IMAGE=ds60sqlpy-worker-python-web:1.1.0
+WORKSHOP_BASE_IMAGE=ds60sqlpy-worker-python-web:1.2.0
 WORKSHOP_POSTGRES_IMAGE=mirror.gcr.io/library/postgres:17
 Images must already exist locally. No action publishes or deletes data/volumes.
 HELP
@@ -51,7 +51,7 @@ if [[ ! -f .workshop/settings.env ]]; then
   flask_port=${WORKSHOP_FLASK_PORT:-18761}
   fastapi_port=${WORKSHOP_FASTAPI_PORT:-18762}
   django_port=${WORKSHOP_DJANGO_PORT:-18763}
-  base=${WORKSHOP_BASE_IMAGE:-ds60sqlpy-worker-python-web:1.1.0}
+  base=${WORKSHOP_BASE_IMAGE:-ds60sqlpy-worker-python-web:1.2.0}
   postgres=${WORKSHOP_POSTGRES_IMAGE:-mirror.gcr.io/library/postgres:17}
   image="$project-image:1.0"
   printf '%s\n' "WORKSHOP_PROJECT=$project" "WORKSHOP_FLASK_PORT=$flask_port" "WORKSHOP_FASTAPI_PORT=$fastapi_port" "WORKSHOP_DJANGO_PORT=$django_port" "WORKSHOP_BASE_IMAGE=$base" "WORKSHOP_POSTGRES_IMAGE=$postgres" "WORKSHOP_IMAGE=$image" "WORKSHOP_UID=$(id -u)" "WORKSHOP_GID=$(id -g)" >.workshop/settings.env

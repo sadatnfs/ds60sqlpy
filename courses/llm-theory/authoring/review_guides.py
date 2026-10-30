@@ -19,11 +19,17 @@ def main() -> None:
             return text
         if str(source_root) not in sys.path:
             sys.path.insert(0, str(source_root))
-        from scripts.format_inline_code import canonical_markdown
+        from scripts.format_inline_code import canonical_markdown, ownership
+        from scripts.format_repo import load_policy
 
-        return canonical_markdown(
-            text, root=source_root, path=path.relative_to(source_root).as_posix()
-        )
+        relative = path.relative_to(source_root).as_posix()
+        generated, protected = ownership(relative, load_policy(source_root))
+        if protected:
+            raise ValueError("Protected Markdown output must remain unchanged: " + relative)
+        if generated:
+            return canonical_markdown(text, root=source_root, path=relative)
+        print("Direct source layout remains owned by format-repo:", relative)
+        return text
 
     for number in REVIEWS:
         identity = f"llm-{number:03d}"

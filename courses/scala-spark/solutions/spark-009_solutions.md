@@ -30,11 +30,11 @@ def artifactCoordinate(base: String, scalaBinary: String, sparkVersion: String):
 The function is a validator for the declared prepared target, not a general statement that other versions are invalid software. Binary suffix and Spark version both participate in artifact identity. Rejecting path-like base names prevents confusing an artifact name with a filesystem or URL selection. Returning a string proves only configuration construction; it does not prove that the artifact was resolved, compiled or run.
 
 ```scala
-assert(artifactCoordinate("spark-sql","2.13","4.0.1") == "org.apache.spark:spark-sql_2.13:4.0.1")
-expectIllegalArgument(artifactCoordinate("spark-sql","3","4.0.1"))
-expectIllegalArgument(artifactCoordinate("spark-sql","2.12","4.0.1"))
-expectIllegalArgument(artifactCoordinate("spark-sql","2.13","4.2.0"))
-expectIllegalArgument(artifactCoordinate("bad/name","2.13","4.0.1"))
+assert(artifactCoordinate("spark-sql", "2.13", "4.0.1") == "org.apache.spark:spark-sql_2.13:4.0.1")
+expectIllegalArgument(artifactCoordinate("spark-sql", "3", "4.0.1"))
+expectIllegalArgument(artifactCoordinate("spark-sql", "2.12", "4.0.1"))
+expectIllegalArgument(artifactCoordinate("spark-sql", "2.13", "4.2.0"))
+expectIllegalArgument(artifactCoordinate("bad/name", "2.13", "4.0.1"))
 ```
 
 ### Exercise 2: Keep execution local and bounded
@@ -54,7 +54,9 @@ The execution target is an explicit course policy. Equality to the single allowe
 
 ```scala
 assert(localMaster("local[2]") == "local[2]")
-Seq("local[*]","spark://example:7077",null).foreach(value => expectIllegalArgument(localMaster(value)))
+Seq("local[*]", "spark://example:7077", null).foreach(value =>
+  expectIllegalArgument(localMaster(value))
+)
 ```
 
 ### Exercise 3: Capture data instead of a resource owner
@@ -103,7 +105,8 @@ Serialization traverses the object graph reachable from the closure. A simple ar
 ```scala
 assert(serializedSize(safe.asInstanceOf[AnyRef]) > 0)
 var rejected = false
-try serializedSize(owner.bad.asInstanceOf[AnyRef]) catch { case _: NotSerializableException => rejected = true }
+try serializedSize(owner.bad.asInstanceOf[AnyRef])
+catch { case _: NotSerializableException => rejected = true }
 assert(rejected, "capturing the nonserializable owner must fail")
 ```
 
@@ -117,9 +120,11 @@ Serialize the supplied local function to memory, deserialize only those self-pro
 def roundTrip(function: Long => Long): Long => Long = {
   val bytes = new ByteArrayOutputStream()
   val output = new ObjectOutputStream(bytes)
-  try { output.writeObject(function); output.flush() } finally output.close()
+  try { output.writeObject(function); output.flush() }
+  finally output.close()
   val input = new ObjectInputStream(new ByteArrayInputStream(bytes.toByteArray))
-  try input.readObject().asInstanceOf[Long => Long] finally input.close()
+  try input.readObject().asInstanceOf[Long => Long]
+  finally input.close()
 }
 ```
 
@@ -127,7 +132,7 @@ A byte stream can be produced successfully yet fail to restore under incompatibl
 
 ```scala
 val restored = roundTrip(safe)
-assert(Seq(-2L,0L,7L).forall(value => restored(value) == safe(value)))
+assert(Seq(-2L, 0L, 7L).forall(value => restored(value) == safe(value)))
 assert(restored(7L) == 21L)
 ```
 
@@ -139,9 +144,11 @@ Return actual Scala version and Java specification version plus the declared spa
 
 ```scala
 def versionReport(): Map[String, String] = {
-  Map("scala_actual" -> scala.util.Properties.versionNumberString,
-      "java_actual" -> System.getProperty("java.specification.version"),
-      "spark_target" -> "4.0.1")
+  Map(
+    "scala_actual" -> scala.util.Properties.versionNumberString,
+    "java_actual" -> System.getProperty("java.specification.version"),
+    "spark_target" -> "4.0.1"
+  )
 }
 ```
 
@@ -149,7 +156,7 @@ The map deliberately distinguishes observations from intentions. Scala and Java 
 
 ```scala
 val report = versionReport()
-assert(report.keySet == Set("scala_actual","java_actual","spark_target"))
+assert(report.keySet == Set("scala_actual", "java_actual", "spark_target"))
 assert(report("scala_actual").startsWith("2.13.") && report("java_actual") == "17")
 assert(report("spark_target") == "4.0.1")
 ```

@@ -59,10 +59,10 @@ The question is: Ask the public assistant forconversion_definition.
 The baseline uses an explicit authored mapping so its evidence contract is transparent. A generative proposal stage would need separate support validation before returning the same answer shape.
 
 ```python
-assistant=Assistant(DOCUMENTS,{'public'},'corpus-v1')
-answer=assistant.answer('conversion_definition')
-assert answer['status']=='answered' and answer['citation']['document_id']=='metric-v1'
-assert 'eligible visits' in answer['text']
+assistant = Assistant(DOCUMENTS, {"public"}, "corpus-v1")
+answer = assistant.answer("conversion_definition")
+assert answer["status"] == "answered" and answer["citation"]["document_id"] == "metric-v1"
+assert "eligible visits" in answer["text"]
 ```
 
 **Expected:** answered with metric-v1 citation and source text.
@@ -76,8 +76,8 @@ The question is: Ask forcomet_period, which has no supporting corpus entry.
 Returning an unrelated top-ranked document would not make the question answerable. The abstention is the correct result under the task contract.
 
 ```python
-missing=assistant.answer('comet_period')
-assert missing['status']=='unknown' and missing['reason']=='missing evidence'
+missing = assistant.answer("comet_period")
+assert missing["status"] == "unknown" and missing["reason"] == "missing evidence"
 ```
 
 **Expected:** unknown with missing evidence reason.
@@ -91,8 +91,11 @@ The question is: Ask a public-only assistant forrestricted_threshold, then ask a
 The public trace does not reveal the restricted document ID. Access is enforced by trusted metadata filtering before evidence selection.
 
 ```python
-public=assistant.answer('restricted_threshold'); privileged=Assistant(DOCUMENTS,{'public','restricted'},'corpus-v1').answer('restricted_threshold')
-assert public['status']=='unknown' and privileged['citation']['document_id']=='private-v1'
+public = assistant.answer("restricted_threshold")
+privileged = Assistant(DOCUMENTS, {"public", "restricted"}, "corpus-v1").answer(
+    "restricted_threshold"
+)
+assert public["status"] == "unknown" and privileged["citation"]["document_id"] == "private-v1"
 ```
 
 **Expected:** public unknown; authorizedanswercitesprivate-v1.
@@ -106,10 +109,13 @@ The question is: Calculate3 purchases over10 eligible visits and reject11 purcha
 The assistant can explain the metric using the retrieved definition, but the value comes from validated arithmetic. This does not establish a causal effect or sampling uncertainty.
 
 ```python
-assert conversion(3,10)==.3
-try: conversion(11,10)
-except ValueError: pass
-else: raise AssertionError('invalid conversion counts')
+assert conversion(3, 10) == 0.3
+try:
+    conversion(11, 10)
+except ValueError:
+    pass
+else:
+    raise AssertionError("invalid conversion counts")
 ```
 
 **Expected:** rate.3; invalid counts raise ValueError.
@@ -123,11 +129,16 @@ The question is: Score supported, missing andrestricted-public questions against
 Status accuracy alone would miss a corrupted citation. The independent source-slice check verifies a second part of the contract.
 
 ```python
-cases=[('conversion_definition','answered'),('comet_period','unknown'),('restricted_threshold','unknown')]
-results=[assistant.answer(question)['status']==expected for question,expected in cases]
-assert results==[True,True,True]
-citation=answer['citation']; source=next(d for d in DOCUMENTS if d['id']==citation['document_id'])
-assert source['text'][citation['start']:citation['end']]==answer['text']
+cases = [
+    ("conversion_definition", "answered"),
+    ("comet_period", "unknown"),
+    ("restricted_threshold", "unknown"),
+]
+results = [assistant.answer(question)["status"] == expected for question, expected in cases]
+assert results == [True, True, True]
+citation = answer["citation"]
+source = next(d for d in DOCUMENTS if d["id"] == citation["document_id"])
+assert source["text"][citation["start"] : citation["end"]] == answer["text"]
 ```
 
 **Expected:** 3 of 3 status contracts pass; citation integrity checked separately.
@@ -141,8 +152,18 @@ The question is: Record local fixture acceptance while leaving pretrained genera
 A successful local baseline is meaningful progress without being a deployment claim. The next evidence is explicit:actual local model outputs, held-out domain questions and real integration boundary tests.
 
 ```python
-receipt={'local_fixture_pass':all(results),'pretrained_generation_executed':False,'real_identity_integration_verified':False,'production_go':'no-go','scope':'offline extractive subject-assistant baseline'}
-assert receipt['local_fixture_pass'] and receipt['production_go']=='no-go' and not receipt['pretrained_generation_executed']
+receipt = {
+    "local_fixture_pass": all(results),
+    "pretrained_generation_executed": False,
+    "real_identity_integration_verified": False,
+    "production_go": "no-go",
+    "scope": "offline extractive subject-assistant baseline",
+}
+assert (
+    receipt["local_fixture_pass"]
+    and receipt["production_go"] == "no-go"
+    and not receipt["pretrained_generation_executed"]
+)
 ```
 
 **Expected:** local_fixture_pass True; production_go no-go.

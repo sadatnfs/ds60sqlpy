@@ -19,7 +19,7 @@ these fields:
   "outcome": "State a testable contract for a small data product.",
   "guide_source": "courses/data-ml-engineering/authoring/foundations/chapters/dme-001.md",
   "source_path": "courses/data-ml-engineering/authoring/foundations/examples/dme-001.py",
-  "related_paths": [{"label": "Polars workshop", "path": "courses/polars/README.md"}]
+  "related_paths": [{ "label": "Polars workshop", "path": "courses/polars/README.md" }]
 }
 ```
 

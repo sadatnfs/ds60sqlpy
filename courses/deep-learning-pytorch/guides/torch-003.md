@@ -78,10 +78,15 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-layer=nn.Linear(3,1,bias=True,dtype=torch.float64)
-with torch.no_grad(): layer.weight.copy_(torch.tensor([[1.,0.,-1.]],dtype=torch.float64)); layer.bias.fill_(2.)
-x=torch.tensor([[1.,2.,3.],[0.,1.,0.]],dtype=torch.float64); out=layer(x)
-torch.testing.assert_close(out,torch.tensor([[0.],[2.]],dtype=torch.float64),atol=1e-12,rtol=0)
+layer = nn.Linear(3, 1, bias=True, dtype=torch.float64)
+with torch.no_grad():
+    layer.weight.copy_(torch.tensor([[1.0, 0.0, -1.0]], dtype=torch.float64))
+    layer.bias.fill_(2.0)
+x = torch.tensor([[1.0, 2.0, 3.0], [0.0, 1.0, 0.0]], dtype=torch.float64)
+out = layer(x)
+torch.testing.assert_close(
+    out, torch.tensor([[0.0], [2.0]], dtype=torch.float64), atol=1e-12, rtol=0
+)
 ```
 
 **Expected:** outputs[[0], [2]], shape(2, 1).
@@ -91,8 +96,8 @@ torch.testing.assert_close(out,torch.tensor([[0.],[2.]],dtype=torch.float64),ato
 There are two Parameter objects but four trainable scalar values. Parameter count and tensor count answer different questions.
 
 ```python
-assert sum(p.numel() for p in layer.parameters())==4
-assert set(layer.state_dict())=={'weight','bias'}
+assert sum(p.numel() for p in layer.parameters()) == 4
+assert set(layer.state_dict()) == {"weight", "bias"}
 ```
 
 **Expected:** 4 scalars; keys weight, bias.
@@ -102,9 +107,9 @@ assert set(layer.state_dict())=={'weight','bias'}
 The transpose is a layout translation, not a change in the modeled function. A non symmetric rectangular fixture makes an accidental orientation error visible.
 
 ```python
-mathematical_w=layer.weight.T
-assert tuple(mathematical_w.shape)==(3,1)
-torch.testing.assert_close(x@mathematical_w+layer.bias,out,atol=1e-12,rtol=0)
+mathematical_w = layer.weight.T
+assert tuple(mathematical_w.shape) == (3, 1)
+torch.testing.assert_close(x @ mathematical_w + layer.bias, out, atol=1e-12, rtol=0)
 ```
 
 **Expected:** direct result equals module output.

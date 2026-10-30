@@ -49,20 +49,37 @@ Returning the first qualifying position gives a precise duplicate policy. An arb
 import java.util.*;
 
 public class Main {
-    record Item(String id,int key){}
-    static int lowerBound(int[] values,int target){int low=0,high=values.length;while(low<high){int mid=low+(high-low)/2;if(values[mid]<target)low=mid+1;else high=mid;}return low;}
-    static int minimumCoins(int amount,int[] coins){
-        if(amount<0||amount>1000)throw new IllegalArgumentException("amount0..1000 required");
-        for(int coin:coins)if(coin<=0)throw new IllegalArgumentException("positive coins required");
-        int[] dp=new int[amount+1];Arrays.fill(dp,amount+1);dp[0]=0;
-        for(int current=1;current<=amount;current++)for(int coin:coins)if(coin<=current)dp[current]=Math.min(dp[current],dp[current-coin]+1);
-        return dp[amount]>amount?-1:dp[amount];
-    }
-    public static void main(String[] args) throws Exception {
-        int[] sorted={1,2,2,5};assert lowerBound(sorted,2)==1 && lowerBound(sorted,6)==4;
-    }
-}
 
+  record Item(String id, int key) {}
+
+  static int lowerBound(int[] values, int target) {
+    int low = 0,
+      high = values.length;
+    while (low < high) {
+      int mid = low + (high - low) / 2;
+      if (values[mid] < target) low = mid + 1;
+      else high = mid;
+    }
+    return low;
+  }
+
+  static int minimumCoins(int amount, int[] coins) {
+    if (amount < 0 || amount > 1000) throw new IllegalArgumentException("amount0..1000 required");
+    for (int coin : coins)
+      if (coin <= 0) throw new IllegalArgumentException("positive coins required");
+    int[] dp = new int[amount + 1];
+    Arrays.fill(dp, amount + 1);
+    dp[0] = 0;
+    for (int current = 1; current <= amount; current++) for (int coin : coins)
+      if (coin <= current) dp[current] = Math.min(dp[current], dp[current - coin] + 1);
+    return dp[amount] > amount ? -1 : dp[amount];
+  }
+
+  public static void main(String[] args) throws Exception {
+    int[] sorted = { 1, 2, 2, 5 };
+    assert lowerBound(sorted, 2) == 1 && lowerBound(sorted, 6) == 4;
+  }
+}
 ```
 
 **Expected:** indices 1 and 4.
@@ -75,23 +92,40 @@ The half-open interval starts empty for an empty input. The result is an inserti
 import java.util.*;
 
 public class Main {
-    record Item(String id,int key){}
-    static int lowerBound(int[] values,int target){int low=0,high=values.length;while(low<high){int mid=low+(high-low)/2;if(values[mid]<target)low=mid+1;else high=mid;}return low;}
-    static int minimumCoins(int amount,int[] coins){
-        if(amount<0||amount>1000)throw new IllegalArgumentException("amount0..1000 required");
-        for(int coin:coins)if(coin<=0)throw new IllegalArgumentException("positive coins required");
-        int[] dp=new int[amount+1];Arrays.fill(dp,amount+1);dp[0]=0;
-        for(int current=1;current<=amount;current++)for(int coin:coins)if(coin<=current)dp[current]=Math.min(dp[current],dp[current-coin]+1);
-        return dp[amount]>amount?-1:dp[amount];
-    }
-    public static void main(String[] args) throws Exception {
-        int[] sorted={1,2,2,5};assert lowerBound(sorted,2)==1 && lowerBound(sorted,6)==4;
 
-        assert lowerBound(new int[0],7)==0;
-        assert lowerBound(sorted,0)==0;
+  record Item(String id, int key) {}
+
+  static int lowerBound(int[] values, int target) {
+    int low = 0,
+      high = values.length;
+    while (low < high) {
+      int mid = low + (high - low) / 2;
+      if (values[mid] < target) low = mid + 1;
+      else high = mid;
     }
+    return low;
+  }
+
+  static int minimumCoins(int amount, int[] coins) {
+    if (amount < 0 || amount > 1000) throw new IllegalArgumentException("amount0..1000 required");
+    for (int coin : coins)
+      if (coin <= 0) throw new IllegalArgumentException("positive coins required");
+    int[] dp = new int[amount + 1];
+    Arrays.fill(dp, amount + 1);
+    dp[0] = 0;
+    for (int current = 1; current <= amount; current++) for (int coin : coins)
+      if (coin <= current) dp[current] = Math.min(dp[current], dp[current - coin] + 1);
+    return dp[amount] > amount ? -1 : dp[amount];
+  }
+
+  public static void main(String[] args) throws Exception {
+    int[] sorted = { 1, 2, 2, 5 };
+    assert lowerBound(sorted, 2) == 1 && lowerBound(sorted, 6) == 4;
+
+    assert lowerBound(new int[0], 7) == 0;
+    assert lowerBound(sorted, 0) == 0;
+  }
 }
-
 ```
 
 **Expected:** both return0.

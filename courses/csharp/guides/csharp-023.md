@@ -59,26 +59,31 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Buffers;
 
-internal static class Program
-{
-    private static void Check(bool condition, string reason)
+internal static class Program {
+  private static void Check(bool condition, string reason) {
+    if (!condition)
+      throw new InvalidOperationException(reason);
+  }
+
+  private static async Task Main() {
     {
-        if (!condition) throw new InvalidOperationException(reason);
+      int ParseCount(string text) {
+        int value = int.Parse(text, CultureInfo.InvariantCulture);
+        if (value < 0)
+          throw new ArgumentOutOfRangeException(nameof(text));
+        return value;
+      }
+      bool format = false;
+      try {
+        ParseCount("oops");
+      } catch (FormatException) {
+        format = true;
+      }
+      Check(format && ParseCount("3") == 3, "format and success are distinct");
     }
-
-    private static async Task Main()
-    {
-        {
-            int ParseCount(string text) { int value = int.Parse(text, CultureInfo.InvariantCulture); if (value < 0) throw new ArgumentOutOfRangeException(nameof(text)); return value; }
-            bool format = false;
-            try { ParseCount("oops"); } catch (FormatException) { format = true; }
-            Check(format && ParseCount("3") == 3, "format and success are distinct");
-        }
-        Console.WriteLine("csharp-023: passed");
-        await Task.CompletedTask;
-    }
-
-
+    Console.WriteLine("csharp-023: passed");
+    await Task.CompletedTask;
+  }
 }
 ```
 
@@ -105,26 +110,29 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Buffers;
 
-internal static class Program
-{
-    private static void Check(bool condition, string reason)
-    {
-        if (!condition) throw new InvalidOperationException(reason);
-    }
+internal static class Program {
+  private static void Check(bool condition, string reason) {
+    if (!condition)
+      throw new InvalidOperationException(reason);
+  }
 
-    private static async Task Main()
+  private static async Task Main() {
     {
-        {
-            Exception? observed = null;
-            try { try { throw new IOException("synthetic read failure"); } catch (IOException cause) { throw new InvalidOperationException("import failed", cause); } }
-            catch (InvalidOperationException error) { observed = error; }
-            Check(observed?.InnerException is IOException, "cause retained");
+      Exception? observed = null;
+      try {
+        try {
+          throw new IOException("synthetic read failure");
+        } catch (IOException cause) {
+          throw new InvalidOperationException("import failed", cause);
         }
-        Console.WriteLine("csharp-023: passed");
-        await Task.CompletedTask;
+      } catch (InvalidOperationException error) {
+        observed = error;
+      }
+      Check(observed?.InnerException is IOException, "cause retained");
     }
-
-
+    Console.WriteLine("csharp-023: passed");
+    await Task.CompletedTask;
+  }
 }
 ```
 

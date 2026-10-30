@@ -99,14 +99,14 @@ These worked excerpts come from `sql/postgres-60day/day52_project3_dwh_part1.sql
 
 ```sql
 CREATE TABLE dim_date (
-  date_key       INT PRIMARY KEY,      -- yyyymmdd
-  date_actual    DATE NOT NULL,
-  year           INT NOT NULL,
-  quarter        INT NOT NULL,
-  month          INT NOT NULL,
-  day            INT NOT NULL,
-  day_name       TEXT NOT NULL,
-  is_weekend     BOOLEAN NOT NULL
+  date_key INT PRIMARY KEY, -- yyyymmdd
+  date_actual DATE NOT NULL,
+  year INT NOT NULL,
+  quarter INT NOT NULL,
+  month INT NOT NULL,
+  day INT NOT NULL,
+  day_name TEXT NOT NULL,
+  is_weekend BOOLEAN NOT NULL
 );
 ```
 
@@ -118,14 +118,14 @@ CREATE TABLE dim_date (
 
 ```sql
 CREATE TABLE dim_customer (
-  customer_sk    INT PRIMARY KEY DEFAULT nextval('dim_customer_sk_seq'),
-  customer_id    INT NOT NULL,   -- business key
-  full_name      TEXT,
-  country        TEXT,
-  segment        TEXT,
-  valid_from     DATE NOT NULL,
-  valid_to       DATE,
-  is_current     BOOLEAN NOT NULL DEFAULT TRUE
+  customer_sk INT PRIMARY KEY DEFAULT nextval('dim_customer_sk_seq'),
+  customer_id INT NOT NULL, -- business key
+  full_name TEXT,
+  country TEXT,
+  segment TEXT,
+  valid_from DATE NOT NULL,
+  valid_to DATE,
+  is_current BOOLEAN NOT NULL DEFAULT TRUE
 );
 ```
 

@@ -23,8 +23,10 @@ The question is: Predict for float32 rows[1,2],[3,4].
 The reference coefficient vector makes output arithmetic transparent. Shape validation ensures the result is one scalar per input record.
 
 ```python
-x=np.array([[1,2],[3,4]],dtype='float32'); result=predict(x)
-np.testing.assert_array_equal(result,[0,2]); assert result.shape==(2,)
+x = np.array([[1, 2], [3, 4]], dtype="float32")
+result = predict(x)
+np.testing.assert_array_equal(result, [0, 2])
+assert result.shape == (2,)
 ```
 
 **Expected:** outputs 0,2 with shape(2,).
@@ -38,8 +40,8 @@ The question is: Predict each row independently and compare concatenated outputs
 A stateless affine model should not depend on neighboring records. A training-mode normalization layer could violate this behavior, so the test is valuable when the implementation grows.
 
 ```python
-single=np.concatenate([predict(x[i:i+1]) for i in range(2)])
-np.testing.assert_array_equal(single,result)
+single = np.concatenate([predict(x[i : i + 1]) for i in range(2)])
+np.testing.assert_array_equal(single, result)
 ```
 
 **Expected:** exact equality for this fixed linear fixture.
@@ -53,10 +55,13 @@ The question is: Pass shapes(0,2) and(5,2).
 An empty batch provides no predictions, and an oversized batch violates the declared resource budget. Both failures occur before the model computation.
 
 ```python
-for bad in [np.empty((0,2),dtype='float32'),np.zeros((5,2),dtype='float32')]:
-    try: predict(bad)
-    except ValueError as error: assert 'batch' in str(error)
-    else: raise AssertionError('bad batch accepted')
+for bad in [np.empty((0, 2), dtype="float32"), np.zeros((5, 2), dtype="float32")]:
+    try:
+        predict(bad)
+    except ValueError as error:
+        assert "batch" in str(error)
+    else:
+        raise AssertionError("bad batch accepted")
 ```
 
 **Expected:** ValueError with batch in the message.
@@ -70,10 +75,13 @@ The question is: Pass a vector[1,2] and a matrix with three columns.
 A single record still needs a batch axis. Guessing whether a vector represents one record or many one-feature records can silently change the meaning of data.
 
 ```python
-for bad in [np.array([1,2],dtype='float32'),np.zeros((2,3),dtype='float32')]:
-    try: predict(bad)
-    except ValueError as error: assert 'shape' in str(error)
-    else: raise AssertionError('bad shape accepted')
+for bad in [np.array([1, 2], dtype="float32"), np.zeros((2, 3), dtype="float32")]:
+    try:
+        predict(bad)
+    except ValueError as error:
+        assert "shape" in str(error)
+    else:
+        raise AssertionError("bad shape accepted")
 ```
 
 **Expected:** ValueError with shape in the message.
@@ -87,12 +95,18 @@ The question is: Pass a NaN row and an int64 row under the explicit float32 poli
 A strict dtype boundary makes precision changes visible. A different API could deliberately cast, but it would need to document and test that policy rather than do it implicitly.
 
 ```python
-try: predict(np.array([[np.nan,1]],dtype='float32'))
-except ValueError: pass
-else: raise AssertionError('NaN accepted')
-try: predict(np.array([[1,2]],dtype='int64'))
-except TypeError: pass
-else: raise AssertionError('dtype silently coerced')
+try:
+    predict(np.array([[np.nan, 1]], dtype="float32"))
+except ValueError:
+    pass
+else:
+    raise AssertionError("NaN accepted")
+try:
+    predict(np.array([[1, 2]], dtype="int64"))
+except TypeError:
+    pass
+else:
+    raise AssertionError("dtype silently coerced")
 ```
 
 **Expected:** ValueError for nonfinite; TypeError for dtype.
@@ -106,8 +120,10 @@ The question is: Snapshot a valid batch, predict and mutate the returned result;
 Ownership is part of the contract. An output view into caller or model state can turn a harmless downstream edit into a hidden data mutation.
 
 ```python
-before=x.copy(); answer=predict(x); answer[0]=999
-np.testing.assert_array_equal(x,before)
+before = x.copy()
+answer = predict(x)
+answer[0] = 999
+np.testing.assert_array_equal(x, before)
 ```
 
 **Expected:** input remains byte-identical.

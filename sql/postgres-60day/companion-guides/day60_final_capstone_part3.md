@@ -97,7 +97,10 @@ These worked excerpts come from `sql/postgres-60day/day60_final_capstone_part3.s
 ### Example 1
 
 ```sql
-SELECT * FROM v_dq_customers;
+SELECT
+  *
+FROM
+  v_dq_customers;
 ```
 
 **How to read it:** Example 1: Start with `v_dq_customers` in `FROM`/`JOIN`. The final `SELECT` displays `*`. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
@@ -107,7 +110,10 @@ SELECT * FROM v_dq_customers;
 ### Example 2
 
 ```sql
-SELECT * FROM v_dq_orders;
+SELECT
+  *
+FROM
+  v_dq_orders;
 ```
 
 **How to read it:** Example 2: Start with `v_dq_orders` in `FROM`/`JOIN`. The final `SELECT` displays `*`. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.

@@ -47,13 +47,15 @@ For this lesson's **a restartable EDA and preprocessing project with an auditabl
 ```python
 import pandas as pd
 
-raw = pd.DataFrame({
-    "entity_id": [1, 2, 2, 3],
-    "event_time": pd.to_datetime([
-        "2025-01-01", "2025-01-02", "2025-01-02", "2025-01-03"
-    ], utc=True),
-    "amount": [10.0, 20.0, 20.0, None],
-})
+raw = pd.DataFrame(
+    {
+        "entity_id": [1, 2, 2, 3],
+        "event_time": pd.to_datetime(
+            ["2025-01-01", "2025-01-02", "2025-01-02", "2025-01-03"], utc=True
+        ),
+        "amount": [10.0, 20.0, 20.0, None],
+    }
+)
 scope = {
     "provenance": "constructed course fixture",
     "license": "course-authored fixture; CC0-style reuse permitted",
@@ -95,9 +97,7 @@ known_amounts = raw.loc[analysis_rows, "amount"]
 exploration = {
     "row_count": len(raw),
     "missing_amount": int(raw["amount"].isna().sum()),
-    "duplicate_key_rows": int(
-        raw.duplicated(["entity_id", "event_time"]).sum()
-    ),
+    "duplicate_key_rows": int(raw.duplicated(["entity_id", "event_time"]).sum()),
     "known_total": float(raw["amount"].sum()),
     "known_amount_denominator": int(analysis_rows.sum()),
     "amount_median": float(known_amounts.median()),
@@ -106,9 +106,7 @@ exploration = {
         float(known_amounts.max()),
     ),
     "entity_amount_correlation": float(
-        raw.loc[analysis_rows, ["entity_id", "amount"]]
-        .corr()
-        .loc["entity_id", "amount"]
+        raw.loc[analysis_rows, ["entity_id", "amount"]].corr().loc["entity_id", "amount"]
     ),
 }
 findings = [
@@ -131,8 +129,7 @@ assert exploration["missing_amount"] == 1
 assert exploration["duplicate_key_rows"] == 1
 assert exploration["known_total"] == 50.0
 assert exploration["known_amount_denominator"] == 3
-assert all({"claim", "evidence", "denominator", "caveat"} <= finding.keys()
-           for finding in findings)
+assert all({"claim", "evidence", "denominator", "caveat"} <= finding.keys() for finding in findings)
 assert leakage_prone_fields_excluded == []
 ```
 
@@ -196,14 +193,16 @@ assert cleaned["amount"].isna().sum() == 1
 ```python
 import pandera.pandas as pa
 
-project_schema = pa.DataFrameSchema({
-    "entity_id": pa.Column(int, checks=pa.Check.ge(1)),
-    "event_time": pa.Column(
-        pd.DatetimeTZDtype(unit="ns", tz="UTC"),
-        nullable=False,
-    ),
-    "amount": pa.Column(float, checks=pa.Check.ge(0), nullable=True),
-})
+project_schema = pa.DataFrameSchema(
+    {
+        "entity_id": pa.Column(int, checks=pa.Check.ge(1)),
+        "event_time": pa.Column(
+            pd.DatetimeTZDtype(unit="ns", tz="UTC"),
+            nullable=False,
+        ),
+        "amount": pa.Column(float, checks=pa.Check.ge(0), nullable=True),
+    }
+)
 validated = project_schema.validate(cleaned, lazy=True)
 assert len(validated) == 3
 
@@ -249,9 +248,7 @@ manifest_path = artifact_dir / "manifest.json"
 report_path = artifact_dir / "report.md"
 
 validated.to_csv(data_path, index=False)
-daily_amount = (
-    validated.set_index("event_time")["amount"].resample("D").sum(min_count=1)
-)
+daily_amount = validated.set_index("event_time")["amount"].resample("D").sum(min_count=1)
 axes = daily_amount.plot(
     kind="bar",
     title="Known amount by UTC day",
@@ -288,9 +285,7 @@ assert len(reloaded) == manifest["row_count"]
 assert float(revalidated["amount"].sum()) == manifest["known_amount_total"]
 assert revalidated["entity_id"].nunique() == manifest["unique_entity_count"]
 assert all((artifact_dir / name).exists() for name in manifest["files"])
-assert set(manifest["files"]) == {
-    "clean.csv", "daily-amount.png", "report.md"
-}
+assert set(manifest["files"]) == {"clean.csv", "daily-amount.png", "report.md"}
 ```
 
 **Verification evidence:** saved/reloaded shape, schema, and key totals match the validated in-memory frame.

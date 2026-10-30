@@ -49,13 +49,15 @@ def main():
     for index, case in enumerate(cases):
         gaussian = vec(
             list(case["gaussian"].items()),
-            lambda item: "Gaussian("
-            + json.dumps(item[0])
-            + ", "
-            + number(item[1]["mean"])
-            + ", "
-            + number(item[1]["precision"])
-            + ")",
+            lambda item: (
+                "Gaussian("
+                + json.dumps(item[0])
+                + ", "
+                + number(item[1]["mean"])
+                + ", "
+                + number(item[1]["precision"])
+                + ")"
+            ),
         )
         l1 = vec(
             list(case["l1"].items()),

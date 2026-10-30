@@ -23,8 +23,19 @@ rather than assuming a familiar-looking query must be right.
 ## Exercise 1: Perform a guarded reservation
 
 ```sql
-UPDATE concurrency_stock SET available=available-2,version=version+1
-WHERE sku='A' AND version=1 AND available>=2 RETURNING sku,available,version;
+UPDATE
+  concurrency_stock
+SET
+  available = available - 2,
+  version = version + 1
+WHERE
+  sku = 'A'
+  AND version = 1
+  AND available >= 2
+RETURNING
+  sku,
+  available,
+  version;
 ```
 
 The UPDATE selects a unique SKU and checks both expectations in the same statement that changes the values. It increments the version so an earlier reader cannot reuse version 1 after this reservation succeeds. RETURNING supplies direct evidence of the row that changed. The exercise wrapper uses a savepoint so subsequent independent questions start from the same fixture. The assertion checks the returned state and the script separately confirms rollback restoration. A preceding SELECT without a guarded write would leave a time gap during which its observation could become stale. No timing claim follows here because this is still a single-session operation.
@@ -38,8 +49,19 @@ The UPDATE selects a unique SKU and checks both expectations in the same stateme
 ## Exercise 2: Reject a stale expected version
 
 ```sql
-UPDATE concurrency_stock SET available=available-1,version=version+1
-WHERE sku='A' AND version=99 AND available>=1 RETURNING sku,available,version;
+UPDATE
+  concurrency_stock
+SET
+  available = available - 1,
+  version = version + 1
+WHERE
+  sku = 'A'
+  AND version = 99
+  AND available >= 1
+RETURNING
+  sku,
+  available,
+  version;
 ```
 
 Version 99 does not match the current row, so no mutation occurs. This is intentionally a successful SQL statement with an unsuccessful business precondition. Keep those two outcomes distinct in application code and learner evidence. The assertion checks both the empty RETURNING relation and the unchanged stored state. Removing the version condition would make the statement affect a row while destroying the protection the caller requested. A caller can reread to investigate, but must decide whether the original business intent remains valid before retrying. Under actual concurrent stronger-isolation execution an exception may be another possible outcome; this deterministic stale-version example makes no claim that all conflicts are reported as zero rows.
@@ -53,8 +75,19 @@ Version 99 does not match the current row, so no mutation occurs. This is intent
 ## Exercise 3: Reject insufficient capacity independently
 
 ```sql
-UPDATE concurrency_stock SET available=available-2,version=version+1
-WHERE sku='B' AND version=1 AND available>=2 RETURNING sku,available,version;
+UPDATE
+  concurrency_stock
+SET
+  available = available - 2,
+  version = version + 1
+WHERE
+  sku = 'B'
+  AND version = 1
+  AND available >= 2
+RETURNING
+  sku,
+  available,
+  version;
 ```
 
 The version precondition is satisfied, but available >= 2 is false for B's one unit. Both predicates belong to the atomic update condition, so stock never becomes negative and the version does not advance. The CHECK constraint is an additional invariant guard; the ordinary business shortage should be handled without intentionally violating it. The assertion verifies an empty result and the unchanged B row. A zero-row outcome alone does not identify which precondition failed, so the caller may need an explicit follow-up read and a conflict policy. Keep that diagnostic read separate from a claim that the earlier attempt succeeded.
@@ -68,16 +101,56 @@ The version precondition is satisfied, but available >= 2 is false for B's one u
 ## Exercise 4: Model two callers sharing an old version
 
 ```sql
-CREATE TEMP TABLE model_trace(caller text PRIMARY KEY,affected_rows bigint) ON COMMIT DROP;
+CREATE TEMP TABLE model_trace (
+  caller text PRIMARY KEY,
+  affected_rows bigint
+) ON COMMIT DROP;
+
 WITH changed AS (
-  UPDATE concurrency_stock SET available=available-2,version=version+1
-  WHERE sku='A' AND version=1 AND available>=2 RETURNING sku
-) INSERT INTO model_trace SELECT 'One',count(*) FROM changed;
+  UPDATE
+    concurrency_stock
+  SET
+    available = available - 2,
+    version = version + 1
+  WHERE
+    sku = 'A'
+    AND version = 1
+    AND available >= 2
+  RETURNING
+    sku)
+INSERT INTO model_trace
+SELECT
+  'One',
+  count(*)
+FROM
+  changed;
+
 WITH changed AS (
-  UPDATE concurrency_stock SET available=available-1,version=version+1
-  WHERE sku='A' AND version=1 AND available>=1 RETURNING sku
-) INSERT INTO model_trace SELECT 'Two',count(*) FROM changed;
-SELECT caller,affected_rows FROM model_trace ORDER BY caller;
+  UPDATE
+    concurrency_stock
+  SET
+    available = available - 1,
+    version = version + 1
+  WHERE
+    sku = 'A'
+    AND version = 1
+    AND available >= 1
+  RETURNING
+    sku)
+INSERT INTO model_trace
+SELECT
+  'Two',
+  count(*)
+FROM
+  changed;
+
+SELECT
+  caller,
+  affected_rows
+FROM
+  model_trace
+ORDER BY
+  caller;
 ```
 
 The first caller's successful write advances version 1 to 2. A distinct second statement with the old version then finds no matching row. The solution executes two statements and captures their RETURNING counts into a temporary trace table, avoiding ambiguous attempts to update the same row twice inside one SQL statement. The assertion expects One to affect one row and Two none. This models the conflict contract but does not reproduce simultaneous transactions or show how long a writer waits. The optional lab is the source of actual multi-session evidence. Rollback to the surrounding savepoint removes both the modeled mutation and trace objects before the next exercise.
@@ -91,7 +164,14 @@ The first caller's successful write advances version 1 to 2. A distinct second s
 ## Exercise 5: Verify a no-change read result
 
 ```sql
-SELECT sku,available,version FROM concurrency_stock ORDER BY sku;
+SELECT
+  sku,
+  available,
+  version
+FROM
+  concurrency_stock
+ORDER BY
+  sku;
 ```
 
 This read confirms that the independent exercise wrappers restored the local fixture to its initial state. It does not show whether another session could see the row before or after a commit. The assertion checks both rows and their versions so accidental persistence from a previous exercise becomes visible. To make an isolation claim, run the optional two-session sequence and preserve the actual SELECT output before and after the other session commits. Merely selecting current_setting for an isolation level would show a configuration, not an observed anomaly or consistency guarantee. Keep those evidence tiers separate when explaining your result to another engineer.
@@ -105,8 +185,18 @@ This read confirms that the independent exercise wrappers restored the local fix
 ## Exercise 6: Transfer the guard to an atomic replenishment
 
 ```sql
-UPDATE concurrency_stock SET available=available+3,version=version+1
-WHERE sku='B' AND version=1 RETURNING sku,available,version;
+UPDATE
+  concurrency_stock
+SET
+  available = available + 3,
+  version = version + 1
+WHERE
+  sku = 'B'
+  AND version = 1
+RETURNING
+  sku,
+  available,
+  version;
 ```
 
 Replenishment changes the state just as reservation does, so it must advance the version. Otherwise an old reader could still act on the former version while using outdated capacity information. The first update returns B with four units and version 2. Repeating the old version precondition affects no rows. The solution captures that second RETURNING count as a negative control before rolling back the exercise. This does not make arbitrary retries idempotent after an unknown commit result: a retried caller needs a durable operation identity to know whether the first intent already committed. The version guard prevents a stale conditional write, while idempotency solves a related but different recovery question.

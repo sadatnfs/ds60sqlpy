@@ -101,13 +101,26 @@ These worked excerpts come from `sql/postgres-60day/day05_cross_self_joins.sql`.
 
 ```sql
 WITH cats AS (
-  SELECT DISTINCT category FROM products
-), ctries AS (
-  SELECT DISTINCT country FROM customers
+  SELECT DISTINCT
+    category
+  FROM
+    products
+),
+ctries AS (
+  SELECT DISTINCT
+    country
+  FROM
+    customers
 )
-SELECT cats.category, ctries.country
-FROM cats CROSS JOIN ctries
-ORDER BY 1,2;
+SELECT
+  cats.category,
+  ctries.country
+FROM
+  cats
+  CROSS JOIN ctries
+ORDER BY
+  1,
+  2;
 ```
 
 **How to read it:** Example 1: Start with `products`, and `customers` in `FROM`/`JOIN`. The final `SELECT` displays `category`, and `country`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
@@ -117,13 +130,18 @@ ORDER BY 1,2;
 ### Example 2
 
 ```sql
-SELECT e.employee_id, e.full_name AS employee, m.full_name AS manager
-FROM employees e
-LEFT JOIN employees m ON m.employee_id = e.manager_id
-ORDER BY manager NULLS FIRST,
-         m.employee_id NULLS FIRST,
-         employee,
-         e.employee_id
+SELECT
+  e.employee_id,
+  e.full_name AS employee,
+  m.full_name AS manager
+FROM
+  employees e
+  LEFT JOIN employees m ON m.employee_id = e.manager_id
+ORDER BY
+  manager NULLS FIRST,
+  m.employee_id NULLS FIRST,
+  employee,
+  e.employee_id
 LIMIT 50;
 ```
 

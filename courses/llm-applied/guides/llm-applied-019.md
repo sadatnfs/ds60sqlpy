@@ -120,9 +120,11 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-difference=nn.Parameter(torch.tensor(0.,dtype=torch.float64)); reference=0.; beta=.5
-loss=F.softplus(-beta*(difference-reference))
-np.testing.assert_allclose(loss.item(),np.log(2),atol=1e-12,rtol=0)
+difference = nn.Parameter(torch.tensor(0.0, dtype=torch.float64))
+reference = 0.0
+beta = 0.5
+loss = F.softplus(-beta * (difference - reference))
+np.testing.assert_allclose(loss.item(), np.log(2), atol=1e-12, rtol=0)
 ```
 
 **Expected:** loss \(\log(2)\).
@@ -132,7 +134,8 @@ np.testing.assert_allclose(loss.item(),np.log(2),atol=1e-12,rtol=0)
 The negative gradient means gradient descent increases the chosen-response advantage. The scale includes beta and the sigmoid derivative at zero.
 
 ```python
-loss.backward(); np.testing.assert_allclose(difference.grad.item(),-.25,atol=1e-12,rtol=0)
+loss.backward()
+np.testing.assert_allclose(difference.grad.item(), -0.25, atol=1e-12, rtol=0)
 ```
 
 **Expected:** gradient-.25.
@@ -142,8 +145,11 @@ loss.backward(); np.testing.assert_allclose(difference.grad.item(),-.25,atol=1e-
 The reference remains fixed while the policy margin changes. A smaller loss demonstrates agreement with the supplied preference label, not independent answer quality.
 
 ```python
-opt=torch.optim.SGD([difference],lr=.2); opt.step(); after=F.softplus(-beta*(difference-reference))
-np.testing.assert_allclose(difference.item(),.05,atol=1e-12,rtol=0); assert after.item()<loss.item()
+opt = torch.optim.SGD([difference], lr=0.2)
+opt.step()
+after = F.softplus(-beta * (difference - reference))
+np.testing.assert_allclose(difference.item(), 0.05, atol=1e-12, rtol=0)
+assert after.item() < loss.item()
 ```
 
 **Expected:** difference.05; loss below \(\log(2)\).

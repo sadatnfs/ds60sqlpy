@@ -168,8 +168,8 @@ string is non-empty.
 
 ```python
 raw = " 0042 "
-cleaned = raw.strip()       # "0042" is still text; raw is unchanged.
-number = int(cleaned)       # int parses the compatible text as 42.
+cleaned = raw.strip()  # "0042" is still text; raw is unchanged.
+number = int(cleaned)  # int parses the compatible text as 42.
 assert (raw, cleaned, number) == (" 0042 ", "0042", 42)
 
 

@@ -23,8 +23,9 @@ The question is: Partition IDs 1..6 into batches of size two; retain each batch 
 The counter measures updates, not observations. Concatenating the three batches recovers the six original identities exactly once. This check detects both an omitted final slice and a loop that increments once per record.
 
 ```python
-ids=list(range(1,7)); batches=[ids[i:i+2] for i in range(0,6,2)]
-assert batches==[[1,2],[3,4],[5,6]]
+ids = list(range(1, 7))
+batches = [ids[i : i + 2] for i in range(0, 6, 2)]
+assert batches == [[1, 2], [3, 4], [5, 6]]
 ```
 
 **Expected:** batches [[1,2],[3,4],[5,6]] and 3 updates.
@@ -38,9 +39,10 @@ The question is: Partition five IDs by two and compare with explicitly dropping 
 An epoch with drop_remainder may not expose every record. Naming that choice avoids quietly changing the training population. The tail has one example and its mean gradient must divide by one.
 
 ```python
-ids=list(range(1,6)); batches=[ids[i:i+2] for i in range(0,5,2)]
-assert list(map(len,batches))==[2,2,1]
-assert sum((b for b in batches if len(b)==2),[])==[1,2,3,4]
+ids = list(range(1, 6))
+batches = [ids[i : i + 2] for i in range(0, 5, 2)]
+assert list(map(len, batches)) == [2, 2, 1]
+assert sum((b for b in batches if len(b) == 2), []) == [1, 2, 3, 4]
 ```
 
 **Expected:** sizes [2,2,1]; dropping retains only IDs1..4.
@@ -54,12 +56,17 @@ The question is: Implement three batch updates for x=1..6,y=2x,\(w=0\),rate=.01;
 Each gradient depends on the current weight. Recording only the final loss would conceal whether the assignment happened. The finite and distinct states show real updates for this fixture without claiming that every possible dataset produces a different weight each time.
 
 ```python
-x=tf.constant([1.,2.,3.,4.,5.,6.]); y=2*x; w=tf.Variable(0.); history=[]
-for i in range(0,6,2):
-    with tf.GradientTape() as tape: loss=tf.reduce_mean((w*x[i:i+2]-y[i:i+2])**2)
-    w.assign_sub(.01*tape.gradient(loss,w)); history.append(float(w))
-assert len(history)==3 and all(np.isfinite(history))
-assert len(set(history))==3
+x = tf.constant([1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+y = 2 * x
+w = tf.Variable(0.0)
+history = []
+for i in range(0, 6, 2):
+    with tf.GradientTape() as tape:
+        loss = tf.reduce_mean((w * x[i : i + 2] - y[i : i + 2]) ** 2)
+    w.assign_sub(0.01 * tape.gradient(loss, w))
+    history.append(float(w))
+assert len(history) == 3 and all(np.isfinite(history))
+assert len(set(history)) == 3
 ```
 
 **Expected:** 3 finite, nonidentical updated weights.
@@ -74,13 +81,19 @@ Both runs process six records but perform different optimization experiments. Eq
 
 ```python
 def train(size):
-    w=tf.Variable(0.); steps=0
-    for i in range(0,6,size):
-        with tf.GradientTape() as tape: loss=tf.reduce_mean((w*x[i:i+size]-y[i:i+size])**2)
-        w.assign_sub(.01*tape.gradient(loss,w)); steps+=1
-    return float(w),steps
-a,na=train(1); b,nb=train(3)
-assert (na,nb)==(6,2) and abs(a-b)>1e-6
+    w = tf.Variable(0.0)
+    steps = 0
+    for i in range(0, 6, size):
+        with tf.GradientTape() as tape:
+            loss = tf.reduce_mean((w * x[i : i + size] - y[i : i + size]) ** 2)
+        w.assign_sub(0.01 * tape.gradient(loss, w))
+        steps += 1
+    return float(w), steps
+
+
+a, na = train(1)
+b, nb = train(3)
+assert (na, nb) == (6, 2) and abs(a - b) > 1e-6
 ```
 
 **Expected:** 6 versus2 steps and different endpoint weights.
@@ -94,9 +107,11 @@ The question is: Shuffle IDs with permutation [5,0,4,1,3,2] and apply the same p
 A shared index permutation preserves the relation between records. Independently shuffling targets creates a different task while preserving marginal value distributions, which is why checking only target histograms cannot detect this bug.
 
 ```python
-order=tf.constant([5,0,4,1,3,2]); sx=tf.gather(x,order); sy=tf.gather(y,order)
-np.testing.assert_allclose(sy.numpy(),2*sx.numpy())
-assert not np.allclose(y.numpy(),2*sx.numpy())
+order = tf.constant([5, 0, 4, 1, 3, 2])
+sx = tf.gather(x, order)
+sy = tf.gather(y, order)
+np.testing.assert_allclose(sy.numpy(), 2 * sx.numpy())
+assert not np.allclose(y.numpy(), 2 * sx.numpy())
 ```
 
 **Expected:** Every shuffled target equals twice its paired input.
@@ -110,8 +125,8 @@ The question is: Combine batch mean losses2 and8 with counts2 and 1; compare mea
 The correct epoch statistic counts examples. Batch means hide their denominators. Reconstruct sums by multiplying each mean by its batch count, sum those numerators, then divide by total examples.
 
 ```python
-assert (2*2+8*1)/3==4
-assert (2+8)/2==5
+assert (2 * 2 + 8 * 1) / 3 == 4
+assert (2 + 8) / 2 == 5
 ```
 
 **Expected:** record mean4; unweighted batch mean5.

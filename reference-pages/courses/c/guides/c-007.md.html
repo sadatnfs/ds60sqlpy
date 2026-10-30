@@ -244,8 +244,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
   puts<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Worked example checks passed.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
   <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> strlen is 3 while array size is 4.</p>
 <p>The fourth byte is the terminator. Forgetting it when allocating an output creates a one-byte overflow risk.</p>
 <h4 id="worked-example-2-modify-owned-text">Worked example 2: Modify owned text<a class="heading-anchor" href="#worked-example-2-modify-owned-text" aria-label="Link to this section">#</a></h4>
@@ -282,8 +281,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
   puts<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Worked example checks passed.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
   <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The result is bat.</p>
 <p>The array is writable. Performing the same assignment through a pointer to a string literal would be undefined behavior.</p>
 <h3 id="prediction-before-execution">Prediction before execution<a class="heading-anchor" href="#prediction-before-execution" aria-label="Link to this section">#</a></h3>

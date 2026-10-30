@@ -169,8 +169,13 @@ charter = {
     "stop_rule": "stop if target cannot be reproduced from source evidence",
 }
 required = {
-    "stakeholder", "decision", "prediction_time", "baseline",
-    "primary_metric", "guardrails", "stop_rule",
+    "stakeholder",
+    "decision",
+    "prediction_time",
+    "baseline",
+    "primary_metric",
+    "guardrails",
+    "stop_rule",
 }
 missing = required - charter.keys()
 print({"missing": sorted(missing), "charter": charter})
@@ -193,12 +198,14 @@ acceptance = [
     {"name": "latency_ms", "observed": 42, "operator": "<=", "threshold": 100},
 ]
 
+
 def passes(item):
     return (
         item["observed"] >= item["threshold"]
         if item["operator"] == ">="
         else item["observed"] <= item["threshold"]
     )
+
 
 results = {item["name"]: passes(item) for item in acceptance}
 print(results)

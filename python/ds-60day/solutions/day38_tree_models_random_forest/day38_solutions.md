@@ -53,6 +53,7 @@ perm_imp = perm.importances_mean
 
 # Compare top features
 import numpy as np
+
 order_imp = np.argsort(impurity_imp)[::-1][:10]
 order_perm = np.argsort(perm_imp)[::-1][:10]
 order_imp, order_perm

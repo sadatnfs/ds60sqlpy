@@ -43,12 +43,12 @@ Read the operations in dependency order. Record which values exist before each l
 Aggregation and presentation order are explicit parts of the chosen representation.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let mut counts = std::collections::BTreeMap::new();
-        for label in ["b", "a", "b"] { *counts.entry(label).or_insert(0) += 1; }
+        for label in ["b", "a", "b"] {
+            *counts.entry(label).or_insert(0) += 1;
+        }
         assert_eq!(counts.get("b"), Some(&2));
         assert_eq!(counts.keys().copied().collect::<Vec<_>>(), vec!["a", "b"]);
     }
@@ -64,8 +64,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 Membership is a domain decision that can guide duplicate rejection or deduplication.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let mut seen = std::collections::HashSet::new();

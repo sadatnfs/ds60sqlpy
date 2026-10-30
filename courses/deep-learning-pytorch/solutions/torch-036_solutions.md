@@ -61,8 +61,11 @@ The question is: Use train x = [1, 2, 3] and holdout 4, 5 with target 2 x and di
 The data identity is fixed before training. The tiny holdout is useful for local mechanics but not sufficient for a broad quality claim.
 
 ```python
-x=torch.tensor([[1.],[2.],[3.]],dtype=torch.float64); y=2*x; held=torch.tensor([[4.],[5.]],dtype=torch.float64)
-split={'train':['a','b','c'],'test':['d','e']}; assert not set(split['train'])&set(split['test']) and len(split['test'])==2
+x = torch.tensor([[1.0], [2.0], [3.0]], dtype=torch.float64)
+y = 2 * x
+held = torch.tensor([[4.0], [5.0]], dtype=torch.float64)
+split = {"train": ["a", "b", "c"], "test": ["d", "e"]}
+assert not set(split["train"]) & set(split["test"]) and len(split["test"]) == 2
 ```
 
 **Expected:** 3 training and 2 holdout records.
@@ -76,14 +79,19 @@ The question is: Zero-initialize float64 Linear and run 30 SGD.01 updates.
 The budget is not extended after seeing the holdout. The baseline predicts training mean target 4, so gives errors 16 and 36on the two test rows.
 
 ```python
-model=nn.Linear(1,1,bias=False,dtype=torch.float64)
-with torch.no_grad(): model.weight.zero_()
-optimizer=torch.optim.SGD(model.parameters(),lr=.01)
+model = nn.Linear(1, 1, bias=False, dtype=torch.float64)
+with torch.no_grad():
+    model.weight.zero_()
+optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
 for _ in range(30):
-    optimizer.zero_grad(set_to_none=True); (model(x)-y).square().mean().backward(); optimizer.step()
+    optimizer.zero_grad(set_to_none=True)
+    (model(x) - y).square().mean().backward()
+    optimizer.step()
 model.eval()
-with torch.no_grad(): expected=model(held); error=(expected-2*held).square().mean().item()
-assert torch.isfinite(model.weight).all() and error<26
+with torch.no_grad():
+    expected = model(held)
+    error = (expected - 2 * held).square().mean().item()
+assert torch.isfinite(model.weight).all() and error < 26
 ```
 
 **Expected:** finite weights; holdout error below constant training-mean baseline 26.
@@ -97,10 +105,19 @@ The question is: Save weights, schema and split manifest with a weight SHA256.
 The hash binds the manifest to the saved bytes. The feature order and dtype provide semantic information that a state dictionary alone cannot explain.
 
 ```python
-temporary=tempfile.TemporaryDirectory(); folder=Path(temporary.name); weights=folder/'weights.pt'; torch.save(model.state_dict(),weights)
-manifest={'schema':{'features':['x'],'dtype':'float64','width':1},'split':split,'weight_sha256':hashlib.sha256(weights.read_bytes()).hexdigest(),'steps':30}
-manifest_path=folder/'manifest.json'; manifest_path.write_text(json.dumps(manifest,sort_keys=True))
-assert len(manifest['weight_sha256'])==64 and manifest['schema']['width']==1
+temporary = tempfile.TemporaryDirectory()
+folder = Path(temporary.name)
+weights = folder / "weights.pt"
+torch.save(model.state_dict(), weights)
+manifest = {
+    "schema": {"features": ["x"], "dtype": "float64", "width": 1},
+    "split": split,
+    "weight_sha256": hashlib.sha256(weights.read_bytes()).hexdigest(),
+    "steps": 30,
+}
+manifest_path = folder / "manifest.json"
+manifest_path.write_text(json.dumps(manifest, sort_keys=True))
+assert len(manifest["weight_sha256"]) == 64 and manifest["schema"]["width"] == 1
 ```
 
 **Expected:** manifest has feature x, float64, width 1 and matching hash.
@@ -114,7 +131,7 @@ The question is: Run the checked loader in a fresh interpreter and compare holdo
 The child reconstructs from files and cannot reuse the trained parent module. The integrity and schema gates execute before loading state.
 
 ```python
-child=textwrap.dedent("""
+child = textwrap.dedent("""
 import hashlib,json,sys,torch
 from pathlib import Path
 from torch import nn
@@ -125,10 +142,19 @@ model=nn.Linear(1,1,bias=False,dtype=torch.float64); model.load_state_dict(torch
 with torch.inference_mode(): predictions=model(torch.tensor([[4.],[5.]],dtype=torch.float64)).tolist()
 print(json.dumps(predictions))
 """)
-compile(child,'torch-release-child','exec')
-result=subprocess.run([sys.executable,'-c',child,str(folder)],capture_output=True,text=True,timeout=60,check=False)
-if result.returncode: raise RuntimeError('release child failed: '+result.stderr)
-np.testing.assert_allclose(json.loads(result.stdout.strip().splitlines()[-1]),expected.numpy(),atol=1e-12,rtol=0)
+compile(child, "torch-release-child", "exec")
+result = subprocess.run(
+    [sys.executable, "-c", child, str(folder)],
+    capture_output=True,
+    text=True,
+    timeout=60,
+    check=False,
+)
+if result.returncode:
+    raise RuntimeError("release child failed: " + result.stderr)
+np.testing.assert_allclose(
+    json.loads(result.stdout.strip().splitlines()[-1]), expected.numpy(), atol=1e-12, rtol=0
+)
 ```
 
 **Expected:** predictions match within 1e-12.
@@ -142,10 +168,17 @@ The question is: Replace the declared weight hash with 64 zeros and rerun the lo
 A negative control proves the gate can actually block a bad bundle. A file-existence check would not detect this identity mismatch.
 
 ```python
-broken={**manifest,'weight_sha256':'0'*64}; manifest_path.write_text(json.dumps(broken,sort_keys=True))
-rejected=subprocess.run([sys.executable,'-c',child,str(folder)],capture_output=True,text=True,timeout=60,check=False)
-assert rejected.returncode!=0 and 'weight hash mismatch' in rejected.stderr
-manifest_path.write_text(json.dumps(manifest,sort_keys=True))
+broken = {**manifest, "weight_sha256": "0" * 64}
+manifest_path.write_text(json.dumps(broken, sort_keys=True))
+rejected = subprocess.run(
+    [sys.executable, "-c", child, str(folder)],
+    capture_output=True,
+    text=True,
+    timeout=60,
+    check=False,
+)
+assert rejected.returncode != 0 and "weight hash mismatch" in rejected.stderr
+manifest_path.write_text(json.dumps(manifest, sort_keys=True))
 ```
 
 **Expected:** nonzero child exit and weight hash mismatch diagnostic.
@@ -159,9 +192,15 @@ The question is: Record local parity pass, holdout count 2, previous artifact v1
 The local acceptance is real but limited. A production decision needs representative data, operational boundaries and additional reliability evidence; the capstone does not invent them.
 
 ```python
-receipt={'local_contracts_pass':True,'test_count':2,'previous_artifact':'v1','production_go':False,'limits':['synthetic fixture','no operational deployment test']}
+receipt = {
+    "local_contracts_pass": True,
+    "test_count": 2,
+    "previous_artifact": "v1",
+    "production_go": False,
+    "limits": ["synthetic fixture", "no operational deployment test"],
+}
 temporary.cleanup()
-assert receipt['local_contracts_pass'] and not receipt['production_go'] and not folder.exists()
+assert receipt["local_contracts_pass"] and not receipt["production_go"] and not folder.exists()
 ```
 
 **Expected:** local checks True; production no-go; directory absent.

@@ -12,13 +12,17 @@ Keep rows whose amount is nonnegative or NULL, then return entity_id, segment, d
 
 ```scala
 def transform(source: DataFrame): DataFrame = {
-  source.filter(col("amount") >= 0L || col("amount").isNull).select(col("entity_id"),col("segment"),(col("amount") * 2L).as("doubled"))
+  source
+    .filter(col("amount") >= 0L || col("amount").isNull)
+    .select(col("entity_id"), col("segment"), (col("amount") * 2L).as("doubled"))
 }
 ```
 
 ```python
 def transform(source):
-    return source.filter((F.col("amount")>=0)|F.col("amount").isNull()).select("entity_id","segment",(F.col("amount")*2).alias("doubled"))
+    return source.filter((F.col("amount") >= 0) | F.col("amount").isNull()).select(
+        "entity_id", "segment", (F.col("amount") * 2).alias("doubled")
+    )
 ```
 
 The predicate makes unknown-amount retention a policy rather than an accident of three-valued logic. Arithmetic preservesNULL instead of manufacturing zero. No deduplication is requested, so identical source occurrences remain identical output occurrences. Aggregate checks provide a readable first diagnostic while the later bag oracle checks every occurrence.
@@ -32,14 +36,14 @@ Return ordered(name, simple_type) pairs from the result schema. Compare with ent
 **Expected:** Exactly those three fields in that order. Casting entity_id to string changes the contract even when printed values look alike.
 
 ```scala
-def schemaContract(frame: DataFrame): Seq[(String,String)] = {
-  frame.schema.fields.toSeq.map(field => (field.name,field.dataType.simpleString))
+def schemaContract(frame: DataFrame): Seq[(String, String)] = {
+  frame.schema.fields.toSeq.map(field => (field.name, field.dataType.simpleString))
 }
 ```
 
 ```python
 def schema_contract(frame):
-    return [(field.name,field.dataType.simpleString()) for field in frame.schema.fields]
+    return [(field.name, field.dataType.simpleString()) for field in frame.schema.fields]
 ```
 
 The contract is explicit about names, order and data types. This fixture compares nullability semantics through actual values rather than demanding an identical optimizer-derived nullable flag. A different product could include stricter nullability metadata, but it should state that requirement separately rather than confusing values with schema annotations.
@@ -54,8 +58,11 @@ Reject a schema mismatch first, then require both exceptAll differences to be em
 
 ```scala
 def assertSameBag(actual: DataFrame, expected: DataFrame): Unit = {
-  require(schemaContract(actual) == schemaContract(expected),"schema contract mismatch")
-  require(actual.exceptAll(expected).count() == 0L && expected.exceptAll(actual).count() == 0L,"bag contract mismatch")
+  require(schemaContract(actual) == schemaContract(expected), "schema contract mismatch")
+  require(
+    actual.exceptAll(expected).count() == 0L && expected.exceptAll(actual).count() == 0L,
+    "bag contract mismatch"
+  )
 }
 ```
 
@@ -78,15 +85,15 @@ Persist the supplied transformed relation with MEMORY_AND_DISK, materialize via 
 **Expected:** Count 7, total 130, an InMemoryTableScan reuse marker, and no registered storage level after return.
 
 ```scala
-def cachedSummary(frame: DataFrame): (Long,Long,String) = {
+def cachedSummary(frame: DataFrame): (Long, Long, String) = {
   frame.persist(StorageLevel.MEMORY_AND_DISK)
   try {
-   require(frame.storageLevel != StorageLevel.NONE,"cache not registered")
-   val rows = frame.count()
-   val total = frame.agg(sum("doubled")).first().getLong(0)
-   val plan = frame.filter(col("doubled") >= 0L).queryExecution.executedPlan.toString
-   (rows,total,plan)
-  } finally frame.unpersist(blocking=true)
+    require(frame.storageLevel != StorageLevel.NONE, "cache not registered")
+    val rows = frame.count()
+    val total = frame.agg(sum("doubled")).first().getLong(0)
+    val plan = frame.filter(col("doubled") >= 0L).queryExecution.executedPlan.toString
+    (rows, total, plan)
+  } finally frame.unpersist(blocking = true)
 }
 ```
 
@@ -97,8 +104,8 @@ def cached_summary(frame):
         assert frame.storageLevel != StorageLevel.NONE
         rows = frame.count()
         total = frame.agg(F.sum("doubled")).first()[0]
-        plan = frame.filter(F.col("doubled")>=0)._jdf.queryExecution().executedPlan().toString()
-        return rows,total,plan
+        plan = frame.filter(F.col("doubled") >= 0)._jdf.queryExecution().executedPlan().toString()
+        return rows, total, plan
     finally:
         frame.unpersist(blocking=True)
 ```
@@ -117,9 +124,9 @@ Persist and materialize the relation, then raise an injected failure before a la
 def failingReuse(frame: DataFrame): Unit = {
   frame.persist(StorageLevel.MEMORY_AND_DISK)
   try {
-   frame.count()
-   throw new IllegalStateException("injected_after_materialize")
-  } finally frame.unpersist(blocking=true)
+    frame.count()
+    throw new IllegalStateException("injected_after_materialize")
+  } finally frame.unpersist(blocking = true)
 }
 ```
 
@@ -144,9 +151,9 @@ Return directional exceptAll row counts after schema validation. Compare transfo
 **Expected:** Distinct has 5 rows; unexpected occurrences 0 and missing expected occurrences 2. The bag validator raises a named bag contract mismatch.
 
 ```scala
-def differenceCounts(actual: DataFrame, expected: DataFrame): (Long,Long) = {
-  require(schemaContract(actual) == schemaContract(expected),"schema contract mismatch")
-  (actual.exceptAll(expected).count(),expected.exceptAll(actual).count())
+def differenceCounts(actual: DataFrame, expected: DataFrame): (Long, Long) = {
+  require(schemaContract(actual) == schemaContract(expected), "schema contract mismatch")
+  (actual.exceptAll(expected).count(), expected.exceptAll(actual).count())
 }
 ```
 
@@ -154,7 +161,7 @@ def differenceCounts(actual: DataFrame, expected: DataFrame): (Long,Long) = {
 def difference_counts(actual, expected):
     if schema_contract(actual) != schema_contract(expected):
         raise ValueError("schema contract mismatch")
-    return actual.exceptAll(expected).count(),expected.exceptAll(actual).count()
+    return actual.exceptAll(expected).count(), expected.exceptAll(actual).count()
 ```
 
 The negative control proves that the oracle protects occurrence multiplicity rather than only value membership. There are no new distinct values, so a set comparator would miss the error. Directional bag counts explain the failure as two missing occurrences, which is more useful than a generic mismatch message when diagnosing an accidentalDISTINCT or deduplication step.

@@ -111,12 +111,12 @@ These worked excerpts come from `sql/professional/lessons/sql_repl_01_cdc_high_a
 
 ```sql
 SELECT
-    current_database() AS database_name,
-    current_setting('wal_level') AS wal_level,
-    current_setting('max_wal_senders') AS max_wal_senders,
-    current_setting('max_replication_slots') AS max_replication_slots,
-    current_setting('hot_standby') AS hot_standby,
-    pg_catalog.pg_is_in_recovery() AS is_in_recovery;
+  current_database() AS database_name,
+  current_setting('wal_level') AS wal_level,
+  current_setting('max_wal_senders') AS max_wal_senders,
+  current_setting('max_replication_slots') AS max_replication_slots,
+  current_setting('hot_standby') AS hot_standby,
+  pg_catalog.pg_is_in_recovery() AS is_in_recovery;
 ```
 
 **How to read it:** Example 1: Start with the row source produced by the preceding CTEs in `FROM`/`JOIN`. The final `SELECT` displays `database_name`, `wal_level`, `max_wal_senders`, `max_replication_slots`, and `hot_standby`. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
@@ -127,16 +127,38 @@ SELECT
 
 ```sql
 SELECT
-    (SELECT COUNT(*) FROM pg_catalog.pg_replication_slots) AS slot_count,
-    (
-        SELECT COUNT(*)
-        FROM pg_catalog.pg_replication_slots AS s
-        WHERE s.active
-    ) AS active_slot_count,
-    (SELECT COUNT(*) FROM pg_catalog.pg_publication) AS publication_count,
-    (SELECT COUNT(*) FROM pg_catalog.pg_subscription) AS subscription_count,
-    (SELECT COUNT(*) FROM pg_catalog.pg_stat_replication) AS sender_count,
-    (SELECT COUNT(*) FROM pg_catalog.pg_stat_wal_receiver) AS receiver_count;
+  (
+    SELECT
+      COUNT(*)
+    FROM
+      pg_catalog.pg_replication_slots) AS slot_count,
+  (
+    SELECT
+      COUNT(*)
+    FROM
+      pg_catalog.pg_replication_slots AS s
+    WHERE
+      s.active) AS active_slot_count,
+  (
+    SELECT
+      COUNT(*)
+    FROM
+      pg_catalog.pg_publication) AS publication_count,
+  (
+    SELECT
+      COUNT(*)
+    FROM
+      pg_catalog.pg_subscription) AS subscription_count,
+  (
+    SELECT
+      COUNT(*)
+    FROM
+      pg_catalog.pg_stat_replication) AS sender_count,
+  (
+    SELECT
+      COUNT(*)
+    FROM
+      pg_catalog.pg_stat_wal_receiver) AS receiver_count;
 ```
 
 **How to read it:** Example 2: Start with `pg_catalog.pg_replication_slots`, `pg_catalog.pg_publication`, `pg_catalog.pg_subscription`, and `pg_catalog.pg_stat_replication` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows. The final `SELECT` displays the columns written in the final `SELECT`. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.

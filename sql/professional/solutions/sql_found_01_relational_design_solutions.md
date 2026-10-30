@@ -72,25 +72,20 @@ and keeps `external_reference` as a nullable natural identifier:
 
 ```sql
 CREATE TABLE pro_relational_lab.maintenance_visits (
-    visit_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    item_id bigint NOT NULL
-        REFERENCES pro_relational_lab.equipment_items (item_id)
-        ON DELETE RESTRICT,
-    opened_on date NOT NULL DEFAULT CURRENT_DATE,
-    completed_on date,
-    provider_name text NOT NULL CHECK (btrim(provider_name) <> ''),
-    service_note text NOT NULL CHECK (btrim(service_note) <> ''),
-    cost numeric(10, 2) NOT NULL DEFAULT 0 CHECK (cost >= 0),
-    external_reference text UNIQUE,
-    service_days integer GENERATED ALWAYS AS
-        (
-            CASE
-                WHEN completed_on IS NULL THEN NULL
-                ELSE completed_on - opened_on
-            END
-        ) STORED,
-    CONSTRAINT maintenance_completion_order_ck
-        CHECK (completed_on IS NULL OR completed_on >= opened_on)
+  visit_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  item_id bigint NOT NULL REFERENCES pro_relational_lab.equipment_items (item_id) ON DELETE RESTRICT,
+  opened_on date NOT NULL DEFAULT CURRENT_DATE,
+  completed_on date,
+  provider_name text NOT NULL CHECK (btrim(provider_name) <> ''),
+  service_note text NOT NULL CHECK (btrim(service_note) <> ''),
+  cost numeric(10, 2) NOT NULL DEFAULT 0 CHECK (cost >= 0),
+  external_reference text UNIQUE,
+  service_days integer GENERATED ALWAYS AS ( CASE WHEN completed_on IS NULL THEN
+    NULL
+  ELSE
+    completed_on - opened_on
+  END) STORED,
+  CONSTRAINT maintenance_completion_order_ck CHECK (completed_on IS NULL OR completed_on >= opened_on)
 );
 ```
 

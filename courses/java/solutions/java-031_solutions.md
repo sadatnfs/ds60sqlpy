@@ -27,8 +27,8 @@ Task: Read Version on the known Friendly provider.
 The annotation's retention policy makes it visible at runtime. Its value is information for a compatibility check,not automatic enforcement.
 
 ```java
-Version version=Friendly.class.getAnnotation(Version.class);
-assert version!=null && version.value()==2;
+Version version = Friendly.class.getAnnotation(Version.class);
+assert version != null && version.value() == 2;
 ```
 
 **Expected:** version 2.
@@ -42,8 +42,8 @@ Task: Findgreet(String) and invoke it with Ada.
 The method name and parameter types form an explicit signature. A wrong signature fails at lookup rather than silently selecting an unrelated overload.
 
 ```java
-var method=Friendly.class.getMethod("greet",String.class);
-assert method.invoke(new Friendly(),"Ada").equals("Hello, Ada");
+var method = Friendly.class.getMethod("greet", String.class);
+assert method.invoke(new Friendly(), "Ada").equals("Hello, Ada");
 ```
 
 **Expected:** Hello, Ada.
@@ -57,10 +57,13 @@ Task: Create the temporaryMETA-INF/services entry and discover Greeting provider
 This exercises actual ServiceLoader discovery and provider construction. A manually instantiated object alone would not verify the descriptor path or binary names.
 
 ```java
-try(ServiceFixture fixture=new ServiceFixture()) {
-    var providers=java.util.ServiceLoader.load(Greeting.class,fixture.loader).stream().map(java.util.ServiceLoader.Provider::get).toList();
-    assert providers.size()==1 && providers.get(0).getClass()==Friendly.class;
-    assert providers.get(0).greet("Lin").equals("Hello, Lin");
+try (ServiceFixture fixture = new ServiceFixture()) {
+  var providers = java.util.ServiceLoader.load(Greeting.class, fixture.loader)
+    .stream()
+    .map(java.util.ServiceLoader.Provider::get)
+    .toList();
+  assert providers.size() == 1 && providers.get(0).getClass() == Friendly.class;
+  assert providers.get(0).greet("Lin").equals("Hello, Lin");
 }
 ```
 
@@ -75,8 +78,12 @@ Task: Invokegreet with blank text and inspect InvocationTargetException cause.
 The wrapper distinguishes invocation machinery from the domain failure thrown by the target. Preserve the cause when reporting it.
 
 ```java
-boolean targetFailure=false;
-try{method.invoke(new Friendly()," ");}catch(java.lang.reflect.InvocationTargetException expected){targetFailure=expected.getCause() instanceof IllegalArgumentException;}
+boolean targetFailure = false;
+try {
+  method.invoke(new Friendly(), " ");
+} catch (java.lang.reflect.InvocationTargetException expected) {
+  targetFailure = expected.getCause() instanceof IllegalArgumentException;
+}
 assert targetFailure;
 ```
 
@@ -91,9 +98,18 @@ Task: Look up an absent class and an unsupportedgreet(int)signature.
 Reflection does not remove type contracts;it delays some checks. Fixed allowlists and startup validation can keep failures understandable.
 
 ```java
-boolean missingClass=false,missingMethod=false;
-try{Class.forName("course.missing.NoSuchProvider");}catch(ClassNotFoundException expected){missingClass=true;}
-try{Friendly.class.getMethod("greet",int.class);}catch(NoSuchMethodException expected){missingMethod=true;}
+boolean missingClass = false,
+  missingMethod = false;
+try {
+  Class.forName("course.missing.NoSuchProvider");
+} catch (ClassNotFoundException expected) {
+  missingClass = true;
+}
+try {
+  Friendly.class.getMethod("greet", int.class);
+} catch (NoSuchMethodException expected) {
+  missingMethod = true;
+}
 assert missingClass && missingMethod;
 ```
 
@@ -108,8 +124,9 @@ Task: Accept provider versions1..2 and reject a hypotheticalversion3 under the c
 A version annotation does not make a provider compatible by itself. The consumer must define and apply an admission policy and test actual behavior.
 
 ```java
-int supportedMaximum=2;assert version.value()>=1 && version.value()<=supportedMaximum;
-assert 3>supportedMaximum;
+int supportedMaximum = 2;
+assert version.value() >= 1 && version.value() <= supportedMaximum;
+assert 3 > supportedMaximum;
 ```
 
 **Expected:** version 2 accepted;version 3 rejected.

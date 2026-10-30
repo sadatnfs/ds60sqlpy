@@ -79,9 +79,12 @@ The same pattern object is stateful when global or sticky. Reusing it as a pure 
 
 ```javascript
 const pattern = /a/g;
-assert.equal(pattern.test('aa'), true); assert.equal(pattern.lastIndex, 1);
-assert.equal(pattern.test('aa'), true); assert.equal(pattern.lastIndex, 2);
-assert.equal(pattern.test('aa'), false); assert.equal(pattern.lastIndex, 0);
+assert.equal(pattern.test('aa'), true);
+assert.equal(pattern.lastIndex, 1);
+assert.equal(pattern.test('aa'), true);
+assert.equal(pattern.lastIndex, 2);
+assert.equal(pattern.test('aa'), false);
+assert.equal(pattern.lastIndex, 0);
 ```
 
 **Expected:** matches at 0 then 1; third call false resets cursor 0.

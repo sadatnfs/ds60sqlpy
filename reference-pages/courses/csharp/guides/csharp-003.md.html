@@ -230,27 +230,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-keyword">using</span> System.Text.RegularExpressions<span class="syntax-punctuation">;</span>
 <span class="syntax-keyword">using</span> System.Buffers<span class="syntax-punctuation">;</span>
 
-<span class="syntax-keyword">internal</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Program</span>
-<span class="syntax-punctuation">{</span>
-    <span class="syntax-keyword">private</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">Check</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">bool</span> condition<span class="syntax-punctuation">,</span> <span class="syntax-keyword">string</span> reason<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">internal</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Program</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">private</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">Check</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">bool</span> condition<span class="syntax-punctuation">,</span> <span class="syntax-keyword">string</span> reason<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>condition<span class="syntax-punctuation">)</span>
+      <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-function">InvalidOperationException</span><span class="syntax-punctuation">(</span>reason<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
+
+  <span class="syntax-keyword">private</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">async</span> Task <span class="syntax-function">Main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
     <span class="syntax-punctuation">{</span>
-        <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>condition<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> InvalidOperationException<span class="syntax-punctuation">(</span>reason<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      <span class="syntax-keyword">bool</span> overflowed <span class="syntax-operator">=</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">;</span>
+      <span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span>
+        <span class="syntax-keyword">int</span> large <span class="syntax-operator">=</span> <span class="syntax-keyword">int</span><span class="syntax-punctuation">.</span>MaxValue<span class="syntax-punctuation">;</span>
+        _ <span class="syntax-operator">=</span> <span class="syntax-keyword">checked</span><span class="syntax-punctuation">(</span>large <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      <span class="syntax-punctuation">}</span> <span class="syntax-keyword">catch</span> <span class="syntax-punctuation">(</span>OverflowException<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+        overflowed <span class="syntax-operator">=</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">;</span>
+      <span class="syntax-punctuation">}</span>
+      Check<span class="syntax-punctuation">(</span>overflowed<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;overflow must be visible&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      Check<span class="syntax-punctuation">(</span><span class="syntax-keyword">checked</span><span class="syntax-punctuation">(</span><span class="syntax-number">100</span> <span class="syntax-operator">+</span> <span class="syntax-number">20</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;normal addition&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
     <span class="syntax-punctuation">}</span>
-
-    <span class="syntax-keyword">private</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">async</span> Task <span class="syntax-function">Main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
-    <span class="syntax-punctuation">{</span>
-        <span class="syntax-punctuation">{</span>
-            <span class="syntax-keyword">bool</span> overflowed <span class="syntax-operator">=</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">;</span>
-            <span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">int</span> large <span class="syntax-operator">=</span> <span class="syntax-keyword">int</span><span class="syntax-punctuation">.</span>MaxValue<span class="syntax-punctuation">;</span> _ <span class="syntax-operator">=</span> <span class="syntax-keyword">checked</span><span class="syntax-punctuation">(</span>large <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
-            <span class="syntax-keyword">catch</span> <span class="syntax-punctuation">(</span>OverflowException<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> overflowed <span class="syntax-operator">=</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
-            Check<span class="syntax-punctuation">(</span>overflowed<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;overflow must be visible&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-            Check<span class="syntax-punctuation">(</span><span class="syntax-keyword">checked</span><span class="syntax-punctuation">(</span><span class="syntax-number">100</span> <span class="syntax-operator">+</span> <span class="syntax-number">20</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;normal addition&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-        <span class="syntax-punctuation">}</span>
-        Console<span class="syntax-punctuation">.</span>WriteLine<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;csharp-003: passed&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-        <span class="syntax-keyword">await</span> Task<span class="syntax-punctuation">.</span>CompletedTask<span class="syntax-punctuation">;</span>
-    <span class="syntax-punctuation">}</span>
-
-
+    Console<span class="syntax-punctuation">.</span>WriteLine<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;csharp-003: passed&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">await</span> Task<span class="syntax-punctuation">.</span>CompletedTask<span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The maximum int plus one is rejected; 100 plus 20 is accepted.</p>
 <h4 id="example-b-preserve-decimal-intent">Example B: Preserve decimal intent<a class="heading-anchor" href="#example-b-preserve-decimal-intent" aria-label="Link to this section">#</a></h4>
@@ -271,26 +271,24 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-keyword">using</span> System.Text.RegularExpressions<span class="syntax-punctuation">;</span>
 <span class="syntax-keyword">using</span> System.Buffers<span class="syntax-punctuation">;</span>
 
-<span class="syntax-keyword">internal</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Program</span>
-<span class="syntax-punctuation">{</span>
-    <span class="syntax-keyword">private</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">Check</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">bool</span> condition<span class="syntax-punctuation">,</span> <span class="syntax-keyword">string</span> reason<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">internal</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Program</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">private</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">Check</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">bool</span> condition<span class="syntax-punctuation">,</span> <span class="syntax-keyword">string</span> reason<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>condition<span class="syntax-punctuation">)</span>
+      <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-function">InvalidOperationException</span><span class="syntax-punctuation">(</span>reason<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
+
+  <span class="syntax-keyword">private</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">async</span> Task <span class="syntax-function">Main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
     <span class="syntax-punctuation">{</span>
-        <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>condition<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> InvalidOperationException<span class="syntax-punctuation">(</span>reason<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      <span class="syntax-keyword">decimal</span> amount <span class="syntax-operator">=</span> <span class="syntax-number">0.1m</span> <span class="syntax-operator">+</span> <span class="syntax-number">0.2m</span><span class="syntax-punctuation">;</span>
+      Check<span class="syntax-punctuation">(</span>amount <span class="syntax-operator">==</span> <span class="syntax-number">0.3m</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;decimal tenths&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      Check<span class="syntax-punctuation">(</span>Math<span class="syntax-punctuation">.</span>Round<span class="syntax-punctuation">(</span><span class="syntax-number">2.345m</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> MidpointRounding<span class="syntax-punctuation">.</span>ToEven<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">2.34m</span><span class="syntax-punctuation">,</span>
+            <span class="syntax-string">&quot;even midpoint&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      Check<span class="syntax-punctuation">(</span>Math<span class="syntax-punctuation">.</span>Round<span class="syntax-punctuation">(</span><span class="syntax-number">2.345m</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> MidpointRounding<span class="syntax-punctuation">.</span>AwayFromZero<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">2.35m</span><span class="syntax-punctuation">,</span>
+            <span class="syntax-string">&quot;away midpoint&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
     <span class="syntax-punctuation">}</span>
-
-    <span class="syntax-keyword">private</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">async</span> Task <span class="syntax-function">Main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
-    <span class="syntax-punctuation">{</span>
-        <span class="syntax-punctuation">{</span>
-            <span class="syntax-keyword">decimal</span> amount <span class="syntax-operator">=</span> <span class="syntax-number">0.1m</span> <span class="syntax-operator">+</span> <span class="syntax-number">0.2m</span><span class="syntax-punctuation">;</span>
-            Check<span class="syntax-punctuation">(</span>amount <span class="syntax-operator">==</span> <span class="syntax-number">0.3m</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;decimal tenths&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-            Check<span class="syntax-punctuation">(</span>Math<span class="syntax-punctuation">.</span>Round<span class="syntax-punctuation">(</span><span class="syntax-number">2.345m</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> MidpointRounding<span class="syntax-punctuation">.</span>ToEven<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">2.34m</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;even midpoint&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-            Check<span class="syntax-punctuation">(</span>Math<span class="syntax-punctuation">.</span>Round<span class="syntax-punctuation">(</span><span class="syntax-number">2.345m</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> MidpointRounding<span class="syntax-punctuation">.</span>AwayFromZero<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">2.35m</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;away midpoint&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-        <span class="syntax-punctuation">}</span>
-        Console<span class="syntax-punctuation">.</span>WriteLine<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;csharp-003: passed&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-        <span class="syntax-keyword">await</span> Task<span class="syntax-punctuation">.</span>CompletedTask<span class="syntax-punctuation">;</span>
-    <span class="syntax-punctuation">}</span>
-
-
+    Console<span class="syntax-punctuation">.</span>WriteLine<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;csharp-003: passed&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">await</span> Task<span class="syntax-punctuation">.</span>CompletedTask<span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Two valid midpoint policies produce 2.34 and 2.35.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>

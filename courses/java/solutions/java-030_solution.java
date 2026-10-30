@@ -67,7 +67,7 @@ public class Main {
   }
 
   public static void main(String[] args) throws Exception {
-    // Exercise 1: Round-trip version2 data
+    // Exercise 1: Round-trip version 2 data
     Account record = new Account("a1", 125, "Café");
     byte[] encoded = encode(record, 2);
     assert decode(encoded).equals(record);
@@ -108,7 +108,7 @@ public class Main {
     }
     assert bounded;
 
-    // Exercise 6: Reject trailing data andinvalid domain state
+    // Exercise 6: Reject trailing data and invalid domain state
     byte[] trailing = Arrays.copyOf(encoded, encoded.length + 1);
     boolean extra = false,
       negative = false;

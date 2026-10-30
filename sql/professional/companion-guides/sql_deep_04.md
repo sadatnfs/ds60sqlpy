@@ -105,12 +105,25 @@ Dependency ordering uses different logic. A vertex is eligible only when all of 
 ### Example 1
 
 ```sql
-WITH RECURSIVE sequence(value) AS (
- VALUES(1)
- UNION ALL
- SELECT value+1 FROM sequence WHERE value<4
+WITH RECURSIVE sequence (
+  value
+) AS (
+  VALUES (1)
+  UNION ALL
+  SELECT
+    value + 1
+  FROM
+    sequence
+  WHERE
+    value < 4
 )
-SELECT value,value*value AS square FROM sequence ORDER BY value;
+SELECT
+  value,
+  value * value AS square
+FROM
+  sequence
+ORDER BY
+  value;
 ```
 
 The anchor starts at one and the step adds one only while the current value is below four. The output grain is one integer value with its square, yielding(1,1),(2,4),(3,9),(4,16). The strict step condition supplies a finite termination argument; ORDER BY supplies presentation, not recursion execution order.
@@ -118,9 +131,10 @@ The anchor starts at one and the step adds one only while the current value is b
 ### Example 2
 
 ```sql
-SELECT ARRAY['a','b','c']::text[] AS path,
-       'b'=ANY(ARRAY['a','b','c']::text[]) AS revisits_b,
-       ARRAY['a','b','c']::text[] || 'd'::text AS extended_path;
+SELECT
+  ARRAY['a', 'b', 'c']::text[] AS path,
+  'b' = ANY (ARRAY['a', 'b', 'c']::text[]) AS revisits_b,
+  ARRAY['a', 'b', 'c']::text[] || 'd'::text AS extended_path;
 ```
 
 The one-row output has path, revisits_b, extended_path. Membership is true for b, and appending d yields [a, b, c, d]. The path array records vertex identities, making a cycle guard independent of depth or a total-cost value that might repeat for unrelated routes.

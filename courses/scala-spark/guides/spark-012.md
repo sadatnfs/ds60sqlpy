@@ -51,24 +51,43 @@ import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 
-val schema = StructType(Seq(
-  StructField("event_id",LongType,false),
-  StructField("team",StringType,true),
-  StructField("amount_cents",LongType,true)))
-val rows = Seq(Row(1L,"A",0L),Row(2L,"B",null),Row(3L,"A",25L),Row(4L,"B",40L))
-val raw = spark.createDataFrame(spark.sparkContext.parallelize(rows,2),schema)
+val schema = StructType(
+  Seq(
+    StructField("event_id", LongType, false),
+    StructField("team", StringType, true),
+    StructField("amount_cents", LongType, true)
+  )
+)
+val rows = Seq(Row(1L, "A", 0L), Row(2L, "B", null), Row(3L, "A", 25L), Row(4L, "B", 40L))
+val raw = spark.createDataFrame(spark.sparkContext.parallelize(rows, 2), schema)
 ```
 
 ```python
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 
-schema = StructType([
-    StructField("event_id", LongType(), False),
-    StructField("team", StringType(), True),
-    StructField("amount_cents", LongType(), True),
-])
-raw = spark.createDataFrame([(1, "A", 0), (2, "B", None), (3, "A", 25), (4, "B", 40)], schema=schema)
+schema = StructType(
+    [
+        StructField("event_id", LongType(), False),
+        StructField("team", StringType(), True),
+        StructField("amount_cents", LongType(), True),
+    ]
+)
+raw = spark.createDataFrame(
+    [(1, "A", 0), (2, "B", None), (3, "A", 25), (4, "B", 40)], schema=schema
+)
 ```
 
 ## Worked example / walkthrough
@@ -77,7 +96,7 @@ raw = spark.createDataFrame([(1, "A", 0), (2, "B", None), (3, "A", 25), (4, "B",
 
 ```scala
 val names = raw.schema.fields.map(_.name).toSeq
-assert(names == Seq("event_id","team","amount_cents"))
+assert(names == Seq("event_id", "team", "amount_cents"))
 assert(raw.schema("event_id").dataType == LongType)
 assert(!raw.schema("event_id").nullable && raw.schema("amount_cents").nullable)
 println(raw.schema.simpleString)
@@ -99,7 +118,9 @@ The schema is checked independently from the row values. Nullable amount permits
 val planned = raw.filter(col("team") === lit("A"))
 val observedCount = planned.count()
 assert(observedCount == 2L)
-assert(planned.select("event_id").orderBy("event_id").collect().map(_.getLong(0)).toSeq == Seq(1L,3L))
+assert(
+  planned.select("event_id").orderBy("event_id").collect().map(_.getLong(0)).toSeq == Seq(1L, 3L)
+)
 println(s"team A rows=$observedCount")
 ```
 

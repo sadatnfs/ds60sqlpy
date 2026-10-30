@@ -100,29 +100,22 @@ These worked excerpts come from `sql/postgres-60day/day27_pivot_unpivot.sql`. Us
 ### Example 1
 
 ```sql
-SELECT p.category,
-       SUM(oi.quantity) FILTER (
-         WHERE EXTRACT(MONTH FROM o.order_date AT TIME ZONE 'UTC') = 1
-       ) AS jan_qty,
-       SUM(oi.quantity) FILTER (
-         WHERE EXTRACT(MONTH FROM o.order_date AT TIME ZONE 'UTC') = 2
-       ) AS feb_qty,
-       SUM(oi.quantity) FILTER (
-         WHERE EXTRACT(MONTH FROM o.order_date AT TIME ZONE 'UTC') = 3
-       ) AS mar_qty
-FROM order_items oi
-JOIN orders o ON o.order_id = oi.order_id
-JOIN products p ON p.product_id = oi.product_id
-WHERE o.order_date >= (
-        date_trunc('year', CURRENT_TIMESTAMP AT TIME ZONE 'UTC')
-        AT TIME ZONE 'UTC'
-      )
-  AND o.order_date < (
-        date_trunc('year', CURRENT_TIMESTAMP AT TIME ZONE 'UTC')
-        + INTERVAL '1 year'
-      ) AT TIME ZONE 'UTC'
-GROUP BY p.category
-ORDER BY p.category;
+SELECT
+  p.category,
+  SUM(oi.quantity) FILTER (WHERE EXTRACT(MONTH FROM o.order_date AT TIME ZONE 'UTC') = 1) AS jan_qty,
+  SUM(oi.quantity) FILTER (WHERE EXTRACT(MONTH FROM o.order_date AT TIME ZONE 'UTC') = 2) AS feb_qty,
+  SUM(oi.quantity) FILTER (WHERE EXTRACT(MONTH FROM o.order_date AT TIME ZONE 'UTC') = 3) AS mar_qty
+FROM
+  order_items oi
+  JOIN orders o ON o.order_id = oi.order_id
+  JOIN products p ON p.product_id = oi.product_id
+WHERE
+  o.order_date >= (date_trunc('year', CURRENT_TIMESTAMP AT TIME ZONE 'UTC') AT TIME ZONE 'UTC')
+  AND o.order_date < (date_trunc('year', CURRENT_TIMESTAMP AT TIME ZONE 'UTC') + INTERVAL '1 year') AT TIME ZONE 'UTC'
+GROUP BY
+  p.category
+ORDER BY
+  p.category;
 ```
 
 **How to read it:** Example 1: Start with `o.order_date`, `order_items`, `orders`, and `products` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows; let `GROUP BY` collapse rows to its grouping keys. The final `SELECT` displays `category`, `jan_qty`, `feb_qty`, and `mar_qty`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
@@ -133,36 +126,40 @@ ORDER BY p.category;
 
 ```sql
 WITH source AS (
-  SELECT p.category,
-         EXTRACT(MONTH FROM o.order_date AT TIME ZONE 'UTC')::integer
-           AS month_number,
-         oi.quantity
-  FROM order_items oi
-  JOIN orders o ON o.order_id = oi.order_id
-  JOIN products p ON p.product_id = oi.product_id
-  WHERE o.order_date >= (
-          date_trunc('year', CURRENT_TIMESTAMP AT TIME ZONE 'UTC')
-          AT TIME ZONE 'UTC'
-        )
-    AND o.order_date < (
-          date_trunc('year', CURRENT_TIMESTAMP AT TIME ZONE 'UTC')
-          + INTERVAL '1 year'
-        ) AT TIME ZONE 'UTC'
-), wide AS (
-  SELECT category,
-         SUM(quantity) FILTER (WHERE month_number = 1) AS jan_qty,
-         SUM(quantity) FILTER (WHERE month_number = 2) AS feb_qty
-  FROM source
-  GROUP BY category
+  SELECT
+    p.category,
+    EXTRACT(MONTH FROM o.order_date AT TIME ZONE 'UTC')::integer AS month_number,
+    oi.quantity
+  FROM
+    order_items oi
+    JOIN orders o ON o.order_id = oi.order_id
+    JOIN products p ON p.product_id = oi.product_id
+  WHERE
+    o.order_date >= (date_trunc('year', CURRENT_TIMESTAMP AT TIME ZONE 'UTC') AT TIME ZONE 'UTC')
+    AND o.order_date < (date_trunc('year', CURRENT_TIMESTAMP AT TIME ZONE 'UTC') + INTERVAL '1 year') AT TIME ZONE 'UTC'
+),
+wide AS (
+  SELECT
+    category,
+    SUM(quantity) FILTER (WHERE month_number = 1) AS jan_qty,
+  SUM(quantity) FILTER (WHERE month_number = 2) AS feb_qty
+FROM
+  source
+GROUP BY
+  category
 )
-SELECT wide.category,
-       month_value.month_name,
-       month_value.quantity
-FROM wide
-CROSS JOIN LATERAL (
-  VALUES ('jan', wide.jan_qty), ('feb', wide.feb_qty)
-) AS month_value(month_name, quantity)
-ORDER BY wide.category, month_value.month_name;
+SELECT
+  wide.category,
+  month_value.month_name,
+  month_value.quantity
+FROM
+  wide
+  CROSS JOIN LATERAL (
+    VALUES ('jan', wide.jan_qty),
+      ('feb', wide.feb_qty)) AS month_value (month_name, quantity)
+ORDER BY
+  wide.category,
+  month_value.month_name;
 ```
 
 **How to read it:** Example 2: Start with `o.order_date`, `order_items`, `orders`, and `products` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows; let `GROUP BY` collapse rows to its grouping keys. The final `SELECT` displays `category`, `month_name`, and `quantity`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.

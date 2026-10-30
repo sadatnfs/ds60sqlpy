@@ -12,8 +12,12 @@ ReturnNULL/None unchanged; collapse only space, tab, newline and carriage return
 
 ```scala
 def normalizeLabel(value: String): String = {
-  if(value == null) null
-  else value.replaceAll("[ \t\r\n]+"," ").replaceAll("^ +| +$","").map(ch => if(ch >= 'A' && ch <= 'Z') (ch + 32).toChar else ch)
+  if (value == null) null
+  else
+    value
+      .replaceAll("[ \t\r\n]+", " ")
+      .replaceAll("^ +| +$", "")
+      .map(ch => if (ch >= 'A' && ch <= 'Z') (ch + 32).toChar else ch)
 }
 ```
 
@@ -21,8 +25,10 @@ def normalizeLabel(value: String): String = {
 def normalize_label(value):
     if value is None:
         return None
-    collapsed = re.sub(r"[ \t\r\n]+"," ",value).strip(" ")
-    return collapsed.translate(str.maketrans("ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz"))
+    collapsed = re.sub(r"[ \t\r\n]+", " ", value).strip(" ")
+    return collapsed.translate(
+        str.maketrans("ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz")
+    )
 ```
 
 The function is a pure value transformation with an explicit missingness rule. The character class and mapping delimit its semantics instead of inheriting different broad language defaults. Preserving all other code points is part of the contract; this implementation deliberately does not perform Unicode case folding, NFC normalization or transliteration.
@@ -37,13 +43,31 @@ Produce id, normalized using translate, regexp_replace and trim on the label col
 
 ```scala
 def builtinLabels(raw: DataFrame): DataFrame = {
-  raw.select(col("id"),trim(regexp_replace(translate(col("label"),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz"),"[ \t\r\n]+"," ")).as("normalized"))
+  raw.select(
+    col("id"),
+    trim(
+      regexp_replace(
+        translate(col("label"), "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"),
+        "[ \t\r\n]+",
+        " "
+      )
+    ).as("normalized")
+  )
 }
 ```
 
 ```python
 def builtin_labels(raw):
-    return raw.select("id",F.trim(F.regexp_replace(F.translate("label","ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz"),r"[ \t\r\n]+"," ")).alias("normalized"))
+    return raw.select(
+        "id",
+        F.trim(
+            F.regexp_replace(
+                F.translate("label", "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"),
+                r"[ \t\r\n]+",
+                " ",
+            )
+        ).alias("normalized"),
+    )
 ```
 
 The expression tree makes the rule visible as a composition of supported string operations. NULL propagates through these functions in the intended way. The full golden list confirms that their exact behavior matches the business rule, including boundaries where a seemingly simpler Unicode lowercase or whitespace shorthand would differ.
@@ -59,14 +83,14 @@ Create a Scala String UDF or a Python StringType scalar UDF with useArrow=False,
 ```scala
 def udfLabels(raw: DataFrame): DataFrame = {
   val normalize = udf((value: String) => normalizeLabel(value))
-  raw.select(col("id"),normalize(col("label")).as("normalized"))
+  raw.select(col("id"), normalize(col("label")).as("normalized"))
 }
 ```
 
 ```python
 def udf_labels(raw):
-    normalize = F.udf(normalize_label,StringType(),useArrow=False)
-    return raw.select("id",normalize("label").alias("normalized"))
+    normalize = F.udf(normalize_label, StringType(), useArrow=False)
+    return raw.select("id", normalize("label").alias("normalized"))
 ```
 
 The UDF declaration describes how Spark should represent the returned value but does not verify semantic correctness. Golden checks remain necessary. Python explicitly opts out of Arrow so optional packages cannot silently change the execution mode. The scalar body receives values, not DataFrames, and must not start a session or perform external effects.
@@ -101,14 +125,37 @@ Classify normalized values as missing, empty or text and count each category. Se
 **Expected:** Missing 1, empty 2, text 9. Literal null text belongs only to ID 12; unknown value belongs only to ID 1.
 
 ```scala
-def labelCategories(frame: DataFrame): Seq[(String,Long)] = {
-  frame.withColumn("category",when(col("normalized").isNull,"missing").when(col("normalized") === "","empty").otherwise("text")).groupBy("category").count().collect().toSeq.map(r => (r.getString(0),r.getLong(1))).sortBy(_._1)
+def labelCategories(frame: DataFrame): Seq[(String, Long)] = {
+  frame
+    .withColumn(
+      "category",
+      when(col("normalized").isNull, "missing")
+        .when(col("normalized") === "", "empty")
+        .otherwise("text")
+    )
+    .groupBy("category")
+    .count()
+    .collect()
+    .toSeq
+    .map(r => (r.getString(0), r.getLong(1)))
+    .sortBy(_._1)
 }
 ```
 
 ```python
 def label_categories(frame):
-    return sorted(tuple(r) for r in frame.withColumn("category",F.when(F.col("normalized").isNull(),"missing").when(F.col("normalized")=="","empty").otherwise("text")).groupBy("category").count().collect())
+    return sorted(
+        tuple(r)
+        for r in frame.withColumn(
+            "category",
+            F.when(F.col("normalized").isNull(), "missing")
+            .when(F.col("normalized") == "", "empty")
+            .otherwise("text"),
+        )
+        .groupBy("category")
+        .count()
+        .collect()
+    )
 ```
 
 The population checks catch a normalizer that turns unknown input into empty text or interprets a literal spelling as a missing-value marker. Both are common but consequential policy changes. Keeping these categories separate supports honest completeness reporting and prevents string-cleaning convenience from silently changing downstream denominators.
@@ -122,8 +169,11 @@ Validate a result against the full golden sequence. Deliberately apply general l
 **Expected:** The wrong implementation disagrees at least on IDs 4,5,6,9. Python additionally removes the preserved nonbreaking spaces atID 8.
 
 ```scala
-def validateGolden(actual: Seq[(Long,Option[String])], expected: Seq[(Long,Option[String])]): Unit = {
-  require(actual == expected,"Golden label contract mismatch")
+def validateGolden(
+    actual: Seq[(Long, Option[String])],
+    expected: Seq[(Long, Option[String])]
+): Unit = {
+  require(actual == expected, "Golden label contract mismatch")
 }
 ```
 

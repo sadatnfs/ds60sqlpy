@@ -68,36 +68,60 @@ The complete source creates the owned local session described above, then constr
 import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
-import java.nio.file.{Files,Path,Paths,StandardOpenOption,StandardCopyOption}
+import java.nio.file.{Files, Path, Paths, StandardOpenOption, StandardCopyOption}
 import java.nio.charset.StandardCharsets
 import java.util.UUID
 import scala.jdk.CollectionConverters._
-import org.apache.spark.sql.streaming.{StreamingQuery,Trigger}
+import org.apache.spark.sql.streaming.{StreamingQuery, Trigger}
 import scala.collection.mutable.ArrayBuffer
 
-require(spark.version == "4.0.1","Prepared Spark4.0.1 required")
-spark.conf.set("spark.sql.streaming.stopTimeout","5000")
-ownedRoot=Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(),"spark-036-")
-val input=ownedRoot.resolve("input");val checkpoint=ownedRoot.resolve("checkpoint");val sink=Files.createDirectory(ownedRoot.resolve("sink"))
-publishFile(ownedRoot,input,"batch-01.json",Seq("""{"id":1,"cents":100}""","""{"id":2,"cents":200}"""))
-val staticFrame=spark.read.schema(eventSchema).json(input.toString)
+require(spark.version == "4.0.1", "Prepared Spark4.0.1 required")
+spark.conf.set("spark.sql.streaming.stopTimeout", "5000")
+ownedRoot = Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(), "spark-036-")
+val input = ownedRoot.resolve("input"); val checkpoint = ownedRoot.resolve("checkpoint");
+val sink = Files.createDirectory(ownedRoot.resolve("sink"))
+publishFile(
+  ownedRoot,
+  input,
+  "batch-01.json",
+  Seq("""{"id":1,"cents":100}""", """{"id":2,"cents":200}""")
+)
+val staticFrame = spark.read.schema(eventSchema).json(input.toString)
 ```
 
 ```python
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 from pathlib import Path
 import tempfile
 import shutil
 import json
 import uuid
 
-if spark.version!="4.0.1":raise ValueError("Prepared Spark4.0.1 required")
-spark.conf.set("spark.sql.streaming.stopTimeout","5000")
-owned_root=Path(tempfile.mkdtemp(prefix="spark-036-",dir=Path.cwd()))
-input_path=owned_root/"input";checkpoint=owned_root/"checkpoint";sink=owned_root/"sink";sink.mkdir()
-publish_file(owned_root,input_path,"batch-01.json",['{"id":1,"cents":100}','{"id":2,"cents":200}'])
-static_frame=spark.read.schema(EVENT_SCHEMA).json(str(input_path))
+if spark.version != "4.0.1":
+    raise ValueError("Prepared Spark4.0.1 required")
+spark.conf.set("spark.sql.streaming.stopTimeout", "5000")
+owned_root = Path(tempfile.mkdtemp(prefix="spark-036-", dir=Path.cwd()))
+input_path = owned_root / "input"
+checkpoint = owned_root / "checkpoint"
+sink = owned_root / "sink"
+sink.mkdir()
+publish_file(
+    owned_root, input_path, "batch-01.json", ['{"id":1,"cents":100}', '{"id":2,"cents":200}']
+)
+static_frame = spark.read.schema(EVENT_SCHEMA).json(str(input_path))
 ```
 
 ## Worked example / walkthrough
@@ -105,19 +129,19 @@ static_frame=spark.read.schema(EVENT_SCHEMA).json(str(input_path))
 ### Worked example 1
 
 ```scala
-val demo=spark.read.schema(eventSchema).json(input.toString)
-val text=canonicalBatch(demo)
-assert(text=="1,100\n2,200\n")
-assert(publishBatch(sink,"demo-v1",0L,text,false))
-assert(!publishBatch(sink,"demo-v1",0L,text,false))
+val demo = spark.read.schema(eventSchema).json(input.toString)
+val text = canonicalBatch(demo)
+assert(text == "1,100\n2,200\n")
+assert(publishBatch(sink, "demo-v1", 0L, text, false))
+assert(!publishBatch(sink, "demo-v1", 0L, text, false))
 ```
 
 ```python
-demo=spark.read.schema(EVENT_SCHEMA).json(str(input_path))
-text=canonical_batch(demo)
-assert text=="1,100\n2,200\n"
-assert publish_batch(sink,"demo-v1",0,text)
-assert not publish_batch(sink,"demo-v1",0,text)
+demo = spark.read.schema(EVENT_SCHEMA).json(str(input_path))
+text = canonical_batch(demo)
+assert text == "1,100\n2,200\n"
+assert publish_batch(sink, "demo-v1", 0, text)
+assert not publish_batch(sink, "demo-v1", 0, text)
 ```
 
 The same key and canonical content publishes once. This direct helper demonstration isolates the sink rule;the reference exercises the real foreachBatch failure and replay separately.
@@ -125,19 +149,22 @@ The same key and canonical content publishes once. This direct helper demonstrat
 ### Worked example 2
 
 ```scala
-var failed=false
-try publishBatch(sink,"demo-failure",0L,"1,100\n",true) catch { case e: IllegalStateException if e.getMessage=="injected_before_publication" => failed=true }
-assert(failed && publishedRows(sink,"demo-failure").isEmpty)
+var failed = false
+try publishBatch(sink, "demo-failure", 0L, "1,100\n", true)
+catch {
+  case e: IllegalStateException if e.getMessage == "injected_before_publication" => failed = true
+}
+assert(failed && publishedRows(sink, "demo-failure").isEmpty)
 ```
 
 ```python
 try:
-    publish_batch(sink,"demo-failure",0,"1,100\n",True)
+    publish_batch(sink, "demo-failure", 0, "1,100\n", True)
 except RuntimeError as error:
-    assert str(error)=="injected_before_publication"
+    assert str(error) == "injected_before_publication"
 else:
     raise AssertionError("Failure injection disappeared")
-assert published_rows(sink,"demo-failure")==[]
+assert published_rows(sink, "demo-failure") == []
 ```
 
 Failure after staging leaves no published row. The expected exception is inspected explicitly;temporary-file cleanup is not mistaken for a successful commit.

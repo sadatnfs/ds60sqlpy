@@ -14,9 +14,17 @@ Return key, fact_rows, dimension_rows, predicted_inner for the union of key buck
 def multiplicity(facts: DataFrame, dimension: DataFrame): DataFrame = {
   val f = facts.groupBy("key").agg(count(lit(1)).as("fact_rows")).as("f")
   val d = dimension.groupBy("key").agg(count(lit(1)).as("dimension_rows")).as("d")
-  val joined = f.join(d,col("f.key") <=> col("d.key"),"full")
-    .select(coalesce(col("f.key"),col("d.key")).as("key"),coalesce(col("fact_rows"),lit(0L)).as("fact_rows"),coalesce(col("dimension_rows"),lit(0L)).as("dimension_rows"))
-  joined.withColumn("predicted_inner",when(col("key").isNull,lit(0L)).otherwise(col("fact_rows") * col("dimension_rows")))
+  val joined = f
+    .join(d, col("f.key") <=> col("d.key"), "full")
+    .select(
+      coalesce(col("f.key"), col("d.key")).as("key"),
+      coalesce(col("fact_rows"), lit(0L)).as("fact_rows"),
+      coalesce(col("dimension_rows"), lit(0L)).as("dimension_rows")
+    )
+  joined.withColumn(
+    "predicted_inner",
+    when(col("key").isNull, lit(0L)).otherwise(col("fact_rows") * col("dimension_rows"))
+  )
 }
 ```
 
@@ -24,8 +32,17 @@ def multiplicity(facts: DataFrame, dimension: DataFrame): DataFrame = {
 def multiplicity(facts, dimension):
     f = facts.groupBy("key").agg(F.count(F.lit(1)).alias("fact_rows")).alias("f")
     d = dimension.groupBy("key").agg(F.count(F.lit(1)).alias("dimension_rows")).alias("d")
-    joined = f.join(d, F.col("f.key").eqNullSafe(F.col("d.key")), "full").select(F.coalesce(F.col("f.key"),F.col("d.key")).alias("key"),F.coalesce("fact_rows",F.lit(0)).alias("fact_rows"),F.coalesce("dimension_rows",F.lit(0)).alias("dimension_rows"))
-    return joined.withColumn("predicted_inner",F.when(F.col("key").isNull(),F.lit(0)).otherwise(F.col("fact_rows")*F.col("dimension_rows")))
+    joined = f.join(d, F.col("f.key").eqNullSafe(F.col("d.key")), "full").select(
+        F.coalesce(F.col("f.key"), F.col("d.key")).alias("key"),
+        F.coalesce("fact_rows", F.lit(0)).alias("fact_rows"),
+        F.coalesce("dimension_rows", F.lit(0)).alias("dimension_rows"),
+    )
+    return joined.withColumn(
+        "predicted_inner",
+        F.when(F.col("key").isNull(), F.lit(0)).otherwise(
+            F.col("fact_rows") * F.col("dimension_rows")
+        ),
+    )
 ```
 
 Preaggregation makes key multiplicity explicit before any fact measure is repeated. The full join retains keys missing from either side. NULL-safe equality is used only to consolidate diagnostic buckets; the predicted ordinary-equality count still assigns zero to NULL. This separation prevents a convenient diagnostic implementation from silently changing the business join policy.
@@ -40,13 +57,20 @@ Return fact_id, dimension_row, amount_cents from an ordinary inner equality join
 
 ```scala
 def equalityJoin(facts: DataFrame, dimension: DataFrame): DataFrame = {
-  facts.as("f").join(dimension.as("d"),col("f.key") === col("d.key"),"inner").select(col("f.fact_id"),col("d.dimension_row"),col("f.amount_cents"))
+  facts
+    .as("f")
+    .join(dimension.as("d"), col("f.key") === col("d.key"), "inner")
+    .select(col("f.fact_id"), col("d.dimension_row"), col("f.amount_cents"))
 }
 ```
 
 ```python
 def equality_join(facts, dimension):
-    return facts.alias("f").join(dimension.alias("d"),F.col("f.key")==F.col("d.key"),"inner").select("f.fact_id","d.dimension_row","f.amount_cents")
+    return (
+        facts.alias("f")
+        .join(dimension.alias("d"), F.col("f.key") == F.col("d.key"), "inner")
+        .select("f.fact_id", "d.dimension_row", "f.amount_cents")
+    )
 ```
 
 The output identity is a fact/dimension pair, not a unique fact. Repeated fact amounts are therefore expected in this relation but must not be mistaken for independent revenue. Both APIs and SQL are checked against literal pairs, which detects wrong matches even if their total row count happens to agree. Physical join strategy does not alter these relational semantics.
@@ -61,13 +85,20 @@ Return fact_id, dimension_row from an ordinary left equality join. Preserve unma
 
 ```scala
 def leftJoin(facts: DataFrame, dimension: DataFrame): DataFrame = {
-  facts.as("f").join(dimension.as("d"),col("f.key") === col("d.key"),"left").select(col("f.fact_id"),col("d.dimension_row"))
+  facts
+    .as("f")
+    .join(dimension.as("d"), col("f.key") === col("d.key"), "left")
+    .select(col("f.fact_id"), col("d.dimension_row"))
 }
 ```
 
 ```python
 def left_join(facts, dimension):
-    return facts.alias("f").join(dimension.alias("d"),F.col("f.key")==F.col("d.key"),"left").select("f.fact_id","d.dimension_row")
+    return (
+        facts.alias("f")
+        .join(dimension.alias("d"), F.col("f.key") == F.col("d.key"), "left")
+        .select("f.fact_id", "d.dimension_row")
+    )
 ```
 
 The NULL-extended row preserves an unmatched fact but does not represent a real dimension record. Counting the nonnullable dimension identity distinguishes that placeholder from a match. The NULL-key fact remains unmatched under ordinary equality even though a NULL dimension key exists. The count-distinct fact check verifies population retention separately from the ten-row pair result.
@@ -81,14 +112,16 @@ Return a pair of DataFrames containing matched and unmatched facts under ordinar
 **Expected:** Semi IDs are[1,2,3], anti IDs[4,5,6]. Key A contributes two semi rows despite three dimension matches. Their bags reconcile to all six facts.
 
 ```scala
-def membership(facts: DataFrame, dimension: DataFrame): (DataFrame,DataFrame) = {
-  (facts.join(dimension,Seq("key"),"left_semi"),facts.join(dimension,Seq("key"),"left_anti"))
+def membership(facts: DataFrame, dimension: DataFrame): (DataFrame, DataFrame) = {
+  (facts.join(dimension, Seq("key"), "left_semi"), facts.join(dimension, Seq("key"), "left_anti"))
 }
 ```
 
 ```python
 def membership(facts, dimension):
-    return facts.join(dimension,on="key",how="left_semi"),facts.join(dimension,on="key",how="left_anti")
+    return facts.join(dimension, on="key", how="left_semi"), facts.join(
+        dimension, on="key", how="left_anti"
+    )
 ```
 
 A semi join asks whether a match exists and therefore does not need to emit every matching right row. The anti join is its complementary membership relation under the same equality rule. Using these operators expresses the desired grain directly and avoids an inner-join-plus-distinct repair that could erase legitimate duplicate left occurrences.
@@ -103,13 +136,20 @@ Return fact_id, dimension_row from an inner join using NULL-safe key equality. C
 
 ```scala
 def nullSafeJoin(facts: DataFrame, dimension: DataFrame): DataFrame = {
-  facts.as("f").join(dimension.as("d"),col("f.key") <=> col("d.key"),"inner").select(col("f.fact_id"),col("d.dimension_row"))
+  facts
+    .as("f")
+    .join(dimension.as("d"), col("f.key") <=> col("d.key"), "inner")
+    .select(col("f.fact_id"), col("d.dimension_row"))
 }
 ```
 
 ```python
 def null_safe_join(facts, dimension):
-    return facts.alias("f").join(dimension.alias("d"),F.col("f.key").eqNullSafe(F.col("d.key")),"inner").select("f.fact_id","d.dimension_row")
+    return (
+        facts.alias("f")
+        .join(dimension.alias("d"), F.col("f.key").eqNullSafe(F.col("d.key")), "inner")
+        .select("f.fact_id", "d.dimension_row")
+    )
 ```
 
 The extra pair follows directly from treating two NULL values as equal. This can be appropriate for a meaningful missing-value category, but it is usually not evidence that two unknown entity identifiers belong together. Multiple NULL rows on either side would also multiply. The literal pair difference makes the changed semantic policy visible rather than hiding it inside an optimization rewrite.
@@ -124,18 +164,22 @@ Reject a dimension unless key is nonnull and unique, then left-enrich facts with
 
 ```scala
 def safeEnrichment(facts: DataFrame, dimension: DataFrame): DataFrame = {
-  val keys = dimension.agg(count(lit(1)),countDistinct(col("key"))).first()
+  val keys = dimension.agg(count(lit(1)), countDistinct(col("key"))).first()
   require(keys.getLong(0) == keys.getLong(1), "dimension keys must be nonnull and unique")
-  facts.join(dimension.select("key","label"),Seq("key"),"left").select("fact_id","amount_cents","label")
+  facts
+    .join(dimension.select("key", "label"), Seq("key"), "left")
+    .select("fact_id", "amount_cents", "label")
 }
 ```
 
 ```python
 def safe_enrichment(facts, dimension):
-    keys = dimension.agg(F.count(F.lit(1)),F.countDistinct("key")).first()
+    keys = dimension.agg(F.count(F.lit(1)), F.countDistinct("key")).first()
     if keys[0] != keys[1]:
         raise ValueError("dimension keys must be nonnull and unique")
-    return facts.join(dimension.select("key","label"),on="key",how="left").select("fact_id","amount_cents","label")
+    return facts.join(dimension.select("key", "label"), on="key", how="left").select(
+        "fact_id", "amount_cents", "label"
+    )
 ```
 
 COUNT DISTINCT ignores NULL and collapses duplicates, so equality with total row count establishes the declared nonnull unique-key condition. The reviewed subset is supplied as a business decision for this fixture, not inferred from ingestion order. Once the dimension satisfies that contract, the left enrichment preserves one row per fact and its additive amount. Unmatched labels remain visible for a separate coverage policy.

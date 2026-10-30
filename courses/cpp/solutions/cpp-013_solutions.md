@@ -31,7 +31,8 @@ If Release passes instantly while Debug catches a failure, inspect NDEBUG and an
 ## Worked example 1
 
 ```cpp
-if (twice(3)!=6) return 1;
+if (twice(3) != 6)
+  return 1;
 ```
 
 Expected: The process returns nonzero if the result is wrong, including Release builds.

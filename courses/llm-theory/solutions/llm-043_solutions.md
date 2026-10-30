@@ -31,11 +31,12 @@ The question is: Use zero queries/keys and values[[2, 0], [0, 2], [6, 6]] under 
 The score arithmetic is identical; the allowed information differs. A future source change may affect an encoder output when the whole source is available, while a future target change must not affect an earlier causal output.
 
 ```python
-q=np.zeros((3,2)); values=np.array([[2.,0.],[0.,2.],[6.,6.]])
-encoder,_=attention(q,q,values,np.ones((3,3),dtype=bool))
-decoder,_=attention(q,q,values,np.tri(3,dtype=bool))
-np.testing.assert_allclose(encoder,np.tile([8/3,8/3],(3,1)),atol=1e-12,rtol=0)
-np.testing.assert_allclose(decoder,[[2,0],[1,1],[8/3,8/3]],atol=1e-12,rtol=0)
+q = np.zeros((3, 2))
+values = np.array([[2.0, 0.0], [0.0, 2.0], [6.0, 6.0]])
+encoder, _ = attention(q, q, values, np.ones((3, 3), dtype=bool))
+decoder, _ = attention(q, q, values, np.tri(3, dtype=bool))
+np.testing.assert_allclose(encoder, np.tile([8 / 3, 8 / 3], (3, 1)), atol=1e-12, rtol=0)
+np.testing.assert_allclose(decoder, [[2, 0], [1, 1], [8 / 3, 8 / 3]], atol=1e-12, rtol=0)
 ```
 
 **Expected:** encoder rows all[8/3, 8/3]; decoder rows[2, 0], [1, 1], [8/3, 8/3].
@@ -49,10 +50,11 @@ The question is: Use two zero target queries, three zero source keys and the sam
 The output count follows the query sequence, not the source length. A square-mask assumption would incorrectly reject or distort ordinary encoder-decoder attention.
 
 ```python
-target_queries=np.zeros((2,2)); source_keys=np.zeros((3,2))
-cross,weights=attention(target_queries,source_keys,values,np.ones((2,3),dtype=bool))
-assert weights.shape==(2,3) and cross.shape==(2,2)
-np.testing.assert_allclose(cross,np.tile([8/3,8/3],(2,1)),atol=1e-12,rtol=0)
+target_queries = np.zeros((2, 2))
+source_keys = np.zeros((3, 2))
+cross, weights = attention(target_queries, source_keys, values, np.ones((2, 3), dtype=bool))
+assert weights.shape == (2, 3) and cross.shape == (2, 2)
+np.testing.assert_allclose(cross, np.tile([8 / 3, 8 / 3], (2, 1)), atol=1e-12, rtol=0)
 ```
 
 **Expected:** score/weight shape(2, 3); output shape(2, 2); both outputs[8/3, 8/3].
@@ -66,9 +68,13 @@ The question is: For target IDs[5, 7, 3], prepend BOS 1 and form input/label pai
 The current decoder input is the previous target under this shifted convention. Allowing the diagonal is compatible with causality; copying the current answer into the same input position would not be.
 
 ```python
-target=np.array([5,7,3]); inputs=np.concatenate([[1],target[:-1]]); labels=target.copy(); mask=np.tri(3,dtype=bool)
-np.testing.assert_array_equal(inputs,[1,5,7]); np.testing.assert_array_equal(labels,[5,7,3])
-assert mask[0,0] and not mask[0,1]
+target = np.array([5, 7, 3])
+inputs = np.concatenate([[1], target[:-1]])
+labels = target.copy()
+mask = np.tri(3, dtype=bool)
+np.testing.assert_array_equal(inputs, [1, 5, 7])
+np.testing.assert_array_equal(labels, [5, 7, 3])
+assert mask[0, 0] and not mask[0, 1]
 ```
 
 **Expected:** inputs[1, 5, 7]; labels[5, 7, 3]; diagonal allowed without seeing the target itself.
@@ -82,9 +88,13 @@ The question is: Corrupt source[2, 5, 7] at the middle position with MASK 0 and 
 The source attention mask and the loss participation mask have different shapes and purposes. A masked-language objective does not require a causal triangle over the complete source.
 
 ```python
-original=np.array([2,5,7]); corrupted=original.copy(); corrupted[1]=0; active=np.array([False,True,False])
-np.testing.assert_array_equal(corrupted,[2,0,7]); assert original[active].tolist()==[5]
-assert np.ones((3,3),dtype=bool)[1].all()
+original = np.array([2, 5, 7])
+corrupted = original.copy()
+corrupted[1] = 0
+active = np.array([False, True, False])
+np.testing.assert_array_equal(corrupted, [2, 0, 7])
+assert original[active].tolist() == [5]
+assert np.ones((3, 3), dtype=bool)[1].all()
 ```
 
 **Expected:** input[2, 0, 7]; one active label 5; bidirectional context remains allowed.
@@ -98,10 +108,12 @@ The question is: Change only the third value vector and compare the first two en
 This is a direct information-flow test. The encoder behavior is valid for a fully available source but invalid if those same positions represent unavailable future targets.
 
 ```python
-changed=values.copy(); changed[2]=[100,200]
-new_encoder,_=attention(q,q,changed,np.ones((3,3),dtype=bool)); new_decoder,_=attention(q,q,changed,np.tri(3,dtype=bool))
-assert not np.allclose(new_encoder[:2],encoder[:2])
-np.testing.assert_allclose(new_decoder[:2],decoder[:2],atol=1e-12,rtol=0)
+changed = values.copy()
+changed[2] = [100, 200]
+new_encoder, _ = attention(q, q, changed, np.ones((3, 3), dtype=bool))
+new_decoder, _ = attention(q, q, changed, np.tri(3, dtype=bool))
+assert not np.allclose(new_encoder[:2], encoder[:2])
+np.testing.assert_allclose(new_decoder[:2], decoder[:2], atol=1e-12, rtol=0)
 ```
 
 **Expected:** encoder prefix changes; causal decoder prefix stays fixed.
@@ -115,10 +127,10 @@ The question is: Mark the third source position as padding for both target queri
 Padding describes source availability, not target causality. A decoder may need a causal self-attention mask and a separate source-padding cross-attention mask in the same block.
 
 ```python
-allowed=np.array([[True,True,False],[True,True,False]])
-masked,weights=attention(target_queries,source_keys,values,allowed)
-np.testing.assert_allclose(masked,[[1,1],[1,1]],atol=1e-12,rtol=0)
-np.testing.assert_array_equal(weights[:,2],[0,0])
+allowed = np.array([[True, True, False], [True, True, False]])
+masked, weights = attention(target_queries, source_keys, values, allowed)
+np.testing.assert_allclose(masked, [[1, 1], [1, 1]], atol=1e-12, rtol=0)
+np.testing.assert_array_equal(weights[:, 2], [0, 0])
 ```
 
 **Expected:** both cross outputs[1, 1]; padded source weight 0.

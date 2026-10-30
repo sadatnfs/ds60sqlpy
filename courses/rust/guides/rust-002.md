@@ -43,8 +43,6 @@ Read the operations in dependency order. Record which values exist before each l
 Only the value requiring state transitions is declared mutable.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let per_box = 4;
@@ -65,8 +63,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 Shadowing can change type, but names must still explain whether a value is text, length or parsed quantity.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let count = "12";

@@ -23,12 +23,13 @@ Worked reference for Exercise 1; Extract and test
 from __future__ import annotations
 from typing import Iterable
 
+
 def scale_minmax(xs: Iterable[float]) -> list[float]:
     xs = list(xs)
     mn, mx = min(xs), max(xs)
     if mx == mn:  # avoid divide by zero
         return [0.0 for _ in xs]
-    return [(x-mn)/(mx-mn) for x in xs]
+    return [(x - mn) / (mx - mn) for x in xs]
 ```
 
 ```python
@@ -36,11 +37,13 @@ def scale_minmax(xs: Iterable[float]) -> list[float]:
 import pytest
 from myproj.fe import scale_minmax
 
+
 def test_scale_happy():
-    assert scale_minmax([0,5,10]) == [0.0, 0.5, 1.0]
+    assert scale_minmax([0, 5, 10]) == [0.0, 0.5, 1.0]
+
 
 def test_scale_constant():
-    assert scale_minmax([3,3,3]) == [0.0,0.0,0.0]
+    assert scale_minmax([3, 3, 3]) == [0.0, 0.0, 0.0]
 ```
 Run tests
 ```powershell
@@ -59,18 +62,18 @@ Worked reference for Exercise 2; pre‑commit
 ```yaml
 # .pre-commit-config.yaml
 repos:
-- repo: local
-  hooks:
-  - id: ruff-check
-    name: Ruff check
-    entry: ruff check --fix
-    language: system
-    types: [python]
-  - id: ruff-format
-    name: Ruff format
-    entry: ruff format
-    language: system
-    types: [python]
+  - repo: local
+    hooks:
+      - id: ruff-check
+        name: Ruff check
+        entry: ruff check --fix
+        language: system
+        types: [python]
+      - id: ruff-format
+        name: Ruff format
+        entry: ruff format
+        language: system
+        types: [python]
 ```
 Core setup already installs pre-commit. Install the local hook and run it:
 
@@ -97,13 +100,13 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v6
-    - uses: actions/setup-python@v6
-      with: { python-version: '3.12' }
-    - run: python -m pip install -e ".[quality]"
-    - run: ruff check .
-    - run: ruff format --check .
-    - run: pytest -q
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with: { python-version: "3.12" }
+      - run: python -m pip install -e ".[quality]"
+      - run: ruff check .
+      - run: ruff format --check .
+      - run: pytest -q
 ```
 Notes
 - Keep PRs small and focused; require reviews

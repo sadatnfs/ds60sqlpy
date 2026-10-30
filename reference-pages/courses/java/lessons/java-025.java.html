@@ -198,19 +198,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 1: Expose a strong retention path</span></span>
-<span class="source-line">    <span class="syntax-comment">// Store a small byte array in a list anddrop the local variable reference.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Store a small byte array in a list and drop the local variable reference.</span></span>
 <span class="source-line">    <span class="syntax-comment">// Expected: list still exposes the same array contents.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 2: Remove one ownership path deliberately</span></span>
-<span class="source-line">    <span class="syntax-comment">// Keep a separate reference,clear the list,andinspect the separate reference.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: list empty;separate array stillvalid.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Keep a separate reference,clear the list,and inspect the separate reference.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: list empty;separate array still valid.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 3: Inspect a weak reference without timing assumptions</span></span>
-<span class="source-line">    <span class="syntax-comment">// Create aWeakReference to the still-strongly-referenced array.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Create a WeakReference to the still-strongly-referenced array.</span></span>
 <span class="source-line">    <span class="syntax-comment">// Expected: weakget returns the same object while strong reference exists.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 4: Separate value size from allocation count</span></span>
-<span class="source-line">    <span class="syntax-comment">// Create ten arrays of128bytes andcount logical payload bytes.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Create ten arrays of 128 bytes and count logical payload bytes.</span></span>
 <span class="source-line">    <span class="syntax-comment">// Expected: 1280 logical bytes;no exact heap-overhead claim.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 5: Reuse a bounded working buffer</span></span>
@@ -218,8 +218,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">    <span class="syntax-comment">// Expected: same buffer identity;final value9.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 6: Record process memory cautiously</span></span>
-<span class="source-line">    <span class="syntax-comment">// ReadRuntime total/free/max memory andcheck only valid ordering relationships.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: nonnegative counters;max at leasttotal;no claim of exact object size.</span></span>
+<span class="source-line">    <span class="syntax-comment">// ReadRuntime total/free/max memory and check only valid ordering relationships.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: nonnegative counters; max at least total; no claim of exact object size.</span></span>
 <span class="source-line">    System<span class="syntax-punctuation">.</span><span class="syntax-attribute">out</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">println</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement and check the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line">  <span class="syntax-punctuation">}</span></span>
 <span class="source-line"><span class="syntax-punctuation">}</span></span>

@@ -12,7 +12,7 @@ Return all source columns plus parsed_amount from try_cast(trim(amount_text) AS 
 
 ```scala
 def withParsed(frame: DataFrame): DataFrame = {
-  frame.withColumn("parsed_amount",expr("try_cast(trim(amount_text) AS BIGINT)"))
+  frame.withColumn("parsed_amount", expr("try_cast(trim(amount_text) AS BIGINT)"))
 }
 ```
 
@@ -33,13 +33,23 @@ Add parse_status with missing for source NULL, rejected for a nonnull source tha
 
 ```scala
 def parseLedger(frame: DataFrame): DataFrame = {
-  withParsed(frame).withColumn("parse_status",when(col("amount_text").isNull,lit("missing")).when(col("parsed_amount").isNull,lit("rejected")).otherwise(lit("valid")))
+  withParsed(frame).withColumn(
+    "parse_status",
+    when(col("amount_text").isNull, lit("missing"))
+      .when(col("parsed_amount").isNull, lit("rejected"))
+      .otherwise(lit("valid"))
+  )
 }
 ```
 
 ```python
 def parse_ledger(frame):
-    return with_parsed(frame).withColumn("parse_status", F.when(F.col("amount_text").isNull(), F.lit("missing")).when(F.col("parsed_amount").isNull(), F.lit("rejected")).otherwise(F.lit("valid")))
+    return with_parsed(frame).withColumn(
+        "parse_status",
+        F.when(F.col("amount_text").isNull(), F.lit("missing"))
+        .when(F.col("parsed_amount").isNull(), F.lit("rejected"))
+        .otherwise(F.lit("valid")),
+    )
 ```
 
 The branch order preserves source provenance. If parsed NULL were checked first, the allowed missing record would be mislabeled as malformed. Every input gets exactly one status, so the ledger can reconcile accepted and rejected populations. This is an explicit source policy; another pipeline may reject missing amounts too, but it must state that different decision.
@@ -54,13 +64,19 @@ Retain valid and missing statuses, then return event_id and parsed_amount aliase
 
 ```scala
 def acceptedProjection(frame: DataFrame): DataFrame = {
-  parseLedger(frame).filter(col("parse_status") =!= lit("rejected")).select(col("event_id"),col("parsed_amount").as("amount_cents"))
+  parseLedger(frame)
+    .filter(col("parse_status") =!= lit("rejected"))
+    .select(col("event_id"), col("parsed_amount").as("amount_cents"))
 }
 ```
 
 ```python
 def accepted_projection(frame):
-    return parse_ledger(frame).filter(F.col("parse_status") != F.lit("rejected")).select("event_id", F.col("parsed_amount").alias("amount_cents"))
+    return (
+        parse_ledger(frame)
+        .filter(F.col("parse_status") != F.lit("rejected"))
+        .select("event_id", F.col("parsed_amount").alias("amount_cents"))
+    )
 ```
 
 The projection changes representation while retaining event identity and allowed missingness. Negative five remains because this stage answers conversion validity, not the later nonnegative-domain question. Separate row and known-value counts prevent a NULL-to-zero replacement from hiding in an unchanged total. The literal rows supply an independent oracle for both language implementations.
@@ -76,14 +92,18 @@ Register the raw frame as a session-local view and produce the same six event_id
 ```scala
 def sqlProjection(spark: SparkSession, frame: DataFrame): DataFrame = {
   frame.createOrReplaceTempView("ds60_spark_015_raw")
-  spark.sql("WITH parsed AS (SELECT event_id,amount_text,try_cast(trim(amount_text) AS BIGINT) AS amount_cents FROM ds60_spark_015_raw) SELECT event_id,amount_cents FROM parsed WHERE amount_text IS NULL OR amount_cents IS NOT NULL")
+  spark.sql(
+    "WITH parsed AS (SELECT event_id,amount_text,try_cast(trim(amount_text) AS BIGINT) AS amount_cents FROM ds60_spark_015_raw) SELECT event_id,amount_cents FROM parsed WHERE amount_text IS NULL OR amount_cents IS NOT NULL"
+  )
 }
 ```
 
 ```python
 def sql_projection(spark, frame):
     frame.createOrReplaceTempView("ds60_spark_015_raw")
-    return spark.sql("WITH parsed AS (SELECT event_id,amount_text,try_cast(trim(amount_text) AS BIGINT) AS amount_cents FROM ds60_spark_015_raw) SELECT event_id,amount_cents FROM parsed WHERE amount_text IS NULL OR amount_cents IS NOT NULL")
+    return spark.sql(
+        "WITH parsed AS (SELECT event_id,amount_text,try_cast(trim(amount_text) AS BIGINT) AS amount_cents FROM ds60_spark_015_raw) SELECT event_id,amount_cents FROM parsed WHERE amount_text IS NULL OR amount_cents IS NOT NULL"
+    )
 ```
 
 The CTE names the intermediate parsed relation and retains the original token for the acceptance predicate. OR combines the allowed source-missing case with successful conversion. Dropping amount_text before filtering would make those cases indistinguishable. Final ordering is applied by the bounded canonical helper, so SQL planning order is not mistaken for output order.
@@ -98,7 +118,7 @@ Return a strict trimmed BIGINT cast projection. Evaluate a valid subset successf
 
 ```scala
 def strictProjection(frame: DataFrame): DataFrame = {
-  frame.select(col("event_id"),trim(col("amount_text")).cast(LongType).as("amount_cents"))
+  frame.select(col("event_id"), trim(col("amount_text")).cast(LongType).as("amount_cents"))
 }
 ```
 
@@ -125,7 +145,9 @@ def nonnegativeAmounts(frame: DataFrame): DataFrame = {
 
 ```python
 def nonnegative_amounts(frame):
-    return accepted_projection(frame).filter(F.col("amount_cents").isNull() | (F.col("amount_cents") >= F.lit(0)))
+    return accepted_projection(frame).filter(
+        F.col("amount_cents").isNull() | (F.col("amount_cents") >= F.lit(0))
+    )
 ```
 
 The domain rule is applied after conversion and retains its own rejected population. A syntactically valid negative adjustment can therefore be reported as a domain decision rather than a parse error. Keeping source-missing amounts is also explicit. The conservation equation accounts for all eight inputs across the two validation stages, preventing a successful total from hiding unexplained row loss.

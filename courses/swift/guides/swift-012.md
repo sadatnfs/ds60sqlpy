@@ -45,20 +45,27 @@ The struct contains value state and its mutation is explicit.
 ```swift
 import Foundation
 
-struct Inventory { private(set) var stock: Int; mutating func reserve(_ amount: Int) -> Bool { guard amount >= 0, amount <= stock else { return false }; stock -= amount; return true } }
+struct Inventory {
+  private(set) var stock: Int
+  mutating func reserve(_ amount: Int) -> Bool {
+    guard amount >= 0, amount <= stock else { return false }
+    stock -= amount
+    return true
+  }
+}
 
 @main
 struct LessonMain {
-    static func main() async throws {
-        do {
-            var first = Inventory(stock: 5)
-            var second = first
-            precondition(second.reserve(2))
-            precondition(first.stock == 5 && second.stock == 3)
-            precondition(first.reserve(0))
-        }
-        print("swift-012: passed")
+  static func main() async throws {
+    do {
+      var first = Inventory(stock: 5)
+      var second = first
+      precondition(second.reserve(2))
+      precondition(first.stock == 5 && second.stock == 3)
+      precondition(first.reserve(0))
     }
+    print("swift-012: passed")
+  }
 }
 ```
 
@@ -71,19 +78,26 @@ Checking every rejection condition before subtraction preserves failure atomicit
 ```swift
 import Foundation
 
-struct Inventory { private(set) var stock: Int; mutating func reserve(_ amount: Int) -> Bool { guard amount >= 0, amount <= stock else { return false }; stock -= amount; return true } }
+struct Inventory {
+  private(set) var stock: Int
+  mutating func reserve(_ amount: Int) -> Bool {
+    guard amount >= 0, amount <= stock else { return false }
+    stock -= amount
+    return true
+  }
+}
 
 @main
 struct LessonMain {
-    static func main() async throws {
-        do {
-            var inventory = Inventory(stock: 3)
-            precondition(!inventory.reserve(4))
-            precondition(!inventory.reserve(-1))
-            precondition(inventory.stock == 3)
-        }
-        print("swift-012: passed")
+  static func main() async throws {
+    do {
+      var inventory = Inventory(stock: 3)
+      precondition(!inventory.reserve(4))
+      precondition(!inventory.reserve(-1))
+      precondition(inventory.stock == 3)
     }
+    print("swift-012: passed")
+  }
 }
 ```
 

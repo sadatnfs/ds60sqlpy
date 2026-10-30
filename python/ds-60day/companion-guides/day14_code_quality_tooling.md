@@ -118,8 +118,10 @@ identify which line creates each intermediate object.
 ```python
 from typing import get_type_hints
 
+
 def total(values: list[float]) -> float:
     return sum(values)
+
 
 (get_type_hints(total), total([1.5, 2.0]))
 ```

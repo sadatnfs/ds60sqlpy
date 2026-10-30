@@ -12,6 +12,7 @@ Contents
 Setup and synthetic data
 ```python
 import numpy as np
+
 rng = np.random.default_rng(0)
 
 n, d = 200, 3
@@ -23,7 +24,7 @@ y = X @ true_w + rng.normal(scale=0.5, size=n)
 Worked reference for Exercise 1; Add intercept and recompute w
 ```python
 # Add a column of ones for intercept
-X1 = np.c_[np.ones((n, 1)), X]   # shape (n, d+1)
+X1 = np.c_[np.ones((n, 1)), X]  # shape (n, d+1)
 
 # Normal equation with pseudo-inverse for stability
 w_hat = np.linalg.pinv(X1.T @ X1) @ X1.T @ y
@@ -43,7 +44,7 @@ lr = LinearRegression(fit_intercept=True)
 lr.fit(X, y)
 
 w0 = lr.intercept_
-w  = lr.coef_
+w = lr.coef_
 
 w0, w
 ```
@@ -175,9 +176,7 @@ x1 = np.array([0.0, 1.0, 2.0, 3.0])
 x2 = np.array([1.0, 0.0, 1.0, 2.0])
 X = np.column_stack([x1, x2, x1 + x2])
 y = np.array([1.0, 2.0, 4.0, 6.0])
-coefficients, residuals, rank, singular_values = np.linalg.lstsq(
-    X, y, rcond=None
-)
+coefficients, residuals, rank, singular_values = np.linalg.lstsq(X, y, rcond=None)
 assert rank == 2
 assert np.allclose(X @ coefficients, y, atol=1.0)
 ```
@@ -201,6 +200,7 @@ assumption or data boundary rather than hiding the failure.
 ```python
 import numpy as np
 
+
 def cosine_similarity(left: np.ndarray, right: np.ndarray) -> float:
     if left.ndim != 1 or right.ndim != 1 or left.shape != right.shape:
         raise ValueError("vectors must be one-dimensional with equal length")
@@ -208,6 +208,7 @@ def cosine_similarity(left: np.ndarray, right: np.ndarray) -> float:
     if denominator == 0.0:
         raise ValueError("cosine similarity is undefined for a zero vector")
     return float(np.dot(left, right) / denominator)
+
 
 assert np.isclose(
     cosine_similarity(np.array([1.0, 0.0]), np.array([0.0, 1.0])),

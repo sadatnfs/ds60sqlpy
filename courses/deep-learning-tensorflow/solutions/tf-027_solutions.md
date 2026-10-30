@@ -23,9 +23,12 @@ The question is: Create a fixed two-feature identity Dense base and freeze it.
 The identity fixture keeps transfer semantics visible. In the earlier capstone the base may be learned, but freezing should obey the same state contract.
 
 ```python
-base=tf.keras.layers.Dense(2,use_bias=False,kernel_initializer=tf.keras.initializers.Identity()); x=tf.constant([[1.,0.],[0.,1.],[1.,1.]])
-base(x); base.trainable=False
-np.testing.assert_array_equal(base(x).numpy(),x.numpy()); assert not base.trainable_variables
+base = tf.keras.layers.Dense(2, use_bias=False, kernel_initializer=tf.keras.initializers.Identity())
+x = tf.constant([[1.0, 0.0], [0.0, 1.0], [1.0, 1.0]])
+base(x)
+base.trainable = False
+np.testing.assert_array_equal(base(x).numpy(), x.numpy())
+assert not base.trainable_variables
 ```
 
 **Expected:** base output equals input; no trainable base variables.
@@ -39,10 +42,16 @@ The question is: Attach a zero-initialized one-unit head; fit targets[1,2,3] for
 Zero initial outputs give nonzero residuals, so this fixture has an observable update. A trainable flag alone would not prove that an optimizer actually changed the head.
 
 ```python
-head=tf.keras.layers.Dense(1,use_bias=False,kernel_initializer='zeros'); features=base(x,training=False); head(features); before=head.get_weights()[0].copy(); target=tf.constant([[1.],[2.],[3.]])
-with tf.GradientTape() as tape: loss=tf.reduce_mean((head(features)-target)**2)
-g=tape.gradient(loss,head.trainable_variables); tf.keras.optimizers.SGD(.1).apply_gradients(zip(g,head.trainable_variables))
-assert not np.array_equal(before,head.get_weights()[0])
+head = tf.keras.layers.Dense(1, use_bias=False, kernel_initializer="zeros")
+features = base(x, training=False)
+head(features)
+before = head.get_weights()[0].copy()
+target = tf.constant([[1.0], [2.0], [3.0]])
+with tf.GradientTape() as tape:
+    loss = tf.reduce_mean((head(features) - target) ** 2)
+g = tape.gradient(loss, head.trainable_variables)
+tf.keras.optimizers.SGD(0.1).apply_gradients(zip(g, head.trainable_variables))
+assert not np.array_equal(before, head.get_weights()[0])
 ```
 
 **Expected:** at least one head coefficient changes.
@@ -56,7 +65,7 @@ The question is: Compare the base kernel with identity after head training.
 A weight snapshot provides direct evidence. Checking only that base.trainable is false would miss an accidental explicit assignment outside the optimizer.
 
 ```python
-np.testing.assert_array_equal(base.get_weights()[0],np.eye(2,dtype='float32'))
+np.testing.assert_array_equal(base.get_weights()[0], np.eye(2, dtype="float32"))
 ```
 
 **Expected:** base weights remain byte-identical to identity.
@@ -70,8 +79,8 @@ The question is: Evaluate the new head on all three local records and compare wi
 The head has learned a direction toward the relabelled target. One update does not demonstrate good final fit, and the exercise does not present it as a completed training run.
 
 ```python
-pred=head(base(x,training=False)).numpy()
-assert pred.shape==(3,1) and (pred>0).all()
+pred = head(base(x, training=False)).numpy()
+assert pred.shape == (3, 1) and (pred > 0).all()
 ```
 
 **Expected:** all three predictions positive.
@@ -85,11 +94,13 @@ The question is: Unfreeze the base and initialize a new SGD optimizer; different
 The lower rate is declared as part of a new phase, not inferred from a universal transfer rule. A new optimizer avoids silently reusing an incompatible slot-variable set.
 
 ```python
-base.trainable=True; variables=base.trainable_variables+head.trainable_variables
-with tf.GradientTape() as tape: loss=tf.reduce_mean((head(base(x,training=False))-target)**2)
-grads=tape.gradient(loss,variables)
-assert len(grads)==2 and all(g is not None for g in grads)
-tf.keras.optimizers.SGD(.01).apply_gradients(zip(grads,variables))
+base.trainable = True
+variables = base.trainable_variables + head.trainable_variables
+with tf.GradientTape() as tape:
+    loss = tf.reduce_mean((head(base(x, training=False)) - target) ** 2)
+grads = tape.gradient(loss, variables)
+assert len(grads) == 2 and all(g is not None for g in grads)
+tf.keras.optimizers.SGD(0.01).apply_gradients(zip(grads, variables))
 ```
 
 **Expected:** both base and head now have connected gradients.
@@ -103,7 +114,7 @@ The question is: Compare the unfrozen base with its original identity after the 
 This control demonstrates that the preservation test is capable of detecting real changes. It helps distinguish successful freezing from a fixture whose gradients were zero everywhere.
 
 ```python
-assert not np.array_equal(base.get_weights()[0],np.eye(2,dtype='float32'))
+assert not np.array_equal(base.get_weights()[0], np.eye(2, dtype="float32"))
 ```
 
 **Expected:** base is no longer identical.

@@ -222,6 +222,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="worked-example-2-validate-presence-without-disclosure">Worked example 2: Validate presence without disclosure<a class="heading-anchor" href="#worked-example-2-validate-presence-without-disclosure" aria-label="Link to this section">#</a></h4>
 <p>The application should report a safe readiness fact.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
+
 value <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">/run/secrets/demo</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>read_text<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> value<span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">demo secret is empty</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>

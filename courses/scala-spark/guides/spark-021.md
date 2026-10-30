@@ -58,30 +58,52 @@ The complete source creates the owned local session described above, then constr
 import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
-import java.nio.file.{Files,Path,Paths}
+import java.nio.file.{Files, Path, Paths}
 import scala.jdk.CollectionConverters._
 
-ownedRoot = Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(),".ds60-spark-021-")
-val fixture = spark.range(0L,12L,1L,2).withColumn("group_id",col("id") % 3L).withColumn("amount",col("id") * 10L).withColumn("unused_payload",lit("xxxxxxxxxxxxxxxx"))
+ownedRoot = Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(), ".ds60-spark-021-")
+val fixture = spark
+  .range(0L, 12L, 1L, 2)
+  .withColumn("group_id", col("id") % 3L)
+  .withColumn("amount", col("id") * 10L)
+  .withColumn("unused_payload", lit("xxxxxxxxxxxxxxxx"))
 val dataPath = ownedRoot.resolve("data").toString
 fixture.write.mode("errorifexists").parquet(dataPath)
 val input = spark.read.parquet(dataPath)
 input.createOrReplaceTempView("ds60_spark_021_input")
 val projectionQuery = "SELECT id,amount*2 AS doubled FROM ds60_spark_021_input WHERE amount>=30"
-val aggregateQuery = "SELECT group_id,COUNT(*) AS n,SUM(amount) AS total FROM ds60_spark_021_input WHERE amount>=30 GROUP BY group_id"
+val aggregateQuery =
+  "SELECT group_id,COUNT(*) AS n,SUM(amount) AS total FROM ds60_spark_021_input WHERE amount>=30 GROUP BY group_id"
 ```
 
 ```python
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 from pathlib import Path
 import tempfile
 import shutil
 import re
 
-owned_root = Path(tempfile.mkdtemp(prefix=".ds60-spark-021-",dir=".")).resolve()
-fixture = spark.range(0,12,1,2).withColumn("group_id",F.col("id")%3).withColumn("amount",F.col("id")*10).withColumn("unused_payload",F.lit("xxxxxxxxxxxxxxxx"))
-data_path = str(owned_root/"data")
+owned_root = Path(tempfile.mkdtemp(prefix=".ds60-spark-021-", dir=".")).resolve()
+fixture = (
+    spark.range(0, 12, 1, 2)
+    .withColumn("group_id", F.col("id") % 3)
+    .withColumn("amount", F.col("id") * 10)
+    .withColumn("unused_payload", F.lit("xxxxxxxxxxxxxxxx"))
+)
+data_path = str(owned_root / "data")
 fixture.write.mode("errorifexists").parquet(data_path)
 input_frame = spark.read.parquet(data_path)
 input_frame.createOrReplaceTempView("ds60_spark_021_input")
@@ -95,13 +117,13 @@ aggregate_query = "SELECT group_id,COUNT(*) AS n,SUM(amount) AS total FROM ds60_
 
 ```scala
 assert(input.count() == 12L)
-assert(input.columns.toSeq == Seq("id","group_id","amount","unused_payload"))
+assert(input.columns.toSeq == Seq("id", "group_id", "amount", "unused_payload"))
 println("Owned Parquet fixture has four stored columns and12 rows")
 ```
 
 ```python
 assert input_frame.count() == 12
-assert input_frame.columns == ["id","group_id","amount","unused_payload"]
+assert input_frame.columns == ["id", "group_id", "amount", "unused_payload"]
 print("Owned Parquet fixture has four stored columns and12 rows")
 ```
 

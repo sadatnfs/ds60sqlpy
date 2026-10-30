@@ -946,8 +946,12 @@ merely ran is not evidence of mastery.</code></pre></div>
         per_device_train_batch_size<span class="syntax-operator">=</span><span class="syntax-number">8</span><span class="syntax-punctuation">,</span>
         per_device_eval_batch_size<span class="syntax-operator">=</span><span class="syntax-number">16</span><span class="syntax-punctuation">,</span>
         logging_steps<span class="syntax-operator">=</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span>
-        report_to<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">none</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> use_cpu<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> dataloader_num_workers<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span>
-        save_strategy<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">no</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> seed<span class="syntax-operator">=</span><span class="syntax-number">49</span><span class="syntax-punctuation">,</span> data_seed<span class="syntax-operator">=</span><span class="syntax-number">49</span><span class="syntax-punctuation">,</span>
+        report_to<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">none</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        use_cpu<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span>
+        dataloader_num_workers<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span>
+        save_strategy<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">no</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        seed<span class="syntax-operator">=</span><span class="syntax-number">49</span><span class="syntax-punctuation">,</span>
+        data_seed<span class="syntax-operator">=</span><span class="syntax-number">49</span><span class="syntax-punctuation">,</span>
     <span class="syntax-punctuation">)</span>
     trainer <span class="syntax-operator">=</span> Trainer<span class="syntax-punctuation">(</span>
         model<span class="syntax-operator">=</span>model<span class="syntax-punctuation">,</span>
@@ -1016,7 +1020,9 @@ merely ran is not evidence of mastery.</code></pre></div>
 
     weighted_model <span class="syntax-operator">=</span> AutoModelForSequenceClassification<span class="syntax-operator">.</span>from_pretrained<span class="syntax-punctuation">(</span>
         model_dir<span class="syntax-punctuation">,</span>
-        num_labels<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> local_files_only<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> use_safetensors<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span>
+        num_labels<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span>
+        local_files_only<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span>
+        use_safetensors<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span>
     <span class="syntax-punctuation">)</span>
     trainer_weighted <span class="syntax-operator">=</span> WeightedTrainer<span class="syntax-punctuation">(</span>
         model<span class="syntax-operator">=</span>weighted_model<span class="syntax-punctuation">,</span>

@@ -49,8 +49,8 @@ A retained image can be selected without a registry connection:
 
 ```sh
 DS60_FORMAT_IMAGE=reviewed-main-tools:local \
-DS60_FORMAT_R_IMAGE=reviewed-r-tools:local \
-DS60_FORMAT_JULIA_IMAGE=reviewed-julia-tools:local \
+  DS60_FORMAT_R_IMAGE=reviewed-r-tools:local \
+  DS60_FORMAT_JULIA_IMAGE=reviewed-julia-tools:local \
   ./scripts/format-repo --check
 ```
 

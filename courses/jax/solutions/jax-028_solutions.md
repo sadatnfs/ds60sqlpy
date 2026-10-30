@@ -9,7 +9,7 @@ Equal counts make the weighting rules coincide; that fixture alone would not exp
 **Expected:** Both outputs two, equal to the mean of local means in this special case.
 
 ```python
-close(mapped_mean(jnp.array([2., 6.]), jnp.array([2., 2.])), [2., 2.])
+close(mapped_mean(jnp.array([2.0, 6.0]), jnp.array([2.0, 2.0])), [2.0, 2.0])
 ```
 
 ## Exercise 2: Add a zero-count participant
@@ -19,7 +19,7 @@ A zero-count participant contributes neither observations nor numerator mass; th
 **Expected:** Three replicated outputs 3.5.
 
 ```python
-close(mapped_mean(jnp.array([2., 12., 0.]), jnp.array([1., 3., 0.])), [3.5, 3.5, 3.5])
+close(mapped_mean(jnp.array([2.0, 12.0, 0.0]), jnp.array([1.0, 3.0, 0.0])), [3.5, 3.5, 3.5])
 ```
 
 ## Exercise 3: Gather participant identity
@@ -29,8 +29,8 @@ Gather retains a participant axis, whereas psum produces a reduced value.
 **Expected:** Each participant receives [2,5].
 
 ```python
-gather = jax.vmap(lambda x: jax.lax.all_gather(x, 'replica'), axis_name='replica')
-close(gather(jnp.array([2., 5.])), [[2., 5.], [2., 5.]])
+gather = jax.vmap(lambda x: jax.lax.all_gather(x, "replica"), axis_name="replica")
+close(gather(jnp.array([2.0, 5.0])), [[2.0, 5.0], [2.0, 5.0]])
 ```
 
 ## Exercise 4: Check a global sum
@@ -40,8 +40,8 @@ Replication of the reduced value does not mean the global sum should be counted 
 **Expected:** Each participant receives 14.
 
 ```python
-summed = jax.vmap(lambda x: jax.lax.psum(x, 'replica'), axis_name='replica')
-close(summed(jnp.array([2., 5., 7.])), [14., 14., 14.])
+summed = jax.vmap(lambda x: jax.lax.psum(x, "replica"), axis_name="replica")
+close(summed(jnp.array([2.0, 5.0, 7.0])), [14.0, 14.0, 14.0])
 ```
 
 ## Exercise 5: Compile the collective model
@@ -61,8 +61,8 @@ This negative control would pass if only equal-sized shards were tested.
 **Expected:** The unweighted result differs from -30.
 
 ```python
-wrong = jnp.mean(jnp.array([-4., -116.]) / local_counts)
-assert not np.isclose(float(wrong), -30.)
+wrong = jnp.mean(jnp.array([-4.0, -116.0]) / local_counts)
+assert not np.isclose(float(wrong), -30.0)
 ```
 
 ## Scope of this evidence

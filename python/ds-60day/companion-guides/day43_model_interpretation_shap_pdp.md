@@ -53,6 +53,8 @@ rf.score(Xte, yte)
 explainer = shap.TreeExplainer(rf, feature_perturbation="tree_path_dependent")
 X_sample = Xte[:200]
 shap_values = explainer.shap_values(X_sample)
+
+
 def select_class_shap(values, feature_shape, class_index=1, class_count=2):
     """Select a classifier output without confusing class and sample axes."""
     if not 0 <= class_index < class_count:
@@ -69,6 +71,7 @@ def select_class_shap(values, feature_shape, class_index=1, class_count=2):
     if selected.shape != feature_shape or not np.isfinite(selected).all():
         raise ValueError("selected SHAP values must be finite and match the features")
     return selected
+
 
 positive_class_values = select_class_shap(shap_values, X_sample.shape)
 # Class1 is benign in this bundled dataset; no causal claim follows.
@@ -160,9 +163,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 
 X, y = load_breast_cancer(return_X_y=True)
-X_train, X_valid, y_train, y_valid = train_test_split(
-    X, y, stratify=y, random_state=4301
-)
+X_train, X_valid, y_train, y_valid = train_test_split(X, y, stratify=y, random_state=4301)
 model = RandomForestClassifier(n_estimators=80, random_state=4301, n_jobs=1)
 model.fit(X_train, y_train)
 row = X_valid[[0]].copy()
@@ -170,8 +171,7 @@ baseline = model.predict_proba(row)[0, 1]
 changed = row.copy()
 changed[0, 0] = np.median(X_train[:, 0])
 perturbed = model.predict_proba(changed)[0, 1]
-print({"baseline": baseline, "one_feature_changed": perturbed,
-       "difference": perturbed - baseline})
+print({"baseline": baseline, "one_feature_changed": perturbed, "difference": perturbed - baseline})
 ```
 
 **Expected observation:** Changing one feature can move the prediction, but the difference is a model sensitivity under an artificial intervention.
@@ -187,13 +187,11 @@ Example A instead of reading it as unrelated syntax.
 from sklearn.inspection import permutation_importance
 
 result = permutation_importance(
-    model, X_valid, y_valid, scoring="roc_auc",
-    n_repeats=8, random_state=4302, n_jobs=1
+    model, X_valid, y_valid, scoring="roc_auc", n_repeats=8, random_state=4302, n_jobs=1
 )
 order = result.importances_mean.argsort()[::-1][:3]
 summary = [
-    (int(i), float(result.importances_mean[i]), float(result.importances_std[i]))
-    for i in order
+    (int(i), float(result.importances_mean[i]), float(result.importances_std[i])) for i in order
 ]
 print(summary)
 assert all(mean >= -3 * std for _, mean, std in summary)

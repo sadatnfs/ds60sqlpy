@@ -118,14 +118,17 @@ identify which line creates each intermediate object.
 ```python
 from collections.abc import Iterable, Iterator
 
+
 def normalize(rows: Iterable[dict[str, str]]) -> Iterator[dict[str, str]]:
     for row in rows:
         yield {"name": row["name"].strip(), "status": row["status"].lower()}
+
 
 def active_only(rows: Iterable[dict[str, str]]) -> Iterator[dict[str, str]]:
     for row in rows:
         if row["status"] == "active":
             yield row
+
 
 source = [{"name": " Ada ", "status": "ACTIVE"}, {"name": "Lin", "status": "inactive"}]
 list(active_only(normalize(source)))
@@ -157,6 +160,7 @@ def batches(items: Iterable[int], size: int) -> Iterator[tuple[int, ...]]:
             batch = []
     if batch:
         yield tuple(batch)
+
 
 list(batches(range(5), 2))
 ```
@@ -215,6 +219,7 @@ of them as blank-code prompts:
 ```python
 from collections.abc import Iterable, Iterator
 
+
 def parsed_integers(lines: Iterable[str]) -> Iterator[int]:
     for line_number, raw in enumerate(lines, start=1):
         text = raw.strip()
@@ -224,6 +229,7 @@ def parsed_integers(lines: Iterable[str]) -> Iterator[int]:
             yield int(text)
         except ValueError as exc:
             raise ValueError(f"line {line_number}: expected integer") from exc
+
 
 result = list(parsed_integers(["10\n", "\n", "20\n"]))
 ```

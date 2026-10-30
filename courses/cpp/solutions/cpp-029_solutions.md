@@ -31,7 +31,10 @@ If a test occasionally reads0 instead of 42, inspect whether it observes complet
 ## Worked example 1
 
 ```cpp
-int answer=0; std::thread t([&]{answer=42;}); t.join(); assert(answer==42);
+int answer = 0;
+std::thread t([&] { answer = 42; });
+t.join();
+assert(answer == 42);
 ```
 
 Expected: After join the result is 42 and the borrowed local is still alive.

@@ -204,9 +204,11 @@ transformation, and a generator when values can be streamed.
 readings = [12, -1, 18, 7, 21]
 valid_squares = [value**2 for value in readings if value >= 0]
 
+
 def batches(values: list[int], size: int):
     for start in range(0, len(values), size):
         yield values[start : start + size]
+
 
 print(list(batches(valid_squares, 2)))
 ```

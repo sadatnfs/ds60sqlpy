@@ -29,9 +29,7 @@ def test_published_package_links_preserve_literal_code() -> None:
         "```python\nvalue = '[literal](../../../../packages/example)'\n```\n"
     )
     after = build["published_package_links"](before)
-    assert after == before.replace(
-        "[Guide](../../../../packages/", "[Guide](../../../packages/", 1
-    )
+    assert after == before.replace("[Guide](../../../../packages/", "[Guide](../../../packages/", 1)
 
 
 def test_all_chapters_have_complete_sources_and_fresh_outputs() -> None:

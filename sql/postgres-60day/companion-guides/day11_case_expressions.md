@@ -100,15 +100,23 @@ These worked excerpts come from `sql/postgres-60day/day11_case_expressions.sql`.
 ### Example 1
 
 ```sql
-SELECT o.order_id, o.total_amount,
-  CASE
-    WHEN o.total_amount >= 1000 THEN 'XL'
-    WHEN o.total_amount >= 300 THEN 'L'
-    WHEN o.total_amount >= 100 THEN 'M'
-    ELSE 'S'
+SELECT
+  o.order_id,
+  o.total_amount,
+  CASE WHEN o.total_amount >= 1000 THEN
+    'XL'
+  WHEN o.total_amount >= 300 THEN
+    'L'
+  WHEN o.total_amount >= 100 THEN
+    'M'
+  ELSE
+    'S'
   END AS order_size
-FROM orders o
-ORDER BY o.total_amount DESC, o.order_id
+FROM
+  orders o
+ORDER BY
+  o.total_amount DESC,
+  o.order_id
 LIMIT 50;
 ```
 
@@ -119,14 +127,29 @@ LIMIT 50;
 ### Example 2
 
 ```sql
-SELECT p.category,
-  SUM(CASE WHEN o.order_date >= now() - interval '30 days' THEN oi.quantity ELSE 0 END) AS qty_30d,
-  SUM(CASE WHEN o.order_date >= now() - interval '90 days' THEN oi.quantity ELSE 0 END) AS qty_90d
-FROM order_items oi
-JOIN orders o ON o.order_id = oi.order_id
-JOIN products p ON p.product_id = oi.product_id
-GROUP BY p.category
-ORDER BY qty_30d DESC, p.category;
+SELECT
+  p.category,
+  SUM(
+    CASE WHEN o.order_date >= now() - interval '30 days' THEN
+      oi.quantity
+    ELSE
+      0
+    END) AS qty_30d,
+  SUM(
+    CASE WHEN o.order_date >= now() - interval '90 days' THEN
+      oi.quantity
+    ELSE
+      0
+    END) AS qty_90d
+FROM
+  order_items oi
+  JOIN orders o ON o.order_id = oi.order_id
+  JOIN products p ON p.product_id = oi.product_id
+GROUP BY
+  p.category
+ORDER BY
+  qty_30d DESC,
+  p.category;
 ```
 
 **How to read it:** Example 2: Start with `order_items`, `orders`, and `products` in `FROM`/`JOIN`; let `GROUP BY` collapse rows to its grouping keys. The final `SELECT` displays `category`, `qty_30d`, and `qty_90d`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.

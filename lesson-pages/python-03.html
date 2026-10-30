@@ -441,6 +441,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
         <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">pass</span><span class="syntax-string">&quot;</span>
     <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">fail</span><span class="syntax-string">&quot;</span>
 
+
 <span class="syntax-punctuation">[</span>classify_score<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-number">42</span><span class="syntax-punctuation">,</span> <span class="syntax-number">75</span><span class="syntax-punctuation">,</span> <span class="syntax-number">95</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span></code></pre>
 <p><strong>Expected observation</strong></p>
 <pre class="highlighted-code"><code class="language-text">`[&#x27;fail&#x27;, &#x27;pass&#x27;, &#x27;distinction&#x27;]`. The guard rejects out-of-domain values before classification.</code></pre>
@@ -454,6 +455,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
         <span class="syntax-keyword">return</span> <span class="syntax-keyword">None</span>
     <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
         <span class="syntax-keyword">return</span> count
+
 
 <span class="syntax-punctuation">[</span>parse_count<span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> text <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string"> 12 </span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">twelve</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span></code></pre>
 <p><strong>Expected observation</strong></p>
@@ -856,7 +858,11 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 
 <span class="syntax-keyword">assert</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>output<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">30</span>
 <span class="syntax-keyword">assert</span> <span class="syntax-punctuation">[</span>output<span class="syntax-punctuation">[</span>index <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> index <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">15</span><span class="syntax-punctuation">,</span> <span class="syntax-number">16</span><span class="syntax-punctuation">,</span> <span class="syntax-number">30</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span>
-    <span class="syntax-string">&quot;</span><span class="syntax-string">Fizz</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Buzz</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">FizzBuzz</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">16</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">FizzBuzz</span><span class="syntax-string">&quot;</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">Fizz</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">Buzz</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">FizzBuzz</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">16</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">FizzBuzz</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
 <span class="syntax-punctuation">]</span></code></pre>
 <p>The combined rule comes first because an <code>elif</code> chain stops at the first true condition.</p>
 <p><strong>Verification evidence:</strong> capture the output lines, assert there are exactly 30, and assert positions 3, 5, 15, 16, and 30 equal <code>Fizz</code>, <code>Buzz</code>, <code>FizzBuzz</code>, <code>16</code>, and <code>FizzBuzz</code>.</p>

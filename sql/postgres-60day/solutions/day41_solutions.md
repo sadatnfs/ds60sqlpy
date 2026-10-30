@@ -73,47 +73,32 @@ Build one row per product category containing:
 SET search_path TO training, public;
 
 WITH lines AS (
-  SELECT p.category,
-         o.order_id,
-         o.customer_id,
-         o.order_date,
-         oi.quantity,
-         oi.unit_price * oi.quantity * (1 - oi.discount) AS revenue
-  FROM orders o
-  JOIN order_items oi USING (order_id)
-  JOIN products p USING (product_id)
-)
-SELECT category,
-       ROUND(SUM(revenue) FILTER (
-         WHERE order_date >= CURRENT_TIMESTAMP - interval '30 days'
-       ), 2) AS revenue_30d,
-       ROUND(SUM(revenue) FILTER (
-         WHERE order_date >= CURRENT_TIMESTAMP - interval '90 days'
-       ), 2) AS revenue_90d,
-       COUNT(DISTINCT order_id) FILTER (
-         WHERE order_date >= CURRENT_TIMESTAMP - interval '30 days'
-       ) AS orders_30d,
-       SUM(quantity) FILTER (
-         WHERE order_date >= CURRENT_TIMESTAMP - interval '30 days'
-       ) AS units_30d,
-       COUNT(DISTINCT customer_id) FILTER (
-         WHERE order_date >= CURRENT_TIMESTAMP - interval '90 days'
-       ) AS customers_90d,
-       ROUND(
-         SUM(revenue) FILTER (
-           WHERE order_date >= CURRENT_TIMESTAMP - interval '30 days'
-         )
-         / NULLIF(
-             COUNT(DISTINCT order_id) FILTER (
-               WHERE order_date >= CURRENT_TIMESTAMP - interval '30 days'
-             ),
-             0
-           ),
-         2
-       ) AS revenue_per_order_30d
-FROM lines
-GROUP BY category
-ORDER BY revenue_30d DESC NULLS LAST, category;
+  SELECT
+    p.category,
+    o.order_id,
+    o.customer_id,
+    o.order_date,
+    oi.quantity,
+    oi.unit_price * oi.quantity * (1 - oi.discount) AS revenue
+  FROM
+    orders o
+    JOIN order_items oi USING (order_id)
+    JOIN products p USING (product_id))
+SELECT
+  category,
+  ROUND(SUM(revenue) FILTER (WHERE order_date >= CURRENT_TIMESTAMP - interval '30 days'), 2) AS revenue_30d,
+  ROUND(SUM(revenue) FILTER (WHERE order_date >= CURRENT_TIMESTAMP - interval '90 days'), 2) AS revenue_90d,
+  COUNT(DISTINCT order_id) FILTER (WHERE order_date >= CURRENT_TIMESTAMP - interval '30 days') AS orders_30d,
+  SUM(quantity) FILTER (WHERE order_date >= CURRENT_TIMESTAMP - interval '30 days') AS units_30d,
+  COUNT(DISTINCT customer_id) FILTER (WHERE order_date >= CURRENT_TIMESTAMP - interval '90 days') AS customers_90d,
+  ROUND(SUM(revenue) FILTER (WHERE order_date >= CURRENT_TIMESTAMP - interval '30 days') / NULLIF (COUNT(DISTINCT order_id) FILTER (WHERE order_date >= CURRENT_TIMESTAMP - interval '30 days'), 0), 2) AS revenue_per_order_30d
+FROM
+  lines
+GROUP BY
+  category
+ORDER BY
+  revenue_30d DESC NULLS LAST,
+  category;
 ```
 
 Expected shape: one row for each category in `training.products`, with six
@@ -141,28 +126,38 @@ products per country.
 SET search_path TO training, public;
 
 WITH product_revenue AS (
-  SELECT c.country,
-         p.product_id,
-         p.name,
-         SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS revenue
-  FROM customers c
-  JOIN orders o USING (customer_id)
-  JOIN order_items oi USING (order_id)
-  JOIN products p USING (product_id)
-  GROUP BY c.country, p.product_id, p.name
-), ranked AS (
-  SELECT *,
-         ROW_NUMBER() OVER (
-           PARTITION BY country ORDER BY revenue DESC, product_id
-         ) AS product_rank
-  FROM product_revenue
+  SELECT
+    c.country,
+    p.product_id,
+    p.name,
+    SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS revenue
+  FROM
+    customers c
+    JOIN orders o USING (customer_id)
+    JOIN order_items oi USING (order_id)
+    JOIN products p USING (product_id)
+  GROUP BY
+    c.country, p.product_id, p.name
+),
+ranked AS (
+  SELECT
+    *,
+    ROW_NUMBER() OVER (PARTITION BY country ORDER BY revenue DESC,
+      product_id) AS product_rank
+  FROM
+    product_revenue
 )
-SELECT country,
-       string_agg(name, ', ' ORDER BY product_rank) AS top_five_products
-FROM ranked
-WHERE product_rank <= 5
-GROUP BY country
-ORDER BY country;
+SELECT
+  country,
+  string_agg(name, ', ' ORDER BY product_rank) AS top_five_products
+FROM
+  ranked
+WHERE
+  product_rank <= 5
+GROUP BY
+  country
+ORDER BY
+  country;
 ```
 
 Expected shape: one row per represented country and one comma-separated label
@@ -194,33 +189,49 @@ generated level.
 
 ```sql
 WITH lines AS (
-  SELECT c.country,
-         p.category,
-         oi.quantity * oi.unit_price * (1 - oi.discount) AS revenue
-  FROM orders o
-  JOIN customers c USING (customer_id)
-  JOIN order_items oi USING (order_id)
-  JOIN products p USING (product_id)
-), cube_rows AS (
-  SELECT country,
-         category,
-         SUM(revenue) AS revenue,
-         GROUPING(country, category) AS grouping_mask
-  FROM lines
-  GROUP BY CUBE (country, category)
-)
-SELECT country,
-       category,
-       revenue,
-       grouping_mask,
-       CASE grouping_mask
-         WHEN 0 THEN 'detail'
-         WHEN 1 THEN 'country subtotal'
-         WHEN 2 THEN 'category subtotal'
-         WHEN 3 THEN 'grand total'
-       END AS grouping_level
-FROM cube_rows
-ORDER BY grouping_mask, country, category;
+  SELECT
+    c.country,
+    p.category,
+    oi.quantity * oi.unit_price * (1 - oi.discount) AS revenue
+  FROM
+    orders o
+    JOIN customers c USING (customer_id)
+    JOIN order_items oi USING (order_id)
+    JOIN products p USING (product_id)
+),
+cube_rows AS (
+  SELECT
+    country,
+    category,
+    SUM(revenue) AS revenue,
+    GROUPING (country,
+    category) AS grouping_mask
+  FROM
+    lines
+  GROUP BY
+    CUBE (country,
+    category))
+  SELECT
+    country,
+    category,
+    revenue,
+    grouping_mask,
+    CASE grouping_mask
+    WHEN 0 THEN
+      'detail'
+    WHEN 1 THEN
+      'country subtotal'
+    WHEN 2 THEN
+      'category subtotal'
+    WHEN 3 THEN
+      'grand total'
+    END AS grouping_level
+  FROM
+    cube_rows
+  ORDER BY
+    grouping_mask,
+    country,
+    category;
 ```
 
 Read this in three stages:
@@ -266,20 +277,30 @@ allowed by the model, keeps grouping flag zero and receives a different label.
 
 ```sql
 WITH country_input AS (
-  SELECT country
-  FROM customers
+  SELECT
+    country
+  FROM
+    customers
   UNION ALL
-  SELECT NULL::text
+  SELECT
+    NULL::text
 )
-SELECT CASE
-         WHEN GROUPING(country) = 1 THEN 'ALL COUNTRIES'
-         ELSE COALESCE(country, '(stored null)')
-       END AS country_label,
-       GROUPING(country) AS is_subtotal,
-       COUNT(*) AS customers
-FROM country_input
-GROUP BY GROUPING SETS ((country), ())
-ORDER BY is_subtotal, country_label;
+SELECT
+  CASE WHEN GROUPING (country) = 1 THEN
+    'ALL COUNTRIES'
+  ELSE
+    COALESCE(country, '(stored null)')
+  END AS country_label,
+  GROUPING (country) AS is_subtotal,
+  COUNT(*) AS customers
+FROM
+  country_input
+GROUP BY
+  GROUPING SETS ((country),
+    ())
+ORDER BY
+  is_subtotal,
+  country_label;
 ```
 
 The extra `NULL::text` is input data inside a CTE; it is not passed to
@@ -303,11 +324,10 @@ receives `1`. The labels branch on that flag before using `COALESCE`.
 `COALESCE(..., '{}'::text[])`; the explicit type must match the aggregate type.
 
 ```sql
-SELECT COALESCE(
-         array_agg(email) FILTER (WHERE false),
-         '{}'::text[]
-       ) AS empty_email_array
-FROM customers;
+SELECT
+  COALESCE(array_agg(email) FILTER (WHERE false), '{}'::text[]) AS empty_email_array
+FROM
+  customers;
 ```
 
 There is no `GROUP BY`, so the aggregate query returns one scalar row even

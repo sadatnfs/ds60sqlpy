@@ -41,24 +41,25 @@ else:
         raise RuntimeError("Existing experiment has a different artifact location")
     experiment_id = experiment.experiment_id
 mlflow.set_experiment(experiment_id=experiment_id)
-
 ```
 
 Worked reference for Exercise 1; Grid search with autologging
 ```python
 mlflow.sklearn.autolog(log_models=False, log_input_examples=False, silent=True)
 
-param_grid = {'n_estimators':[30,60], 'max_depth':[None,5,10]}
+param_grid = {"n_estimators": [30, 60], "max_depth": [None, 5, 10]}
 rf = RandomForestClassifier(random_state=0)
-cv = GridSearchCV(rf, param_grid=param_grid, scoring='roc_auc', cv=3, n_jobs=1, return_train_score=True)
+cv = GridSearchCV(
+    rf, param_grid=param_grid, scoring="roc_auc", cv=3, n_jobs=1, return_train_score=True
+)
 
-with mlflow.start_run(run_name='rf_grid'):
+with mlflow.start_run(run_name="rf_grid"):
     cv.fit(Xtr, ytr)
     best_auc = cv.best_score_
-    mlflow.log_metric('cv_auc_mean', best_auc)
-    print('Best CV AUC:', best_auc)
+    mlflow.log_metric("cv_auc_mean", best_auc)
+    print("Best CV AUC:", best_auc)
 
-print('Best params:', cv.best_params_)
+print("Best params:", cv.best_params_)
 ```
 Explanation
 - autolog captures parameters and metrics; model inference/package inspection is disabled during the grid search. The winning model is logged explicitly using the already prepared locked environment.
@@ -68,23 +69,26 @@ Explanation
 
 Worked reference for Exercise 2; Log and load best model
 ```python
-with mlflow.start_run(run_name='rf_best_model') as run:
+with mlflow.start_run(run_name="rf_best_model") as run:
     best = RandomForestClassifier(random_state=0, **cv.best_params_).fit(Xtr, ytr)
-    proba = best.predict_proba(Xte)[:,1]
+    proba = best.predict_proba(Xte)[:, 1]
     test_auc = roc_auc_score(yte, proba)
-    mlflow.log_metric('test_auc', test_auc)
+    mlflow.log_metric("test_auc", test_auc)
     model_info = mlflow.sklearn.log_model(
-        best, name="model", input_example=Xtr[:2], pip_requirements=[],
+        best,
+        name="model",
+        input_example=Xtr[:2],
+        pip_requirements=[],
         # Only our freshly fitted local RandomForest is trusted here.
         skops_trusted_types=["sklearn.tree._tree.Tree"],
     )
     run_id = run.info.run_id
 
-print('Logged under run:', run_id)
+print("Logged under run:", run_id)
 
 # Load model later
 loaded = mlflow.sklearn.load_model(model_info.model_uri)
-print('Loaded AUC:', roc_auc_score(yte, loaded.predict_proba(Xte)[:,1]))
+print("Loaded AUC:", roc_auc_score(yte, loaded.predict_proba(Xte)[:, 1]))
 ```
 Notes
 - Track the run_id to retrieve artifacts

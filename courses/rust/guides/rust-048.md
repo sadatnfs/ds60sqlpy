@@ -43,13 +43,15 @@ Read the operations in dependency order. Record which values exist before each l
 The calculation preserves a complete accounting of its five input positions.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         use arrow::array::{Array, Int32Array};
         let values = Int32Array::from(vec![Some(2), None, Some(3), Some(-1), Some(0)]);
-        let accepted: Vec<_> = values.iter().flatten().filter(|value| *value >= 0).collect();
+        let accepted: Vec<_> = values
+            .iter()
+            .flatten()
+            .filter(|value| *value >= 0)
+            .collect();
         assert_eq!(accepted.iter().sum::<i32>(), 5);
         assert_eq!(accepted.len(), 3);
         assert_eq!(values.null_count(), 1);
@@ -67,8 +69,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 A total of zero alone cannot express this distinction.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         use arrow::array::{Array, Int32Array};

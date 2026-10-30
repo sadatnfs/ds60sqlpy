@@ -22,7 +22,7 @@ from pathlib import Path
 # 2) Reproducibility and device
 torch.manual_seed(0)
 np.random.seed(0)
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # 3) Paths and a disclosed mechanics-only fallback
 root = Path("data")
@@ -85,9 +85,7 @@ Worked reference for Exercise 1; Linear head then unfreeze last block
 ```python
 # 1) Reuse cached weights without making a surprise network request
 weights = models.ResNet18_Weights.DEFAULT
-checkpoint = (
-    Path(torch.hub.get_dir()) / "checkpoints" / Path(weights.url).name
-)
+checkpoint = Path(torch.hub.get_dir()) / "checkpoints" / Path(weights.url).name
 if checkpoint.exists():
     model = models.resnet18(weights=None)
     model.load_state_dict(torch.load(checkpoint, map_location="cpu", weights_only=True))
@@ -110,6 +108,7 @@ model = model.to(device)
 opt = torch.optim.Adam(model.fc.parameters(), lr=1e-3)
 loss_fn = nn.CrossEntropyLoss()
 
+
 def run_epoch(train=True):
     dl = train_dl if train else valid_dl
     model.train() if train else model.eval()
@@ -117,36 +116,48 @@ def run_epoch(train=True):
     for module in model.modules():
         if isinstance(module, nn.modules.batchnorm._BatchNorm):
             module.eval()
-    total=0; correct=0; loss_sum=0.0
+    total = 0
+    correct = 0
+    loss_sum = 0.0
     with torch.set_grad_enabled(train):
         for xb, yb in dl:
             xb, yb = xb.to(device), yb.to(device)
-            if train: opt.zero_grad()
+            if train:
+                opt.zero_grad()
             logits = model(xb)
             loss = loss_fn(logits, yb)
-            if train: loss.backward(); opt.step()
-            loss_sum += loss.item()*xb.size(0)
-            correct += (logits.argmax(1)==yb).sum().item(); total += xb.size(0)
-    return loss_sum/total, correct/total
+            if train:
+                loss.backward()
+                opt.step()
+            loss_sum += loss.item() * xb.size(0)
+            correct += (logits.argmax(1) == yb).sum().item()
+            total += xb.size(0)
+    return loss_sum / total, correct / total
 
-hist_head = {'tr':[], 'va':[]}
+
+hist_head = {"tr": [], "va": []}
 for _ in range(5):
     tr_loss, tr_acc = run_epoch(train=True)
     va_loss, va_acc = run_epoch(train=False)
-    hist_head['tr'].append((tr_loss, tr_acc)); hist_head['va'].append((va_loss, va_acc))
+    hist_head["tr"].append((tr_loss, tr_acc))
+    hist_head["va"].append((va_loss, va_acc))
 
 # 5) Unfreeze last block and use smaller LR
-for p in model.layer4.parameters(): p.requires_grad = True
-opt = torch.optim.Adam([
-    {'params': model.fc.parameters(), 'lr': 1e-3},
-    {'params': model.layer4.parameters(), 'lr': 3e-4},
-])
+for p in model.layer4.parameters():
+    p.requires_grad = True
+opt = torch.optim.Adam(
+    [
+        {"params": model.fc.parameters(), "lr": 1e-3},
+        {"params": model.layer4.parameters(), "lr": 3e-4},
+    ]
+)
 
-hist_tune = {'tr':[], 'va':[]}
+hist_tune = {"tr": [], "va": []}
 for _ in range(5):
     tr_loss, tr_acc = run_epoch(train=True)
     va_loss, va_acc = run_epoch(train=False)
-    hist_tune['tr'].append((tr_loss, tr_acc)); hist_tune['va'].append((va_loss, va_acc))
+    hist_tune["tr"].append((tr_loss, tr_acc))
+    hist_tune["va"].append((va_loss, va_acc))
 ```
 Line‑by‑line
 - Freeze: prevents backbone weights from updating; BatchNorm is explicitly kept in evaluation mode so its running buffers also stay fixed
@@ -157,12 +168,15 @@ Line‑by‑line
 
 Worked reference for Exercise 2; Augmentation
 ```python
-aug_tfms = transforms.Compose([
-    transforms.RandomResizedCrop(64, scale=(0.8, 1.0)),
-    transforms.RandomHorizontalFlip(p=0.5),
-    transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2),
-    transforms.ToTensor(), transforms.Normalize(mean, std)
-])
+aug_tfms = transforms.Compose(
+    [
+        transforms.RandomResizedCrop(64, scale=(0.8, 1.0)),
+        transforms.RandomHorizontalFlip(p=0.5),
+        transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2),
+        transforms.ToTensor(),
+        transforms.Normalize(mean, std),
+    ]
+)
 if using_image_folder:
     train_ds_aug = datasets.ImageFolder(train_dir, transform=aug_tfms)
 else:
@@ -182,11 +196,12 @@ train_dl_aug = DataLoader(
 
 # Re-train head phase with augmentation for a few epochs
 train_dl = train_dl_aug  # swap in
-hist_aug = {'tr':[], 'va':[]}
+hist_aug = {"tr": [], "va": []}
 for _ in range(5):
     tr_loss, tr_acc = run_epoch(train=True)
     va_loss, va_acc = run_epoch(train=False)
-    hist_aug['tr'].append((tr_loss, tr_acc)); hist_aug['va'].append((va_loss, va_acc))
+    hist_aug["tr"].append((tr_loss, tr_acc))
+    hist_aug["va"].append((va_loss, va_acc))
 ```
 Notes
 - RandomResizedCrop increases robustness to scale/position
@@ -201,19 +216,27 @@ Worked reference for Exercise 3; OneCycleLR
 max_lr = 1e-3
 steps_per_epoch = len(train_dl)
 opt = torch.optim.Adam(model.parameters(), lr=max_lr)
-sched = torch.optim.lr_scheduler.OneCycleLR(opt, max_lr=max_lr,
-    epochs=5, steps_per_epoch=steps_per_epoch, pct_start=0.3, div_factor=10)
+sched = torch.optim.lr_scheduler.OneCycleLR(
+    opt, max_lr=max_lr, epochs=5, steps_per_epoch=steps_per_epoch, pct_start=0.3, div_factor=10
+)
 
 lrs = []
 for epoch in range(5):
     model.train()
     for xb, yb in train_dl:
         xb, yb = xb.to(device), yb.to(device)
-        opt.zero_grad(); loss = loss_fn(model(xb), yb)
-        loss.backward(); opt.step(); sched.step()
+        opt.zero_grad()
+        loss = loss_fn(model(xb), yb)
+        loss.backward()
+        opt.step()
+        sched.step()
         lrs.append(sched.get_last_lr()[0])
 
-plt.plot(lrs); plt.title('OneCycle LR'); plt.xlabel('Step'); plt.ylabel('LR'); plt.show()
+plt.plot(lrs)
+plt.title("OneCycle LR")
+plt.xlabel("Step")
+plt.ylabel("LR")
+plt.show()
 ```
 Explanation
 - OneCycle warms up to max_lr then cools down; often yields faster, smoother training

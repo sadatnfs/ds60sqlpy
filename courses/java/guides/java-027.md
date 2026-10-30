@@ -55,28 +55,99 @@ The compiler target is explicit. A file named.class would not by itself prove th
 import java.util.*;
 
 public class Main {
-    static final class BuildFixture implements AutoCloseable {
-        final java.nio.file.Path root,source,classes;
-        BuildFixture() throws Exception {root=java.nio.file.Files.createTempDirectory("ds60-build-");source=root.resolve("Hello.java");classes=root.resolve("classes");java.nio.file.Files.createDirectories(classes);java.nio.file.Files.writeString(source,"public class Hello { public static void main(String[] args){System.out.println(\"build-ok\");} }");}
-        int compile(){var compiler=javax.tools.ToolProvider.getSystemJavaCompiler();if(compiler==null)throw new IllegalStateException("JDK required");return compiler.run(null,null,null,"--release","21","-d",classes.toString(),source.toString());}
-        java.nio.file.Path pack(String name) throws Exception {var target=root.resolve(name);var jar=java.util.spi.ToolProvider.findFirst("jar").orElseThrow();var output=new java.io.StringWriter();int result=jar.run(new java.io.PrintWriter(output),new java.io.PrintWriter(output),"--create","--file",target.toString(),"--main-class","Hello","--date=2020-01-01T00:00:02Z","-C",classes.toString(),".");if(result!=0)throw new AssertionError(output.toString());return target;}
-        String childStderr="";
-        String run(java.nio.file.Path jar) throws Exception {
-            String executable=java.nio.file.Path.of(System.getProperty("java.home"),"bin","java").toString();
-            var stdout=root.resolve("child.stdout");var stderr=root.resolve("child.stderr");
-            var process=new ProcessBuilder(executable,"-ea","-jar",jar.toString()).redirectOutput(stdout.toFile()).redirectError(stderr.toFile()).start();
-            if(!process.waitFor(5,java.util.concurrent.TimeUnit.SECONDS)){process.destroyForcibly();throw new AssertionError("JAR timeout");}
-            String text=java.nio.file.Files.readString(stdout);childStderr=java.nio.file.Files.readString(stderr);
-            if(process.exitValue()!=0)throw new AssertionError("child exit "+process.exitValue()+": "+childStderr);
-            return text;
-        }
-        public void close() throws java.io.IOException {try(var paths=java.nio.file.Files.walk(root)){for(var path:paths.sorted(Comparator.reverseOrder()).toList())java.nio.file.Files.deleteIfExists(path);}}
-    }
-    public static void main(String[] args) throws Exception {
-        try(BuildFixture fixture=new BuildFixture()) {assert fixture.compile()==0;assert java.nio.file.Files.isRegularFile(fixture.classes.resolve("Hello.class"));}
-    }
-}
 
+  static final class BuildFixture implements AutoCloseable {
+
+    final java.nio.file.Path root, source, classes;
+
+    BuildFixture() throws Exception {
+      root = java.nio.file.Files.createTempDirectory("ds60-build-");
+      source = root.resolve("Hello.java");
+      classes = root.resolve("classes");
+      java.nio.file.Files.createDirectories(classes);
+      java.nio.file.Files.writeString(
+        source,
+        "public class Hello { public static void main(String[] args){System.out.println(\"build-ok\");} }"
+      );
+    }
+
+    int compile() {
+      var compiler = javax.tools.ToolProvider.getSystemJavaCompiler();
+      if (compiler == null) throw new IllegalStateException("JDK required");
+      return compiler.run(
+        null,
+        null,
+        null,
+        "--release",
+        "21",
+        "-d",
+        classes.toString(),
+        source.toString()
+      );
+    }
+
+    java.nio.file.Path pack(String name) throws Exception {
+      var target = root.resolve(name);
+      var jar = java.util.spi.ToolProvider.findFirst("jar").orElseThrow();
+      var output = new java.io.StringWriter();
+      int result = jar.run(
+        new java.io.PrintWriter(output),
+        new java.io.PrintWriter(output),
+        "--create",
+        "--file",
+        target.toString(),
+        "--main-class",
+        "Hello",
+        "--date=2020-01-01T00:00:02Z",
+        "-C",
+        classes.toString(),
+        "."
+      );
+      if (result != 0) throw new AssertionError(output.toString());
+      return target;
+    }
+
+    String childStderr = "";
+
+    String run(java.nio.file.Path jar) throws Exception {
+      String executable = java.nio.file.Path.of(
+        System.getProperty("java.home"),
+        "bin",
+        "java"
+      ).toString();
+      var stdout = root.resolve("child.stdout");
+      var stderr = root.resolve("child.stderr");
+      var process = new ProcessBuilder(executable, "-ea", "-jar", jar.toString())
+        .redirectOutput(stdout.toFile())
+        .redirectError(stderr.toFile())
+        .start();
+      if (!process.waitFor(5, java.util.concurrent.TimeUnit.SECONDS)) {
+        process.destroyForcibly();
+        throw new AssertionError("JAR timeout");
+      }
+      String text = java.nio.file.Files.readString(stdout);
+      childStderr = java.nio.file.Files.readString(stderr);
+      if (process.exitValue() != 0) throw new AssertionError(
+        "child exit " + process.exitValue() + ": " + childStderr
+      );
+      return text;
+    }
+
+    public void close() throws java.io.IOException {
+      try (var paths = java.nio.file.Files.walk(root)) {
+        for (var path : paths.sorted(Comparator.reverseOrder()).toList())
+          java.nio.file.Files.deleteIfExists(path);
+      }
+    }
+  }
+
+  public static void main(String[] args) throws Exception {
+    try (BuildFixture fixture = new BuildFixture()) {
+      assert fixture.compile() == 0;
+      assert java.nio.file.Files.isRegularFile(fixture.classes.resolve("Hello.class"));
+    }
+  }
+}
 ```
 
 **Expected:** compiler exit 0;Hello.class exists.
@@ -89,33 +160,108 @@ The archive contains both bytecode and entrypoint metadata. These are separate c
 import java.util.*;
 
 public class Main {
-    static final class BuildFixture implements AutoCloseable {
-        final java.nio.file.Path root,source,classes;
-        BuildFixture() throws Exception {root=java.nio.file.Files.createTempDirectory("ds60-build-");source=root.resolve("Hello.java");classes=root.resolve("classes");java.nio.file.Files.createDirectories(classes);java.nio.file.Files.writeString(source,"public class Hello { public static void main(String[] args){System.out.println(\"build-ok\");} }");}
-        int compile(){var compiler=javax.tools.ToolProvider.getSystemJavaCompiler();if(compiler==null)throw new IllegalStateException("JDK required");return compiler.run(null,null,null,"--release","21","-d",classes.toString(),source.toString());}
-        java.nio.file.Path pack(String name) throws Exception {var target=root.resolve(name);var jar=java.util.spi.ToolProvider.findFirst("jar").orElseThrow();var output=new java.io.StringWriter();int result=jar.run(new java.io.PrintWriter(output),new java.io.PrintWriter(output),"--create","--file",target.toString(),"--main-class","Hello","--date=2020-01-01T00:00:02Z","-C",classes.toString(),".");if(result!=0)throw new AssertionError(output.toString());return target;}
-        String childStderr="";
-        String run(java.nio.file.Path jar) throws Exception {
-            String executable=java.nio.file.Path.of(System.getProperty("java.home"),"bin","java").toString();
-            var stdout=root.resolve("child.stdout");var stderr=root.resolve("child.stderr");
-            var process=new ProcessBuilder(executable,"-ea","-jar",jar.toString()).redirectOutput(stdout.toFile()).redirectError(stderr.toFile()).start();
-            if(!process.waitFor(5,java.util.concurrent.TimeUnit.SECONDS)){process.destroyForcibly();throw new AssertionError("JAR timeout");}
-            String text=java.nio.file.Files.readString(stdout);childStderr=java.nio.file.Files.readString(stderr);
-            if(process.exitValue()!=0)throw new AssertionError("child exit "+process.exitValue()+": "+childStderr);
-            return text;
-        }
-        public void close() throws java.io.IOException {try(var paths=java.nio.file.Files.walk(root)){for(var path:paths.sorted(Comparator.reverseOrder()).toList())java.nio.file.Files.deleteIfExists(path);}}
-    }
-    public static void main(String[] args) throws Exception {
-        try(BuildFixture fixture=new BuildFixture()) {assert fixture.compile()==0;assert java.nio.file.Files.isRegularFile(fixture.classes.resolve("Hello.class"));}
 
-        try(BuildFixture fixture=new BuildFixture()) {
-            assert fixture.compile()==0;var jar=fixture.pack("one.jar");
-            try(var archive=new java.util.jar.JarFile(jar.toFile())){assert archive.getJarEntry("Hello.class")!=null;assert archive.getManifest().getMainAttributes().getValue("Main-Class").equals("Hello");}
-        }
+  static final class BuildFixture implements AutoCloseable {
+
+    final java.nio.file.Path root, source, classes;
+
+    BuildFixture() throws Exception {
+      root = java.nio.file.Files.createTempDirectory("ds60-build-");
+      source = root.resolve("Hello.java");
+      classes = root.resolve("classes");
+      java.nio.file.Files.createDirectories(classes);
+      java.nio.file.Files.writeString(
+        source,
+        "public class Hello { public static void main(String[] args){System.out.println(\"build-ok\");} }"
+      );
     }
+
+    int compile() {
+      var compiler = javax.tools.ToolProvider.getSystemJavaCompiler();
+      if (compiler == null) throw new IllegalStateException("JDK required");
+      return compiler.run(
+        null,
+        null,
+        null,
+        "--release",
+        "21",
+        "-d",
+        classes.toString(),
+        source.toString()
+      );
+    }
+
+    java.nio.file.Path pack(String name) throws Exception {
+      var target = root.resolve(name);
+      var jar = java.util.spi.ToolProvider.findFirst("jar").orElseThrow();
+      var output = new java.io.StringWriter();
+      int result = jar.run(
+        new java.io.PrintWriter(output),
+        new java.io.PrintWriter(output),
+        "--create",
+        "--file",
+        target.toString(),
+        "--main-class",
+        "Hello",
+        "--date=2020-01-01T00:00:02Z",
+        "-C",
+        classes.toString(),
+        "."
+      );
+      if (result != 0) throw new AssertionError(output.toString());
+      return target;
+    }
+
+    String childStderr = "";
+
+    String run(java.nio.file.Path jar) throws Exception {
+      String executable = java.nio.file.Path.of(
+        System.getProperty("java.home"),
+        "bin",
+        "java"
+      ).toString();
+      var stdout = root.resolve("child.stdout");
+      var stderr = root.resolve("child.stderr");
+      var process = new ProcessBuilder(executable, "-ea", "-jar", jar.toString())
+        .redirectOutput(stdout.toFile())
+        .redirectError(stderr.toFile())
+        .start();
+      if (!process.waitFor(5, java.util.concurrent.TimeUnit.SECONDS)) {
+        process.destroyForcibly();
+        throw new AssertionError("JAR timeout");
+      }
+      String text = java.nio.file.Files.readString(stdout);
+      childStderr = java.nio.file.Files.readString(stderr);
+      if (process.exitValue() != 0) throw new AssertionError(
+        "child exit " + process.exitValue() + ": " + childStderr
+      );
+      return text;
+    }
+
+    public void close() throws java.io.IOException {
+      try (var paths = java.nio.file.Files.walk(root)) {
+        for (var path : paths.sorted(Comparator.reverseOrder()).toList())
+          java.nio.file.Files.deleteIfExists(path);
+      }
+    }
+  }
+
+  public static void main(String[] args) throws Exception {
+    try (BuildFixture fixture = new BuildFixture()) {
+      assert fixture.compile() == 0;
+      assert java.nio.file.Files.isRegularFile(fixture.classes.resolve("Hello.class"));
+    }
+
+    try (BuildFixture fixture = new BuildFixture()) {
+      assert fixture.compile() == 0;
+      var jar = fixture.pack("one.jar");
+      try (var archive = new java.util.jar.JarFile(jar.toFile())) {
+        assert archive.getJarEntry("Hello.class") != null;
+        assert archive.getManifest().getMainAttributes().getValue("Main-Class").equals("Hello");
+      }
+    }
+  }
 }
-
 ```
 
 **Expected:** JAR exists andcontainsHello.class.

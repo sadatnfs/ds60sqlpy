@@ -142,11 +142,13 @@ A rolling statistic includes nearby history; a lag exposes a prior observation. 
 identify which line creates each intermediate object.
 
 ```python
-time_features = pd.DataFrame({
-    "sales": daily,
-    "rolling_3": daily.rolling(3, min_periods=1).mean(),
-    "previous_day": daily.shift(1),
-})
+time_features = pd.DataFrame(
+    {
+        "sales": daily,
+        "rolling_3": daily.rolling(3, min_periods=1).mean(),
+        "previous_day": daily.shift(1),
+    }
+)
 time_features.round(2)
 ```
 

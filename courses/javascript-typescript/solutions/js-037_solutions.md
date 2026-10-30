@@ -33,7 +33,19 @@ The injected wait records policy without sleeping. The result demonstrates class
 ```javascript
 let attempts = 0;
 const waits = [];
-const result = await retry(async () => { attempts += 1; if (attempts < 3) throw Object.assign(new Error('temporary'), { transient: true }); return 'ready'; }, { wait: async value => { waits.push(value); }, random: () => 0.5 });
+const result = await retry(
+  async () => {
+    attempts += 1;
+    if (attempts < 3) throw Object.assign(new Error('temporary'), { transient: true });
+    return 'ready';
+  },
+  {
+    wait: async (value) => {
+      waits.push(value);
+    },
+    random: () => 0.5,
+  },
+);
 assert.equal(result, 'ready');
 assert.equal(attempts, 3);
 assert.deepEqual(waits, [50, 100]);
@@ -51,10 +63,25 @@ A retry policy must retain a bounded final failure. Converting exhaustion into a
 
 ```javascript
 let permanent = 0;
-await assert.rejects(retry(async () => { permanent += 1; throw new Error('permanent'); }), /permanent/u);
+await assert.rejects(
+  retry(async () => {
+    permanent += 1;
+    throw new Error('permanent');
+  }),
+  /permanent/u,
+);
 assert.equal(permanent, 1);
 let transient = 0;
-await assert.rejects(retry(async () => { transient += 1; throw Object.assign(new Error('still unavailable'), { transient: true }); }, { wait: async () => {} }), /still unavailable/u);
+await assert.rejects(
+  retry(
+    async () => {
+      transient += 1;
+      throw Object.assign(new Error('still unavailable'), { transient: true });
+    },
+    { wait: async () => {} },
+  ),
+  /still unavailable/u,
+);
 assert.equal(transient, 3);
 ```
 
@@ -106,23 +133,37 @@ The scheduler limits started operations, not merely the size of a Promise result
 ```javascript
 let active = 0;
 let peak = 0;
-const result = await mapBounded([1, 2, 3, 4], 2, async value => {
-  active += 1; peak = Math.max(peak, active);
-  try { await delay(1); return value * 2; }
-  finally { active -= 1; }
+const result = await mapBounded([1, 2, 3, 4], 2, async (value) => {
+  active += 1;
+  peak = Math.max(peak, active);
+  try {
+    await delay(1);
+    return value * 2;
+  } finally {
+    active -= 1;
+  }
 });
 assert.deepEqual(result, [2, 4, 6, 8]);
 assert.ok(peak <= 2 && peak > 0);
 assert.equal(active, 0);
 const started = [];
-await assert.rejects(mapBounded([1, 2, 3, 4], 2, async value => {
-  started.push(value); active += 1;
-  try { if (value === 2) throw new Error('controlled failure'); await delay(1); return value; }
-  finally { active -= 1; }
-}), /controlled failure/u);
+await assert.rejects(
+  mapBounded([1, 2, 3, 4], 2, async (value) => {
+    started.push(value);
+    active += 1;
+    try {
+      if (value === 2) throw new Error('controlled failure');
+      await delay(1);
+      return value;
+    } finally {
+      active -= 1;
+    }
+  }),
+  /controlled failure/u,
+);
 assert.deepEqual(started, [1, 2]);
 assert.equal(active, 0);
-assert.deepEqual(await mapBounded([], 2, async value => value), []);
+assert.deepEqual(await mapBounded([], 2, async (value) => value), []);
 ```
 
 **Expected:** results 2,4,6,8; peak active at most 2; active returns to 0.
@@ -140,7 +181,16 @@ const controller = new AbortController();
 const reason = new Error('cancelled before start');
 controller.abort(reason);
 let attempts = 0;
-await assert.rejects(retry(async () => { attempts += 1; return 1; }, { signal: controller.signal }), error => error === reason);
+await assert.rejects(
+  retry(
+    async () => {
+      attempts += 1;
+      return 1;
+    },
+    { signal: controller.signal },
+  ),
+  (error) => error === reason,
+);
 assert.equal(attempts, 0);
 ```
 

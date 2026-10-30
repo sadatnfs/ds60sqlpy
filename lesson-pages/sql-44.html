@@ -432,22 +432,39 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
 <p>These worked excerpts come from <code>sql/postgres-60day/day44_monitoring_diagnostics.sql</code>. Use <strong>Whole SQL lesson (psql)</strong> in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared <code>psql</code> routes are described above.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> pid<span class="syntax-punctuation">,</span> usename<span class="syntax-punctuation">,</span> datname<span class="syntax-punctuation">,</span> <span class="syntax-keyword">state</span><span class="syntax-punctuation">,</span> query_start<span class="syntax-punctuation">,</span> NOW<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> query_start <span class="syntax-keyword">AS</span> running_for<span class="syntax-punctuation">,</span> <span class="syntax-keyword">left</span><span class="syntax-punctuation">(</span>query<span class="syntax-punctuation">,</span> <span class="syntax-number">120</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> query
-<span class="syntax-keyword">FROM</span> pg_stat_activity
-<span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">state</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;idle&#x27;</span>
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> running_for <span class="syntax-keyword">DESC</span>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  pid<span class="syntax-punctuation">,</span>
+  usename<span class="syntax-punctuation">,</span>
+  datname<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">state</span><span class="syntax-punctuation">,</span>
+  query_start<span class="syntax-punctuation">,</span>
+  NOW<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> query_start <span class="syntax-keyword">AS</span> running_for<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">left</span> <span class="syntax-punctuation">(</span>query<span class="syntax-punctuation">,</span>
+    <span class="syntax-number">120</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> query
+<span class="syntax-keyword">FROM</span>
+  pg_stat_activity
+<span class="syntax-keyword">WHERE</span>
+  <span class="syntax-keyword">state</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;idle&#x27;</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  running_for <span class="syntax-keyword">DESC</span>
 <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">20</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 1: Start with <code>pg_stat_activity</code> in <code>FROM</code>/<code>JOIN</code>; let <code>WHERE</code> remove nonqualifying rows. The final <code>SELECT</code> displays <code>pid</code>, <code>usename</code>, <code>datname</code>, <code>state</code>, <code>query_start</code>, <code>running_for</code>, and <code>query</code>. <code>ORDER BY</code> determines presentation order and the final <code>LIMIT 20</code> caps displayed rows. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 1 returns one row per <code>pid</code>, <code>usename</code>, and <code>datname</code>, capped at 20 rows with columns <code>pid</code>, <code>usename</code>, <code>datname</code>, <code>state</code>, <code>query_start</code>, and <code>running_for</code> from <code>pg_stat_activity</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-keyword">ANALYZE</span>
-<span class="syntax-keyword">SELECT</span> p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span> <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>quantity<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> qty
-<span class="syntax-keyword">FROM</span> order_items oi
-<span class="syntax-keyword">JOIN</span> products p <span class="syntax-keyword">ON</span> p<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>product_id
-<span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">ON</span> o<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>order_id
-<span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> now<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;180 days&#x27;</span>
-<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>category
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> qty <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span></code></pre>
+<span class="syntax-keyword">SELECT</span>
+  p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>quantity<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> qty
+<span class="syntax-keyword">FROM</span>
+  order_items oi
+  <span class="syntax-keyword">JOIN</span> products p <span class="syntax-keyword">ON</span> p<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>product_id
+  <span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">ON</span> o<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>order_id
+<span class="syntax-keyword">WHERE</span>
+  o<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> now<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;180 days&#x27;</span>
+<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+  p<span class="syntax-punctuation">.</span>category
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  qty <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 2 returns plan rows rather than business rows. The node tree is evidence about one execution strategy; it does not replace a correctness check on the underlying query.</p>
 <p><strong>Expected result/shape:</strong> Example 2 prints a plan tree, not business rows. Run the underlying <code>SELECT</code> separately and reconcile its <code>category</code> key set and row count over <code>order_items</code>, <code>products</code>, and <code>orders</code>; then compare node estimates, actual rows × loops, buffers, and timing without requiring one fixed plan.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -724,18 +741,23 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <h4 id="solution-1--exercise-1-longest-running-active-statements">Exercise 1: Longest-running active statements<a class="heading-anchor" href="#solution-1--exercise-1-longest-running-active-statements" aria-label="Link to this section">#</a></h4>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
-<span class="syntax-keyword">SELECT</span> pid<span class="syntax-punctuation">,</span>
-       usename<span class="syntax-punctuation">,</span>
-       datname<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">state</span><span class="syntax-punctuation">,</span>
-       clock_timestamp<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> query_start <span class="syntax-keyword">AS</span> runtime<span class="syntax-punctuation">,</span>
-       wait_event_type<span class="syntax-punctuation">,</span>
-       wait_event<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">left</span><span class="syntax-punctuation">(</span>query<span class="syntax-punctuation">,</span> <span class="syntax-number">160</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> query
-<span class="syntax-keyword">FROM</span> pg_stat_activity
-<span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">state</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;active&#x27;</span>
+<span class="syntax-keyword">SELECT</span>
+  pid<span class="syntax-punctuation">,</span>
+  usename<span class="syntax-punctuation">,</span>
+  datname<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">state</span><span class="syntax-punctuation">,</span>
+  clock_timestamp<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> query_start <span class="syntax-keyword">AS</span> runtime<span class="syntax-punctuation">,</span>
+  wait_event_type<span class="syntax-punctuation">,</span>
+  wait_event<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">left</span> <span class="syntax-punctuation">(</span>query<span class="syntax-punctuation">,</span>
+    <span class="syntax-number">160</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> query
+<span class="syntax-keyword">FROM</span>
+  pg_stat_activity
+<span class="syntax-keyword">WHERE</span>
+  <span class="syntax-keyword">state</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;active&#x27;</span>
   <span class="syntax-keyword">AND</span> pid <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> pg_backend_pid<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> runtime <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">;</span></code></pre>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  runtime <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">;</span></code></pre>
 <p>Expected shape: zero or more currently active sessions, excluding the monitoring query itself. A long runtime can be normal; inspect wait events, locks, and the operation&#x27;s purpose before intervening.</p>
 <h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -818,9 +840,13 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="syntax-keyword">END</span>
 $optional_pg_stat_statements$<span class="syntax-punctuation">;</span>
 
-<span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span>
-<span class="syntax-keyword">FROM</span> top_statement_stats
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> ranking<span class="syntax-punctuation">,</span> rank_position<span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">SELECT</span>
+  <span class="syntax-operator">*</span>
+<span class="syntax-keyword">FROM</span>
+  top_statement_stats
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  ranking<span class="syntax-punctuation">,</span>
+  rank_position<span class="syntax-punctuation">;</span>
 
 <span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></code></pre>
 <p>Expected shape: up to twenty rows when <code>pg_stat_statements</code> is installed and loaded, at most ten for each ranking label. Otherwise the block emits an explanatory notice and the final query returns an empty result.</p>

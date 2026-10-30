@@ -109,8 +109,8 @@ These worked excerpts come from `sql/professional/lessons/sql_analytics_01_query
 
 ```sql
 CREATE TABLE pro_analytics_lab.users (
-    user_id bigint PRIMARY KEY,
-    signup_at timestamptz NOT NULL
+  user_id bigint PRIMARY KEY,
+  signup_at timestamptz NOT NULL
 );
 ```
 
@@ -122,12 +122,12 @@ CREATE TABLE pro_analytics_lab.users (
 
 ```sql
 CREATE TABLE pro_analytics_lab.events (
-    ingestion_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    source_event_id text NOT NULL,
-    user_id bigint NOT NULL REFERENCES pro_analytics_lab.users (user_id),
-    event_name text NOT NULL,
-    event_at timestamptz NOT NULL,
-    ingested_at timestamptz NOT NULL
+  ingestion_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  source_event_id text NOT NULL,
+  user_id bigint NOT NULL REFERENCES pro_analytics_lab.users (user_id),
+  event_name text NOT NULL,
+  event_at timestamptz NOT NULL,
+  ingested_at timestamptz NOT NULL
 );
 ```
 

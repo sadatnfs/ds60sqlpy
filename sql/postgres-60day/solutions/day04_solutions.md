@@ -83,14 +83,19 @@ executable companion when you want a self-contained check.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT c.customer_id,
-       c.full_name,
-       COUNT(o.order_id) AS order_count
-FROM customers AS c
-LEFT JOIN orders AS o
-  ON o.customer_id = c.customer_id
-GROUP BY c.customer_id, c.full_name
-ORDER BY order_count DESC, c.customer_id;
+SELECT
+  c.customer_id,
+  c.full_name,
+  COUNT(o.order_id) AS order_count
+FROM
+  customers AS c
+  LEFT JOIN orders AS o ON o.customer_id = c.customer_id
+GROUP BY
+  c.customer_id,
+  c.full_name
+ORDER BY
+  order_count DESC,
+  c.customer_id;
 ```
 
 **Expected shape:** One row per customer; zero is visible.
@@ -124,14 +129,17 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT p.product_id,
-       p.name,
-       p.category
-FROM products AS p
-LEFT JOIN order_items AS oi
-  ON oi.product_id = p.product_id
-WHERE oi.order_item_id IS NULL
-ORDER BY p.product_id;
+SELECT
+  p.product_id,
+  p.name,
+  p.category
+FROM
+  products AS p
+  LEFT JOIN order_items AS oi ON oi.product_id = p.product_id
+WHERE
+  oi.order_item_id IS NULL
+ORDER BY
+  p.product_id;
 ```
 
 **Expected shape:** One row per unsold product.
@@ -169,27 +177,39 @@ cardinality contract.
 
 ```sql
 WITH expense_months AS (
-  SELECT e.category,
-         date_trunc('month', e.expense_date)::date AS period,
-         SUM(e.amount) AS actual_amount
-  FROM expenses AS e
-  GROUP BY e.category, date_trunc('month', e.expense_date)
-), budget_months AS (
-  SELECT b.category,
-         b.period,
-         SUM(b.amount) AS budget_amount
-  FROM budgets AS b
-  GROUP BY b.category, b.period
+  SELECT
+    e.category,
+    date_trunc('month', e.expense_date)::date AS period,
+    SUM(e.amount) AS actual_amount
+  FROM
+    expenses AS e
+  GROUP BY
+    e.category,
+    date_trunc('month', e.expense_date)
+),
+budget_months AS (
+  SELECT
+    b.category,
+    b.period,
+    SUM(b.amount) AS budget_amount
+  FROM
+    budgets AS b
+  GROUP BY
+    b.category,
+    b.period
 )
-SELECT COALESCE(bm.category, em.category) AS category,
-       COALESCE(bm.period, em.period) AS period,
-       ROUND(bm.budget_amount, 2) AS budget_amount,
-       ROUND(em.actual_amount, 2) AS actual_amount
-FROM budget_months AS bm
-FULL JOIN expense_months AS em
-  ON em.category = bm.category
- AND em.period = bm.period
-ORDER BY period, category;
+SELECT
+  COALESCE(bm.category, em.category) AS category,
+  COALESCE(bm.period, em.period) AS period,
+  ROUND(bm.budget_amount, 2) AS budget_amount,
+  ROUND(em.actual_amount, 2) AS actual_amount
+FROM
+  budget_months AS bm
+  FULL JOIN expense_months AS em ON em.category = bm.category
+    AND em.period = bm.period
+  ORDER BY
+    period,
+    category;
 ```
 
 **Expected shape:** One row per category/month present in either source.
@@ -223,15 +243,20 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT c.customer_id,
-       c.full_name,
-       COUNT(o.order_id) AS delivered_orders
-FROM customers AS c
-LEFT JOIN orders AS o
-  ON o.customer_id = c.customer_id
- AND o.status = 'delivered'
-GROUP BY c.customer_id, c.full_name
-ORDER BY delivered_orders DESC, c.customer_id;
+SELECT
+  c.customer_id,
+  c.full_name,
+  COUNT(o.order_id) AS delivered_orders
+FROM
+  customers AS c
+  LEFT JOIN orders AS o ON o.customer_id = c.customer_id
+    AND o.status = 'delivered'
+GROUP BY
+  c.customer_id,
+  c.full_name
+ORDER BY
+  delivered_orders DESC,
+  c.customer_id;
 ```
 
 **Expected shape:** One row per customer, including zero delivered orders.
@@ -265,13 +290,16 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT c.customer_id,
-       COUNT(o.order_id) AS order_count
-FROM customers AS c
-LEFT JOIN orders AS o
-  ON o.customer_id = c.customer_id
-GROUP BY c.customer_id
-ORDER BY c.customer_id;
+SELECT
+  c.customer_id,
+  COUNT(o.order_id) AS order_count
+FROM
+  customers AS c
+  LEFT JOIN orders AS o ON o.customer_id = c.customer_id
+GROUP BY
+  c.customer_id
+ORDER BY
+  c.customer_id;
 ```
 
 **Expected shape:** One row per customer with correct zero counts.
@@ -305,18 +333,16 @@ cardinality contract.
 - `FILTER (WHERE ...)`: limits one aggregate without removing rows needed by neighboring aggregates.
 
 ```sql
-SELECT COUNT(DISTINCT p.product_id) FILTER (
-         WHERE p.product_id IS NOT NULL AND oi.product_id IS NOT NULL
-       ) AS matched_products,
-       COUNT(DISTINCT p.product_id) FILTER (
-         WHERE p.product_id IS NOT NULL AND oi.product_id IS NULL
-       ) AS unsold_products,
-       COUNT(DISTINCT oi.product_id) FILTER (
-         WHERE p.product_id IS NULL AND oi.product_id IS NOT NULL
-       ) AS orphan_item_product_ids
-FROM products AS p
-FULL JOIN order_items AS oi
-  ON oi.product_id = p.product_id;
+SELECT
+  COUNT(DISTINCT p.product_id) FILTER (WHERE p.product_id IS NOT NULL
+    AND oi.product_id IS NOT NULL) AS matched_products,
+  COUNT(DISTINCT p.product_id) FILTER (WHERE p.product_id IS NOT NULL
+    AND oi.product_id IS NULL) AS unsold_products,
+  COUNT(DISTINCT oi.product_id) FILTER (WHERE p.product_id IS NULL
+    AND oi.product_id IS NOT NULL) AS orphan_item_product_ids
+FROM
+  products AS p
+  FULL JOIN order_items AS oi ON oi.product_id = p.product_id;
 ```
 
 **Expected shape:** One summary row with three mutually interpretable counts.

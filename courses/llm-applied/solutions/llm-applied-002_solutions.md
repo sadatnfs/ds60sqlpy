@@ -51,8 +51,8 @@ The question is: Validate visits 10, purchases 3 and assignment_unit account.
 The denominator and unit are known before division. This calculation is deterministic and does not depend on the wording of an explanation.
 
 ```python
-record=validate({'visits':10,'purchases':3,'assignment_unit':'account'})
-assert rate(record)==.3
+record = validate({"visits": 10, "purchases": 3, "assignment_unit": "account"})
+assert rate(record) == 0.3
 ```
 
 **Expected:** conversion rate 0.3.
@@ -66,9 +66,12 @@ The question is: Validate visits 2 and purchases 3 under the declared one-purcha
 A JSON parser cannot detect this domain contradiction. The validation rule catches a semantically invalid proposal even though its keys and primitive types are correct.
 
 ```python
-try: validate({'visits':2,'purchases':3,'assignment_unit':'account'})
-except ValueError: pass
-else: raise AssertionError('impossible counts accepted')
+try:
+    validate({"visits": 2, "purchases": 3, "assignment_unit": "account"})
+except ValueError:
+    pass
+else:
+    raise AssertionError("impossible counts accepted")
 ```
 
 **Expected:** ValueError for inconsistent counts.
@@ -82,10 +85,10 @@ The question is: Parse the source text Visits: 10; Purchases: 3; Unit: account a
 Offsets refer to the original source string. Normalizing text before saving offsets without a mapping would make citations point at the wrong characters.
 
 ```python
-text='Visits: 10; Purchases: 3; Unit: account'
-parsed,spans=extract(text)
-assert parsed==record
-assert text[slice(*spans['visits'])]=='10' and text[slice(*spans['purchases'])]=='3'
+text = "Visits: 10; Purchases: 3; Unit: account"
+parsed, spans = extract(text)
+assert parsed == record
+assert text[slice(*spans["visits"])] == "10" and text[slice(*spans["purchases"])] == "3"
 ```
 
 **Expected:** values10 and3; each span slices the original digits.
@@ -99,10 +102,13 @@ The question is: Submit a record with purchases=None and compare it with a real 
 A missing value requires a separate unknown-status schema or a repair workflow. Coercing it to zero changes the statistical meaning of the data.
 
 ```python
-try: validate({'visits':10,'purchases':None,'assignment_unit':'account'})
-except TypeError: pass
-else: raise AssertionError('missing treated as count')
-assert rate(validate({'visits':10,'purchases':0,'assignment_unit':'account'}))==0
+try:
+    validate({"visits": 10, "purchases": None, "assignment_unit": "account"})
+except TypeError:
+    pass
+else:
+    raise AssertionError("missing treated as count")
+assert rate(validate({"visits": 10, "purchases": 0, "assignment_unit": "account"})) == 0
 ```
 
 **Expected:** None is rejected by this strict schema; zero is accepted with rate 0.
@@ -116,10 +122,16 @@ The question is: Submit visits=True, then add an undeclared p_value field to a v
 A model can produce syntactically convenient but semantically wrong values. Exact-key and exact-type checks prevent a downstream analysis from silently consuming unsupported claims.
 
 ```python
-for candidate,kind in [({'visits':True,'purchases':0,'assignment_unit':'account'},TypeError),({**record,'p_value':.01},ValueError)]:
-    try: validate(candidate)
-    except kind: pass
-    else: raise AssertionError('schema bypass accepted')
+for candidate, kind in [
+    ({"visits": True, "purchases": 0, "assignment_unit": "account"}, TypeError),
+    ({**record, "p_value": 0.01}, ValueError),
+]:
+    try:
+        validate(candidate)
+    except kind:
+        pass
+    else:
+        raise AssertionError("schema bypass accepted")
 ```
 
 **Expected:** TypeError for a boolean count; ValueError for an extra field.
@@ -133,10 +145,13 @@ The question is: Attempt to replace account with visit and explain why the indep
 The fixture deliberately supports one study design. Expanding it to visit-level randomization requires an explicit new contract and evaluation, not a casual string substitution.
 
 ```python
-try: validate({**record,'assignment_unit':'visit'})
-except ValueError: pass
-else: raise AssertionError('unsupported assignment unit')
-assert record['assignment_unit']=='account'
+try:
+    validate({**record, "assignment_unit": "visit"})
+except ValueError:
+    pass
+else:
+    raise AssertionError("unsupported assignment unit")
+assert record["assignment_unit"] == "account"
 ```
 
 **Expected:** invalid unit rejected; account remains explicit.

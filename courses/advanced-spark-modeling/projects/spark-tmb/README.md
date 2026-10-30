@@ -37,8 +37,8 @@ For different already prepared local image tags:
 
 ```bash
 DS60_TMB_BASE=ds60-tmb-local:dev-1.9.25 \
-DS60_SPARK_BASE=ds60sqlpy-worker-spark-local-python:1.1.0 \
-DS60_JAVA_BASE=ds60sqlpy-worker-java21:1.1.0 \
+  DS60_SPARK_BASE=ds60sqlpy-worker-spark-local-python:1.1.0 \
+  DS60_JAVA_BASE=ds60sqlpy-worker-java21:1.1.0 \
   courses/advanced-spark-modeling/projects/spark-tmb/workshop build
 ```
 

@@ -117,7 +117,9 @@ Task: Use ReturnType and Awaited for a small async function, then actually call 
 The type aliases perform no I/O and no waiting. The await expression is the actual runtime operation, and the assertion compares its observed result.
 
 ```typescript
-async function load(): Promise<{ count: number }> { return { count: 3 }; }
+async function load(): Promise<{ count: number }> {
+  return { count: 3 };
+}
 type Loaded = Awaited<ReturnType<typeof load>>;
 const expected: Loaded = { count: 3 };
 assert.deepEqual(await load(), expected);
@@ -134,11 +136,17 @@ Task: Require exactly the literal success/failure keys on a label table.
 satisfies checks the expression against the required relation without functioning as a runtime parser. Dynamic external keys still need validation before they become trusted configuration.
 
 ```typescript
-const labels = { success: 'Ready', failure: 'Retry' } satisfies Record<'success' | 'failure', string>;
+const labels = { success: 'Ready', failure: 'Retry' } satisfies Record<
+  'success' | 'failure',
+  string
+>;
 assert.equal(labels.success, 'Ready');
 function negativeTypeCheck(): void {
   // @ts-expect-error typo is not a permitted literal key and failure is absent.
-  const invalid = { success: 'Ready', typo: 'Retry' } satisfies Record<'success' | 'failure', string>;
+  const invalid = { success: 'Ready', typo: 'Retry' } satisfies Record<
+    'success' | 'failure',
+    string
+  >;
   void invalid;
 }
 void negativeTypeCheck;

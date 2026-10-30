@@ -82,11 +82,16 @@ executable companion when you want a self-contained check.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT c.country,
-       COUNT(*) AS customer_count
-FROM customers AS c
-GROUP BY c.country
-ORDER BY customer_count DESC, c.country;
+SELECT
+  c.country,
+  COUNT(*) AS customer_count
+FROM
+  customers AS c
+GROUP BY
+  c.country
+ORDER BY
+  customer_count DESC,
+  c.country;
 ```
 
 **Expected shape:** One row per country.
@@ -121,15 +126,20 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT p.category,
-       ROUND(SUM(oi.unit_price * oi.quantity * (1 - oi.discount)), 2) AS net_revenue,
-       ROUND(AVG(oi.unit_price), 2) AS average_unit_price
-FROM order_items AS oi
-JOIN products AS p
-  ON p.product_id = oi.product_id
-GROUP BY p.category
-HAVING SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) > 100000
-ORDER BY net_revenue DESC, p.category;
+SELECT
+  p.category,
+  ROUND(SUM(oi.unit_price * oi.quantity * (1 - oi.discount)), 2) AS net_revenue,
+  ROUND(AVG(oi.unit_price), 2) AS average_unit_price
+FROM
+  order_items AS oi
+  JOIN products AS p ON p.product_id = oi.product_id
+GROUP BY
+  p.category
+HAVING
+  SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) > 100000
+ORDER BY
+  net_revenue DESC,
+  p.category;
 ```
 
 **Expected shape:** One row per qualifying category.
@@ -163,13 +173,19 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT o.status,
-       COUNT(*) AS order_count,
-       ROUND(AVG(o.total_amount), 2) AS average_order_total
-FROM orders AS o
-GROUP BY o.status
-HAVING COUNT(*) >= 100
-ORDER BY order_count DESC, o.status;
+SELECT
+  o.status,
+  COUNT(*) AS order_count,
+  ROUND(AVG(o.total_amount), 2) AS average_order_total
+FROM
+  orders AS o
+GROUP BY
+  o.status
+HAVING
+  COUNT(*) >= 100
+ORDER BY
+  order_count DESC,
+  o.status;
 ```
 
 **Expected shape:** One row per qualifying order status.
@@ -201,10 +217,12 @@ cardinality contract.
 - `FILTER (WHERE ...)`: limits one aggregate without removing rows needed by neighboring aggregates.
 
 ```sql
-SELECT COUNT(*) AS all_rows,
-       COUNT(c.email) AS nonnull_email_rows,
-       COUNT(*) FILTER (WHERE c.email IS NULL) AS missing_email_rows
-FROM customers AS c;
+SELECT
+  COUNT(*) AS all_rows,
+  COUNT(c.email) AS nonnull_email_rows,
+  COUNT(*) FILTER (WHERE c.email IS NULL) AS missing_email_rows
+FROM
+  customers AS c;
 ```
 
 **Expected shape:** One row; present plus missing equals total.
@@ -238,12 +256,18 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT e.category,
-       ROUND(SUM(e.amount), 2) AS total_expense
-FROM expenses AS e
-GROUP BY e.category
-HAVING SUM(e.amount) > 1000000
-ORDER BY total_expense DESC, e.category;
+SELECT
+  e.category,
+  ROUND(SUM(e.amount), 2) AS total_expense
+FROM
+  expenses AS e
+GROUP BY
+  e.category
+HAVING
+  SUM(e.amount) > 1000000
+ORDER BY
+  total_expense DESC,
+  e.category;
 ```
 
 **Expected shape:** One row per expense category over the threshold.
@@ -279,14 +303,19 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT date_trunc('month', o.order_date)::date AS order_month,
-       COUNT(*) AS order_count,
-       ROUND(SUM(o.total_amount), 2) AS order_revenue,
-       COUNT(*) FILTER (WHERE o.status = 'returned') AS returned_orders
-FROM orders AS o
-WHERE o.order_date >= date_trunc('month', CURRENT_TIMESTAMP) - INTERVAL '11 months'
-GROUP BY date_trunc('month', o.order_date)
-ORDER BY order_month;
+SELECT
+  date_trunc('month', o.order_date)::date AS order_month,
+  COUNT(*) AS order_count,
+  ROUND(SUM(o.total_amount), 2) AS order_revenue,
+  COUNT(*) FILTER (WHERE o.status = 'returned') AS returned_orders
+FROM
+  orders AS o
+WHERE
+  o.order_date >= date_trunc('month', CURRENT_TIMESTAMP) - INTERVAL '11 months'
+GROUP BY
+  date_trunc('month', o.order_date)
+ORDER BY
+  order_month;
 ```
 
 **Expected shape:** Up to 12 month rows in chronological order.

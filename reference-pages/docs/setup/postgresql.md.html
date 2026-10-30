@@ -198,7 +198,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The course targets the disposable database <code>advanced_sql_training</code>. Its fresh Docker learner login is <code>admin</code> with password <code>admin</code>. A separate bootstrap role performs container initialization. The classroom supplies the connection internally, so ordinary SQL source should contain no connection string.</p>
 <h3 id="confirm-the-connection-from-the-sql-pad">Confirm the connection from the SQL pad<a class="heading-anchor" href="#confirm-the-connection-from-the-sql-pad" aria-label="Link to this section">#</a></h3>
 <p>Open <strong>PostgreSQL</strong>, choose the first on-ramp lesson and select SQL snippet mode when offered. Run:</p>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> current_database<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> database_name<span class="syntax-punctuation">,</span> <span class="syntax-keyword">current_user</span> <span class="syntax-keyword">AS</span> learner_role<span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  current_database<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> database_name<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">current_user</span> <span class="syntax-keyword">AS</span> learner_role<span class="syntax-punctuation">;</span></code></pre>
 <p>On a fresh default installation, expect <code>advanced_sql_training</code> and <code>admin</code>. A deliberately configured existing course login can differ. Keep the query result with your notes; a running container alone does not prove a query works.</p>
 <h3 id="choose-the-correct-execution-mode">Choose the correct execution mode<a class="heading-anchor" href="#choose-the-correct-execution-mode" aria-label="Link to this section">#</a></h3>
 <div class="table-wrap"><table><thead><tr>

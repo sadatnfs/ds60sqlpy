@@ -119,14 +119,16 @@ Support and correctness form separate axes. A correct-looking answer with unsupp
 Both relevant documents are retrieved, but the first appears second. Recall alone would not reveal that ordering.
 
 ```python
+def retrieval_metrics(retrieved, relevant):
+    if len(retrieved) != len(set(retrieved)):
+        raise ValueError("duplicate retrieved ID")
+    recall = None if not relevant else len(set(retrieved) & relevant) / len(relevant)
+    rank = next((i for i, key in enumerate(retrieved, 1) if key in relevant), None)
+    return recall, 0.0 if rank is None else 1 / rank
 
-def retrieval_metrics(retrieved,relevant):
-    if len(retrieved)!=len(set(retrieved)): raise ValueError('duplicate retrieved ID')
-    recall=None if not relevant else len(set(retrieved)&relevant)/len(relevant)
-    rank=next((i for i,key in enumerate(retrieved,1) if key in relevant),None)
-    return recall,0. if rank is None else 1/rank
-recall,rr=retrieval_metrics(['b','c','a'],{'a','c'})
-assert recall==1 and rr==.5
+
+recall, rr = retrieval_metrics(["b", "c", "a"], {"a", "c"})
+assert recall == 1 and rr == 0.5
 ```
 
 **Expected:** recall 1; reciprocal rank 0.5.
@@ -136,7 +138,7 @@ assert recall==1 and rr==.5
 The answer stage cannot use evidence absent from its context. This is a retrieval failure even if a language model guesses the answer from prior training.
 
 ```python
-assert retrieval_metrics(['b','c'],{'a'})==(0.,0.)
+assert retrieval_metrics(["b", "c"], {"a"}) == (0.0, 0.0)
 ```
 
 **Expected:** recall 0; reciprocal rank 0.
@@ -146,8 +148,9 @@ assert retrieval_metrics(['b','c'],{'a'})==(0.,0.)
 A denominator of zero does not mean perfect recall. The correct task behavior is evaluated through an explicit answerability and abstention policy.
 
 ```python
-assert retrieval_metrics(['b'],set())==(None,0.)
-result={'question':'q-missing','answerable':False,'abstained':True}; assert not result['answerable'] and result['abstained']
+assert retrieval_metrics(["b"], set()) == (None, 0.0)
+result = {"question": "q-missing", "answerable": False, "abstained": True}
+assert not result["answerable"] and result["abstained"]
 ```
 
 **Expected:** recall None; appropriate abstention True.

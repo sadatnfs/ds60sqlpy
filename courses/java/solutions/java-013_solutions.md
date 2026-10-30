@@ -38,8 +38,8 @@ Task: Strip a string,then uppercase it withLocale.ROOT.
 The composition order is explicit. For transformations that do not commute, reversing the order changes the result.
 
 ```java
-java.util.function.Function<String,String> strip = String::strip;
-java.util.function.Function<String,String> upper = value -> value.toUpperCase(Locale.ROOT);
+java.util.function.Function<String, String> strip = String::strip;
+java.util.function.Function<String, String> upper = value -> value.toUpperCase(Locale.ROOT);
 assert strip.andThen(upper).apply(" red ").equals("RED");
 ```
 
@@ -54,8 +54,8 @@ Task: Compose add1 andmultiply2 usingandThen and compose on3.
 A small noncommuting example makes the API semantics visible. Readingcompose as if it wereandThen is a common source of subtle pipeline errors.
 
 ```java
-java.util.function.Function<Integer,Integer> addOne = value -> value + 1;
-java.util.function.Function<Integer,Integer> twice = value -> value * 2;
+java.util.function.Function<Integer, Integer> addOne = value -> value + 1;
+java.util.function.Function<Integer, Integer> twice = value -> value * 2;
 assert addOne.andThen(twice).apply(3) == 8;
 assert addOne.compose(twice).apply(3) == 7;
 ```
@@ -89,8 +89,9 @@ The reference binding is stable, but the list remains mutable. This action shoul
 ```java
 List<String> captured = new ArrayList<>();
 java.util.function.Consumer<String> append = captured::add;
-append.accept("a"); append.accept("b");
-assert captured.equals(List.of("a","b"));
+append.accept("a");
+append.accept("b");
+assert captured.equals(List.of("a", "b"));
 ```
 
 **Expected:** captured list becomesa,b.
@@ -104,10 +105,14 @@ Task: Pass a method reference to a parser that rejects blank input and parses a 
 A named helper makes validation and failure behavior easier to document than a long inline lambda. Function syntax does not imply that exceptions disappear.
 
 ```java
-java.util.function.Function<String,Integer> parser = Main::parsePositive;
+java.util.function.Function<String, Integer> parser = Main::parsePositive;
 assert parser.apply("7") == 7;
 boolean blank = false;
-try { parser.apply(" "); } catch(IllegalArgumentException expected) { blank = true; }
+try {
+  parser.apply(" ");
+} catch (IllegalArgumentException expected) {
+  blank = true;
+}
 assert blank;
 ```
 

@@ -23,8 +23,10 @@ The question is: Set both policy and reference chosen-minus-rejected differences
 Equal relative preferences cancel even though absolute sequence log probabilities differ. The objective compares a change in preference relative to the reference.
 
 ```python
-margin=.1*((-2-(-3))-(-4-(-5))); loss=np.logaddexp(0,-margin)
-assert margin==0; np.testing.assert_allclose(loss,np.log(2),atol=1e-12,rtol=0)
+margin = 0.1 * ((-2 - (-3)) - (-4 - (-5)))
+loss = np.logaddexp(0, -margin)
+assert margin == 0
+np.testing.assert_allclose(loss, np.log(2), atol=1e-12, rtol=0)
 ```
 
 **Expected:** margin0 and loss log 2.
@@ -38,8 +40,9 @@ The question is: Use policy difference2,reference difference 0,beta.5.
 A positive adjusted margin reduces the logistic loss. This expresses agreement with the supplied preference label, not independent correctness.
 
 ```python
-margin=.5*(2-0); loss=np.logaddexp(0,-margin)
-np.testing.assert_allclose(loss,np.log1p(np.exp(-1)),atol=1e-12,rtol=0)
+margin = 0.5 * (2 - 0)
+loss = np.logaddexp(0, -margin)
+np.testing.assert_allclose(loss, np.log1p(np.exp(-1)), atol=1e-12, rtol=0)
 ```
 
 **Expected:** margin1;loss \(\log(1+e^{-1})\).
@@ -53,8 +56,9 @@ The question is: Swap chosen and rejected while keeping their scores attached to
 The sign must reverse because both policy and reference differences reverse. Swapping only one side would calculate a different and inconsistent objective.
 
 ```python
-reversed_margin=-margin; reversed_loss=np.logaddexp(0,-reversed_margin)
-assert reversed_margin==-1 and reversed_loss>loss
+reversed_margin = -margin
+reversed_loss = np.logaddexp(0, -reversed_margin)
+assert reversed_margin == -1 and reversed_loss > loss
 ```
 
 **Expected:** margin-1 and larger loss.
@@ -68,8 +72,9 @@ The question is: Evaluate margins1000 and-1000 withlogaddexp.
 A naive `log(sigmoid())` calculation may underflow at extreme margins. The stable form computes the same objective without an unnecessary probability round trip.
 
 ```python
-values=np.logaddexp(0,-np.array([1000.,-1000.]))
-assert np.isfinite(values).all(); np.testing.assert_allclose(values,[0,1000],atol=1e-12,rtol=0)
+values = np.logaddexp(0, -np.array([1000.0, -1000.0]))
+assert np.isfinite(values).all()
+np.testing.assert_allclose(values, [0, 1000], atol=1e-12, rtol=0)
 ```
 
 **Expected:** finite losses approximately0 and1000.
@@ -83,8 +88,10 @@ The question is: Store response IDsr1,r2 and a preference label; reverse the lab
 Keeping scores keyed by response identity prevents an array-order error from changing which text a probability belongs to.
 
 ```python
-scores={'r1':-2.,'r2':-4.}; pair={'chosen':'r1','rejected':'r2'}; flipped={'chosen':pair['rejected'],'rejected':pair['chosen']}
-assert flipped['chosen']=='r2' and scores['r1']==-2
+scores = {"r1": -2.0, "r2": -4.0}
+pair = {"chosen": "r1", "rejected": "r2"}
+flipped = {"chosen": pair["rejected"], "rejected": pair["chosen"]}
+assert flipped["chosen"] == "r2" and scores["r1"] == -2
 ```
 
 **Expected:** chosen identity changes tor2; scores remain keyed by ID.
@@ -98,8 +105,8 @@ The question is: Record that a preferred response may still contain a false fact
 An objective can faithfully optimize noisy or incomplete labels. Reliability claims require separate evidence about the properties the labels do not establish.
 
 ```python
-report={'preference_agreement':True,'factuality_verified':False,'online_rl_executed':False}
-assert not report['factuality_verified'] and not report['online_rl_executed']
+report = {"preference_agreement": True, "factuality_verified": False, "online_rl_executed": False}
+assert not report["factuality_verified"] and not report["online_rl_executed"]
 ```
 
 **Expected:** preference agreementTrue,factuality_verifiedFalse.

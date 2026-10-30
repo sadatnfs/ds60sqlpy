@@ -437,12 +437,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   event_time TIMESTAMPTZ <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
   customer_id <span class="syntax-builtin">INT</span><span class="syntax-punctuation">,</span>
   payload JSONB
-<span class="syntax-punctuation">)</span> PARTITION <span class="syntax-keyword">BY</span> RANGE <span class="syntax-punctuation">(</span>event_time<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<span class="syntax-punctuation">)</span>
+PARTITION <span class="syntax-keyword">BY</span> RANGE <span class="syntax-punctuation">(</span>event_time<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 1 is data definition language (DDL). <code>psql</code> prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.</p>
 <p><strong>Expected result/shape:</strong> Example 1 must print the expected DDL command tag for <code>big_events</code>. Verify the object in <code>pg_catalog.pg_inherits</code>, and <code>pg_catalog.pg_class</code>, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> big_events_2025_01 PARTITION <span class="syntax-keyword">OF</span> big_events
-  <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">VALUES</span> <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-01-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">TO</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-02-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<span class="syntax-keyword">FOR</span> <span class="syntax-keyword">VALUES</span> <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-01-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">TO</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-02-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 2 is data definition language (DDL). <code>psql</code> prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.</p>
 <p><strong>Expected result/shape:</strong> Example 2 must print the expected DDL command tag for <code>big_events_2025_01</code>. Verify the object in <code>pg_catalog.pg_inherits</code>, and <code>pg_catalog.pg_class</code>, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -707,34 +708,36 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
   event_time timestamptz <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
   customer_id <span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span>
   payload jsonb
-<span class="syntax-punctuation">)</span> PARTITION <span class="syntax-keyword">BY</span> RANGE <span class="syntax-punctuation">(</span>event_time<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">)</span>
+PARTITION <span class="syntax-keyword">BY</span> RANGE <span class="syntax-punctuation">(</span>event_time<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 
-<span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_big_events_2025_01
-  PARTITION <span class="syntax-keyword">OF</span> solution_big_events
-  <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">VALUES</span> <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-01-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span>
-             <span class="syntax-keyword">TO</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-02-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_big_events_2025_01 PARTITION <span class="syntax-keyword">OF</span> solution_big_events
+<span class="syntax-keyword">FOR</span> <span class="syntax-keyword">VALUES</span> <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-01-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">TO</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-02-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 
-<span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_big_events_2025_02
-  PARTITION <span class="syntax-keyword">OF</span> solution_big_events
-  <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">VALUES</span> <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-02-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span>
-             <span class="syntax-keyword">TO</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-03-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_big_events_2025_02 PARTITION <span class="syntax-keyword">OF</span> solution_big_events
+<span class="syntax-keyword">FOR</span> <span class="syntax-keyword">VALUES</span> <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-02-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">TO</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-03-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 
-<span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_big_events_2025_03
-  PARTITION <span class="syntax-keyword">OF</span> solution_big_events
-  <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">VALUES</span> <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-03-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span>
-             <span class="syntax-keyword">TO</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-04-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_big_events_2025_03 PARTITION <span class="syntax-keyword">OF</span> solution_big_events
+<span class="syntax-keyword">FOR</span> <span class="syntax-keyword">VALUES</span> <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-03-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">TO</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-04-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 
-<span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> solution_big_events<span class="syntax-punctuation">(</span>event_time<span class="syntax-punctuation">,</span> customer_id<span class="syntax-punctuation">,</span> payload<span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> timestamptz <span class="syntax-string">&#x27;2025-01-01 00:00:00+00&#x27;</span>
-         <span class="syntax-operator">+</span> <span class="syntax-punctuation">(</span>event_no <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;30 minutes&#x27;</span><span class="syntax-punctuation">,</span>
-       <span class="syntax-number">1</span> <span class="syntax-operator">+</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>event_no <span class="syntax-operator">*</span> <span class="syntax-number">29</span> <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">%</span> <span class="syntax-number">500</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
-       jsonb_build_object<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;source_row&#x27;</span><span class="syntax-punctuation">,</span> event_no<span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">FROM</span> generate_series<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3000</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">g</span><span class="syntax-punctuation">(</span>event_no<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> solution_big_events <span class="syntax-punctuation">(</span>event_time<span class="syntax-punctuation">,</span> customer_id<span class="syntax-punctuation">,</span> payload<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span>
+  timestamptz <span class="syntax-string">&#x27;2025-01-01 00:00:00+00&#x27;</span> <span class="syntax-operator">+</span> <span class="syntax-punctuation">(</span>event_no <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;30 minutes&#x27;</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-number">1</span> <span class="syntax-operator">+</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>event_no <span class="syntax-operator">*</span> <span class="syntax-number">29</span> <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">%</span> <span class="syntax-number">500</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+  jsonb_build_object<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;source_row&#x27;</span><span class="syntax-punctuation">,</span> event_no<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">FROM</span>
+  generate_series<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3000</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">g</span> <span class="syntax-punctuation">(</span>event_no<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 
-<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">VERBOSE</span><span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">FROM</span> solution_big_events
-<span class="syntax-keyword">WHERE</span> event_time <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> timestamptz <span class="syntax-string">&#x27;2025-03-01 00:00:00+00&#x27;</span>
+<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">VERBOSE</span>
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span>
+  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">FROM</span>
+  solution_big_events
+<span class="syntax-keyword">WHERE</span>
+  event_time <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> timestamptz <span class="syntax-string">&#x27;2025-03-01 00:00:00+00&#x27;</span>
   <span class="syntax-keyword">AND</span> event_time <span class="syntax-operator">&lt;</span> timestamptz <span class="syntax-string">&#x27;2025-04-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">;</span>
 
 <span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></code></pre>
@@ -758,47 +761,56 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
   event_time timestamptz <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>
   customer_id <span class="syntax-builtin">int</span><span class="syntax-punctuation">,</span>
   payload jsonb
-<span class="syntax-punctuation">)</span> PARTITION <span class="syntax-keyword">BY</span> RANGE <span class="syntax-punctuation">(</span>event_time<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">)</span>
+PARTITION <span class="syntax-keyword">BY</span> RANGE <span class="syntax-punctuation">(</span>event_time<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 
-<span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> indexed_big_events_2025_01
-  PARTITION <span class="syntax-keyword">OF</span> indexed_big_events
-  <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">VALUES</span> <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-01-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span>
-             <span class="syntax-keyword">TO</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-02-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> indexed_big_events_2025_01 PARTITION <span class="syntax-keyword">OF</span> indexed_big_events
+<span class="syntax-keyword">FOR</span> <span class="syntax-keyword">VALUES</span> <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-01-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">TO</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-02-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 
-<span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> indexed_big_events_2025_02
-  PARTITION <span class="syntax-keyword">OF</span> indexed_big_events
-  <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">VALUES</span> <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-02-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span>
-             <span class="syntax-keyword">TO</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-03-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> indexed_big_events_2025_02 PARTITION <span class="syntax-keyword">OF</span> indexed_big_events
+<span class="syntax-keyword">FOR</span> <span class="syntax-keyword">VALUES</span> <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-02-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">TO</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-03-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 
-<span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> indexed_big_events_2025_03
-  PARTITION <span class="syntax-keyword">OF</span> indexed_big_events
-  <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">VALUES</span> <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-03-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span>
-             <span class="syntax-keyword">TO</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-04-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> indexed_big_events_2025_03 PARTITION <span class="syntax-keyword">OF</span> indexed_big_events
+<span class="syntax-keyword">FOR</span> <span class="syntax-keyword">VALUES</span> <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-03-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">TO</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;2025-04-01 00:00:00+00&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 
-<span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> indexed_big_events<span class="syntax-punctuation">(</span>event_time<span class="syntax-punctuation">,</span> customer_id<span class="syntax-punctuation">,</span> payload<span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> timestamptz <span class="syntax-string">&#x27;2025-01-01 00:00:00+00&#x27;</span>
-         <span class="syntax-operator">+</span> <span class="syntax-punctuation">(</span>event_no <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;30 minutes&#x27;</span><span class="syntax-punctuation">,</span>
-       <span class="syntax-number">1</span> <span class="syntax-operator">+</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>event_no <span class="syntax-operator">*</span> <span class="syntax-number">29</span> <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">%</span> <span class="syntax-number">500</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
-       jsonb_build_object<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;source_row&#x27;</span><span class="syntax-punctuation">,</span> event_no<span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">FROM</span> generate_series<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3000</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">g</span><span class="syntax-punctuation">(</span>event_no<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> indexed_big_events <span class="syntax-punctuation">(</span>event_time<span class="syntax-punctuation">,</span> customer_id<span class="syntax-punctuation">,</span> payload<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span>
+  timestamptz <span class="syntax-string">&#x27;2025-01-01 00:00:00+00&#x27;</span> <span class="syntax-operator">+</span> <span class="syntax-punctuation">(</span>event_no <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;30 minutes&#x27;</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-number">1</span> <span class="syntax-operator">+</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>event_no <span class="syntax-operator">*</span> <span class="syntax-number">29</span> <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">%</span> <span class="syntax-number">500</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+  jsonb_build_object<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;source_row&#x27;</span><span class="syntax-punctuation">,</span> event_no<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">FROM</span>
+  generate_series<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3000</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">g</span> <span class="syntax-punctuation">(</span>event_no<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 
-<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span> BUFFERS<span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> event_time<span class="syntax-punctuation">,</span> customer_id
-<span class="syntax-keyword">FROM</span> indexed_big_events
-<span class="syntax-keyword">WHERE</span> event_time <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> timestamptz <span class="syntax-string">&#x27;2025-03-02 00:00:00+00&#x27;</span>
+<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span>
+  BUFFERS
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span>
+  event_time<span class="syntax-punctuation">,</span>
+  customer_id
+<span class="syntax-keyword">FROM</span>
+  indexed_big_events
+<span class="syntax-keyword">WHERE</span>
+  event_time <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> timestamptz <span class="syntax-string">&#x27;2025-03-02 00:00:00+00&#x27;</span>
   <span class="syntax-keyword">AND</span> event_time <span class="syntax-operator">&lt;</span> timestamptz <span class="syntax-string">&#x27;2025-03-03 00:00:00+00&#x27;</span><span class="syntax-punctuation">;</span>
 
-<span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> indexed_big_events_2025_01_time_idx
-  <span class="syntax-keyword">ON</span> indexed_big_events_2025_01<span class="syntax-punctuation">(</span>event_time<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-<span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> indexed_big_events_2025_02_time_idx
-  <span class="syntax-keyword">ON</span> indexed_big_events_2025_02<span class="syntax-punctuation">(</span>event_time<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
-<span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> indexed_big_events_2025_03_time_idx
-  <span class="syntax-keyword">ON</span> indexed_big_events_2025_03<span class="syntax-punctuation">(</span>event_time<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> indexed_big_events_2025_01_time_idx <span class="syntax-keyword">ON</span> indexed_big_events_2025_01 <span class="syntax-punctuation">(</span>event_time<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 
-<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span> BUFFERS<span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> event_time<span class="syntax-punctuation">,</span> customer_id
-<span class="syntax-keyword">FROM</span> indexed_big_events
-<span class="syntax-keyword">WHERE</span> event_time <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> timestamptz <span class="syntax-string">&#x27;2025-03-02 00:00:00+00&#x27;</span>
+<span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> indexed_big_events_2025_02_time_idx <span class="syntax-keyword">ON</span> indexed_big_events_2025_02 <span class="syntax-punctuation">(</span>event_time<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+
+<span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> indexed_big_events_2025_03_time_idx <span class="syntax-keyword">ON</span> indexed_big_events_2025_03 <span class="syntax-punctuation">(</span>event_time<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+
+<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span>
+  BUFFERS
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span>
+  event_time<span class="syntax-punctuation">,</span>
+  customer_id
+<span class="syntax-keyword">FROM</span>
+  indexed_big_events
+<span class="syntax-keyword">WHERE</span>
+  event_time <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> timestamptz <span class="syntax-string">&#x27;2025-03-02 00:00:00+00&#x27;</span>
   <span class="syntax-keyword">AND</span> event_time <span class="syntax-operator">&lt;</span> timestamptz <span class="syntax-string">&#x27;2025-03-03 00:00:00+00&#x27;</span><span class="syntax-punctuation">;</span>
 
 <span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></code></pre>

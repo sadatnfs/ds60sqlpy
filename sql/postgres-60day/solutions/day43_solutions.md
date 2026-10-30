@@ -77,18 +77,42 @@ BEGIN;
 SET search_path TO training, public;
 
 COPY (
-  SELECT customer_id, full_name, email, country, created_at, segment, attributes
-  FROM customers
-  WHERE country = 'US'
-  ORDER BY customer_id
-) TO STDOUT WITH (FORMAT csv, HEADER true);
+  SELECT
+    customer_id,
+    full_name,
+    email,
+    country,
+    created_at,
+    segment,
+    attributes
+  FROM
+    customers
+  WHERE
+    country = 'US'
+  ORDER BY
+    customer_id)
+  TO STDOUT WITH (
+    FORMAT csv,
+    HEADER true);
 
 CREATE TEMP TABLE customers_restore_stage AS
-SELECT full_name, email, country, created_at, segment, attributes
-FROM customers
-WHERE country = 'US';
+SELECT
+  full_name,
+  email,
+  country,
+  created_at,
+  segment,
+  attributes
+FROM
+  customers
+WHERE
+  country = 'US';
 
-SELECT COUNT(*) AS staged_rows FROM customers_restore_stage;
+SELECT
+  COUNT(*) AS staged_rows
+FROM
+  customers_restore_stage;
+
 ROLLBACK;
 ```
 
@@ -115,19 +139,38 @@ BEGIN;
 SET search_path TO training, public;
 
 CREATE TEMP TABLE customers_restore_stage AS
-SELECT full_name, email, country, created_at, segment, attributes
-FROM customers
-WHERE country = 'US';
+SELECT
+  full_name,
+  email,
+  country,
+  created_at,
+  segment,
+  attributes
+FROM
+  customers
+WHERE
+  country = 'US';
 
-UPDATE customers_restore_stage
-SET full_name = full_name || ' [restored]'
-WHERE email = 'customer1@example.com';
+UPDATE
+  customers_restore_stage
+SET
+  full_name = full_name || ' [restored]'
+WHERE
+  email = 'customer1@example.com';
 
-INSERT INTO customers(full_name, email, country, created_at, segment, attributes)
-SELECT full_name, email, country, created_at, segment, attributes
-FROM customers_restore_stage
-ON CONFLICT (email) DO UPDATE
-SET full_name = EXCLUDED.full_name,
+INSERT INTO customers (full_name, email, country, created_at, segment, attributes)
+SELECT
+  full_name,
+  email,
+  country,
+  created_at,
+  segment,
+  attributes
+FROM
+  customers_restore_stage
+ON CONFLICT (email)
+  DO UPDATE SET
+    full_name = EXCLUDED.full_name,
     country = EXCLUDED.country,
     segment = EXCLUDED.segment,
     attributes = EXCLUDED.attributes;

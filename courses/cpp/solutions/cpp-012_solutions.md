@@ -31,8 +31,8 @@ A syntax/type diagnostic with a source line is usually from compilation. An unde
 ## Worked example 1
 
 ```cpp
-int add(int,int);
-int add(int a,int b) { return a+b; }
+int add(int, int);
+int add(int a, int b) { return a + b; }
 ```
 
 Expected: One declaration and one matching definition form a valid single-file demonstration.

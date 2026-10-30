@@ -59,27 +59,27 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Buffers;
 
-internal static class Program
-{
-    private static void Check(bool condition, string reason)
+internal static class Program {
+  private static void Check(bool condition, string reason) {
+    if (!condition)
+      throw new InvalidOperationException(reason);
+  }
+
+  private static async Task Main() {
     {
-        if (!condition) throw new InvalidOperationException(reason);
+      bool overflowed = false;
+      try {
+        int large = int.MaxValue;
+        _ = checked(large + 1);
+      } catch (OverflowException) {
+        overflowed = true;
+      }
+      Check(overflowed, "overflow must be visible");
+      Check(checked(100 + 20) == 120, "normal addition");
     }
-
-    private static async Task Main()
-    {
-        {
-            bool overflowed = false;
-            try { int large = int.MaxValue; _ = checked(large + 1); }
-            catch (OverflowException) { overflowed = true; }
-            Check(overflowed, "overflow must be visible");
-            Check(checked(100 + 20) == 120, "normal addition");
-        }
-        Console.WriteLine("csharp-003: passed");
-        await Task.CompletedTask;
-    }
-
-
+    Console.WriteLine("csharp-003: passed");
+    await Task.CompletedTask;
+  }
 }
 ```
 
@@ -106,26 +106,24 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Buffers;
 
-internal static class Program
-{
-    private static void Check(bool condition, string reason)
+internal static class Program {
+  private static void Check(bool condition, string reason) {
+    if (!condition)
+      throw new InvalidOperationException(reason);
+  }
+
+  private static async Task Main() {
     {
-        if (!condition) throw new InvalidOperationException(reason);
+      decimal amount = 0.1m + 0.2m;
+      Check(amount == 0.3m, "decimal tenths");
+      Check(Math.Round(2.345m, 2, MidpointRounding.ToEven) == 2.34m,
+            "even midpoint");
+      Check(Math.Round(2.345m, 2, MidpointRounding.AwayFromZero) == 2.35m,
+            "away midpoint");
     }
-
-    private static async Task Main()
-    {
-        {
-            decimal amount = 0.1m + 0.2m;
-            Check(amount == 0.3m, "decimal tenths");
-            Check(Math.Round(2.345m, 2, MidpointRounding.ToEven) == 2.34m, "even midpoint");
-            Check(Math.Round(2.345m, 2, MidpointRounding.AwayFromZero) == 2.35m, "away midpoint");
-        }
-        Console.WriteLine("csharp-003: passed");
-        await Task.CompletedTask;
-    }
-
-
+    Console.WriteLine("csharp-003: passed");
+    await Task.CompletedTask;
+  }
 }
 ```
 

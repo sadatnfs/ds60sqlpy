@@ -84,17 +84,23 @@ executable companion when you want a self-contained check.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT c.customer_id,
-       c.full_name,
-       c.country,
-       COUNT(o.order_id) AS order_count,
-       COALESCE(ROUND(SUM(o.total_amount), 2), 0) AS stored_revenue,
-       MAX(o.order_date) AS latest_order_date
-FROM customers AS c
-LEFT JOIN orders AS o
-  ON o.customer_id = c.customer_id
-GROUP BY c.customer_id, c.full_name, c.country
-ORDER BY stored_revenue DESC, c.customer_id;
+SELECT
+  c.customer_id,
+  c.full_name,
+  c.country,
+  COUNT(o.order_id) AS order_count,
+  COALESCE(ROUND(SUM(o.total_amount), 2), 0) AS stored_revenue,
+  MAX(o.order_date) AS latest_order_date
+FROM
+  customers AS c
+  LEFT JOIN orders AS o ON o.customer_id = c.customer_id
+GROUP BY
+  c.customer_id,
+  c.full_name,
+  c.country
+ORDER BY
+  stored_revenue DESC,
+  c.customer_id;
 ```
 
 **Expected shape:** One row per customer.
@@ -128,22 +134,24 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT p.product_id,
-       p.name,
-       p.category,
-       SUM(oi.quantity) AS units_sold,
-       ROUND(SUM(oi.unit_price * oi.quantity * (1 - oi.discount)), 2) AS net_revenue,
-       ROUND(SUM(p.cost * oi.quantity), 2) AS catalog_cost,
-       ROUND(
-         SUM(oi.unit_price * oi.quantity * (1 - oi.discount))
-           - SUM(p.cost * oi.quantity),
-         2
-       ) AS gross_profit
-FROM products AS p
-JOIN order_items AS oi
-  ON oi.product_id = p.product_id
-GROUP BY p.product_id, p.name, p.category
-ORDER BY gross_profit DESC, p.product_id;
+SELECT
+  p.product_id,
+  p.name,
+  p.category,
+  SUM(oi.quantity) AS units_sold,
+  ROUND(SUM(oi.unit_price * oi.quantity * (1 - oi.discount)), 2) AS net_revenue,
+  ROUND(SUM(p.cost * oi.quantity), 2) AS catalog_cost,
+  ROUND(SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) - SUM(p.cost * oi.quantity), 2) AS gross_profit
+FROM
+  products AS p
+  JOIN order_items AS oi ON oi.product_id = p.product_id
+GROUP BY
+  p.product_id,
+  p.name,
+  p.category
+ORDER BY
+  gross_profit DESC,
+  p.product_id;
 ```
 
 **Expected shape:** One row per sold product.
@@ -177,13 +185,19 @@ cardinality contract.
 - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
-SELECT date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date AS utc_month,
-       o.status,
-       COUNT(*) AS order_count,
-       ROUND(SUM(o.total_amount), 2) AS stored_revenue
-FROM orders AS o
-GROUP BY date_trunc('month', o.order_date AT TIME ZONE 'UTC'), o.status
-ORDER BY utc_month, o.status;
+SELECT
+  date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date AS utc_month,
+  o.status,
+  COUNT(*) AS order_count,
+  ROUND(SUM(o.total_amount), 2) AS stored_revenue
+FROM
+  orders AS o
+GROUP BY
+  date_trunc('month', o.order_date AT TIME ZONE 'UTC'),
+  o.status
+ORDER BY
+  utc_month,
+  o.status;
 ```
 
 **Expected shape:** One row per observed month and status.
@@ -220,28 +234,37 @@ cardinality contract.
 
 ```sql
 WITH line_totals AS (
-  SELECT oi.order_id,
-         SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS line_total
-  FROM order_items AS oi
-  GROUP BY oi.order_id
-), paid_totals AS (
-  SELECT p.order_id,
-         SUM(p.amount) AS paid_total
-  FROM payments AS p
-  GROUP BY p.order_id
+  SELECT
+    oi.order_id,
+    SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS line_total
+  FROM
+    order_items AS oi
+  GROUP BY
+    oi.order_id
+),
+paid_totals AS (
+  SELECT
+    p.order_id,
+    SUM(p.amount) AS paid_total
+  FROM
+    payments AS p
+  GROUP BY
+    p.order_id
 )
-SELECT o.order_id,
-       ROUND(o.total_amount, 2) AS stored_total,
-       ROUND(lt.line_total, 2) AS line_total,
-       ROUND(COALESCE(pt.paid_total, 0), 2) AS paid_total,
-       ROUND(o.total_amount - lt.line_total, 2) AS stored_minus_lines,
-       ROUND(o.total_amount - COALESCE(pt.paid_total, 0), 2) AS unpaid_balance
-FROM orders AS o
-JOIN line_totals AS lt
-  ON lt.order_id = o.order_id
-LEFT JOIN paid_totals AS pt
-  ON pt.order_id = o.order_id
-ORDER BY ABS(o.total_amount - lt.line_total) DESC, o.order_id;
+SELECT
+  o.order_id,
+  ROUND(o.total_amount, 2) AS stored_total,
+  ROUND(lt.line_total, 2) AS line_total,
+  ROUND(COALESCE(pt.paid_total, 0), 2) AS paid_total,
+  ROUND(o.total_amount - lt.line_total, 2) AS stored_minus_lines,
+  ROUND(o.total_amount - COALESCE(pt.paid_total, 0), 2) AS unpaid_balance
+FROM
+  orders AS o
+  JOIN line_totals AS lt ON lt.order_id = o.order_id
+  LEFT JOIN paid_totals AS pt ON pt.order_id = o.order_id
+ORDER BY
+  ABS(o.total_amount - lt.line_total) DESC,
+  o.order_id;
 ```
 
 **Expected shape:** One row per order with differences.
@@ -279,28 +302,40 @@ cardinality contract.
 
 ```sql
 WITH actual AS (
-  SELECT e.category,
-         date_trunc('month', e.expense_date)::date AS period,
-         SUM(e.amount) AS amount
-  FROM expenses AS e
-  GROUP BY e.category, date_trunc('month', e.expense_date)
-), planned AS (
-  SELECT b.category,
-         b.period,
-         SUM(b.amount) AS amount
-  FROM budgets AS b
-  GROUP BY b.category, b.period
+  SELECT
+    e.category,
+    date_trunc('month', e.expense_date)::date AS period,
+    SUM(e.amount) AS amount
+  FROM
+    expenses AS e
+  GROUP BY
+    e.category,
+    date_trunc('month', e.expense_date)
+),
+planned AS (
+  SELECT
+    b.category,
+    b.period,
+    SUM(b.amount) AS amount
+  FROM
+    budgets AS b
+  GROUP BY
+    b.category,
+    b.period
 )
-SELECT COALESCE(p.category, a.category) AS category,
-       COALESCE(p.period, a.period) AS period,
-       ROUND(p.amount, 2) AS budget_amount,
-       ROUND(a.amount, 2) AS actual_amount,
-       ROUND(a.amount - p.amount, 2) AS variance
-FROM planned AS p
-FULL JOIN actual AS a
-  ON a.category = p.category
- AND a.period = p.period
-ORDER BY period, category;
+SELECT
+  COALESCE(p.category, a.category) AS category,
+  COALESCE(p.period, a.period) AS period,
+  ROUND(p.amount, 2) AS budget_amount,
+  ROUND(a.amount, 2) AS actual_amount,
+  ROUND(a.amount - p.amount, 2) AS variance
+FROM
+  planned AS p
+  FULL JOIN actual AS a ON a.category = p.category
+    AND a.period = p.period
+  ORDER BY
+    period,
+    category;
 ```
 
 **Expected shape:** One row per category/month in either source.
@@ -334,28 +369,41 @@ cardinality contract.
 
 ```sql
 WITH customer_kpis AS (
-  SELECT COUNT(*) AS customers
-  FROM customers
-), order_kpis AS (
-  SELECT COUNT(*) AS orders,
-         SUM(total_amount) AS stored_revenue
-  FROM orders
-), line_kpis AS (
-  SELECT SUM(unit_price * quantity * (1 - discount)) AS computed_revenue
-  FROM order_items
-), payment_kpis AS (
-  SELECT SUM(amount) AS payments
-  FROM payments
+  SELECT
+    COUNT(*) AS customers
+  FROM
+    customers
+),
+order_kpis AS (
+  SELECT
+    COUNT(*) AS orders,
+    SUM(total_amount) AS stored_revenue
+  FROM
+    orders
+),
+line_kpis AS (
+  SELECT
+    SUM(unit_price * quantity * (1 - discount)) AS computed_revenue
+  FROM
+    order_items
+),
+payment_kpis AS (
+  SELECT
+    SUM(amount) AS payments
+  FROM
+    payments
 )
-SELECT c.customers,
-       o.orders,
-       ROUND(o.stored_revenue, 2) AS stored_revenue,
-       ROUND(l.computed_revenue, 2) AS computed_revenue,
-       ROUND(p.payments, 2) AS payments
-FROM customer_kpis AS c
-CROSS JOIN order_kpis AS o
-CROSS JOIN line_kpis AS l
-CROSS JOIN payment_kpis AS p;
+SELECT
+  c.customers,
+  o.orders,
+  ROUND(o.stored_revenue, 2) AS stored_revenue,
+  ROUND(l.computed_revenue, 2) AS computed_revenue,
+  ROUND(p.payments, 2) AS payments
+FROM
+  customer_kpis AS c
+  CROSS JOIN order_kpis AS o
+  CROSS JOIN line_kpis AS l
+  CROSS JOIN payment_kpis AS p;
 ```
 
 **Expected shape:** Exactly one summary row.

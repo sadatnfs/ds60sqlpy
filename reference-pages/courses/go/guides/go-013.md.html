@@ -236,8 +236,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">.</span>Join<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;reports&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;daily.json&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;reports/daily.json&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;path package&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The result is reports/daily.json.</p>
 <p>path works with slash-separated logical paths. filepath is a different package whose behavior follows the host operating system.</p>
 <h4 id="worked-example-2-compose-standard-library-apis">Worked example 2: Compose standard-library APIs<a class="heading-anchor" href="#worked-example-2-compose-standard-library-apis" aria-label="Link to this section">#</a></h4>
@@ -269,8 +268,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		check<span class="syntax-punctuation">(</span>err <span class="syntax-operator">==</span> <span class="syntax-keyword">nil</span> <span class="syntax-operator">&amp;&amp;</span> v <span class="syntax-operator">==</span> <span class="syntax-number">12</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;package composition&quot;</span><span class="syntax-punctuation">)</span>
 	<span class="syntax-punctuation">}</span>
 	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Worked example checks passed.&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">}</span>
-</code></pre>
+<span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The parsed value is 12.</p>
 <p>Each package contributes a small contract. Trimming is an explicit input policy, while numeric parsing remains independently fallible.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>

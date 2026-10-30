@@ -106,7 +106,9 @@ def main():
         result["recovered"] = work.fit_and_predict(loss_frame)
         work.compare(result["baseline"], result["recovered"])
         result["named_targets_recovered"] = work.named_target_check(loss_frame)
-        work.compare_named_targets(result["named_targets_before"], result["named_targets_recovered"])
+        work.compare_named_targets(
+            result["named_targets_before"], result["named_targets_recovered"]
+        )
         control.wait_restored()
         result["executors_after"] = two_workers(json.loads(probe.identities(spark._jsparkSession)))
         result["forecast_after"] = work.forecast()

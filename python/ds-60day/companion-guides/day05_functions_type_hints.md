@@ -122,6 +122,7 @@ def mean(values: list[float]) -> float:
         raise ValueError("values must not be empty")
     return sum(values) / len(values)
 
+
 mean([2.0, 4.0, 9.0])
 ```
 
@@ -144,6 +145,7 @@ def discounted(price: float, *, rate: float = 0.0) -> float:
     if not 0 <= rate <= 1:
         raise ValueError("rate must be between 0 and 1")
     return price * (1 - rate)
+
 
 discounted(80.0, rate=0.25)
 ```

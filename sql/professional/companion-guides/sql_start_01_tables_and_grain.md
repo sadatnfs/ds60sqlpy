@@ -150,9 +150,15 @@ Run these in the complete learner file so the temporary fixture and transaction 
 ### Example 1: A full observation retains its identity
 
 ```sql
-SELECT reading_id, station, reading_day, temperature
-FROM start_readings
-ORDER BY reading_id;
+SELECT
+  reading_id,
+  station,
+  reading_day,
+  temperature
+FROM
+  start_readings
+ORDER BY
+  reading_id;
 ```
 
 The input and output grain are both one observation, identified by reading_id. Selecting four columns changes the width of the result, not the number of observations. The missing South measurement is printed as an empty-looking field by default in psql; it is the SQL NULL marker, not a zero. Use the explicit ID to locate that observation.
@@ -162,10 +168,15 @@ The input and output grain are both one observation, identified by reading_id. S
 ### Example 2: Two visually identical rows are still two observations
 
 ```sql
-SELECT station, temperature
-FROM start_readings
-WHERE reading_id <= 2
-ORDER BY reading_id;
+SELECT
+  station,
+  temperature
+FROM
+  start_readings
+WHERE
+  reading_id <= 2
+ORDER BY
+  reading_id;
 ```
 
 FROM starts with six observations; WHERE keeps IDs 1 and 2; SELECT hides their IDs and dates. Both output rows now display North and 18. SQL preserves both rows. The input identities explain why the repeated visible values are valid. Rerun with reading_id in the SELECT list to make the distinction visible. Sorting by an unprojected input column is allowed here because this is an ordinary SELECT without DISTINCT.

@@ -440,24 +440,38 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
 <p>These worked excerpts come from <code>sql/postgres-60day/day01_select_where_orderby.sql</code>. Use <strong>Whole SQL lesson (psql)</strong> in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared <code>psql</code> routes are described above.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span> full_name<span class="syntax-punctuation">,</span> country<span class="syntax-punctuation">,</span> created_at
-<span class="syntax-keyword">FROM</span> customers
-<span class="syntax-keyword">WHERE</span> country <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;US&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;CA&#x27;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-comment">-- `customer_id` makes ties on the timestamp deterministic before LIMIT.</span>
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> created_at <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> customer_id <span class="syntax-keyword">DESC</span>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  customer_id<span class="syntax-punctuation">,</span>
+  full_name<span class="syntax-punctuation">,</span>
+  country<span class="syntax-punctuation">,</span>
+  created_at
+<span class="syntax-keyword">FROM</span>
+  customers
+<span class="syntax-keyword">WHERE</span>
+  country <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;US&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;CA&#x27;</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-comment">-- `customer_id` makes ties on the timestamp deterministic before LIMIT.</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  created_at <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span>
+  customer_id <span class="syntax-keyword">DESC</span>
 <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">10</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 1: Start with <code>customers</code> in <code>FROM</code>/<code>JOIN</code>; let <code>WHERE</code> remove nonqualifying rows. The final <code>SELECT</code> displays <code>customer_id</code>, <code>full_name</code>, <code>country</code>, and <code>created_at</code>. <code>ORDER BY</code> determines presentation order and the final <code>LIMIT 10</code> caps displayed rows. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 1 returns one row per <code>customer_id</code>, and <code>country</code>, capped at 10 rows with columns <code>customer_id</code>, <code>full_name</code>, <code>country</code>, and <code>created_at</code> from <code>customers</code>. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an <code>ORDER BY</code>, and inspect <code>NULL</code> only for columns this example can produce.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>&#32;
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
   product_id<span class="syntax-punctuation">,</span>
   name<span class="syntax-punctuation">,</span>
   price<span class="syntax-punctuation">,</span>
   cost<span class="syntax-punctuation">,</span>
-  <span class="syntax-punctuation">(</span>price <span class="syntax-operator">-</span> cost<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> gross_margin
-<span class="syntax-keyword">FROM</span> products
-<span class="syntax-keyword">WHERE</span> price <span class="syntax-operator">&gt;</span> <span class="syntax-number">50</span>
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> gross_margin <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> price <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> product_id
+  <span class="syntax-punctuation">(</span>price <span class="syntax-operator">-</span>
+    cost<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> gross_margin
+<span class="syntax-keyword">FROM</span>
+  products
+<span class="syntax-keyword">WHERE</span>
+  price <span class="syntax-operator">&gt;</span> <span class="syntax-number">50</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  gross_margin <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span>
+  price <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span>
+  product_id
 <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">15</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 2: Start with <code>products</code> in <code>FROM</code>/<code>JOIN</code>; let <code>WHERE</code> remove nonqualifying rows. The final <code>SELECT</code> displays <code>product_id</code>, <code>name</code>, <code>price</code>, <code>cost</code>, and <code>gross_margin</code>. <code>ORDER BY</code> determines presentation order and the final <code>LIMIT 15</code> caps displayed rows. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 2 returns one row per <code>product_id</code>, capped at 15 rows with columns <code>product_id</code>, <code>name</code>, <code>price</code>, <code>cost</code>, and <code>gross_margin</code> from <code>products</code>. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an <code>ORDER BY</code>, and inspect <code>NULL</code> only for columns this example can produce.</p>
@@ -786,12 +800,16 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 <li><code>LIMIT</code>: is applied after ordering and is meaningful only when the query first defines which rows come first.</li>
 </ul>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span>
-       o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
-       o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">,</span>
-       o<span class="syntax-punctuation">.</span>order_date
-<span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_id <span class="syntax-keyword">DESC</span>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span>
+  o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+  o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">,</span>
+  o<span class="syntax-punctuation">.</span>order_date
+<span class="syntax-keyword">FROM</span>
+  orders <span class="syntax-keyword">AS</span> o
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  o<span class="syntax-punctuation">.</span>order_date <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span>
+  o<span class="syntax-punctuation">.</span>order_id <span class="syntax-keyword">DESC</span>
 <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">20</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> At most 20 rows; one row per order, newest first.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
@@ -816,13 +834,18 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 <li><code>LIMIT</code>: is applied after ordering and is meaningful only when the query first defines which rows come first.</li>
 </ul>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span>
-       p<span class="syntax-punctuation">.</span>name<span class="syntax-punctuation">,</span>
-       p<span class="syntax-punctuation">.</span>price<span class="syntax-punctuation">,</span>
-       p<span class="syntax-punctuation">.</span>created_at
-<span class="syntax-keyword">FROM</span> products <span class="syntax-keyword">AS</span> p
-<span class="syntax-keyword">WHERE</span> p<span class="syntax-punctuation">.</span>created_at <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;90 days&#x27;</span>
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>price <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">.</span>product_id
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span>
+  p<span class="syntax-punctuation">.</span>name<span class="syntax-punctuation">,</span>
+  p<span class="syntax-punctuation">.</span>price<span class="syntax-punctuation">,</span>
+  p<span class="syntax-punctuation">.</span>created_at
+<span class="syntax-keyword">FROM</span>
+  products <span class="syntax-keyword">AS</span> p
+<span class="syntax-keyword">WHERE</span>
+  p<span class="syntax-punctuation">.</span>created_at <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;90 days&#x27;</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  p<span class="syntax-punctuation">.</span>price <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span>
+  p<span class="syntax-punctuation">.</span>product_id
 <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">10</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> At most 10 product rows; every row is in the 90-day window.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
@@ -846,14 +869,19 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><code>WHERE</code>: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</li>
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 </ul>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>created_at
-<span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span>
-<span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;GB&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;DE&#x27;</span><span class="syntax-punctuation">)</span>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>created_at
+<span class="syntax-keyword">FROM</span>
+  customers <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span>
+<span class="syntax-keyword">WHERE</span>
+  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;GB&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;DE&#x27;</span><span class="syntax-punctuation">)</span>
   <span class="syntax-keyword">AND</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>created_at <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">INTERVAL</span> <span class="syntax-string">&#x27;1 year&#x27;</span>
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>created_at <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">;</span></code></pre>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>created_at <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> Only GB/DE customers from the declared window.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-3">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-3" aria-label="Link to this section">#</a></h5>
@@ -875,10 +903,12 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><code>FROM</code>: establishes the starting relation and therefore the initial row grain.</li>
 <li><code>FILTER (WHERE ...)</code>: limits one aggregate without removing rows needed by neighboring aggregates.</li>
 </ul>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>email <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> missing_email_count<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>email <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> present_email_count<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> customer_count
-<span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">;</span></code></pre>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>email <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> missing_email_count<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>email <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> present_email_count<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> customer_count
+<span class="syntax-keyword">FROM</span>
+  customers <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> Exactly one summary row with counts whose sum equals all customers.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
 <h5 id="solution-1--reasoning-and-verification-4">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-4" aria-label="Link to this section">#</a></h5>
@@ -901,11 +931,15 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
 <li><code>LIMIT</code>: is applied after ordering and is meaningful only when the query first defines which rows come first.</li>
 </ul>
-<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span>
-       p<span class="syntax-punctuation">.</span>name<span class="syntax-punctuation">,</span>
-       p<span class="syntax-punctuation">.</span>price
-<span class="syntax-keyword">FROM</span> products <span class="syntax-keyword">AS</span> p
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>price <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">.</span>product_id
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
+  p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span>
+  p<span class="syntax-punctuation">.</span>name<span class="syntax-punctuation">,</span>
+  p<span class="syntax-punctuation">.</span>price
+<span class="syntax-keyword">FROM</span>
+  products <span class="syntax-keyword">AS</span> p
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  p<span class="syntax-punctuation">.</span>price <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span>
+  p<span class="syntax-punctuation">.</span>product_id
 <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">10</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected shape:</strong> At most 10 rows, highest prices first, stable across repeated runs on unchanged data.</p>
 <p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>

@@ -70,34 +70,60 @@ The complete source creates the owned local session described above, then constr
 import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
-import java.nio.file.{Files,Path,Paths,StandardOpenOption,StandardCopyOption}
+import java.nio.file.{Files, Path, Paths, StandardOpenOption, StandardCopyOption}
 import java.nio.charset.StandardCharsets
 import java.util.UUID
 import scala.jdk.CollectionConverters._
-import org.apache.spark.sql.streaming.{StreamingQuery,Trigger}
+import org.apache.spark.sql.streaming.{StreamingQuery, Trigger}
 import scala.collection.mutable.ArrayBuffer
 
-require(spark.version == "4.0.1","Prepared Spark4.0.1 required")
-spark.conf.set("spark.sql.streaming.stopTimeout","5000")
-ownedRoot=Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(),"spark-038-")
-val input=ownedRoot.resolve("input");val checkpoint=ownedRoot.resolve("checkpoint");val output=ownedRoot.resolve("output")
-publishFile(ownedRoot,input,"batch-01.json",Seq("""{"id":1,"cents":100}""","""{"id":1,"cents":100}""","""{"id":2,"cents":200}"""))
+require(spark.version == "4.0.1", "Prepared Spark4.0.1 required")
+spark.conf.set("spark.sql.streaming.stopTimeout", "5000")
+ownedRoot = Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(), "spark-038-")
+val input = ownedRoot.resolve("input"); val checkpoint = ownedRoot.resolve("checkpoint");
+val output = ownedRoot.resolve("output")
+publishFile(
+  ownedRoot,
+  input,
+  "batch-01.json",
+  Seq("""{"id":1,"cents":100}""", """{"id":1,"cents":100}""", """{"id":2,"cents":200}""")
+)
 ```
 
 ```python
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 from pathlib import Path
 import tempfile
 import shutil
 import json
 import uuid
 
-if spark.version!="4.0.1":raise ValueError("Prepared Spark4.0.1 required")
-spark.conf.set("spark.sql.streaming.stopTimeout","5000")
-owned_root=Path(tempfile.mkdtemp(prefix="spark-038-",dir=Path.cwd()))
-input_path=owned_root/"input";checkpoint=owned_root/"checkpoint";output=owned_root/"output"
-publish_file(owned_root,input_path,"batch-01.json",['{"id":1,"cents":100}','{"id":1,"cents":100}','{"id":2,"cents":200}'])
+if spark.version != "4.0.1":
+    raise ValueError("Prepared Spark4.0.1 required")
+spark.conf.set("spark.sql.streaming.stopTimeout", "5000")
+owned_root = Path(tempfile.mkdtemp(prefix="spark-038-", dir=Path.cwd()))
+input_path = owned_root / "input"
+checkpoint = owned_root / "checkpoint"
+output = owned_root / "output"
+publish_file(
+    owned_root,
+    input_path,
+    "batch-01.json",
+    ['{"id":1,"cents":100}', '{"id":1,"cents":100}', '{"id":2,"cents":200}'],
+)
 ```
 
 ## Worked example / walkthrough
@@ -105,15 +131,16 @@ publish_file(owned_root,input_path,"batch-01.json",['{"id":1,"cents":100}','{"id
 ### Worked example 1
 
 ```scala
-val result=observe(spark,input,ownedRoot.resolve("demo-checkpoint"),ownedRoot.resolve("demo-output"))
-assert(result.inputRows==3L && result.stateRows.contains(2L))
-assert(bag(spark,ownedRoot.resolve("demo-output"))==Seq("1:100","2:200"))
+val result =
+  observe(spark, input, ownedRoot.resolve("demo-checkpoint"), ownedRoot.resolve("demo-output"))
+assert(result.inputRows == 3L && result.stateRows.contains(2L))
+assert(bag(spark, ownedRoot.resolve("demo-output")) == Seq("1:100", "2:200"))
 ```
 
 ```python
-result=observe(spark,input_path,owned_root/"demo-checkpoint",owned_root/"demo-output")
-assert result["input_rows"]==3 and result["state_rows"]==2
-assert bag(spark,owned_root/"demo-output")==["1:100","2:200"]
+result = observe(spark, input_path, owned_root / "demo-checkpoint", owned_root / "demo-output")
+assert result["input_rows"] == 3 and result["state_rows"] == 2
+assert bag(spark, owned_root / "demo-output") == ["1:100", "2:200"]
 ```
 
 The progress state count and committed row bag agree for this actual bounded deduplication query. The observations still have distinct meanings and are checked separately.
@@ -121,15 +148,15 @@ The progress state count and committed row bag agree for this actual bounded ded
 ### Worked example 2
 
 ```scala
-val milliseconds=Seq(100L,100L,10000L)
-val ratio=milliseconds.max.toDouble/milliseconds.sorted.apply(1)
-assert(ratio==100.0)
+val milliseconds = Seq(100L, 100L, 10000L)
+val ratio = milliseconds.max.toDouble / milliseconds.sorted.apply(1)
+assert(ratio == 100.0)
 ```
 
 ```python
-milliseconds=[100,100,10000]
-ratio=max(milliseconds)/sorted(milliseconds)[1]
-assert ratio==100
+milliseconds = [100, 100, 10000]
+ratio = max(milliseconds) / sorted(milliseconds)[1]
+assert ratio == 100
 ```
 
 This synthetic task-duration ratio identifies a long tail. It does not prove the cause or measure a task from the preceding live query.

@@ -30,7 +30,12 @@ Creating the cursor and executing its body are separate events. The trace distin
 
 ```javascript
 const trace = [];
-function* values() { trace.push('started'); yield 2; trace.push('continued'); yield 4; }
+function* values() {
+  trace.push('started');
+  yield 2;
+  trace.push('continued');
+  yield 4;
+}
 const cursor = values();
 assert.deepEqual(trace, []);
 assert.deepEqual(cursor.next(), { value: 2, done: false });
@@ -50,8 +55,19 @@ The loop performs iterator closing when control exits through break. Resource-ow
 
 ```javascript
 const trace = [];
-function* rows() { try { trace.push('opened'); yield 1; yield 2; } finally { trace.push('closed'); } }
-for (const value of rows()) { trace.push(value); break; }
+function* rows() {
+  try {
+    trace.push('opened');
+    yield 1;
+    yield 2;
+  } finally {
+    trace.push('closed');
+  }
+}
+for (const value of rows()) {
+  trace.push(value);
+  break;
+}
 assert.deepEqual(trace, ['opened', 1, 'closed']);
 ```
 
@@ -83,7 +99,10 @@ Task: Read a generator yielding 1 and returning 9, then compare spread.
 A final return value belongs to the completion record. Treating it as another ordinary item would change the data stream.
 
 ```javascript
-function* sample() { yield 1; return 9; }
+function* sample() {
+  yield 1;
+  return 9;
+}
 const cursor = sample();
 assert.deepEqual(cursor.next(), { value: 1, done: false });
 assert.deepEqual(cursor.next(), { value: 9, done: true });
@@ -101,7 +120,10 @@ Task: Suspend at a request, then send 4 to produce its double.
 The second next call resolves the suspended yield expression to 4. This is a two-way protocol, though simple data pipelines often need only one-way yielding.
 
 ```javascript
-function* conversation() { const answer = yield 'request'; yield answer * 2; }
+function* conversation() {
+  const answer = yield 'request';
+  yield answer * 2;
+}
 const cursor = conversation();
 assert.equal(cursor.next().value, 'request');
 assert.equal(cursor.next(4).value, 8);

@@ -59,25 +59,22 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Buffers;
 
-internal static class Program
-{
-    private static void Check(bool condition, string reason)
+internal static class Program {
+  private static void Check(bool condition, string reason) {
+    if (!condition)
+      throw new InvalidOperationException(reason);
+  }
+
+  private static async Task Main() {
     {
-        if (!condition) throw new InvalidOperationException(reason);
+      Task<int> pending = Task.FromResult(7);
+      int value = await pending;
+      Check(value == 7 && pending.IsCompletedSuccessfully,
+            "observed completion");
     }
-
-    private static async Task Main()
-    {
-        {
-            Task<int> pending = Task.FromResult(7);
-            int value = await pending;
-            Check(value == 7 && pending.IsCompletedSuccessfully, "observed completion");
-        }
-        Console.WriteLine("csharp-029: passed");
-        await Task.CompletedTask;
-    }
-
-
+    Console.WriteLine("csharp-029: passed");
+    await Task.CompletedTask;
+  }
 }
 ```
 
@@ -104,27 +101,27 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Buffers;
 
-internal static class Program
-{
-    private static void Check(bool condition, string reason)
+internal static class Program {
+  private static void Check(bool condition, string reason) {
+    if (!condition)
+      throw new InvalidOperationException(reason);
+  }
+
+  private static async Task Main() {
     {
-        if (!condition) throw new InvalidOperationException(reason);
+      int[] values = await Task.WhenAll(Task.FromResult(2), Task.FromResult(3));
+      Check(values.SequenceEqual(new[] { 2, 3 }), "input order retained");
+      bool observed = false;
+      try {
+        await Task.FromException<int>(new InvalidOperationException("fixture"));
+      } catch (InvalidOperationException) {
+        observed = true;
+      }
+      Check(observed, "failure propagated through await");
     }
-
-    private static async Task Main()
-    {
-        {
-            int[] values = await Task.WhenAll(Task.FromResult(2), Task.FromResult(3));
-            Check(values.SequenceEqual(new[] { 2, 3 }), "input order retained");
-            bool observed = false;
-            try { await Task.FromException<int>(new InvalidOperationException("fixture")); } catch (InvalidOperationException) { observed = true; }
-            Check(observed, "failure propagated through await");
-        }
-        Console.WriteLine("csharp-029: passed");
-        await Task.CompletedTask;
-    }
-
-
+    Console.WriteLine("csharp-029: passed");
+    await Task.CompletedTask;
+  }
 }
 ```
 

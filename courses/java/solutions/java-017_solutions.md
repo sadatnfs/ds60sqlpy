@@ -23,9 +23,10 @@ Task: Look up known a and unknown b in a fixed map through Optional.
 The absence ofb is an expected lookup outcome. It is not represented as zero because zero could be a valid stored value.
 
 ```java
-Map<String,Integer> data=Map.of("a",7);
-Optional<Integer> known=Optional.ofNullable(data.get("a")); Optional<Integer> missing=Optional.ofNullable(data.get("b"));
-assert known.orElseThrow()==7 && missing.isEmpty();
+Map<String, Integer> data = Map.of("a", 7);
+Optional<Integer> known = Optional.ofNullable(data.get("a"));
+Optional<Integer> missing = Optional.ofNullable(data.get("b"));
+assert known.orElseThrow() == 7 && missing.isEmpty();
 ```
 
 **Expected:** a present with 7; b empty.
@@ -39,8 +40,8 @@ Task: Map the known value to double and apply the same mapping to empty.
 The mapping function is not called for an emptyOptional. This keeps the absence policy visible without repeated null conditionals.
 
 ```java
-assert known.map(value -> value*2).orElseThrow()==14;
-assert missing.map(value -> value*2).isEmpty();
+assert known.map(value -> value * 2).orElseThrow() == 14;
+assert missing.map(value -> value * 2).isEmpty();
 ```
 
 **Expected:** 14 and empty.
@@ -54,9 +55,9 @@ Task: Use a counter-producing fallback withorElse andorElseGet on a present valu
 Method arguments are evaluated beforeorElse is invoked. A supplier delays the computation and avoids unnecessary expensive or side-effecting work.
 
 ```java
-var calls=new java.util.concurrent.atomic.AtomicInteger();
-assert known.orElse(calls.incrementAndGet())==7 && calls.get()==1;
-assert known.orElseGet(calls::incrementAndGet)==7 && calls.get()==1;
+var calls = new java.util.concurrent.atomic.AtomicInteger();
+assert known.orElse(calls.incrementAndGet()) == 7 && calls.get() == 1;
+assert known.orElseGet(calls::incrementAndGet) == 7 && calls.get() == 1;
 ```
 
 **Expected:** orElse increments;orElseGet does not.
@@ -70,9 +71,13 @@ Task: Validate an empty identifier before consulting the map.
 An invalid request and a valid request with no result are different outcomes. Conflating them makes error diagnosis and user feedback less precise.
 
 ```java
-boolean invalid=false;
-try { lookup(data," "); } catch(IllegalArgumentException expected){invalid=true;}
-assert invalid && lookup(data,"b").isEmpty();
+boolean invalid = false;
+try {
+  lookup(data, " ");
+} catch (IllegalArgumentException expected) {
+  invalid = true;
+}
+assert invalid && lookup(data, "b").isEmpty();
 ```
 
 **Expected:** IllegalArgumentException rather than empty.
@@ -86,7 +91,7 @@ Task: Parse an optional numeric string through a helper returningOptional<Intege
 The helper deliberately treats parse failure as absence for this small API. A richer application may need to retain the error reason instead of discarding it.
 
 ```java
-assert Optional.of("12").flatMap(Main::tryParse).orElseThrow()==12;
+assert Optional.of("12").flatMap(Main::tryParse).orElseThrow() == 12;
 assert Optional.of("bad").flatMap(Main::tryParse).isEmpty();
 ```
 
@@ -101,8 +106,12 @@ Task: Callget on empty and catchNoSuchElementException.
 Optional does not make unchecked access safe. Prefer an explicit fallback,orElseThrow with context,or a branching operation that matches the caller contract.
 
 ```java
-boolean absent=false;
-try { Optional.empty().get(); } catch(NoSuchElementException expected){absent=true;}
+boolean absent = false;
+try {
+  Optional.empty().get();
+} catch (NoSuchElementException expected) {
+  absent = true;
+}
 assert absent;
 ```
 

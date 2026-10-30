@@ -31,7 +31,7 @@ When the wrong output appears only in optimized builds, investigate undefined be
 ## Worked example 1
 
 ```cpp
-assert(total({2,4,6})==12);
+assert(total({2, 4, 6}) == 12);
 ```
 
 Expected: Known input gives 12 before any measurement.
@@ -39,7 +39,8 @@ Expected: Known input gives 12 before any measurement.
 ## Worked example 2
 
 ```cpp
-for(int i=0;i<1000;++i) checksum+=total({2,4,6});
+for (int i = 0; i < 1000; ++i)
+  checksum += total({2, 4, 6});
 ```
 
 Expected: The checksum is 12000; elapsed nanoseconds vary by run.

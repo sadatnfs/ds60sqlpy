@@ -12,17 +12,39 @@ Read a static copy of the two-row schema fixture and require bigint id/cents, kn
 
 ```scala
 def validatedBag(frame: DataFrame): Seq[String] = {
-  require(frame.schema.fields.map(f => (f.name,f.dataType.simpleString)).toSeq == Seq(("id","bigint"),("cents","bigint")))
-  require(frame.count() <= 8L && frame.filter(col("id").isNull || col("cents").isNull || col("id") <= 0L || col("cents") < 0L).count() == 0L)
-  frame.orderBy("id","cents").collect().map(r => s"${r.getLong(0)}:${r.getLong(1)}").toSeq
+  require(
+    frame.schema.fields.map(f => (f.name, f.dataType.simpleString)).toSeq == Seq(
+      ("id", "bigint"),
+      ("cents", "bigint")
+    )
+  )
+  require(
+    frame.count() <= 8L && frame
+      .filter(col("id").isNull || col("cents").isNull || col("id") <= 0L || col("cents") < 0L)
+      .count() == 0L
+  )
+  frame.orderBy("id", "cents").collect().map(r => s"${r.getLong(0)}:${r.getLong(1)}").toSeq
 }
 ```
 
 ```python
 def validated_bag(frame):
-    if [(f.name,f.dataType.simpleString()) for f in frame.schema.fields]!=[("id","bigint"),("cents","bigint")]:raise ValueError("Schema mismatch")
-    if frame.count()>8 or frame.filter(F.col("id").isNull()|F.col("cents").isNull()|(F.col("id")<=0)|(F.col("cents")<0)).count():raise ValueError("Invalid bounded records")
-    return [f"{r.id}:{r.cents}" for r in frame.orderBy("id","cents").collect()]
+    if [(f.name, f.dataType.simpleString()) for f in frame.schema.fields] != [
+        ("id", "bigint"),
+        ("cents", "bigint"),
+    ]:
+        raise ValueError("Schema mismatch")
+    if (
+        frame.count() > 8
+        or frame.filter(
+            F.col("id").isNull()
+            | F.col("cents").isNull()
+            | (F.col("id") <= 0)
+            | (F.col("cents") < 0)
+        ).count()
+    ):
+        raise ValueError("Invalid bounded records")
+    return [f"{r.id}:{r.cents}" for r in frame.orderBy("id", "cents").collect()]
 ```
 
 The row grain is one input event occurrence, not one distinct business identity. Validating types and missingness before collection makes the tiny oracle meaningful and keeps a null from becoming a string that accidentally looks like a legitimate key. Sorting establishes a comparison order without changing multiplicity.
@@ -36,14 +58,14 @@ Execute the AvailableNow Parquet query with its owned checkpoint/output and reta
 **Expected:** Two input rows and exactly 1:100,2:200 in the committed sink.
 
 ```scala
-def firstRun(spark: SparkSession,input: Path,checkpoint: Path,output: Path): RunReceipt = {
-  runParquet(spark,input,checkpoint,output)
+def firstRun(spark: SparkSession, input: Path, checkpoint: Path, output: Path): RunReceipt = {
+  runParquet(spark, input, checkpoint, output)
 }
 ```
 
 ```python
-def first_run(spark,input_path,checkpoint,output):
-    return run_parquet(spark,input_path,checkpoint,output)
+def first_run(spark, input_path, checkpoint, output):
+    return run_parquet(spark, input_path, checkpoint, output)
 ```
 
 AvailableNow bounds the available input for this invocation and terminates after processing it. The source offset log and sink commit metadata have different responsibilities. The progress receipt records what this run observed, while actual Parquet readback checks the committed output values. An inactive query alone would not establish those values.
@@ -57,16 +79,29 @@ Publish a second file with 2:200 and 3:300, then restart the compatible query wi
 **Expected:** Only 2 new input rows are processed. The sink bag is 1:100,2:200,2:200,3:300. Query ID persists and run ID changes.
 
 ```scala
-def resumeNewFile(spark: SparkSession,root: Path,input: Path,checkpoint: Path,output: Path): RunReceipt = {
-  publishFile(root,input,"batch-02.json",Seq("""{"id":2,"cents":200}""","""{"id":3,"cents":300}"""))
-  runParquet(spark,input,checkpoint,output)
+def resumeNewFile(
+    spark: SparkSession,
+    root: Path,
+    input: Path,
+    checkpoint: Path,
+    output: Path
+): RunReceipt = {
+  publishFile(
+    root,
+    input,
+    "batch-02.json",
+    Seq("""{"id":2,"cents":200}""", """{"id":3,"cents":300}""")
+  )
+  runParquet(spark, input, checkpoint, output)
 }
 ```
 
 ```python
-def resume_new_file(spark,root,input_path,checkpoint,output):
-    publish_file(root,input_path,"batch-02.json",['{"id":2,"cents":200}','{"id":3,"cents":300}'])
-    return run_parquet(spark,input_path,checkpoint,output)
+def resume_new_file(spark, root, input_path, checkpoint, output):
+    publish_file(
+        root, input_path, "batch-02.json", ['{"id":2,"cents":200}', '{"id":3,"cents":300}']
+    )
+    return run_parquet(spark, input_path, checkpoint, output)
 ```
 
 The checkpoint retains which immutable source files were processed. The new file has a new source identity even though one row repeats a business ID. The preserved duplicate is intentional evidence separating source-offset recovery from an application deduplication policy. Persistent query ID and fresh run ID show the distinction between a logical query and one execution attempt.
@@ -80,14 +115,14 @@ Run the same compatible query again without adding input and compare output befo
 **Expected:** Zero new input rows and an unchanged 4-row output bag.
 
 ```scala
-def resumeEmpty(spark: SparkSession,input: Path,checkpoint: Path,output: Path): RunReceipt = {
-  runParquet(spark,input,checkpoint,output)
+def resumeEmpty(spark: SparkSession, input: Path, checkpoint: Path, output: Path): RunReceipt = {
+  runParquet(spark, input, checkpoint, output)
 }
 ```
 
 ```python
-def resume_empty(spark,input_path,checkpoint,output):
-    return run_parquet(spark,input_path,checkpoint,output)
+def resume_empty(spark, input_path, checkpoint, output):
+    return run_parquet(spark, input_path, checkpoint, output)
 ```
 
 No new file offset means no fresh source data to append. An empty progress sequence is compatible with this finite no-work case, so the checker avoids inventing a required microbatch. The before/after output comparison ensures a restart did not duplicate previously committed source occurrences.
@@ -101,16 +136,32 @@ Start from a new checkpoint only when the output namespace is also new. Replay t
 **Expected:** The separate output has 4 rows, with a new logical query ID. The old output remains 4 rows.
 
 ```scala
-def separateReplay(spark: SparkSession,input: Path,checkpoint: Path,output: Path,oldCheckpoint: Path,oldOutput: Path): RunReceipt = {
-  require(checkpoint!=oldCheckpoint && output!=oldOutput && !Files.exists(checkpoint) && !Files.exists(output))
-  runParquet(spark,input,checkpoint,output)
+def separateReplay(
+    spark: SparkSession,
+    input: Path,
+    checkpoint: Path,
+    output: Path,
+    oldCheckpoint: Path,
+    oldOutput: Path
+): RunReceipt = {
+  require(
+    checkpoint != oldCheckpoint && output != oldOutput && !Files.exists(checkpoint) && !Files
+      .exists(output)
+  )
+  runParquet(spark, input, checkpoint, output)
 }
 ```
 
 ```python
-def separate_replay(spark,input_path,checkpoint,output,old_checkpoint,old_output):
-    if checkpoint==old_checkpoint or output==old_output or checkpoint.exists() or output.exists():raise ValueError("Fresh checkpoint and separate sink required")
-    return run_parquet(spark,input_path,checkpoint,output)
+def separate_replay(spark, input_path, checkpoint, output, old_checkpoint, old_output):
+    if (
+        checkpoint == old_checkpoint
+        or output == old_output
+        or checkpoint.exists()
+        or output.exists()
+    ):
+        raise ValueError("Fresh checkpoint and separate sink required")
+    return run_parquet(spark, input_path, checkpoint, output)
 ```
 
 The new checkpoint defines a new source-history namespace and can see all available files again. A separate sink makes that replay inspectable without contaminating the prior committed output. This is a deliberate replay experiment, not a repair that deletes or resets an existing checkpoint.
@@ -126,15 +177,15 @@ Return output row count, distinct business IDs and total cents, then explain why
 ```scala
 def guaranteeLedger(frame: DataFrame): Seq[Long] = {
   validatedBag(frame)
-  val r=frame.agg(count(lit(1)),countDistinct("id"),sum("cents")).first()
-  Seq(r.getLong(0),r.getLong(1),r.getLong(2))
+  val r = frame.agg(count(lit(1)), countDistinct("id"), sum("cents")).first()
+  Seq(r.getLong(0), r.getLong(1), r.getLong(2))
 }
 ```
 
 ```python
 def guarantee_ledger(frame):
     validated_bag(frame)
-    return tuple(frame.agg(F.count(F.lit(1)),F.countDistinct("id"),F.sum("cents")).first())
+    return tuple(frame.agg(F.count(F.lit(1)), F.countDistinct("id"), F.sum("cents")).first())
 ```
 
 The three-number ledger catches a misleading countDistinct-only success claim. A replay-safe file sink can preserve each source occurrence correctly while still containing repeated business events. Recovery semantics depend jointly on replayable immutable source files, compatible checkpoint state and the selected sink protocol. A process-level local rehearsal does not qualify arbitrary external side effects or distributed storage durability.

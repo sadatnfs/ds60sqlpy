@@ -101,21 +101,34 @@ These worked excerpts come from `sql/postgres-60day/day23_ctes_intro.sql`. Use *
 
 ```sql
 WITH order_lines AS (
-  SELECT o.order_id,
-         o.customer_id,
-         SUM(oi.unit_price*oi.quantity*(1-oi.discount)) AS order_total
-  FROM orders o
-  JOIN order_items oi ON oi.order_id = o.order_id
-  GROUP BY o.order_id, o.customer_id
-), top_customers AS (
-  SELECT customer_id,
-         SUM(order_total) AS lifetime_revenue
-  FROM order_lines
-  GROUP BY customer_id
+  SELECT
+    o.order_id,
+    o.customer_id,
+    SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS order_total
+  FROM
+    orders o
+    JOIN order_items oi ON oi.order_id = o.order_id
+  GROUP BY
+    o.order_id,
+    o.customer_id
+),
+top_customers AS (
+  SELECT
+    customer_id,
+    SUM(order_total) AS lifetime_revenue
+  FROM
+    order_lines
+  GROUP BY
+    customer_id
 )
-SELECT tc.customer_id, tc.lifetime_revenue
-FROM top_customers tc
-ORDER BY lifetime_revenue DESC, tc.customer_id
+SELECT
+  tc.customer_id,
+  tc.lifetime_revenue
+FROM
+  top_customers tc
+ORDER BY
+  lifetime_revenue DESC,
+  tc.customer_id
 LIMIT 20;
 ```
 
@@ -127,24 +140,37 @@ LIMIT 20;
 
 ```sql
 -- The same topic query shown as a plan instead of business rows.
-EXPLAIN (COSTS OFF)
-WITH order_lines AS (
-  SELECT o.order_id,
-         o.customer_id,
-         SUM(oi.unit_price*oi.quantity*(1-oi.discount)) AS order_total
-  FROM orders o
-  JOIN order_items oi ON oi.order_id = o.order_id
-  GROUP BY o.order_id, o.customer_id
-), top_customers AS (
-  SELECT customer_id,
-         SUM(order_total) AS lifetime_revenue
-  FROM order_lines
-  GROUP BY customer_id
+EXPLAIN (
+  COSTS OFF
+) WITH order_lines AS (
+  SELECT
+    o.order_id,
+    o.customer_id,
+    SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS order_total
+  FROM
+    orders o
+    JOIN order_items oi ON oi.order_id = o.order_id
+  GROUP BY
+    o.order_id,
+    o.customer_id),
+  top_customers AS (
+    SELECT
+      customer_id,
+      SUM(order_total) AS lifetime_revenue
+    FROM
+      order_lines
+    GROUP BY
+      customer_id
 )
-SELECT tc.customer_id, tc.lifetime_revenue
-FROM top_customers tc
-ORDER BY lifetime_revenue DESC, tc.customer_id
-LIMIT 20;
+  SELECT
+    tc.customer_id,
+    tc.lifetime_revenue
+  FROM
+    top_customers tc
+  ORDER BY
+    lifetime_revenue DESC,
+    tc.customer_id
+  LIMIT 20;
 ```
 
 **How to read it:** Example 2 is executed by `psql` as part of the complete lesson. Expected notices are evidence; an unexpected error stops the script.

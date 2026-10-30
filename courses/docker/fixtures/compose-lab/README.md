@@ -70,7 +70,10 @@ Stop the writer before exporting. The command writes a new local backup file and
 
 ```sh
 docker compose -p ds60-docker-study stop app
-( set -C; docker compose -p ds60-docker-study run --rm --no-deps app python -c "from pathlib import Path; import json; p=Path('/data/counter.json'); v=json.loads(p.read_text()) if p.exists() else {'schema_version':1,'counter':0}; assert type(v) is dict and type(v.get('schema_version')) is int and v['schema_version']==1 and type(v['counter']) is int and v['counter']>=0; print(json.dumps(v,sort_keys=True))" > counter-backup.json )
+(
+  set -C
+  docker compose -p ds60-docker-study run --rm --no-deps app python -c "from pathlib import Path; import json; p=Path('/data/counter.json'); v=json.loads(p.read_text()) if p.exists() else {'schema_version':1,'counter':0}; assert type(v) is dict and type(v.get('schema_version')) is int and v['schema_version']==1 and type(v['counter']) is int and v['counter']>=0; print(json.dumps(v,sort_keys=True))" >counter-backup.json
+)
 ```
 
 Expected file is a small JSON object with schema_version 1 and the recorded counter. If export fails, keep the error and do not treat an empty or partial file as a backup. Verify the file before use. This procedure is valid for this stopped single-file teaching app. It is not a live PostgreSQL backup recipe.
@@ -86,7 +89,7 @@ if docker volume inspect ds60-docker-study-restore >/dev/null 2>&1; then
 fi
 docker volume create --label ds60.study=restore ds60-docker-study-restore
 docker run --rm --pull never --user 0:0 --network none -v ds60-docker-study-restore:/restore ds60-docker-study:local python -c "import os; os.chown('/restore',10001,10001)"
-docker run --rm -i --pull never --network none -v ds60-docker-study-restore:/data ds60-docker-study:local python -c "import sys,json; from pathlib import Path; v=json.load(sys.stdin); assert type(v) is dict and type(v.get('schema_version')) is int and v['schema_version']==1 and type(v.get('counter')) is int and v['counter']>=0; p=Path('/data/counter.json'); f=p.open('x'); f.write(json.dumps(v)+'\\n'); f.close(); print('restored',v['counter'])" < counter-backup.json
+docker run --rm -i --pull never --network none -v ds60-docker-study-restore:/data ds60-docker-study:local python -c "import sys,json; from pathlib import Path; v=json.load(sys.stdin); assert type(v) is dict and type(v.get('schema_version')) is int and v['schema_version']==1 and type(v.get('counter')) is int and v['counter']>=0; p=Path('/data/counter.json'); f=p.open('x'); f.write(json.dumps(v)+'\\n'); f.close(); print('restored',v['counter'])" <counter-backup.json
 docker run --rm --pull never --network none --read-only -v ds60-docker-study-restore:/data:ro ds60-docker-study:local python -c "from pathlib import Path; import json; v=json.loads(Path('/data/counter.json').read_text()); print('verified',v['counter'])"
 ```
 

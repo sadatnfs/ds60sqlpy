@@ -15,8 +15,16 @@ Return customer_id, revenue, visits, revenue_per_visit, ratio_defined from `deep
 **Verify:** For sql-deep-02 Exercise 1, recompute each numerator and denominator from its customer rows; retain a NULL ratio when the denominator is zero rather than substituting an observed zero.
 
 ```sql
-SELECT customer_id,revenue,visits,revenue/NULLIF(visits,0) AS revenue_per_visit,
- visits>0 AS ratio_defined FROM deep2_usage ORDER BY customer_id;
+SELECT
+  customer_id,
+  revenue,
+  visits,
+  revenue / NULLIF (visits, 0) AS revenue_per_visit,
+  visits > 0 AS ratio_defined
+FROM
+  deep2_usage
+ORDER BY
+  customer_id;
 ```
 
 NULLIF converts only a zero denominator to NULL, preventing a division error while retaining an undefined ratio. The separate ratio_defined flag exposes why the ratio is missing. Keeping customer 3 preserves the original customer population even though that customer cannot contribute a defined per-visit ratio. COALESCE of the ratio to zero would silently assert an efficiency value that was never measured.
@@ -32,11 +40,14 @@ Return one row keyed by metric_id=all_customers with columns metric_id, customer
 **Verify:** For sql-deep-02 Exercise 2, calculate the pooled numerator divided by the pooled denominator independently of the average of defined customer ratios; report how many customer ratios each calculation includes.
 
 ```sql
-SELECT 'all_customers' AS metric_id,count(*) AS customer_count,
- count(revenue/NULLIF(visits,0)) AS defined_ratio_count,
- sum(revenue)/NULLIF(sum(visits),0) AS ratio_of_totals,
- avg(revenue/NULLIF(visits,0)) AS mean_customer_ratio
-FROM deep2_usage;
+SELECT
+  'all_customers' AS metric_id,
+  count(*) AS customer_count,
+  count(revenue / NULLIF (visits, 0)) AS defined_ratio_count,
+  sum(revenue) / NULLIF (sum(visits), 0) AS ratio_of_totals,
+  avg(revenue / NULLIF (visits, 0)) AS mean_customer_ratio
+FROM
+  deep2_usage;
 ```
 
 Both measures use correct arithmetic but different weighting. The ratio of totals gives each visit equal influence and includes all source revenue in its numerator. AVG ignores NULL ratios, so its denominator is the two customers with visits, not all three customers. Reporting both population counts prevents readers from confusing an equal-customer summary with a visit-weighted operational rate.
@@ -52,11 +63,25 @@ As of 2026-01-02, return product_id, snapshot_day, units from the latest eligibl
 **Verify:** For sql-deep-02 Exercise 3, check the chosen timestamp is at or before the cutoff and no later eligible snapshot exists for the same product; sum only those chosen states.
 
 ```sql
-SELECT product_id,snapshot_day,units FROM (
- SELECT DISTINCT ON(product_id) product_id,snapshot_day,units,snapshot_id
- FROM deep2_stock WHERE snapshot_day<=DATE '2026-01-02'
- ORDER BY product_id,snapshot_day DESC,snapshot_id DESC
-) AS latest ORDER BY product_id;
+SELECT
+  product_id,
+  snapshot_day,
+  units
+FROM ( SELECT DISTINCT ON (product_id)
+    product_id,
+    snapshot_day,
+    units,
+    snapshot_id
+  FROM
+    deep2_stock
+  WHERE
+    snapshot_day <= DATE '2026-01-02'
+  ORDER BY
+    product_id,
+    snapshot_day DESC,
+    snapshot_id DESC) AS latest
+ORDER BY
+  product_id;
 ```
 
 The cutoff filter removes future state before selecting the latest row. DISTINCT ON keeps the first row within each product under the explicitly descending version order. The outer ORDER BY states the final presentation order, separate from the inner selection order. Summing all snapshots would count state repeatedly, while selecting one global maximum date could omit products whose most recent eligible snapshot occurred earlier.
@@ -72,10 +97,18 @@ Return order_id, weight_sum only for orders whose total bridge weight is not exa
 **Verify:** For sql-deep-02 Exercise 4, sum the bridge weights separately for each source identity before multiplying amounts; inspect the per-source weight-sum output to identify the source whose weights fail conservation.
 
 ```sql
-SELECT o.order_id,COALESCE(sum(b.weight),0) AS weight_sum
-FROM deep2_orders AS o LEFT JOIN deep2_bridge AS b ON b.order_id=o.order_id
-GROUP BY o.order_id HAVING COALESCE(sum(b.weight),0)<>1
-ORDER BY o.order_id;
+SELECT
+  o.order_id,
+  COALESCE(sum(b.weight), 0) AS weight_sum
+FROM
+  deep2_orders AS o
+  LEFT JOIN deep2_bridge AS b ON b.order_id = o.order_id
+GROUP BY
+  o.order_id
+HAVING
+  COALESCE(sum(b.weight), 0) <> 1
+ORDER BY
+  o.order_id;
 ```
 
 Starting from orders ensures a completely missing bridge would also be diagnosed with total weight zero. Grouping by order_id checks conservation at the original fact grain before multiplying amounts. Exact numeric inputs make equality to one a deliberate contract; approximate floating weights would need a justified tolerance. A channel aggregate could otherwise look plausible while quietly losing part of an order's value.
@@ -91,16 +124,42 @@ Within this exercise savepoint, change order 3 direct weight to 0.3. Return chan
 **Verify:** For sql-deep-02 Exercise 5, compare the repaired source-level weight sums with one and reconcile the allocated total to the original source total; inspect the named destination allocation as well.
 
 ```sql
-UPDATE deep2_bridge SET weight=0.3 WHERE order_id=3 AND channel='direct';
+UPDATE
+  deep2_bridge
+SET
+  weight = 0.3
+WHERE
+  order_id = 3
+  AND channel = 'direct';
+
 WITH weights AS (
- SELECT o.order_id,COALESCE(sum(b.weight),0) AS weight_sum
- FROM deep2_orders AS o LEFT JOIN deep2_bridge AS b ON b.order_id=o.order_id
- GROUP BY o.order_id
+  SELECT
+    o.order_id,
+    COALESCE(sum(b.weight), 0) AS weight_sum
+  FROM
+    deep2_orders AS o
+    LEFT JOIN deep2_bridge AS b ON b.order_id = o.order_id
+  GROUP BY
+    o.order_id
 )
-SELECT b.channel,sum(o.amount*b.weight) AS allocated_amount
-FROM deep2_orders AS o JOIN deep2_bridge AS b ON b.order_id=o.order_id
-WHERE NOT EXISTS(SELECT 1 FROM weights WHERE weight_sum<>1)
-GROUP BY b.channel ORDER BY b.channel;
+SELECT
+  b.channel,
+  sum(o.amount * b.weight) AS allocated_amount
+FROM
+  deep2_orders AS o
+  JOIN deep2_bridge AS b ON b.order_id = o.order_id
+WHERE
+  NOT EXISTS (
+    SELECT
+      1
+    FROM
+      weights
+    WHERE
+      weight_sum <> 1)
+GROUP BY
+  b.channel
+ORDER BY
+  b.channel;
 ```
 
 The global gate is evaluated before presenting the aggregate as a complete allocation. It does not hide a bad order by dropping only that order, which would silently change the total population. Multiplying each order amount by its bridge fraction then summing by channel preserves total value once every order conserves weight. The savepoint isolates the corrective fixture mutation so later examples still begin from known original data.
@@ -116,13 +175,28 @@ For every event return event_id, match_count, segment, match_status. Match custo
 **Verify:** For sql-deep-02 Exercise 6, count effective interval matches per event before choosing a dimension value; preserve an event with zero matches and expose an event with multiple matches instead of arbitrary deduplication.
 
 ```sql
-SELECT e.event_id,count(h.version_id) AS match_count,
- CASE WHEN count(h.version_id)=1 THEN min(h.segment) END AS segment,
- CASE WHEN count(h.version_id)=0 THEN 'missing'
-      WHEN count(h.version_id)=1 THEN 'matched' ELSE 'ambiguous' END AS match_status
-FROM deep2_events AS e LEFT JOIN deep2_history AS h
- ON h.customer_id=e.customer_id AND h.valid_from<=e.occurred_at AND e.occurred_at<h.valid_to
-GROUP BY e.event_id ORDER BY e.event_id;
+SELECT
+  e.event_id,
+  count(h.version_id) AS match_count,
+  CASE WHEN count(h.version_id) = 1 THEN
+    min(h.segment)
+  END AS segment,
+  CASE WHEN count(h.version_id) = 0 THEN
+    'missing'
+  WHEN count(h.version_id) = 1 THEN
+    'matched'
+  ELSE
+    'ambiguous'
+  END AS match_status
+FROM
+  deep2_events AS e
+  LEFT JOIN deep2_history AS h ON h.customer_id = e.customer_id
+    AND h.valid_from <= e.occurred_at
+    AND e.occurred_at < h.valid_to
+GROUP BY
+  e.event_id
+ORDER BY
+  e.event_id;
 ```
 
 The left join retains unmatched events, while counting the nonnull version_id distinguishes a real match from the left-join placeholder. Half-open bounds prevent adjacent versions from both owning the transition instant. min(segment) is used only after proving exactly one match, so it is not an arbitrary way to hide overlap. Returning one diagnostic row per event makes ambiguity visible without allowing raw history fanout to inflate downstream measures.

@@ -51,9 +51,13 @@ The question is: Use query[1, 0, 0] and documents purchase[1, .1, 0], geometry[0
 The ranking follows the declared topic geometry. The fixture does not demonstrate that a learned model will assign these vectors to arbitrary language.
 
 ```python
-table={'purchase':np.array([1.,.1,0.]),'geometry':np.array([0.,1.,0.]),'mixed':np.array([.5,.5,0.])}
-ranked=cosine_rank(np.array([1.,0.,0.]),table)
-assert [key for key,score in ranked]==['purchase','mixed','geometry']
+table = {
+    "purchase": np.array([1.0, 0.1, 0.0]),
+    "geometry": np.array([0.0, 1.0, 0.0]),
+    "mixed": np.array([0.5, 0.5, 0.0]),
+}
+ranked = cosine_rank(np.array([1.0, 0.0, 0.0]), table)
+assert [key for key, score in ranked] == ["purchase", "mixed", "geometry"]
 ```
 
 **Expected:** purchase ranks first, mixed second, geometry last.
@@ -67,9 +71,13 @@ The question is: Scale the purchase vector by 10 and compare its cosine score wi
 Normalization removes positive magnitude scaling from the score. A model trained for unnormalized dot products may use magnitude meaningfully, so the scoring convention must match the model contract.
 
 ```python
-query=np.array([1.,0.,0.]); original=table['purchase']; scaled=10*original
-np.testing.assert_allclose(unit(original)@unit(query),unit(scaled)@unit(query),atol=1e-12,rtol=0)
-assert scaled@query==10*(original@query)
+query = np.array([1.0, 0.0, 0.0])
+original = table["purchase"]
+scaled = 10 * original
+np.testing.assert_allclose(
+    unit(original) @ unit(query), unit(scaled) @ unit(query), atol=1e-12, rtol=0
+)
+assert scaled @ query == 10 * (original @ query)
 ```
 
 **Expected:** cosine unchanged within1e-12; raw dot product multiplies by 10.
@@ -83,9 +91,9 @@ The question is: Assign buy the same literal vector as purchase and compare retr
 The semantic relation was supplied by the fixture author. A pretrained encoder would need to learn or represent it, and a domain-specific synonym may still be missed.
 
 ```python
-word_vectors={'buy':np.array([1.,0.,0.]),'purchase':np.array([1.,0.,0.])}
-assert set('buy'.split())&set('purchase'.split())==set()
-np.testing.assert_array_equal(word_vectors['buy'],word_vectors['purchase'])
+word_vectors = {"buy": np.array([1.0, 0.0, 0.0]), "purchase": np.array([1.0, 0.0, 0.0])}
+assert set("buy".split()) & set("purchase".split()) == set()
+np.testing.assert_array_equal(word_vectors["buy"], word_vectors["purchase"])
 ```
 
 **Expected:** vector scores match; literal word overlap is empty.
@@ -99,10 +107,13 @@ The question is: Normalize[0, 0] and[1, NaN] through the checked helper.
 A zero vector has no direction and NaN is not a valid coordinate. Returning a plausible similarity would hide an encoding or data-quality failure.
 
 ```python
-for bad in [np.array([0.,0.]),np.array([1.,np.nan])]:
-    try: unit(bad)
-    except ValueError: pass
-    else: raise AssertionError('invalid vector accepted')
+for bad in [np.array([0.0, 0.0]), np.array([1.0, np.nan])]:
+    try:
+        unit(bad)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("invalid vector accepted")
 ```
 
 **Expected:** both raise ValueError.
@@ -116,8 +127,9 @@ The question is: Compare query metadata modelA with an index encoded by modelB, 
 Vector dimensions are only a shape contract. Two models can use unrelated coordinate systems with the same width, so their dot products are not meaningful cross-model similarities.
 
 ```python
-query_meta={'model':'A','width':3,'normalization':'unit'}; index_meta={'model':'B','width':3,'normalization':'unit'}
-assert query_meta!=index_meta
+query_meta = {"model": "A", "width": 3, "normalization": "unit"}
+index_meta = {"model": "B", "width": 3, "normalization": "unit"}
+assert query_meta != index_meta
 ```
 
 **Expected:** metadata identity mismatch is detected; the caller must enforce the retrieval gate.
@@ -131,9 +143,10 @@ The question is: Give an irrelevant document a high-scoring vector and record th
 A relevance-labelled counterexample separates the ranking mechanism from its task quality. Improving an embedding model requires evaluating these failures, not merely checking that cosine arithmetic is correct.
 
 ```python
-misleading={'wrong':np.array([1.,0.,0.]),'relevant':np.array([.5,.5,0.])}; relevant={'relevant'}
-top=cosine_rank(query,misleading)[0][0]
-assert top=='wrong' and top not in relevant
+misleading = {"wrong": np.array([1.0, 0.0, 0.0]), "relevant": np.array([0.5, 0.5, 0.0])}
+relevant = {"relevant"}
+top = cosine_rank(query, misleading)[0][0]
+assert top == "wrong" and top not in relevant
 ```
 
 **Expected:** top-ranked ID wrong is outside the authored relevant set.

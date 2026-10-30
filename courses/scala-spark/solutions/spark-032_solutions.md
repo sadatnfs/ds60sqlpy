@@ -12,13 +12,20 @@ Apply withWatermark(event_time,5 minutes) before grouping by a 5-minute window a
 
 ```scala
 def windowed(events: DataFrame): DataFrame = {
-  events.withWatermark("event_time","5 minutes").groupBy(window(col("event_time"),"5 minutes"),col("team")).agg(count(lit(1)).as("records"),sum("amount").as("total"))
+  events
+    .withWatermark("event_time", "5 minutes")
+    .groupBy(window(col("event_time"), "5 minutes"), col("team"))
+    .agg(count(lit(1)).as("records"), sum("amount").as("total"))
 }
 ```
 
 ```python
 def windowed(events):
-    return events.withWatermark("event_time","5 minutes").groupBy(F.window("event_time","5 minutes"),"team").agg(F.count(F.lit(1)).alias("records"),F.sum("amount").alias("total"))
+    return (
+        events.withWatermark("event_time", "5 minutes")
+        .groupBy(F.window("event_time", "5 minutes"), "team")
+        .agg(F.count(F.lit(1)).alias("records"), F.sum("amount").alias("total"))
+    )
 ```
 
 Watermark metadata must be associated with the event-time expression that drives the stateful window. The aggregate retains the window boundaries so finalization and later output interpretation remain inspectable. Constructing this plan does not yet prove that any watermark has advanced or any window has been emitted.
@@ -39,7 +46,11 @@ def watermarks(progress: Seq[StreamingQueryProgress]): Seq[String] = {
 
 ```python
 def watermarks(progress):
-    return [p["eventTime"]["watermark"] for p in progress if p.get("eventTime",{}).get("watermark") is not None]
+    return [
+        p["eventTime"]["watermark"]
+        for p in progress
+        if p.get("eventTime", {}).get("watermark") is not None
+    ]
 ```
 
 The receipt establishes what the query actually reported rather than equating a configured delay with progress. The first maximum event time is 00:04, so a five-minute delay leaves the first window open. Zero-input progress can be meaningful for stateful finalization, which is why it is retained instead of discarded as noise.
@@ -53,15 +64,34 @@ Publish phase 2, run the compatible query again and read finalized sink rows as(
 **Expected:** The finalized sink contains only(00:00, A,3,35) at this point. The actual watermark reaches at least 00:07.
 
 ```scala
-def finalRows(spark: SparkSession, root: Path): Seq[(String,String,Long,Long)] = {
-  spark.read.schema(resultSchema).parquet(root.resolve("output").toString).select(date_format(col("window.start"),"HH:mm").as("start"),col("team"),col("records"),col("total")).orderBy("start","team").collect().toSeq.map(r => (r.getString(0),r.getString(1),r.getLong(2),r.getLong(3)))
+def finalRows(spark: SparkSession, root: Path): Seq[(String, String, Long, Long)] = {
+  spark.read
+    .schema(resultSchema)
+    .parquet(root.resolve("output").toString)
+    .select(
+      date_format(col("window.start"), "HH:mm").as("start"),
+      col("team"),
+      col("records"),
+      col("total")
+    )
+    .orderBy("start", "team")
+    .collect()
+    .toSeq
+    .map(r => (r.getString(0), r.getString(1), r.getLong(2), r.getLong(3)))
 }
 ```
 
 ```python
 def final_rows(spark, root):
-    frame = spark.read.schema(result_schema).parquet(str(root/"output"))
-    return [tuple(r) for r in frame.select(F.date_format("window.start","HH:mm").alias("start"),"team","records","total").orderBy("start","team").collect()]
+    frame = spark.read.schema(result_schema).parquet(str(root / "output"))
+    return [
+        tuple(r)
+        for r in frame.select(
+            F.date_format("window.start", "HH:mm").alias("start"), "team", "records", "total"
+        )
+        .orderBy("start", "team")
+        .collect()
+    ]
 ```
 
 The three-count,35-total output is direct evidence that the out-of-order event was accepted while its window state was retained. The actual watermark then explains append finalization. A two-count,30-total result would reveal a wrong sequencing orlate-data interpretation even if both runs completed successfully.
@@ -76,14 +106,14 @@ Publish phase 3 after phase 2 has terminated. Read the actual state-operator dro
 
 ```scala
 def droppedRows(progress: Seq[StreamingQueryProgress]): Long = {
-  require(progress.exists(_.stateOperators.nonEmpty),"No state-operator evidence")
+  require(progress.exists(_.stateOperators.nonEmpty), "No state-operator evidence")
   progress.flatMap(_.stateOperators).map(_.numRowsDroppedByWatermark).sum
 }
 ```
 
 ```python
 def dropped_rows(progress):
-    operators = [operator for p in progress for operator in p.get("stateOperators",[])]
+    operators = [operator for p in progress for operator in p.get("stateOperators", [])]
     if not operators or any("numRowsDroppedByWatermark" not in operator for operator in operators):
         raise ValueError("No complete state-operator evidence")
     return sum(operator["numRowsDroppedByWatermark"] for operator in operators)
@@ -100,14 +130,21 @@ Publish the 00:30 administrative advancer, run phase 4 and return a ledger of to
 **Expected:** Seven total inputs, one observed drop, five finalized business records across three tuples:(00:00, A,3,35),(00:10, A,1,30),(00:10, B,1,7). The advancer window remains pending.
 
 ```scala
-def eventLedger(phases: Seq[Seq[StreamingQueryProgress]], output: Seq[(String,String,Long,Long)]): (Long,Long,Long) = {
-  (phases.flatten.map(_.numInputRows).sum,phases.map(droppedRows).sum,output.map(_._3).sum)
+def eventLedger(
+    phases: Seq[Seq[StreamingQueryProgress]],
+    output: Seq[(String, String, Long, Long)]
+): (Long, Long, Long) = {
+  (phases.flatten.map(_.numInputRows).sum, phases.map(droppedRows).sum, output.map(_._3).sum)
 }
 ```
 
 ```python
 def event_ledger(phases, output):
-    return sum(p["numInputRows"] for phase in phases for p in phase),sum(dropped_rows(phase) for phase in phases),sum(row[2] for row in output)
+    return (
+        sum(p["numInputRows"] for phase in phases for p in phase),
+        sum(dropped_rows(phase) for phase in phases),
+        sum(row[2] for row in output),
+    )
 ```
 
 The reconciliation separates consumed input, discarded late state updates and finalized business output. The administrative event is neither lost norpart of the five business records; its own window has not crossed the finalization threshold. This prevents a finite test from mislabeling pending state as missing output or claiming every source record must immediately appear in append mode.
@@ -122,34 +159,55 @@ Attempt two invalid configurations in separate owned paths: Update mode to Parqu
 
 ```scala
 def rejectUnsupported(spark: SparkSession, root: Path, kind: String): Unit = {
-  require(Set("update-file","append-unwatermarked").contains(kind),"Unknown invalid case")
-  val relation = if(kind == "update-file") windowed(stream(spark,root)) else stream(spark,root).groupBy("team").count()
-  val mode = if(kind == "update-file") "update" else "append"
+  require(Set("update-file", "append-unwatermarked").contains(kind), "Unknown invalid case")
+  val relation =
+    if (kind == "update-file") windowed(stream(spark, root))
+    else stream(spark, root).groupBy("team").count()
+  val mode = if (kind == "update-file") "update" else "append"
   var query: StreamingQuery = null
   var rejected = false
   try {
-   query = relation.writeStream.format("parquet").outputMode(mode).option("checkpointLocation",root.resolve(kind+"-checkpoint").toString).trigger(Trigger.AvailableNow()).start(root.resolve(kind+"-output").toString)
-   query.awaitTermination(30000L)
+    query = relation.writeStream
+      .format("parquet")
+      .outputMode(mode)
+      .option("checkpointLocation", root.resolve(kind + "-checkpoint").toString)
+      .trigger(Trigger.AvailableNow())
+      .start(root.resolve(kind + "-output").toString)
+    query.awaitTermination(30000L)
   } catch { case _: org.apache.spark.sql.AnalysisException => rejected = true }
-  finally { if(query != null) query.stop() }
-  require(rejected,"Unsupported output configuration was accepted")
+  finally { if (query != null) query.stop() }
+  require(rejected, "Unsupported output configuration was accepted")
 }
 ```
 
 ```python
 def reject_unsupported(spark, root, kind):
-    if kind not in {"update-file","append-unwatermarked"}: raise ValueError("Unknown invalid case")
-    relation = windowed(stream(spark,root)) if kind == "update-file" else stream(spark,root).groupBy("team").count()
+    if kind not in {"update-file", "append-unwatermarked"}:
+        raise ValueError("Unknown invalid case")
+    relation = (
+        windowed(stream(spark, root))
+        if kind == "update-file"
+        else stream(spark, root).groupBy("team").count()
+    )
     mode = "update" if kind == "update-file" else "append"
-    query = None; rejected = False
+    query = None
+    rejected = False
     try:
-        query = relation.writeStream.format("parquet").outputMode(mode).option("checkpointLocation",str(root/(kind+"-checkpoint"))).trigger(availableNow=True).start(str(root/(kind+"-output")))
+        query = (
+            relation.writeStream.format("parquet")
+            .outputMode(mode)
+            .option("checkpointLocation", str(root / (kind + "-checkpoint")))
+            .trigger(availableNow=True)
+            .start(str(root / (kind + "-output")))
+        )
         query.awaitTermination(30)
     except AnalysisException:
         rejected = True
     finally:
-        if query is not None: query.stop()
-    if not rejected: raise AssertionError("Unsupported output configuration was accepted")
+        if query is not None:
+            query.stop()
+    if not rejected:
+        raise AssertionError("Unsupported output configuration was accepted")
 ```
 
 The negative cases validate actual engine eligibility rather than relying only on terminology. A file append sink accepts finalized new rows, not arbitrary in-place aggregate updates. The separate owned namespaces prevent a rejected configuration from changing the valid checkpoint or output. Query cleanup remains mandatory even if an unexpected runtime version accepts a case.

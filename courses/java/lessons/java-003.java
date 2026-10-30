@@ -3,11 +3,11 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     // Exercise 1: Guard a nullable value
-    // Use textnull and testtext!=null before callingisEmpty.
-    // Expected: conditionfalse with noNullPointerException.
+    // Use text null and test text!=null before calling isEmpty.
+    // Expected: condition false with no NullPointerException.
 
     // Exercise 2: Trace a prefix sum
-    // Sum array2,4,6 while retaining the invariant thatsum covers indices belowi.
+    // Sum array2,4,6 while retaining the invariant that sum covers indices belowi.
     // Expected: prefix sums2,6,12;final12.
 
     // Exercise 3: Handle an empty loop
@@ -24,7 +24,7 @@ public class Main {
 
     // Exercise 6: Expose a wrong boundary
     // Compare a loop usingi<=length with the validi<length contract on a one-element array.
-    // Expected: wrong loop raisesArrayIndexOutOfBoundsException.
+    // Expected: wrong loop raises ArrayIndexOutOfBoundsException.
     System.out.println("Implement and check the six exercises in your saved copy.");
   }
 }

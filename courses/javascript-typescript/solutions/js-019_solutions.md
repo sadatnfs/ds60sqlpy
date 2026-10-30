@@ -29,7 +29,9 @@ Task: Define a function accepting two numbers and returning their sum; inspect i
 The annotation describes accepted calls to checked TypeScript code. It is erased during compilation; the emitted function still performs JavaScript addition and would need validation at an untyped boundary.
 
 ```typescript
-function add(left: number, right: number): number { return left + right; }
+function add(left: number, right: number): number {
+  return left + right;
+}
 const result = add(2, 3);
 assert.equal(result, 5);
 assert.equal(typeof result, 'number');
@@ -71,7 +73,9 @@ A literal type can describe one exact protocol tag. A mutable binding must allow
 const fixed = 'ready';
 let mutable = 'ready';
 mutable = 'done';
-function acceptReady(value: 'ready'): string { return value; }
+function acceptReady(value: 'ready'): string {
+  return value;
+}
 assert.equal(acceptReady(fixed), 'ready');
 assert.equal(mutable, 'done');
 function negativeTypeCheck(): void {
@@ -133,7 +137,8 @@ The typeof branch narrows the static type, while the finite check enforces an ad
 
 ```typescript
 function doubleFinite(value: unknown): number {
-  if (typeof value !== 'number' || !Number.isFinite(value)) throw new TypeError('finite number required');
+  if (typeof value !== 'number' || !Number.isFinite(value))
+    throw new TypeError('finite number required');
   return value * 2;
 }
 assert.equal(doubleFinite(12), 24);

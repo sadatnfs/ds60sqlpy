@@ -69,44 +69,63 @@ SET search_path TO dwh, training, public;
 CREATE TABLE agg_sales_product_month (
   year int NOT NULL,
   month int NOT NULL,
-  product_sk int NOT NULL REFERENCES dim_product(product_sk),
-  revenue numeric(14,2) NOT NULL,
+  product_sk int NOT NULL REFERENCES dim_product (product_sk),
+  revenue numeric(14, 2) NOT NULL,
   units bigint NOT NULL,
   orders bigint NOT NULL,
   PRIMARY KEY (year, month, product_sk)
 );
 
-INSERT INTO agg_sales_product_month(
-  year, month, product_sk, revenue, units, orders
-)
-SELECT dd.year,
-       dd.month,
-       fs.product_sk,
-       ROUND(SUM(fs.amount), 2),
-       SUM(fs.quantity),
-       COUNT(DISTINCT fs.order_id)
-FROM fact_sales fs
-JOIN dim_date dd USING (date_key)
-GROUP BY dd.year, dd.month, fs.product_sk;
+INSERT INTO agg_sales_product_month (year, month, product_sk, revenue, units, orders)
+SELECT
+  dd.year,
+  dd.month,
+  fs.product_sk,
+  ROUND(SUM(fs.amount), 2),
+  SUM(fs.quantity),
+  COUNT(DISTINCT fs.order_id)
+FROM
+  fact_sales fs
+  JOIN dim_date dd USING (date_key)
+GROUP BY
+  dd.year,
+  dd.month,
+  fs.product_sk;
 
 WITH aggregate_total AS (
-  SELECT year, month, SUM(revenue) AS revenue
-  FROM agg_sales_product_month
-  GROUP BY year, month
-), fact_total AS (
-  SELECT dd.year, dd.month, ROUND(SUM(fs.amount), 2) AS revenue
-  FROM fact_sales fs
-  JOIN dim_date dd USING (date_key)
-  GROUP BY dd.year, dd.month
+  SELECT
+    year,
+    month,
+    SUM(revenue) AS revenue
+  FROM
+    agg_sales_product_month
+  GROUP BY
+    year,
+    month
+),
+fact_total AS (
+  SELECT
+    dd.year,
+    dd.month,
+    ROUND(SUM(fs.amount), 2) AS revenue
+  FROM
+    fact_sales fs
+    JOIN dim_date dd USING (date_key)
+  GROUP BY
+    dd.year, dd.month
 )
-SELECT a.year,
-       a.month,
-       a.revenue AS aggregate_revenue,
-       f.revenue AS fact_revenue,
-       a.revenue - f.revenue AS difference
-FROM aggregate_total a
-JOIN fact_total f USING (year, month)
-ORDER BY a.year, a.month;
+SELECT
+  a.year,
+  a.month,
+  a.revenue AS aggregate_revenue,
+  f.revenue AS fact_revenue,
+  a.revenue - f.revenue AS difference
+FROM
+  aggregate_total a
+  JOIN fact_total f USING (year, month)
+ORDER BY
+  a.year,
+  a.month;
 
 ROLLBACK;
 ```

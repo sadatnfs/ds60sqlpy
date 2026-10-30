@@ -433,28 +433,42 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These worked excerpts come from <code>sql/postgres-60day/day49_project2_finance_part1.sql</code>. Use <strong>Whole SQL lesson (psql)</strong> in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared <code>psql</code> routes are described above.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> monthly <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue
-  <span class="syntax-keyword">FROM</span> orders o
-  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-number">1</span>
+  <span class="syntax-keyword">SELECT</span>
+    date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue
+  <span class="syntax-keyword">FROM</span>
+    orders o
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+    <span class="syntax-number">1</span>
 <span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> monthly <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">month</span> <span class="syntax-keyword">DESC</span> <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">24</span><span class="syntax-punctuation">;</span></code></pre>
+<span class="syntax-keyword">SELECT</span>
+  <span class="syntax-operator">*</span>
+<span class="syntax-keyword">FROM</span>
+  monthly
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  <span class="syntax-keyword">month</span> <span class="syntax-keyword">DESC</span>
+<span class="syntax-keyword">LIMIT</span> <span class="syntax-number">24</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 1: Start with <code>orders</code> in <code>FROM</code>/<code>JOIN</code>; let <code>GROUP BY</code> collapse rows to its grouping keys. The final <code>SELECT</code> displays <code>*</code>. <code>ORDER BY</code> determines presentation order and the final <code>LIMIT 24</code> caps displayed rows. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 1 returns one grouped row per <code>month</code>, capped at 24 rows with columns <code>month</code>, and <code>revenue</code> from <code>orders</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> monthly <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue
-  <span class="syntax-keyword">FROM</span> orders o
-  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-number">1</span>
+  <span class="syntax-keyword">SELECT</span>
+    date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue
+  <span class="syntax-keyword">FROM</span>
+    orders o
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+    <span class="syntax-number">1</span>
 <span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> m<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
-       m<span class="syntax-punctuation">.</span>revenue<span class="syntax-punctuation">,</span>
-       LAG<span class="syntax-punctuation">(</span>m<span class="syntax-punctuation">.</span>revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">12</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> m<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> prev_year<span class="syntax-punctuation">,</span>
-       ROUND<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>m<span class="syntax-punctuation">.</span>revenue <span class="syntax-operator">-</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>LAG<span class="syntax-punctuation">(</span>m<span class="syntax-punctuation">.</span>revenue<span class="syntax-punctuation">,</span><span class="syntax-number">12</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> m<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
-             <span class="syntax-operator">/</span> <span class="syntax-keyword">NULLIF</span><span class="syntax-punctuation">(</span>LAG<span class="syntax-punctuation">(</span>m<span class="syntax-punctuation">.</span>revenue<span class="syntax-punctuation">,</span><span class="syntax-number">12</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> m<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> yoy_growth
-<span class="syntax-keyword">FROM</span> monthly m
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> m<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span> <span class="syntax-keyword">DESC</span>
+<span class="syntax-keyword">SELECT</span>
+  m<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
+  m<span class="syntax-punctuation">.</span>revenue<span class="syntax-punctuation">,</span>
+  LAG<span class="syntax-punctuation">(</span>m<span class="syntax-punctuation">.</span>revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">12</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> m<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> prev_year<span class="syntax-punctuation">,</span>
+  ROUND<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>m<span class="syntax-punctuation">.</span>revenue <span class="syntax-operator">-</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>LAG<span class="syntax-punctuation">(</span>m<span class="syntax-punctuation">.</span>revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">12</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> m<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-keyword">NULLIF</span> <span class="syntax-punctuation">(</span>LAG<span class="syntax-punctuation">(</span>m<span class="syntax-punctuation">.</span>revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">12</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> m<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> yoy_growth
+<span class="syntax-keyword">FROM</span>
+  monthly m
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  m<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span> <span class="syntax-keyword">DESC</span>
 <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">36</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>How to read it:</strong> Example 2: Start with <code>orders</code> in <code>FROM</code>/<code>JOIN</code>; let <code>GROUP BY</code> collapse rows to its grouping keys; let each <code>OVER</code> expression calculate across related rows without collapsing them. The final <code>SELECT</code> displays <code>month</code>, <code>revenue</code>, <code>prev_year</code>, and <code>yoy_growth</code>. <code>ORDER BY</code> determines presentation order and the final <code>LIMIT 36</code> caps displayed rows. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
 <p><strong>Expected result/shape:</strong> Example 2 returns one grouped row per <code>month</code>, and <code>prev_year</code>, capped at 36 rows with columns <code>month</code>, <code>revenue</code>, <code>prev_year</code>, and <code>yoy_growth</code> from <code>orders</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.</p>
@@ -773,73 +787,87 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
 <span class="syntax-keyword">WITH</span> monthly_observed <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue
-  <span class="syntax-keyword">FROM</span> orders
-  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> order_date<span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> bounds <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">MIN</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> first_month<span class="syntax-punctuation">,</span> <span class="syntax-keyword">MAX</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> last_month
-  <span class="syntax-keyword">FROM</span> monthly_observed
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> month_spine <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> generate_series<span class="syntax-punctuation">(</span>
-           first_month<span class="syntax-punctuation">,</span> last_month<span class="syntax-punctuation">,</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;1 month&#x27;</span>
-         <span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span>
-  <span class="syntax-keyword">FROM</span> bounds
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> monthly_complete <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> spine<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>observed<span class="syntax-punctuation">.</span>revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue<span class="syntax-punctuation">,</span>
-         observed<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span> <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">AS</span> had_source_rows
-  <span class="syntax-keyword">FROM</span> month_spine spine
-  <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> monthly_observed observed <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> forecast_rows <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
-         revenue<span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">AVG</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>
-           <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">month</span> <span class="syntax-keyword">ROWS</span> <span class="syntax-keyword">BETWEEN</span> <span class="syntax-number">6</span> PRECEDING <span class="syntax-keyword">AND</span> <span class="syntax-number">1</span> PRECEDING
-         <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> ma6_forecast<span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>
-           <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">month</span> <span class="syntax-keyword">ROWS</span> <span class="syntax-keyword">BETWEEN</span> <span class="syntax-number">6</span> PRECEDING <span class="syntax-keyword">AND</span> <span class="syntax-number">1</span> PRECEDING
-         <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> ma6_history_rows<span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">AVG</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>
-           <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">month</span> <span class="syntax-keyword">ROWS</span> <span class="syntax-keyword">BETWEEN</span> <span class="syntax-number">12</span> PRECEDING <span class="syntax-keyword">AND</span> <span class="syntax-number">1</span> PRECEDING
-         <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> ma12_forecast<span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>
-           <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">month</span> <span class="syntax-keyword">ROWS</span> <span class="syntax-keyword">BETWEEN</span> <span class="syntax-number">12</span> PRECEDING <span class="syntax-keyword">AND</span> <span class="syntax-number">1</span> PRECEDING
-         <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> ma12_history_rows<span class="syntax-punctuation">,</span>
-         LAG<span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">12</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> seasonal_naive
-  <span class="syntax-keyword">FROM</span> monthly_complete
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> common_scoring_rows <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
-         revenue<span class="syntax-punctuation">,</span>
-         ma6_forecast<span class="syntax-punctuation">,</span>
-         ma12_forecast<span class="syntax-punctuation">,</span>
-         seasonal_naive<span class="syntax-punctuation">,</span>
-         <span class="syntax-number">0</span><span class="syntax-punctuation">.</span><span class="syntax-number">5</span> <span class="syntax-operator">*</span> seasonal_naive <span class="syntax-operator">+</span> <span class="syntax-number">0</span><span class="syntax-punctuation">.</span><span class="syntax-number">5</span> <span class="syntax-operator">*</span> ma6_forecast <span class="syntax-keyword">AS</span> blended_forecast
-  <span class="syntax-keyword">FROM</span> forecast_rows
-  <span class="syntax-keyword">WHERE</span> ma6_history_rows <span class="syntax-operator">=</span> <span class="syntax-number">6</span>
+  <span class="syntax-keyword">SELECT</span>
+    date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue
+  <span class="syntax-keyword">FROM</span>
+    orders
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+    date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> order_date<span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+bounds <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span>
+    <span class="syntax-keyword">MIN</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> first_month<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">MAX</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> last_month
+  <span class="syntax-keyword">FROM</span>
+    monthly_observed
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+month_spine <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span>
+    generate_series<span class="syntax-punctuation">(</span>first_month<span class="syntax-punctuation">,</span> last_month<span class="syntax-punctuation">,</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;1 month&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span>
+  <span class="syntax-keyword">FROM</span>
+    bounds
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+monthly_complete <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span>
+    spine<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>observed<span class="syntax-punctuation">.</span>revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue<span class="syntax-punctuation">,</span>
+    observed<span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span> <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">AS</span> had_source_rows
+  <span class="syntax-keyword">FROM</span>
+    month_spine spine
+    <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> monthly_observed observed <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+forecast_rows <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span>
+    <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
+    revenue<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">AVG</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">month</span> <span class="syntax-keyword">ROWS</span> <span class="syntax-keyword">BETWEEN</span> <span class="syntax-number">6</span> PRECEDING <span class="syntax-keyword">AND</span> <span class="syntax-number">1</span> PRECEDING<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> ma6_forecast<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">month</span> <span class="syntax-keyword">ROWS</span> <span class="syntax-keyword">BETWEEN</span> <span class="syntax-number">6</span> PRECEDING <span class="syntax-keyword">AND</span> <span class="syntax-number">1</span> PRECEDING<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> ma6_history_rows<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">AVG</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">month</span> <span class="syntax-keyword">ROWS</span> <span class="syntax-keyword">BETWEEN</span> <span class="syntax-number">12</span> PRECEDING <span class="syntax-keyword">AND</span> <span class="syntax-number">1</span> PRECEDING<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> ma12_forecast<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">month</span> <span class="syntax-keyword">ROWS</span> <span class="syntax-keyword">BETWEEN</span> <span class="syntax-number">12</span> PRECEDING <span class="syntax-keyword">AND</span> <span class="syntax-number">1</span> PRECEDING<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> ma12_history_rows<span class="syntax-punctuation">,</span>
+    LAG<span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">12</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> seasonal_naive
+  <span class="syntax-keyword">FROM</span>
+    monthly_complete
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+common_scoring_rows <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span>
+    <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
+    revenue<span class="syntax-punctuation">,</span>
+    ma6_forecast<span class="syntax-punctuation">,</span>
+    ma12_forecast<span class="syntax-punctuation">,</span>
+    seasonal_naive<span class="syntax-punctuation">,</span>
+    <span class="syntax-number">0</span><span class="syntax-punctuation">.</span><span class="syntax-number">5</span> <span class="syntax-operator">*</span> seasonal_naive <span class="syntax-operator">+</span> <span class="syntax-number">0</span><span class="syntax-punctuation">.</span><span class="syntax-number">5</span> <span class="syntax-operator">*</span> ma6_forecast <span class="syntax-keyword">AS</span> blended_forecast
+  <span class="syntax-keyword">FROM</span>
+    forecast_rows
+  <span class="syntax-keyword">WHERE</span>
+    ma6_history_rows <span class="syntax-operator">=</span> <span class="syntax-number">6</span>
     <span class="syntax-keyword">AND</span> ma12_history_rows <span class="syntax-operator">=</span> <span class="syntax-number">12</span>
     <span class="syntax-keyword">AND</span> seasonal_naive <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span>
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> model_scores <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">rows</span><span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">rows</span><span class="syntax-punctuation">.</span>revenue<span class="syntax-punctuation">,</span>
-         model<span class="syntax-punctuation">.</span>model<span class="syntax-punctuation">,</span>
-         model<span class="syntax-punctuation">.</span>forecast
-  <span class="syntax-keyword">FROM</span> common_scoring_rows <span class="syntax-keyword">rows</span>
-  <span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> <span class="syntax-keyword">LATERAL</span> <span class="syntax-punctuation">(</span>
-    <span class="syntax-keyword">VALUES</span>
-      <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;MA(6)&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">rows</span><span class="syntax-punctuation">.</span>ma6_forecast<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
-      <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;MA(12)&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">rows</span><span class="syntax-punctuation">.</span>ma12_forecast<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
-      <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;seasonal naive&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">rows</span><span class="syntax-punctuation">.</span>seasonal_naive<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
-      <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;50% seasonal + 50% MA(6)&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">rows</span><span class="syntax-punctuation">.</span>blended_forecast<span class="syntax-punctuation">)</span>
-  <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> model<span class="syntax-punctuation">(</span>model<span class="syntax-punctuation">,</span> forecast<span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> model<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> revenue <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> scored_rows<span class="syntax-punctuation">,</span>
-       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> revenue <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> zero_actual_rows<span class="syntax-punctuation">,</span>
-       ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">AVG</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">ABS</span><span class="syntax-punctuation">(</span>revenue <span class="syntax-operator">-</span> forecast<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-keyword">NULLIF</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> mape
-<span class="syntax-keyword">FROM</span> model_scores
-<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> model
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> model<span class="syntax-punctuation">;</span></code></pre>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+model_scores <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span>
+    <span class="syntax-keyword">rows</span><span class="syntax-punctuation">.</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">rows</span><span class="syntax-punctuation">.</span>revenue<span class="syntax-punctuation">,</span>
+    model<span class="syntax-punctuation">.</span>model<span class="syntax-punctuation">,</span>
+    model<span class="syntax-punctuation">.</span>forecast
+  <span class="syntax-keyword">FROM</span>
+    common_scoring_rows <span class="syntax-keyword">rows</span>
+    <span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> <span class="syntax-keyword">LATERAL</span> <span class="syntax-punctuation">(</span>
+      <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;MA(6)&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">rows</span><span class="syntax-punctuation">.</span>ma6_forecast<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;MA(12)&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">rows</span><span class="syntax-punctuation">.</span>ma12_forecast<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;seasonal naive&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">rows</span><span class="syntax-punctuation">.</span>seasonal_naive<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;50% seasonal + 50% MA(6)&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">rows</span><span class="syntax-punctuation">.</span>blended_forecast<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> model <span class="syntax-punctuation">(</span>model<span class="syntax-punctuation">,</span> forecast<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span>
+  model<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> revenue <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> scored_rows<span class="syntax-punctuation">,</span>
+  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> revenue <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> zero_actual_rows<span class="syntax-punctuation">,</span>
+  ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">AVG</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">ABS</span><span class="syntax-punctuation">(</span>revenue <span class="syntax-operator">-</span> forecast<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-keyword">NULLIF</span> <span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> mape
+<span class="syntax-keyword">FROM</span>
+  model_scores
+<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+  model
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  model<span class="syntax-punctuation">;</span></code></pre>
 <p>Expected shape: four model rows scored on the identical complete-history month set. <code>scored_rows</code> and <code>zero_actual_rows</code> make the MAPE denominator explicit.</p>
 <h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -855,27 +883,35 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
 <span class="syntax-keyword">WITH</span> monthly <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue
-  <span class="syntax-keyword">FROM</span> orders
-  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> order_date<span class="syntax-punctuation">)</span>
-<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> forecasted <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
-         revenue<span class="syntax-punctuation">,</span>
-         LAG<span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">12</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> seasonal_naive<span class="syntax-punctuation">,</span>
-         <span class="syntax-keyword">AVG</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>
-           <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">month</span> <span class="syntax-keyword">ROWS</span> <span class="syntax-keyword">BETWEEN</span> <span class="syntax-number">6</span> PRECEDING <span class="syntax-keyword">AND</span> <span class="syntax-number">1</span> PRECEDING
-         <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> ma6_forecast
-  <span class="syntax-keyword">FROM</span> monthly
+  <span class="syntax-keyword">SELECT</span>
+    date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue
+  <span class="syntax-keyword">FROM</span>
+    orders
+  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
+    date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> order_date<span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+forecasted <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span>
+    <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
+    revenue<span class="syntax-punctuation">,</span>
+    LAG<span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">12</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> seasonal_naive<span class="syntax-punctuation">,</span>
+    <span class="syntax-keyword">AVG</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">month</span> <span class="syntax-keyword">ROWS</span> <span class="syntax-keyword">BETWEEN</span> <span class="syntax-number">6</span> PRECEDING <span class="syntax-keyword">AND</span> <span class="syntax-number">1</span> PRECEDING<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> ma6_forecast
+  <span class="syntax-keyword">FROM</span>
+    monthly
 <span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
-       ROUND<span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> actual<span class="syntax-punctuation">,</span>
-       ROUND<span class="syntax-punctuation">(</span>seasonal_naive<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> seasonal_naive<span class="syntax-punctuation">,</span>
-       ROUND<span class="syntax-punctuation">(</span>ma6_forecast<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> ma6_forecast<span class="syntax-punctuation">,</span>
-       ROUND<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">.</span><span class="syntax-number">5</span> <span class="syntax-operator">*</span> seasonal_naive <span class="syntax-operator">+</span> <span class="syntax-number">0</span><span class="syntax-punctuation">.</span><span class="syntax-number">5</span> <span class="syntax-operator">*</span> ma6_forecast<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> blended_forecast
-<span class="syntax-keyword">FROM</span> forecasted
-<span class="syntax-keyword">WHERE</span> seasonal_naive <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span>
-<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">month</span> <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span></code></pre>
+<span class="syntax-keyword">SELECT</span>
+  <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span>
+  ROUND<span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> actual<span class="syntax-punctuation">,</span>
+  ROUND<span class="syntax-punctuation">(</span>seasonal_naive<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> seasonal_naive<span class="syntax-punctuation">,</span>
+  ROUND<span class="syntax-punctuation">(</span>ma6_forecast<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> ma6_forecast<span class="syntax-punctuation">,</span>
+  ROUND<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">.</span><span class="syntax-number">5</span> <span class="syntax-operator">*</span> seasonal_naive <span class="syntax-operator">+</span> <span class="syntax-number">0</span><span class="syntax-punctuation">.</span><span class="syntax-number">5</span> <span class="syntax-operator">*</span> ma6_forecast<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> blended_forecast
+<span class="syntax-keyword">FROM</span>
+  forecasted
+<span class="syntax-keyword">WHERE</span>
+  seasonal_naive <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span>
+  <span class="syntax-keyword">month</span> <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span></code></pre>
 <h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
 <ul>
 <li><strong>Inputs/evidence:</strong> For sql-49 Exercise 2, read from <code>orders</code>. Build the answer toward <code>month</code>, <code>actual</code>, <code>seasonal_naive</code>, <code>ma6_forecast</code>, and <code>blended_forecast</code>; keep <code>month</code> visible whenever the result has row-level grain.</li>

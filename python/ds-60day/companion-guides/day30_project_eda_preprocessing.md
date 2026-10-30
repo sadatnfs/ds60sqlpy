@@ -124,10 +124,12 @@ identify which line creates each intermediate object.
 ```python
 import pandas as pd
 
-raw = pd.DataFrame({
-    "id": [1, 2, 2, 3],
-    "amount": [10.0, 20.0, 20.0, None],
-})
+raw = pd.DataFrame(
+    {
+        "id": [1, 2, 2, 3],
+        "amount": [10.0, 20.0, 20.0, None],
+    }
+)
 cleaned = raw.drop_duplicates().dropna(subset=["amount"]).copy()
 reconciliation = {
     "raw_rows": len(raw),

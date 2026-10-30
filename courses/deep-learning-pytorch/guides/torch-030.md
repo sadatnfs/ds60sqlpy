@@ -80,8 +80,9 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-means=torch.tensor([2.,6.]); counts=torch.tensor([1.,3.])
-assert (means*counts).sum().div(counts.sum()).item()==5 and means.mean().item()==4
+means = torch.tensor([2.0, 6.0])
+counts = torch.tensor([1.0, 3.0])
+assert (means * counts).sum().div(counts.sum()).item() == 5 and means.mean().item() == 4
 ```
 
 **Expected:** global mean 5; unweighted shard mean 4.
@@ -91,8 +92,13 @@ assert (means*counts).sum().div(counts.sum()).item()==5 and means.mean().item()=
 The per-example vector is an independent oracle for the shard formula. It catches a checker that merely repeats a wrong averaging assumption.
 
 ```python
-values=torch.tensor([2.,4.,6.,8.]); parts=[values[:1],values[1:]]
-assert sum(part.sum() for part in parts).div(sum(part.numel() for part in parts)).item()==values.mean().item()==5
+values = torch.tensor([2.0, 4.0, 6.0, 8.0])
+parts = [values[:1], values[1:]]
+assert (
+    sum(part.sum() for part in parts).div(sum(part.numel() for part in parts)).item()
+    == values.mean().item()
+    == 5
+)
 ```
 
 **Expected:** global mean 5.
@@ -102,11 +108,16 @@ assert sum(part.sum() for part in parts).div(sum(part.numel() for part in parts)
 The weight remains fixed across both backward calls. Accumulation is intentional here, and its denominator is applied exactly once.
 
 ```python
-x=torch.arange(1,5,dtype=torch.float64); y=2*x; w=nn.Parameter(torch.tensor(0.,dtype=torch.float64))
-for start,end in [(0,1),(1,4)]: ((w*x[start:end]-y[start:end])**2).sum().backward()
+x = torch.arange(1, 5, dtype=torch.float64)
+y = 2 * x
+w = nn.Parameter(torch.tensor(0.0, dtype=torch.float64))
+for start, end in [(0, 1), (1, 4)]:
+    ((w * x[start:end] - y[start:end]) ** 2).sum().backward()
 w.grad.div_(4)
-assert w.grad.item()==-30
-oracle=torch.tensor(0.,dtype=torch.float64,requires_grad=True); full=((oracle*x-y)**2).mean(); assert torch.autograd.grad(full,oracle)[0].item()==-30
+assert w.grad.item() == -30
+oracle = torch.tensor(0.0, dtype=torch.float64, requires_grad=True)
+full = ((oracle * x - y) ** 2).mean()
+assert torch.autograd.grad(full, oracle)[0].item() == -30
 ```
 
 **Expected:** gradient-30, matching full-batch mean.

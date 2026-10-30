@@ -143,11 +143,13 @@ from scipy import stats
 
 rng = np.random.default_rng(3201)
 
+
 def mean_interval(sample, confidence=0.95):
     sample = np.asarray(sample, dtype=float)
     se = sample.std(ddof=1) / np.sqrt(sample.size)
     critical = stats.t.ppf((1 + confidence) / 2, df=sample.size - 1)
     return sample.mean() + np.array([-1, 1]) * critical * se
+
 
 small = rng.normal(loc=2.0, scale=1.0, size=25)
 large = rng.normal(loc=2.0, scale=1.0, size=400)

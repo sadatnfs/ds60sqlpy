@@ -43,8 +43,6 @@ Read the operations in dependency order. Record which values exist before each l
 The reference intentionally does not compile an invalid old-binding access; the practice task asks the learner to inspect that diagnostic separately.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let first = String::from("pear");
@@ -64,8 +62,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 The explicit clone makes the allocation and independent ownership decision visible.
 
 ```rust
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let first = String::from("pear");

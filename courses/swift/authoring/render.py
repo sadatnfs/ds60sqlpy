@@ -88,9 +88,7 @@ using System.Buffers;
 def write(path, value):
     path.parent.mkdir(parents=True, exist_ok=True)
     if path.suffix == ".md":
-        value = canonical_markdown(
-            value, root=ROOT, path=path.relative_to(ROOT).as_posix()
-        )
+        value = canonical_markdown(value, root=ROOT, path=path.relative_to(ROOT).as_posix())
     path.write_text(value.rstrip() + "\n", encoding="utf-8", newline="\n")
 
 

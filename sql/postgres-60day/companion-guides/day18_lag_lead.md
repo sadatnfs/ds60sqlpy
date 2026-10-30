@@ -101,30 +101,28 @@ These worked excerpts come from `sql/postgres-60day/day18_lag_lead.sql`. Use **W
 
 ```sql
 WITH cust_orders AS (
-  SELECT o.customer_id,
-         o.order_id,
-         o.order_date,
-         o.total_amount
-  FROM orders o
+  SELECT
+    o.customer_id,
+    o.order_id,
+    o.order_date,
+    o.total_amount
+  FROM
+    orders o
 )
-SELECT customer_id,
-       order_id,
-       order_date,
-       total_amount,
-       LAG(total_amount) OVER (
-         PARTITION BY customer_id
-         ORDER BY order_date, order_id
-       ) AS prev_order_amount,
-       total_amount - LAG(total_amount) OVER (
-         PARTITION BY customer_id
-         ORDER BY order_date, order_id
-       ) AS delta_from_prev,
-       LEAD(total_amount) OVER (
-         PARTITION BY customer_id
-         ORDER BY order_date, order_id
-       ) AS next_order_amount
-FROM cust_orders
-ORDER BY customer_id, order_date, order_id
+SELECT
+  customer_id,
+  order_id,
+  order_date,
+  total_amount,
+  LAG(total_amount) OVER (PARTITION BY customer_id ORDER BY order_date, order_id) AS prev_order_amount,
+  total_amount - LAG(total_amount) OVER (PARTITION BY customer_id ORDER BY order_date, order_id) AS delta_from_prev,
+  LEAD(total_amount) OVER (PARTITION BY customer_id ORDER BY order_date, order_id) AS next_order_amount
+FROM
+  cust_orders
+ORDER BY
+  customer_id,
+  order_date,
+  order_id
 LIMIT 100;
 ```
 
@@ -136,26 +134,31 @@ LIMIT 100;
 
 ```sql
 WITH monthly AS (
-  SELECT date_trunc('month', order_date AT TIME ZONE 'UTC')::date AS month_utc,
-         SUM(total_amount) AS revenue
-  FROM orders
-  GROUP BY month_utc
-), compared AS (
-  SELECT month_utc,
-         revenue,
-         LAG(revenue, 12) OVER (ORDER BY month_utc) AS revenue_prev_year
-  FROM monthly
+  SELECT
+    date_trunc('month', order_date AT TIME ZONE 'UTC')::date AS month_utc,
+    SUM(total_amount) AS revenue
+  FROM
+    orders
+  GROUP BY
+    month_utc
+),
+compared AS (
+  SELECT
+    month_utc,
+    revenue,
+    LAG(revenue, 12) OVER (ORDER BY month_utc) AS revenue_prev_year
+  FROM
+    monthly
 )
-SELECT month_utc,
-       revenue,
-       revenue_prev_year,
-       ROUND(
-         (revenue - revenue_prev_year)
-         / NULLIF(revenue_prev_year, 0),
-         4
-       ) AS yoy_growth
-FROM compared
-ORDER BY month_utc DESC
+SELECT
+  month_utc,
+  revenue,
+  revenue_prev_year,
+  ROUND((revenue - revenue_prev_year) / NULLIF (revenue_prev_year, 0), 4) AS yoy_growth
+FROM
+  compared
+ORDER BY
+  month_utc DESC
 LIMIT 36;
 ```
 

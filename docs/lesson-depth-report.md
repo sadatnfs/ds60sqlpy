@@ -44,7 +44,7 @@ examples actually teach the named topic.
 | `python-20` | 2212 | 8 | 22 | 8/8 | 2192 | 26 cells / 11 code / 2040 words | PASS |
 | `python-21` | 2085 | 8 | 23 | 7/7 | 1825 | 24 cells / 10 code / 1759 words | PASS |
 | `python-22` | 2195 | 8 | 23 | 7/7 | 2066 | 24 cells / 10 code / 1907 words | PASS |
-| `python-23` | 2213 | 8 | 20 | 7/7 | 2205 | 24 cells / 10 code / 1855 words | PASS |
+| `python-23` | 2213 | 8 | 20 | 7/7 | 2202 | 24 cells / 10 code / 1855 words | PASS |
 | `python-24` | 2179 | 8 | 23 | 7/7 | 2191 | 24 cells / 10 code / 1853 words | PASS |
 | `python-25` | 2261 | 8 | 23 | 7/7 | 2049 | 24 cells / 10 code / 1893 words | PASS |
 | `python-26` | 2386 | 8 | 21 | 7/7 | 2121 | 24 cells / 10 code / 1896 words | PASS |
@@ -52,7 +52,7 @@ examples actually teach the named topic.
 | `python-28` | 2176 | 8 | 23 | 7/7 | 2060 | 24 cells / 10 code / 1871 words | PASS |
 | `python-29` | 2176 | 8 | 22 | 7/7 | 2280 | 24 cells / 10 code / 1838 words | PASS |
 | `python-30` | 2461 | 8 | 25 | 10/10 | 3221 | 31 cells / 12 code / 2411 words | PASS |
-| `python-31` | 2379 | 6 | 13 | 6/6 | 1896 | 11 cells / 4 code / 1218 words | PASS |
+| `python-31` | 2379 | 6 | 13 | 6/6 | 1900 | 11 cells / 4 code / 1218 words | PASS |
 | `python-32` | 2296 | 6 | 12 | 6/6 | 1726 | 12 cells / 5 code / 1159 words | PASS |
 | `python-33` | 2261 | 6 | 13 | 6/6 | 1675 | 11 cells / 4 code / 1169 words | PASS |
 | `python-34` | 2177 | 6 | 13 | 6/6 | 1615 | 11 cells / 4 code / 1122 words | PASS |
@@ -62,12 +62,12 @@ examples actually teach the named topic.
 | `python-38` | 2138 | 6 | 13 | 6/6 | 1493 | 11 cells / 4 code / 1057 words | PASS |
 | `python-39` | 2340 | 6 | 15 | 6/6 | 1627 | 11 cells / 4 code / 1197 words | PASS |
 | `python-40` | 2150 | 6 | 13 | 6/6 | 1634 | 11 cells / 4 code / 1094 words | PASS |
-| `python-41` | 2163 | 6 | 13 | 6/6 | 1691 | 13 cells / 5 code / 1103 words | PASS |
-| `python-42` | 2156 | 6 | 13 | 6/6 | 1576 | 12 cells / 5 code / 1083 words | PASS |
+| `python-41` | 2163 | 6 | 13 | 6/6 | 1692 | 13 cells / 5 code / 1103 words | PASS |
+| `python-42` | 2156 | 6 | 13 | 6/6 | 1577 | 12 cells / 5 code / 1083 words | PASS |
 | `python-43` | 2580 | 6 | 15 | 6/6 | 1951 | 13 cells / 5 code / 1284 words | PASS |
 | `python-44` | 2279 | 8 | 13 | 6/6 | 1622 | 12 cells / 4 code / 1208 words | PASS |
 | `python-45` | 2789 | 6 | 14 | 14/14 | 2917 | 13 cells / 4 code / 1689 words | PASS |
-| `python-46` | 2298 | 6 | 15 | 6/6 | 2254 | 11 cells / 4 code / 1217 words | PASS |
+| `python-46` | 2298 | 6 | 15 | 6/6 | 2255 | 11 cells / 4 code / 1217 words | PASS |
 | `python-47` | 2315 | 6 | 15 | 6/6 | 2217 | 11 cells / 4 code / 1216 words | PASS |
 | `python-48` | 2359 | 6 | 15 | 6/6 | 2146 | 11 cells / 4 code / 1211 words | PASS |
 | `python-49` | 2455 | 7 | 15 | 6/6 | 1969 | 12 cells / 5 code / 1225 words | PASS |
@@ -79,7 +79,7 @@ examples actually teach the named topic.
 | `python-55` | 2249 | 9 | 13 | 6/6 | 1716 | 13 cells / 3 code / 1262 words | PASS |
 | `python-56` | 2633 | 8 | 16 | 6/6 | 1932 | 11 cells / 4 code / 1325 words | PASS |
 | `python-57` | 2370 | 6 | 13 | 8/8 | 1782 | 15 cells / 6 code / 1354 words | PASS |
-| `python-58` | 2315 | 8 | 13 | 6/6 | 1561 | 13 cells / 4 code / 1299 words | PASS |
+| `python-58` | 2315 | 8 | 13 | 6/6 | 1563 | 13 cells / 4 code / 1299 words | PASS |
 | `python-59` | 2292 | 6 | 21 | 6/6 | 1335 | 11 cells / 3 code / 1206 words | PASS |
 | `python-60` | 2799 | 6 | 13 | 10/10 | 2114 | 13 cells / 3 code / 1656 words | PASS |
 | `python-pro-01` | 2721 | 7 | 32 | 0/0 | 2903 | notebook gate n/a | PASS |
@@ -130,47 +130,47 @@ examples actually teach the named topic.
 | `sql-05` | 2938 | 4 | 20 | 6/6 | 3122 | notebook gate n/a | PASS |
 | `sql-06` | 2898 | 4 | 20 | 6/6 | 3127 | notebook gate n/a | PASS |
 | `sql-07` | 3167 | 4 | 20 | 6/6 | 3454 | notebook gate n/a | PASS |
-| `sql-08` | 3029 | 4 | 20 | 6/6 | 3149 | notebook gate n/a | PASS |
+| `sql-08` | 3030 | 4 | 20 | 6/6 | 3149 | notebook gate n/a | PASS |
 | `sql-09` | 3217 | 4 | 20 | 6/6 | 3446 | notebook gate n/a | PASS |
-| `sql-10` | 2905 | 4 | 20 | 6/6 | 3618 | notebook gate n/a | PASS |
+| `sql-10` | 2906 | 4 | 20 | 6/6 | 3618 | notebook gate n/a | PASS |
 | `sql-11` | 2881 | 4 | 20 | 6/6 | 2953 | notebook gate n/a | PASS |
 | `sql-12` | 2863 | 4 | 20 | 6/6 | 3010 | notebook gate n/a | PASS |
 | `sql-13` | 3010 | 4 | 20 | 6/6 | 3372 | notebook gate n/a | PASS |
-| `sql-14` | 2816 | 4 | 20 | 6/6 | 2765 | notebook gate n/a | PASS |
-| `sql-15` | 3261 | 4 | 20 | 6/6 | 3723 | notebook gate n/a | PASS |
+| `sql-14` | 2817 | 4 | 20 | 6/6 | 2765 | notebook gate n/a | PASS |
+| `sql-15` | 3263 | 4 | 20 | 6/6 | 3723 | notebook gate n/a | PASS |
 | `sql-found-01` | 3229 | 4 | 19 | 8/8 | 2198 | notebook gate n/a | PASS |
 | `sql-16` | 3307 | 4 | 20 | 6/6 | 3330 | notebook gate n/a | PASS |
-| `sql-17` | 3150 | 4 | 20 | 6/6 | 3357 | notebook gate n/a | PASS |
+| `sql-17` | 3151 | 4 | 20 | 6/6 | 3357 | notebook gate n/a | PASS |
 | `sql-18` | 3079 | 4 | 20 | 6/6 | 3316 | notebook gate n/a | PASS |
 | `sql-19` | 2979 | 4 | 20 | 6/6 | 3374 | notebook gate n/a | PASS |
 | `sql-20` | 3059 | 4 | 20 | 6/6 | 3256 | notebook gate n/a | PASS |
-| `sql-21` | 3041 | 4 | 20 | 6/6 | 3305 | notebook gate n/a | PASS |
-| `sql-22` | 3119 | 4 | 20 | 6/6 | 3592 | notebook gate n/a | PASS |
-| `sql-23` | 3113 | 4 | 20 | 6/6 | 3566 | notebook gate n/a | PASS |
+| `sql-21` | 3043 | 4 | 20 | 6/6 | 3305 | notebook gate n/a | PASS |
+| `sql-22` | 3120 | 4 | 20 | 6/6 | 3592 | notebook gate n/a | PASS |
+| `sql-23` | 3115 | 4 | 20 | 6/6 | 3566 | notebook gate n/a | PASS |
 | `sql-24` | 3092 | 4 | 20 | 6/6 | 3527 | notebook gate n/a | PASS |
 | `sql-25` | 3143 | 4 | 20 | 6/6 | 3704 | notebook gate n/a | PASS |
-| `sql-26` | 3078 | 4 | 20 | 6/6 | 4057 | notebook gate n/a | PASS |
+| `sql-26` | 3080 | 4 | 20 | 6/6 | 4057 | notebook gate n/a | PASS |
 | `sql-27` | 3247 | 4 | 20 | 6/6 | 3458 | notebook gate n/a | PASS |
 | `sql-28` | 2976 | 4 | 20 | 6/6 | 2893 | notebook gate n/a | PASS |
 | `sql-29` | 2981 | 4 | 20 | 6/6 | 3092 | notebook gate n/a | PASS |
-| `sql-30` | 3492 | 4 | 20 | 6/6 | 4360 | notebook gate n/a | PASS |
+| `sql-30` | 3494 | 4 | 20 | 6/6 | 4360 | notebook gate n/a | PASS |
 | `sql-31` | 2642 | 4 | 10 | 6/6 | 2241 | notebook gate n/a | PASS |
 | `sql-32` | 2612 | 4 | 10 | 6/6 | 2154 | notebook gate n/a | PASS |
 | `sql-33` | 2597 | 4 | 10 | 6/6 | 2200 | notebook gate n/a | PASS |
 | `sql-34` | 2686 | 4 | 10 | 6/6 | 2404 | notebook gate n/a | PASS |
 | `sql-35` | 2556 | 4 | 10 | 6/6 | 2357 | notebook gate n/a | PASS |
-| `sql-36` | 2725 | 4 | 10 | 6/6 | 2405 | notebook gate n/a | PASS |
+| `sql-36` | 2726 | 4 | 10 | 6/6 | 2405 | notebook gate n/a | PASS |
 | `sql-37` | 2592 | 4 | 10 | 6/6 | 2444 | notebook gate n/a | PASS |
 | `sql-38` | 2705 | 4 | 10 | 7/7 | 2756 | notebook gate n/a | PASS |
 | `sql-39` | 2959 | 4 | 15 | 7/7 | 2749 | notebook gate n/a | PASS |
 | `sql-found-02` | 3397 | 5 | 18 | 8/8 | 2186 | notebook gate n/a | PASS |
 | `sql-40` | 2857 | 4 | 11 | 6/6 | 2472 | notebook gate n/a | PASS |
-| `sql-41` | 3192 | 5 | 14 | 6/6 | 2958 | notebook gate n/a | PASS |
+| `sql-41` | 3194 | 5 | 14 | 6/6 | 2958 | notebook gate n/a | PASS |
 | `sql-42` | 2728 | 4 | 10 | 6/6 | 2520 | notebook gate n/a | PASS |
 | `sql-43` | 2797 | 4 | 15 | 6/6 | 2456 | notebook gate n/a | PASS |
 | `sql-44` | 3134 | 4 | 15 | 6/6 | 2751 | notebook gate n/a | PASS |
 | `sql-45` | 2883 | 4 | 15 | 6/6 | 2423 | notebook gate n/a | PASS |
-| `sql-46` | 2914 | 4 | 15 | 6/6 | 2558 | notebook gate n/a | PASS |
+| `sql-46` | 2915 | 4 | 15 | 6/6 | 2558 | notebook gate n/a | PASS |
 | `sql-47` | 2895 | 4 | 15 | 6/6 | 2448 | notebook gate n/a | PASS |
 | `sql-48` | 2884 | 4 | 15 | 6/6 | 2475 | notebook gate n/a | PASS |
 | `sql-49` | 2754 | 4 | 15 | 6/6 | 2473 | notebook gate n/a | PASS |
@@ -179,11 +179,11 @@ examples actually teach the named topic.
 | `sql-52` | 2745 | 4 | 15 | 6/6 | 2581 | notebook gate n/a | PASS |
 | `sql-53` | 2868 | 4 | 15 | 6/6 | 2500 | notebook gate n/a | PASS |
 | `sql-54` | 2784 | 4 | 15 | 6/6 | 2770 | notebook gate n/a | PASS |
-| `sql-55` | 3059 | 4 | 15 | 6/6 | 2494 | notebook gate n/a | PASS |
-| `sql-56` | 2921 | 4 | 15 | 6/6 | 2526 | notebook gate n/a | PASS |
-| `sql-57` | 3091 | 4 | 15 | 6/6 | 3109 | notebook gate n/a | PASS |
+| `sql-55` | 3061 | 4 | 15 | 6/6 | 2494 | notebook gate n/a | PASS |
+| `sql-56` | 2922 | 4 | 15 | 6/6 | 2526 | notebook gate n/a | PASS |
+| `sql-57` | 3092 | 4 | 15 | 6/6 | 3109 | notebook gate n/a | PASS |
 | `sql-58` | 3113 | 4 | 15 | 10/10 | 4005 | notebook gate n/a | PASS |
-| `sql-59` | 3469 | 4 | 15 | 8/8 | 3545 | notebook gate n/a | PASS |
+| `sql-59` | 3470 | 4 | 15 | 8/8 | 3545 | notebook gate n/a | PASS |
 | `sql-60` | 3295 | 4 | 15 | 10/10 | 3748 | notebook gate n/a | PASS |
 | `sql-sec-01` | 3746 | 5 | 21 | 10/10 | 2368 | notebook gate n/a | PASS |
 | `sql-prog-01` | 3266 | 5 | 17 | 10/10 | 2177 | notebook gate n/a | PASS |
@@ -196,11 +196,11 @@ examples actually teach the named topic.
 | `sql-repl-01` | 4149 | 5 | 18 | 12/12 | 2689 | notebook gate n/a | PASS |
 | `sql-temporal-01` | 3519 | 6 | 18 | 12/12 | 2324 | notebook gate n/a | PASS |
 | `sql-quality-01` | 2553 | 4 | 14 | 6/6 | 1806 | notebook gate n/a | PASS |
-| `sql-scale-01` | 2622 | 4 | 14 | 6/6 | 1854 | notebook gate n/a | PASS |
-| `sql-concurrency-01` | 3056 | 10 | 14 | 6/6 | 1736 | notebook gate n/a | PASS |
+| `sql-scale-01` | 2622 | 4 | 14 | 6/6 | 1856 | notebook gate n/a | PASS |
+| `sql-concurrency-01` | 3059 | 10 | 14 | 6/6 | 1741 | notebook gate n/a | PASS |
 | `sql-deep-01` | 2503 | 4 | 11 | 6/6 | 1733 | notebook gate n/a | PASS |
 | `sql-deep-02` | 2537 | 4 | 11 | 6/6 | 1711 | notebook gate n/a | PASS |
-| `sql-deep-03` | 2562 | 4 | 11 | 6/6 | 1765 | notebook gate n/a | PASS |
+| `sql-deep-03` | 2562 | 4 | 11 | 6/6 | 1766 | notebook gate n/a | PASS |
 | `sql-deep-04` | 2578 | 4 | 11 | 6/6 | 1991 | notebook gate n/a | PASS |
 | `sql-deep-05` | 2597 | 4 | 11 | 6/6 | 2028 | notebook gate n/a | PASS |
 | `sql-deep-06` | 2516 | 4 | 11 | 6/6 | 2004 | notebook gate n/a | PASS |
