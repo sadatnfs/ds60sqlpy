@@ -210,8 +210,7 @@ def test_only_small_same_run_receipts_cross_jobs() -> None:
                     assert step["if"] == "always()"
                 elif step["with"]["name"].startswith("r-build-logs-"):
                     assert step["with"]["name"] == (
-                        "r-build-logs-${{ matrix.architecture }}-"
-                        "attempt-${{ github.run_attempt }}"
+                        "r-build-logs-${{ matrix.architecture }}-attempt-${{ github.run_attempt }}"
                     )
                     assert step["with"]["path"] == "work/r-build-logs/"
                     assert step["if"] == "always() && matrix.group == 'r'"
