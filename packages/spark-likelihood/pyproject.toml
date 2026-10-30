@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ds60-spark-likelihood"
-version = "0.1.0"
+version = "0.2.0"
 description = "Distributed custom likelihood estimation with Spark and PyTorch"
 readme = "README.md"
 requires-python = ">=3.11,<3.13"
@@ -23,11 +23,18 @@ spark = ["pyspark>=4.0.1,<4.1"]
 torch = ["torch>=2.9.1,<2.10"]
 scipy = ["numpy>=2.2.6,<2.3", "scipy>=1.15.3,<1.16"]
 training = ["pyspark>=4.0.1,<4.1", "torch>=2.9.1,<2.10", "lightning>=2.6.1,<2.7"]
+executor-training = [
+  "pyspark>=4.0.1,<4.1",
+  "torch>=2.9.1,<2.10",
+  "numpy>=2.2.6,<2.3",
+  "pandas>=2.2.3,<3",
+  "pyarrow>=19.0.1,<20",
+]
 test = ["pytest>=8.3,<10"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["ds60_spark_likelihood*"]
+include = ["ds60_spark_likelihood*", "ds60_torch_training*"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]

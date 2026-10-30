@@ -12,6 +12,7 @@ import sys
 from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
 
 import pytest
@@ -1026,3 +1027,38 @@ def test_container_git_inventory_disables_host_fsmonitor_and_has_a_timeout(
     monkeypatch.setattr(subprocess, "run", timeout)
     with pytest.raises(subprocess.TimeoutExpired):
         formatting.source_files(tmp_path)
+
+
+@pytest.mark.parametrize("check", [False, True])
+@pytest.mark.parametrize("owner_ok", [False, True])
+def test_index_owner_precedes_readers_and_stops_dependents_on_failure(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, check: bool, owner_ok: bool
+) -> None:
+    from ds60sqlpy import catalog_builder
+    from scripts import audit_lesson_depth, audit_practice
+
+    monkeypatch.setattr(sys, "path", list(sys.path))
+    (tmp_path / "curriculum").mkdir()
+    (tmp_path / "curriculum/catalog.json").write_text("{}\n")
+    monkeypatch.setattr(catalog_builder, "build_catalog", lambda _root: {})
+    for index, module in enumerate((audit_practice, audit_lesson_depth)):
+        report = tmp_path / f"report-{index}.md"
+        report.write_text("current\n")
+        monkeypatch.setattr(module, "DEFAULT_REPORT_PATH", report)
+        monkeypatch.setattr(module, "audit", lambda: [SimpleNamespace(passes=True)])
+        monkeypatch.setattr(module, "render_report", lambda _rows: "current\n")
+    calls: list[list[str]] = []
+
+    def run(command: list[str], _root: Path) -> bool:
+        calls.append(command)
+        return owner_ok if Path(command[1]).name == "index.py" else True
+
+    monkeypatch.setattr(formatting, "run", run)
+    assert formatting.generated_views(tmp_path, check) is owner_ok
+    assert Path(calls[0][1]).name == "index.py"
+    assert calls[0][2] == ("check" if check else "build")
+    assert [Path(command[1]).name for command in calls] == (
+        ["index.py", "build_course_guide.py", "compile_lesson_tex.py", "build_lesson_readers.py"]
+        if owner_ok
+        else ["index.py"]
+    )

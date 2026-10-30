@@ -1,6 +1,6 @@
 # Independent Spark likelihood package
 
-This directory is the canonical implementation of distribution `ds60-spark-likelihood`, import `ds60_spark_likelihood`, version 0.1.0. It must not import the classroom/server package or require R. Root source paths under `src/ds60sqlpy/spark_likelihood` are compatibility aliases only; do not duplicate numerical implementations there.
+This directory is the canonical implementation of distribution `ds60-spark-likelihood`, imports `ds60_spark_likelihood` and `ds60_torch_training`, version 0.2.0. It must not import the classroom/server package or require R. Root source paths under `src/ds60sqlpy/spark_likelihood` are compatibility aliases only; do not duplicate numerical implementations there.
 
 Preserve the tested row kernel, finite float64 contracts, weighted reduction, one global penalty, empty-partition receipts, parameter digests and truthful optimizer status. Joint complete-unit losses use a distinct protocol and cannot be simulated by returning a scalar from the per-row callback. Cross-unit coupling must be refused or explicitly implemented with a different algorithm.
 

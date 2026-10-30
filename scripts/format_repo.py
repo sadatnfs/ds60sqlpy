@@ -469,6 +469,7 @@ def ensure_publication_paths(root: Path) -> None:
         "README.md",
         "CONTRIBUTING.md",
         "AGENTS.md",
+        "accomplishments",
         "lesson-pages",
         "reference-pages",
         "courses",
@@ -536,6 +537,15 @@ def generated_views(root: Path, check: bool) -> bool:
                 success = False
             else:
                 path.write_text(expected, encoding="utf-8", newline="\n")
+    index_command = [
+        sys.executable,
+        str(root / "accomplishments/index.py"),
+        "check" if check else "build",
+        "--repo",
+        str(root),
+    ]
+    if not run(index_command, root):
+        return False
     for script in ("build_course_guide.py", "compile_lesson_tex.py", "build_lesson_readers.py"):
         command = [sys.executable, str(root / "scripts" / script)]
         if check:

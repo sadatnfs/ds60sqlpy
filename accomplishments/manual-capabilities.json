@@ -1,0 +1,246 @@
+{
+  "schema_version": 1,
+  "entries": [
+    {
+      "id": "capability:classroom-runtime",
+      "title": "Owned Docker classroom start, stop and resume",
+      "source_paths": ["classroom", "scripts/classroom.sh"],
+      "docs_paths": ["docs/one-command-classroom.md"],
+      "aliases": ["classroom", "resume", "saved learner state"],
+      "keywords": ["Docker", "worker selection", "learner volumes"],
+      "related_ids": [],
+      "status": {
+        "implementation": "maintained_source",
+        "acceptance": "release_specific_receipts_required"
+      },
+      "evidence": [
+        {
+          "tier": "source",
+          "path": "docs/one-command-classroom.md",
+          "note": "Maintained start and strict resume route; no current image availability claim"
+        }
+      ]
+    },
+    {
+      "id": "capability:course-catalog",
+      "title": "Registered lesson and course catalog",
+      "source_paths": ["src/ds60sqlpy/catalog_builder.py", "src/ds60sqlpy/modules.py"],
+      "docs_paths": ["docs/content-authoring.md"],
+      "aliases": ["ModuleCatalog", "legacy catalog", "course tracks"],
+      "keywords": ["curriculum", "authoring", "reader", "lesson"],
+      "related_ids": [],
+      "status": { "implementation": "maintained_source", "acceptance": "source_registered" },
+      "evidence": [
+        {
+          "tier": "source",
+          "path": "curriculum/catalog.json",
+          "note": "Generated legacy catalog and authored course manifests are indexed separately"
+        }
+      ]
+    },
+    {
+      "id": "capability:source-formatting",
+      "title": "Guarded course source and reader formatting",
+      "source_paths": ["scripts/format_repo.py", "scripts/format_inline_code.py"],
+      "docs_paths": ["docs/content-authoring.md", "docs/validation.md"],
+      "aliases": ["format_repo", "inline formatter", "reader generation"],
+      "keywords": ["formatting", "generated readers", "authoring"],
+      "related_ids": ["capability:course-catalog"],
+      "status": { "implementation": "maintained_source", "acceptance": "current_ci_required" },
+      "evidence": [
+        {
+          "tier": "source",
+          "path": "scripts/format-policy.json",
+          "note": "Guarded formatter policy; hosted source CI is a separate gate"
+        }
+      ]
+    },
+    {
+      "id": "capability:spark-deployment",
+      "title": "Spark deployment course and owned cluster lab",
+      "source_paths": [
+        "courses/spark-deployment/track.json",
+        "courses/spark-deployment/projects/cluster-lab/lab.py"
+      ],
+      "docs_paths": [
+        "courses/spark-deployment/README.md",
+        "courses/spark-deployment/projects/cluster-lab/README.md"
+      ],
+      "aliases": ["Compose Spark lab", "Kubernetes submit", "spark-deploy"],
+      "keywords": ["deployment", "Spark", "cluster", "notebook"],
+      "related_ids": ["track:spark-deployment"],
+      "status": {
+        "implementation": "maintained_source",
+        "acceptance": "target_specific_runtime_required"
+      },
+      "evidence": [
+        {
+          "tier": "source",
+          "path": "courses/spark-deployment/lessons.json",
+          "note": "Authored deployment course; target runtime acceptance remains separate"
+        }
+      ]
+    },
+    {
+      "id": "capability:classroom-publisher",
+      "title": "Two-platform classroom image publication",
+      "source_paths": [".github/workflows/publish-images.yml", "scripts/docker_release.py"],
+      "docs_paths": ["docs/dockerhub.md"],
+      "aliases": ["publish-docker", "Docker Hub publisher", "canonical image tags"],
+      "keywords": ["release", "AMD64", "ARM64", "promotion"],
+      "related_ids": ["capability:classroom-runtime"],
+      "status": {
+        "implementation": "maintained_workflow",
+        "acceptance": "version_and_run_specific"
+      },
+      "evidence": [
+        {
+          "tier": "source",
+          "path": ".github/workflows/publish-images.yml",
+          "note": "Publisher definition; staging is not canonical promotion"
+        }
+      ]
+    },
+    {
+      "id": "capability:published-module-audit",
+      "title": "Post-publication all-module pull and resume audit",
+      "source_paths": [
+        ".github/workflows/audit-published-release.yml",
+        "scripts/ci_hub_release_audit.py"
+      ],
+      "docs_paths": ["docs/dockerhub.md"],
+      "aliases": ["all-module audit", "Hub pull audit", "saved pin verification"],
+      "keywords": ["release", "quota", "native architecture", "stop resume"],
+      "related_ids": ["capability:classroom-publisher"],
+      "status": {
+        "implementation": "maintained_workflow",
+        "acceptance": "release_specific_receipts_required"
+      },
+      "evidence": [
+        {
+          "tier": "source",
+          "path": "scripts/ci_hub_release_audit.py",
+          "note": "Dispatch-only audit, distinct from original publisher and current availability"
+        }
+      ]
+    },
+    {
+      "id": "capability:native-modeling",
+      "title": "Native Spark TMBad model and JVM/Python interfaces",
+      "source_paths": [
+        "packages/spark-tmbad/native/include/ds60_tmbad/registry.hpp",
+        "packages/spark-tmbad/python/pyproject.toml"
+      ],
+      "docs_paths": ["packages/spark-tmbad/README.md"],
+      "aliases": ["TMBad", "SparkTMBad", "native custom models"],
+      "keywords": ["likelihood", "autodiff", "prediction", "forecast"],
+      "related_ids": ["package:spark-tmbad"],
+      "status": {
+        "implementation": "maintained_source",
+        "acceptance": "architecture_specific_receipts_required"
+      },
+      "evidence": [
+        {
+          "tier": "source",
+          "path": "packages/spark-tmbad/native/include/ds60_tmbad/registry.hpp",
+          "note": "Prepared model registry; native runtime claims require separate receipts"
+        }
+      ]
+    },
+    {
+      "id": "capability:optional-r-reference",
+      "title": "Optional R/TMB/glmmTMB comparison recipe",
+      "source_paths": [
+        "packages/spark-tmbad/reference/registry.json",
+        "packages/spark-tmbad/reference/R/run.R",
+        "packages/spark-tmbad/reference/R/common.R",
+        "packages/spark-tmbad/reference/R/native_cases.R",
+        "packages/spark-tmbad/reference/tests/newton_seed.R"
+      ],
+      "docs_paths": ["packages/spark-tmbad/reference/README.md"],
+      "aliases": ["glmmTMB", "R reference", "TMB comparison", "Newton-seeded nonlinear growth"],
+      "keywords": ["optional", "reference", "model cases", "Newton refinement", "AMD64", "ARM64"],
+      "related_ids": ["package:spark-tmbad"],
+      "status": {
+        "implementation": "maintained_optional_recipe",
+        "acceptance": "native_both_at_53b_run_41122123106_only"
+      },
+      "evidence": [
+        {
+          "tier": "historical_local",
+          "path": "packages/spark-tmbad/reference/qualification/index-v2.json",
+          "note": "24 hash-bound ARM64 v2 cases, retained separately"
+        },
+        {
+          "tier": "source",
+          "path": "packages/spark-tmbad/reference/tests/newton_seed.R",
+          "note": "Guarded Newton seed and failure controls; two-platform acceptance is exact-source run 41122123106, not recurrence"
+        }
+      ]
+    },
+    {
+      "id": "capability:r-build-logs",
+      "title": "Bounded R build-log condensation with complete raw logs",
+      "source_paths": [
+        "docker/workers/r/install_packages.py",
+        "packages/spark-tmbad/reference/prepare.py",
+        "tests/test_r_build_logging.py"
+      ],
+      "docs_paths": ["packages/spark-tmbad/reference/README.md", "docs/validation.md"],
+      "aliases": ["R build logs", "full compressed R logs", "console diagnostic condensation"],
+      "keywords": ["R", "source build", "raw gzip", "diagnostics", "run 40991855886"],
+      "related_ids": ["capability:optional-r-reference", "capability:classroom-publisher"],
+      "status": {
+        "implementation": "maintained_source",
+        "acceptance": "run_specific_artifacts_required"
+      },
+      "evidence": [
+        {
+          "tier": "source",
+          "path": "tests/test_r_build_logging.py",
+          "note": "Exact repeated console warnings may shrink; original raw bytes and failures remain. Hosted run 40991855886 is run-specific evidence."
+        }
+      ]
+    },
+    {
+      "id": "capability:release-artifact-retrieval",
+      "title": "Bounded source-bound release artifact retrieval",
+      "source_paths": ["scripts/ci_release_artifacts.py", "tests/test_ci_release_artifacts.py"],
+      "docs_paths": ["docs/dockerhub.md"],
+      "aliases": ["release artifact selector", "bounded receipt fetch", "GitHub artifact retry"],
+      "keywords": ["release", "artifact", "source revision", "attempt identity", "bounded retry"],
+      "related_ids": ["capability:classroom-publisher"],
+      "status": {
+        "implementation": "maintained_source",
+        "acceptance": "exact_run_receipts_required"
+      },
+      "evidence": [
+        {
+          "tier": "source",
+          "path": "scripts/ci_release_artifacts.py",
+          "note": "Read-only bounded retries and exact run/source/attempt/ZIP admission; final 1.3 promotion remains a separate gate"
+        }
+      ]
+    },
+    {
+      "id": "capability:modeling-studies",
+      "title": "Simulation study designs and bounded historical shards",
+      "source_paths": ["packages/spark-tmbad/studies/design/studies.json"],
+      "docs_paths": ["packages/spark-tmbad/studies/README.md"],
+      "aliases": ["simulations", "Monte Carlo studies", "sim IDs"],
+      "keywords": ["study", "design", "calibration", "partial results"],
+      "related_ids": ["package:spark-tmbad"],
+      "status": {
+        "implementation": "mixed_design_and_source",
+        "acceptance": "per_study_historical_status"
+      },
+      "evidence": [
+        {
+          "tier": "design_or_historical",
+          "path": "packages/spark-tmbad/studies/design/studies.json",
+          "note": "Individual study status must be read by ID"
+        }
+      ]
+    }
+  ]
+}

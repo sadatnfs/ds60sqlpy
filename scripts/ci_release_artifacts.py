@@ -10,6 +10,7 @@ import re
 import stat
 import subprocess
 import sys
+import time
 import zipfile
 from dataclasses import dataclass
 from pathlib import Path
@@ -21,6 +22,10 @@ from scripts.ci_profiles import RUNNERS, groups  # noqa: E402
 
 MAX_JSON = 256 * 1024
 MAX_ARCHIVE = 512 * 1024
+READ_ATTEMPTS = 4
+READ_DEADLINE_SECONDS = 75
+READ_ATTEMPT_SECONDS = 20
+READ_BACKOFF_SECONDS = (5, 15, 30)
 
 
 @dataclass(frozen=True)
@@ -188,11 +193,86 @@ def receipt_bytes(
     return raw
 
 
+def _read_failure(stderr: bytes) -> tuple[str, bool]:
+    """Return only a safe category; never copy CLI text into a receipt or log."""
+    lower = stderr.lower()
+    found = re.search(rb"\bhttp(?:/[0-9.]+)?[ :]+([0-9]{3})\b", lower)
+    status = int(found[1]) if found else None
+    if status == 429:
+        return "http_429", True
+    if status is not None and 500 <= status <= 599:
+        return "http_5xx", True
+    if status == 403 and any(phrase in lower for phrase in (b"rate limit", b"abuse detection")):
+        return "http_403_rate_limit", True
+    if status is not None:
+        return "http_" + str(status), False
+    if any(
+        phrase in lower
+        for phrase in (
+            b"connection reset",
+            b"unexpected eof",
+            b"connection timed out",
+            b"i/o timeout",
+            b"tls handshake timeout",
+            b"context deadline exceeded",
+        )
+    ):
+        return "transport", True
+    return "unclassified", False
+
+
 def gh(args: list[str], *, maximum: int) -> bytes:
-    result = subprocess.run(["gh", *args], capture_output=True, check=False, timeout=120)
-    if result.returncode or len(result.stdout) > maximum:
-        raise ValueError("Could not read bounded artifacts from this workflow run")
-    return result.stdout
+    if (
+        not args
+        or args[0] != "api"
+        or any(
+            arg in {"-X", "--method", "-F", "--field", "-f", "--raw-field"}
+            or arg.startswith("--method=")
+            for arg in args
+        )
+    ):
+        raise ValueError("Only read-only artifact API calls are admitted")
+    deadline = time.monotonic() + READ_DEADLINE_SECONDS
+    attempts = 0
+    category = "none"
+    for index in range(READ_ATTEMPTS):
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            break
+        attempts += 1
+        try:
+            result = subprocess.run(
+                ["gh", *args],
+                capture_output=True,
+                check=False,
+                timeout=min(READ_ATTEMPT_SECONDS, remaining),
+            )
+        except subprocess.TimeoutExpired:
+            category = "transport_timeout"
+        else:
+            if len(result.stdout) > maximum:
+                raise ValueError("Artifact API response exceeds its byte bound")
+            if result.returncode == 0:
+                return result.stdout
+            category, transient = _read_failure(result.stderr)
+            if not transient:
+                raise ValueError(
+                    "Artifact API read failed: category="
+                    + category
+                    + ", exit="
+                    + str(result.returncode)
+                )
+        if index + 1 == READ_ATTEMPTS:
+            break
+        delay = min(READ_BACKOFF_SECONDS[index], max(0.0, deadline - time.monotonic()))
+        if delay > 0:
+            time.sleep(delay)
+    raise ValueError(
+        "Artifact API transient read exhausted: category="
+        + category
+        + ", attempts="
+        + str(attempts)
+    )
 
 
 def main() -> int:

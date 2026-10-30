@@ -198,12 +198,12 @@
         "lightning": "2.6.1",
         "java_major": "17",
         "scipy": "1.15.3",
-        "ds60-spark-likelihood": "0.1.0"
+        "ds60-spark-likelihood": "0.2.0"
       },
       "role": "primary-no-r-platform",
       "package": {
         "distribution": "ds60-spark-likelihood",
-        "version": "0.1.0",
+        "version": "0.2.0",
         "ml_checks": [
           "ml-option-inexact-integer-refusal",
           "ml-option-exact-integer-float-acceptance",
@@ -284,7 +284,7 @@
             "passed": true,
             "role": "optional-r-tmb-reference",
             "distribution": "ds60-spark-likelihood",
-            "version": "0.1.0",
+            "version": "0.2.0",
             "classroom_imported": false,
             "torch_imported": false,
             "isolated_python": true
@@ -419,7 +419,7 @@
         "TMB": "1.9.25",
         "Matrix": "1.7.6",
         "java_major": "21",
-        "ds60-spark-likelihood": "0.1.0"
+        "ds60-spark-likelihood": "0.2.0"
       },
       "role": "optional-r-tmb-reference",
       "dataframe_checks": [

@@ -22,7 +22,12 @@ WORKFLOWS = {
         "PostgreSQL 17 end-to-end",
     ),
     ".github/workflows/app-build.yml": ("Portable Docker classroom starter",),
+    ".github/workflows/verify-torch-package.yml": (
+        "Independent Spark PyTorch (amd64)",
+        "Independent Spark PyTorch (arm64)",
+    ),
 }
+TORCH_WORKFLOW = ".github/workflows/verify-torch-package.yml"
 
 
 def selected_runs(pages: Any, revision: str) -> dict[str, dict[str, Any]]:
@@ -35,13 +40,14 @@ def selected_runs(pages: Any, revision: str) -> dict[str, dict[str, Any]]:
         all_runs.extend(page["workflow_runs"])
     result = {}
     for path in WORKFLOWS:
+        required_event = "workflow_dispatch" if path == TORCH_WORKFLOW else "push"
         allowed = {path, path + "@main", path + "@refs/heads/main", path + "@" + revision}
         matches = [
             run
             for run in all_runs
             if isinstance(run, dict)
             and run.get("path") in allowed
-            and run.get("event") == "push"
+            and run.get("event") == required_event
             and run.get("head_branch") == "main"
             and run.get("head_sha") == revision
         ]

@@ -71,6 +71,12 @@ subject's generator, then its check mode where provided. The CUDA route assemble
 separate owned fragments; web development generates from chapter data and source
 templates. The original plans are loaded by `module_plans.load_core_plans`, not
 a design-preview renderer. Shared HTML remains generated through `make generate`.
+Rebuild the [accomplishment index](../../../accomplishments/INDEX.md) after
+track, lesson, variant, package, model, reference or study registry changes:
+`python accomplishments/index.py build --repo .`, then
+`python accomplishments/index.py check --repo .`. The generated lookup is
+source and evidence metadata. Edit `RUNNING.md` only when a reviewed evidence
+tier changes; it is never generated.
 
 Use the existing `/classroom` directory, accessible theme and capability notice.
 Keep drafts and results separate for every lesson/variant/language. Navigation

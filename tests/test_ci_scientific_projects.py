@@ -145,12 +145,12 @@ def package_fixture(spec: dict[str, Any], architecture: str, root: Path) -> dict
     path = "/usr/local/lib/python3.12/site-packages/ds60_spark_likelihood"
     identity = {
         "distribution": "ds60-spark-likelihood",
-        "version": "0.1.0",
+        "version": "0.2.0",
         "package_path": path,
         "isolated_python": True,
         "classroom_imported": False,
         "r_dependency_required": False,
-        "wheel_name": "ds60_spark_likelihood-0.1.0-py3-none-any.whl",
+        "wheel_name": "ds60_spark_likelihood-0.2.0-py3-none-any.whl",
         "wheel_sha256": "a" * 64,
         **{
             key: package_sources(root)
@@ -162,7 +162,7 @@ def package_fixture(spec: dict[str, Any], architecture: str, root: Path) -> dict
     for mode, kinds in spec["package"]["observations"].items():
         observations[mode] = [{"kind": kind, "passed": True} for kind in kinds]
         observations[mode][0].update(
-            version="0.1.0",
+            version="0.2.0",
             module_path=path + "/__init__.py",
             classroom_imported=False,
             rscript_present=False,
@@ -216,7 +216,7 @@ def package_fixture(spec: dict[str, Any], architecture: str, root: Path) -> dict
             "spark": "4.0.1",
             "torch": "2.9.1+cpu",
             "scipy": "1.15.3",
-            "package": "0.1.0",
+            "package": "0.2.0",
             "architecture": architecture,
         },
         results={

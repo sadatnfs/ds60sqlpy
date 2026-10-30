@@ -1,3 +1,3 @@
 """Generated TeX cache integrity binding; regenerate with compile_lesson_tex.py."""
 
-TEX_CACHE_SHA256 = "0816b0c122465f9b3e004a34037d0c52975b2e02e949a3ef773e6d4114716bb8"
+TEX_CACHE_SHA256 = "666f63a2af7aa6188638463eefcd0229f213dd6f841d1e0ab8943b6247a1382f"

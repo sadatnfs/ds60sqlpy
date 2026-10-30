@@ -24,7 +24,7 @@ On a machine authorized and able to obtain the public base images and locked
 packages:
 
 ```sh
-docker build --tag spark-likelihood:0.1.0 .
+docker build --tag spark-likelihood:0.2.0 .
 ```
 
 The defaults are `python:3.12.12-slim-bookworm` and
@@ -73,7 +73,7 @@ docker build --pull=false --network=none \
   --build-arg SPARK_IMAGE=YOUR_PREPARED_LOCAL_SPARK_IMAGE \
   --build-arg PREPARED_OS_PACKAGES=1 \
   --build-arg OFFLINE_PYTHON=1 \
-  --tag spark-likelihood:0.1.0-offline .
+  --tag spark-likelihood:0.2.0-offline .
 ```
 
 Verify those two image names exist locally and match the native engine before
@@ -105,7 +105,7 @@ docker run --rm --pull=never --network none --hostname localhost \
   --memory 4g --cpus 2 --pids-limit 1024 --read-only \
   --tmpfs /tmp:rw,exec,nosuid,nodev,size=1073741824,mode=1777 \
   --env SPARK_LOCAL_IP=127.0.0.1 \
-  spark-likelihood:0.1.0 --master 'local[2]' \
+  spark-likelihood:0.2.0 --master 'local[2]' \
   /opt/spark-likelihood/examples/validate_installed.py spark
 ```
 

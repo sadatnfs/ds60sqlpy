@@ -221,6 +221,8 @@ python scripts/check_content_rendering.py
 python scripts/build_course_guide.py --check
 python scripts/compile_lesson_tex.py --check
 python scripts/build_lesson_readers.py --check
+python accomplishments/index.py check --repo .
+DS60_INDEX_REPO=&quot;$PWD&quot; python -m unittest -v accomplishments/test_index.py
 python scripts/check_modules.py
 python scripts/check_repository_guidance.py
 python scripts/validate_notebooks.py
@@ -233,7 +235,8 @@ python scripts/scan_secrets.py --history
 git diff --check</code></pre>
 <p><code>normalize_lesson_prose.py</code> is a dry check by default. When deliberately refreshing reviewed prose, run it with <code>--write</code> after authoring generators and before HTML generation. <code>check_content_rendering.py</code> renders the actual published Markdown and notebooks, checking mathematics and code blocks through the production reader. A generic Markdown parser is not a substitute.</p>
 <p><code>compile_lesson_tex.py --check</code> recompiles explicit TeX with the pinned bundled KaTeX compiler and checks the input inventory, compiled HTML/MathML and integrity binding. Node is needed for this contributor check; no runtime CDN is used. Intentional generation normalizes prose, compiles TeX and then builds readers. <code>--check-inputs</code> checks source coverage and cache integrity without invoking Node; it does not recompile. A successful compiler check establishes supported syntax and synchronized typesetting artifacts, not correct derivations or statistical assumptions. Code remains literal, and uncompiled draft expressions retain the safe native MathML fallback.</p>
-<p>After an intentional content change, regenerate the catalog, reports and readers with <code>make generate</code>, or run that target&#x27;s listed Python commands when Make is unavailable. Review the generated diff. Never hand-edit maintained HTML to hide source drift. The journey preview is a developer design archive; the live <code>/classroom</code>, <code>/learn</code> and <code>/journeys</code> URLs use one shared interface.</p>
+<p>The <a href="../accomplishments/INDEX.md.html">accomplishment lookup</a> is generated from maintained source and edited <code>manual-capabilities.json</code>. Its byte-for-byte check and loader-parity test run after catalog and reader checks. Keep the dated <code>RUNNING.md</code> manual. A source row is not runtime, publication or learner acceptance.</p>
+<p>After an intentional content change, regenerate the catalog, reports, readers and accomplishment lookup with <code>make generate</code>, or run that target&#x27;s listed Python commands when Make is unavailable. Review the generated diff. Never hand-edit maintained HTML to hide source drift. The journey preview is a developer design archive; the live <code>/classroom</code>, <code>/learn</code> and <code>/journeys</code> URLs use one shared interface.</p>
 <p>The secret scanner reports categories and locations without copying suspected credentials into logs. It checks the current tree and reachable Git history. Keep private progress, work directories, caches and environment files out of source control and release archives. Source cleanup does not remove material already published in Git history; historical findings require a separate reviewed response.</p>
 <h3 id="run-tests-in-parallel">Run tests in parallel<a class="heading-anchor" href="#run-tests-in-parallel" aria-label="Link to this section">#</a></h3>
 <p>Use four grouped workers by default:</p>

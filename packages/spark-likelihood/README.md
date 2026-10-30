@@ -2,7 +2,7 @@
 
 `ds60-spark-likelihood` is an independent Python package for fitting custom low-dimensional likelihoods with Spark and PyTorch. Spark schedules complete independent contributions, Torch differentiates local CPU float64 calculations, and a driver optimizer receives bounded numerical summaries. There is no R or classroom-server dependency.
 
-Version 0.1.0 is the first package release. The row kernel preserves the separately tested objective, gradient, reduction, weighting, empty-partition and optimizer contracts. A distinct complete-unit protocol preserves joint likelihoods; scalar group losses must never be sent through the row-batching kernel. Cross-group latent covariance and a differentiable Spark SQL plan are different problems and are not implied by this package.
+Version 0.1.0 was the first package release. Version 0.2.0 adds a separate bounded CPU executor training namespace, `ds60_torch_training`. The row kernel preserves the separately tested objective, gradient, reduction, weighting, empty-partition and optimizer contracts. A distinct complete-unit protocol preserves joint likelihoods; scalar group losses must never be sent through the row-batching kernel. Cross-group latent covariance and a differentiable Spark SQL plan are different problems and are not implied by this package.
 
 ## Install from the package directory
 
@@ -23,7 +23,7 @@ The extras declare compatible interfaces; they are not a pinned CPU environment.
 ## Prepare the complete CPU image
 
 ```sh
-docker build --tag spark-likelihood:0.1.0 .
+docker build --tag spark-likelihood:0.2.0 .
 ```
 
 The build context is this package alone. Neutral public Python and Spark bases,
@@ -38,6 +38,8 @@ receipt does not qualify a different Docker build. Read [preparation](docs/PREPA
 and [tooling](tooling/README.md) before selecting the network/offline path. Use
 [integration](integration/README.md) for the separate master/two-worker/driver
 acceptance procedure; a built image alone is not distributed execution evidence.
+The [CPU training integration harness](training-integration/README.md) has a
+separate one-wheel executor and worker-loss acceptance route.
 
 ## Additive row likelihoods
 
@@ -72,7 +74,7 @@ Build and test the wheel independently from the parent classroom application. In
 
 ## Model and execution contracts
 
-Read [objectives and complete units](docs/objectives.md), [custom model authoring](docs/custom-models.md), [the Gamma-Poisson custom group model](docs/gamma-poisson.md), and [distributed training](docs/distributed-training.md). They distinguish row likelihoods, joint independent groups, shared versus separate parameters, explicit point-prediction targets and large neural-network training. The exact Gaussian random-intercept example runs entirely in Torch; it does not require R or imply support for arbitrary Laplace approximations.
+Read [objectives and complete units](docs/objectives.md), [custom model authoring](docs/custom-models.md), [the Gamma-Poisson custom group model](docs/gamma-poisson.md), [distributed training](docs/distributed-training.md), and [CPU executor training](docs/CPU-TORCH-TRAINING.md). They distinguish row likelihoods, joint independent groups, shared versus separate parameters, explicit point-prediction targets and large neural-network training. The exact Gaussian random-intercept example runs entirely in Torch; it does not require R or imply support for arbitrary Laplace approximations.
 
 Qualification has separate layers: source tests, installed-wheel import isolation, numerical oracles, actual local Spark tasks and DataFrame/ML persistence. Native architecture and dependency versions belong to the retained execution receipts. Tiny CPU examples do not establish remote-cluster or GPU performance.
 

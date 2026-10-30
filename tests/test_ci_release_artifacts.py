@@ -5,11 +5,14 @@ from __future__ import annotations
 import io
 import json
 import stat
+import subprocess
+import time
 import zipfile
 from typing import Any
 
 import pytest
 
+from scripts import ci_release_artifacts as gate
 from scripts.ci_release_artifacts import Artifact, logical_keys, receipt_bytes, select_artifacts
 
 SHA = "a" * 40
@@ -148,3 +151,151 @@ def test_complete_receipt_selection_contains_both_seeds_and_every_worker_group()
         keys
     )
     assert not any("python-core" in key or "cuda" in key for key in keys)
+
+
+@pytest.mark.parametrize(
+    "diagnostic",
+    [
+        b"gh: HTTP 429: too many requests",
+        b"gh: HTTP 502: bad gateway",
+        b"gh: HTTP 403: secondary rate limit exceeded",
+        b"read: connection reset by peer",
+    ],
+)
+def test_known_transient_artifact_reads_retry_then_recover(
+    monkeypatch: pytest.MonkeyPatch, diagnostic: bytes
+) -> None:
+    secret = b"Bearer private-token https://signed.example/secret"
+    responses = iter(
+        [
+            subprocess.CompletedProcess([], 1, b"", diagnostic + secret),
+            subprocess.CompletedProcess([], 0, b"valid", b""),
+        ]
+    )
+    calls: list[float] = []
+    sleeps: list[float] = []
+
+    def run(*args: Any, **kwargs: Any) -> subprocess.CompletedProcess[bytes]:
+        calls.append(kwargs["timeout"])
+        return next(responses)
+
+    monkeypatch.setattr(subprocess, "run", run)
+    monkeypatch.setattr(time, "sleep", sleeps.append)
+    assert gate.gh(["api", "repos/example/repo/actions/runs/1/artifacts"], maximum=100) == b"valid"
+    assert len(calls) == 2 and sleeps == [5]
+
+
+def test_transport_timeout_retries_without_exposing_exception_text(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls = 0
+
+    def run(*args: Any, **kwargs: Any) -> subprocess.CompletedProcess[bytes]:
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            raise subprocess.TimeoutExpired("signed-secret-command", kwargs["timeout"])
+        return subprocess.CompletedProcess([], 0, b"ok", b"")
+
+    monkeypatch.setattr(subprocess, "run", run)
+    monkeypatch.setattr(time, "sleep", lambda _: None)
+    assert gate.gh(["api", "repos/example/repo/actions/artifacts/1/zip"], maximum=100) == b"ok"
+    assert calls == 2
+
+
+def test_transient_read_exhaustion_is_bounded_and_redacted(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls = 0
+    sleeps: list[float] = []
+
+    def run(*args: Any, **kwargs: Any) -> subprocess.CompletedProcess[bytes]:
+        nonlocal calls
+        calls += 1
+        return subprocess.CompletedProcess(
+            [], 1, b"", b"gh: HTTP 503: private-token https://signed.example/secret"
+        )
+
+    monkeypatch.setattr(subprocess, "run", run)
+    monkeypatch.setattr(time, "sleep", sleeps.append)
+    with pytest.raises(ValueError, match="transient read exhausted") as captured:
+        gate.gh(["api", "repos/example/repo/actions/runs/1/artifacts"], maximum=100)
+    assert calls == gate.READ_ATTEMPTS == 4 and sleeps == [5, 15, 30]
+    assert "http_5xx" in str(captured.value) and "attempts=4" in str(captured.value)
+    assert "private-token" not in str(captured.value) and "signed.example" not in str(
+        captured.value
+    )
+
+
+def test_timeout_retries_respect_one_total_deadline(monkeypatch: pytest.MonkeyPatch) -> None:
+    clock = [0.0]
+    timeouts: list[float] = []
+
+    def run(*args: Any, **kwargs: Any) -> subprocess.CompletedProcess[bytes]:
+        duration = kwargs["timeout"]
+        timeouts.append(duration)
+        clock[0] += duration
+        raise subprocess.TimeoutExpired("secret-command", duration)
+
+    monkeypatch.setattr(subprocess, "run", run)
+    monkeypatch.setattr(time, "monotonic", lambda: clock[0])
+    monkeypatch.setattr(time, "sleep", lambda duration: clock.__setitem__(0, clock[0] + duration))
+    with pytest.raises(ValueError, match="transient read exhausted") as captured:
+        gate.gh(["api", "repos/example/repo/actions/runs/1/artifacts"], maximum=100)
+    assert len(timeouts) == 3
+    assert timeouts == [20, 20, 15]
+    assert all(0 < duration <= gate.READ_ATTEMPT_SECONDS for duration in timeouts)
+    assert clock[0] == gate.READ_DEADLINE_SECONDS
+    assert "secret-command" not in str(captured.value)
+
+
+@pytest.mark.parametrize(
+    "diagnostic",
+    [
+        b"gh: HTTP 401: bad credentials private-token",
+        b"gh: HTTP 403: permission denied private-token",
+        b"gh: HTTP 404: missing private-token",
+        b"gh: unknown failure private-token",
+    ],
+)
+def test_auth_permission_missing_and_unknown_fail_without_retry_or_secret_leak(
+    monkeypatch: pytest.MonkeyPatch, diagnostic: bytes
+) -> None:
+    calls = 0
+
+    def run(*args: Any, **kwargs: Any) -> subprocess.CompletedProcess[bytes]:
+        nonlocal calls
+        calls += 1
+        return subprocess.CompletedProcess([], 1, b"", diagnostic)
+
+    monkeypatch.setattr(subprocess, "run", run)
+    monkeypatch.setattr(time, "sleep", lambda _: pytest.fail("Nontransient failure slept"))
+    with pytest.raises(ValueError, match="Artifact API read failed") as captured:
+        gate.gh(["api", "repos/example/repo/actions/runs/1/artifacts"], maximum=100)
+    assert calls == 1 and "private-token" not in str(captured.value)
+
+
+@pytest.mark.parametrize("returncode", [0, 1])
+def test_oversized_artifact_response_is_fatal_without_retry(
+    monkeypatch: pytest.MonkeyPatch, returncode: int
+) -> None:
+    calls = 0
+
+    def run(*args: Any, **kwargs: Any) -> subprocess.CompletedProcess[bytes]:
+        nonlocal calls
+        calls += 1
+        return subprocess.CompletedProcess(
+            [], returncode, b"x" * 101, b"gh: HTTP 503 private-token"
+        )
+
+    monkeypatch.setattr(subprocess, "run", run)
+    monkeypatch.setattr(time, "sleep", lambda _: pytest.fail("Oversize failure slept"))
+    with pytest.raises(ValueError, match="byte bound") as captured:
+        gate.gh(["api", "repos/example/repo/actions/runs/1/artifacts"], maximum=100)
+    assert calls == 1 and "private-token" not in str(captured.value)
+
+
+def test_mutating_api_flags_are_not_retried_or_invoked(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(subprocess, "run", lambda *args, **kwargs: pytest.fail("Mutating call ran"))
+    with pytest.raises(ValueError, match="read-only"):
+        gate.gh(["api", "-X", "POST", "repos/example/repo"], maximum=100)

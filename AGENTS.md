@@ -5,7 +5,10 @@
 Maintain one local Docker classroom at `/classroom` for programming, data
 science, statistics, machine learning and systems. Derive subject and lesson
 IDs, variants and readiness from the catalog loaders,
-not a copied inventory. Historical day numbers are stable labels, not a deadline.
+not a copied inventory. The [accomplishment lookup](accomplishments/INDEX.md)
+helps find registered source and evidence records; it does not track learner
+progress or prove current publication. Historical day numbers are stable labels,
+not a deadline.
 
 Read [README.md](README.md), [CONTRIBUTING.md](CONTRIBUTING.md), and the closest
 subject `AGENTS.md`. Inspect `git status --short --branch` and preserve unrelated
@@ -45,6 +48,7 @@ given for the current task rather than asking repeatedly.
 | Image publication and hosted pull acceptance | `.github/workflows/publish-images.yml`, `.github/workflows/targeted-images.yml`, `.github/workflows/verify-published-images.yml`, `scripts/ci_targeted_images.py`, `scripts/docker_release.py`, `scripts/ci_hub_acceptance.py`, `scripts/ci_hub_reverify.py`, `./classroom publish`, `docker/classroom-images.tsv` |
 | Product composition and runtime preparation | `compose.classroom.yaml`, `compose.modules.yaml`, `docker/workers/`, reviewed optional overlays |
 | Unified directory, editor and preview | `classroom.py`, `assets/classroom.*`, `browser_runs.py` |
+| Accomplishment lookup and dated evidence log | [index](accomplishments/INDEX.md), generated `accomplishments/inventory.json`, edited `accomplishments/manual-capabilities.json`, manual [running log](accomplishments/RUNNING.md), [builder](accomplishments/index.py) |
 | Historical Python/SQL/bridge identity | `catalog_builder.py`, source artifacts, `curriculum/extensions/`, generated `curriculum/catalog.json` |
 | Original five module plans | `module_plans.py`, `docs/expansion/plans/` |
 | Additive subjects and variants | `courses/<subject>/track.json`, `lessons.json`, `modules.py`, `module_extensions.py` |

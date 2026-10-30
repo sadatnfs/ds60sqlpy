@@ -194,6 +194,18 @@ def test_release_jobs_target_linux_containers_and_contributor_tooling() -> None:
             assert "docker push" not in workflow and "--push" not in workflow
             assert "setup-qemu" not in workflow
             assert "if: always()" in workflow
+        elif path.name == "verify-torch-package.yml":
+            assert runners == ["${{ matrix.runner }}"]
+            assert "runner: ubuntu-24.04-arm" in workflow
+            assert "runner: ubuntu-24.04" in workflow
+            assert "workflow_dispatch:" in workflow and "  push:" not in workflow
+            assert "contents: read" in workflow and "contents: write" not in workflow
+            assert "--network=none" in workflow and "--pull=never" in workflow
+            assert "training-integration/run.py" in workflow
+            assert "test_torch_adapter_runtime.py" in workflow
+            assert "docker push" not in workflow and "--push" not in workflow
+            assert "setup-qemu" not in workflow
+            assert "if: always()" in workflow
         else:
             assert runners and set(runners) == {"ubuntu-latest"}, path.name
         assert "windows-latest" not in workflow and "macos-latest" not in workflow

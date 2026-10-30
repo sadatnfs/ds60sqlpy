@@ -23,6 +23,7 @@ generate:
 	$(PYTHON) scripts/build_catalog.py
 	$(PYTHON) scripts/audit_practice.py --write-report
 	$(PYTHON) scripts/audit_lesson_depth.py --write-report
+	$(PYTHON) accomplishments/index.py build --repo .
 	$(PYTHON) scripts/build_course_guide.py
 	$(PYTHON) scripts/compile_lesson_tex.py
 	$(PYTHON) scripts/build_lesson_readers.py
@@ -43,6 +44,8 @@ check: format-check lint
 	$(PYTHON) scripts/compile_lesson_tex.py --check
 	$(PYTHON) scripts/check_content_rendering.py
 	$(PYTHON) scripts/check_published_links.py
+	$(PYTHON) accomplishments/index.py check --repo .
+	DS60_INDEX_REPO="$(CURDIR)" $(PYTHON) -m unittest -v accomplishments/test_index.py
 	$(PYTHON) scripts/course.py validate
 	$(MAKE) test
 
