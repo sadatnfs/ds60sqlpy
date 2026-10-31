@@ -2,21 +2,52 @@
   "as_of_utc_date": "2026-10-30",
   "kind": "ds60-evidence-bounded-qualification-summary",
   "publisher": {
+    "attempt_1": "Promotion stopped at a digest readback mismatch; attempt2 reconciled existing tags and resumed without rewriting matching immutable indexes.",
     "extended_all_module_audit": "not_run_owner_prioritized_build_completion",
-    "hosted_run_id": 41139387934,
-    "ordinary_native_worker_build_jobs_passed": 36,
-    "ordinary_native_worker_qualification_steps_passed": 36,
-    "promotion_or_fresh_pull_claim": false,
-    "run_attempt": 1,
+    "latest_tag_count": 26,
+    "postpull": {
+      "amd64": "passed",
+      "arm64": "passed"
+    },
+    "postpull_receipts": {
+      "amd64": {
+        "artifact_name": "hub-acceptance-amd64-attempt-2",
+        "artifact_zip_sha256": "d266260cd8281ec34c2bd87ab949987d54a5680f1e68b65fc09363dfb7dbe051",
+        "receipt_sha256": "93ec566e8100992891882d40c3abefee9a9fb6aa509916e37ea819034da42b4a",
+        "run_id": "41139387934",
+        "selected_profile_count": 26,
+        "source_revision": "0db974c6d021a0bce5b9260577c122ad29bca876",
+        "status": "accepted",
+        "version": "1.3.0"
+      },
+      "arm64": {
+        "artifact_name": "hub-acceptance-arm64-attempt-2",
+        "artifact_zip_sha256": "b5fab31c5be0c453107dcb83635d926e26b277fb4b3e5493df2f36a30d4acb3b",
+        "receipt_sha256": "160ce1d577a40b0198654ecd0dd8c46298367d300aa7dad73e1c4571d0ed7cc0",
+        "run_id": "41139387934",
+        "selected_profile_count": 26,
+        "source_revision": "0db974c6d021a0bce5b9260577c122ad29bca876",
+        "status": "accepted",
+        "version": "1.3.0"
+      }
+    },
+    "prerequisite_jobs_passed": 41,
+    "promotion": "published",
+    "published_release_json_sha256": "da06b0362c8358c00c6f4ecbb7aa162bb8e909a05827c03e15b539b8433bb99e",
+    "published_release_zip_sha256": "9850560603ee3e75b520aa43ab9598fe718ff61450f7be30e461e068085430dd",
+    "publisher_run_conclusion": "success",
+    "publisher_run_status": "completed",
+    "run_attempt": 2,
+    "run_id": "41139387934",
     "source_revision": "0db974c6d021a0bce5b9260577c122ad29bca876",
-    "status": "scientific_checks_and_promotion_pending",
-    "version": "1.3.0"
+    "version": "1.3.0",
+    "version_and_latest_digests_equal": true,
+    "version_tag_count": 26
   },
   "records": {
     "application_builds": {
       "evidence_sha256": "677f4936ada3509e191cf449f7f9574c32dfdfda8d24778fa524c4335a6ed99f",
       "hosted_run_id": 41139388006,
-      "local_source_starter_zip_sha256": "7b0435556a1cf2e0032fbfcb3644bfd827c06997582220a51b24732aaf4642a2",
       "ordinary_docker_jobs": "skipped",
       "portable_starter_job": "success",
       "source_revision": "0db974c6d021a0bce5b9260577c122ad29bca876",

@@ -133,6 +133,21 @@ source revisions, hosted runs, artifact hashes and limits for this completion.
   routes. MAP estimates are not posterior samples; accepted bounded execution
   does not establish arbitrary-program or unlimited-scale support.
 
+## Final release closeout
+
+Classroom 1.3.0 was published from source `0db974c6d021a0bce5b9260577c122ad29bca876`
+in workflow `41139387934`, attempt 2: 26 immutable combined AMD64/ARM64
+version indexes and 26 matching latest aliases. All 41 prerequisite jobs passed.
+The first promotion stopped on a registry digest readback; the source-bound
+recovery reconciled existing tags and preserved matching immutable content.
+Both native fresh-pull, browser, stop/resume and learner-marker checks passed.
+This readback supersedes the earlier pending-publication checkpoints above.
+The extended all-module pull/runtime audit was not launched after the owner
+prioritized build completion. Delivery uses the repository and Docker images;
+optional local source ZIP deliverables were removed at the owner's request.
+The protected-state cleanup remains complete. See the qualification summary
+for exact run, source and artifact hashes.
+
 ## Maintenance rule
 
 Append a dated entry when a meaningful source, test, native runtime,
