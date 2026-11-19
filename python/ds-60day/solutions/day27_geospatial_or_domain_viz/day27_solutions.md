@@ -1,4 +1,4 @@
-# Day 27: Solutions: Geospatial or Domain-specific Visualization
+# Day 27 Solutions: Geospatial and Domain-Specific Visualization
 
 <!-- BEGIN BEGINNER SOLUTION REVIEW -->
 ## Concept review before comparing answers
@@ -32,13 +32,13 @@ emptiness, bounds, provenance, and offline availability before plotting.
 For this lesson's **geospatial semantics, coordinate reference systems, valid geometry, and offline fallback** model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.
 <!-- END BEGINNER SOLUTION REVIEW -->
 
-## Exercises 1–2: Worked answers
+## Exercises 1-2: Worked answers
 
 ### Exercise 1: worked answer
 
 **Learner contract:** Using only a local or already-cached boundary/point source, create a GeoDataFrame plot. **Before plotting:** record provenance/license, CRS, geometry types, invalid/empty counts, and bounds. **Constraints:** transform all layers to one appropriate CRS and never use `set_crs` as if it reprojected coordinates. **Verify:** check a known location/bounds and confirm entity count survives reprojection.
 
-**Reasoning:** Make this boundary unambiguous in code: Using only a local or already-cached boundary/point source, create a GeoDataFrame plot. Before plotting: record provenance/license, CRS, geometry types, invalid/empty counts, and bounds. Constraints: transform all layers to one appropriate CRS and never use `set_crs` as if it reprojected coordinates. Values below, at, and above the named boundary must produce the evidence check a known location/bounds and confirm entity count survives reprojection. Those cases show how geospatial semantics, coordinate reference systems, valid geometry, and offline fallback behaves at its edge.
+**Reasoning:** Profiling provenance, license, CRS, geometry types, validity, and bounds before plotting catches the common spatial errors early: an unknown CRS, swapped coordinates, or broken shapes. The known-location check confirms that San Francisco's x value is -122.4, which holds only if the points were built in `(longitude, latitude)` order. `to_crs("EPSG:3857")` computes new coordinates in meters for Web Mercator, so the geometries change while the number of entities stays the same; `set_crs` would only relabel the existing numbers, which is correct only when the original CRS label was missing or wrong.
 
 ```python
 import geopandas as gpd
@@ -75,13 +75,11 @@ This constructed local fixture needs no basemap or network source.
 `to_crs` transforms coordinates; `set_crs` would only relabel their
 meaning and would be incorrect here.
 
-**Verification evidence:** check a known location/bounds and confirm entity count survives reprojection.
-
 ### Exercise 2: worked answer
 
 **Learner contract:** Alternatively, construct a deterministic NetworkX domain graph where node and edge meanings are written explicitly. **Constraints:** use a fixed layout seed, encode at most a few meaningful attributes, provide labels/legend, and do not require network data. **Verify:** reconcile plotted node/edge counts to the graph and explain what spatial questions this fallback cannot answer.
 
-**Reasoning:** Implement this exact contract as written: Alternatively, construct a deterministic NetworkX domain graph where node and edge meanings are written explicitly. Constraints: use a fixed layout seed, encode at most a few meaningful attributes, provide labels/legend, and do not require network data. Keep the prompt's named data and constraints visible in the code, then establish this specific result: reconcile plotted node/edge counts to the graph and explain what spatial questions this fallback cannot answer. That connects the answer to geospatial semantics, coordinate reference systems, valid geometry, and offline fallback.
+**Reasoning:** When geographic data is unavailable, a small graph can still show structure, here which step feeds which. The fixed `seed=42` makes `spring_layout` produce the same positions on every run, node shapes plus a legend encode each node's role without relying on color, and a label on each node names it directly. The reconciliation checks that the drawing shows three nodes and that the graph has two edges. The positions are chosen for readability, so distances in this drawing mean nothing, which is the limitation to state.
 
 ```python
 import matplotlib.pyplot as plt
@@ -130,61 +128,75 @@ A deterministic graph can show dependency relationships offline, but
 it cannot answer geographic distance, containment, or coordinate
 questions because its layout encodes readability, not physical space.
 
-**Verification evidence:** reconcile plotted node/edge counts to the graph and explain what spatial questions this fallback cannot answer.
-
-## Exercises 3–7: Expanded mastery answers
+## Exercises 3-7: Expanded mastery answers
 
 ### Exercise 3: answer contract
 
 **Learner contract:** **Prediction:** Predict what goes wrong when latitude/longitude degrees are overlaid on a web map measured in Web Mercator meters. **Progressive hint:** Layers must use compatible coordinate reference systems (CRSs). **Verify:** Compare both CRS/bounds, then assert reprojection makes units compatible and the transformed layers overlap in a plausible extent.
 
-**Reasoning:** Predict this named state change before running it: Prediction: Predict what goes wrong when latitude/longitude degrees are overlaid on a web map measured in Web Mercator meters. Progressive hint: Layers must use compatible coordinate reference systems (CRSs). Then compare the prediction with this proof target: Compare both CRS/bounds, then assert reprojection makes units compatible and the transformed layers overlap in a plausible extent. This makes geospatial semantics, coordinate reference systems, valid geometry, and offline fallback observable instead of relying on intuition.
-
-**Evidence to locate in the grouped implementation:** Compare both CRS/bounds, then assert reprojection makes units compatible and the transformed layers overlap in a plausible extent.
+**Reasoning:** EPSG:4326 measures in degrees and Web Mercator, EPSG:3857, in meters, so drawing raw longitudes such as -122 on a meter-based map places the points within about 130 meters of the map origin, off the coast of West Africa, far from the United States. The shared implementation for Exercises 3-4 prints both units and bounds, shows that the raw degree box does not lie inside the meter-based extent, and then shows that after `to_crs` both layers share one CRS and the points fall inside the map extent.
 
 ### Exercise 4: answer contract
 
 **Learner contract:** **Tracing:** Trace one point represented as `(longitude, latitude)` and explain why swapping values can still create a valid but wrong location. **Progressive hint:** Both numbers may fall in legal ranges, so semantic order matters. **Verify:** Validate the known longitude/latitude pair against real bounds, swap it, and show why semantic checks, not only numeric ranges, detect the wrong location.
 
-**Reasoning:** Trace the concrete values in this contract one step at a time: Tracing: Trace one point represented as `(longitude, latitude)` and explain why swapping values can still create a valid but wrong location. Progressive hint: Both numbers may fall in legal ranges, so semantic order matters. Record the named value, shape, label, or iterator position needed to establish: Validate the known longitude/latitude pair against real bounds, swap it, and show why semantic checks, not only numeric ranges, detect the wrong location. The trace exposes geospatial semantics, coordinate reference systems, valid geometry, and offline fallback directly.
-
-**Evidence to locate in the grouped implementation:** Validate the known longitude/latitude pair against real bounds, swap it, and show why semantic checks, not only numeric ranges, detect the wrong location.
+**Reasoning:** GeoPandas and shapely store points as `(x, y)`, which for geographic data means `(longitude, latitude)`, the reverse of the order in which places are often written. Swapping New York's `(-73.9, 40.7)` gives `(40.7, -73.9)`, and both numbers still pass range checks, because longitude allows -180 to 180 and latitude -90 to 90, yet the point lands in Antarctica. Only a semantic check, such as testing that the point lies inside the expected region's bounding box, detects this error, as the shared implementation for Exercises 3-4 shows.
 
 ### Exercise 5: answer contract
 
 **Learner contract:** **Implementation:** Implement a longitude/latitude bounding-box validator with clear ordering and range checks. **Progressive hint:** Require west ≤ east, south ≤ north, and geographic bounds. **Verify:** Assert a valid box passes and separately reject west>east, south>north, longitude outside ±180, and latitude outside ±90.
 
-**Reasoning:** Implement this exact contract as written: Implementation: Implement a longitude/latitude bounding-box validator with clear ordering and range checks. Progressive hint: Require west ≤ east, south ≤ north, and geographic bounds. Keep the prompt's named data and constraints visible in the code, then establish this specific result: Assert a valid box passes and separately reject west>east, south>north, longitude outside ±180, and latitude outside ±90. That connects the answer to geospatial semantics, coordinate reference systems, valid geometry, and offline fallback.
-
-**Evidence to locate in the grouped implementation:** Assert a valid box passes and separately reject west>east, south>north, longitude outside ±180, and latitude outside ±90.
+**Reasoning:** Checking the bounds in `__post_init__` means an invalid box cannot be created at all, so every `GeographicBounds` object in the program is known to be valid. The chained comparisons `-180 <= west <= east <= 180` and `-90 <= south <= north <= 90` test order and range in one expression each, and `contains` is called with named arguments, so longitude and latitude cannot be swapped silently. The shared implementation for Exercises 5-7 checks a valid box and each of the four invalid kinds separately. This simple box cannot represent a region that crosses the 180-degree meridian, which needs a separate rule.
 
 ### Exercise 6: answer contract
 
 **Learner contract:** **Debugging:** Repair a spatial join or overlay attempted before CRS comparison and reprojection. **Progressive hint:** Inspect `.crs`; transform one layer to the other's CRS. **Verify:** Show the pre-reprojection CRS mismatch, transform one layer, and assert the operation now uses equal CRS while preserving row identities.
 
-**Reasoning:** Reproduce the exact failure described here before changing code: Debugging: Repair a spatial join or overlay attempted before CRS comparison and reprojection. Progressive hint: Inspect `.crs`; transform one layer to the other's CRS. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Show the pre-reprojection CRS mismatch, transform one layer, and assert the operation now uses equal CRS while preserving row identities. The diagnosis depends on geospatial semantics, coordinate reference systems, valid geometry, and offline fallback.
-
-**Evidence to locate in the grouped implementation:** Show the pre-reprojection CRS mismatch, transform one layer, and assert the operation now uses equal CRS while preserving row identities.
+**Reasoning:** A spatial join compares coordinates numerically, so joining points in degrees to regions in meters finds no matches: GeoPandas warns about the CRS mismatch but still returns a result in which every region is missing. The repair compares `.crs` first and transforms one layer with `to_crs`, so both layers use the same units before the join. The shared implementation for Exercises 5-7 reproduces the empty join, then asserts equal CRS, the expected regions, and that each store keeps its original row.
 
 ### Exercise 7: answer contract
 
 **Learner contract:** **Edge case and explanation:** Define fallback behavior for missing/invalid geometry or unavailable map data, including an offline domain-graph alternative. **Progressive hint:** A missing basemap should not erase the analytical data layer. **Verify:** Feed missing/invalid geometry and unavailable basemap fixtures; assert analytical records remain represented by the documented local layer or graph fallback.
 
-**Reasoning:** Make this boundary unambiguous in code: Edge case and explanation: Define fallback behavior for missing/invalid geometry or unavailable map data, including an offline domain-graph alternative. Progressive hint: A missing basemap should not erase the analytical data layer. Values below, at, and above the named boundary must produce the evidence Feed missing/invalid geometry and unavailable basemap fixtures; assert analytical records remain represented by the documented local layer or graph fallback. Those cases show how geospatial semantics, coordinate reference systems, valid geometry, and offline fallback behaves at its edge.
-
-**Evidence to locate in the grouped implementation:** Feed missing/invalid geometry and unavailable basemap fixtures; assert analytical records remain represented by the documented local layer or graph fallback.
+**Reasoning:** Missing and invalid geometries are records whose location is unknown or broken, not records to drop silently, so each gets a status, `valid`, `missing`, or `invalid`, and only valid shapes are drawn while the others are listed in a table. A basemap is context around the analytical layer, so when no cached basemap exists, the chart falls back to the local layer alone and says so in its title. The shared implementation for Exercises 5-7 checks that the drawn and listed records together account for every input record.
 
 ## Expanded mastery lab solutions
 
 Treat coordinate reference system, coordinate order, source provenance, geometry validity, and network/cache behavior as part of the visualization.
 
-### Shared implementation for Exercises 3–4: CRS and coordinate order
+### Shared implementation for Exercises 3-4: CRS and coordinate order
 
 Longitude/latitude data are commonly stored as `(x, y) = (longitude, latitude)`.
 Swapping them may still produce numbers inside valid ranges but a wrong place.
 Degrees and projected meters cannot be overlaid without reprojection.
 
-### Shared implementation for Exercises 5–7: Validate spatial boundaries and degrade gracefully
+```python
+import geopandas as gpd
+from shapely.geometry import Point, box
+
+cities = gpd.GeoDataFrame(
+    {"name": ["San Francisco", "New York"]},
+    geometry=[Point(-122.4, 37.8), Point(-73.9, 40.7)],  # (longitude, latitude)
+    crs="EPSG:4326",
+)
+map_extent = gpd.GeoSeries([box(-125, 32, -70, 45)], crs="EPSG:4326").to_crs("EPSG:3857")
+print(cities.crs.axis_info[0].unit_name, map_extent.crs.axis_info[0].unit_name)  # degree metre
+print(cities.total_bounds.round(1), map_extent.total_bounds.round(0))
+# Raw degrees sit next to the map origin, far outside the meter-based extent.
+assert not map_extent.iloc[0].contains(box(*cities.total_bounds))
+projected_cities = cities.to_crs(map_extent.crs)
+assert projected_cities.crs == map_extent.crs
+assert map_extent.iloc[0].contains(box(*projected_cities.total_bounds))
+
+contiguous_us = box(-125, 24, -66, 50)  # west, south, east, north in degrees
+new_york = Point(-73.9, 40.7)
+swapped = Point(new_york.y, new_york.x)  # (40.7, -73.9)
+assert -180 <= swapped.x <= 180 and -90 <= swapped.y <= 90  # range checks still pass
+assert contiguous_us.contains(new_york)
+assert not contiguous_us.contains(swapped)  # a point in Antarctica, not New York
+```
+
+### Shared implementation for Exercises 5-7: Validate spatial boundaries and degrade gracefully
 
 ```python
 from dataclasses import dataclass
@@ -210,6 +222,72 @@ class GeographicBounds:
 bounds = GeographicBounds(west=-125, south=32, east=-114, north=42)
 assert bounds.contains(longitude=-122.4, latitude=37.8)
 assert not bounds.contains(longitude=37.8, latitude=-122.4)
+
+invalid_boxes = {
+    "west > east": (-114, 32, -125, 42),
+    "south > north": (-125, 42, -114, 32),
+    "longitude outside 180": (-190, 32, -114, 42),
+    "latitude outside 90": (-125, -95, -114, 42),
+}
+for problem, (west, south, east, north) in invalid_boxes.items():
+    try:
+        GeographicBounds(west=west, south=south, east=east, north=north)
+    except ValueError as error:
+        print(f"{problem}: {error}")
+    else:
+        raise AssertionError(f"{problem} should be rejected")
+
+# A spatial join before reprojection silently matches nothing.
+import warnings
+from pathlib import Path
+
+import geopandas as gpd
+import matplotlib.pyplot as plt
+from shapely.geometry import Point, Polygon, box
+
+stores = gpd.GeoDataFrame(
+    {"store": ["sf-01", "ny-07"]},
+    geometry=[Point(-122.4, 37.8), Point(-73.9, 40.7)],
+    crs="EPSG:4326",
+)
+regions = gpd.GeoDataFrame(
+    {"region": ["west", "east"]},
+    geometry=[box(-125, 32, -114, 42), box(-80, 38, -70, 45)],
+    crs="EPSG:4326",
+).to_crs("EPSG:3857")
+assert stores.crs != regions.crs  # degrees versus meters
+with warnings.catch_warnings(record=True) as caught:
+    warnings.simplefilter("always")
+    wrong = gpd.sjoin(stores, regions, how="left", predicate="within")
+print(str(caught[0].message).splitlines()[0] if caught else "no warning")
+assert wrong["region"].isna().all()
+aligned = stores.to_crs(regions.crs)
+joined = gpd.sjoin(aligned, regions, how="left", predicate="within")
+assert aligned.crs == regions.crs
+assert joined["store"].tolist() == ["sf-01", "ny-07"]  # row identities preserved
+assert joined["region"].tolist() == ["west", "east"]
+
+# Missing or invalid geometry stays visible as a record; a missing basemap is optional.
+bowtie = Polygon([(0, 0), (1, 1), (1, 0), (0, 1), (0, 0)])  # self-intersecting
+records = gpd.GeoDataFrame(
+    {"site": ["a", "b", "c"]},
+    geometry=[Point(-122.4, 37.8), None, bowtie],
+    crs="EPSG:4326",
+)
+records["geometry_status"] = "valid"
+records.loc[records.geometry.isna(), "geometry_status"] = "missing"
+records.loc[records.geometry.notna() & ~records.geometry.is_valid, "geometry_status"] = "invalid"
+drawable = records[records["geometry_status"].eq("valid")]
+not_drawn = records.loc[records["geometry_status"].ne("valid"), ["site", "geometry_status"]]
+assert len(drawable) + len(not_drawn) == len(records)  # every record is represented
+print(not_drawn.to_dict("records"))
+
+cached_basemap = Path("artifacts/day27/basemap.png")
+basemap_note = "cached basemap" if cached_basemap.exists() else "no basemap: local layer only"
+ax = drawable.plot()
+ax.set_title(f"Sites ({basemap_note}; {len(not_drawn)} listed, not drawn)")
+assert len(ax.collections) == 1
+plt.close(ax.figure)
 ```
 
 Before a GeoPandas operation, reject unknown CRSs and call `to_crs` so both

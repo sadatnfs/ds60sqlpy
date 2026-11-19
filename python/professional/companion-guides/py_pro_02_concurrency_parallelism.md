@@ -4,12 +4,12 @@
 
 **Level:** advanced
 
-**Estimated time:** 180–240 minutes
+**Estimated time:** 180-240 minutes
 
 ## Level and prerequisites
 
 - **Catalog prerequisite:** `python-15`
-- Python Days 1–15
+- Python Days 1-15
 - Functions, exceptions, context managers, and basic testing
 - `async`/`await` vocabulary from Bridge Day 7 is helpful but not required
 
@@ -102,7 +102,7 @@ backpressure. The consumer count bounds active worker calls.
 ## How to run this lesson
 
 **Primary browser route:** run `./classroom` from the repository root and
-choose **Python** on `/classroom`. Open this lesson in the shared workspace,
+choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
 read its capability notice, and use its supported coding or reading workflow.
 The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
 
@@ -298,7 +298,7 @@ uv run --no-sync python python/professional/solutions/py_pro_02_concurrency_para
 The workload is intentionally small for safety; process startup may make it
 slower than sequential execution. That observation is part of the lesson.
 
-**Verify:** isolate CPU work; make the CPU function a top-level function with serializable arguments and results; use: and ProcessPoolExecutor; run process creation only beneath: the documented POSIX/WSL command: The workload is intentionally small for safety; process startup may make it slower than sequential execution.
+**Verify:** run the solution module with `--with-processes` and record its process-pool result and wall time beside the sequential run; confirm that the worker function is defined at module top level, that the pool is created from `multiprocessing.get_context("spawn")`, and that no process starts outside the `__main__` guard. A slower pool on this small workload is the expected startup-cost observation.
 
 ### Exercise 6: reason about shared state
 
@@ -420,7 +420,7 @@ The lesson is complete without an AI assistant. If you want optional
 coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
-Tutor me through `python-pro-02` — Concurrency and parallelism decision lab.
+Tutor me through `python-pro-02`: Concurrency and parallelism decision lab.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize choosing async, threads, or processes and bounding concurrent work. Use exactly these maintained learner materials:

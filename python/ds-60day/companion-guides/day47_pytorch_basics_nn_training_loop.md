@@ -19,7 +19,7 @@ By the end of the lesson, you can:
 ## Prerequisites
 
 - Complete `python-46` (deep learning overview).
-- Know stratified splitting and scaling from `python-34`–`python-35`.
+- Know stratified splitting and scaling from `python-34` to `python-35`.
 - Use CPU by default; CUDA-specific acceleration is optional.
 
 ## Vocabulary and mental models
@@ -101,21 +101,11 @@ for opening this lesson in the Docker classroom.
    lesson complete. A clean run catches hidden state and stale
    variables.
 
-Windows PowerShell:
-
-```powershell
-.\.venv\Scripts\python.exe -m jupyter lab
-```
-
-macOS/Linux:
+Linux, macOS, or Ubuntu in Windows WSL 2:
 
 ```bash
 .venv/bin/python -m jupyter lab
 ```
-
-If the Windows environment uses the documented conda-prefix fallback,
-use `.\.venv\python.exe` in place of
-`.\.venv\Scripts\python.exe`.
 
 ## Concept deep dive: logits, minibatches, modes, and a correct PyTorch training loop
 
@@ -137,12 +127,6 @@ training behaviors but does not itself disable gradients. Use
 - **`DataLoader(dataset, batch_size=..., shuffle=...)`:** yields bounded feature/target batches and controls training order.
 - **`model(features)`:** returns logits shaped `(batch, classes)` for multiclass classification.
 - **`CrossEntropyLoss(logits, labels)`:** expects floating logits and `long` class indices shaped `(batch,)`.
-
-Read an API call from the inside out: identify the data entering the
-operation, the state learned (if any), the value returned, and the
-evidence that would make the result trustworthy. A method returning
-without an exception proves only that the syntax and immediate runtime
-path worked.
 
 ### Focused example A: make the logits-and-label contract executable
 
@@ -168,9 +152,6 @@ assert logits.shape == (2, 2) and loss.ndim == 0
 **Assumption to name:** Class labels are zero-based indices and no softmax was applied before the loss.
 
 ### Focused example B: observe dropout differ between train and eval modes
-
-This second example changes one important condition. Compare it with
-Example A instead of reading it as unrelated syntax.
 
 ```python
 import torch
@@ -221,11 +202,11 @@ assert torch.equal(eval_output, values)
 
 1. Add dropout to the MLP and compare results.
 
-**Verify:** Practice 1; logits, minibatches, modes, and a correct PyTorch training loop; from identical initial weights and split, print train/eval metrics for dropout=0 and the chosen dropout rate; assert repeated eval-mode predictions are equal while train-mode outputs can differ.
+**Verify:** From identical initial weights and split, print train/eval metrics for dropout=0 and the chosen dropout rate; assert repeated eval-mode predictions are equal while train-mode outputs can differ.
 
 2. Implement a small minibatch training loop with `DataLoader`.
 
-**Verify:** Practice 2; logits, minibatches, modes, and a correct PyTorch training loop; for a fixed toy dataset, assert each DataLoader batch shape/dtype, account for every example once per epoch, print sample-weighted epoch loss, and show at least one parameter tensor changes after optimizer.step().
+**Verify:** For a fixed toy dataset, assert each DataLoader batch shape/dtype, account for every example once per epoch, print sample-weighted epoch loss, and show at least one parameter tensor changes after optimizer.step().
 
 ### Progressive hints
 
@@ -306,7 +287,7 @@ The lesson is complete without an AI assistant. If you want optional
 coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
-Tutor me through `python-47` : Day 47 : PyTorch Tensors, Modules, and Training Loops.
+Tutor me through `python-47` (Day 47: PyTorch Tensors, Modules, and Training Loops).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize logits, minibatches, modes, and a correct PyTorch training loop. Use exactly these maintained learner materials:

@@ -4,12 +4,12 @@
 
 **Level:** advanced
 
-**Estimated time:** 210–270 minutes
+**Estimated time:** 210-270 minutes
 
 ## Level and prerequisites
 
 - **Catalog prerequisites:** `python-23` and `python-pro-02`
-- Python Days 1–15 and the data track through Day 23
+- Python Days 1-15 and the data track through Day 23
 - `python-pro-02` for process/concurrency trade-offs
 - Optional NumPy from the normal data profile
 
@@ -89,7 +89,7 @@ where work occurs, not exact seconds.
 ## How to run this lesson
 
 **Primary browser route:** run `./classroom` from the repository root and
-choose **Python** on `/classroom`. Open this lesson in the shared workspace,
+choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
 read its capability notice, and use its supported coding or reading workflow.
 The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
 
@@ -422,7 +422,7 @@ The lesson is complete without an AI assistant. If you want optional
 coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
-Tutor me through `python-perf-01` — Measurement-first performance engineering.
+Tutor me through `python-perf-01`: Measurement-first performance engineering.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize measurement design, complexity, profiling, and performance budgets. Use exactly these maintained learner materials:

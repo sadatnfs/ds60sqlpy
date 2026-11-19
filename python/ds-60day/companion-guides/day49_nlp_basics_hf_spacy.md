@@ -109,21 +109,11 @@ for opening this lesson in the Docker classroom.
    lesson complete. A clean run catches hidden state and stale
    variables.
 
-Windows PowerShell:
-
-```powershell
-.\.venv\Scripts\python.exe -m jupyter lab
-```
-
-macOS/Linux:
+Linux, macOS, or Ubuntu in Windows WSL 2:
 
 ```bash
 .venv/bin/python -m jupyter lab
 ```
-
-If the Windows environment uses the documented conda-prefix fallback,
-use `.\.venv\python.exe` in place of
-`.\.venv\Scripts\python.exe`.
 
 ## Concept deep dive: tokenization contracts, cached NLP models, and sensitive-text evaluation
 
@@ -146,12 +136,6 @@ privacy boundary.
 - **`from_pretrained(..., local_files_only=True)`:** bundles a specific cached Transformer tokenizer/model and postprocessing; model identity must be explicit.
 - **token offsets and truncation:** connect tokens back to original text and define what content the model actually saw.
 
-Read an API call from the inside out: identify the data entering the
-operation, the state learned (if any), the value returned, and the
-evidence that would make the result trustworthy. A method returning
-without an exception proves only that the syntax and immediate runtime
-path worked.
-
 ### Focused example A: inspect an offline spaCy token boundary
 
 Before running the example, predict the shape, type, or direction of the
@@ -173,9 +157,6 @@ assert "".join(token.text_with_ws for token in doc) == doc.text
 **Assumption to name:** The blank English tokenizer supplies lexical boundaries only; it has no trained part-of-speech or entity component.
 
 ### Focused example B: make vocabulary and unknown-token behavior visible
-
-This second example changes one important condition. Compare it with
-Example A instead of reading it as unrelated syntax.
 
 ```python
 vocabulary = {"[UNK]": 0, "data": 1, "science": 2, "helps": 3}
@@ -214,11 +195,11 @@ assert token_ids[-1] == vocabulary["[UNK]"]
 
 1. Try a zero-shot-classification pipeline with your own candidate labels.
 
-**Verify:** Practice 1; tokenization contracts, cached NLP models, and sensitive-text evaluation; when cached model artifacts exist, print model revision, candidate labels, input text, ordered labels, and scores whose sum is approximately 1; otherwise print an explicit offline-skip result without downloading.
+**Verify:** When cached model artifacts exist, print model revision, candidate labels, input text, ordered labels, and scores whose sum is approximately 1; otherwise print an explicit offline-skip result without downloading.
 
 2. Compare tokenization from spaCy with a Hugging Face tokenizer.
 
-**Verify:** Practice 2; tokenization contracts, cached NLP models, and sensitive-text evaluation; for one fixed text, print spaCy token text/start/end and Hugging Face token IDs/tokens/offsets; reconstruct covered substrings, mark special/unknown/truncated tokens, and record exact tokenizer model/revision or local fallback.
+**Verify:** For one fixed text, print spaCy token text/start/end and Hugging Face token IDs/tokens/offsets; reconstruct covered substrings, mark special/unknown/truncated tokens, and record exact tokenizer model/revision or local fallback.
 
 ### Progressive hints
 
@@ -298,7 +279,7 @@ The lesson is complete without an AI assistant. If you want optional
 coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
-Tutor me through `python-49` : Day 49 : NLP Basics with Hugging Face and spaCy.
+Tutor me through `python-49` (Day 49: NLP Basics with Hugging Face and spaCy).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize tokenization contracts, cached NLP models, and sensitive-text evaluation. Use exactly these maintained learner materials:

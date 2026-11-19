@@ -1,4 +1,4 @@
-# Day 11 - Debugging, Logging, and Profiling
+# Day 11: Debugging, Logging, and Profiling
 
 **Level:** Beginner
 
@@ -71,8 +71,7 @@ They are separate from the browser's saved pads, notes and progress in Docker
 volumes. Neither route automatically copies attempts or completion markers to
 the other; record progress in the interface you actually used.
 
-**Lesson outcome:** use day 11 - debugging, logging, and profiling to practice evidence-driven debugging, useful logs, and measurement before optimization
-and explain the evidence produced by your code.
+**Outcome:** Find bugs from tracebacks and logs, and measure before optimizing.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
@@ -131,14 +130,7 @@ def accepted_count(values: list[int]) -> int:
 accepted_count([4, -1, 0])
 ```
 
-**Expected observation**
-
-```text
-The function returns `2`; when the notebook has a visible logging handler, one INFO event reports counts rather than raw sensitive values.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** The function returns `2`; when the notebook has a visible logging handler, one INFO event reports counts rather than raw sensitive values.
 
 ### Worked example 2 - Measure two equivalent membership strategies
 
@@ -163,9 +155,6 @@ set_seconds = timeit("999 in value_set", number=5_000, globals=globals())
 ```text
 Both lookups agree and the set is normally faster in this repeated lookup scenario. Exact durations vary by computer and are not asserted.
 ```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
 
 ### A debugging routine for this topic
 

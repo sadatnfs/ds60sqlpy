@@ -1,4 +1,4 @@
-# Day 60: Solutions: Capstone Completion and Presentation
+# Day 60 Solutions: Capstone Completion and Presentation
 
 We deliver a presentation outline, packaging checklist, and reproducibility steps.
 
@@ -9,18 +9,18 @@ Contents
 
 ---
 
-Worked reference for Exercise 1; Slide outline
+Worked reference for Exercise 1: Slide outline
 ```markdown
-1) Context and stakes — the problem and why it matters
-2) Data — sources, quality, challenges; quick EDA visual
-3) Methods — models, features, validation; why chosen
-4) Results — metrics vs baseline; error analysis
-5) Deployment — how to use; latency, cost, monitoring
-6) Risks and ethics — limitations, mitigation
-7) Next steps — roadmap and open questions
+1) Context and stakes: the problem and why it matters
+2) Data: sources, quality, challenges; quick EDA visual
+3) Methods: models, features, validation; why chosen
+4) Results: metrics vs baseline; error analysis
+5) Deployment: how to use; latency, cost, monitoring
+6) Risks and ethics: limitations, mitigation
+7) Next steps: roadmap and open questions
 ```
 
-Worked reference for Exercise 2; Packaging
+Worked reference for Exercise 2: Packaging
 ```makefile
 # Makefile
 PYTHON ?= python
@@ -41,10 +41,10 @@ smoke:
 	$(PYTHON) -m pytest -q tests/smoke
 ```
 
-Create the virtual environment with the operating-system-specific setup before
-using the Makefile. On Windows, pass the interpreter explicitly if `make` is
-available: `make PYTHON=.venv/Scripts/python.exe smoke`. VS Code tasks or a
-PowerShell script are equally valid Windows automation.
+Create the virtual environment before using the Makefile. Windows users run
+the same `make` targets inside Ubuntu on WSL 2, where the interpreter is
+`.venv/bin/python`; pass another one explicitly with
+`make PYTHON=/path/to/python smoke` if needed.
 
 Checklist
 - Declare dependencies in `pyproject.toml`, keep a reviewed lock, and include a
@@ -54,7 +54,7 @@ Checklist
 
 ---
 
-Worked reference for Exercise 3; Demo and smoke tests
+Worked reference for Exercise 3: Demo and smoke tests
 ```python
 # tests/smoke/test_api.py
 import os
@@ -137,7 +137,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1; release evidence, cold-start reproducibility, presentation claims, and handoff; from a clean checkout/environment, run the documented train and test commands with exit code 0; record dataset/split hashes, baseline and candidate metric files, passing tests, and the frozen selection rule before opening final-test labels.
+**Verify:** From a clean checkout/environment, run the documented train and test commands with exit code 0; record dataset/split hashes, baseline and candidate metric files, passing tests, and the frozen selection rule before opening final-test labels.
 
 ### Exercise 2: Original lesson practice
 
@@ -149,7 +149,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2; release evidence, cold-start reproducibility, presentation claims, and handoff; have another person or clean shell execute every README command in order; require exit code 0 and compare produced metric/artifact hashes with the results notebook, documenting any intentionally nondeterministic field.
+**Verify:** Have another person or clean shell execute every README command in order; require exit code 0 and compare produced metric/artifact hashes with the results notebook, documenting any intentionally nondeterministic field.
 
 ### Exercise 3: Original lesson practice
 
@@ -161,7 +161,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 3; release evidence, cold-start reproducibility, presentation claims, and handoff; write artifacts only under ignored artifacts/, list relative path, SHA-256, size, model/data/split/code identity, Python and dependency-lock hash, then reload the primary artifact in a fresh process and match a fixed prediction.
+**Verify:** Write artifacts only under ignored artifacts/, list relative path, SHA-256, size, model/data/split/code identity, Python and dependency-lock hash, then reload the primary artifact in a fresh process and match a fixed prediction.
 
 ### Exercise 4: Original lesson practice
 
@@ -173,7 +173,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 4; release evidence, cold-start reproducibility, presentation claims, and handoff; export every presentation visual with title, axes/units, population/window, support, and source metric; reconcile each plotted value with the results table and remove any claim not supported by the frozen evaluation.
+**Verify:** Export every presentation visual with title, axes/units, population/window, support, and source metric; reconcile each plotted value with the results table and remove any claim not supported by the frozen evaluation.
 
 ### Exercise 5: Original lesson practice
 
@@ -185,7 +185,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 5; release evidence, cold-start reproducibility, presentation claims, and handoff; write three takeaways that each cite a metric, comparison, and limitation, plus one open question with the data/experiment needed to answer it; rehearse the story in the declared time and keep a tested fallback demo.
+**Verify:** Write three takeaways that each cite a metric, comparison, and limitation, plus one open question with the data/experiment needed to answer it; rehearse the story in the declared time and keep a tested fallback demo.
 
 ### Exercise 6: Cold-start reproduction
 

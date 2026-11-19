@@ -20,7 +20,7 @@ You have worked with time-series data and explicit schemas. This module steps be
 ## How to run this lesson
 
 **Primary browser route:** run `./classroom` from the repository root and
-choose **Python** on `/classroom`. Open this lesson in the shared workspace,
+choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
 read its capability notice, and use its supported coding or reading workflow.
 The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
 

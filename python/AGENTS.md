@@ -8,7 +8,7 @@ Lead learner instructions with the Docker classroom. The host interpreter
 commands below apply to the prepared contributor environment and optional
 Jupyter workflows, not a second learner installer. Windows uses WSL 2.
 
-- Target Python 3.11–3.12; use Python 3.12 for canonical examples and CI.
+- Target Python 3.11-3.12; use Python 3.12 for canonical examples and CI.
 - Run from the repository root using the environment in [CONTRIBUTING](../CONTRIBUTING.md).
 - Prefer `uv run --no-sync python ...` or the prepared `.venv/bin/python`.
 - Browser Python runs use a fresh process for each Run; notebook kernels have
@@ -18,7 +18,7 @@ Jupyter workflows, not a second learner installer. Windows uses WSL 2.
 
 - Keep notebooks valid `nbformat` documents with the repository kernelspec.
 - Prefer small, purposeful cells. Introduce one idea at a time.
-- Historical Day 1–60 learner notebooks must contain at least eight purposeful
+- Historical Day 1-60 learner notebooks must contain at least eight purposeful
   cells, including at least three runnable code cells and enough explanatory
   Markdown to teach the lesson without an agent. These are minimums, not a
   reason to split prose or add filler.

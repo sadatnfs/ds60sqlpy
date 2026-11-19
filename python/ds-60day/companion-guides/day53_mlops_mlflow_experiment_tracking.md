@@ -90,16 +90,10 @@ source file to commit.
 
 ## View the local UI
 
-macOS/Linux:
+Linux, macOS, or Ubuntu in Windows WSL 2:
 
 ```bash
 .venv/bin/mlflow ui --backend-store-uri sqlite:///artifacts/day53/tracking.sqlite --host 127.0.0.1
-```
-
-Windows PowerShell:
-
-```powershell
-.\.venv\Scripts\mlflow.exe ui --backend-store-uri sqlite:///artifacts/day53/tracking.sqlite --host 127.0.0.1
 ```
 
 Open `http://127.0.0.1:5000`, and stop the process with Ctrl+C when finished.
@@ -131,21 +125,11 @@ for opening this lesson in the Docker classroom.
    lesson complete. A clean run catches hidden state and stale
    variables.
 
-Windows PowerShell:
-
-```powershell
-.\.venv\Scripts\python.exe -m jupyter lab
-```
-
-macOS/Linux:
+Linux, macOS, or Ubuntu in Windows WSL 2:
 
 ```bash
 .venv/bin/python -m jupyter lab
 ```
-
-If the Windows environment uses the documented conda-prefix fallback,
-use `.\.venv\python.exe` in place of
-`.\.venv\Scripts\python.exe`.
 
 ## Concept deep dive: MLflow run identity, params, metrics, artifacts, and reproducible evidence
 
@@ -167,12 +151,6 @@ control system, or backup.
 - **`with mlflow.start_run():`:** creates a bounded lifecycle so successful and failed runs receive terminal status.
 - **`log_param` versus `log_metric`:** stores fixed configuration separately from numeric measurements that may evolve by step.
 - **`log_artifact` / model logging:** copies output into the run's artifact store; verify reload and input contract rather than trusting existence.
-
-Read an API call from the inside out: identify the data entering the
-operation, the state learned (if any), the value returned, and the
-evidence that would make the result trustworthy. A method returning
-without an exception proves only that the syntax and immediate runtime
-path worked.
 
 ### Focused example A: separate comparable configuration from results
 
@@ -206,9 +184,6 @@ print(run_record)
 **Assumption to name:** The data snapshot and metric definition are stable enough that two records are actually comparable.
 
 ### Focused example B: create and inspect a fully local temporary run
-
-This second example changes one important condition. Compare it with
-Example A instead of reading it as unrelated syntax.
 
 ```python
 from pathlib import Path
@@ -262,15 +237,15 @@ finally:
 
 1. Log additional parameters such as Logistic Regression `C` and compare runs.
 
-**Verify:** Practice 1; MLflow run identity, params, metrics, artifacts, and reproducible evidence; query the exact run IDs and print each LogisticRegression C, split/data hash, ROC AUC, status, and artifact URI; assert the comparison uses the same split and metric definition.
+**Verify:** Query the exact run IDs and print each LogisticRegression C, split/data hash, ROC AUC, status, and artifact URI; assert the comparison uses the same split and metric definition.
 
 2. Save a confusion-matrix PNG and log it as an artifact.
 
-**Verify:** Practice 2; MLflow run identity, params, metrics, artifacts, and reproducible evidence; save a confusion-matrix PNG with labeled axes, log it under the selected run, fetch its artifact listing, and assert the downloaded file is a valid nonempty PNG tied to that run ID.
+**Verify:** Save a confusion-matrix PNG with labeled axes, log it under the selected run, fetch its artifact listing, and assert the downloaded file is a valid nonempty PNG tied to that run ID.
 
 3. Try a different classifier, such as Random Forest, and compare ROC AUC.
 
-**Verify:** Practice 3; MLflow run identity, params, metrics, artifacts, and reproducible evidence; run RandomForest and the baseline on the same data/split/metric, print both run IDs, parameters, ROC AUC, and fit status, and state that the final test was not used to choose between them.
+**Verify:** Run RandomForest and the baseline on the same data/split/metric, print both run IDs, parameters, ROC AUC, and fit status, and state that the final test was not used to choose between them.
 
 ### Progressive hints
 
@@ -347,7 +322,7 @@ The lesson is complete without an AI assistant. If you want optional
 coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
-Tutor me through `python-53` : Day 53 : Experiment Tracking with MLflow.
+Tutor me through `python-53` (Day 53: Experiment Tracking with MLflow).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize MLflow run identity, params, metrics, artifacts, and reproducible evidence. Use exactly these maintained learner materials:

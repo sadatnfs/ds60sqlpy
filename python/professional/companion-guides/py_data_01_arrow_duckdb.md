@@ -4,12 +4,12 @@
 
 **Level:** intermediate/advanced
 
-**Estimated time:** 180–240 minutes
+**Estimated time:** 180-240 minutes
 
 ## Level and prerequisites
 
 - **Catalog prerequisite:** `python-23`
-- Python Days 1–23, especially CSV, pandas I/O, generators, and data pipelines
+- Python Days 1-23, especially CSV, pandas I/O, generators, and data pipelines
 - SQL `SELECT`, `WHERE`, aggregation, and `GROUP BY`
 - Core setup for the CSV path
 - Optional local `pandas`, `pyarrow`, and `duckdb` packages for the columnar path
@@ -103,7 +103,7 @@ CSV and partition exercises. It never tries to install a package.
 ## How to run this lesson
 
 **Primary browser route:** run `./classroom` from the repository root and
-choose **Python** on `/classroom`. Open this lesson in the shared workspace,
+choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
 read its capability notice, and use its supported coding or reading workflow.
 The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
 
@@ -407,7 +407,7 @@ The lesson is complete without an AI assistant. If you want optional
 coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
-Tutor me through `python-data-01` — Columnar data, Arrow, Parquet, and embedded analytical SQL.
+Tutor me through `python-data-01`: Columnar data, Arrow, Parquet, and embedded analytical SQL.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize typed data boundaries, Arrow/Parquet schema, partitions, and pushdown evidence. Use exactly these maintained learner materials:

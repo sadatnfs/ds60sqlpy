@@ -4,8 +4,8 @@ This folder contains worked solutions for the Python practice exercises.
 
 Current artifact coverage:
 
-- Markdown solution guides: Days 1–60
-- Runnable solution notebooks: Days 1–60
+- Markdown solution guides: Days 1-60
+- Runnable solution notebooks: Days 1-60
 
 The classroom lists reference availability per lesson. Prepared contributors
 can also use `uv run --no-sync python scripts/course.py catalog --track python`

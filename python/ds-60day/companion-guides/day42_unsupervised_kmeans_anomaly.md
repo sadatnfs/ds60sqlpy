@@ -1,4 +1,4 @@
-# Day 42: K-Means and Anomaly Detection
+# Day 42: K-Means Clustering and Anomaly Detection
 
 **Lesson ID:** `python-42` · **Level:** intermediate · **Dependencies:** `data` · **Network:** offline
 
@@ -69,7 +69,7 @@ meaningful common unit.
 ## How to run this lesson
 
 **Primary browser route:** run `./classroom` from the repository root and
-choose **Python** on `/classroom`. Open this lesson in the shared workspace,
+choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
 read its capability notice, and use its supported coding or reading workflow.
 The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
 
@@ -88,21 +88,11 @@ for opening this lesson in the Docker classroom.
    lesson complete. A clean run catches hidden state and stale
    variables.
 
-Windows PowerShell:
-
-```powershell
-.\.venv\Scripts\python.exe -m jupyter lab
-```
-
-macOS/Linux:
+Linux, macOS, or Ubuntu in Windows WSL 2:
 
 ```bash
 .venv/bin/python -m jupyter lab
 ```
-
-If the Windows environment uses the documented conda-prefix fallback,
-use `.\.venv\python.exe` in place of
-`.\.venv\Scripts\python.exe`.
 
 ## Concept deep dive: unsupervised geometry, cluster stability, and anomaly ranking
 
@@ -124,12 +114,6 @@ are essential evidence.
 - **`KMeans(n_clusters=k, n_init=..., random_state=...)`:** declares cluster count and repeated initialization so a local optimum is not mistaken for truth.
 - **`silhouette_score(X, labels)`:** compares cohesion and separation under the selected distance; it needs at least two nontrivial clusters.
 - **`decision_function(X)`:** returns a continuous anomaly score; inspect ordering before applying a threshold.
-
-Read an API call from the inside out: identify the data entering the
-operation, the state learned (if any), the value returned, and the
-evidence that would make the result trustworthy. A method returning
-without an exception proves only that the syntax and immediate runtime
-path worked.
 
 ### Focused example A: show that feature scale changes K-Means geometry
 
@@ -164,9 +148,6 @@ print(
 **Assumption to name:** Standard-deviation scaling represents the intended similarity, rather than erasing meaningful units.
 
 ### Focused example B: treat anomaly output as a ranking, not a verdict
-
-This second example changes one important condition. Compare it with
-Example A instead of reading it as unrelated syntax.
 
 ```python
 import numpy as np
@@ -211,15 +192,15 @@ assert {200, 201}.issubset(set(most_unusual))
 
 1. Try several values of `k` and plot inertia versus `k` (the elbow plot).
 
-**Verify:** Practice 1; unsupervised geometry, cluster stability, and anomaly ranking; for each declared k, print inertia, cluster sizes, and seed and save a labeled elbow curve; assert inertia is non-increasing and do not call the visual bend proof of true classes.
+**Verify:** For each declared k, print inertia, cluster sizes, and seed and save a labeled elbow curve; assert inertia is non-increasing and do not call the visual bend proof of true classes.
 
 2. Compute silhouette scores for `k` from 2 through 6 and discuss the result.
 
-**Verify:** Practice 2; unsupervised geometry, cluster stability, and anomaly ranking; for k=2..6 on identical scaled rows, print silhouette score and cluster sizes, choose the largest score only after checking no tiny/empty cluster, and repeat with at least three seeds to report stability.
+**Verify:** For k=2..6 on identical scaled rows, print silhouette score and cluster sizes, choose the largest score only after checking no tiny/empty cluster, and repeat with at least three seeds to report stability.
 
 3. Compare Isolation Forest with Local Outlier Factor.
 
-**Verify:** Practice 3; unsupervised geometry, cluster stability, and anomaly ranking; on identical scaled data and declared contamination/neighbors, print each method's continuous anomaly score and top-n row IDs; report overlap and inspect injected normal/outlier controls instead of equating labels blindly.
+**Verify:** On identical scaled data and declared contamination/neighbors, print each method's continuous anomaly score and top-n row IDs; report overlap and inspect injected normal/outlier controls instead of equating labels blindly.
 
 ### Progressive hints
 
@@ -293,7 +274,7 @@ The lesson is complete without an AI assistant. If you want optional
 coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
-Tutor me through `python-42` — Day 42 — K-Means and Anomaly Detection.
+Tutor me through `python-42` (Day 42: K-Means and Anomaly Detection).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize unsupervised geometry, cluster stability, and anomaly ranking. Use exactly these maintained learner materials:

@@ -4,12 +4,12 @@
 
 **Level:** advanced
 
-**Estimated time:** 180–240 minutes
+**Estimated time:** 180-240 minutes
 
 ## Level and prerequisites
 
 - **Catalog prerequisite:** `python-15`
-- Python Days 1–15, including exceptions, dataclasses, logging, testing, and CLI
+- Python Days 1-15, including exceptions, dataclasses, logging, testing, and CLI
   configuration
 - HTTP method/status vocabulary from Python Day 44 is helpful
 - No API key, public service, HTTP package, or network connection
@@ -112,7 +112,7 @@ Inspect the printed first log event. Its authorization value must be
 ## How to run this lesson
 
 **Primary browser route:** run `./classroom` from the repository root and
-choose **Python** on `/classroom`. Open this lesson in the shared workspace,
+choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
 read its capability notice, and use its supported coding or reading workflow.
 The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
 
@@ -421,7 +421,7 @@ PYTHONDONTWRITEBYTECODE=1 uv run --no-sync python -m unittest python.professiona
 - Add a thin adapter for one HTTP library and keep these policy tests unchanged.
 - Combine this lesson with `python-pro-02`, using a bounded queue whose workers
   call the reliable client.
-- Continue to Bridge Days 3–4 to compare HTTP value binding, transaction
+- Continue to Bridge Days 3-4 to compare HTTP value binding, transaction
   boundaries, retry eligibility, and idempotency with database operations.
 
 ## Ask an AI tutor about this lesson
@@ -430,7 +430,7 @@ The lesson is complete without an AI assistant. If you want optional
 coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
-Tutor me through `python-svc-01` — Reliable HTTP clients and external-service boundaries.
+Tutor me through `python-svc-01`: Reliable HTTP clients and external-service boundaries.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize HTTP mechanism versus retry, timeout, pagination, idempotency, and redaction policy. Use exactly these maintained learner materials:

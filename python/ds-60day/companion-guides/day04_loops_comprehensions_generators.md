@@ -1,4 +1,4 @@
-# Day 4 - Loops, Comprehensions, and Generators
+# Day 4: Loops, Comprehensions, and Generators
 
 **Level:** Beginner
 
@@ -70,8 +70,7 @@ They are separate from the browser's saved pads, notes and progress in Docker
 volumes. Neither route automatically copies attempts or completion markers to
 the other; record progress in the interface you actually used.
 
-**Lesson outcome:** use day 4 - loops, comprehensions, and generators to practice iteration, eager collection building, and lazy generators
-and explain the evidence produced by your code.
+**Outcome:** Repeat work with loops, build lists with comprehensions, and consume generators lazily.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
@@ -126,14 +125,7 @@ compact = [c * 9 / 5 + 32 for c in temperatures if c > 0]
 (warm_fahrenheit, compact, warm_fahrenheit == compact)
 ```
 
-**Expected observation**
-
-```text
-`([44.6, 53.6], [44.6, 53.6], True)`. The two forms implement the same filter and transformation.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** `([44.6, 53.6], [44.6, 53.6], True)`. The two forms implement the same filter and transformation.
 
 ### Worked example 2 - Observe a generator's saved position
 
@@ -148,14 +140,7 @@ after_exhaustion = list(squares)
 (first, rest, after_exhaustion)
 ```
 
-**Expected observation**
-
-```text
-`(0, [1, 4, 9], [])`. Materializing `rest` consumes everything that remained.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** `(0, [1, 4, 9], [])`. Materializing `rest` consumes everything that remained.
 
 ### A debugging routine for this topic
 

@@ -71,8 +71,7 @@ They are separate from the browser's saved pads, notes and progress in Docker
 volumes. Neither route automatically copies attempts or completion markers to
 the other; record progress in the interface you actually used.
 
-**Lesson outcome:** use day 8; files, json, csv, and context managers to practice resource ownership, text encodings, and structured file boundaries
-and explain the evidence produced by your code.
+**Outcome:** Read and write text, JSON, and CSV files safely with context managers.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
@@ -127,14 +126,7 @@ decoded = json.loads(encoded)
 (encoded, decoded == record)
 ```
 
-**Expected observation**
-
-```text
-The JSON text and `True` are displayed. Serialization creates text; parsing reconstructs equivalent Python data.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** The JSON text and `True` are displayed. Serialization creates text; parsing reconstructs equivalent Python data.
 
 ### Worked example 2: Read CSV rows as dictionaries
 
@@ -150,14 +142,7 @@ rows = list(csv.DictReader(io.StringIO(csv_text)))
 (rows, type(rows[0]["score"]).__name__)
 ```
 
-**Expected observation**
-
-```text
-`([{'name': 'Ada', 'score': '9'}, {'name': 'Lin', 'score': '10'}], 'str')`. Numeric-looking CSV fields still require conversion.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** `([{'name': 'Ada', 'score': '9'}, {'name': 'Lin', 'score': '10'}], 'str')`. Numeric-looking CSV fields still require conversion.
 
 ### A debugging routine for this topic
 
@@ -299,7 +284,7 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-08`
-(Day 8 — Files, JSON, CSV, and Context Managers). Direct catalog prerequisites: `python-07`.
+(Day 8: Files, JSON, CSV, and Context Managers). Direct catalog prerequisites: `python-07`.
 I have completed the direct prerequisites: `python-07`. Emphasize resource ownership, text encodings, and structured file boundaries.
 Read `python/ds-60day/companion-guides/day08_files_json_csv_context.md` and use the learner notebook
 `python/ds-60day/notebooks/day08_files_json_csv_context.ipynb`. Do not open or quote anything under `solutions/` unless

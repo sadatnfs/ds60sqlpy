@@ -1,4 +1,4 @@
-# Day 54: Solutions: Monitoring and Model Governance
+# Day 54 Solutions: Model Monitoring and Governance
 
 We compute simple drift metrics (PSI), design a logging schema, and outline an approval flow.
 
@@ -9,7 +9,7 @@ Contents
 
 ---
 
-Worked reference for Exercise 1; PSI implementation
+Worked reference for Exercise 1: PSI implementation
 ```python
 import numpy as np, pandas as pd
 import matplotlib.pyplot as plt
@@ -52,7 +52,7 @@ Notes
 
 ---
 
-Worked reference for Exercise 2; Logging schema
+Worked reference for Exercise 2: Logging schema
 ```json
 {
   "timestamp": "2024-01-01T12:34:56Z",
@@ -70,7 +70,7 @@ Guidance
 
 ---
 
-Worked reference for Exercise 3; Approval flow
+Worked reference for Exercise 3: Approval flow
 - PR merges to main trigger CI: unit tests, data contract tests, reproducible training
 - Register candidate model to Registry as Staging; run shadow deployment A/B tests
 - Approval gate requires: model card, fairness metrics, governance checklist
@@ -125,7 +125,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1; monitoring layers, drift signals, delayed labels, and governance decisions; for each named feature/window, print reference/current counts, fixed bin edges, PSI contributions, and total; assert bins/reference remain frozen and independently recompute one total within 1e-12.
+**Verify:** For each named feature/window, print reference/current counts, fixed bin edges, PSI contributions, and total; assert bins/reference remain frozen and independently recompute one total within 1e-12.
 
 ### Exercise 2: Original lesson practice
 
@@ -137,7 +137,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2; monitoring layers, drift signals, delayed labels, and governance decisions; save a dashboard with weekly AUC and PSI on labeled separate axes, and print the underlying week/support/AUC/PSI table; mark missing-label weeks rather than silently treating them as zero.
+**Verify:** Save a dashboard with weekly AUC and PSI on labeled separate axes, and print the underlying week/support/AUC/PSI table; mark missing-label weeks rather than silently treating them as zero.
 
 ### Exercise 3: Original lesson practice
 
@@ -149,11 +149,11 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 3; monitoring layers, drift signals, delayed labels, and governance decisions; produce a policy table naming model owner, approver, metric/window/threshold, minimum support, alert route, investigation SLA, rollback trigger, artifact ID, and audit evidence; walk one breached alert through named owners and actions.
+**Verify:** Produce a policy table naming model owner, approver, metric/window/threshold, minimum support, alert route, investigation SLA, rollback trigger, artifact ID, and audit evidence; walk one breached alert through named owners and actions.
 
 ### Exercise 4: Label-delay analysis
 
-**Prompt:** Simulate labels arriving 14–30 days after predictions. Build separate views for immediate input/score health and matured performance cohorts.
+**Prompt:** Simulate labels arriving 14-30 days after predictions. Build separate views for immediate input/score health and matured performance cohorts.
 
 **Reasoning before implementation:** Join outcomes by stable prediction ID and evaluate only cohorts whose label window has matured; report label coverage and censoring.
 

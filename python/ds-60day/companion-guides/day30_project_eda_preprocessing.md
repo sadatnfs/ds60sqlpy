@@ -20,7 +20,7 @@ By the end of this project, you can:
 
 ## Prerequisites
 
-Complete Days 16–29, especially cleaning (`python-18`), EDA (`python-24`),
+Complete Days 16-29, especially cleaning (`python-18`), EDA (`python-24`),
 visualization (`python-25`), feature engineering (`python-28`), and schemas
 (`python-29`).
 
@@ -76,8 +76,7 @@ They are separate from the browser's saved pads, notes and progress in Docker
 volumes. Neither route automatically copies attempts or completion markers to
 the other; record progress in the interface you actually used.
 
-**Lesson outcome:** use day 30; project: reproducible eda and preprocessing to practice a restartable EDA and preprocessing project with an auditable evidence chain
-and explain the evidence produced by your code.
+**Outcome:** Deliver a reproducible EDA and preprocessing project with a decision log.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
@@ -147,9 +146,6 @@ reconciliation
 The reconciliation reports four raw rows, two clean rows, two removed rows, and totals before/after. Those changes still need documented rationale.
 ```
 
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
-
 ### Worked example 2: Represent a decision as data
 
 A structured entry is easier to audit than a scattered comment. Before running it, predict the final displayed value and
@@ -172,9 +168,6 @@ sorted(decision)
 ```text
 All six required fields are listed. The impact makes clear that de-duplication changes additive totals.
 ```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
 
 ### A debugging routine for this topic
 
@@ -323,7 +316,7 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-30`
-(Day 30 — Project: Reproducible EDA and Preprocessing). Direct catalog prerequisites: `python-29`.
+(Day 30: Project: Reproducible EDA and Preprocessing). Direct catalog prerequisites: `python-29`.
 I have completed the direct prerequisites: `python-29`. Emphasize a restartable EDA and preprocessing project with an auditable evidence chain.
 Read `python/ds-60day/companion-guides/day30_project_eda_preprocessing.md` and use the learner notebook
 `python/ds-60day/notebooks/day30_project_eda_preprocessing.ipynb`. Do not open or quote anything under `solutions/` unless

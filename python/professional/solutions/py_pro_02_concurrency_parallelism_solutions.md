@@ -220,7 +220,7 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** isolate CPU work; make the CPU function a top-level function with serializable arguments and results; use: and ProcessPoolExecutor; run process creation only beneath: Windows PowerShell: macOS/Linux: The workload is intentionally small for safety; process startup may make it slower than sequential execution.
+**Verify:** run the solution module with `--with-processes` and record its process-pool result and wall time beside the sequential run; confirm that the worker function is defined at module top level, that the pool is created from `multiprocessing.get_context("spawn")`, and that no process starts outside the `__main__` guard. A slower pool on this small workload is the expected startup-cost observation.
 
 ### Exercise 6: reason about shared state
 

@@ -1,4 +1,4 @@
-# Day 46: Solutions: Deep Learning Overview
+# Day 46 Solutions: Deep Learning Overview
 
 In these solutions we implement a tiny MLP, compare optimizers, and deeply explain vanishing/exploding gradients and mitigations. Each code block is followed by a line‑by‑line walkthrough.
 
@@ -47,7 +47,7 @@ Explanation
 
 ---
 
-Worked reference for Exercise 1; Tiny MLP and capacity exploration
+Worked reference for Exercise 1: Tiny MLP and capacity exploration
 ```python
 class MLP(nn.Module):
     def __init__(self, width=32, depth=2):
@@ -122,7 +122,7 @@ Walkthrough
 
 ---
 
-Worked reference for Exercise 2; SGD vs Adam convergence
+Worked reference for Exercise 2: SGD vs Adam convergence
 ```python
 def fit_with_opt(model, opt_ctor, lr=1e-2, epochs=400):
     model = model.to(device)
@@ -164,7 +164,7 @@ Explanation
 
 ---
 
-Worked reference for Exercise 3; Vanishing/exploding gradients and mitigation
+Worked reference for Exercise 3: Vanishing/exploding gradients and mitigation
 
 Concepts
 - Vanishing: gradients shrink through depth (e.g., sigmoids/tanh saturate); early layers update slowly
@@ -266,7 +266,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1; tensors, computation graphs, gradients, and the optimizer cycle; save a labeled epoch-versus-loss curve and print the raw loss sequence; assert every plotted point is the sample-weighted epoch loss and report whether the final value improved over epoch 1.
+**Verify:** Save a labeled epoch-versus-loss curve and print the raw loss sequence; assert every plotted point is the sample-weighted epoch loss and report whether the final value improved over epoch 1.
 
 ### Exercise 2: Original lesson practice
 
@@ -278,7 +278,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2; tensors, computation graphs, gradients, and the optimizer cycle; from identical initial weights, batches, epochs, and seed, print SGD and Adam loss per epoch plus final validation loss; report convergence behavior without declaring a winner from unequal settings.
+**Verify:** From identical initial weights, batches, epochs, and seed, print SGD and Adam loss per epoch plus final validation loss; report convergence behavior without declaring a winner from unequal settings.
 
 ### Exercise 3: Original lesson practice
 
@@ -290,7 +290,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 3; tensors, computation graphs, gradients, and the optimizer cycle; assert the network's layer dimensions and output shape on a fixed batch, then compare parameter count and validation loss with the original model under the same seed/optimizer budget.
+**Verify:** Assert the network's layer dimensions and output shape on a fixed batch, then compare parameter count and validation loss with the original model under the same seed/optimizer budget.
 
 ### Exercise 4: Autograd tracing
 

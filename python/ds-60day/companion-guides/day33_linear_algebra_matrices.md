@@ -64,7 +64,7 @@ condition number and can amplify error.
 ## How to run this lesson
 
 **Primary browser route:** run `./classroom` from the repository root and
-choose **Python** on `/classroom`. Open this lesson in the shared workspace,
+choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
 read its capability notice, and use its supported coding or reading workflow.
 The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
 
@@ -83,21 +83,11 @@ for opening this lesson in the Docker classroom.
    lesson complete. A clean run catches hidden state and stale
    variables.
 
-Windows PowerShell:
-
-```powershell
-.\.venv\Scripts\python.exe -m jupyter lab
-```
-
-macOS/Linux:
+Linux, macOS, or Ubuntu in Windows WSL 2:
 
 ```bash
 .venv/bin/python -m jupyter lab
 ```
-
-If the Windows environment uses the documented conda-prefix fallback,
-use `.\.venv\python.exe` in place of
-`.\.venv\Scripts\python.exe`.
 
 ## Concept deep dive: matrix shapes, linear transformations, rank, and stable least squares
 
@@ -121,12 +111,6 @@ why rank and condition number belong in the diagnostic story.
 - **`A @ B`:** performs matrix multiplication, which is different from elementwise `A * B`.
 - **`np.linalg.lstsq(X, y, rcond=None)`:** solves least squares directly and reports rank without explicitly forming an unstable inverse.
 
-Read an API call from the inside out: identify the data entering the
-operation, the state learned (if any), the value returned, and the
-evidence that would make the result trustworthy. A method returning
-without an exception proves only that the syntax and immediate runtime
-path worked.
-
 ### Focused example A: trace a matrix product by shape and by hand
 
 Before running the example, predict the shape, type, or direction of the
@@ -149,9 +133,6 @@ assert np.array_equal(predictions, np.array([8.0, 26.0, 44.0]))
 **Assumption to name:** Columns of the matrix and positions in the coefficient vector use the same feature order.
 
 ### Focused example B: observe coefficient instability under collinearity
-
-This second example changes one important condition. Compare it with
-Example A instead of reading it as unrelated syntax.
 
 ```python
 import numpy as np
@@ -196,17 +177,17 @@ print(
 
 1. Add an intercept column of ones and recompute the coefficients.
 
-**Verify:** Practice 1; matrix shapes, linear transformations, rank, and stable least squares; assert the augmented design has one more column and its first column is all ones; print intercept, slopes, rank, and residual norm, then verify matrix predictions equal the fitted values within 1e-10.
+**Verify:** Assert the augmented design has one more column and its first column is all ones; print intercept, slopes, rank, and residual norm, then verify matrix predictions equal the fitted values within 1e-10.
 
 2. Compare the closed-form result with scikit-learn's `LinearRegression` on the
    same data.
 
-**Verify:** Practice 2; matrix shapes, linear transformations, rank, and stable least squares; fit both methods to identical X and y with matching intercept policy; print both coefficient vectors and maximum prediction difference, and require predictions to agree within 1e-10.
+**Verify:** Fit both methods to identical X and y with matching intercept policy; print both coefficient vectors and maximum prediction difference, and require predictions to agree within 1e-10.
 
 3. Explain when the normal equation becomes numerically unstable and why
    iterative methods are often used for larger problems.
 
-**Verify:** Practice 3; matrix shapes, linear transformations, rank, and stable least squares; construct a duplicate or nearly duplicate column, report matrix rank and condition number, and show that a stable least-squares/SVD prediction remains usable while direct normal-equation coefficients become unstable.
+**Verify:** Construct a duplicate or nearly duplicate column, report matrix rank and condition number, and show that a stable least-squares/SVD prediction remains usable while direct normal-equation coefficients become unstable.
 
 ### Progressive hints
 
@@ -282,7 +263,7 @@ The lesson is complete without an AI assistant. If you want optional
 coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
-Tutor me through `python-33` — Day 33 — Linear Algebra and Matrices.
+Tutor me through `python-33` (Day 33: Linear Algebra and Matrices).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize matrix shapes, linear transformations, rank, and stable least squares. Use exactly these maintained learner materials:

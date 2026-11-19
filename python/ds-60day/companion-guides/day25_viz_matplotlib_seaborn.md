@@ -1,4 +1,4 @@
-# Day 25: Visualization with Matplotlib and Seaborn
+# Day 25: Visualization with Matplotlib and seaborn
 
 **Offline teaching data:** The [original synthetic fixtures](../../fixtures/README.md) replace first-run sample-data downloads. Their values are not historical or observational evidence. Keep numerical conclusions scoped to the declared teaching input.
 
@@ -75,8 +75,7 @@ They are separate from the browser's saved pads, notes and progress in Docker
 volumes. Neither route automatically copies attempts or completion markers to
 the other; record progress in the interface you actually used.
 
-**Lesson outcome:** use day 25; visualization with matplotlib and seaborn to practice static chart choice, figure/axes ownership, labeling, and reproducible export
-and explain the evidence produced by your code.
+**Outcome:** Make labeled Matplotlib and seaborn charts and export them reproducibly.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
@@ -129,14 +128,7 @@ fig.tight_layout()
 (type(fig).__name__, type(ax).__name__, len(ax.patches))
 ```
 
-**Expected observation**
-
-```text
-The tuple identifies `Figure`, `Axes`, and five histogram bins. The displayed chart has units on both axes.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** The tuple identifies `Figure`, `Axes`, and five histogram bins. The displayed chart has units on both axes.
 
 ### Worked example 2: Make category ordering explicit
 
@@ -151,17 +143,10 @@ bars = ax2.bar(categories, counts, color=["0.45", "0.65", "0.85"])
 ax2.set(title="Accounts by tier", xlabel="Tier", ylabel="Accounts")
 ax2.bar_label(bars)
 fig2.tight_layout()
-[bar.get_height() for bar in bars]
+[int(bar.get_height()) for bar in bars]
 ```
 
-**Expected observation**
-
-```text
-`[8, 5, 2]`. Direct value labels make the quantities readable without relying on color.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** `[8, 5, 2]`. Direct value labels make the quantities readable without relying on color.
 
 ### A debugging routine for this topic
 
@@ -241,6 +226,11 @@ expected behavior, constraints, and verification into your work cell. A
 result is not complete merely because it “looks right”; run the stated
 assertion or inspection and explain what it proves.
 
+**Dataset:** the exercises use the offline `restaurant-bills` fixture, loaded
+with `from ds60sqlpy.teaching_data import load_teaching_frame` and
+`df = load_teaching_frame("restaurant-bills")`: 240 synthetic bills with the
+columns `total_bill`, `tip`, `sex`, `smoker`, `day`, `time`, and `size`.
+
 1. Recreate two Day 24 plots and improve their communication. **For each:** write the question and reader, choose the mark/encoding, label units and denominator, order categories deliberately, and add accessible non-color cues where needed.
    **Expected behavior:** a reader can state the intended comparison without reading surrounding code.
    **Verify:** reconcile plotted counts/summary values to the source DataFrame.
@@ -310,7 +300,7 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-25`
-(Day 25 — Visualization with Matplotlib and Seaborn). Direct catalog prerequisites: `python-24`.
+(Day 25: Visualization with Matplotlib and Seaborn). Direct catalog prerequisites: `python-24`.
 I have completed the direct prerequisites: `python-24`. Emphasize static chart choice, figure/axes ownership, labeling, and reproducible export.
 Read `python/ds-60day/companion-guides/day25_viz_matplotlib_seaborn.md` and use the learner notebook
 `python/ds-60day/notebooks/day25_viz_matplotlib_seaborn.ipynb`. Do not open or quote anything under `solutions/` unless

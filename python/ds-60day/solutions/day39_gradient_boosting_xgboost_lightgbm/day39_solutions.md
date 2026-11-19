@@ -1,4 +1,4 @@
-# Day 39: Solutions: Gradient Boosting (sklearn, XGBoost, LightGBM)
+# Day 39 Solutions: Gradient Boosting with XGBoost and LightGBM
 
 We train gradient-boosted tree models, tune key hyperparameters, and use early stopping when supported.
 
@@ -32,7 +32,7 @@ X_train, X_valid, y_train, y_valid = train_test_split(
 )
 ```
 
-Worked reference for Exercise 1; Sweep learning_rate and n_estimators (sklearn)
+Worked reference for Exercise 1: Sweep learning_rate and n_estimators (sklearn)
 ```python
 learning_rates = [0.03, 0.05, 0.1]
 n_estimators_grid = [100, 250, 500]
@@ -101,7 +101,7 @@ else:
     }
 ```
 
-Worked reference for Exercise 2; LightGBM comparison (if installed)
+Worked reference for Exercise 2: LightGBM comparison (if installed)
 ```python
 try:
     import lightgbm as lgb
@@ -185,7 +185,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1; sequential boosting, learning-rate budgets, and validation control; evaluate every (learning_rate, n_estimators) pair on one frozen training/validation split and scorer; print the complete score table, selected pair, fit count, and validation metric without consulting final-test labels.
+**Verify:** Evaluate every (learning_rate, n_estimators) pair on one frozen training/validation split and scorer; print the complete score table, selected pair, fit count, and validation metric without consulting final-test labels.
 
 ### Exercise 2: Original lesson practice
 
@@ -197,7 +197,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2; sequential boosting, learning-rate budgets, and validation control; first print an explicit installed/skipped capability result for XGBoost and LightGBM; when both run, use identical rows, splits, metric, seed, and search budget and report validation score, best iteration, and elapsed time for each.
+**Verify:** First print an explicit installed/skipped capability result for XGBoost and LightGBM; when both run, use identical rows, splits, metric, seed, and search budget and report validation score, best iteration, and elapsed time for each.
 
 ### Exercise 3: Early-stopping design
 

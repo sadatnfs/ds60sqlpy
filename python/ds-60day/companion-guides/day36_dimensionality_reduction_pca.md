@@ -1,4 +1,4 @@
-# Day 36: Dimensionality Reduction with PCA
+# Day 36: PCA and Feature Selection
 
 **Lesson ID:** `python-36` · **Level:** intermediate · **Dependencies:** `data` · **Network:** offline
 
@@ -66,7 +66,7 @@ information about global means, variances, and component directions.
 ## How to run this lesson
 
 **Primary browser route:** run `./classroom` from the repository root and
-choose **Python** on `/classroom`. Open this lesson in the shared workspace,
+choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
 read its capability notice, and use its supported coding or reading workflow.
 The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
 
@@ -85,21 +85,11 @@ for opening this lesson in the Docker classroom.
    lesson complete. A clean run catches hidden state and stale
    variables.
 
-Windows PowerShell:
-
-```powershell
-.\.venv\Scripts\python.exe -m jupyter lab
-```
-
-macOS/Linux:
+Linux, macOS, or Ubuntu in Windows WSL 2:
 
 ```bash
 .venv/bin/python -m jupyter lab
 ```
-
-If the Windows environment uses the documented conda-prefix fallback,
-use `.\.venv\python.exe` in place of
-`.\.venv\Scripts\python.exe`.
 
 ## Concept deep dive: PCA geometry, scaling, variance, and reconstruction
 
@@ -122,12 +112,6 @@ scaling, reconstruction, and downstream performance.
 - **`StandardScaler()`:** centers and scales features when equalized variance, rather than raw units, is the intended geometry.
 - **`PCA(n_components=...).fit(X_train)`:** learns training-only means, axes, and explained variance.
 - **`.transform()` / `.inverse_transform()`:** moves between feature and component spaces, enabling reconstruction-error checks.
-
-Read an API call from the inside out: identify the data entering the
-operation, the state learned (if any), the value returned, and the
-evidence that would make the result trustworthy. A method returning
-without an exception proves only that the syntax and immediate runtime
-path worked.
 
 ### Focused example A: observe how units change the first component
 
@@ -159,9 +143,6 @@ print({"raw_loading": raw.components_[0], "scaled_loading": scaled.components_[0
 **Assumption to name:** Equal standard-deviation weighting is scientifically appropriate; scaling is not automatically correct.
 
 ### Focused example B: connect retained components to reconstruction error
-
-This second example changes one important condition. Compare it with
-Example A instead of reading it as unrelated syntax.
 
 ```python
 import numpy as np
@@ -207,16 +188,16 @@ assert all(errors[k] >= errors[k + 1] for k in (1, 2, 3))
 
 1. Plot cumulative explained variance and choose a component count.
 
-**Verify:** Practice 1; PCA geometry, scaling, variance, and reconstruction; fit PCA on training data only, print cumulative explained variance by component, and choose the smallest count reaching a declared threshold such as 95%; assert transformed train/test column counts match that choice.
+**Verify:** Fit PCA on training data only, print cumulative explained variance by component, and choose the smallest count reaching a declared threshold such as 95%; assert transformed train/test column counts match that choice.
 
 2. Compare PCA before and after feature standardization.
 
-**Verify:** Practice 2; PCA geometry, scaling, variance, and reconstruction; on one frozen split, report feature scales and PCA explained-variance ratios before and after StandardScaler; verify each scaler/PCA pair is fitted on training rows only.
+**Verify:** On one frozen split, report feature scales and PCA explained-variance ratios before and after StandardScaler; verify each scaler/PCA pair is fitted on training rows only.
 
 3. Try `SelectKBest` on a classification dataset and compare its validated
    performance with PCA.
 
-**Verify:** Practice 3; PCA geometry, scaling, variance, and reconstruction; evaluate SelectKBest and scaled PCA with identical folds, component/feature counts, estimator, and metric; print every fold score plus mean/std and keep the final test labels unopened.
+**Verify:** Evaluate SelectKBest and scaled PCA with identical folds, component/feature counts, estimator, and metric; print every fold score plus mean/std and keep the final test labels unopened.
 
 ### Progressive hints
 
@@ -290,7 +271,7 @@ The lesson is complete without an AI assistant. If you want optional
 coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
-Tutor me through `python-36` — Day 36 — Dimensionality Reduction with PCA.
+Tutor me through `python-36` (Day 36: Dimensionality Reduction with PCA).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize PCA geometry, scaling, variance, and reconstruction. Use exactly these maintained learner materials:

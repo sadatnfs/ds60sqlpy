@@ -1,4 +1,4 @@
-# Day 22: Advanced pandas: Vectorization, `query`, and Categoricals
+# Day 22: Advanced pandas: Vectorization, query, and Categoricals
 
 **Offline teaching data:** The [original synthetic fixtures](../../fixtures/README.md) replace first-run sample-data downloads. Their values are not historical or observational evidence. Keep numerical conclusions scoped to the declared teaching input.
 
@@ -74,8 +74,7 @@ They are separate from the browser's saved pads, notes and progress in Docker
 volumes. Neither route automatically copies attempts or completion markers to
 the other; record progress in the interface you actually used.
 
-**Lesson outcome:** use day 22; advanced pandas: vectorization, `query`, and categoricals to practice pandas vectorization, expression APIs, and memory-aware categoricals
-and explain the evidence produced by your code.
+**Outcome:** Replace row-wise apply with vectorized code, query, and categoricals.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
@@ -130,14 +129,7 @@ frame["band"] = np.select(
 frame.to_dict("records")
 ```
 
-**Expected observation**
-
-```text
-`[{'amount': 5, 'band': 'low'}, {'amount': 20, 'band': 'medium'}, {'amount': 60, 'band': 'high'}]`.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** `[{'amount': 5, 'band': 'low'}, {'amount': 20, 'band': 'medium'}, {'amount': 60, 'band': 'high'}]`.
 
 ### Worked example 2: Measure categorical conversion
 
@@ -160,9 +152,6 @@ categorical = labels.astype("category")
 ```text
 Two unique labels across 2,000 rows are reported, and the categorical representation is normally smaller. Exact byte counts vary by pandas version.
 ```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
 
 ### A debugging routine for this topic
 
@@ -221,6 +210,47 @@ large = sales.query("regional_share >= 0.5")
 
 `transform` returns one aligned value per original row, so division is direct
 and no row-wise lookup is required.
+
+### Measure apply against vectorized code, then use eval
+
+Claims about speed need a measurement on the same data. The example computes
+one tip rate per row three ways: a row-wise `apply`, plain column arithmetic,
+and `DataFrame.eval`, which evaluates a string expression over columns. It
+checks that all three agree before comparing the two timings.
+
+```python
+import time
+
+import numpy as np
+import pandas as pd
+
+rng = np.random.default_rng(22)
+bills = pd.DataFrame({"tip": rng.uniform(1, 10, 20_000), "total_bill": rng.uniform(10, 60, 20_000)})
+
+start = time.perf_counter()
+by_row = bills.apply(lambda row: row["tip"] / row["total_bill"], axis=1)
+apply_seconds = time.perf_counter() - start
+
+start = time.perf_counter()
+vectorized = bills["tip"] / bills["total_bill"]
+vectorized_seconds = time.perf_counter() - start
+
+with_eval = bills.eval("tip / total_bill")
+(
+    bool(np.allclose(by_row, vectorized)),
+    bool(np.allclose(with_eval, vectorized)),
+    apply_seconds > 10 * vectorized_seconds,
+)
+```
+
+**Expected observation:** `(True, True, True)`: the three results agree, and
+the row-wise `apply` takes more than ten times as long as column arithmetic (on
+the machine used to write this lesson it was roughly 200 to 400 times slower;
+exact timings vary from run to run). `eval` gave the same numbers, but it is
+not automatically faster: for small frames, parsing the expression costs more
+than the arithmetic itself, and the pandas documentation recommends it mainly
+for large frames. Use `eval` and `query` for readable column expressions, and
+time any speed claim on representative data.
 
 ## Dataset note
 
@@ -288,6 +318,10 @@ values), and the categorical decision is supported by measured bytes.
   expressions as safe code.
 - **Categorical assignment rejects a new label:** add the category first or
   convert back to string.
+- **Memory numbers change under pandas 3:** pandas 3 stores text in the `str`
+  dtype instead of `object` (see the pandas 3 note in Day 17), which changes
+  the baseline for a categorical memory comparison. Measure with
+  `memory_usage(deep=True)` on the version you actually run.
 
 ## Continue
 
@@ -303,7 +337,7 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-22`
-(Day 22 — Advanced pandas: Vectorization, `query`, and Categoricals). Direct catalog prerequisites: `python-21`.
+(Day 22: Advanced pandas: Vectorization, `query`, and Categoricals). Direct catalog prerequisites: `python-21`.
 I have completed the direct prerequisites: `python-21`. Emphasize pandas vectorization, expression APIs, and memory-aware categoricals.
 Read `python/ds-60day/companion-guides/day22_advanced_pandas_apply_query_eval.md` and use the learner notebook
 `python/ds-60day/notebooks/day22_advanced_pandas_apply_query_eval.ipynb`. Do not open or quote anything under `solutions/` unless

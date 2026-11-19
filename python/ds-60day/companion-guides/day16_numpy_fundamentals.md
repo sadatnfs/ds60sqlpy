@@ -72,8 +72,7 @@ They are separate from the browser's saved pads, notes and progress in Docker
 volumes. Neither route automatically copies attempts or completion markers to
 the other; record progress in the interface you actually used.
 
-**Lesson outcome:** use day 16; numpy arrays, vectorization, and broadcasting to practice NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting
-and explain the evidence produced by your code.
+**Outcome:** Create NumPy arrays and replace loops with vectorized, broadcast operations.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
@@ -126,14 +125,7 @@ scores = np.array([[8, 6, 10], [4, 9, 8]])
 }
 ```
 
-**Expected observation**
-
-```text
-`{'shape': (2, 3), 'per_column': [6.0, 7.5, 9.0], 'per_row': [8.0, 7.0]}`.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** `{'shape': (2, 3), 'per_column': [6.0, 7.5, 9.0], 'per_row': [8.0, 7.0]}`.
 
 ### Worked example 2: Center every column through broadcasting
 
@@ -146,14 +138,7 @@ centered = scores - column_means
 (centered.tolist(), centered.mean(axis=0).round(10).tolist())
 ```
 
-**Expected observation**
-
-```text
-The centered rows are displayed and every column mean is `[0.0, 0.0, 0.0]` up to floating-point precision.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** The centered rows are displayed and every column mean is `[0.0, 0.0, 0.0]` up to floating-point precision.
 
 ### A debugging routine for this topic
 
@@ -295,7 +280,7 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-16`
-(Day 16 — NumPy Arrays, Vectorization, and Broadcasting). Direct catalog prerequisites: `python-15`.
+(Day 16: NumPy Arrays, Vectorization, and Broadcasting). Direct catalog prerequisites: `python-15`.
 I have completed the direct prerequisites: `python-15`. Emphasize NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting.
 Read `python/ds-60day/companion-guides/day16_numpy_fundamentals.md` and use the learner notebook
 `python/ds-60day/notebooks/day16_numpy_fundamentals.ipynb`. Do not open or quote anything under `solutions/` unless

@@ -1,4 +1,4 @@
-# Day 47: Solutions: PyTorch Basics, Modules, and the Training Loop
+# Day 47 Solutions: PyTorch Tensors, Modules, and Training Loops
 
 We build a minimal, correct training loop; add early stopping; add a LR scheduler; and enable mixed precision training. After each code block you’ll find a line‑by‑line explanation.
 
@@ -60,7 +60,7 @@ Explanation
 
 ---
 
-Worked reference for Exercise 1; Early stopping on validation loss
+Worked reference for Exercise 1: Early stopping on validation loss
 ```python
 class EarlyStopper:
     def __init__(self, patience=10, min_delta=0.0):
@@ -140,7 +140,7 @@ Line‑by‑line
 
 ---
 
-Worked reference for Exercise 2; StepLR scheduler
+Worked reference for Exercise 2: StepLR scheduler
 ```python
 # Reset model and optimizer for a fair comparison
 model2 = MLP(20, 128, 2).to(device)
@@ -167,7 +167,7 @@ Explanation
 
 ---
 
-Worked reference for Exercise 3; Mixed precision training
+Worked reference for Exercise 3: Mixed precision training
 ```python
 # The modern AMP extension requires PyTorch 2.3 or newer. Some optional
 # Intel macOS environments retain 2.2; their earlier FP32 examples still work.
@@ -260,7 +260,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1; logits, minibatches, modes, and a correct PyTorch training loop; from identical initial weights and split, print train/eval metrics for dropout=0 and the chosen dropout rate; assert repeated eval-mode predictions are equal while train-mode outputs can differ.
+**Verify:** From identical initial weights and split, print train/eval metrics for dropout=0 and the chosen dropout rate; assert repeated eval-mode predictions are equal while train-mode outputs can differ.
 
 ### Exercise 2: Original lesson practice
 
@@ -272,7 +272,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2; logits, minibatches, modes, and a correct PyTorch training loop; for a fixed toy dataset, assert each DataLoader batch shape/dtype, account for every example once per epoch, print sample-weighted epoch loss, and show at least one parameter tensor changes after optimizer.step().
+**Verify:** For a fixed toy dataset, assert each DataLoader batch shape/dtype, account for every example once per epoch, print sample-weighted epoch loss, and show at least one parameter tensor changes after optimizer.step().
 
 ### Exercise 3: Shape and dtype contract
 

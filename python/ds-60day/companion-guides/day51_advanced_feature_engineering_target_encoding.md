@@ -78,7 +78,7 @@ to trust the category-specific value.
 ## How to run this lesson
 
 **Primary browser route:** run `./classroom` from the repository root and
-choose **Python** on `/classroom`. Open this lesson in the shared workspace,
+choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
 read its capability notice, and use its supported coding or reading workflow.
 The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
 
@@ -97,21 +97,11 @@ for opening this lesson in the Docker classroom.
    lesson complete. A clean run catches hidden state and stale
    variables.
 
-Windows PowerShell:
-
-```powershell
-.\.venv\Scripts\python.exe -m jupyter lab
-```
-
-macOS/Linux:
+Linux, macOS, or Ubuntu in Windows WSL 2:
 
 ```bash
 .venv/bin/python -m jupyter lab
 ```
-
-If the Windows environment uses the documented conda-prefix fallback,
-use `.\.venv\python.exe` in place of
-`.\.venv\Scripts\python.exe`.
 
 ## Concept deep dive: out-of-fold target encoding, smoothing, and transform-time unknowns
 
@@ -133,12 +123,6 @@ than ordinary shuffled folds.
 - **`groupby(category)[target].agg(['mean', 'count'])`:** builds category evidence only from the allowed training subset.
 - **`(count * mean + strength * prior) / (count + strength)`:** smooths low-support categories toward the training-wide prior.
 - **out-of-fold transform:** fits one map per training fold and writes values only to that fold's held-out rows.
-
-Read an API call from the inside out: identify the data entering the
-operation, the state learned (if any), the value returned, and the
-evidence that would make the result trustworthy. A method returning
-without an exception proves only that the syntax and immediate runtime
-path worked.
 
 ### Focused example A: show why a one-row category leaks perfectly
 
@@ -163,9 +147,6 @@ assert leaked.iloc[3] == target.iloc[3]
 **Assumption to name:** Category identity is available at prediction time, but the current row's target is not.
 
 ### Focused example B: smooth known categories and fall back for unknowns
-
-This second example changes one important condition. Compare it with
-Example A instead of reading it as unrelated syntax.
 
 ```python
 import pandas as pd
@@ -211,16 +192,16 @@ assert encoded.iloc[2] == prior and encoded.iloc[3] == prior
 1. Add K-fold target encoding to a scikit-learn pipeline through a custom
    transformer or `FunctionTransformer`.
 
-**Verify:** Practice 1; out-of-fold target encoding, smoothing, and transform-time unknowns; produce one out-of-fold encoded value per training row, assert that row's target was excluded from its category statistic, and test missing/unseen categories through the fitted pipeline without NaN or leakage.
+**Verify:** Produce one out-of-fold encoded value per training row, assert that row's target was excluded from its category statistic, and test missing/unseen categories through the fitted pipeline without NaN or leakage.
 
 2. Add an appropriate prior and smoothing; experiment with `n_splits`.
 
-**Verify:** Practice 2; out-of-fold target encoding, smoothing, and transform-time unknowns; print global prior, smoothing formula, n_splits, category count/support, and encoded values for rare/common/unseen categories; compare at least three n_splits values on identical folds.
+**Verify:** Print global prior, smoothing formula, n_splits, category count/support, and encoded values for rare/common/unseen categories; compare at least three n_splits values on identical folds.
 
 3. Compare ROC AUC with one-hot encoding across multiple seeded train/test
    splits.
 
-**Verify:** Practice 3; out-of-fold target encoding, smoothing, and transform-time unknowns; over multiple declared seeded splits, print ROC-AUC pairs for target encoding and one-hot encoding plus mean/std/difference; keep all encoding fits inside each training fold.
+**Verify:** Over multiple declared seeded splits, print ROC-AUC pairs for target encoding and one-hot encoding plus mean/std/difference; keep all encoding fits inside each training fold.
 
 ### Progressive hints
 

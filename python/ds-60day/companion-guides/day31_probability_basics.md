@@ -65,7 +65,7 @@ not as a replacement for the formulas.
 ## How to run this lesson
 
 **Primary browser route:** run `./classroom` from the repository root and
-choose **Python** on `/classroom`. Open this lesson in the shared workspace,
+choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
 read its capability notice, and use its supported coding or reading workflow.
 The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
 
@@ -84,21 +84,11 @@ for opening this lesson in the Docker classroom.
    lesson complete. A clean run catches hidden state and stale
    variables.
 
-Windows PowerShell:
-
-```powershell
-.\.venv\Scripts\python.exe -m jupyter lab
-```
-
-macOS/Linux:
+Linux, macOS, or Ubuntu in Windows WSL 2:
 
 ```bash
 .venv/bin/python -m jupyter lab
 ```
-
-If the Windows environment uses the documented conda-prefix fallback,
-use `.\.venv\python.exe` in place of
-`.\.venv\Scripts\python.exe`.
 
 ## Concept deep dive: probability models, conditional evidence, and simulation error
 
@@ -121,12 +111,6 @@ accuracy depends on the number and independence of simulated runs.
 - **`rng = np.random.default_rng(seed)`:** creates an isolated reproducible random-number generator; the seed is an experiment input.
 - **`rng.binomial(n, p, size)`:** returns `size` independent counts, each between zero and `n`, under constant success probability `p`.
 - **`event.mean()`:** estimates a probability only when the Boolean or 0/1 array represents the event at the intended experimental grain.
-
-Read an API call from the inside out: identify the data entering the
-operation, the state learned (if any), the value returned, and the
-evidence that would make the result trustworthy. A method returning
-without an exception proves only that the syntax and immediate runtime
-path worked.
 
 ### Focused example A: solve an at-least-one event by its complement
 
@@ -153,9 +137,6 @@ assert abs(simulated - analytic) < 0.02
 **Assumption to name:** The 1,000 opportunities are independent and all use the same event probability.
 
 ### Focused example B: make the Bayes denominator visible with counts
-
-This second example changes one important condition. Compare it with
-Example A instead of reading it as unrelated syntax.
 
 ```python
 population = 10_000
@@ -208,18 +189,18 @@ Complete these in the learner notebook:
 
 1. Simulate `Binomial(n=10, p=0.3)` 10,000 times and plot a histogram.
 
-**Verify:** Practice 1; probability models, conditional evidence, and simulation error; with seed 731, produce exactly 10,000 integer draws in [0, 10]; assert the sample mean is within 0.08 of 3.0, and save a labeled 11-bin histogram whose counts sum to 10,000.
+**Verify:** With seed 731, produce exactly 10,000 integer draws in [0, 10]; assert the sample mean is within 0.08 of 3.0, and save a labeled 11-bin histogram whose counts sum to 10,000.
 
 2. Generate `Normal(0, 1)` values, compute their mean and variance, and overlay
    the probability density function. The standard-library formula is enough;
    SciPy is optional.
 
-**Verify:** Practice 2; probability models, conditional evidence, and simulation error; with a declared seed and 10,000 draws, print sample size, mean, and population variance; require |mean| < 0.05 and |variance - 1| < 0.08, and overlay the labeled standard-normal PDF on a density-scaled histogram.
+**Verify:** With a declared seed and 10,000 draws, print sample size, mean, and population variance; require |mean| < 0.05 and |variance - 1| < 0.08, and overlay the labeled standard-normal PDF on a density-scaled histogram.
 
 3. Given sensitivity `0.95`, specificity `0.90`, and prevalence `0.01`, compute
    \(P(\text{disease}\mid\text{positive})\).
 
-**Verify:** Practice 3; probability models, conditional evidence, and simulation error; show the Bayes numerator 0.95 × 0.01, denominator 0.95 × 0.01 + 0.10 × 0.99, and posterior 0.0876 (about 8.76%); verify the false-positive term is included.
+**Verify:** Show the Bayes numerator 0.95 × 0.01, denominator 0.95 × 0.01 + 0.10 × 0.99, and posterior 0.0876 (about 8.76%); verify the false-positive term is included.
 
 ### Progressive hints
 
@@ -291,7 +272,7 @@ The lesson is complete without an AI assistant. If you want optional
 coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
-Tutor me through `python-31` — Day 31 — Probability Basics.
+Tutor me through `python-31` (Day 31: Probability Basics).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize probability models, conditional evidence, and simulation error. Use exactly these maintained learner materials:

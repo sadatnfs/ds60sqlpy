@@ -74,8 +74,7 @@ They are separate from the browser's saved pads, notes and progress in Docker
 volumes. Neither route automatically copies attempts or completion markers to
 the other; record progress in the interface you actually used.
 
-**Lesson outcome:** use day 24; exploratory data analysis best practices to practice question-led exploratory data analysis with evidence, caveats, and quality checks
-and explain the evidence produced by your code.
+**Outcome:** Profile a dataset and record questions, caveats, and quality checks.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
@@ -137,14 +136,7 @@ profile = {
 profile
 ```
 
-**Expected observation**
-
-```text
-The profile reports four rows, one duplicate row, and a 0.25 missing rate for `amount`.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** The profile reports four rows, one duplicate row, and a 0.25 missing rate for `amount`.
 
 ### Worked example 2: Compare robust and non-robust center
 
@@ -153,17 +145,10 @@ identify which line creates each intermediate object.
 
 ```python
 values = pd.Series([10, 11, 12, 13, 200])
-{"mean": values.mean(), "median": values.median(), "max": values.max()}
+{"mean": float(values.mean()), "median": float(values.median()), "max": int(values.max())}
 ```
 
-**Expected observation**
-
-```text
-`{'mean': 49.2, 'median': 12.0, 'max': 200}`. The difference motivates inspection; it does not automatically justify deleting 200.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** `{'mean': 49.2, 'median': 12.0, 'max': 200}`. The difference motivates inspection; it does not automatically justify deleting 200.
 
 ### A debugging routine for this topic
 
@@ -246,6 +231,13 @@ expected behavior, constraints, and verification into your work cell. A
 result is not complete merely because it “looks right”; run the stated
 assertion or inspection and explain what it proves.
 
+**Dataset:** the exercises use the offline `bird-measurements` fixture,
+loaded with `from ds60sqlpy.teaching_data import load_teaching_frame` and
+`df = load_teaching_frame("bird-measurements")`. Its 180 synthetic rows have
+the columns `species`, `island`, `bill_length_mm`, `bill_depth_mm`,
+`flipper_length_mm`, `body_mass_g`, and `sex`; `bill_length_mm` is missing in 11
+rows and `sex` in 7.
+
 1. Produce a concise EDA for one local or already-cached dataset, organized as question → provenance/scope/grain → quality → univariate distributions → relationships/segments → findings/caveats.
    **Expected behavior:** every table/plot answers a written question and has an observation plus limitation. **Constraint:** avoid causal language and full-data dumps.
    **Verify:** restart and reproduce all results top to bottom.
@@ -316,7 +308,7 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-24`
-(Day 24 — Exploratory Data Analysis Best Practices). Direct catalog prerequisites: `python-23`.
+(Day 24: Exploratory Data Analysis Best Practices). Direct catalog prerequisites: `python-23`.
 I have completed the direct prerequisites: `python-23`. Emphasize question-led exploratory data analysis with evidence, caveats, and quality checks.
 Read `python/ds-60day/companion-guides/day24_eda_best_practices.md` and use the learner notebook
 `python/ds-60day/notebooks/day24_eda_best_practices.ipynb`. Do not open or quote anything under `solutions/` unless

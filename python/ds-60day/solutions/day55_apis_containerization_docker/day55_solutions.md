@@ -1,4 +1,4 @@
-# Day 55: Solutions: APIs and Containerization with Docker
+# Day 55 Solutions: Containerizing a FastAPI Model Service
 
 We containerize a FastAPI service, add a health endpoint and Docker HEALTHCHECK, and optimize image size via multi‑stage builds.
 
@@ -9,7 +9,7 @@ Contents
 
 ---
 
-Worked reference for Exercise 1; Minimal FastAPI app and Dockerfile
+Worked reference for Exercise 1: Minimal FastAPI app and Dockerfile
 ```python
 # app.py
 from fastapi import FastAPI
@@ -45,7 +45,7 @@ CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
 fastapi>=0.115,<1
 uvicorn>=0.30,<1
 ```
-Build and run (the same one-line commands work in Bash, zsh, PowerShell, and Command Prompt):
+Build and run from Bash (Linux, macOS, or Ubuntu in Windows WSL 2):
 ```bash
 docker build -t ds-fastapi:latest .
 docker run -p 8000:8000 ds-fastapi:latest
@@ -53,7 +53,7 @@ docker run -p 8000:8000 ds-fastapi:latest
 
 ---
 
-Worked reference for Exercise 2; Health endpoint and HEALTHCHECK
+Worked reference for Exercise 2: Health endpoint and HEALTHCHECK
 ```python
 # app.py addition
 @app.get("/health")
@@ -76,7 +76,7 @@ Explanation
 
 ---
 
-Worked reference for Exercise 3; Multi‑stage build
+Worked reference for Exercise 3: Multi‑stage build
 ```dockerfile
 # Stage 1: build dependencies in an isolated virtual environment.
 FROM python:3.12-slim AS builder
@@ -156,7 +156,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1; container build boundaries, minimal images, and health semantics; build the image from a direct-runtime-only dependency file, print resolved package versions and image size, and run the health/predict smoke tests; prove test/notebook-only packages are absent.
+**Verify:** Build the image from a direct-runtime-only dependency file, print resolved package versions and image size, and run the health/predict smoke tests; prove test/notebook-only packages are absent.
 
 ### Exercise 2: Original lesson practice
 
@@ -168,7 +168,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2; container build boundaries, minimal images, and health semantics; with TestClient and the running container, assert GET /health returns status 200 and exactly {'status': 'ok'}; distinguish liveness from readiness by testing a missing/tampered model artifact.
+**Verify:** With TestClient and the running container, assert GET /health returns status 200 and exactly {'status': 'ok'}; distinguish liveness from readiness by testing a missing/tampered model artifact.
 
 ### Exercise 3: Original lesson practice
 
@@ -180,7 +180,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 3; container build boundaries, minimal images, and health semantics; keep this optional and connected: either record a skipped result, or name the registry/repository/tag/digest, show authenticated push exit code 0, pull by digest, and rerun health/predict without exposing credentials.
+**Verify:** Keep this optional and connected: either record a skipped result, or name the registry/repository/tag/digest, show authenticated push exit code 0, pull by digest, and rerun health/predict without exposing credentials.
 
 ### Exercise 4: Layer and secret audit
 

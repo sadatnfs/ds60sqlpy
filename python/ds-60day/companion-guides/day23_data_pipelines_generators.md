@@ -1,4 +1,4 @@
-# Day 23: Streaming Data Pipelines and Generators
+# Day 23: Streaming Data Pipelines with Generators
 
 **Level:** Intermediate
 
@@ -72,8 +72,7 @@ They are separate from the browser's saved pads, notes and progress in Docker
 volumes. Neither route automatically copies attempts or completion markers to
 the other; record progress in the interface you actually used.
 
-**Lesson outcome:** use day 23; streaming data pipelines and generators to practice lazy, composable data-pipeline stages with explicit resource and error policy
-and explain the evidence produced by your code.
+**Outcome:** Build lazy, batched data pipelines from generator functions.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
@@ -134,14 +133,7 @@ source = [{"name": " Ada ", "status": "ACTIVE"}, {"name": "Lin", "status": "inac
 list(active_only(normalize(source)))
 ```
 
-**Expected observation**
-
-```text
-`[{'name': 'Ada', 'status': 'active'}]`. No stage needed all records at once.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** `[{'name': 'Ada', 'status': 'active'}]`. No stage needed all records at once.
 
 ### Worked example 2: Preserve a final partial batch
 
@@ -165,14 +157,7 @@ def batches(items: Iterable[int], size: int) -> Iterator[tuple[int, ...]]:
 list(batches(range(5), 2))
 ```
 
-**Expected observation**
-
-```text
-`[(0, 1), (2, 3), (4,)]`. The last partial batch is not silently lost.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** `[(0, 1), (2, 3), (4,)]`. The last partial batch is not silently lost.
 
 ### A debugging routine for this topic
 
@@ -313,7 +298,7 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-23`
-(Day 23 — Streaming Data Pipelines and Generators). Direct catalog prerequisites: `python-22`.
+(Day 23: Streaming Data Pipelines and Generators). Direct catalog prerequisites: `python-22`.
 I have completed the direct prerequisites: `python-22`. Emphasize lazy, composable data-pipeline stages with explicit resource and error policy.
 Read `python/ds-60day/companion-guides/day23_data_pipelines_generators.md` and use the learner notebook
 `python/ds-60day/notebooks/day23_data_pipelines_generators.ipynb`. Do not open or quote anything under `solutions/` unless

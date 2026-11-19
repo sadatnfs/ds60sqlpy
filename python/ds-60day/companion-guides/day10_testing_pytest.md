@@ -13,7 +13,7 @@ By the end of this lesson, you can:
 - use parametrization for multiple cases of one rule;
 - assert a specific exception with `pytest.raises`;
 - use `tmp_path` for isolated filesystem tests;
-- run the repository's test suite through its `.venv` interpreter.
+- run pytest on a small test file from the classroom pad and read its report.
 
 ## Prerequisites
 
@@ -71,8 +71,7 @@ They are separate from the browser's saved pads, notes and progress in Docker
 volumes. Neither route automatically copies attempts or completion markers to
 the other; record progress in the interface you actually used.
 
-**Lesson outcome:** use day 10; testing with pytest to practice tests as executable contracts and useful failure reports
-and explain the evidence produced by your code.
+**Outcome:** Write pytest tests for normal, boundary, and invalid inputs and read the failures.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
@@ -123,14 +122,7 @@ assert subtotal([]) == 0
 "two subtotal contracts passed"
 ```
 
-**Expected observation**
-
-```text
-`'two subtotal contracts passed'`. If an assertion fails, execution stops at the violated contract.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** `'two subtotal contracts passed'`. If an assertion fails, execution stops at the violated contract.
 
 ### Worked example 2: Represent cases as data
 
@@ -147,14 +139,7 @@ results = [(value, is_valid_percentage(value) == expected) for value, expected i
 results
 ```
 
-**Expected observation**
-
-```text
-`[(0, True), (100, True), (-0.1, True), (100.1, True)]`. Each tuple reports that its expectation matched.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** `[(0, True), (100, True), (-0.1, True), (100.1, True)]`. Each tuple reports that its expectation matched.
 
 ### A debugging routine for this topic
 
@@ -220,18 +205,91 @@ def test_normalize_age_rejects_negative() -> None:
         normalize_age("-1")
 ```
 
-## Run tests
+## Run pytest from the classroom pad
 
-Windows PowerShell:
+pytest is a separate program: it finds files named `test_*.py`, runs every
+`test_*` function in them, and prints a report. A classroom Run executes one
+program, so the recipe below writes the worked example's module and test file
+into a temporary folder, runs pytest on that folder as a child process with
+`subprocess.run`, prints pytest's report, and deletes the folder. The empty
+`pytest.ini` keeps pytest from reading settings from anywhere else. Reuse the
+recipe for the exercises by replacing the two source strings.
 
-```powershell
-.\.venv\Scripts\python.exe -m pytest
+```python
+import os
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+module_source = """def normalize_age(raw: str) -> int:
+    age = int(raw)
+    if age < 0:
+        raise ValueError("age must be non-negative")
+    return age
+"""
+
+test_source = """import pytest
+
+from ages import normalize_age
+
+
+@pytest.mark.parametrize(("raw", "expected"), [("0", 0), ("42", 42)])
+def test_normalize_age(raw: str, expected: int) -> None:
+    assert normalize_age(raw) == expected
+
+
+def test_normalize_age_rejects_negative() -> None:
+    with pytest.raises(ValueError, match="non-negative"):
+        normalize_age("-1")
+"""
+
+# Write a tiny project into a temporary folder, run pytest on it in a child
+# process, and delete the folder afterwards.
+with tempfile.TemporaryDirectory(prefix="day10-") as folder:
+    project = Path(folder)
+    (project / "pytest.ini").write_text("[pytest]\n", encoding="utf-8")
+    (project / "ages.py").write_text(module_source, encoding="utf-8")
+    (project / "test_ages.py").write_text(test_source, encoding="utf-8")
+    environment = dict(os.environ, PYTEST_DISABLE_PLUGIN_AUTOLOAD="1", PYTHONDONTWRITEBYTECODE="1")
+    environment.pop("PYTEST_ADDOPTS", None)
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "pytest",
+            "-q",
+            "--color=no",
+            "-p",
+            "no:cacheprovider",
+            "test_ages.py",
+        ],
+        cwd=project,
+        env=environment,
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
+
+print(result.stdout)
+assert result.returncode == 0, result.stdout + result.stderr
 ```
 
-macOS/Linux:
+**Expected observation:** three dots and `3 passed`: two parametrized cases
+and the negative test. Change `match="non-negative"` to
+`match="positive integer"` and rerun: the report ends with
+`FAILED test_ages.py::test_normalize_age_rejects_negative` and
+`1 failed, 2 passed`, and the failure explains `Regex pattern did not match`
+with the expected pattern and the actual message.
+
+### Optional local workflow
+
+In a prepared contributor checkout (see [CONTRIBUTING](../../../CONTRIBUTING.md)),
+save the two files as `ages.py` and `test_ages.py` in a scratch folder outside
+the repository and run pytest on that folder from the repository root:
 
 ```bash
-.venv/bin/python -m pytest
+uv run --no-sync python -m pytest -q path/to/scratch-folder
 ```
 
 ## Exercises and progressive hints
@@ -242,7 +300,7 @@ result is not complete merely because it “looks right”; run the stated
 assertion or inspection and explain what it proves.
 
 1. Write pytest tests for `safe_divide(numerator, denominator)` and `validate_email(text)`. **Coverage:** one ordinary result, negative values, zero denominator, one accepted bounded email example, and several rejected near misses. **Constraints:** name each behavior clearly and compare observable return values directly.
-   **Verify:** run the test file from the repository root and confirm all intended cases are collected.
+   **Verify:** run the tests with the pad recipe in "Run pytest from the classroom pad" and confirm that the summary counts every case you wrote as passed.
 
 2. Add negative tests with `pytest.raises` for the narrow exception types documented by both functions. **Constraints:** keep only the expected failing call inside each context manager and match one stable, useful message fragment.
    **Verify:** temporarily change the expected exception once to observe a meaningful failure, then restore it.
@@ -309,7 +367,7 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-10`
-(Day 10 — Testing with pytest). Direct catalog prerequisites: `python-09`.
+(Day 10: Testing with pytest). Direct catalog prerequisites: `python-09`.
 I have completed the direct prerequisites: `python-09`. Emphasize tests as executable contracts and useful failure reports.
 Read `python/ds-60day/companion-guides/day10_testing_pytest.md` and use the learner notebook
 `python/ds-60day/notebooks/day10_testing_pytest.ipynb`. Do not open or quote anything under `solutions/` unless

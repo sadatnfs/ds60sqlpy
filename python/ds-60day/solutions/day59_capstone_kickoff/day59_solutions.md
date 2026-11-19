@@ -1,4 +1,4 @@
-# Day 59: Solutions: Capstone Kickoff
+# Day 59 Solutions: Capstone Kickoff and Planning
 
 We provide concrete templates and examples for scope, metrics, data access, baseline, risks, and milestones.
 
@@ -9,7 +9,7 @@ Contents
 
 ---
 
-Worked reference for Exercise 1; Problem and hypotheses (template)
+Worked reference for Exercise 1: Problem and hypotheses (template)
 ```markdown
 # Problem Statement
 We aim to predict <target> for <users/stakeholders> to achieve <business value>.
@@ -24,7 +24,7 @@ We aim to predict <target> for <users/stakeholders> to achieve <business value>.
 - Secondary: Calibration error ≤ 0.02, latency ≤ 50ms P95
 ```
 
-Worked reference for Exercise 2; Data sources and contracts
+Worked reference for Exercise 2: Data sources and contracts
 ```markdown
 ## Sources
 - Warehouse table analytics.users_daily (owner: data-eng)
@@ -35,7 +35,7 @@ Worked reference for Exercise 2; Data sources and contracts
 - Access: request via JIRA SEC‑123; principle of least privilege
 ```
 
-Worked reference for Exercise 3; Baseline, risks, milestones
+Worked reference for Exercise 3: Baseline, risks, milestones
 ```markdown
 ## Baseline
 - Heuristic: last_30d_activity>0 → non‑churner; baseline AUC ≈ 0.62
@@ -101,7 +101,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1; capstone scope, decision framing, data contracts, and early stop rules; write a decision, population, prediction/analysis unit, target, primary metric formula, baseline, success threshold, guardrail, and out-of-scope list; include an owner and stop condition for each threshold.
+**Verify:** Write a decision, population, prediction/analysis unit, target, primary metric formula, baseline, success threshold, guardrail, and out-of-scope list; include an owner and stop condition for each threshold.
 
 ### Exercise 2: Original lesson practice
 
@@ -113,7 +113,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2; capstone scope, decision framing, data contracts, and early stop rules; create the declared src/tests/notebooks/data-or-config layout plus README and ignored local artifact paths; print a tree and run one smoke import/test from a clean process with exit code 0.
+**Verify:** Create the declared src/tests/notebooks/data-or-config layout plus README and ignored local artifact paths; print a tree and run one smoke import/test from a clean process with exit code 0.
 
 ### Exercise 3: Original lesson practice
 
@@ -125,7 +125,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 3; capstone scope, decision framing, data contracts, and early stop rules; save a baseline metric file containing dataset/split hash, seed, model parameters, metric value, denominator/support, and timestamp; reload it and reproduce the metric on the same frozen split.
+**Verify:** Save a baseline metric file containing dataset/split hash, seed, model parameters, metric value, denominator/support, and timestamp; reload it and reproduce the metric on the same frozen split.
 
 ### Exercise 4: Scope and stop rules
 

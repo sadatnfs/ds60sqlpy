@@ -110,7 +110,7 @@ Use roughly this story:
 ## How to run this lesson
 
 **Primary browser route:** run `./classroom` from the repository root and
-choose **Python** on `/classroom`. Open this lesson in the shared workspace,
+choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
 read its capability notice, and use its supported coding or reading workflow.
 The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
 
@@ -129,21 +129,11 @@ for opening this lesson in the Docker classroom.
    lesson complete. A clean run catches hidden state and stale
    variables.
 
-Windows PowerShell:
-
-```powershell
-.\.venv\Scripts\python.exe -m jupyter lab
-```
-
-macOS/Linux:
+Linux, macOS, or Ubuntu in Windows WSL 2:
 
 ```bash
 .venv/bin/python -m jupyter lab
 ```
-
-If the Windows environment uses the documented conda-prefix fallback,
-use `.\.venv\python.exe` in place of
-`.\.venv\Scripts\python.exe`.
 
 ## Concept deep dive: release evidence, cold-start reproducibility, presentation claims, and handoff
 
@@ -166,12 +156,6 @@ owners, monitoring, rollback, retention, and known gaps.
 - **release manifest:** pins code/data/environment/artifact identities and the commands used to verify them.
 - **claim-to-evidence matrix:** maps each slide or conclusion to a metric, artifact, test, and limitation.
 - **handoff/runbook:** defines normal operation, monitoring, failure response, rollback, ownership, and retention.
-
-Read an API call from the inside out: identify the data entering the
-operation, the state learned (if any), the value returned, and the
-evidence that would make the result trustworthy. A method returning
-without an exception proves only that the syntax and immediate runtime
-path worked.
 
 ### Focused example A: reject unsupported presentation claims
 
@@ -203,9 +187,6 @@ assert unsupported == ["works for every population"]
 **Assumption to name:** Evidence files are versioned, reproducible, and actually support the wording of their claims.
 
 ### Focused example B: turn release readiness into a failing checklist
-
-This second example changes one important condition. Compare it with
-Example A instead of reading it as unrelated syntax.
 
 ```python
 release = {
@@ -253,24 +234,24 @@ The notebook's final checklist is the exercise:
 
 1. Finalize the data and training/evaluation pipeline.
 
-**Verify:** Practice 1; release evidence, cold-start reproducibility, presentation claims, and handoff; from a clean checkout/environment, run the documented train and test commands with exit code 0; record dataset/split hashes, baseline and candidate metric files, passing tests, and the frozen selection rule before opening final-test labels.
+**Verify:** From a clean checkout/environment, run the documented train and test commands with exit code 0; record dataset/split hashes, baseline and candidate metric files, passing tests, and the frozen selection rule before opening final-test labels.
 
 2. Produce a results notebook and README with exact reproduction steps.
 
-**Verify:** Practice 2; release evidence, cold-start reproducibility, presentation claims, and handoff; have another person or clean shell execute every README command in order; require exit code 0 and compare produced metric/artifact hashes with the results notebook, documenting any intentionally nondeterministic field.
+**Verify:** Have another person or clean shell execute every README command in order; require exit code 0 and compare produced metric/artifact hashes with the results notebook, documenting any intentionally nondeterministic field.
 
 3. Save artifacts under an ignored `artifacts/` path and retain dependency
    metadata/lock.
 
-**Verify:** Practice 3; release evidence, cold-start reproducibility, presentation claims, and handoff; write artifacts only under ignored artifacts/, list relative path, SHA-256, size, model/data/split/code identity, Python and dependency-lock hash, then reload the primary artifact in a fresh process and match a fixed prediction.
+**Verify:** Write artifacts only under ignored artifacts/, list relative path, SHA-256, size, model/data/split/code identity, Python and dependency-lock hash, then reload the primary artifact in a fresh process and match a fixed prediction.
 
 4. Prepare presentation-ready visuals and the short story above.
 
-**Verify:** Practice 4; release evidence, cold-start reproducibility, presentation claims, and handoff; export every presentation visual with title, axes/units, population/window, support, and source metric; reconcile each plotted value with the results table and remove any claim not supported by the frozen evaluation.
+**Verify:** Export every presentation visual with title, axes/units, population/window, support, and source metric; reconcile each plotted value with the results table and remove any claim not supported by the frozen evaluation.
 
 5. Write three takeaways and one open question.
 
-**Verify:** Practice 5; release evidence, cold-start reproducibility, presentation claims, and handoff; write three takeaways that each cite a metric, comparison, and limitation, plus one open question with the data/experiment needed to answer it; rehearse the story in the declared time and keep a tested fallback demo.
+**Verify:** Write three takeaways that each cite a metric, comparison, and limitation, plus one open question with the data/experiment needed to answer it; rehearse the story in the declared time and keep a tested fallback demo.
 
 ### Progressive hints
 
@@ -356,7 +337,7 @@ The lesson is complete without an AI assistant. If you want optional
 coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
-Tutor me through `python-60` — Day 60 — Capstone Completion and Presentation.
+Tutor me through `python-60` (Day 60: Capstone Completion and Presentation).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize release evidence, cold-start reproducibility, presentation claims, and handoff. Use exactly these maintained learner materials:

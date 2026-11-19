@@ -96,21 +96,11 @@ for opening this lesson in the Docker classroom.
    lesson complete. A clean run catches hidden state and stale
    variables.
 
-Windows PowerShell:
-
-```powershell
-.\.venv\Scripts\python.exe -m jupyter lab
-```
-
-macOS/Linux:
+Linux, macOS, or Ubuntu in Windows WSL 2:
 
 ```bash
 .venv/bin/python -m jupyter lab
 ```
-
-If the Windows environment uses the documented conda-prefix fallback,
-use `.\.venv\python.exe` in place of
-`.\.venv\Scripts\python.exe`.
 
 ## Concept deep dive: tensors, computation graphs, gradients, and the optimizer cycle
 
@@ -134,12 +124,6 @@ generalization.
 - **`loss.backward()`:** computes derivatives through the recorded graph and adds them to existing `.grad` values.
 - **`optimizer.zero_grad(); ...; optimizer.step()`:** clears old gradients, computes a new step, and updates registered parameters.
 
-Read an API call from the inside out: identify the data entering the
-operation, the state learned (if any), the value returned, and the
-evidence that would make the result trustworthy. A method returning
-without an exception proves only that the syntax and immediate runtime
-path worked.
-
 ### Focused example A: differentiate a scalar function by autograd
 
 Before running the example, predict the shape, type, or direction of the
@@ -161,9 +145,6 @@ assert x.grad.item() == 8.0  # derivative: 2*x + 2 at x=3
 **Assumption to name:** `x` is a scalar leaf and only one backward pass has contributed to its gradient.
 
 ### Focused example B: see gradient accumulation explicitly
-
-This second example changes one important condition. Compare it with
-Example A instead of reading it as unrelated syntax.
 
 ```python
 import torch
@@ -207,15 +188,15 @@ assert (first, accumulated, cleared) == (4.0, 8.0, 0.0)
 
 1. Plot the loss over epochs.
 
-**Verify:** Practice 1; tensors, computation graphs, gradients, and the optimizer cycle; save a labeled epoch-versus-loss curve and print the raw loss sequence; assert every plotted point is the sample-weighted epoch loss and report whether the final value improved over epoch 1.
+**Verify:** Save a labeled epoch-versus-loss curve and print the raw loss sequence; assert every plotted point is the sample-weighted epoch loss and report whether the final value improved over epoch 1.
 
 2. Replace SGD with Adam and compare convergence.
 
-**Verify:** Practice 2; tensors, computation graphs, gradients, and the optimizer cycle; from identical initial weights, batches, epochs, and seed, print SGD and Adam loss per epoch plus final validation loss; report convergence behavior without declaring a winner from unequal settings.
+**Verify:** From identical initial weights, batches, epochs, and seed, print SGD and Adam loss per epoch plus final validation loss; report convergence behavior without declaring a winner from unequal settings.
 
 3. Add one hidden layer and a ReLU activation.
 
-**Verify:** Practice 3; tensors, computation graphs, gradients, and the optimizer cycle; assert the network's layer dimensions and output shape on a fixed batch, then compare parameter count and validation loss with the original model under the same seed/optimizer budget.
+**Verify:** Assert the network's layer dimensions and output shape on a fixed batch, then compare parameter count and validation loss with the original model under the same seed/optimizer budget.
 
 ### Progressive hints
 
@@ -293,7 +274,7 @@ The lesson is complete without an AI assistant. If you want optional
 coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
-Tutor me through `python-46` : Day 46 : Deep Learning Overview.
+Tutor me through `python-46` (Day 46: Deep Learning Overview).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize tensors, computation graphs, gradients, and the optimizer cycle. Use exactly these maintained learner materials:

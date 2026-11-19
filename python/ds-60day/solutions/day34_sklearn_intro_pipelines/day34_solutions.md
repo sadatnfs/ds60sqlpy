@@ -1,4 +1,4 @@
-# Day 34: Solutions: scikit-learn Intro and Pipelines
+# Day 34 Solutions: scikit-learn Estimators and Pipelines
 
 We build a basic preprocessing + model pipeline, then swap models (Ridge) and inspect coefficients, emphasizing reproducibility and leak-free evaluation.
 
@@ -9,7 +9,7 @@ Contents
 
 ---
 
-Worked reference for Exercise 1; Pipeline with scaler + LinearRegression
+Worked reference for Exercise 1: Pipeline with scaler + LinearRegression
 ```python
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
@@ -31,7 +31,7 @@ Line-by-line
 
 ---
 
-Worked reference for Exercise 2; Swap to Ridge and compare
+Worked reference for Exercise 2: Swap to Ridge and compare
 ```python
 from sklearn.linear_model import Ridge
 
@@ -46,7 +46,7 @@ Notes
 
 ---
 
-Worked reference for Exercise 3; Inspect coefficients with and without scaling
+Worked reference for Exercise 3: Inspect coefficients with and without scaling
 ```python
 # With scaling
 pipe.fit(Xtr, ytr)
@@ -117,7 +117,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1; the scikit-learn estimator contract and leakage-safe pipelines; use one frozen train/test split and one preprocessing pipeline; report Ridge alpha, baseline and Ridge R² plus RMSE, and assert model selection never reads the test labels.
+**Verify:** Use one frozen train/test split and one preprocessing pipeline; report Ridge alpha, baseline and Ridge R² plus RMSE, and assert model selection never reads the test labels.
 
 ### Exercise 2: Original lesson practice
 
@@ -129,7 +129,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2; the scikit-learn estimator contract and leakage-safe pipelines; print feature names in coefficient order and both scaled-space coefficients and coefficients converted back to original units; verify the two representations produce equal predictions within 1e-10.
+**Verify:** Print feature names in coefficient order and both scaled-space coefficients and coefficients converted back to original units; verify the two representations produce equal predictions within 1e-10.
 
 ### Exercise 3: Leakage prediction
 

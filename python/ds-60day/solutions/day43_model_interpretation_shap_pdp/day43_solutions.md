@@ -1,4 +1,4 @@
-# Day 43: Solutions: Model Interpretation (SHAP, PDP, LIME)
+# Day 43 Solutions: Model Interpretation with SHAP and Partial Dependence
 
 We introduce global vs local interpretability, compute SHAP values for a tree model, draw Partial Dependence Plots (PDP), and briefly show how to apply LIME (optional).
 
@@ -48,7 +48,7 @@ print(
 )
 ```
 
-Worked reference for Exercise 1; SHAP summary (tree model)
+Worked reference for Exercise 1: SHAP summary (tree model)
 ```python
 def select_class_shap(values, feature_shape, class_index=1, class_count=2):
     """Select a classifier output without confusing class and sample axes."""
@@ -113,7 +113,7 @@ Notes
 
 ---
 
-Worked reference for Exercise 2; Partial Dependence Plots (PDP)
+Worked reference for Exercise 2: Partial Dependence Plots (PDP)
 ```python
 from sklearn.inspection import PartialDependenceDisplay
 import matplotlib.pyplot as plt
@@ -216,7 +216,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1; global versus local explanations, perturbation assumptions, and causal limits; assert that the normalized positive-class SHAP matrix has 50 rows and one column per named feature; report both named top-five lists, their numeric means, the fixed permutation seed/repeat count, and their set/rank overlap on the identical held-out rows and scorer.
+**Verify:** Assert that the normalized positive-class SHAP matrix has 50 rows and one column per named feature; report both named top-five lists, their numeric means, the fixed permutation seed/repeat count, and their set/rank overlap on the identical held-out rows and scorer.
 
 ### Exercise 2: Original lesson practice
 
@@ -228,7 +228,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2; global versus local explanations, perturbation assumptions, and causal limits; print the selected feature name, index, and held-out permutation mean; assert that same index enters the PDP call, then retain the labeled curve/deciles plus a numeric direction and sparse-support caveat without causal language.
+**Verify:** Print the selected feature name, index, and held-out permutation mean; assert that same index enters the PDP call, then retain the labeled curve/deciles plus a numeric direction and sparse-support caveat without causal language.
 
 ### Exercise 3: Original lesson practice
 
@@ -240,7 +240,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 3; global versus local explanations, perturbation assumptions, and causal limits; treat only a missing `lime` import as a skip; when installed, record three seed-specific contribution lists and compare sign, top-five overlap, and instability against SHAP for held-out row 0; let every other exception fail visibly.
+**Verify:** Treat only a missing `lime` import as a skip; when installed, record three seed-specific contribution lists and compare sign, top-five overlap, and instability against SHAP for held-out row 0; let every other exception fail visibly.
 
 ### Exercise 4: Local-versus-global diagnosis
 

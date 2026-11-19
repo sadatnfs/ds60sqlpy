@@ -1,4 +1,4 @@
-# Day 36: Solutions: Dimensionality Reduction with PCA
+# Day 36 Solutions: PCA and Feature Selection
 
 We standardize features, fit PCA, and choose the number of components via cumulative explained variance. We also compare PCA before/after scaling and briefly try SelectKBest.
 
@@ -19,7 +19,7 @@ import numpy as np, matplotlib.pyplot as plt
 X, y = load_iris(return_X_y=True)
 ```
 
-Worked reference for Exercise 1; Cumulative explained variance (scree)
+Worked reference for Exercise 1: Cumulative explained variance (scree)
 ```python
 sc = StandardScaler()
 Xz = sc.fit_transform(X)
@@ -45,7 +45,7 @@ Line-by-line
 
 ---
 
-Worked reference for Exercise 2; PCA before vs after scaling
+Worked reference for Exercise 2: PCA before vs after scaling
 ```python
 pca_raw = PCA(n_components=2).fit(X)
 X2_raw = pca_raw.transform(X)
@@ -66,7 +66,7 @@ Observation
 
 ---
 
-Worked reference for Exercise 3; SelectKBest vs PCA
+Worked reference for Exercise 3: SelectKBest vs PCA
 ```python
 from sklearn.feature_selection import SelectKBest, f_classif
 from sklearn.model_selection import cross_val_score
@@ -145,7 +145,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1; PCA geometry, scaling, variance, and reconstruction; fit PCA on training data only, print cumulative explained variance by component, and choose the smallest count reaching a declared threshold such as 95%; assert transformed train/test column counts match that choice.
+**Verify:** Fit PCA on training data only, print cumulative explained variance by component, and choose the smallest count reaching a declared threshold such as 95%; assert transformed train/test column counts match that choice.
 
 ### Exercise 2: Original lesson practice
 
@@ -157,7 +157,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2; PCA geometry, scaling, variance, and reconstruction; on one frozen split, report feature scales and PCA explained-variance ratios before and after StandardScaler; verify each scaler/PCA pair is fitted on training rows only.
+**Verify:** On one frozen split, report feature scales and PCA explained-variance ratios before and after StandardScaler; verify each scaler/PCA pair is fitted on training rows only.
 
 ### Exercise 3: Original lesson practice
 
@@ -169,7 +169,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 3; PCA geometry, scaling, variance, and reconstruction; evaluate SelectKBest and scaled PCA with identical folds, component/feature counts, estimator, and metric; print every fold score plus mean/std and keep the final test labels unopened.
+**Verify:** Evaluate SelectKBest and scaled PCA with identical folds, component/feature counts, estimator, and metric; print every fold score plus mean/std and keep the final test labels unopened.
 
 ### Exercise 4: Reconstruction analysis
 

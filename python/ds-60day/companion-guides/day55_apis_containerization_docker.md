@@ -1,4 +1,4 @@
-# Day 55: Containerizing a FastAPI Service
+# Day 55: Containerizing a FastAPI Model Service
 
 **Lesson ID:** `python-55` · **Level:** advanced · **Dependencies:** `production` · **Network:** offline
 
@@ -61,7 +61,7 @@ release supply-chain policy.
 
 ## Build and run
 
-These Docker commands are the same in PowerShell and POSIX shells:
+Run these Docker commands from Bash (Linux, macOS, or Ubuntu in Windows WSL 2):
 
 ```text
 docker build -t ds60-api:local .
@@ -70,7 +70,7 @@ docker run --rm --name ds60-api -p 8000:8000 ds60-api:local
 
 Test from another terminal.
 
-macOS/Linux:
+Linux, macOS, or Ubuntu in Windows WSL 2:
 
 ```bash
 curl http://127.0.0.1:8000/health
@@ -79,21 +79,12 @@ curl -X POST http://127.0.0.1:8000/predict \
   -d '{"features":[5.1,3.5,1.4,0.2]}'
 ```
 
-Windows PowerShell:
-
-```powershell
-Invoke-RestMethod -Uri 'http://127.0.0.1:8000/health'
-$body = @{ features = @(5.1, 3.5, 1.4, 0.2) } | ConvertTo-Json
-Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:8000/predict' `
-  -ContentType 'application/json' -Body $body
-```
-
 <!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT -->
 
 ## How to run this lesson
 
 **Primary browser route:** run `./classroom` from the repository root and
-choose **Python** on `/classroom`. Open this lesson in the shared workspace,
+choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
 read its capability notice, and use its supported coding or reading workflow.
 The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
 
@@ -112,21 +103,11 @@ for opening this lesson in the Docker classroom.
    lesson complete. A clean run catches hidden state and stale
    variables.
 
-Windows PowerShell:
-
-```powershell
-.\.venv\Scripts\python.exe -m jupyter lab
-```
-
-macOS/Linux:
+Linux, macOS, or Ubuntu in Windows WSL 2:
 
 ```bash
 .venv/bin/python -m jupyter lab
 ```
-
-If the Windows environment uses the documented conda-prefix fallback,
-use `.\.venv\python.exe` in place of
-`.\.venv\Scripts\python.exe`.
 
 ## Concept deep dive: container build boundaries, minimal images, and health semantics
 
@@ -148,12 +129,6 @@ automatically.
 - **`FROM` / pinned base:** establishes operating-system and Python dependencies; pin and scan rather than trusting `latest`.
 - **`COPY` and `.dockerignore`:** define which local files enter the build context and image layers.
 - **`CMD` / `HEALTHCHECK`:** define the main process and probe command without replacing service-level readiness policy.
-
-Read an API call from the inside out: identify the data entering the
-operation, the state learned (if any), the value returned, and the
-evidence that would make the result trustworthy. A method returning
-without an exception proves only that the syntax and immediate runtime
-path worked.
 
 ### Focused example A: audit build-context inclusion before Docker runs
 
@@ -184,9 +159,6 @@ assert ".env" not in included and not any(p.startswith(".venv/") for p in includ
 **Assumption to name:** This simplified matcher demonstrates review logic; Docker's complete ignore semantics and the real context still need inspection.
 
 ### Focused example B: distinguish process health from traffic readiness
-
-This second example changes one important condition. Compare it with
-Example A instead of reading it as unrelated syntax.
 
 ```python
 def probe(*, process_running, model_loaded, dependency_ready, draining):
@@ -234,16 +206,16 @@ assert during_dependency_outage == {"healthy": True, "ready": False}
 
 1. Create a slim dependency file containing only direct API runtime needs.
 
-**Verify:** Practice 1; container build boundaries, minimal images, and health semantics; build the image from a direct-runtime-only dependency file, print resolved package versions and image size, and run the health/predict smoke tests; prove test/notebook-only packages are absent.
+**Verify:** Build the image from a direct-runtime-only dependency file, print resolved package versions and image size, and run the health/predict smoke tests; prove test/notebook-only packages are absent.
 
 2. Add `GET /health` returning `{"status": "ok"}`.
 
-**Verify:** Practice 2; container build boundaries, minimal images, and health semantics; with TestClient and the running container, assert GET /health returns status 200 and exactly {'status': 'ok'}; distinguish liveness from readiness by testing a missing/tampered model artifact.
+**Verify:** With TestClient and the running container, assert GET /health returns status 200 and exactly {'status': 'ok'}; distinguish liveness from readiness by testing a missing/tampered model artifact.
 
 3. Optionally push the image to a registry if you intentionally use a connected
    account.
 
-**Verify:** Practice 3; container build boundaries, minimal images, and health semantics; keep this optional and connected: either record a skipped result, or name the registry/repository/tag/digest, show authenticated push exit code 0, pull by digest, and rerun health/predict without exposing credentials.
+**Verify:** Keep this optional and connected: either record a skipped result, or name the registry/repository/tag/digest, show authenticated push exit code 0, pull by digest, and rerun health/predict without exposing credentials.
 
 ### Progressive hints
 
@@ -317,7 +289,7 @@ The lesson is complete without an AI assistant. If you want optional
 coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
-Tutor me through `python-55` — Day 55 — Containerizing a FastAPI Service.
+Tutor me through `python-55` (Day 55: Containerizing a FastAPI Service).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize container build boundaries, minimal images, and health semantics. Use exactly these maintained learner materials:

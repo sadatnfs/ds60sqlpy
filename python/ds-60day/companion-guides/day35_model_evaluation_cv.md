@@ -35,7 +35,7 @@ By the end of the lesson, you can:
 | Recall | Fraction of actual positives that are found |
 | F1 | Harmonic mean of precision and recall at a chosen threshold |
 | ROC AUC | Ranking probability across a randomly drawn positive/negative pair |
-| Bias–variance tradeoff | Tension between systematic error and sensitivity to sampled data |
+| Bias-variance tradeoff | Tension between systematic error and sensitivity to sampled data |
 
 Cross-validation evaluates the entire fitting recipe. If feature selection,
 scaling, or imputation learns from data, it belongs inside the pipeline that each
@@ -74,7 +74,7 @@ folds were formed so someone else can reproduce the estimate.
 ## How to run this lesson
 
 **Primary browser route:** run `./classroom` from the repository root and
-choose **Python** on `/classroom`. Open this lesson in the shared workspace,
+choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
 read its capability notice, and use its supported coding or reading workflow.
 The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
 
@@ -93,21 +93,11 @@ for opening this lesson in the Docker classroom.
    lesson complete. A clean run catches hidden state and stale
    variables.
 
-Windows PowerShell:
-
-```powershell
-.\.venv\Scripts\python.exe -m jupyter lab
-```
-
-macOS/Linux:
+Linux, macOS, or Ubuntu in Windows WSL 2:
 
 ```bash
 .venv/bin/python -m jupyter lab
 ```
-
-If the Windows environment uses the documented conda-prefix fallback,
-use `.\.venv\python.exe` in place of
-`.\.venv\Scripts\python.exe`.
 
 ## Concept deep dive: metrics, resampling design, and honest generalization estimates
 
@@ -131,12 +121,6 @@ code runs.
 - **`confusion_matrix(y_true, y_pred)`:** returns outcome counts at the selected threshold; inspect label order before unpacking.
 - **`cross_validate(estimator, X, y, cv=..., scoring=...)`:** fits a fresh estimator per fold and can report multiple metrics and timing.
 - **splitter objects:** encode random, stratified, grouped, or temporal assumptions; `cv=5` is not a universal design.
-
-Read an API call from the inside out: identify the data entering the
-operation, the state learned (if any), the value returned, and the
-evidence that would make the result trustworthy. A method returning
-without an exception proves only that the syntax and immediate runtime
-path worked.
 
 ### Focused example A: derive precision and recall from outcome counts
 
@@ -163,9 +147,6 @@ assert recall == tp / (tp + fn)
 **Assumption to name:** Class `1` is the positive class and each error type has a known operational consequence.
 
 ### Focused example B: keep entity groups out of each other's folds
-
-This second example changes one important condition. Compare it with
-Example A instead of reading it as unrelated syntax.
 
 ```python
 import numpy as np
@@ -211,22 +192,23 @@ print("all validation groups were unseen during training")
 
 1. Evaluate the pipeline with `accuracy`, `f1`, and `roc_auc`.
 
-**Verify:** Practice 1; metrics, resampling design, and honest generalization estimates; on the same declared stratified folds, print every accuracy, F1, and ROC-AUC fold score plus mean and standard deviation; include positive-class support and use probability/decision scores, not hard labels, for ROC AUC.
+**Verify:** On the same declared stratified folds, print every accuracy, F1, and ROC-AUC fold score plus mean and standard deviation; include positive-class support and use probability/decision scores, not hard labels, for ROC AUC.
 
 2. Compare the variability from 5-fold and 10-fold cross-validation.
 
-**Verify:** Practice 2; metrics, resampling design, and honest generalization estimates; use identical data, estimator, scorer, shuffle policy, and seed for 5 and 10 folds; print both score vectors, means, and standard deviations, and confirm every row appears in validation exactly once per run.
+**Verify:** Use identical data, estimator, scorer, and shuffle policy for 5 and 10 folds; print both score vectors with their means and fold standard deviations, and confirm every row appears in validation exactly once per run. Then rerun each design over at least ten shuffle seeds and compare how much the mean moves: the fold spread within one run is not the variance of the cross-validation estimate.
 
 3. Explain leakage risks and how placing preprocessing in a pipeline helps.
 
-**Verify:** Practice 3; metrics, resampling design, and honest generalization estimates; show fold indices or a fit counter proving preprocessing is fitted separately inside each training fold; contrast with one deliberately pre-fitted transformation and explain why its validation score is contaminated.
+**Verify:** Show fold indices or a fit counter proving preprocessing is fitted separately inside each training fold; contrast with one deliberately pre-fitted transformation and explain why its validation score is contaminated.
 
 ### Progressive hints
 
 1. Keep folds identical across metrics. Ask whether each metric uses predicted
    labels, scores, or probabilities.
-2. Create two `StratifiedKFold` objects with shuffle and fixed seeds. Compare
-   both mean and spread; do not infer a universal rule from one dataset.
+2. Create two `StratifiedKFold` objects with shuffle and fixed seeds. Smaller
+   validation folds make single fold scores noisier, so compare the spread of
+   the mean across reshuffled runs, not only the fold spread of one run.
 3. Sketch what the scaler would know if it were fit before the folds existed.
    Repeat the reasoning for imputation and feature selection.
 
@@ -293,7 +275,7 @@ The lesson is complete without an AI assistant. If you want optional
 coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
-Tutor me through `python-35` — Day 35 — Model Evaluation and Cross-Validation.
+Tutor me through `python-35` (Day 35: Model Evaluation and Cross-Validation).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize metrics, resampling design, and honest generalization estimates. Use exactly these maintained learner materials:

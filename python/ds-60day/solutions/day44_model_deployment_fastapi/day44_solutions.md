@@ -1,4 +1,4 @@
-# Day 44: Solutions: Model Deployment Basics with FastAPI
+# Day 44 Solutions: Serving a Model with FastAPI
 
 We train and save a model (joblib), build a minimal FastAPI endpoint to serve predictions, and test it with curl. We then add small improvements: input validation and class name mapping.
 
@@ -9,7 +9,7 @@ Contents
 
 ---
 
-Worked reference for Exercise 1; Train and save model
+Worked reference for Exercise 1: Train and save model
 ```python
 from sklearn.datasets import load_iris
 from sklearn.linear_model import LogisticRegression
@@ -35,7 +35,7 @@ Line-by-line
 
 ---
 
-Worked reference for Exercise 2; Minimal FastAPI endpoint
+Worked reference for Exercise 2: Minimal FastAPI endpoint
 Create `artifacts/day44/app.py`:
 ```python
 from typing import Annotated
@@ -70,7 +70,7 @@ python -m uvicorn app:app --app-dir artifacts/day44 --reload
 
 ---
 
-Worked reference for Exercise 3; Test with curl; handle bad inputs
+Worked reference for Exercise 3: Test with curl; handle bad inputs
 ```bash
 # OK request
 curl -s -X POST http://127.0.0.1:8000/predict \
@@ -140,7 +140,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1; validated request contracts, trusted artifacts, and testable inference endpoints; with TestClient, assert a valid payload returns 200 and the declared response schema; assert missing, wrong-type, extra, and out-of-range fields return 422 with field-level errors and no traceback or request body in logs.
+**Verify:** With TestClient, assert a valid payload returns 200 and the declared response schema; assert missing, wrong-type, extra, and out-of-range fields return 422 with field-level errors and no traceback or request body in logs.
 
 ### Exercise 2: Original lesson practice
 
@@ -152,7 +152,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2; validated request contracts, trusted artifacts, and testable inference endpoints; for a fixed request, assert the response contains both numeric class_id and the matching class_name from persisted metadata; test an unknown/out-of-range model class as an explicit startup or 5xx failure.
+**Verify:** For a fixed request, assert the response contains both numeric class_id and the matching class_name from persisted metadata; test an unknown/out-of-range model class as an explicit startup or 5xx failure.
 
 ### Exercise 3: Original lesson practice
 
@@ -164,7 +164,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 3; validated request contracts, trusted artifacts, and testable inference endpoints; build a fresh environment from the runtime file, run the health and predict smoke tests with exit code 0, and record installed versions; exclude notebooks, test-only tools, and undeclared transitive guesses.
+**Verify:** Build a fresh environment from the runtime file, run the health and predict smoke tests with exit code 0, and record installed versions; exclude notebooks, test-only tools, and undeclared transitive guesses.
 
 ### Exercise 4: Boundary-case testing
 

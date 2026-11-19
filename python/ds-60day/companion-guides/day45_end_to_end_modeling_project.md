@@ -1,4 +1,4 @@
-# Day 45: End-to-End Modeling Mini-Project
+# Day 45: Project: End-to-End Modeling
 
 **Offline teaching data:** The [original synthetic fixtures](../../fixtures/README.md) replace first-run sample-data downloads. Their values are not historical or observational evidence. Keep numerical conclusions scoped to the declared teaching input.
 
@@ -23,7 +23,7 @@ By the end of the project, you can:
 
 - Complete `python-44` and therefore `python-31` through `python-44`.
 - Have a working `data` environment and a writable ignored `artifacts/` folder.
-- Cache the Seaborn Titanic dataset while connected before an offline session.
+- No download is needed: the notebook loads the offline synthetic `passenger-outcomes` fixture with `load_teaching_frame`.
 
 ## Dataset and offline contract
 
@@ -33,7 +33,7 @@ Their generated values demonstrate programming methods, not real-world populatio
 The separate reference solution uses scikit-learn's package-bundled
 breast-cancer dataset to demonstrate the same engineering gates without a
 network dependency. It is intentionally a transferable reference, not a
-line-for-line Titanic answer.
+line-for-line answer for the passenger fixture.
 
 ## Vocabulary and mental models
 
@@ -87,7 +87,7 @@ future input must pass through the exact fitted preprocessing.
 ## How to run this lesson
 
 **Primary browser route:** run `./classroom` from the repository root and
-choose **Python** on `/classroom`. Open this lesson in the shared workspace,
+choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
 read its capability notice, and use its supported coding or reading workflow.
 The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
 
@@ -106,21 +106,11 @@ for opening this lesson in the Docker classroom.
    lesson complete. A clean run catches hidden state and stale
    variables.
 
-Windows PowerShell:
-
-```powershell
-.\.venv\Scripts\python.exe -m jupyter lab
-```
-
-macOS/Linux:
+Linux, macOS, or Ubuntu in Windows WSL 2:
 
 ```bash
 .venv/bin/python -m jupyter lab
 ```
-
-If the Windows environment uses the documented conda-prefix fallback,
-use `.\.venv\python.exe` in place of
-`.\.venv\Scripts\python.exe`.
 
 ## Concept deep dive: an end-to-end evidence chain from decision to reproducible artifact
 
@@ -143,12 +133,6 @@ environment, seed, commands, and limitations.
 - **`DummyClassifier(strategy=...)`:** creates a minimal predictive reference under the exact same split and metric.
 - **`ColumnTransformer` inside `Pipeline`:** binds column-specific preprocessing and prediction into one fitted artifact.
 - **manifest + acceptance gates:** connect data hash, schema, code/environment, metrics, limitations, and artifact identity.
-
-Read an API call from the inside out: identify the data entering the
-operation, the state learned (if any), the value returned, and the
-evidence that would make the result trustworthy. A method returning
-without an exception proves only that the syntax and immediate runtime
-path worked.
 
 ### Focused example A: require the candidate to beat a same-split baseline
 
@@ -184,9 +168,6 @@ assert scores["candidate"] > scores["baseline"]
 **Assumption to name:** ROC AUC and this split reflect the decision; the test result was not repeatedly consulted during development.
 
 ### Focused example B: turn completion into explicit acceptance gates
-
-This second example changes one important condition. Compare it with
-Example A instead of reading it as unrelated syntax.
 
 ```python
 evidence = {
@@ -239,32 +220,32 @@ The notebook's project checklist is the exercise:
 
 1. Load the dataset and create train/validation/test boundaries.
 
-**Verify:** Practice 1; an end-to-end evidence chain from decision to reproducible artifact; record dataset identity/hash, target, row count, and frozen train/validation/test indices; assert the three index sets are pairwise disjoint and their counts sum to the validated rows.
+**Verify:** Record dataset identity/hash, target, row count, and frozen train/validation/test indices; assert the three index sets are pairwise disjoint and their counts sum to the validated rows.
 
 2. Preprocess with `ColumnTransformer`.
 
-**Verify:** Practice 2; an end-to-end evidence chain from decision to reproducible artifact; fit one ColumnTransformer inside the training pipeline, print output feature names/order and transformed shapes, and predict a validation row containing the declared missing/unknown-category boundary.
+**Verify:** Fit one ColumnTransformer inside the training pipeline, print output feature names/order and transformed shapes, and predict a validation row containing the declared missing/unknown-category boundary.
 
 3. Train a baseline model.
 
-**Verify:** Practice 3; an end-to-end evidence chain from decision to reproducible artifact; fit a declared naive/simple baseline on training rows, print validation metric and denominator/support, and save its parameters and seed before trying a more complex candidate.
+**Verify:** Fit a declared naive/simple baseline on training rows, print validation metric and denominator/support, and save its parameters and seed before trying a more complex candidate.
 
 4. Evaluate with appropriate metrics and cross-validation.
 
-**Verify:** Practice 4; an end-to-end evidence chain from decision to reproducible artifact; print every cross-validation score plus mean/std on training data and one frozen validation comparison; reserve the test set for one final evaluation and report the metric formula and support.
+**Verify:** Print every cross-validation score plus mean/std on training data and one frozen validation comparison; reserve the test set for one final evaluation and report the metric formula and support.
 
 5. Save the model and preprocessing together with `joblib`.
 
-**Verify:** Practice 5; an end-to-end evidence chain from decision to reproducible artifact; save one joblib pipeline containing preprocessing and model, compute its SHA-256, reload it in a fresh process, and assert predictions and feature metadata match the pre-save values.
+**Verify:** Save one joblib pipeline containing preprocessing and model, compute its SHA-256, reload it in a fresh process, and assert predictions and feature metadata match the pre-save values.
 
 6. Write a short README-style section in the notebook covering rationale,
    metrics, limitations, and next steps.
 
-**Verify:** Practice 6; an end-to-end evidence chain from decision to reproducible artifact; include runnable setup/train/test commands, data provenance/hash, baseline/candidate metrics, limitations, and next step; have a clean-shell replay finish with exit code 0.
+**Verify:** Include runnable setup/train/test commands, data provenance/hash, baseline/candidate metrics, limitations, and next step; have a clean-shell replay finish with exit code 0.
 
 7. Optionally adapt the Day 44 FastAPI service.
 
-**Verify:** Practice 7; an end-to-end evidence chain from decision to reproducible artifact; if the API extension is attempted, run Day 44 health/valid/invalid TestClient cases against the reloaded artifact; otherwise record an explicit skipped result and keep the capstone complete.
+**Verify:** If the API extension is attempted, run Day 44 health/valid/invalid TestClient cases against the reloaded artifact; otherwise record an explicit skipped result and keep the capstone complete.
 
 ### Progressive hints
 
@@ -354,7 +335,7 @@ The lesson is complete without an AI assistant. If you want optional
 coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
-Tutor me through `python-45` — Day 45 — End-to-End Modeling Mini-Project.
+Tutor me through `python-45` (Day 45: End-to-End Modeling Mini-Project).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize an end-to-end evidence chain from decision to reproducible artifact. Use exactly these maintained learner materials:

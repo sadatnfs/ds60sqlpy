@@ -1,4 +1,4 @@
-# Day 50: Solutions: Time Series Modeling
+# Day 50 Solutions: Time-Series Forecasting and Evaluation
 
 We compare a seasonal-naive baseline and recursive lag models on the same
 fixed 14-step forecast horizon. Four development origins select a candidate
@@ -33,7 +33,7 @@ assert development.index.max() < test.index.min()
 assert (df["y"] > 0).all()  # MAPE is suitable for this positive fixture only.
 ```
 
-Worked reference for Exercise 1; Seasonal naive baseline
+Worked reference for Exercise 1: Seasonal naive baseline
 ```python
 def seasonal_naive_forecast(history, future_index, season=7):
     """Repeat the final observed season from one fixed forecast origin."""
@@ -57,7 +57,7 @@ Explanation
 
 ---
 
-Worked reference for Exercise 2; TimeSeriesSplit and models
+Worked reference for Exercise 2: TimeSeriesSplit and models
 ```python
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
@@ -136,7 +136,7 @@ Line by line
 
 ---
 
-Worked reference for Exercise 3; Final fit and error visualization
+Worked reference for Exercise 3: Final fit and error visualization
 ```python
 training = make_lag_table(development)
 model = model_factories[selected_name]().fit(training[FEATURES], training["target"])
@@ -225,7 +225,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1; forecast horizons, temporal backtesting, naive baselines, and leakage-safe lags; fit m=7 and m=30 using training observations only, forecast the identical timestamped test window, and print MAE plus errors by horizon for both; report convergence/skip status and selected seasonal period.
+**Verify:** Fit m=7 and m=30 using training observations only, forecast the identical timestamped test window, and print MAE plus errors by horizon for both; report convergence/skip status and selected seasonal period.
 
 ### Exercise 2: Original lesson practice
 
@@ -237,7 +237,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2; forecast horizons, temporal backtesting, naive baselines, and leakage-safe lags; on the same forecast origins, print MAE for last-value, 30-day seasonal-naive, and ARIMA; assert each forecast at time t uses only observations before t and include a metric table keyed by model.
+**Verify:** On the same forecast origins, print MAE for last-value, 30-day seasonal-naive, and ARIMA; assert each forecast at time t uses only observations before t and include a metric table keyed by model.
 
 ### Exercise 3: Original lesson practice
 
@@ -249,7 +249,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 3; forecast horizons, temporal backtesting, naive baselines, and leakage-safe lags; difference only the training series, print its length/NaN handling and selected autocorrelations with confidence bounds, and assert no test-period timestamp entered the transform or lag calculation.
+**Verify:** Difference only the training series, print its length/NaN handling and selected autocorrelations with confidence bounds, and assert no test-period timestamp entered the transform or lag calculation.
 
 ### Exercise 4: Rolling-origin evaluation
 

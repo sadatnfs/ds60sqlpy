@@ -1,4 +1,4 @@
-# Day 7: Strings, Regular Expressions, and `pathlib`
+# Day 7: Strings, Regular Expressions, and pathlib
 
 **Level:** Beginner
 
@@ -70,8 +70,7 @@ They are separate from the browser's saved pads, notes and progress in Docker
 volumes. Neither route automatically copies attempts or completion markers to
 the other; record progress in the interface you actually used.
 
-**Lesson outcome:** use day 7; strings, regular expressions, and `pathlib` to practice text normalization, bounded pattern matching, and portable paths
-and explain the evidence produced by your code.
+**Outcome:** Clean text, match patterns with regular expressions, and build portable paths.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
@@ -120,14 +119,7 @@ match = pattern.fullmatch("sales_2025-07-01_west.csv")
 match.groupdict() if match else None
 ```
 
-**Expected observation**
-
-```text
-`{'date': '2025-07-01', 'region': 'west'}`. A filename with extra trailing text returns `None`.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** `{'date': '2025-07-01', 'region': 'west'}`. A filename with extra trailing text returns `None`.
 
 ### Worked example 2: Build a path without platform-specific separators
 
@@ -141,14 +133,7 @@ report = Path("artifacts") / "daily sales.csv"
 (report.parent, report.stem, report.suffix, report.with_suffix(".json"))
 ```
 
-**Expected observation**
-
-```text
-A tuple of `Path` values is displayed. On every supported operating system the components remain meaningful without hard-coded `/` or `\` separators.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** A tuple of `Path` values is displayed. On every supported operating system the components remain meaningful without hard-coded `/` or `\` separators.
 
 ### A debugging routine for this topic
 
@@ -287,7 +272,7 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-07`
-(Day 7 — Strings, Regular Expressions, and `pathlib`). Direct catalog prerequisites: `python-06`.
+(Day 7: Strings, Regular Expressions, and `pathlib`). Direct catalog prerequisites: `python-06`.
 I have completed the direct prerequisites: `python-06`. Emphasize text normalization, bounded pattern matching, and portable paths.
 Read `python/ds-60day/companion-guides/day07_strings_regex_pathlib.md` and use the learner notebook
 `python/ds-60day/notebooks/day07_strings_regex_pathlib.ipynb`. Do not open or quote anything under `solutions/` unless

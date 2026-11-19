@@ -1,4 +1,4 @@
-# Day 40: Hyperparameter Tuning with SearchCV
+# Day 40: Hyperparameter Tuning with Grid and Randomized Search
 
 **Lesson ID:** `python-40` · **Level:** intermediate · **Dependencies:** `data` · **Network:** offline
 
@@ -19,7 +19,7 @@ By the end of the lesson, you can:
 ## Prerequisites
 
 - Complete `python-39` (gradient boosting).
-- Be comfortable with pipelines and stratified CV from `python-34`–`python-35`.
+- Be comfortable with pipelines and stratified CV from `python-34` to `python-35`.
 - Understand the distinction between hyperparameters and fitted parameters.
 
 ## Vocabulary and mental models
@@ -72,7 +72,7 @@ untouched final test set.
 ## How to run this lesson
 
 **Primary browser route:** run `./classroom` from the repository root and
-choose **Python** on `/classroom`. Open this lesson in the shared workspace,
+choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
 read its capability notice, and use its supported coding or reading workflow.
 The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
 
@@ -91,21 +91,11 @@ for opening this lesson in the Docker classroom.
    lesson complete. A clean run catches hidden state and stale
    variables.
 
-Windows PowerShell:
-
-```powershell
-.\.venv\Scripts\python.exe -m jupyter lab
-```
-
-macOS/Linux:
+Linux, macOS, or Ubuntu in Windows WSL 2:
 
 ```bash
 .venv/bin/python -m jupyter lab
 ```
-
-If the Windows environment uses the documented conda-prefix fallback,
-use `.\.venv\python.exe` in place of
-`.\.venv\Scripts\python.exe`.
 
 ## Concept deep dive: hyperparameter search spaces, fit budgets, and nested evaluation
 
@@ -127,12 +117,6 @@ cross-validation loop evaluates the entire selection procedure.
 - **`step__parameter`:** addresses nested pipeline parameters; inspect `get_params()` instead of guessing names.
 - **`ParameterGrid(space)`:** enumerates the exact Cartesian search and makes the fit budget calculable.
 - **`GridSearchCV(..., scoring=..., refit=...)`:** scores candidates in inner folds and refits the selected configuration on all supplied rows.
-
-Read an API call from the inside out: identify the data entering the
-operation, the state learned (if any), the value returned, and the
-evidence that would make the result trustworthy. A method returning
-without an exception proves only that the syntax and immediate runtime
-path worked.
 
 ### Focused example A: calculate the search budget before fitting
 
@@ -160,9 +144,6 @@ assert len(candidates) == 16
 **Assumption to name:** Every listed combination is valid for the estimator and receives the same fold assignments.
 
 ### Focused example B: make the refit metric explicit in multi-metric search
-
-This second example changes one important condition. Compare it with
-Example A instead of reading it as unrelated syntax.
 
 ```python
 from sklearn.datasets import load_iris
@@ -217,12 +198,12 @@ assert search.refit == "f1_macro"
 
 1. Use `RandomizedSearchCV` with a wider parameter space.
 
-**Verify:** Practice 1; hyperparameter search spaces, fit budgets, and nested evaluation; declare parameter distributions, n_iter, scorer, CV splitter, and seed; print candidate count, expected fit count, best parameters, best CV score, failed-fit count, and one untouched-test metric.
+**Verify:** Declare parameter distributions, n_iter, scorer, CV splitter, and seed; print candidate count, expected fit count, best parameters, best CV score, failed-fit count, and one untouched-test metric.
 
 2. Implement nested cross-validation and compare its result with the non-nested
    search score.
 
-**Verify:** Practice 2; hyperparameter search spaces, fit budgets, and nested evaluation; print every outer-fold score from a search fitted only inside that fold, its mean/std, and the optimistic non-nested best-CV score; assert outer validation indices never enter their inner search.
+**Verify:** Print every outer-fold score from a search fitted only inside that fold, its mean/std, and the optimistic non-nested best-CV score; assert outer validation indices never enter their inner search.
 
 ### Progressive hints
 
@@ -300,7 +281,7 @@ The lesson is complete without an AI assistant. If you want optional
 coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
-Tutor me through `python-40` — Day 40 — Hyperparameter Tuning with SearchCV.
+Tutor me through `python-40` (Day 40: Hyperparameter Tuning with SearchCV).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize hyperparameter search spaces, fit budgets, and nested evaluation. Use exactly these maintained learner materials:

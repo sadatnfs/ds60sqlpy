@@ -91,8 +91,7 @@ They are separate from the browser's saved pads, notes and progress in Docker
 volumes. Neither route automatically copies attempts or completion markers to
 the other; record progress in the interface you actually used.
 
-**Lesson outcome:** use day 26; interactive visualization with plotly and altair to practice interactive visual encodings, bounded interaction, and portable HTML export
-and explain the evidence produced by your code.
+**Outcome:** Make interactive Plotly and Altair charts and export offline HTML.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
@@ -157,14 +156,7 @@ fig = px.scatter(
 (len(fig.data), fig.layout.xaxis.title.text, fig.layout.yaxis.title.text)
 ```
 
-**Expected observation**
-
-```text
-Two traces (one per team) and the `hours`/`tasks` axis titles are reported. The notebook also renders the interactive figure.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** Two traces (one per team) and the `hours`/`tasks` axis titles are reported. The notebook also renders the interactive figure.
 
 ### Worked example 2: Inspect a self-contained HTML representation
 
@@ -180,14 +172,7 @@ html = fig.to_html(full_html=True, include_plotlyjs=True)
 }
 ```
 
-**Expected observation**
-
-```text
-Both Boolean checks are `True`; the file-sized string is large because Plotly JavaScript is embedded.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** Both Boolean checks are `True`; the file-sized string is large because Plotly JavaScript is embedded.
 
 ### A debugging routine for this topic
 
@@ -264,6 +249,11 @@ expected behavior, constraints, and verification into your work cell. A
 result is not complete merely because it “looks right”; run the stated
 assertion or inspection and explain what it proves.
 
+**Dataset:** the exercises use the offline `restaurant-bills` fixture, loaded
+with `from ds60sqlpy.teaching_data import load_teaching_frame` and
+`df = load_teaching_frame("restaurant-bills")`: 240 synthetic bills with the
+columns `total_bill`, `tip`, `sex`, `smoker`, `day`, `time`, and `size`.
+
 1. Create an interactive histogram whose bin count can be changed only within sensible bounds. **Plotly route:** isolate a builder accepting `bins`; **Altair route:** bind a range input to a parameter.
    **Expected behavior:** changing bins alters aggregation without changing the underlying observations.
    **Verify:** test minimum/default/maximum settings and show the displayed total count remains the number of non-missing values.
@@ -333,7 +323,7 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-26`
-(Day 26 — Interactive Visualization with Plotly and Altair). Direct catalog prerequisites: `python-25`.
+(Day 26: Interactive Visualization with Plotly and Altair). Direct catalog prerequisites: `python-25`.
 I have completed the direct prerequisites: `python-25`. Emphasize interactive visual encodings, bounded interaction, and portable HTML export.
 Read `python/ds-60day/companion-guides/day26_viz_plotly_altair.md` and use the learner notebook
 `python/ds-60day/notebooks/day26_viz_plotly_altair.ipynb`. Do not open or quote anything under `solutions/` unless

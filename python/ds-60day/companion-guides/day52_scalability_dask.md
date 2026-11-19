@@ -1,4 +1,4 @@
-# Day 52: Scalability with Dask and Chunked pandas
+# Day 52: Scaling with Dask and Chunked pandas
 
 **Lesson ID:** `python-52` · **Level:** advanced · **Dependencies:** `production` · **Network:** offline
 
@@ -93,21 +93,11 @@ for opening this lesson in the Docker classroom.
    lesson complete. A clean run catches hidden state and stale
    variables.
 
-Windows PowerShell:
-
-```powershell
-.\.venv\Scripts\python.exe -m jupyter lab
-```
-
-macOS/Linux:
+Linux, macOS, or Ubuntu in Windows WSL 2:
 
 ```bash
 .venv/bin/python -m jupyter lab
 ```
-
-If the Windows environment uses the documented conda-prefix fallback,
-use `.\.venv\python.exe` in place of
-`.\.venv\Scripts\python.exe`.
 
 ## Concept deep dive: lazy task graphs, partitions, bounded reducers, and scale evidence
 
@@ -129,12 +119,6 @@ more than merely importing Dask.
 - **lazy expression:** describes tasks and dependencies; inspect partitions/graph before execution.
 - **`.compute()`:** executes the graph and materializes the result in local memory.
 - **chunk state + combine:** keeps sufficient statistics such as sum/count rather than averaging chunk averages incorrectly.
-
-Read an API call from the inside out: identify the data entering the
-operation, the state learned (if any), the value returned, and the
-evidence that would make the result trustworthy. A method returning
-without an exception proves only that the syntax and immediate runtime
-path worked.
 
 ### Focused example A: combine chunk sums and counts correctly
 
@@ -158,9 +142,6 @@ assert correct_mean == 26.5 and wrong_mean_of_means != correct_mean
 **Assumption to name:** Every valid value contributes once and missing-value rules are the same in every chunk.
 
 ### Focused example B: see a lazy Dask computation remain unevaluated
-
-This second example changes one important condition. Compare it with
-Example A instead of reading it as unrelated syntax.
 
 ```python
 from dask import delayed
@@ -209,17 +190,17 @@ assert result == 42 and calls == [21]
 
 1. Read a large local CSV with Dask and compute groupby aggregations.
 
-**Verify:** Practice 1; lazy task graphs, partitions, bounded reducers, and scale evidence; generate/read a named local CSV, print Dask partition count and groupby result, and assert keys/values match pandas within 1e-10 after deterministic sorting.
+**Verify:** Generate/read a named local CSV, print Dask partition count and groupby result, and assert keys/values match pandas within 1e-10 after deterministic sorting.
 
 2. Persist the DataFrame and compare repeated timings with and without
    persistence.
 
-**Verify:** Practice 2; lazy task graphs, partitions, bounded reducers, and scale evidence; record at least three uncached and persisted repeated timings for the same aggregation, Dask graph/partition sizes, and result equality; close the local client and avoid claiming a speedup from one run.
+**Verify:** Record at least three uncached and persisted repeated timings for the same aggregation, Dask graph/partition sizes, and result equality; close the local client and avoid claiming a speedup from one run.
 
 3. Implement the same reduction with `pandas.read_csv(..., chunksize=...)` and
    compare memory and elapsed time.
 
-**Verify:** Practice 3; lazy task graphs, partitions, bounded reducers, and scale evidence; for identical CSV and aggregation, print pandas-chunked and Dask results, elapsed-time samples, and measured peak memory; assert sorted numeric outputs match within 1e-10.
+**Verify:** For identical CSV and aggregation, print pandas-chunked and Dask results, elapsed-time samples, and measured peak memory; assert sorted numeric outputs match within 1e-10.
 
 ### Progressive hints
 
@@ -297,7 +278,7 @@ The lesson is complete without an AI assistant. If you want optional
 coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
-Tutor me through `python-52` : Day 52 : Scalability with Dask and Chunked pandas.
+Tutor me through `python-52` (Day 52: Scalability with Dask and Chunked pandas).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize lazy task graphs, partitions, bounded reducers, and scale evidence. Use exactly these maintained learner materials:

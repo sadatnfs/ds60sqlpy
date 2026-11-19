@@ -1,4 +1,4 @@
-# Day 41: Solutions: Handling Class Imbalance
+# Day 41 Solutions: Handling Class Imbalance
 
 We diagnose imbalance, pick appropriate metrics, try class weighting and resampling, and tune the decision threshold for the minority class. We also plot PR curves for a clearer picture than ROC under imbalance.
 
@@ -28,7 +28,7 @@ X, y = make_classification(n_samples=5000, weights=[0.95, 0.05], flip_y=0.01, ra
 Xtr, Xte, ytr, yte = train_test_split(X, y, stratify=y, random_state=42)
 ```
 
-Worked reference for Exercise 1; class_weight vs SMOTE
+Worked reference for Exercise 1: class_weight vs SMOTE
 ```python
 # Class weighting
 clf_bal = LogisticRegression(max_iter=1000, class_weight="balanced", n_jobs=1)
@@ -36,7 +36,7 @@ clf_bal.fit(Xtr, ytr)
 proba_bal = clf_bal.predict_proba(Xte)[:, 1]
 yhat_bal = (proba_bal >= 0.5).astype(int)
 
-print("Balanced weights — report at 0.5 threshold:")
+print("Balanced weights, report at 0.5 threshold:")
 print(classification_report(yte, yhat_bal, digits=3))
 print(
     {
@@ -54,7 +54,7 @@ try:
     clf_sm = LogisticRegression(max_iter=1000, n_jobs=1).fit(Xtr_sm, ytr_sm)
     proba_sm = clf_sm.predict_proba(Xte)[:, 1]
     yhat_sm = (proba_sm >= 0.5).astype(int)
-    print("SMOTE — report at 0.5 threshold:")
+    print("SMOTE, report at 0.5 threshold:")
     print(classification_report(yte, yhat_sm, digits=3))
     print(
         {
@@ -63,7 +63,7 @@ try:
         }
     )
 except Exception as e:
-    print("SMOTE unavailable — pip install imbalanced-learn to enable.\n", e)
+    print("SMOTE unavailable; pip install imbalanced-learn to enable.\n", e)
 ```
 Notes
 - class_weight='balanced' reweights the loss; very cheap and often effective
@@ -71,7 +71,7 @@ Notes
 
 ---
 
-Worked reference for Exercise 2; Threshold tuning for minority F1
+Worked reference for Exercise 2: Threshold tuning for minority F1
 ```python
 def best_f1_threshold(y_true, proba):
     prec, rec, th = precision_recall_curve(y_true, proba)
@@ -102,14 +102,14 @@ Tips
 
 ---
 
-Worked reference for Exercise 3; PR curve
+Worked reference for Exercise 3: PR curve
 ```python
 prec, rec, _ = precision_recall_curve(yte, proba_bal)
 ap = average_precision_score(yte, proba_bal)
 plt.plot(rec, prec, label=f"LogReg (AP={ap:.3f})")
 plt.xlabel("Recall")
 plt.ylabel("Precision")
-plt.title("Precision–Recall curve")
+plt.title("Precision-recall curve")
 plt.legend()
 plt.tight_layout()
 plt.show()
@@ -169,7 +169,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1; rare-class metrics, training interventions, and threshold policy; compare class_weight='balanced' and SMOTE using identical stratified folds, estimator, threshold, and metrics; prove SMOTE is inside the training pipeline and print class support, confusion counts, PR AUC, and minority F1 for both.
+**Verify:** Compare class_weight='balanced' and SMOTE using identical stratified folds, estimator, threshold, and metrics; prove SMOTE is inside the training pipeline and print class support, confusion counts, PR AUC, and minority F1 for both.
 
 ### Exercise 2: Original lesson practice
 
@@ -181,11 +181,11 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2; rare-class metrics, training interventions, and threshold policy; choose the threshold from validation predictions only; print the selected threshold, precision, recall, F1, and TP/FP/FN counts, then evaluate that frozen threshold once on untouched test predictions.
+**Verify:** Choose the threshold from validation predictions only; print the selected threshold, precision, recall, F1, and TP/FP/FN counts, then evaluate that frozen threshold once on untouched test predictions.
 
 ### Exercise 3: Original lesson practice
 
-**Prompt:** Plot precision–recall curves and discuss the tradeoff.
+**Prompt:** Plot precision-recall curves and discuss the tradeoff.
 
 **How to reason about it:** A precision-recall curve should include class prevalence and support. Use model scores rather than hard labels and do not compare curves drawn from different evaluation populations without labeling that difference.
 
@@ -193,7 +193,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 3; rare-class metrics, training interventions, and threshold policy; save a labeled precision-recall curve with no-skill prevalence baseline and chosen threshold marker; print average precision and the marker's precision/recall rather than judging the plot alone.
+**Verify:** Save a labeled precision-recall curve with no-skill prevalence baseline and chosen threshold marker; print average precision and the marker's precision/recall rather than judging the plot alone.
 
 ### Exercise 4: Prevalence-shift reasoning
 

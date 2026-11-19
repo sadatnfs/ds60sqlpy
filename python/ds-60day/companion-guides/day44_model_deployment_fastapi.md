@@ -1,4 +1,4 @@
-# Day 44: Model Deployment with FastAPI
+# Day 44: Serving a Model with FastAPI
 
 **Lesson ID:** `python-44` · **Level:** intermediate · **Dependencies:** `production` · **Network:** offline
 
@@ -13,7 +13,7 @@ By the end of the lesson, you can:
 - save and reload a trusted scikit-learn artifact with `joblib`;
 - define typed request data with Pydantic;
 - implement a FastAPI `POST /predict` endpoint;
-- test valid and invalid requests from PowerShell or a POSIX shell; and
+- test valid and invalid requests with `curl` from Bash (Linux, macOS, or Windows WSL 2); and
 - identify versioning, security, concurrency, and observability gaps.
 
 ## Prerequisites
@@ -76,22 +76,19 @@ development reload only while editing.
 
 ## Test the request on your operating system
 
-macOS/Linux:
+Use Bash on Linux, macOS, or Ubuntu in Windows WSL 2. The server keeps running
+in its terminal, so start it in one terminal:
 
 ```bash
 .venv/bin/python -m uvicorn app:app --reload
+```
+
+Then send the request from a second terminal:
+
+```bash
 curl -X POST http://127.0.0.1:8000/predict \
   -H 'Content-Type: application/json' \
   -d '{"features":[5.1,3.5,1.4,0.2]}'
-```
-
-Windows PowerShell (server in one terminal, request in another):
-
-```powershell
-.\.venv\Scripts\python.exe -m uvicorn app:app --reload
-$body = @{ features = @(5.1, 3.5, 1.4, 0.2) } | ConvertTo-Json
-Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:8000/predict' `
-  -ContentType 'application/json' -Body $body
 ```
 
 <!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT -->
@@ -99,7 +96,7 @@ Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:8000/predict' `
 ## How to run this lesson
 
 **Primary browser route:** run `./classroom` from the repository root and
-choose **Python** on `/classroom`. Open this lesson in the shared workspace,
+choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
 read its capability notice, and use its supported coding or reading workflow.
 The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
 
@@ -118,21 +115,11 @@ for opening this lesson in the Docker classroom.
    lesson complete. A clean run catches hidden state and stale
    variables.
 
-Windows PowerShell:
-
-```powershell
-.\.venv\Scripts\python.exe -m jupyter lab
-```
-
-macOS/Linux:
+Linux, macOS, or Ubuntu in Windows WSL 2:
 
 ```bash
 .venv/bin/python -m jupyter lab
 ```
-
-If the Windows environment uses the documented conda-prefix fallback,
-use `.\.venv\python.exe` in place of
-`.\.venv\Scripts\python.exe`.
 
 ## Concept deep dive: validated request contracts, trusted artifacts, and testable inference endpoints
 
@@ -153,12 +140,6 @@ must be verified before the service becomes ready.
 - **`class Request(BaseModel)`:** declares typed input fields and validation constraints that become JSON Schema.
 - **`@app.post('/predict', response_model=...)`:** binds an HTTP method/path to a validated function contract.
 - **`TestClient(app).post(..., json=payload)`:** exercises serialization, routing, validation, and response behavior without starting a network server.
-
-Read an API call from the inside out: identify the data entering the
-operation, the state learned (if any), the value returned, and the
-evidence that would make the result trustworthy. A method returning
-without an exception proves only that the syntax and immediate runtime
-path worked.
 
 ### Focused example A: make request validation fail before inference
 
@@ -187,9 +168,6 @@ except ValidationError as exc:
 **Assumption to name:** Exactly four ordered measurements is the public contract; coercion and range policy are documented.
 
 ### Focused example B: check artifact feature compatibility explicitly
-
-This second example changes one important condition. Compare it with
-Example A instead of reading it as unrelated syntax.
 
 ```python
 import numpy as np
@@ -233,15 +211,15 @@ print(model.predict_proba(request_features).tolist())
 
 1. Add input validation and friendly error behavior.
 
-**Verify:** Practice 1; validated request contracts, trusted artifacts, and testable inference endpoints; with TestClient, assert a valid payload returns 200 and the declared response schema; assert missing, wrong-type, extra, and out-of-range fields return 422 with field-level errors and no traceback or request body in logs.
+**Verify:** With TestClient, assert a valid payload returns 200 and the declared response schema; assert missing, wrong-type, extra, and out-of-range fields return 422 with field-level errors and no traceback or request body in logs.
 
 2. Return the class name as well as the numeric class identifier.
 
-**Verify:** Practice 2; validated request contracts, trusted artifacts, and testable inference endpoints; for a fixed request, assert the response contains both numeric class_id and the matching class_name from persisted metadata; test an unknown/out-of-range model class as an explicit startup or 5xx failure.
+**Verify:** For a fixed request, assert the response contains both numeric class_id and the matching class_name from persisted metadata; test an unknown/out-of-range model class as an explicit startup or 5xx failure.
 
 3. Create a minimal runtime dependency file for this API.
 
-**Verify:** Practice 3; validated request contracts, trusted artifacts, and testable inference endpoints; build a fresh environment from the runtime file, run the health and predict smoke tests with exit code 0, and record installed versions; exclude notebooks, test-only tools, and undeclared transitive guesses.
+**Verify:** Build a fresh environment from the runtime file, run the health and predict smoke tests with exit code 0, and record installed versions; exclude notebooks, test-only tools, and undeclared transitive guesses.
 
 ### Progressive hints
 
@@ -314,7 +292,7 @@ The lesson is complete without an AI assistant. If you want optional
 coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
-Tutor me through `python-44` — Day 44 — Model Deployment with FastAPI.
+Tutor me through `python-44` (Day 44: Model Deployment with FastAPI).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize validated request contracts, trusted artifacts, and testable inference endpoints. Use exactly these maintained learner materials:

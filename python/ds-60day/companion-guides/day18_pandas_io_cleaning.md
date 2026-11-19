@@ -1,4 +1,4 @@
-# Day 18: pandas I/O and Data Cleaning
+# Day 18: Loading and Cleaning Data with pandas
 
 **Offline teaching data:** The [original synthetic fixtures](../../fixtures/README.md) replace first-run sample-data downloads. Their values are not historical or observational evidence. Keep numerical conclusions scoped to the declared teaching input.
 
@@ -74,8 +74,7 @@ They are separate from the browser's saved pads, notes and progress in Docker
 volumes. Neither route automatically copies attempts or completion markers to
 the other; record progress in the interface you actually used.
 
-**Lesson outcome:** use day 18; pandas i/o and data cleaning to practice pandas input boundaries, explicit cleaning, and reproducible output
-and explain the evidence produced by your code.
+**Outcome:** Load a dataset, profile it, and clean it without changing the raw data.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
@@ -140,9 +139,6 @@ cleaned = raw.assign(
 The names are trimmed, numeric text is converted, and one conversion failure is reported as missing.
 ```
 
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
-
 ### Worked example 2: Write a cleaning function that preserves raw input
 
 Copy at the boundary and make repeated application stable. Before running it, predict the final displayed value and
@@ -161,14 +157,7 @@ twice = clean_people(once)
 (raw.loc[0, "name"], once.equals(twice))
 ```
 
-**Expected observation**
-
-```text
-`(' Ada ', True)`. The raw frame is unchanged and the demonstrated cleaner is idempotent on this data.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** `(' Ada ', True)`. The raw frame is unchanged and the demonstrated cleaner is idempotent on this data.
 
 ### A debugging routine for this topic
 
@@ -231,6 +220,41 @@ tidy = raw.pipe(clean)
 Inspect the rows that became missing before filling or dropping them; coercion
 without review can hide a source-system change.
 
+### Read and write CSV with explicit parsing rules
+
+`pd.read_csv` guesses types unless you state them. The example reads CSV text
+from memory (`StringIO` behaves like an open file), names the text columns'
+dtype, declares that `n/a` means missing, and parses the date column. It then
+writes the frame back to CSV and reads it again with the same rules to prove
+the round trip keeps every value and type.
+
+```python
+from io import StringIO
+
+import pandas as pd
+
+csv_text = """order_id,amount,city,ordered_on
+A1,10.5,SF,2025-01-03
+A2,n/a,NY,2025-01-04
+A3,7,ny,2025-01-05
+"""
+rules = {"dtype": {"order_id": "string", "city": "string"}, "parse_dates": ["ordered_on"]}
+orders = pd.read_csv(StringIO(csv_text), na_values=["n/a"], **rules)
+
+buffer = StringIO()
+orders.to_csv(buffer, index=False)
+reloaded = pd.read_csv(StringIO(buffer.getvalue()), **rules)
+(orders.dtypes.astype(str).to_dict(), int(orders["amount"].isna().sum()), reloaded.equals(orders))
+```
+
+**Expected observation:**
+`({'order_id': 'string', 'amount': 'float64', 'city': 'string', 'ordered_on': 'datetime64[ns]'}, 1, True)`.
+Exactly one amount became missing because `n/a` was declared as a missing
+marker, and the written CSV stores it as an empty field, which the reader
+treats as missing again. Without `dtype=`, the text columns would be `object`;
+without `parse_dates=`, `ordered_on` would stay text. `city` still contains
+both `NY` and `ny`: reading a file does not clean it, which is the next step.
+
 ## Dataset and format notes
 
 The checked-in synthetic teaching fixtures load without network access.
@@ -242,6 +266,13 @@ Each item is a complete mini-contract. Before writing code, copy its input,
 expected behavior, constraints, and verification into your work cell. A
 result is not complete merely because it “looks right”; run the stated
 assertion or inspection and explain what it proves.
+
+**Dataset:** the exercises use the offline `passenger-outcomes` fixture,
+loaded with `from ds60sqlpy.teaching_data import load_teaching_frame` and
+`df = load_teaching_frame("passenger-outcomes")`. Its 360 synthetic rows have
+15 columns, including `survived`, `pclass`, `sex`, `age`, `fare`, `embarked`, and
+`deck`; `age` is missing in 28 rows, `fare` in 12, `embarked` in 10, and `deck`
+in 270.
 
 1. Load a local CSV into pandas, recording path, encoding, row grain, shape, columns, dtypes, missing counts, and duplicate-key counts before changing anything.
    **Expected behavior:** produce a compact profile, not a full data dump. **Constraint:** use repository-relative `Path` objects and no network source.
@@ -302,6 +333,10 @@ missing values, and the input frame remains unchanged.
   before and after the call.
 - **CSV values gain unexpected types:** inspect raw strings and pass explicit
   `dtype`/parsing rules at the boundary.
+- **Text dtype names differ between pandas versions:** pandas 3 infers text
+  columns as the `str` dtype instead of `object` (see the pandas 3 note in
+  Day 17). Request the dtype you rely on, such as `"string"`, rather than
+  depending on inference.
 
 ## Continue
 
@@ -317,7 +352,7 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-18`
-(Day 18 — pandas I/O and Data Cleaning). Direct catalog prerequisites: `python-17`.
+(Day 18: pandas I/O and Data Cleaning). Direct catalog prerequisites: `python-17`.
 I have completed the direct prerequisites: `python-17`. Emphasize pandas input boundaries, explicit cleaning, and reproducible output.
 Read `python/ds-60day/companion-guides/day18_pandas_io_cleaning.md` and use the learner notebook
 `python/ds-60day/notebooks/day18_pandas_io_cleaning.ipynb`. Do not open or quote anything under `solutions/` unless

@@ -62,7 +62,7 @@ separate test estimate.
 ## How to run this lesson
 
 **Primary browser route:** run `./classroom` from the repository root and
-choose **Python** on `/classroom`. Open this lesson in the shared workspace,
+choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
 read its capability notice, and use its supported coding or reading workflow.
 The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
 
@@ -81,21 +81,11 @@ for opening this lesson in the Docker classroom.
    lesson complete. A clean run catches hidden state and stale
    variables.
 
-Windows PowerShell:
-
-```powershell
-.\.venv\Scripts\python.exe -m jupyter lab
-```
-
-macOS/Linux:
+Linux, macOS, or Ubuntu in Windows WSL 2:
 
 ```bash
 .venv/bin/python -m jupyter lab
 ```
-
-If the Windows environment uses the documented conda-prefix fallback,
-use `.\.venv\python.exe` in place of
-`.\.venv\Scripts\python.exe`.
 
 ## Concept deep dive: tree splits, ensemble variance reduction, and held-out importance
 
@@ -117,12 +107,6 @@ association is broken. Neither establishes causality.
 - **`DecisionTreeClassifier(max_depth=..., min_samples_leaf=...)`:** sets capacity controls before fitting and exposes tree-specific train/validation gaps.
 - **`RandomForestClassifier(n_estimators=..., random_state=...)`:** averages bootstrapped, feature-subsampled trees; enough estimators stabilize rather than deepen the model.
 - **`permutation_importance(model, X_valid, y_valid, ...)`:** measures held-out score change under repeated feature shuffles.
-
-Read an API call from the inside out: identify the data entering the
-operation, the state learned (if any), the value returned, and the
-evidence that would make the result trustworthy. A method returning
-without an exception proves only that the syntax and immediate runtime
-path worked.
 
 ### Focused example A: make the depth-versus-generalization gap visible
 
@@ -149,9 +133,6 @@ for depth in (1, 3, 8, None):
 
 ### Focused example B: test a deliberately useless noise feature
 
-This second example changes one important condition. Compare it with
-Example A instead of reading it as unrelated syntax.
-
 ```python
 import numpy as np
 from sklearn.datasets import load_breast_cancer
@@ -166,17 +147,28 @@ X_train, X_valid, y_train, y_valid = train_test_split(X, y, stratify=y, random_s
 forest = RandomForestClassifier(n_estimators=80, random_state=3802, n_jobs=1)
 forest.fit(X_train, y_train)
 importance = permutation_importance(
-    forest, X_valid, y_valid, n_repeats=5, random_state=3802, n_jobs=1
+    forest, X_valid, y_valid, n_repeats=5, random_state=3802, n_jobs=1, scoring="neg_log_loss"
 )
+means = importance.importances_mean
+noise_rank = int((means > means[-1]).sum()) + 1
 print(
     {
-        "noise_importance": importance.importances_mean[-1],
-        "best_importance": importance.importances_mean.max(),
+        "noise_importance": round(float(means[-1]), 4),
+        "best_importance": round(float(means.max()), 4),
+        "noise_rank": f"{noise_rank} of {len(means)}",
     }
 )
 ```
 
-**Expected observation:** The random noise feature should have importance near zero, while at least one real feature matters more.
+**Expected observation:** `{'noise_importance': -0.0001, 'best_importance': 0.0758, 'noise_rank': '30 of 31'}`.
+Scored by log loss, shuffling the noise column changes almost nothing and it
+ranks 30 of 31, while the best real feature raises validation log loss by about
+0.076. With the default accuracy scoring, the same forest reports a best
+importance of only 0.0028 and ranks the noise column 11 of 31. Accuracy on 143
+validation rows changes in steps of 1/143 (about 0.007), and correlated
+breast-cancer measurements substitute for each other when only one is
+shuffled, so single-feature accuracy importance is too coarse here. Log loss
+responds to every change in predicted probability.
 
 **Assumption to name:** The model's held-out score is good enough that score perturbations are interpretable.
 
@@ -204,11 +196,11 @@ print(
 
 1. Plot tree depth versus accuracy.
 
-**Verify:** Practice 1; tree splits, ensemble variance reduction, and held-out importance; for a declared depth grid including an unconstrained tree, print train and validation accuracy mean/std on identical folds and save the labeled depth curve; choose depth from validation evidence only.
+**Verify:** For a declared depth grid including an unconstrained tree, print train and validation accuracy mean/std on identical folds and save the labeled depth curve; choose depth from validation evidence only.
 
 2. Inspect feature importances and discuss their reliability.
 
-**Verify:** Practice 2; tree splits, ensemble variance reduction, and held-out importance; report impurity and seeded held-out permutation importance by feature, including a synthetic noise feature and permutation variability; flag any claim that treats impurity rank as causal or stable without the held-out check.
+**Verify:** Report impurity and seeded held-out permutation importance by feature, including a synthetic noise feature and permutation variability; flag any claim that treats impurity rank as causal or stable without the held-out check.
 
 ### Progressive hints
 
@@ -286,7 +278,7 @@ The lesson is complete without an AI assistant. If you want optional
 coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
-Tutor me through `python-38` — Day 38 — Decision Trees and Random Forests.
+Tutor me through `python-38` (Day 38: Decision Trees and Random Forests).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize tree splits, ensemble variance reduction, and held-out importance. Use exactly these maintained learner materials:

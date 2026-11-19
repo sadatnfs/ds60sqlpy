@@ -1,4 +1,4 @@
-# Day 37: Solutions: Regularization and Linear Models
+# Day 37 Solutions: Regularized Linear Models
 
 We compare Ridge (L2) and Lasso (L1) with proper scaling, sweep alpha values, and inspect sparsity of coefficients. We also touch on ElasticNet.
 
@@ -22,7 +22,7 @@ X, y = load_diabetes(return_X_y=True)
 Xtr, Xte, ytr, yte = train_test_split(X, y, random_state=42)
 ```
 
-Worked reference for Exercise 1; Alpha sweep
+Worked reference for Exercise 1: Alpha sweep
 ```python
 alphas = np.logspace(-3, 2, 10)  # 0.001..100
 ridge_scores, lasso_scores = [], []
@@ -47,7 +47,7 @@ Notes
 
 ---
 
-Worked reference for Exercise 2; Coefficients and sparsity
+Worked reference for Exercise 2: Coefficients and sparsity
 ```python
 best_ridge = Pipeline([("sc", StandardScaler()), ("m", Ridge(alpha=1.0))]).fit(Xtr, ytr)
 best_lasso = Pipeline([("sc", StandardScaler()), ("m", Lasso(alpha=0.01, max_iter=20000))]).fit(
@@ -66,7 +66,7 @@ Interpretation
 
 ---
 
-Worked reference for Exercise 3; ElasticNet
+Worked reference for Exercise 3: ElasticNet
 ```python
 enet = Pipeline(
     [("sc", StandardScaler()), ("m", ElasticNet(alpha=0.1, l1_ratio=0.5, max_iter=20000))]
@@ -127,7 +127,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1; regularization strength, coefficient shrinkage, sparsity, and stability; evaluate Ridge and Lasso over one declared logarithmic alpha grid with identical folds; save a labeled validation-score curve, print the selected alpha/mean/std for each model, and leave the final test set untouched.
+**Verify:** Evaluate Ridge and Lasso over one declared logarithmic alpha grid with identical folds; save a labeled validation-score curve, print the selected alpha/mean/std for each model, and leave the final test set untouched.
 
 ### Exercise 2: Original lesson practice
 
@@ -139,7 +139,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2; regularization strength, coefficient shrinkage, sparsity, and stability; print a feature-aligned coefficient table for Ridge and Lasso, define the near-zero tolerance used for sparsity, and report each nonzero count plus validation metric from the same scaled pipeline.
+**Verify:** Print a feature-aligned coefficient table for Ridge and Lasso, define the near-zero tolerance used for sparsity, and report each nonzero count plus validation metric from the same scaled pipeline.
 
 ### Exercise 3: Prediction
 

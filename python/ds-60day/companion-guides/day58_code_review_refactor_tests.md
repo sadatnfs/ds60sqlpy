@@ -74,22 +74,13 @@ tested without downloading data, opening a notebook, or fitting a model.
 
 ## Run quality checks
 
-macOS/Linux:
+Linux, macOS, or Ubuntu in Windows WSL 2:
 
 ```bash
 .venv/bin/ruff check src tests
 .venv/bin/ruff format --check src tests
 .venv/bin/mypy src tests
 .venv/bin/python -m pytest -q
-```
-
-Windows PowerShell:
-
-```powershell
-.\.venv\Scripts\ruff.exe check src tests
-.\.venv\Scripts\ruff.exe format --check src tests
-.\.venv\Scripts\mypy.exe src tests
-.\.venv\Scripts\python.exe -m pytest -q
 ```
 
 Ruff is the repository's sole Python formatter and linter; keep its checked-in
@@ -100,7 +91,7 @@ configuration as the source of truth.
 ## How to run this lesson
 
 **Primary browser route:** run `./classroom` from the repository root and
-choose **Python** on `/classroom`. Open this lesson in the shared workspace,
+choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
 read its capability notice, and use its supported coding or reading workflow.
 The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
 
@@ -119,21 +110,11 @@ for opening this lesson in the Docker classroom.
    lesson complete. A clean run catches hidden state and stale
    variables.
 
-Windows PowerShell:
-
-```powershell
-.\.venv\Scripts\python.exe -m jupyter lab
-```
-
-macOS/Linux:
+Linux, macOS, or Ubuntu in Windows WSL 2:
 
 ```bash
 .venv/bin/python -m jupyter lab
 ```
-
-If the Windows environment uses the documented conda-prefix fallback,
-use `.\.venv\python.exe` in place of
-`.\.venv\Scripts\python.exe`.
 
 ## Concept deep dive: behavior-preserving refactoring, seams, tests, and compatibility review
 
@@ -155,12 +136,6 @@ cannot prove runtime or domain behavior.
 - **characterization test:** locks down important current behavior before extracting or renaming it.
 - **pure core + impure shell:** isolates transformations from I/O so normal, boundary, and failure cases are deterministic.
 - **Ruff + mypy + pytest:** checks formatting/lint, static type contracts, and executable behavior as complementary evidence.
-
-Read an API call from the inside out: identify the data entering the
-operation, the state learned (if any), the value returned, and the
-evidence that would make the result trustworthy. A method returning
-without an exception proves only that the syntax and immediate runtime
-path worked.
 
 ### Focused example A: capture legacy behavior before extraction
 
@@ -187,9 +162,6 @@ assert observed == 4.0  # characterization: preserve while restructuring
 **Assumption to name:** Rounding only the final total is intended behavior; malformed-row policy still needs a failure test.
 
 ### Focused example B: extract a pure boundary with explicit failures
-
-This second example changes one important condition. Compare it with
-Example A instead of reading it as unrelated syntax.
 
 ```python
 from decimal import Decimal, InvalidOperation
@@ -241,15 +213,15 @@ except ValueError as exc:
 
 1. Move at least two notebook functions into a `src/` package and add tests.
 
-**Verify:** Practice 1; behavior-preserving refactoring, seams, tests, and compatibility review; import two moved functions from src in a fresh process and run focused normal/boundary/failure tests with exit code 0; prove the notebook now calls those imports and no copied implementation remains.
+**Verify:** Import two moved functions from src in a fresh process and run focused normal/boundary/failure tests with exit code 0; prove the notebook now calls those imports and no copied implementation remains.
 
 2. Add type hints and docstrings, then run mypy.
 
-**Verify:** Practice 2; behavior-preserving refactoring, seams, tests, and compatibility review; run mypy on the exact src/test paths with exit code 0 and save its transcript; include parameter/return annotations and docstrings that state errors/side effects, plus one negative typing fixture that fails as expected.
+**Verify:** Run mypy on the exact src/test paths with exit code 0 and save its transcript; include parameter/return annotations and docstrings that state errors/side effects, plus one negative typing fixture that fails as expected.
 
 3. Write a short maintainer guide in the project root.
 
-**Verify:** Practice 3; behavior-preserving refactoring, seams, tests, and compatibility review; write a maintainer guide containing clean setup, test/lint/type commands, architecture/data flow, artifact locations, release/rollback, and troubleshooting; have another clean shell execute every command successfully.
+**Verify:** Write a maintainer guide containing clean setup, test/lint/type commands, architecture/data flow, artifact locations, release/rollback, and troubleshooting; have another clean shell execute every command successfully.
 
 ### Progressive hints
 
@@ -326,7 +298,7 @@ The lesson is complete without an AI assistant. If you want optional
 coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
-Tutor me through `python-58` — Day 58 — Code Review, Refactoring, and Tests.
+Tutor me through `python-58` (Day 58: Code Review, Refactoring, and Tests).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize behavior-preserving refactoring, seams, tests, and compatibility review. Use exactly these maintained learner materials:

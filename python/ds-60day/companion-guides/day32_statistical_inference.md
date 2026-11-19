@@ -1,4 +1,4 @@
-# Day 32: Statistical Inference
+# Day 32: Statistical Inference: Intervals and Tests
 
 **Lesson ID:** `python-32` · **Level:** intermediate · **Dependencies:** `data` · **Network:** offline
 
@@ -68,7 +68,7 @@ with the sample size and assumptions; a p-value alone hides the effect magnitude
 ## How to run this lesson
 
 **Primary browser route:** run `./classroom` from the repository root and
-choose **Python** on `/classroom`. Open this lesson in the shared workspace,
+choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
 read its capability notice, and use its supported coding or reading workflow.
 The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
 
@@ -87,21 +87,11 @@ for opening this lesson in the Docker classroom.
    lesson complete. A clean run catches hidden state and stale
    variables.
 
-Windows PowerShell:
-
-```powershell
-.\.venv\Scripts\python.exe -m jupyter lab
-```
-
-macOS/Linux:
+Linux, macOS, or Ubuntu in Windows WSL 2:
 
 ```bash
 .venv/bin/python -m jupyter lab
 ```
-
-If the Windows environment uses the documented conda-prefix fallback,
-use `.\.venv\python.exe` in place of
-`.\.venv\Scripts\python.exe`.
 
 ## Concept deep dive: sampling uncertainty, confidence intervals, and hypothesis-test evidence
 
@@ -124,12 +114,6 @@ true, and it does not measure whether an effect is useful.
 - **`stats.ttest_1samp(sample, popmean)`:** compares a sample mean with a reference value using a t statistic and estimated standard error.
 - **`stats.ttest_ind(a, b, equal_var=False)`:** runs Welch's two-sample test without assuming equal population variances.
 - **`estimate ± critical_value * standard_error`:** forms an interval only after choosing a confidence level and an appropriate sampling model.
-
-Read an API call from the inside out: identify the data entering the
-operation, the state learned (if any), the value returned, and the
-evidence that would make the result trustworthy. A method returning
-without an exception proves only that the syntax and immediate runtime
-path worked.
 
 ### Focused example A: see interval width respond to sample size
 
@@ -163,9 +147,6 @@ assert np.ptp(large_ci) < np.ptp(small_ci)
 **Assumption to name:** The observations are independent and the mean's t-based sampling model is reasonable.
 
 ### Focused example B: separate statistical detection from practical size
-
-This second example changes one important condition. Compare it with
-Example A instead of reading it as unrelated syntax.
 
 ```python
 import numpy as np
@@ -208,18 +189,18 @@ assert abs(standardized_effect) < 0.05
 1. Draw groups from `Normal(0, 1)` and `Normal(0.3, 1)`, then test the
    difference in means with Welch's t-test.
 
-**Verify:** Practice 1; sampling uncertainty, confidence intervals, and hypothesis-test evidence; record seed, both sample sizes, sample means/variances, Welch t statistic, degrees of freedom, and p-value; independently recompute the mean difference and state the exact null plus the decision at a declared alpha.
+**Verify:** Record seed, both sample sizes, sample means/variances, Welch t statistic, degrees of freedom, and p-value; independently recompute the mean difference and state the exact null plus the decision at a declared alpha.
 
 2. Build a contingency table from categorical data and run a chi-square test.
    For a fully offline run, construct a small table directly; a cached Seaborn
    dataset is optional.
 
-**Verify:** Practice 2; sampling uncertainty, confidence intervals, and hypothesis-test evidence; print the observed and expected contingency tables, chi-square statistic, degrees of freedom, and p-value; assert observed and expected totals match and flag any expected cell below 5.
+**Verify:** Print the observed and expected contingency tables, chi-square statistic, degrees of freedom, and p-value; assert observed and expected totals match and flag any expected cell below 5.
 
 3. Compute 90% and 99% confidence intervals for the same mean and compare their
    widths.
 
-**Verify:** Practice 3; sampling uncertainty, confidence intervals, and hypothesis-test evidence; from one unchanged sample, print its mean, standard error, and both interval endpoints; assert the 99% interval is wider than the 90% interval and both are centered on the same sample mean.
+**Verify:** From one unchanged sample, print its mean, standard error, and both interval endpoints; assert the 99% interval is wider than the 90% interval and both are centered on the same sample mean.
 
 ### Progressive hints
 
@@ -291,7 +272,7 @@ The lesson is complete without an AI assistant. If you want optional
 coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
-Tutor me through `python-32` — Day 32 — Statistical Inference.
+Tutor me through `python-32` (Day 32: Statistical Inference).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize sampling uncertainty, confidence intervals, and hypothesis-test evidence. Use exactly these maintained learner materials:

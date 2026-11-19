@@ -69,8 +69,7 @@ They are separate from the browser's saved pads, notes and progress in Docker
 volumes. Neither route automatically copies attempts or completion markers to
 the other; record progress in the interface you actually used.
 
-**Lesson outcome:** use day 6; lists, tuples, sets, and dictionaries to practice choosing lists, tuples, sets, and dictionaries by semantics
-and explain the evidence produced by your code.
+**Outcome:** Choose a list, tuple, set, or dictionary for what the data must guarantee.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
@@ -124,14 +123,7 @@ for value in values:
 unique_in_order
 ```
 
-**Expected observation**
-
-```text
-`['a', 'b', 'c']`. Converting straight to a set would represent uniqueness but would not express first-seen order.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** `['a', 'b', 'c']`. Converting straight to a set would represent uniqueness but would not express first-seen order.
 
 ### Worked example 2: Aggregate pairs into a dictionary
 
@@ -146,14 +138,7 @@ for product, quantity in purchases:
 totals
 ```
 
-**Expected observation**
-
-```text
-`{'tea': 5, 'coffee': 1}`. Tuple unpacking gives names to the two fields in each pair.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** `{'tea': 5, 'coffee': 1}`. Tuple unpacking gives names to the two fields in each pair.
 
 ### A debugging routine for this topic
 
@@ -293,7 +278,7 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-06`
-(Day 6 — Lists, Tuples, Sets, and Dictionaries). Direct catalog prerequisites: `python-05`.
+(Day 6: Lists, Tuples, Sets, and Dictionaries). Direct catalog prerequisites: `python-05`.
 I have completed the direct prerequisites: `python-05`. Emphasize choosing lists, tuples, sets, and dictionaries by semantics.
 Read `python/ds-60day/companion-guides/day06_data_structures.md` and use the learner notebook
 `python/ds-60day/notebooks/day06_data_structures.ipynb`. Do not open or quote anything under `solutions/` unless

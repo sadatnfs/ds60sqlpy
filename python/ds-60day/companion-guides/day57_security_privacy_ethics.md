@@ -76,7 +76,7 @@ reused repository constant.
 ## How to run this lesson
 
 **Primary browser route:** run `./classroom` from the repository root and
-choose **Python** on `/classroom`. Open this lesson in the shared workspace,
+choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
 read its capability notice, and use its supported coding or reading workflow.
 The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
 
@@ -95,21 +95,11 @@ for opening this lesson in the Docker classroom.
    lesson complete. A clean run catches hidden state and stale
    variables.
 
-Windows PowerShell:
-
-```powershell
-.\.venv\Scripts\python.exe -m jupyter lab
-```
-
-macOS/Linux:
+Linux, macOS, or Ubuntu in Windows WSL 2:
 
 ```bash
 .venv/bin/python -m jupyter lab
 ```
-
-If the Windows environment uses the documented conda-prefix fallback,
-use `.\.venv\python.exe` in place of
-`.\.venv\Scripts\python.exe`.
 
 ## Concept deep dive: data minimization, privacy boundaries, fairness evidence, and accountable controls
 
@@ -132,12 +122,6 @@ uncertainty, and harm analysis, not a single parity number.
 - **detection → review → action:** treats regex/PII scanners as bounded signals with false positives and false negatives.
 - **group metric + support:** reports numerator/denominator and uncertainty so tiny groups do not create confident-looking claims.
 
-Read an API call from the inside out: identify the data entering the
-operation, the state learned (if any), the value returned, and the
-evidence that would make the result trustworthy. A method returning
-without an exception proves only that the syntax and immediate runtime
-path worked.
-
 ### Focused example A: minimize a record through an allowlist
 
 Before running the example, predict the shape, type, or direction of the
@@ -152,7 +136,7 @@ raw_record = {
     "prediction": 0.72,
     "free_text": "not required for this report",
 }
-allowed_fields = {"record_id", "age_band", "prediction"}
+allowed_fields = ("record_id", "age_band", "prediction")  # a tuple keeps a stable order
 minimized = {key: raw_record[key] for key in allowed_fields}
 print(minimized)
 assert "email" not in minimized and "free_text" not in minimized
@@ -163,9 +147,6 @@ assert "email" not in minimized and "free_text" not in minimized
 **Assumption to name:** The purpose and access model justify each allowed field, including the opaque record ID.
 
 ### Focused example B: attach sample support to group error rates
-
-This second example changes one important condition. Compare it with
-Example A instead of reading it as unrelated syntax.
 
 ```python
 groups = {
@@ -211,19 +192,19 @@ assert report["group_b"]["support"] == 5
 
 1. Build a DataFrame PII scanner covering column names and free text.
 
-**Verify:** Practice 1; data minimization, privacy boundaries, fairness evidence, and accountable controls; run the scanner on named columns and free-text fixtures containing email, phone, clean text, and a deliberate false positive; print row/field/finding type without raw PII and report misses/false hits.
+**Verify:** Run the scanner on named columns and free-text fixtures containing email, phone, clean text, and a deliberate false positive; print row/field/finding type without raw PII and report misses/false hits.
 
 2. Add a function that masks email addresses and phone numbers in text.
 
-**Verify:** Practice 2; data minimization, privacy boundaries, fairness evidence, and accountable controls; assert masking replaces complete email and phone fixtures with declared placeholders, preserves surrounding non-PII text, is idempotent on a second pass, and handles malformed/boundary strings explicitly.
+**Verify:** Assert masking replaces complete email and phone fixtures with declared placeholders, preserves surrounding non-PII text, is idempotent on a second pass, and handles malformed/boundary strings explicitly.
 
 3. Simulate subgroup precision and recall for a classifier and compare groups.
 
-**Verify:** Practice 3; data minimization, privacy boundaries, fairness evidence, and accountable controls; for each subgroup, print TP/FP/FN, support, precision, recall, and uncertainty or minimum-support warning; verify each rate from its counts and avoid ranking groups with insufficient denominators.
+**Verify:** For each subgroup, print TP/FP/FN, support, precision, recall, and uncertainty or minimum-support warning; verify each rate from its counts and avoid ranking groups with insufficient denominators.
 
 4. Draft a one-page data-ethics checklist for your project.
 
-**Verify:** Practice 4; data minimization, privacy boundaries, fairness evidence, and accountable controls; save a one-page Markdown checklist file with owner and evidence for collection purpose, minimization, consent/legal basis, access, retention/deletion, security, bias evaluation, incident response, and stop/go approval.
+**Verify:** Save a one-page Markdown checklist file with owner and evidence for collection purpose, minimization, consent/legal basis, access, retention/deletion, security, bias evaluation, incident response, and stop/go approval.
 
 ### Progressive hints
 
@@ -306,7 +287,7 @@ The lesson is complete without an AI assistant. If you want optional
 coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
-Tutor me through `python-57` — Day 57 — Security, Privacy, and Ethics.
+Tutor me through `python-57` (Day 57: Security, Privacy, and Ethics).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize data minimization, privacy boundaries, fairness evidence, and accountable controls. Use exactly these maintained learner materials:

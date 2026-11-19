@@ -1,4 +1,4 @@
-# Day 15: Project: A Testable CLI Data Tool
+# Day 15: Project: A Testable Command-Line Data Tool
 
 **Level:** Beginner checkpoint
 
@@ -17,7 +17,7 @@ By the end of this project, you can:
 
 ## Prerequisites
 
-Complete Days 1–14, especially packages (`python-09`), pytest (`python-10`),
+Complete Days 1-14, especially packages (`python-09`), pytest (`python-10`),
 logging (`python-11`), and quality tooling (`python-14`).
 
 <!-- BEGIN HOW TO RUN -->
@@ -72,8 +72,7 @@ They are separate from the browser's saved pads, notes and progress in Docker
 volumes. Neither route automatically copies attempts or completion markers to
 the other; record progress in the interface you actually used.
 
-**Lesson outcome:** use day 15; project: a testable cli data tool to practice a small command-line application with separated boundaries
-and explain the evidence produced by your code.
+**Outcome:** Build and test a small command-line tool that summarizes a CSV file.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
@@ -128,14 +127,7 @@ args = build_parser().parse_args(["--limit", "2", "Ada", "Lin", "Grace"])
 (args.limit, args.names)
 ```
 
-**Expected observation**
-
-```text
-`(2, ['Ada', 'Lin', 'Grace'])`. Argparse converted `2` to an integer and collected positional names.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** `(2, ['Ada', 'Lin', 'Grace'])`. Argparse converted `2` to an integer and collected positional names.
 
 ### Worked example 2: Keep core work independent of printing
 
@@ -152,14 +144,7 @@ def select_names(names: list[str], *, limit: int) -> list[str]:
 select_names(args.names, limit=args.limit)
 ```
 
-**Expected observation**
-
-```text
-`['Ada', 'Lin']`. Parsing and presentation remain outside the core transformation.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** `['Ada', 'Lin']`. Parsing and presentation remain outside the core transformation.
 
 ### A debugging routine for this topic
 
@@ -246,8 +231,8 @@ assertion or inspection and explain what it proves.
    **Expected behavior:** importing the module produces no output or process exit; `python -m ... --help` works from the documented package parent.
    **Verify:** test both import and module execution.
 
-5. Create a short README usage block for Windows PowerShell and macOS/Linux showing repository-interpreter commands and an example with a path containing spaces. **Constraint:** do not mix Bash syntax into PowerShell.
-   **Verify:** copy the command for your operating system, record exit code `0` and the expected output, and confirm the quoted path with spaces is received as one argument.
+5. Create a short README usage block with Bash commands (Linux, macOS, or Ubuntu in Windows WSL 2) that run the tool through the repository interpreter, including an example whose input path contains a space. **Constraint:** quote the path so the shell passes it as a single argument.
+   **Verify:** run the documented command, record exit code `0` and the expected output, and confirm that the quoted path with a space arrives as one argument; then remove the quotes once and record the resulting argparse error.
 
 ### Additional mastery practice
 
@@ -277,14 +262,7 @@ which contract or mental model each result confirms.
 
 ## Run the project
 
-Windows PowerShell:
-
-```powershell
-.\.venv\Scripts\python.exe tool.py --input data.csv --out artifacts\out.csv
-.\.venv\Scripts\python.exe -m pytest
-```
-
-macOS/Linux:
+Linux, macOS, or Ubuntu in Windows WSL 2:
 
 ```bash
 .venv/bin/python tool.py --input data.csv --out artifacts/out.csv
@@ -327,7 +305,7 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-15`
-(Day 15 — Project: A Testable CLI Data Tool). Direct catalog prerequisites: `python-14`.
+(Day 15: Project: A Testable CLI Data Tool). Direct catalog prerequisites: `python-14`.
 I have completed the direct prerequisites: `python-14`. Emphasize a small command-line application with separated boundaries.
 Read `python/ds-60day/companion-guides/day15_cli_project.md` and use the learner notebook
 `python/ds-60day/notebooks/day15_cli_project.ipynb`. Do not open or quote anything under `solutions/` unless

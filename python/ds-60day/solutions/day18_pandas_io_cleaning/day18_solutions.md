@@ -1,4 +1,4 @@
-# Day 18: Solutions: Pandas I/O and Cleaning
+# Day 18 Solutions: Loading and Cleaning Data with pandas
 
 **Offline teaching data:** The [original synthetic fixtures](../../../fixtures/README.md) replace first-run sample-data downloads. Their values are not historical or observational evidence. Keep numerical conclusions scoped to the declared teaching input.
 
@@ -35,13 +35,13 @@ data should not keep changing it.
 For this lesson's **pandas input boundaries, explicit cleaning, and reproducible output** model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.
 <!-- END BEGINNER SOLUTION REVIEW -->
 
-## Exercises 1–3: Worked answers
+## Exercises 1-3: Worked answers
 
 ### Exercise 1: worked answer
 
 **Learner contract:** Load a local CSV into pandas, recording path, encoding, row grain, shape, columns, dtypes, missing counts, and duplicate-key counts before changing anything. **Expected behavior:** produce a compact profile, not a full data dump. **Constraint:** use repository-relative `Path` objects and no network source. **Verify:** save the first profile values, restart the kernel, and assert the second shape, columns, dtypes, missing counts, and duplicate-key counts exactly match.
 
-**Reasoning:** Implement this exact contract as written: Load a local CSV into pandas, recording path, encoding, row grain, shape, columns, dtypes, missing counts, and duplicate-key counts before changing anything. Expected behavior: produce a compact profile, not a full data dump. Constraint: use repository-relative `Path` objects and no network source. Keep the prompt's named data and constraints visible in the code, then establish this specific result: save the first profile values, restart the kernel, and assert the second shape, columns, dtypes, missing counts, and duplicate-key counts exactly match. That connects the answer to pandas input boundaries, explicit cleaning, and reproducible output.
+**Reasoning:** Recording the profile before any change gives later steps a baseline to check against: shape `(3, 3)`, one exact duplicate row, and one duplicate key, because Ada appears twice at the same event time. Writing the fixture with `Path.write_text` and reading it with an explicit `encoding="utf-8"` makes the second run after a kernel restart produce the same profile, which is what the Verify step compares. Storing counts and dtypes instead of printing the rows keeps the profile compact and safe to share, and `path.as_posix()` records the relative path with forward slashes on every operating system.
 
 ```python
 from pathlib import Path
@@ -92,13 +92,11 @@ Restarting and rerunning reconstructs the same local UTF-8 fixture and
 compact profile. The profile records metadata and counts without
 printing all source rows.
 
-**Verification evidence:** save the first profile values, restart the kernel, and assert the second shape, columns, dtypes, missing counts, and duplicate-key counts exactly match.
-
 ### Exercise 2: worked answer
 
 **Learner contract:** Implement `clean_frame(raw)` that trims selected text, converts documented numeric/date fields, handles missing values by written policy, resolves duplicates by a stated key, and returns a new DataFrame. **Constraints:** do not mutate `raw` or use broad `dropna`; record conversion failures. **Verify:** assert raw preservation and `clean_frame(clean_frame(raw)).equals(clean_frame(raw))` for this contract.
 
-**Reasoning:** Implement this exact contract as written: Implement `clean_frame(raw)` that trims selected text, converts documented numeric/date fields, handles missing values by written policy, resolves duplicates by a stated key, and returns a new DataFrame. Constraints: do not mutate `raw` or use broad `dropna`; record conversion failures. Keep the prompt's named data and constraints visible in the code, then establish this specific result: assert raw preservation and `clean_frame(clean_frame(raw)).equals(clean_frame(raw))` for this contract. That connects the answer to pandas input boundaries, explicit cleaning, and reproducible output.
+**Reasoning:** Each step handles one documented problem: header whitespace and case, padded names, quantities stored as text, and timestamps stored as text. `errors="coerce"` turns unparseable values into missing values instead of stopping, so the function records `quantity_parse_failed` before that information is lost: a value that was present and became missing is a conversion failure, not an originally missing value. Carrying the earlier flag forward with `|` is what makes the function idempotent; without it, the second pass would see an already numeric `<NA>`, flag nothing, and `once.equals(twice)` would fail. Deduplication uses the business key `name, event_time` and keeps the first record, and the snapshot comparison proves that `raw` was not modified.
 
 ```python
 import pandas as pd
@@ -134,13 +132,11 @@ assert once["quantity"].isna().sum() == 1
 assert not once.duplicated(["name", "event_time"]).any()
 ```
 
-**Verification evidence:** assert raw preservation and `clean_frame(clean_frame(raw)).equals(clean_frame(raw))` for this contract.
-
 ### Exercise 3: worked answer
 
 **Learner contract:** Save only the cleaned frame under an ignored learner artifact directory, then read it back. **Expected behavior:** reloaded row count, columns, and key totals match the in-memory clean frame. **Constraints:** create parent folders with `Path.mkdir`, avoid absolute paths, and do not overwrite raw input. **Verify:** Read the saved file back and assert row count, ordered columns, dtypes/normalization policy, and selected key totals match the cleaned in-memory frame.
 
-**Reasoning:** Implement this exact contract as written: Save only the cleaned frame under an ignored learner artifact directory, then read it back. Expected behavior: reloaded row count, columns, and key totals match the in-memory clean frame. Constraints: create parent folders with `Path.mkdir`, avoid absolute paths, and do not overwrite raw input. Keep the prompt's named data and constraints visible in the code, then establish this specific result: Read the saved file back and assert row count, ordered columns, dtypes/normalization policy, and selected key totals match the cleaned in-memory frame. That connects the answer to pandas input boundaries, explicit cleaning, and reproducible output.
+**Reasoning:** Writing to a separate path, asserted to differ from `raw_path`, guarantees that the raw input is never overwritten. CSV stores only text, so the reloaded frame does not keep the pandas extension dtypes: the nullable `Int64` quantity comes back as `float64` because of the missing value, and the UTC timestamps come back as strings. The normalization policy is therefore applied again after reading (`string`, `Int64`, UTC datetime), and `assert_frame_equal` then confirms that values, column order, and dtypes match the in-memory frame. Comparing totals as well catches a lost or duplicated row even before the dtype step.
 
 ```python
 from pathlib import Path
@@ -154,61 +150,57 @@ assert len(reloaded) == len(once)
 assert reloaded.columns.tolist() == once.columns.tolist()
 assert reloaded["quantity"].sum() == once["quantity"].sum()
 assert reloaded["quantity_parse_failed"].sum() == once["quantity_parse_failed"].sum()
+
+# CSV stores text, so apply the documented dtype policy again after reading.
+restored = reloaded.assign(
+    name=reloaded["name"].astype("string"),
+    quantity=reloaded["quantity"].astype("Int64"),
+    event_time=pd.to_datetime(reloaded["event_time"], utc=True),
+)
+pd.testing.assert_frame_equal(restored, once)
 ```
 
 CSV does not preserve every pandas extension dtype, so compare the
 documented reload representation rather than assuming perfect dtype
 round-trip.
 
-**Verification evidence:** Read the saved file back and assert row count, ordered columns, dtypes/normalization policy, and selected key totals match the cleaned in-memory frame.
-
-## Exercises 4–8: Expanded mastery answers
+## Exercises 4-8: Expanded mastery answers
 
 ### Exercise 4: answer contract
 
 **Learner contract:** **Prediction:** Predict the results of `pd.to_datetime(..., errors='coerce', utc=True)` for valid text, invalid text, and a timestamp with an offset. **Progressive hint:** Invalid text becomes `NaT`; valid values normalize to UTC. **Verify:** Create three input rows and assert valid/offset timestamps normalize to the expected UTC instants while invalid text becomes `NaT` and is counted.
 
-**Reasoning:** Predict this named state change before running it: Prediction: Predict the results of `pd.to_datetime(..., errors='coerce', utc=True)` for valid text, invalid text, and a timestamp with an offset. Progressive hint: Invalid text becomes `NaT`; valid values normalize to UTC. Then compare the prediction with this proof target: Create three input rows and assert valid/offset timestamps normalize to the expected UTC instants while invalid text becomes `NaT` and is counted. This makes pandas input boundaries, explicit cleaning, and reproducible output observable instead of relying on intuition.
-
-**Evidence to locate in the grouped implementation:** Create three input rows and assert valid/offset timestamps normalize to the expected UTC instants while invalid text becomes `NaT` and is counted.
+**Reasoning:** `utc=True` converts every parsed value to a single time zone: the naive `"2025-01-01"` is treated as UTC, and `"2025-01-01T02:00:00+02:00"` is shifted to 00:00 UTC, so both rows represent the same instant, which the shared implementation for Exercises 4-5 asserts. `errors="coerce"` turns `"not-a-date"` into `NaT` instead of raising, so the failure has to be counted afterwards or it disappears silently. `format="mixed"` matters because the inputs use different layouts: without it, pandas 2 infers one format from the first value, and the offset timestamp is also coerced to `NaT`.
 
 ### Exercise 5: answer contract
 
 **Learner contract:** **Tracing:** Trace conversion from object strings to pandas nullable `Int64`, including an empty value. **Progressive hint:** Nullable integer dtype can represent `<NA>` without becoming float. **Verify:** Record value and dtype before/after conversion; assert numeric strings become integers, empty input becomes `<NA>`, and dtype is nullable `Int64`.
 
-**Reasoning:** Trace the concrete values in this contract one step at a time: Tracing: Trace conversion from object strings to pandas nullable `Int64`, including an empty value. Progressive hint: Nullable integer dtype can represent `<NA>` without becoming float. Record the named value, shape, label, or iterator position needed to establish: Record value and dtype before/after conversion; assert numeric strings become integers, empty input becomes `<NA>`, and dtype is nullable `Int64`. The trace exposes pandas input boundaries, explicit cleaning, and reproducible output directly.
-
-**Evidence to locate in the grouped implementation:** Record value and dtype before/after conversion; assert numeric strings become integers, empty input becomes `<NA>`, and dtype is nullable `Int64`.
+**Reasoning:** `pd.to_numeric(..., errors="coerce")` returns `float64` here, because the empty string becomes `NaN` and NumPy integer arrays have no missing-value marker, so 2 and 7 would become 2.0 and 7.0. `.astype("Int64")`, with a capital I, converts to pandas' nullable integer dtype, which holds whole numbers and `<NA>` together. The shared implementation for Exercises 4-5 prints the dtype before (`object`) and after (`Int64`) and checks the values, which is the evidence the Verify step asks for.
 
 ### Exercise 6: answer contract
 
 **Learner contract:** **Implementation:** Implement a cleaner that normalizes column names, parses an event time, converts quantity, and returns a copy plus a quality summary. **Progressive hint:** Record invalid counts before dropping or imputing anything. **Verify:** Assert the cleaner leaves raw unchanged, returns expected normalized columns/dtypes, and reports exact invalid timestamp/quantity counts.
 
-**Reasoning:** Implement this exact contract as written: Implementation: Implement a cleaner that normalizes column names, parses an event time, converts quantity, and returns a copy plus a quality summary. Progressive hint: Record invalid counts before dropping or imputing anything. Keep the prompt's named data and constraints visible in the code, then establish this specific result: Assert the cleaner leaves raw unchanged, returns expected normalized columns/dtypes, and reports exact invalid timestamp/quantity counts. That connects the answer to pandas input boundaries, explicit cleaning, and reproducible output.
-
-**Evidence to locate in the grouped implementation:** Assert the cleaner leaves raw unchanged, returns expected normalized columns/dtypes, and reports exact invalid timestamp/quantity counts.
+**Reasoning:** The cleaner returns a copy together with a quality dictionary, so the caller receives both the data and the evidence of what failed to convert. Counting `isna()` after coercion counts original gaps and conversion failures together; that is exact for this fixture, which has no original gaps, but the separate flag from Exercise 2 is the stricter design when the difference matters. Header normalization with `strip`, `casefold`, and underscores turns `" Event Time "` into `event_time`, and the assertion on `raw.columns` proves that the input kept its original headers.
 
 ### Exercise 7: answer contract
 
 **Learner contract:** **Debugging:** Repair an in-place operation performed on a chained selection. **Progressive hint:** Use assignment on the owned copy and avoid `inplace=True` on a temporary object. **Verify:** Reproduce the warning/failure, then assert explicit owned-copy assignment changes only the intended frame and uses no `inplace` temporary mutation.
 
-**Reasoning:** Reproduce the exact failure described here before changing code: Debugging: Repair an in-place operation performed on a chained selection. Progressive hint: Use assignment on the owned copy and avoid `inplace=True` on a temporary object. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Reproduce the warning/failure, then assert explicit owned-copy assignment changes only the intended frame and uses no `inplace` temporary mutation. The diagnosis depends on pandas input boundaries, explicit cleaning, and reproducible output.
-
-**Evidence to locate in the grouped implementation:** Reproduce the warning/failure, then assert explicit owned-copy assignment changes only the intended frame and uses no `inplace` temporary mutation.
+**Reasoning:** `owned[missing]["quantity"].fillna(0, inplace=True)` fills a temporary object created by the first selection, so the frame you meant to change keeps its missing value; pandas 2 emits a `SettingWithCopyWarning`, and pandas 3 never updates the original through such a chain. The repair is one explicit assignment on a frame you own, `owned.loc[missing, "quantity"] = 0`, which names the frame, rows, and column in one step. The shared implementation for Exercises 6-8 reproduces the unchanged result first, then shows that the explicit assignment changes `owned` and leaves `cleaned` untouched.
 
 ### Exercise 8: answer contract
 
 **Learner contract:** **Edge case and explanation:** Choose behavior for an all-missing numeric column whose median is also missing. Reject, use a domain default, or preserve missing, and justify. **Progressive hint:** A statistical fallback cannot be computed from zero observations. **Verify:** Run an all-missing fixture and assert the exact chosen reject/default/preserve policy; document why no sample median was available.
 
-**Reasoning:** Make this boundary unambiguous in code: Edge case and explanation: Choose behavior for an all-missing numeric column whose median is also missing. Reject, use a domain default, or preserve missing, and justify. Progressive hint: A statistical fallback cannot be computed from zero observations. Values below, at, and above the named boundary must produce the evidence Run an all-missing fixture and assert the exact chosen reject/default/preserve policy; document why no sample median was available. Those cases show how pandas input boundaries, explicit cleaning, and reproducible output behaves at its edge.
-
-**Evidence to locate in the grouped implementation:** Run an all-missing fixture and assert the exact chosen reject/default/preserve policy; document why no sample median was available.
+**Reasoning:** A median needs at least one observation, so for a column with none, `median()` returns a missing value, and `fillna(median)` would fill nothing while appearing to succeed. The reference preserves the missing values and reports them, because inventing a number would hide the fact that the source sent no data; a schema that requires the column could reject the batch instead. The `impute_median` helper in the shared implementation for Exercises 6-8 makes the policy explicit and testable: it returns an all-missing column unchanged and fills normally when observations exist.
 
 ## Expanded mastery lab solutions
 
 Profile before cleaning, preserve raw input, and make every conversion, imputation, and rejection rule observable and testable.
 
-### Shared implementation for Exercises 4–5: Explicit conversions
+### Shared implementation for Exercises 4-5: Explicit conversions
 
 ```python
 import pandas as pd
@@ -220,12 +212,17 @@ timestamps = pd.to_datetime(
     utc=True,
 )
 assert timestamps.isna().tolist() == [False, True, False]
+assert timestamps[0] == timestamps[2] == pd.Timestamp("2025-01-01T00:00:00Z")
+assert int(timestamps.isna().sum()) == 1
 
-quantities = pd.to_numeric(pd.Series(["2", "", "7"]), errors="coerce").astype("Int64")
+raw_quantities = pd.Series(["2", "", "7"])
+quantities = pd.to_numeric(raw_quantities, errors="coerce").astype("Int64")
+print(raw_quantities.dtype, "->", quantities.dtype)  # object -> Int64
+assert str(quantities.dtype) == "Int64"
 assert quantities.astype("string").tolist() == ["2", pd.NA, "7"]
 ```
 
-### Shared implementation for Exercises 6–8: Cleaner plus evidence
+### Shared implementation for Exercises 6-8: Cleaner plus evidence
 
 ```python
 def clean_events(source: pd.DataFrame) -> tuple[pd.DataFrame, dict[str, int]]:
@@ -246,9 +243,36 @@ raw = pd.DataFrame({" Event Time ": ["2025-01-01", "bad"], "Quantity": ["2", "ma
 cleaned, quality = clean_events(raw)
 assert list(raw.columns) == [" Event Time ", "Quantity"]  # Raw input unchanged.
 assert quality == {"invalid_event_time": 1, "invalid_quantity": 1}
+assert cleaned.columns.tolist() == ["event_time", "quantity"]
+assert str(cleaned["quantity"].dtype) == "Int64"
+
+# Chained in-place update: the first selection returns a temporary object.
+import warnings
+
+owned = cleaned.copy()
+missing = owned["quantity"].isna()
+with warnings.catch_warnings(record=True) as caught:
+    warnings.simplefilter("always")
+    owned[missing]["quantity"].fillna(0, inplace=True)
+print("chained update:", caught[0].category.__name__ if caught else "no warning")
+assert owned["quantity"].isna().sum() == 1  # owned is unchanged
+owned.loc[missing, "quantity"] = 0  # one explicit assignment on the owned copy
+assert owned["quantity"].tolist() == [2, 0]
+assert cleaned["quantity"].isna().sum() == 1  # the source copy is untouched
+
 
 # All-missing data has no evidence-based median. This contract preserves
 # missing values and reports them; a downstream schema may reject the column.
+def impute_median(values: pd.Series) -> pd.Series:
+    """Fill gaps with the median; return an all-missing column unchanged."""
+    if values.notna().sum() == 0:
+        return values.copy()  # zero observations, so no sample median exists
+    return values.fillna(values.median())
+
+
 all_missing = pd.Series([pd.NA, pd.NA], dtype="Float64")
+# NumPy may warn "Mean of empty slice" here: there are zero observations.
 assert pd.isna(all_missing.median())
+assert impute_median(all_missing).isna().all()
+assert impute_median(pd.Series([1.0, None, 3.0], dtype="Float64")).tolist() == [1.0, 2.0, 3.0]
 ```

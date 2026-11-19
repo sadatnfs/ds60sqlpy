@@ -3,16 +3,19 @@
 **Level:** Beginner
 
 Control flow chooses which statements run. Exceptions separate an expected
-failure path from the successful path.
+failure path from the successful path. Each example in this lesson runs its
+decision once: change the input value and rerun to test another case. Day 4
+adds loops, which repeat a decision automatically.
 
 ## Learning objectives
 
 By the end of this lesson, you can:
 
 - write mutually exclusive `if`/`elif`/`else` branches;
-- iterate with `for` and repeat conditionally with `while`;
-- catch only the exceptions you can handle; and
-- define and raise a domain-specific exception with a useful message.
+- predict how truthiness and comparisons behave inside conditions;
+- catch only the exceptions you can handle with `try`/`except`/`else`/`finally`; and
+- raise a built-in exception such as `ValueError` with a message that explains
+  the failure.
 
 ## Prerequisites
 
@@ -70,8 +73,7 @@ They are separate from the browser's saved pads, notes and progress in Docker
 volumes. Neither route automatically copies attempts or completion markers to
 the other; record progress in the interface you actually used.
 
-**Lesson outcome:** use day 3; control flow, truthiness, and exceptions to practice branch selection, loop decisions, and narrow exception boundaries
-and explain the evidence produced by your code.
+**Outcome:** Order branches correctly and catch only the errors you can handle.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
@@ -114,27 +116,25 @@ Classify a value after validating its domain. Before running it, predict the fin
 identify which line creates each intermediate object.
 
 ```python
-def classify_score(score: int) -> str:
-    if not 0 <= score <= 100:
-        raise ValueError("score must be between 0 and 100")
-    if score >= 90:
-        return "distinction"
-    if score >= 60:
-        return "pass"
-    return "fail"
+score = 75
 
+if not 0 <= score <= 100:
+    grade = "invalid"
+elif score >= 90:
+    grade = "distinction"
+elif score >= 60:
+    grade = "pass"
+else:
+    grade = "fail"
 
-[classify_score(value) for value in (42, 75, 95)]
+grade
 ```
 
-**Expected observation**
-
-```text
-`['fail', 'pass', 'distinction']`. The guard rejects out-of-domain values before classification.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** `'pass'`. Python tests the conditions from the top
+and stops at the first true one: 75 is inside 0 to 100, is not at least 90, and
+is at least 60. Change `score` to `42`, `95`, and `101`, predict each result,
+and rerun: `'fail'`, `'distinction'`, and `'invalid'`. The range check comes
+first so that 101 cannot reach the `'distinction'` branch.
 
 ### Worked example 2: Protect only the fallible conversion
 
@@ -142,26 +142,24 @@ Let unrelated programming errors remain visible. Before running it, predict the 
 identify which line creates each intermediate object.
 
 ```python
-def parse_count(text: str) -> int | None:
-    try:
-        count = int(text.strip())
-    except ValueError:
-        return None
-    else:
-        return count
+text = " 12 "
 
+try:
+    count = int(text.strip())
+except ValueError:
+    count = None
+    outcome = "not an integer"
+else:
+    outcome = "parsed"
 
-[parse_count(text) for text in (" 12 ", "twelve")]
+(count, outcome)
 ```
 
-**Expected observation**
-
-```text
-`[12, None]`. Only invalid integer text is converted into the chosen sentinel.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** `(12, 'parsed')`. Only `int(...)` sits inside
+`try`, so only a failed conversion can reach the handler, and the `else` block
+runs only after the conversion succeeded. Change `text` to `"twelve"` and
+rerun: `(None, 'not an integer')`. Both paths assign `count`, so the last line
+never meets an undefined name.
 
 ### A debugging routine for this topic
 
@@ -188,7 +186,7 @@ of them as blank-code prompts:
 5. **Retrieval:** close the guide and explain the core model from memory
    before moving on.
 
-**Useful alternative:** Return a sentinel only when absence is part of the function's contract; otherwise raise a specific exception and let the caller decide.
+**Useful alternative:** Use a placeholder such as `None` only when "no value" is a legitimate outcome; otherwise raise a specific exception so the failure cannot be mistaken for data.
 
 **Boundary to remember:** Boundary values such as 0, 1, 59, 60, 89, 90, and 100 expose gaps and overlaps in ordered conditions.
 <!-- END BEGINNER DEEP DIVE -->
@@ -197,7 +195,8 @@ of them as blank-code prompts:
 
 - **Branch:** one possible route through a program.
 - **Condition:** an expression interpreted as true or false.
-- **Loop invariant:** a fact that remains true as a loop progresses.
+- **Traceback:** the report Python prints for an unhandled exception; its last
+  line names the exception type and message.
 - **Exception:** an object that interrupts normal execution when an operation
   cannot satisfy its contract.
 - **Raise:** signal a failure; **catch:** handle a specific failure.
@@ -210,19 +209,25 @@ branching.
 ## Worked example
 
 ```python
-def parse_positive_int(raw: str) -> int:
-    try:
-        value = int(raw)
-    except ValueError as exc:
-        raise ValueError(f"expected an integer, received {raw!r}") from exc
+raw = "42"
 
-    if value < 0:
-        raise ValueError("value must be non-negative")
-    return value
+try:
+    value = int(raw)
+except ValueError as exc:
+    raise ValueError(f"expected an integer, received {raw!r}") from exc
+
+if value < 0:
+    raise ValueError(f"value must be non-negative, received {value}")
+
+value
 ```
 
-The conversion failure and domain-rule failure have different causes. The
-messages make both diagnosable.
+With `raw = "42"` the cell displays `42`. With `raw = "forty"`, the conversion
+fails and the new message `expected an integer, received 'forty'` is raised;
+`from exc` keeps the original `invalid literal for int()` error in the
+traceback. With `raw = "-4"`, the conversion succeeds and the domain rule raises
+`value must be non-negative, received -4`. The two failures have different
+causes, and the messages make both diagnosable.
 
 ## Exercises and progressive hints
 
@@ -231,14 +236,14 @@ expected behavior, constraints, and verification into your work cell. A
 result is not complete merely because it “looks right”; run the stated
 assertion or inspection and explain what it proves.
 
-1. Print FizzBuzz for every integer from 1 through 30 inclusive. **Rules:** multiples of both 3 and 5 print `FizzBuzz`; only 3 prints `Fizz`; only 5 prints `Buzz`; all others print the number. **Constraints:** use one ordered `if`/`elif`/`else` chain.
-   **Verify:** capture the output lines, assert there are exactly 30, and assert positions 3, 5, 15, 16, and 30 equal `Fizz`, `Buzz`, `FizzBuzz`, `16`, and `FizzBuzz`.
+1. Given `number = 15`, write one ordered `if`/`elif`/`else` chain that sets `label` to `"FizzBuzz"` for multiples of both 3 and 5, `"Fizz"` for multiples of 3 only, `"Buzz"` for multiples of 5 only, and `str(number)` otherwise. **Constraints:** test divisibility with `%` and keep all four outcomes in one chain.
+   **Verify:** rerun with `number` set to 3, 5, 15, 16, and 30 and assert the labels `"Fizz"`, `"Buzz"`, `"FizzBuzz"`, `"16"`, and `"FizzBuzz"`. Day 4 repeats this decision for 1 through 30 with a `for` loop.
 
-2. Write `parse_age(text)` that returns an integer for valid integer text and returns `None` only when conversion raises `ValueError`. **Constraints:** put only `int(text)` inside `try`; do not use a bare `except`.
-   **Verify:** test `'42'`, `' 7 '`, and `'seven'`, then explain which path uses `else`.
+2. Given `text = " 7 "`, put only `int(text)` inside `try`, set `age` to the integer on success, and set `age = None` when `ValueError` is raised. **Constraints:** do not use a bare `except`; use an `else` block to record success.
+   **Verify:** run with `"42"`, `" 7 "`, and `"seven"` and assert that `age` is `42`, `7`, and `None`; explain which runs execute the `else` block.
 
-3. Define `NegativeMeasurementError` as a subclass of `ValueError`, then write `validate_measurement(value)` that returns non-negative values unchanged and raises your exception for `-0.1`.
-   **Verify:** show one normal return and catch the exact custom type in a small demonstration; do not catch it inside the validator.
+3. Given `measurement = -0.1`, raise `ValueError` with the message `measurement must be non-negative, got -0.1` when the value is negative, and leave non-negative values unchanged. **Constraints:** check the sign with an `if` before any calculation uses the value.
+   **Verify:** run once with `2.5` (no error, value unchanged) and once with `-0.1`; then wrap the check in `try`/`except ValueError as exc` and assert that `str(exc)` equals the exact message. Day 12 shows how to define a dedicated exception type such as `NegativeMeasurementError`.
 
 ### Additional mastery practice
 
@@ -253,15 +258,15 @@ code; these extend rather than replace the original practice above.
 5. **Tracing:** Trace `try/except/else/finally` for a successful integer parse and for invalid text. Which clauses run in each path?
    **Progressive hint:** `else` follows success; `finally` runs in both cases.
    **Verify:** Use a four-column trace for `try`, `except`, `else`, and `finally` on valid/invalid text; each clause's executed flag must match the language rules.
-6. **Implementation:** Implement `classify_score(score)` returning fail/pass/distinction and reject scores outside 0–100 with `ValueError`.
-   **Progressive hint:** Validate the domain before choosing a result branch.
-   **Verify:** Assert representative scores return `fail`, `pass`, and `distinction`, then assert `-1` and `101` each raise `ValueError`.
-7. **Debugging:** Replace a bare `except:` around parsing and calculation with the narrowest useful handler, while allowing programming errors to surface.
-   **Progressive hint:** Keep only the conversion inside the protected block.
-   **Verify:** Show invalid integer text is handled while a deliberate unrelated `TypeError` still reaches the test; keep only conversion inside `try`.
-8. **Edge case and explanation:** Design `safe_ratio(numerator, denominator)` for a zero denominator. Choose between raising, returning `None`, or a default and justify it.
-   **Progressive hint:** A reusable library function usually should not invent a numeric result.
-   **Verify:** Test a nonzero ratio and a zero denominator; assert the chosen zero policy exactly and explain why no fabricated numeric answer leaks through.
+6. **Implementation:** A grader records scores as floats. Policy: from 89.5 to 100 is `"distinction"`, from 59.5 up to (but not including) 89.5 is `"pass"`, from 0 up to 59.5 is `"fail"`, and any score outside 0 to 100 raises `ValueError`. Given `score = 59.5`, write the chain.
+   **Progressive hint:** Validate the range first, then test the thresholds from highest to lowest with `>=`.
+   **Verify:** Rerun with `59.49`, `59.5`, `89.49`, `89.5`, `100.0`, and `100.5`; assert `"fail"`, `"pass"`, `"pass"`, `"distinction"`, `"distinction"`, and a `ValueError` for `100.5`.
+7. **Debugging:** A cell wraps both `count = int(raw_count)` and `total_cost = count * unit_price` in one `try` block followed by a bare `except:` that sets `total_cost = 0`, and `unit_price` was never defined. Rebuild it so only the conversion is protected and only `ValueError` is caught.
+   **Progressive hint:** Keep only the conversion inside the protected block and move the calculation after it.
+   **Verify:** With `raw_count = "twelve"` the handler reports invalid text; with `raw_count = "12"` the `NameError` for `unit_price` now appears instead of a silent `0`; after defining `unit_price = 2.5`, assert `total_cost == 30.0`.
+8. **Edge case and explanation:** Given `numerator = 3` and `denominator = 0`, choose a zero-denominator policy: raise `ZeroDivisionError` with a clear message, or set `ratio = None` and record why. Justify the choice.
+   **Progressive hint:** Code that other people reuse usually should not invent a numeric answer such as `0.0`.
+   **Verify:** With `denominator = 4`, assert `ratio == 0.75`; with `denominator = 0`, assert your chosen outcome exactly and explain why `0.0` would be a fabricated answer.
 
 Before opening the reference solution, write one sentence explaining
 which contract or mental model each result confirms.
@@ -269,23 +274,25 @@ which contract or mental model each result confirms.
 ## Self-check
 
 - Why does branch order matter in FizzBuzz?
-- When should a loop use `break` versus a condition in `while`?
+- Which boundary values (59, 60, 89, 90, 100, 101) prove that the score branches neither overlap nor leave gaps?
 - Why is `except Exception:` usually too broad?
 - What information is preserved by `raise NewError(...) from exc`?
 
-Expected behavior: FizzBuzz has exactly 30 outputs, invalid numeric text is
-reported without hiding unrelated bugs, and negative values raise the custom
-exception.
+Expected behavior: each FizzBuzz test value gets exactly one label, invalid
+numeric text is reported without hiding unrelated bugs, and a negative
+measurement raises `ValueError` with its exact message.
 
 ## Common pitfalls and diagnosis
 
 - **FizzBuzz never prints the combined case:** inspect branch order.
-- **An infinite `while` loop:** identify which statement must change the loop
-  condition; interrupt the notebook kernel if necessary.
+- **`IndentationError`, or a line running in the wrong branch:** every line of
+  a branch must be indented by the same amount under its `if`, `elif`,
+  `else`, `try`, or `except` line. Find where the indentation ends.
 - **Errors disappear silently:** never use a bare `except: pass`; log, return a
   documented fallback, or re-raise.
-- **`UnboundLocalError` after `try`:** a variable was assigned only on the
-  success path. Return from each branch or initialize deliberately.
+- **`NameError` after `try`:** a name was assigned only on the success path,
+  so the failure path left it undefined. Assign it in the handler too (worked
+  example 2 sets `count = None`) or initialize it before `try`.
 - **The wrong exception is caught:** reproduce the smallest failing expression
   and inspect the traceback's final line.
 
@@ -303,8 +310,8 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-03`
-(Day 3 — Control Flow, Truthiness, and Exceptions). Direct catalog prerequisites: `python-02`.
-I have completed the direct prerequisites: `python-02`. Emphasize branch selection, loop decisions, and narrow exception boundaries.
+(Day 3: Control Flow, Truthiness, and Exceptions). Direct catalog prerequisites: `python-02`.
+I have completed the direct prerequisites: `python-02`. Emphasize branch selection, truthiness in conditions, and narrow exception boundaries.
 Read `python/ds-60day/companion-guides/day03_control_flow_exceptions.md` and use the learner notebook
 `python/ds-60day/notebooks/day03_control_flow_exceptions.ipynb`. Do not open or quote anything under `solutions/` unless
 I explicitly ask after making an honest attempt. Use these visible phases:

@@ -1,4 +1,4 @@
-# Day 38: Solutions: Decision Trees and Random Forests
+# Day 38 Solutions: Decision Trees and Random Forests
 
 We train a shallow decision tree and a random forest, control overfitting with depth/leaf parameters, and compare feature importances (impurity vs permutation).
 
@@ -21,7 +21,7 @@ X, y = load_breast_cancer(return_X_y=True)
 Xtr, Xte, ytr, yte = train_test_split(X, y, random_state=42)
 ```
 
-Worked reference for Exercise 1; Depth vs accuracy
+Worked reference for Exercise 1: Depth vs accuracy
 ```python
 depths = [1, 2, 3, 4, 6, 8, None]
 accs = []
@@ -42,13 +42,16 @@ rf_acc = rf.score(Xte, yte)
 rf_acc
 ```
 
-Worked reference for Exercise 2; Feature importances (impurity vs permutation)
+Worked reference for Exercise 2: Feature importances (impurity vs permutation)
 ```python
 # Impurity-based (built-in)
 impurity_imp = rf.feature_importances_
 
-# Permutation-based (on held-out data)
-perm = permutation_importance(rf, Xte, yte, n_repeats=10, random_state=42, n_jobs=1)
+# Permutation-based (on held-out data). Log loss reacts to probability changes;
+# accuracy on 143 rows moves in steps of 1/143 and leaves most features at 0.
+perm = permutation_importance(
+    rf, Xte, yte, n_repeats=10, random_state=42, n_jobs=1, scoring="neg_log_loss"
+)
 perm_imp = perm.importances_mean
 
 # Compare top features
@@ -61,6 +64,13 @@ order_imp, order_perm
 Notes
 - Impurity importances can be biased toward high-cardinality/continuous features
 - Prefer permutation importance on a validation set for model-agnostic insight
+- Choose a permutation score that can register small changes. With the default
+  accuracy score, 21 of the 30 breast-cancer features show exactly zero mean
+  importance on this split, so the "top 10" ranking is mostly ties; with
+  `scoring="neg_log_loss"` every feature has a positive, rankable mean.
+- Correlated measurements (for example the radius, perimeter and area columns)
+  can substitute for one another, so shuffling one of them understates the
+  credit the group shares.
 
 Takeaways
 - Use ensembles (RF) for stronger performance and robustness
@@ -117,7 +127,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1; tree splits, ensemble variance reduction, and held-out importance; for a declared depth grid including an unconstrained tree, print train and validation accuracy mean/std on identical folds and save the labeled depth curve; choose depth from validation evidence only.
+**Verify:** For a declared depth grid including an unconstrained tree, print train and validation accuracy mean/std on identical folds and save the labeled depth curve; choose depth from validation evidence only.
 
 ### Exercise 2: Original lesson practice
 
@@ -129,7 +139,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2; tree splits, ensemble variance reduction, and held-out importance; report impurity and seeded held-out permutation importance by feature, including a synthetic noise feature and permutation variability; flag any claim that treats impurity rank as causal or stable without the held-out check.
+**Verify:** Report impurity and seeded held-out permutation importance by feature, including a synthetic noise feature and permutation variability; flag any claim that treats impurity rank as causal or stable without the held-out check.
 
 ### Exercise 3: Pruning implementation
 

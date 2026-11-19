@@ -1,6 +1,6 @@
 **Execution boundary:** The default flag only defines a synthetic ETL skeleton. Prefect is an optional package, and actual runs require a deliberately selected loopback API. The learner notebook contains the separate model-training exercise. Serving a deployment is a blocking local project extension.
 
-# Day 56: Solutions: Orchestration with Prefect 3
+# Day 56 Solutions: Workflow Orchestration with Prefect
 
 **Offline teaching data:** The [original synthetic fixtures](../../../fixtures/README.md) replace first-run sample-data downloads. Their values are not historical or observational evidence. Keep numerical conclusions scoped to the declared teaching input.
 
@@ -15,7 +15,7 @@ Contents
 
 ---
 
-Worked reference for Exercise 1; Flow and tasks
+Worked reference for Exercise 1: Flow and tasks
 ```python
 from datetime import date
 from typing import TypedDict
@@ -76,7 +76,7 @@ if RUN_LOCAL_PREFECT_FLOW:
 This one-off run is local and deterministic. It needs no Prefect Cloud account,
 API key, external API, or network download after the dependency is installed.
 
-Worked reference for Exercise 2; Retries and a local failure hook
+Worked reference for Exercise 2: Retries and a local failure hook
 ```python
 from prefect.logging.loggers import flow_run_logger
 
@@ -106,7 +106,7 @@ Notes
 
 ---
 
-Worked reference for Exercise 3; Parameters and a local daily schedule
+Worked reference for Exercise 3: Parameters and a local daily schedule
 ```python
 def serve_daily() -> None:
     from urllib.parse import urlsplit
@@ -205,7 +205,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1; observable task boundaries, retries, caching, and idempotent orchestration; run the flow twice with two explicit test_size/random_state pairs, print parameter values, split row counts/hashes, and metrics, and assert a repeated identical pair reproduces the same split.
+**Verify:** Run the flow twice with two explicit test_size/random_state pairs, print parameter values, split row counts/hashes, and metrics, and assert a repeated identical pair reproduces the same split.
 
 ### Exercise 2: Original lesson practice
 
@@ -217,7 +217,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2; observable task boundaries, retries, caching, and idempotent orchestration; make train return a model/artifact identity and evaluate accept that explicit value; print task states and metric, and inject a train failure to prove evaluate does not run on missing output.
+**Verify:** Make train return a model/artifact identity and evaluate accept that explicit value; print task states and metric, and inject a train failure to prove evaluate does not run on missing output.
 
 ### Exercise 3: Original lesson practice
 
@@ -229,7 +229,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 3; observable task boundaries, retries, caching, and idempotent orchestration; either print an explicit offline-skip result or start the local UI, record the local URL and one completed flow-run ID/state, then stop it cleanly; scheduling remains optional and must not require a cloud account.
+**Verify:** Either print an explicit offline-skip result or start the local UI, record the local URL and one completed flow-run ID/state, then stop it cleanly; scheduling remains optional and must not require a cloud account.
 
 ### Exercise 4: Retry and idempotence
 

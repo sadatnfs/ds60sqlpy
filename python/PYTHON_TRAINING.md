@@ -10,7 +10,7 @@ concepts below are taught concepts, not extra host installation prerequisites.
 Overview
 - Goal: Progress from first Python programs to substantial data-science and
   production projects. “Day” is a stable lesson number, not a deadline.
-- Structure: 4 Phases - Core Python & Good Coding (Days 1–15), Data Manipulation & Visualization (Days 16–30), Statistics & Machine Learning (Days 31–45), Advanced Topics, Production & Capstone (Days 46–60).
+- Structure: 4 Phases - Core Python & Good Coding (Days 1-15), Data Manipulation & Visualization (Days 16-30), Statistics & Machine Learning (Days 31-45), Advanced Topics, Production & Capstone (Days 46-60).
 - Each lesson: companion reading, a runnable learner notebook, hands-on
   exercises, a self-check, and a separate worked solution.
 
@@ -27,12 +27,13 @@ topic in one sitting.
 
 ---
 
-## Phase 1 - Core Python & Good Coding Practices (Days 1–15)
+## Phase 1 - Core Python & Good Coding Practices (Days 1-15)
 
-Day 1 - Python setup & REPL, virtual environments, package management
-- Objectives: Start the Docker classroom on Linux, macOS or Windows/WSL 2; identify the
-  `.venv` interpreter in VS Code; use Python and Jupyter.
-- Exercise: Verify the environment, run a simple script, and launch Jupyter.
+Day 1 - Python setup and the REPL
+- Objectives: Start the Docker classroom, run a first program in the browser pad, and read
+  its output and a first error.
+- Exercise: Run, change, and rerun a short program; repair a NameError. (Host Python, virtual
+  environments, and Jupyter are optional contributor tools.)
 
 Day 2 - Basic syntax, variables, data types (str, int, float, bool)
 - Exercise: Small script manipulating types and printing results.
@@ -78,7 +79,7 @@ Day 15 - Project: Small CLI data tool combining above skills
 
 ---
 
-## Phase 2 - Data Manipulation & Visualization (Days 16–30)
+## Phase 2 - Data Manipulation & Visualization (Days 16-30)
 
 Day 16 - NumPy fundamentals: arrays, vectorization, broadcasting
 - Exercise: Convert loops to vectorized NumPy operations.
@@ -128,7 +129,7 @@ Day 30 - Project: EDA + preprocessing notebook on a mid-size dataset
 
 ---
 
-## Phase 3 - Statistics & Machine Learning (Days 31–45)
+## Phase 3 - Statistics & Machine Learning (Days 31-45)
 
 Day 31 - Probability refresh: distributions, Bayes basics, sampling
 - Exercise: Simulate sampling and estimate probabilities.
@@ -177,7 +178,7 @@ Day 45 - Project: End-to-end modeling mini-project (data → model → evaluatio
 
 ---
 
-## Phase 4 - Advanced Topics, Production & Capstone (Days 46–60)
+## Phase 4 - Advanced Topics, Production & Capstone (Days 46-60)
 
 Day 46 - Introduction to deep learning with PyTorch
 - Exercise: Compare a neural model with a simpler baseline and run a small,
@@ -256,7 +257,7 @@ solution links; use the generated catalog for the complete current inventory.
   take more than one session.
 
 ## Resources & Tools
-- Python 3.11–3.12 (3.12 recommended), Jupyter, pandas, NumPy,
+- Python 3.11-3.12 (3.12 recommended), Jupyter, pandas, NumPy,
   scikit-learn, matplotlib/Seaborn, PyTorch, Plotly/Altair, pytest, Ruff,
   mypy, Git, Docker, and MLflow.
 - Use the repository companion guides first. Optional books and external

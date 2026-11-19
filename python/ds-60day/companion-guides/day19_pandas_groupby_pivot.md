@@ -1,4 +1,4 @@
-# Day 19: GroupBy, Aggregation, Pivoting, and Melting
+# Day 19: Grouping, Pivoting, and Melting in pandas
 
 **Offline teaching data:** The [original synthetic fixtures](../../fixtures/README.md) replace first-run sample-data downloads. Their values are not historical or observational evidence. Keep numerical conclusions scoped to the declared teaching input.
 
@@ -74,8 +74,7 @@ They are separate from the browser's saved pads, notes and progress in Docker
 volumes. Neither route automatically copies attempts or completion markers to
 the other; record progress in the interface you actually used.
 
-**Lesson outcome:** use day 19; groupby, aggregation, pivoting, and melting to practice split-apply-combine, grouped summaries, and reshaping
-and explain the evidence produced by your code.
+**Outcome:** Summarize groups and reshape tables with groupby, pivot_table, and melt.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
@@ -133,14 +132,7 @@ summary = orders.groupby("region", as_index=False).agg(
 summary.to_dict("records")
 ```
 
-**Expected observation**
-
-```text
-`[{'region': 'east', 'order_count': 2, 'total': 25}, {'region': 'west', 'order_count': 2, 'total': 15}]`.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** `[{'region': 'east', 'order_count': 2, 'total': 25}, {'region': 'west', 'order_count': 2, 'total': 15}]`.
 
 ### Worked example 2: Align a group total back to every source row
 
@@ -152,14 +144,7 @@ orders = orders.assign(region_total=orders.groupby("region")["amount"].transform
 orders[["order_id", "region", "amount", "region_total"]].to_dict("records")
 ```
 
-**Expected observation**
-
-```text
-Every east row receives `25` and every west row receives `15`; there are still four rows.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** Every east row receives `25` and every west row receives `15`; there are still four rows.
 
 ### A debugging routine for this topic
 
@@ -305,7 +290,7 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-19`
-(Day 19 — GroupBy, Aggregation, Pivoting, and Melting). Direct catalog prerequisites: `python-18`.
+(Day 19: GroupBy, Aggregation, Pivoting, and Melting). Direct catalog prerequisites: `python-18`.
 I have completed the direct prerequisites: `python-18`. Emphasize split-apply-combine, grouped summaries, and reshaping.
 Read `python/ds-60day/companion-guides/day19_pandas_groupby_pivot.md` and use the learner notebook
 `python/ds-60day/notebooks/day19_pandas_groupby_pivot.ipynb`. Do not open or quote anything under `solutions/` unless

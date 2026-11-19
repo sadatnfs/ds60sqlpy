@@ -1,4 +1,4 @@
-# Day 31: Solutions: Probability Basics
+# Day 31 Solutions: Probability Basics
 
 We simulate common distributions, visualize convergence (LLN), and solve a simple Bayes problem.
 
@@ -18,14 +18,14 @@ from math import sqrt, pi, exp
 rng = np.random.default_rng(42)
 ```
 
-Worked reference for Exercise 1; Binomial histogram
+Worked reference for Exercise 1: Binomial histogram
 ```python
 n, p, trials = 10, 0.3, 10_000
 samples = rng.binomial(n=n, p=p, size=trials)
 
 plt.figure(figsize=(6, 4))
 plt.hist(samples, bins=range(n + 2), align="left", rwidth=0.8, color="C0", edgecolor="k")
-plt.title(f"Binomial(n={n}, p={p}) — {trials} trials")
+plt.title(f"Binomial(n={n}, p={p}): {trials} trials")
 plt.xlabel("k successes")
 plt.ylabel("count")
 plt.tight_layout()
@@ -45,7 +45,7 @@ Line-by-line
 
 ---
 
-Worked reference for Exercise 2; Normal(0,1) stats and PDF overlay
+Worked reference for Exercise 2: Normal(0,1) stats and PDF overlay
 ```python
 x = rng.normal(loc=0.0, scale=1.0, size=50_000)
 mu, var = x.mean(), x.var()
@@ -65,7 +65,7 @@ pdf = np.array([normal_pdf(t) for t in z])
 plt.figure(figsize=(6, 4))
 plt.hist(x, bins=60, density=True, color="C2", alpha=0.4, edgecolor="none")
 plt.plot(z, pdf, "k-", lw=2, label="N(0,1) PDF")
-plt.title(f"Normal(0,1) — mean={mu:.3f}, var={var:.3f}")
+plt.title(f"Normal(0,1): mean={mu:.3f}, var={var:.3f}")
 plt.legend()
 plt.tight_layout()
 plt.show()
@@ -76,7 +76,7 @@ Notes
 
 ---
 
-Worked reference for Exercise 3; Bayes: P(disease | positive)
+Worked reference for Exercise 3: Bayes: P(disease | positive)
 Given sensitivity=0.95, specificity=0.90, prevalence=0.01.
 ```python
 sens = 0.95  # P(+|D)
@@ -143,7 +143,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1; probability models, conditional evidence, and simulation error; with seed 731, produce exactly 10,000 integer draws in [0, 10]; assert the sample mean is within 0.08 of 3.0, and save a labeled 11-bin histogram whose counts sum to 10,000.
+**Verify:** With seed 731, produce exactly 10,000 integer draws in [0, 10]; assert the sample mean is within 0.08 of 3.0, and save a labeled 11-bin histogram whose counts sum to 10,000.
 
 ### Exercise 2: Original lesson practice
 
@@ -155,7 +155,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2; probability models, conditional evidence, and simulation error; with a declared seed and 10,000 draws, print sample size, mean, and population variance; require |mean| < 0.05 and |variance - 1| < 0.08, and overlay the labeled standard-normal PDF on a density-scaled histogram.
+**Verify:** With a declared seed and 10,000 draws, print sample size, mean, and population variance; require |mean| < 0.05 and |variance - 1| < 0.08, and overlay the labeled standard-normal PDF on a density-scaled histogram.
 
 ### Exercise 3: Original lesson practice
 
@@ -167,7 +167,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 3; probability models, conditional evidence, and simulation error; show the Bayes numerator 0.95 × 0.01, denominator 0.95 × 0.01 + 0.10 × 0.99, and posterior 0.0876 (about 8.76%); verify the false-positive term is included.
+**Verify:** Show the Bayes numerator 0.95 × 0.01, denominator 0.95 × 0.01 + 0.10 × 0.99, and posterior 0.0876 (about 8.76%); verify the false-positive term is included.
 
 ### Exercise 4: Prediction and uncertainty
 

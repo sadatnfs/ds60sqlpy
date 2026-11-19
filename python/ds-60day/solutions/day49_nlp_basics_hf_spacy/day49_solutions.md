@@ -1,4 +1,4 @@
-# Day 49: Solutions: NLP Basics with Hugging Face and spaCy
+# Day 49 Solutions: NLP Basics with Hugging Face and spaCy
 
 We build a sentiment classifier with Transformers, handle class imbalance with weights, and create a spaCy rule‑based matcher. Detailed explanations follow each block.
 
@@ -9,7 +9,7 @@ Contents
 
 ---
 
-Worked reference for Exercise 1; Fine‑tune DistilBERT for sentiment
+Worked reference for Exercise 1: Fine‑tune DistilBERT for sentiment
 ```python
 import os
 
@@ -101,7 +101,7 @@ Line‑by‑line
 
 ---
 
-Worked reference for Exercise 2; Class weights for imbalance
+Worked reference for Exercise 2: Class weights for imbalance
 ```python
 import os
 
@@ -173,7 +173,7 @@ Explanation
 
 ---
 
-Worked reference for Exercise 3; spaCy matcher
+Worked reference for Exercise 3: spaCy matcher
 ```python
 import spacy
 from spacy.matcher import Matcher
@@ -267,7 +267,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1; tokenization contracts, cached NLP models, and sensitive-text evaluation; when cached model artifacts exist, print model revision, candidate labels, input text, ordered labels, and scores whose sum is approximately 1; otherwise print an explicit offline-skip result without downloading.
+**Verify:** When cached model artifacts exist, print model revision, candidate labels, input text, ordered labels, and scores whose sum is approximately 1; otherwise print an explicit offline-skip result without downloading.
 
 ### Exercise 2: Original lesson practice
 
@@ -279,7 +279,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2; tokenization contracts, cached NLP models, and sensitive-text evaluation; for one fixed text, print spaCy token text/start/end and Hugging Face token IDs/tokens/offsets; reconstruct covered substrings, mark special/unknown/truncated tokens, and record exact tokenizer model/revision or local fallback.
+**Verify:** For one fixed text, print spaCy token text/start/end and Hugging Face token IDs/tokens/offsets; reconstruct covered substrings, mark special/unknown/truncated tokens, and record exact tokenizer model/revision or local fallback.
 
 ### Exercise 3: Truncation debugging
 

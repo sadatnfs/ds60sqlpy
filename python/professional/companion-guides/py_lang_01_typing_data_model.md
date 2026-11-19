@@ -4,12 +4,12 @@
 
 **Level:** advanced
 
-**Estimated time:** 210–270 minutes
+**Estimated time:** 210-270 minutes
 
 ## Level and prerequisites
 
 - **Catalog prerequisite:** `python-12`
-- Python Days 1–12, including iterators, classes, dataclasses, and type hints
+- Python Days 1-12, including iterators, classes, dataclasses, and type hints
 - Bridge Day 2 is helpful introductory Protocol and context-manager practice,
   not a prerequisite
 - Python 3.11 or 3.12
@@ -80,7 +80,7 @@ validates text, schemas, transaction state, and descriptor assignments.
 ## How to run this lesson
 
 **Primary browser route:** run `./classroom` from the repository root and
-choose **Python** on `/classroom`. Open this lesson in the shared workspace,
+choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
 read its capability notice, and use its supported coding or reading workflow.
 The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
 
@@ -372,7 +372,7 @@ The lesson is complete without an AI assistant. If you want optional
 coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
-Tutor me through `python-lang-01` — Advanced typing and the Python data model.
+Tutor me through `python-lang-01`: Advanced typing and the Python data model.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize static type contracts, structural protocols, overloads, and Python data-model hooks. Use exactly these maintained learner materials:

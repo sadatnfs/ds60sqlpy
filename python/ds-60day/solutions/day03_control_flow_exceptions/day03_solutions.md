@@ -1,9 +1,9 @@
-# Day 03: Solutions: Control Flow, Truthiness, and Exceptions
+# Day 3 Solutions: Control Flow, Truthiness, and Exceptions
 
 <!-- BEGIN BEGINNER SOLUTION REVIEW -->
 ## Concept review before comparing answers
 
-These worked answers demonstrate **branch selection, loop decisions, and narrow exception boundaries**. Predict each named
+These worked answers demonstrate **branch selection, truthiness in conditions, and narrow exception boundaries**. Predict each named
 result before comparing your attempt with its matching assertions.
 
 Control flow is the route execution takes through a program. An
@@ -29,194 +29,264 @@ every exception hides programming bugs. `else` runs after a successful
 
 ### How to compare an answer
 
-For this lesson's **branch selection, loop decisions, and narrow exception boundaries** model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.
+For each answer, follow the input value through every condition or `try`
+clause to the printed output or assertion that proves the behavior. Then
+change the input to a boundary value, such as 59.49 or `"seven"`, predict the
+new path, and rerun before accepting the answer.
 <!-- END BEGINNER SOLUTION REVIEW -->
 
-## Exercises 1–3: Worked answers
+## Exercises 1-3: Worked answers
 
 ### Exercise 1: worked answer
 
-**Learner contract:** Print FizzBuzz for every integer from 1 through 30 inclusive. **Rules:** multiples of both 3 and 5 print `FizzBuzz`; only 3 prints `Fizz`; only 5 prints `Buzz`; all others print the number. **Constraints:** use one ordered `if`/`elif`/`else` chain. **Verify:** capture the output lines, assert there are exactly 30, and assert positions 3, 5, 15, 16, and 30 equal `Fizz`, `Buzz`, `FizzBuzz`, `16`, and `FizzBuzz`.
+**Learner contract:** Given `number = 15`, write one ordered `if`/`elif`/`else` chain that sets `label` to `"FizzBuzz"` for multiples of both 3 and 5, `"Fizz"` for multiples of 3 only, `"Buzz"` for multiples of 5 only, and `str(number)` otherwise. **Constraints:** test divisibility with `%` and keep all four outcomes in one chain. **Verify:** rerun with `number` set to 3, 5, 15, 16, and 30 and assert the labels `"Fizz"`, `"Buzz"`, `"FizzBuzz"`, `"16"`, and `"FizzBuzz"`. Day 4 repeats this decision for 1 through 30 with a `for` loop.
 
-**Reasoning:** Implement this exact contract as written: Print FizzBuzz for every integer from 1 through 30 inclusive. Rules: multiples of both 3 and 5 print `FizzBuzz`; only 3 prints `Fizz`; only 5 prints `Buzz`; all others print the number. Constraints: use one ordered `if`/`elif`/`else` chain. Keep the prompt's named data and constraints visible in the code, then establish this specific result: capture the output lines, assert there are exactly 30, and assert positions 3, 5, 15, 16, and 30 equal `Fizz`, `Buzz`, `FizzBuzz`, `16`, and `FizzBuzz`. That connects the answer to branch selection, loop decisions, and narrow exception boundaries.
+**Reasoning:** The combined rule must come first. Fifteen is also a multiple of
+3, so if `number % 3 == 0` were tested first, 15 would stop at `"Fizz"` and
+never reach `"FizzBuzz"`. Testing `number % 15 == 0` is the same as "divisible
+by 3 and by 5" because 3 and 5 share no factor; `number % 3 == 0 and
+number % 5 == 0` says it more literally. `str(number)` keeps every label a
+string, so `"16"` and `"Fizz"` have the same type. Writing four separate `if`
+statements is the usual mistake: 15 then satisfies three of them, and the
+label is whichever assignment happened to run last.
 
 ```python
-output = []
-for number in range(1, 31):
-    if number % 15 == 0:
-        output.append("FizzBuzz")
-    elif number % 3 == 0:
-        output.append("Fizz")
-    elif number % 5 == 0:
-        output.append("Buzz")
-    else:
-        output.append(str(number))
+number = 15
 
-assert len(output) == 30
-assert [output[index - 1] for index in (3, 5, 15, 16, 30)] == [
-    "Fizz",
-    "Buzz",
-    "FizzBuzz",
-    "16",
-    "FizzBuzz",
-]
+if number % 15 == 0:
+    label = "FizzBuzz"
+elif number % 3 == 0:
+    label = "Fizz"
+elif number % 5 == 0:
+    label = "Buzz"
+else:
+    label = str(number)
+
+print(number, label)
+assert label == "FizzBuzz"
 ```
 
-The combined rule comes first because an `elif` chain stops at the
-first true condition.
-
-**Verification evidence:** capture the output lines, assert there are exactly 30, and assert positions 3, 5, 15, 16, and 30 equal `Fizz`, `Buzz`, `FizzBuzz`, `16`, and `FizzBuzz`.
+**Expected output:** `15 FizzBuzz`. Rerunning with `number` set to 3, 5, 16,
+and 30 prints `Fizz`, `Buzz`, `16`, and `FizzBuzz`. Day 4 places the same chain
+inside `for number in range(1, 31):` to produce all thirty labels in one run.
 
 ### Exercise 2: worked answer
 
-**Learner contract:** Write `parse_age(text)` that returns an integer for valid integer text and returns `None` only when conversion raises `ValueError`. **Constraints:** put only `int(text)` inside `try`; do not use a bare `except`. **Verify:** test `'42'`, `' 7 '`, and `'seven'`, then explain which path uses `else`.
+**Learner contract:** Given `text = " 7 "`, put only `int(text)` inside `try`, set `age` to the integer on success, and set `age = None` when `ValueError` is raised. **Constraints:** do not use a bare `except`; use an `else` block to record success. **Verify:** run with `"42"`, `" 7 "`, and `"seven"` and assert that `age` is `42`, `7`, and `None`; explain which runs execute the `else` block.
 
-**Reasoning:** Implement this exact contract as written: Write `parse_age(text)` that returns an integer for valid integer text and returns `None` only when conversion raises `ValueError`. Constraints: put only `int(text)` inside `try`; do not use a bare `except`. Keep the prompt's named data and constraints visible in the code, then establish this specific result: test `'42'`, `' 7 '`, and `'seven'`, then explain which path uses `else`. That connects the answer to branch selection, loop decisions, and narrow exception boundaries.
+**Reasoning:** `int()` ignores surrounding whitespace, so `" 7 "` converts
+directly; only text that is not an integer, such as `"seven"`, raises
+`ValueError`. Keeping only `int(text)` inside `try` means a typo elsewhere in
+the cell, such as a misspelled name, still produces its own error instead of
+silently becoming `None`. The `else` block runs for `"42"` and `" 7 "` but not
+for `"seven"`. A bare `except:` is never the narrow choice: it also catches
+real bugs and even a keyboard interrupt.
 
 ```python
-def parse_age(text: str) -> int | None:
-    try:
-        value = int(text)
-    except ValueError:
-        return None
-    else:
-        return value
+text = " 7 "
 
+try:
+    age = int(text)
+except ValueError:
+    age = None
+    print("not an integer:", repr(text))
+else:
+    print("parsed:", age)
 
-assert parse_age("42") == 42
-assert parse_age(" 7 ") == 7
-assert parse_age("seven") is None
+assert age == 7
 ```
 
-Only conversion is protected; a later programming defect is not
-mislabeled as invalid user input.
-
-**Verification evidence:** test `'42'`, `' 7 '`, and `'seven'`, then explain which path uses `else`.
+**Expected output:** `parsed: 7`. With `text = "seven"` the output is
+`not an integer: 'seven'` and `age` is `None`.
 
 ### Exercise 3: worked answer
 
-**Learner contract:** Define `NegativeMeasurementError` as a subclass of `ValueError`, then write `validate_measurement(value)` that returns non-negative values unchanged and raises your exception for `-0.1`. **Verify:** show one normal return and catch the exact custom type in a small demonstration; do not catch it inside the validator.
+**Learner contract:** Given `measurement = -0.1`, raise `ValueError` with the message `measurement must be non-negative, got -0.1` when the value is negative, and leave non-negative values unchanged. **Constraints:** check the sign with an `if` before any calculation uses the value. **Verify:** run once with `2.5` (no error, value unchanged) and once with `-0.1`; then wrap the check in `try`/`except ValueError as exc` and assert that `str(exc)` equals the exact message. Day 12 shows how to define a dedicated exception type such as `NegativeMeasurementError`.
 
-**Reasoning:** Implement this exact contract as written: Define `NegativeMeasurementError` as a subclass of `ValueError`, then write `validate_measurement(value)` that returns non-negative values unchanged and raises your exception for `-0.1`. Keep the prompt's named data and constraints visible in the code, then establish this specific result: show one normal return and catch the exact custom type in a small demonstration; do not catch it inside the validator. That connects the answer to branch selection, loop decisions, and narrow exception boundaries.
+**Reasoning:** The sign check happens before anything uses the value, so a
+negative reading can never flow into later arithmetic. Putting the value in
+the message (`got -0.1`) tells the reader which input failed without a rerun.
+Catching `ValueError` in the same cell only demonstrates that the exact
+message arrives; in real code the `raise` sits in the checking code and the
+`try` in the code that decides what to do next. Writing `measurement <= 0`
+instead of `< 0` would wrongly reject a legitimate zero reading.
 
 ```python
-class NegativeMeasurementError(ValueError):
-    """Raised when a measurement is below zero."""
+measurement = -0.1
 
-
-def validate_measurement(value: float) -> float:
-    if value < 0:
-        raise NegativeMeasurementError("measurement must be non-negative")
-    return value
-
-
-assert validate_measurement(0.0) == 0.0
 try:
-    validate_measurement(-0.1)
-except NegativeMeasurementError as error:
-    assert "non-negative" in str(error)
-else:
-    raise AssertionError("negative input should fail")
+    if measurement < 0:
+        raise ValueError(f"measurement must be non-negative, got {measurement}")
+    print("accepted:", measurement)
+except ValueError as exc:
+    message = str(exc)
+    print("rejected:", message)
+
+assert message == "measurement must be non-negative, got -0.1"
 ```
 
-**Verification evidence:** show one normal return and catch the exact custom type in a small demonstration; do not catch it inside the validator.
+**Expected output:** `rejected: measurement must be non-negative, got -0.1`.
+With `measurement = 2.5` the `if` is false, nothing is raised, and the output
+is `accepted: 2.5`.
 
-## Exercises 4–8: Expanded mastery answers
+## Exercises 4-8: Expanded mastery answers
 
 ### Exercise 4: answer contract
 
 **Learner contract:** **Prediction:** Predict which branch handles 0, 9, and 12 when checks are ordered as `x % 2 == 0`, `x % 3 == 0`, then both. Explain the bug. **Progressive hint:** Only the first true branch runs; test the most specific rule first. **Verify:** Record the branch selected for `0`, `9`, and `12` before/after reordering; confirm the repaired `12` reaches the combined rule.
 
-**Reasoning:** Predict this named state change before running it: Prediction: Predict which branch handles 0, 9, and 12 when checks are ordered as `x % 2 == 0`, `x % 3 == 0`, then both. Explain the bug. Progressive hint: Only the first true branch runs; test the most specific rule first. Then compare the prediction with this proof target: Record the branch selected for `0`, `9`, and `12` before/after reordering; confirm the repaired `12` reaches the combined rule. This makes branch selection, loop decisions, and narrow exception boundaries observable instead of relying on intuition.
+**Reasoning:** Only the first true condition runs. Any number that passes the
+combined test also passes `x % 2 == 0`, so with the combined test last it can
+never be selected: 12 stops at `"even"`. Moving the combined test to the top
+repairs 12 and also changes 0, because `0 % 2` and `0 % 3` are both 0 (zero is
+a multiple of every nonzero integer). Nine is odd, so the reorder does not
+affect it.
 
-**Evidence to locate in the grouped implementation:** Record the branch selected for `0`, `9`, and `12` before/after reordering; confirm the repaired `12` reaches the combined rule.
+| Value | Original order (even, multiple of 3, both) | Repaired order (both first) |
+|---|---|---|
+| 0 | even | multiple of 6 |
+| 9 | multiple of 3 | multiple of 3 |
+| 12 | even | multiple of 6 |
+
+```python
+x = 12
+
+if x % 2 == 0 and x % 3 == 0:
+    branch = "multiple of 6"
+elif x % 2 == 0:
+    branch = "even"
+elif x % 3 == 0:
+    branch = "multiple of 3"
+else:
+    branch = "other"
+
+print(x, branch)
+assert branch == "multiple of 6"
+```
 
 ### Exercise 5: answer contract
 
 **Learner contract:** **Tracing:** Trace `try/except/else/finally` for a successful integer parse and for invalid text. Which clauses run in each path? **Progressive hint:** `else` follows success; `finally` runs in both cases. **Verify:** Use a four-column trace for `try`, `except`, `else`, and `finally` on valid/invalid text; each clause's executed flag must match the language rules.
 
-**Reasoning:** Trace the concrete values in this contract one step at a time: Tracing: Trace `try/except/else/finally` for a successful integer parse and for invalid text. Which clauses run in each path? Progressive hint: `else` follows success; `finally` runs in both cases. Record the named value, shape, label, or iterator position needed to establish: Use a four-column trace for `try`, `except`, `else`, and `finally` on valid/invalid text; each clause's executed flag must match the language rules. The trace exposes branch selection, loop decisions, and narrow exception boundaries directly.
+**Reasoning:** `try` always starts. When the conversion succeeds, Python skips
+`except`, runs `else`, then runs `finally`. When it fails, the rest of the
+`try` block is skipped, the matching `except` runs, `else` is skipped, and
+`finally` still runs. Printing a line in every clause turns that rule into
+visible evidence. The common wrong prediction is that `finally` runs only
+after an error; it runs on both paths.
 
-**Evidence to locate in the grouped implementation:** Use a four-column trace for `try`, `except`, `else`, and `finally` on valid/invalid text; each clause's executed flag must match the language rules.
+```python
+text = "12"
+
+try:
+    print("try: converting", repr(text))
+    value = int(text)
+except ValueError:
+    print("except: not an integer")
+else:
+    print("else: parsed", value)
+finally:
+    print("finally: always runs")
+```
+
+| Clause | `text = "12"` | `text = "twelve"` |
+|---|---|---|
+| `try` | runs | runs (stops at `int`) |
+| `except` | skipped | runs |
+| `else` | runs | skipped |
+| `finally` | runs | runs |
 
 ### Exercise 6: answer contract
 
-**Learner contract:** **Implementation:** Implement `classify_score(score)` returning fail/pass/distinction and reject scores outside 0–100 with `ValueError`. **Progressive hint:** Validate the domain before choosing a result branch. **Verify:** Assert representative scores return `fail`, `pass`, and `distinction`, then assert `-1` and `101` each raise `ValueError`.
+**Learner contract:** **Implementation:** A grader records scores as floats. Policy: from 89.5 to 100 is `"distinction"`, from 59.5 up to (but not including) 89.5 is `"pass"`, from 0 up to 59.5 is `"fail"`, and any score outside 0 to 100 raises `ValueError`. Given `score = 59.5`, write the chain. **Progressive hint:** Validate the range first, then test the thresholds from highest to lowest with `>=`. **Verify:** Rerun with `59.49`, `59.5`, `89.49`, `89.5`, `100.0`, and `100.5`; assert `"fail"`, `"pass"`, `"pass"`, `"distinction"`, `"distinction"`, and a `ValueError` for `100.5`.
 
-**Reasoning:** Implement this exact contract as written: Implementation: Implement `classify_score(score)` returning fail/pass/distinction and reject scores outside 0–100 with `ValueError`. Progressive hint: Validate the domain before choosing a result branch. Keep the prompt's named data and constraints visible in the code, then establish this specific result: Assert representative scores return `fail`, `pass`, and `distinction`, then assert `-1` and `101` each raise `ValueError`. That connects the answer to branch selection, loop decisions, and narrow exception boundaries.
+**Reasoning:** The policy states half-point thresholds, so the code compares
+the float directly instead of rounding first. That matters because Python's
+`round()` sends halves to the nearest even number: `round(59.5)` is `60`, but
+`round(58.5)` is `58`, so a rounding-based rule would treat equal half-point
+margins differently. Testing from the highest threshold down with `>=` gives
+each boundary to the higher grade: 89.5 is a distinction and 89.49 a pass.
+Validating the range first means 100.5 raises instead of being reported as a
+distinction.
 
-**Evidence to locate in the grouped implementation:** Assert representative scores return `fail`, `pass`, and `distinction`, then assert `-1` and `101` each raise `ValueError`.
+```python
+score = 59.5
+
+if not 0 <= score <= 100:
+    raise ValueError(f"score must be between 0 and 100, got {score}")
+if score >= 89.5:
+    grade = "distinction"
+elif score >= 59.5:
+    grade = "pass"
+else:
+    grade = "fail"
+
+print(score, grade)
+assert grade == "pass"
+```
+
+**Expected output:** `59.5 pass`. Reruns give `59.49 fail`, `89.49 pass`,
+`89.5 distinction`, `100.0 distinction`, and, for `100.5`,
+`ValueError: score must be between 0 and 100, got 100.5`.
 
 ### Exercise 7: answer contract
 
-**Learner contract:** **Debugging:** Replace a bare `except:` around parsing and calculation with the narrowest useful handler, while allowing programming errors to surface. **Progressive hint:** Keep only the conversion inside the protected block. **Verify:** Show invalid integer text is handled while a deliberate unrelated `TypeError` still reaches the test; keep only conversion inside `try`.
+**Learner contract:** **Debugging:** A cell wraps both `count = int(raw_count)` and `total_cost = count * unit_price` in one `try` block followed by a bare `except:` that sets `total_cost = 0`, and `unit_price` was never defined. Rebuild it so only the conversion is protected and only `ValueError` is caught. **Progressive hint:** Keep only the conversion inside the protected block and move the calculation after it. **Verify:** With `raw_count = "twelve"` the handler reports invalid text; with `raw_count = "12"` the `NameError` for `unit_price` now appears instead of a silent `0`; after defining `unit_price = 2.5`, assert `total_cost == 30.0`.
 
-**Reasoning:** Reproduce the exact failure described here before changing code: Debugging: Replace a bare `except:` around parsing and calculation with the narrowest useful handler, while allowing programming errors to surface. Progressive hint: Keep only the conversion inside the protected block. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Show invalid integer text is handled while a deliberate unrelated `TypeError` still reaches the test; keep only conversion inside `try`. The diagnosis depends on branch selection, loop decisions, and narrow exception boundaries.
+**Reasoning:** The original bare `except:` caught the `NameError` for
+`unit_price` and replaced it with `0`, so a programming mistake looked like a
+legitimate zero cost. Protecting only `int(raw_count)` and catching only
+`ValueError` keeps a handler for the failure you expect (bad text) and lets
+every other error stop the run with its own traceback. Run the repaired cell
+once before the `unit_price` line exists to watch the `NameError` appear; that
+visible failure is the point of the repair.
 
-**Evidence to locate in the grouped implementation:** Show invalid integer text is handled while a deliberate unrelated `TypeError` still reaches the test; keep only conversion inside `try`.
+```python
+raw_count = "12"
+unit_price = 2.5  # the definition the bare except had been hiding
+
+try:
+    count = int(raw_count)
+except ValueError:
+    count = None
+    print("invalid count text:", repr(raw_count))
+
+if count is not None:
+    total_cost = count * unit_price
+    print("total:", total_cost)
+    assert total_cost == 30.0
+```
+
+**Expected output:** `total: 30.0`. With `raw_count = "twelve"` the output is
+`invalid count text: 'twelve'` and no total is computed.
 
 ### Exercise 8: answer contract
 
-**Learner contract:** **Edge case and explanation:** Design `safe_ratio(numerator, denominator)` for a zero denominator. Choose between raising, returning `None`, or a default and justify it. **Progressive hint:** A reusable library function usually should not invent a numeric result. **Verify:** Test a nonzero ratio and a zero denominator; assert the chosen zero policy exactly and explain why no fabricated numeric answer leaks through.
+**Learner contract:** **Edge case and explanation:** Given `numerator = 3` and `denominator = 0`, choose a zero-denominator policy: raise `ZeroDivisionError` with a clear message, or set `ratio = None` and record why. Justify the choice. **Progressive hint:** Code that other people reuse usually should not invent a numeric answer such as `0.0`. **Verify:** With `denominator = 4`, assert `ratio == 0.75`; with `denominator = 0`, assert your chosen outcome exactly and explain why `0.0` would be a fabricated answer.
 
-**Reasoning:** Make this boundary unambiguous in code: Edge case and explanation: Design `safe_ratio(numerator, denominator)` for a zero denominator. Choose between raising, returning `None`, or a default and justify it. Progressive hint: A reusable library function usually should not invent a numeric result. Values below, at, and above the named boundary must produce the evidence Test a nonzero ratio and a zero denominator; assert the chosen zero policy exactly and explain why no fabricated numeric answer leaks through. Those cases show how branch selection, loop decisions, and narrow exception boundaries behaves at its edge.
-
-**Evidence to locate in the grouped implementation:** Test a nonzero ratio and a zero denominator; assert the chosen zero policy exactly and explain why no fabricated numeric answer leaks through.
-
-## Expanded mastery lab solutions
-
-Make branch order and exception boundaries deliberate. Catch only the failure that the current layer can interpret or repair.
-
-### Shared implementation for Exercises 4–5: Branch and exception traces
-
-The combined-divisibility check must come first; otherwise values such as 12
-are consumed by the even branch. On successful parsing, `else` and `finally`
-run. On `ValueError`, `except` and `finally` run.
-
-### Shared implementation for Exercises 6–8: Explicit contracts
+**Reasoning:** Division by zero has no numeric answer, so the policy must
+either stop or mark the result as missing; `0.0` would be a fabricated value
+that later sums and averages would silently include. This answer sets
+`ratio = None` with a recorded reason because a report can still show the
+other ratios; code that cannot continue without a ratio should raise
+`ZeroDivisionError("denominator must not be zero")` instead. Checking
+`denominator == 0` before dividing is clearer here than catching the error,
+because the condition is easy to test directly.
 
 ```python
-def classify_score(score: float) -> str:
-    """Classify a score whose valid domain is the closed interval 0..100."""
+numerator = 3
+denominator = 0
 
-    if not 0 <= score <= 100:
-        raise ValueError("score must be between 0 and 100")
-    if score >= 80:
-        return "distinction"
-    if score >= 60:
-        return "pass"
-    return "fail"
+if denominator == 0:
+    ratio = None
+    reason = "denominator is zero, so the ratio is undefined"
+else:
+    ratio = numerator / denominator
+    reason = "computed"
 
-
-assert classify_score(80) == "distinction"  # Boundary belongs to upper band.
-assert classify_score(59.9) == "fail"
-
-
-def parse_count(text: str) -> int | None:
-    """Return None only when text is not a valid integer."""
-
-    try:
-        # Keep the try block narrow: later calculations may reveal real bugs.
-        value = int(text)
-    except ValueError:
-        return None
-    else:
-        return value
-
-
-def safe_ratio(numerator: float, denominator: float) -> float:
-    """Return a ratio, rejecting an undefined zero-denominator operation."""
-
-    if denominator == 0:
-        raise ZeroDivisionError("denominator must be non-zero")
-    return numerator / denominator
-
-
-assert parse_count("12") == 12
-assert parse_count("twelve") is None
-assert safe_ratio(3, 4) == 0.75
+print(ratio, reason)
+assert ratio is None
 ```
 
-Raising in `safe_ratio` preserves the fact that the result is undefined. A
-calling application can translate that exception into `None` or a user message
-if its own contract calls for one.
+**Expected output:** `None denominator is zero, so the ratio is undefined`.
+With `denominator = 4` the output is `0.75 computed`.

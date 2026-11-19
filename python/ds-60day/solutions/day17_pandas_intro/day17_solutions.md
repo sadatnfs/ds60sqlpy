@@ -1,4 +1,4 @@
-# Day 17: Solutions: Pandas Intro (Series, DataFrame, Index)
+# Day 17 Solutions: pandas Series, DataFrames, and Indexing
 
 **Offline teaching data:** The [original synthetic fixtures](../../../fixtures/README.md) replace first-run sample-data downloads. Their values are not historical or observational evidence. Keep numerical conclusions scoped to the declared teaching input.
 
@@ -35,13 +35,13 @@ a small sample before trusting a calculation.
 For this lesson's **labeled tabular data, row grain, indexes, selection, and vectorized columns** model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.
 <!-- END BEGINNER SOLUTION REVIEW -->
 
-## Exercises 1–3: Worked answers
+## Exercises 1-3: Worked answers
 
 ### Exercise 1: worked answer
 
 **Learner contract:** Using the lesson DataFrame, select rows where `time == 'Dinner'`, then compute the mean of the selected `tip` values. **Before code:** state the row grain and write the mask separately. **Expected behavior:** the result is one scalar equal to `dinner_rows['tip'].mean()`. **Constraints:** use `.loc` and do not loop. **Verify:** assert every selected row is Dinner and the selection is non-empty before reporting the mean.
 
-**Reasoning:** Implement this exact contract as written: Using the lesson DataFrame, select rows where `time == 'Dinner'`, then compute the mean of the selected `tip` values. Before code: state the row grain and write the mask separately. Expected behavior: the result is one scalar equal to `dinner_rows['tip'].mean()`. Constraints: use `.loc` and do not loop. Keep the prompt's named data and constraints visible in the code, then establish this specific result: assert every selected row is Dinner and the selection is non-empty before reporting the mean. That connects the answer to labeled tabular data, row grain, indexes, selection, and vectorized columns.
+**Reasoning:** The row grain of the fixture is one restaurant bill per row, so the mask selects whole bills and the mean of their `tip` column is a single scalar. Writing the mask as its own name, `dinner_mask`, makes it inspectable: you can count it and check its index before using it. `.loc[mask]` keeps the original labels, which lets later code line results up with the source. Checking `dinner_rows.empty` before averaging matters because the mean of an empty selection is `NaN`, which looks like data but is not; the reference uses a four-row frame so that the expected mean, 3.5, can be checked by hand.
 
 ```python
 import pandas as pd
@@ -71,13 +71,11 @@ The fixture grain is one restaurant check per row. Keeping
 `dinner_mask`, `dinner_rows`, and the scalar aggregation separate makes
 each shape transition inspectable.
 
-**Verification evidence:** assert every selected row is Dinner and the selection is non-empty before reporting the mean.
-
 ### Exercise 2: worked answer
 
 **Learner contract:** Add a Boolean `is_big_party` column that is `True` exactly when `size >= 5`. **Constraints:** use one vectorized comparison and explicit assignment; do not use row-wise `apply`. **Verify:** compare the new column with `df['size'].ge(5)`, inspect both True and False rows, and confirm row count/index are unchanged.
 
-**Reasoning:** Implement this exact contract as written: Add a Boolean `is_big_party` column that is `True` exactly when `size >= 5`. Constraints: use one vectorized comparison and explicit assignment; do not use row-wise `apply`. Keep the prompt's named data and constraints visible in the code, then establish this specific result: compare the new column with `df['size'].ge(5)`, inspect both True and False rows, and confirm row count/index are unchanged. That connects the answer to labeled tabular data, row grain, indexes, selection, and vectorized columns.
+**Reasoning:** `df["size"].ge(5)` compares the whole column at once and returns a Boolean Series with the same index, so `assign` adds the column without loops and without changing row order. `>= 5` versus `> 5` is the boundary that matters: a party of exactly 5 counts as big under this contract, which the checks on both the True and the False rows confirm. `apply(axis=1)` would produce the same values far more slowly and hide the vectorized intent. `assign` returns a new frame, so the original object is not modified behind your back.
 
 ```python
 df = df.assign(is_big_party=df["size"].ge(5))
@@ -90,13 +88,11 @@ assert df.index.equals(original_df.index)
 
 Vectorized comparison preserves index alignment and avoids row loops.
 
-**Verification evidence:** compare the new column with `df['size'].ge(5)`, inspect both True and False rows, and confirm row count/index are unchanged.
-
 ### Exercise 3: worked answer
 
 **Learner contract:** Create a safe `tip_rate = tip / total_bill`, treating a zero bill as missing rather than infinity, then sort descending by `tip_rate`. **Constraints:** preserve the unsorted source in a separate name and choose where missing rates appear. **Verify:** assert there are no infinite values and that non-missing rates are monotonically decreasing.
 
-**Reasoning:** Implement this exact contract as written: Create a safe `tip_rate = tip / total_bill`, treating a zero bill as missing rather than infinity, then sort descending by `tip_rate`. Constraints: preserve the unsorted source in a separate name and choose where missing rates appear. Keep the prompt's named data and constraints visible in the code, then establish this specific result: assert there are no infinite values and that non-missing rates are monotonically decreasing. That connects the answer to labeled tabular data, row grain, indexes, selection, and vectorized columns.
+**Reasoning:** Division by zero in pandas produces `inf` rather than an error, and `inf` sorts to the top of a descending order, so a zero bill would look like the most generous tip. Masking zero denominators to `NaN` before dividing makes that rate missing instead, and `na_position="last"` states where missing rates go in the sorted output. Sorting into a new name, `ordered`, keeps the unsorted source available for comparison. The checks confirm that there are no infinite values and that the non-missing rates decrease.
 
 ```python
 import numpy as np
@@ -108,61 +104,68 @@ assert not np.isinf(ordered["tip_rate"].dropna()).any()
 assert ordered["tip_rate"].dropna().is_monotonic_decreasing
 ```
 
-**Verification evidence:** assert there are no infinite values and that non-missing rates are monotonically decreasing.
-
-## Exercises 4–8: Expanded mastery answers
+## Exercises 4-8: Expanded mastery answers
 
 ### Exercise 4: answer contract
 
 **Learner contract:** **Prediction:** Predict the difference between `.loc[labels]` and `.iloc[positions]` after an integer index has been reordered. **Progressive hint:** Labels are not automatically row positions. **Verify:** After reordering integer labels, assert `.loc` returns the requested labels and `.iloc` returns the requested positions; list both resulting indexes.
 
-**Reasoning:** Predict this named state change before running it: Prediction: Predict the difference between `.loc[labels]` and `.iloc[positions]` after an integer index has been reordered. Progressive hint: Labels are not automatically row positions. Then compare the prediction with this proof target: After reordering integer labels, assert `.loc` returns the requested labels and `.iloc` returns the requested positions; list both resulting indexes. This makes labeled tabular data, row grain, indexes, selection, and vectorized columns observable instead of relying on intuition.
-
-**Evidence to locate in the grouped implementation:** After reordering integer labels, assert `.loc` returns the requested labels and `.iloc` returns the requested positions; list both resulting indexes.
+**Reasoning:** `.loc` selects by index label and `.iloc` by position, and the two diverge as soon as the index is not `0, 1, 2, ...` in order. In the shared implementation for Exercises 4-5, the labels are `30, 10, 20`, so `.loc[[10, 20]]` returns the rows labelled 10 and 20, while `.iloc[[0, 1]]` returns the first two rows, labelled 30 and 10. Integer labels make the confusion likely: `frame.loc[0]` raises `KeyError` there even though a first row exists. Use `.iloc` only when position is truly the meaning.
 
 ### Exercise 5: answer contract
 
 **Learner contract:** **Tracing:** Trace a boolean mask through creation, alignment by index, and row selection. What happens if mask/index labels differ? **Progressive hint:** Pandas aligns many labeled objects by index. **Verify:** Display mask and frame indexes side by side, then assert aligned selection for matching labels and the documented error/reindex policy for mismatches.
 
-**Reasoning:** Trace the concrete values in this contract one step at a time: Tracing: Trace a boolean mask through creation, alignment by index, and row selection. What happens if mask/index labels differ? Progressive hint: Pandas aligns many labeled objects by index. Record the named value, shape, label, or iterator position needed to establish: Display mask and frame indexes side by side, then assert aligned selection for matching labels and the documented error/reindex policy for mismatches. The trace exposes labeled tabular data, row grain, indexes, selection, and vectorized columns directly.
-
-**Evidence to locate in the grouped implementation:** Display mask and frame indexes side by side, then assert aligned selection for matching labels and the documented error/reindex policy for mismatches.
+**Reasoning:** A Boolean Series used as a row selector is aligned to the frame by index label, not by position. A mask built from the frame itself, such as `reordered["value"].str.endswith("y")`, shares its index, so the selection is exact. A mask with different labels cannot be aligned, and `.loc` raises `IndexingError` instead of guessing, as the shared implementation for Exercises 4-5 shows. The safe habit is to build masks from the frame being filtered; when a mask must come from elsewhere, reindex it explicitly and decide what missing labels mean.
 
 ### Exercise 6: answer contract
 
-**Learner contract:** **Implementation:** Create a safe `tip_rate` column that yields missing values rather than infinity when `total_bill` is zero. **Progressive hint:** Mask or replace the zero denominator before division. **Verify:** Assert zero bills yield missing rates, positive bills yield the calculated ratio, and the entire column contains no positive/negative infinity.
+**Learner contract:** **Implementation:** The fixture has no zero bills, so construct the edge case: append one row with `total_bill = 0.0` and `tip = 1.0` to a copy of `df`, then compute `tip_rate` so that the zero bill yields a missing value instead of infinity. **Progressive hint:** Replace a zero denominator with a missing value, for example with `.where(total_bill != 0)`, before dividing. **Verify:** Assert the new row's rate is missing, the 240 original rows equal `tip / total_bill` exactly, `df` itself still has 240 rows, and the column contains no positive or negative infinity.
 
-**Reasoning:** Implement this exact contract as written: Implementation: Create a safe `tip_rate` column that yields missing values rather than infinity when `total_bill` is zero. Progressive hint: Mask or replace the zero denominator before division. Keep the prompt's named data and constraints visible in the code, then establish this specific result: Assert zero bills yield missing rates, positive bills yield the calculated ratio, and the entire column contains no positive/negative infinity. That connects the answer to labeled tabular data, row grain, indexes, selection, and vectorized columns.
-
-**Evidence to locate in the grouped implementation:** Assert zero bills yield missing rates, positive bills yield the calculated ratio, and the entire column contains no positive/negative infinity.
+**Reasoning:** The fixture has no zero bills, so the edge case has to be constructed: one appended row with `total_bill = 0.0` and `tip = 1.0`. Replacing the zero denominator with a missing value, `.where(total_bill != 0)`, before dividing makes that row's rate `NaN` instead of `inf`, while every original row keeps exactly `tip / total_bill`. Building the extended frame with `pd.concat` leaves the 240-row fixture untouched. The shared implementation for Exercises 6-8 checks the new row, the unchanged original rates, and the absence of infinity.
 
 ### Exercise 7: answer contract
 
 **Learner contract:** **Debugging:** Repair chained assignment on a filtered DataFrame and explain when to use `.loc` or an explicit `.copy()`. **Progressive hint:** Make ownership and target rows explicit. **Verify:** Turn chained-assignment warnings into explicit `.loc` or `.copy()` ownership; assert the intended frame changes and the unintended frame does not.
 
-**Reasoning:** Reproduce the exact failure described here before changing code: Debugging: Repair chained assignment on a filtered DataFrame and explain when to use `.loc` or an explicit `.copy()`. Progressive hint: Make ownership and target rows explicit. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Turn chained-assignment warnings into explicit `.loc` or `.copy()` ownership; assert the intended frame changes and the unintended frame does not. The diagnosis depends on labeled tabular data, row grain, indexes, selection, and vectorized columns.
-
-**Evidence to locate in the grouped implementation:** Turn chained-assignment warnings into explicit `.loc` or `.copy()` ownership; assert the intended frame changes and the unintended frame does not.
+**Reasoning:** `frame[mask]["tip"] = 0.0` performs two operations: the first returns a new temporary frame, and the assignment then changes that temporary, so the original stays unchanged. pandas 2 warns with `SettingWithCopyWarning`; pandas 3, which always uses Copy-on-Write, never updates the original through chained assignment. A single `frame.loc[mask, "tip"] = value` names the target frame, rows, and column in one step, and `.copy()` makes an independent subset explicit, as `dinners` does in the shared implementation for Exercises 6-8, which also shows the original left unchanged after a chained assignment.
 
 ### Exercise 8: answer contract
 
 **Learner contract:** **Edge case and explanation:** Compute a statistic for a possibly empty selection and return `None` instead of silently presenting `NaN` as a real result. **Progressive hint:** Check `.empty` before aggregating when absence has business meaning. **Verify:** Test nonempty and empty selections; assert the former returns the statistic and the latter returns `None`, not a value presented as meaningful.
 
-**Reasoning:** Make this boundary unambiguous in code: Edge case and explanation: Compute a statistic for a possibly empty selection and return `None` instead of silently presenting `NaN` as a real result. Progressive hint: Check `.empty` before aggregating when absence has business meaning. Values below, at, and above the named boundary must produce the evidence Test nonempty and empty selections; assert the former returns the statistic and the latter returns `None`, not a value presented as meaningful. Those cases show how labeled tabular data, row grain, indexes, selection, and vectorized columns behaves at its edge.
-
-**Evidence to locate in the grouped implementation:** Test nonempty and empty selections; assert the former returns the statistic and the latter returns `None`, not a value presented as meaningful.
+**Reasoning:** The mean of an empty selection is `NaN`, which flows into reports and averages as if it were a measurement. Checking `selected.empty` and returning `None` makes absence a distinct, testable outcome, and returning `float(...)` in the nonempty case keeps the result a plain Python number. In the shared implementation for Exercises 6-8, the dinner rows give 2.5 and the nonexistent meal code `"B"` gives `None`. Callers must then handle `None` explicitly, which moves the decision about missing data to the code that knows what it means.
 
 ## Expanded mastery lab solutions
 
 State a DataFrame's row grain, column meanings, and index role before selecting or deriving data. Prefer vectorized, explicit assignments.
 
-### Shared implementation for Exercises 4–5: Labels, positions, and alignment
+### Shared implementation for Exercises 4-5: Labels, positions, and alignment
 
 `.loc` selects index labels; `.iloc` selects zero-based positions. A boolean
 Series is aligned by labels, so a mismatched index can raise or select
 unexpected rows. Build masks from the frame being filtered.
 
-### Shared implementation for Exercises 6–8: Safe derivation and explicit ownership
+```python
+import pandas as pd
+
+reordered = pd.DataFrame({"value": ["thirty", "ten", "twenty"]}, index=[30, 10, 20])
+assert reordered.loc[[10, 20]].index.tolist() == [10, 20]  # labels
+assert reordered.iloc[[0, 1]].index.tolist() == [30, 10]  # positions
+
+mask = reordered["value"].str.endswith("y")  # built from the frame: same index
+assert reordered.loc[mask].index.tolist() == [30, 20]
+
+foreign = pd.Series([True, False, True], index=[0, 1, 2])  # different labels
+try:
+    reordered.loc[foreign]
+except pd.errors.IndexingError as error:
+    print("misaligned mask:", error)
+else:
+    raise AssertionError("a mask with foreign labels should not be accepted")
+```
+
+### Shared implementation for Exercises 6-8: Safe derivation and explicit ownership
 
 ```python
 import numpy as np
@@ -176,6 +179,15 @@ frame = pd.DataFrame(
 denominator = frame["total_bill"].replace(0, np.nan)
 frame["tip_rate"] = frame["tip"] / denominator
 assert pd.isna(frame.loc[10, "tip_rate"])
+
+# Chained assignment changes a temporary copy, so the original stays unchanged.
+import warnings
+
+chained = frame.copy()
+with warnings.catch_warnings(record=True):
+    warnings.simplefilter("always")
+    chained[chained["meal"].eq("D")]["tip"] = 0.0
+assert chained["tip"].tolist() == frame["tip"].tolist()
 
 # Mutate the original frame deliberately.
 frame.loc[frame["meal"].eq("D"), "is_dinner"] = True
@@ -194,4 +206,15 @@ assert mean_tip_for(frame, "D") == 2.5
 assert mean_tip_for(frame, "B") is None
 assert frame.loc[20, "total_bill"] == 20.0
 assert frame.iloc[0]["total_bill"] == 20.0
+
+# The lesson fixture has no zero bills, so build the edge case on a copy.
+from ds60sqlpy.teaching_data import load_teaching_frame
+
+bills = load_teaching_frame("restaurant-bills")
+zero_bill = pd.DataFrame({"total_bill": [0.0], "tip": [1.0]})
+extended = pd.concat([bills, zero_bill], ignore_index=True)
+rate = extended["tip"] / extended["total_bill"].where(extended["total_bill"] != 0)
+assert pd.isna(rate.iloc[-1])
+assert rate.iloc[:-1].equals(bills["tip"] / bills["total_bill"])
+assert len(bills) == 240 and not np.isinf(rate).any()
 ```

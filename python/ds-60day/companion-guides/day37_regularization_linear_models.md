@@ -1,4 +1,4 @@
-# Day 37: Regularization and Linear Models
+# Day 37: Regularized Linear Models
 
 **Lesson ID:** `python-37` · **Level:** intermediate · **Dependencies:** `data` · **Network:** offline
 
@@ -69,7 +69,7 @@ the final test set.
 ## How to run this lesson
 
 **Primary browser route:** run `./classroom` from the repository root and
-choose **Python** on `/classroom`. Open this lesson in the shared workspace,
+choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
 read its capability notice, and use its supported coding or reading workflow.
 The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
 
@@ -88,21 +88,11 @@ for opening this lesson in the Docker classroom.
    lesson complete. A clean run catches hidden state and stale
    variables.
 
-Windows PowerShell:
-
-```powershell
-.\.venv\Scripts\python.exe -m jupyter lab
-```
-
-macOS/Linux:
+Linux, macOS, or Ubuntu in Windows WSL 2:
 
 ```bash
 .venv/bin/python -m jupyter lab
 ```
-
-If the Windows environment uses the documented conda-prefix fallback,
-use `.\.venv\python.exe` in place of
-`.\.venv\Scripts\python.exe`.
 
 ## Concept deep dive: regularization strength, coefficient shrinkage, sparsity, and stability
 
@@ -125,12 +115,6 @@ irrelevant or causally unimportant.
 - **`Pipeline([('scale', StandardScaler()), ('model', Ridge(...))])`:** learns scaling inside each training boundary before applying the penalty.
 - **`alpha`:** controls penalty strength; compare it on a logarithmic scale with cross-validation.
 - **`model.coef_`:** contains coefficients in transformed feature space; inspect magnitude and stability alongside validation error.
-
-Read an API call from the inside out: identify the data entering the
-operation, the state learned (if any), the value returned, and the
-evidence that would make the result trustworthy. A method returning
-without an exception proves only that the syntax and immediate runtime
-path worked.
 
 ### Focused example A: trace Ridge shrinkage as alpha grows
 
@@ -159,9 +143,6 @@ assert norms[0.01] > norms[1.0] > norms[100.0]
 **Assumption to name:** The same scaled design and response are used for every alpha so only regularization changes.
 
 ### Focused example B: distinguish Lasso sparsity from stable selection
-
-This second example changes one important condition. Compare it with
-Example A instead of reading it as unrelated syntax.
 
 ```python
 import numpy as np
@@ -204,13 +185,13 @@ for alpha in (0.1, 1.0, 10.0):
 
 1. Sweep `alpha` values and plot validation scores for Ridge and Lasso.
 
-**Verify:** Practice 1; regularization strength, coefficient shrinkage, sparsity, and stability; evaluate Ridge and Lasso over one declared logarithmic alpha grid with identical folds; save a labeled validation-score curve, print the selected alpha/mean/std for each model, and leave the final test set untouched.
+**Verify:** Evaluate Ridge and Lasso over one declared logarithmic alpha grid with identical folds; save a labeled validation-score curve, print the selected alpha/mean/std for each model, and leave the final test set untouched.
 
 2. Inspect fitted coefficients and compare their sparsity.
 
 The separate solution also demonstrates Elastic Net as a useful extension.
 
-**Verify:** Practice 2; regularization strength, coefficient shrinkage, sparsity, and stability; print a feature-aligned coefficient table for Ridge and Lasso, define the near-zero tolerance used for sparsity, and report each nonzero count plus validation metric from the same scaled pipeline.
+**Verify:** Print a feature-aligned coefficient table for Ridge and Lasso, define the near-zero tolerance used for sparsity, and report each nonzero count plus validation metric from the same scaled pipeline.
 
 ### Progressive hints
 
@@ -286,7 +267,7 @@ The lesson is complete without an AI assistant. If you want optional
 coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
-Tutor me through `python-37` — Day 37 — Regularization and Linear Models.
+Tutor me through `python-37` (Day 37: Regularization and Linear Models).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize regularization strength, coefficient shrinkage, sparsity, and stability. Use exactly these maintained learner materials:

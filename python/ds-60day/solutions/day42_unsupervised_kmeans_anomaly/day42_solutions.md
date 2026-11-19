@@ -1,4 +1,4 @@
-# Day 42: Solutions: Unsupervised Learning (KMeans & Anomaly Detection)
+# Day 42 Solutions: K-Means Clustering and Anomaly Detection
 
 We cluster data with KMeans, evaluate with inertia (elbow) and silhouette (with caveats), and perform simple anomaly detection with IsolationForest and LocalOutlierFactor (LOF).
 
@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 X, y_true = make_blobs(n_samples=600, centers=3, cluster_std=1.2, random_state=42)
 ```
 
-Worked reference for Exercise 1; Elbow (inertia vs K)
+Worked reference for Exercise 1: Elbow (inertia vs K)
 ```python
 Ks = range(1, 10)
 inertias = []
@@ -41,7 +41,7 @@ Interpretation
 
 ---
 
-Worked reference for Exercise 2; Silhouette for K in [2..6]
+Worked reference for Exercise 2: Silhouette for K in [2..6]
 ```python
 sil_scores = {}
 for k in range(2, 7):
@@ -67,7 +67,7 @@ plt.show()
 
 ---
 
-Worked reference for Exercise 3; Anomaly detection: IsolationForest vs LOF
+Worked reference for Exercise 3: Anomaly detection: IsolationForest vs LOF
 ```python
 from sklearn.ensemble import IsolationForest
 from sklearn.neighbors import LocalOutlierFactor
@@ -138,7 +138,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1; unsupervised geometry, cluster stability, and anomaly ranking; for each declared k, print inertia, cluster sizes, and seed and save a labeled elbow curve; assert inertia is non-increasing and do not call the visual bend proof of true classes.
+**Verify:** For each declared k, print inertia, cluster sizes, and seed and save a labeled elbow curve; assert inertia is non-increasing and do not call the visual bend proof of true classes.
 
 ### Exercise 2: Original lesson practice
 
@@ -150,7 +150,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2; unsupervised geometry, cluster stability, and anomaly ranking; for k=2..6 on identical scaled rows, print silhouette score and cluster sizes, choose the largest score only after checking no tiny/empty cluster, and repeat with at least three seeds to report stability.
+**Verify:** For k=2..6 on identical scaled rows, print silhouette score and cluster sizes, choose the largest score only after checking no tiny/empty cluster, and repeat with at least three seeds to report stability.
 
 ### Exercise 3: Original lesson practice
 
@@ -162,7 +162,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 3; unsupervised geometry, cluster stability, and anomaly ranking; on identical scaled data and declared contamination/neighbors, print each method's continuous anomaly score and top-n row IDs; report overlap and inspect injected normal/outlier controls instead of equating labels blindly.
+**Verify:** On identical scaled data and declared contamination/neighbors, print each method's continuous anomaly score and top-n row IDs; report overlap and inspect injected normal/outlier controls instead of equating labels blindly.
 
 ### Exercise 4: Scaling sensitivity
 

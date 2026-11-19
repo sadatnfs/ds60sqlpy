@@ -1,4 +1,4 @@
-# Day 32: Solutions: Statistical Inference (Estimation & Testing)
+# Day 32 Solutions: Statistical Inference: Intervals and Tests
 
 We perform common tests, compute confidence intervals, and interpret results carefully.
 
@@ -17,7 +17,7 @@ from scipy import stats
 rng = np.random.default_rng(0)
 ```
 
-Worked reference for Exercise 1; One-sample and two-sample t-tests
+Worked reference for Exercise 1: One-sample and two-sample t-tests
 ```python
 # One-sample: is the mean different from 0?
 x = rng.normal(loc=0.2, scale=1.0, size=200)
@@ -36,7 +36,7 @@ Line-by-line
 
 ---
 
-Worked reference for Exercise 2; Confidence intervals at multiple levels
+Worked reference for Exercise 2: Confidence intervals at multiple levels
 ```python
 mean = x.mean()
 se = x.std(ddof=1) / np.sqrt(len(x))
@@ -51,7 +51,7 @@ Notes
 
 ---
 
-Worked reference for Exercise 3; Chi-square test for independence
+Worked reference for Exercise 3: Chi-square test for independence
 ```python
 import numpy as np
 from scipy import stats
@@ -115,7 +115,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1; sampling uncertainty, confidence intervals, and hypothesis-test evidence; record seed, both sample sizes, sample means/variances, Welch t statistic, degrees of freedom, and p-value; independently recompute the mean difference and state the exact null plus the decision at a declared alpha.
+**Verify:** Record seed, both sample sizes, sample means/variances, Welch t statistic, degrees of freedom, and p-value; independently recompute the mean difference and state the exact null plus the decision at a declared alpha.
 
 ### Exercise 2: Original lesson practice
 
@@ -127,7 +127,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2; sampling uncertainty, confidence intervals, and hypothesis-test evidence; print the observed and expected contingency tables, chi-square statistic, degrees of freedom, and p-value; assert observed and expected totals match and flag any expected cell below 5.
+**Verify:** Print the observed and expected contingency tables, chi-square statistic, degrees of freedom, and p-value; assert observed and expected totals match and flag any expected cell below 5.
 
 ### Exercise 3: Original lesson practice
 
@@ -139,7 +139,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 3; sampling uncertainty, confidence intervals, and hypothesis-test evidence; from one unchanged sample, print its mean, standard error, and both interval endpoints; assert the 99% interval is wider than the 90% interval and both are centered on the same sample mean.
+**Verify:** From one unchanged sample, print its mean, standard error, and both interval endpoints; assert the 99% interval is wider than the 90% interval and both are centered on the same sample mean.
 
 ### Exercise 4: Prediction
 

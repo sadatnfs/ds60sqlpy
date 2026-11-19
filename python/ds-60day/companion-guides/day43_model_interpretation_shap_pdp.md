@@ -1,4 +1,4 @@
-# Day 43: Model Interpretation with SHAP, PDP, and Permutation
+# Day 43: Model Interpretation with SHAP and Partial Dependence
 
 **Lesson ID:** `python-43` · **Level:** intermediate · **Dependencies:** `ml` · **Network:** offline
 
@@ -107,21 +107,11 @@ for opening this lesson in the Docker classroom.
    lesson complete. A clean run catches hidden state and stale
    variables.
 
-Windows PowerShell:
-
-```powershell
-.\.venv\Scripts\python.exe -m jupyter lab
-```
-
-macOS/Linux:
+Linux, macOS, or Ubuntu in Windows WSL 2:
 
 ```bash
 .venv/bin/python -m jupyter lab
 ```
-
-If the Windows environment uses the documented conda-prefix fallback,
-use `.\.venv\python.exe` in place of
-`.\.venv\Scripts\python.exe`.
 
 ## Concept deep dive: global versus local explanations, perturbation assumptions, and causal limits
 
@@ -143,12 +133,6 @@ missing-feature dependence and a background distribution.
 - **`permutation_importance(..., X_valid, y_valid)`:** measures predictive reliance on held-out data with repeated shuffles and a declared scorer.
 - **`PartialDependenceDisplay.from_estimator(...)`:** averages model predictions over a grid while holding the empirical distribution of other features.
 - **`shap.TreeExplainer(model, data=background, ...)`:** allocates model output under an explicit dependence/background convention; output shape is model/version dependent.
-
-Read an API call from the inside out: identify the data entering the
-operation, the state learned (if any), the value returned, and the
-evidence that would make the result trustworthy. A method returning
-without an exception proves only that the syntax and immediate runtime
-path worked.
 
 ### Focused example A: measure one local prediction's sensitivity
 
@@ -179,9 +163,6 @@ print({"baseline": baseline, "one_feature_changed": perturbed, "difference": per
 **Assumption to name:** The changed feature value combined with all unchanged values represents a plausible input.
 
 ### Focused example B: give permutation importance an uncertainty interval
-
-This second example changes one important condition. Compare it with
-Example A instead of reading it as unrelated syntax.
 
 ```python
 from sklearn.inspection import permutation_importance
@@ -225,11 +206,11 @@ assert all(mean >= -3 * std for _, mean, std in summary)
 
 1. On the first 50 held-out rows, rank features by mean absolute positive-class SHAP value. Report the five names and values, then compare their ordering with held-out permutation importance from the same fitted model, rows, scorer, and five seeded repeats.
 
-**Verify:** Practice 1; global versus local explanations, perturbation assumptions, and causal limits; assert that the normalized positive-class SHAP matrix has 50 rows and one column per named feature; report both named top-five lists, their numeric means, the fixed permutation seed/repeat count, and their set/rank overlap on the identical held-out rows and scorer.
+**Verify:** Assert that the normalized positive-class SHAP matrix has 50 rows and one column per named feature; report both named top-five lists, their numeric means, the fixed permutation seed/repeat count, and their set/rank overlap on the identical held-out rows and scorer.
 
 2. Select the feature ranked first by the held-out permutation calculation in Exercise 1, then plot its one-dimensional PDP. Report its name, ranking value, PDP direction/nonlinearity, and where the displayed deciles show weak data support; do not use causal language.
 
-**Verify:** Practice 2; global versus local explanations, perturbation assumptions, and causal limits; print the selected feature name, index, and held-out permutation mean; assert that same index enters the PDP call, then retain the labeled curve/deciles plus a numeric direction and sparse-support caveat without causal language.
+**Verify:** Print the selected feature name, index, and held-out permutation mean; assert that same index enters the PDP call, then retain the labeled curve/deciles plus a numeric direction and sparse-support caveat without causal language.
 
 3. Optionally explain held-out row 0 with LIME and SHAP using the same positive-class output. Repeat LIME with three declared seeds and compare the signs, top-five overlap, and instability; skip only when importing `lime` raises `ModuleNotFoundError`.
 
@@ -237,7 +218,7 @@ LIME is installed by the `ml` dependency group but remains an optional lesson
 extension. Complete the required work with SHAP and scikit-learn before adding a
 second explanation library.
 
-**Verify:** Practice 3; global versus local explanations, perturbation assumptions, and causal limits; treat only a missing `lime` import as a skip; when installed, record three seed-specific contribution lists and compare sign, top-five overlap, and instability against SHAP for held-out row 0; let every other exception fail visibly.
+**Verify:** Treat only a missing `lime` import as a skip; when installed, record three seed-specific contribution lists and compare sign, top-five overlap, and instability against SHAP for held-out row 0; let every other exception fail visibly.
 
 ### Progressive hints
 
@@ -308,7 +289,7 @@ The lesson is complete without an AI assistant. If you want optional
 coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
-Tutor me through `python-43` : Day 43 : Model Interpretation with SHAP, PDP, and Permutation.
+Tutor me through `python-43` (Day 43: Model Interpretation with SHAP, PDP, and Permutation).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize global versus local explanations, perturbation assumptions, and causal limits. Use exactly these maintained learner materials:

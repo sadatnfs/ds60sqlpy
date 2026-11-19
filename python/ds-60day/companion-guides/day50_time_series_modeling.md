@@ -1,4 +1,4 @@
-# Day 50: Time-Series Modeling and Forecast Evaluation
+# Day 50: Time-Series Forecasting and Evaluation
 
 **Lesson ID:** `python-50` · **Level:** advanced · **Dependencies:** `ml` · **Network:** offline
 
@@ -18,7 +18,10 @@ By the end of the lesson, you can:
 
 ## Prerequisites
 
-- Complete `python-49` (NLP survey).
+- The catalog lists `python-49` because it precedes this lesson in the course
+  order. The forecasting material does not use the optional deep-learning or
+  NLP lessons (Days 46 to 49): what you need is the end-to-end modeling
+  workflow from `python-45`.
 - Recall pandas time indexes from `python-21`.
 - Install the `ml` dependency group, which includes `pmdarima`.
 
@@ -93,21 +96,11 @@ for opening this lesson in the Docker classroom.
    lesson complete. A clean run catches hidden state and stale
    variables.
 
-Windows PowerShell:
-
-```powershell
-.\.venv\Scripts\python.exe -m jupyter lab
-```
-
-macOS/Linux:
+Linux, macOS, or Ubuntu in Windows WSL 2:
 
 ```bash
 .venv/bin/python -m jupyter lab
 ```
-
-If the Windows environment uses the documented conda-prefix fallback,
-use `.\.venv\python.exe` in place of
-`.\.venv\Scripts\python.exe`.
 
 ## Concept deep dive: forecast horizons, temporal backtesting, naive baselines, and leakage-safe lags
 
@@ -128,12 +121,6 @@ realistic forecast origins and reports performance across time regimes.
 - **`series.shift(lag)`:** aligns a past value as a current-row feature; positive lags must precede any rolling summary.
 - **`train.iloc[:-horizon]` / `test.iloc[-horizon:]`:** creates a simple chronological boundary with a declared horizon.
 - **rolling-origin loop:** repeats fit/predict at increasing origins while keeping every target strictly in the future.
-
-Read an API call from the inside out: identify the data entering the
-operation, the state learned (if any), the value returned, and the
-evidence that would make the result trustworthy. A method returning
-without an exception proves only that the syntax and immediate runtime
-path worked.
 
 ### Focused example A: construct a seasonal-naive forecast on matching timestamps
 
@@ -165,9 +152,6 @@ assert mean_absolute_error(test, forecast) == 0.0
 **Assumption to name:** A seven-day season was available and stable; real data rarely repeat perfectly.
 
 ### Focused example B: build a trailing feature that excludes the current target
-
-This second example changes one important condition. Compare it with
-Example A instead of reading it as unrelated syntax.
 
 ```python
 import pandas as pd
@@ -213,17 +197,17 @@ assert features.loc[3, "trailing_mean_2"] == 25.0
 1. Fit `auto_arima` with `m=7` and `m=30`; compare mean absolute error on the
    same test window.
 
-**Verify:** Practice 1; forecast horizons, temporal backtesting, naive baselines, and leakage-safe lags; fit m=7 and m=30 using training observations only, forecast the identical timestamped test window, and print MAE plus errors by horizon for both; report convergence/skip status and selected seasonal period.
+**Verify:** Fit m=7 and m=30 using training observations only, forecast the identical timestamped test window, and print MAE plus errors by horizon for both; report convergence/skip status and selected seasonal period.
 
 2. Create last-value and 30-day seasonal-naive forecasts and compare them with
    ARIMA.
 
-**Verify:** Practice 2; forecast horizons, temporal backtesting, naive baselines, and leakage-safe lags; on the same forecast origins, print MAE for last-value, 30-day seasonal-naive, and ARIMA; assert each forecast at time t uses only observations before t and include a metric table keyed by model.
+**Verify:** On the same forecast origins, print MAE for last-value, 30-day seasonal-naive, and ARIMA; assert each forecast at time t uses only observations before t and include a metric table keyed by model.
 
 3. Difference the training series and inspect autocorrelation without using
    test-period observations.
 
-**Verify:** Practice 3; forecast horizons, temporal backtesting, naive baselines, and leakage-safe lags; difference only the training series, print its length/NaN handling and selected autocorrelations with confidence bounds, and assert no test-period timestamp entered the transform or lag calculation.
+**Verify:** Difference only the training series, print its length/NaN handling and selected autocorrelations with confidence bounds, and assert no test-period timestamp entered the transform or lag calculation.
 
 ### Progressive hints
 
@@ -302,7 +286,7 @@ The lesson is complete without an AI assistant. If you want optional
 coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
-Tutor me through `python-50` : Day 50 : Time-Series Modeling and Forecast Evaluation.
+Tutor me through `python-50` (Day 50: Time-Series Modeling and Forecast Evaluation).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize forecast horizons, temporal backtesting, naive baselines, and leakage-safe lags. Use exactly these maintained learner materials:
@@ -310,7 +294,9 @@ Emphasize forecast horizons, temporal backtesting, naive baselines, and leakage-
 - learner artifact: `python/ds-60day/notebooks/day50_time_series_modeling.ipynb`
 
 Treat me as a beginner except for these direct catalog prerequisites:
-`python-49`. Do not assume knowledge beyond them or skip the
+`python-49` (course order only; the forecasting ideas build on `python-45`
+and pandas time indexes from `python-21`). Do not assume knowledge beyond
+them or skip the
 guide's declared setup boundary. Do not open or quote anything under
 `solutions/` unless I explicitly ask after an honest attempt. First
 explain one concept in plain language and show a tiny example. Then ask

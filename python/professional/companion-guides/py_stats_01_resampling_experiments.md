@@ -4,12 +4,12 @@
 
 **Level:** advanced
 
-**Estimated time:** 240–300 minutes
+**Estimated time:** 240-300 minutes
 
 ## Level and prerequisites
 
 - **Catalog prerequisite:** `python-32`
-- Python Days 1–32
+- Python Days 1-32
 - Means, variance, confidence intervals, hypothesis tests, and p-values
 - SQL or pandas grouping is helpful but not required
 
@@ -74,7 +74,7 @@ None alone establishes that a real-world causal design was implemented.
 ## How to run this lesson
 
 **Primary browser route:** run `./classroom` from the repository root and
-choose **Python** on `/classroom`. Open this lesson in the shared workspace,
+choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
 read its capability notice, and use its supported coding or reading workflow.
 The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
 
@@ -385,7 +385,7 @@ The lesson is complete without an AI assistant. If you want optional
 coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
-Tutor me through `python-stats-01` — Resampling, experiments, and causal boundaries.
+Tutor me through `python-stats-01`: Resampling, experiments, and causal boundaries.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize bootstrap and permutation resampling, experimental estimands, and causal boundaries. Use exactly these maintained learner materials:

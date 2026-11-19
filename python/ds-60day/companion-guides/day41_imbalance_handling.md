@@ -31,8 +31,8 @@ By the end of the lesson, you can:
 | Resampling | Changing training class frequencies through over- or undersampling |
 | SMOTE | Synthesizing minority examples between nearby minority observations |
 | Decision threshold | Score boundary converted into a class label |
-| Precision–recall curve | Precision and recall across thresholds |
-| Average precision | Summary of the precision–recall ranking curve |
+| Precision-recall curve | Precision and recall across thresholds |
+| Average precision | Summary of the precision-recall ranking curve |
 | Calibration | Agreement between predicted probabilities and observed frequencies |
 
 A classifier produces scores; a threshold turns scores into actions. Model
@@ -71,7 +71,7 @@ using validation data and an explicit cost, capacity, recall, or precision goal.
 ## How to run this lesson
 
 **Primary browser route:** run `./classroom` from the repository root and
-choose **Python** on `/classroom`. Open this lesson in the shared workspace,
+choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
 read its capability notice, and use its supported coding or reading workflow.
 The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
 
@@ -90,21 +90,11 @@ for opening this lesson in the Docker classroom.
    lesson complete. A clean run catches hidden state and stale
    variables.
 
-Windows PowerShell:
-
-```powershell
-.\.venv\Scripts\python.exe -m jupyter lab
-```
-
-macOS/Linux:
+Linux, macOS, or Ubuntu in Windows WSL 2:
 
 ```bash
 .venv/bin/python -m jupyter lab
 ```
-
-If the Windows environment uses the documented conda-prefix fallback,
-use `.\.venv\python.exe` in place of
-`.\.venv\Scripts\python.exe`.
 
 ## Concept deep dive: rare-class metrics, training interventions, and threshold policy
 
@@ -126,12 +116,6 @@ never final-test labels.
 - **`np.bincount(y)` / prevalence:** establishes class support before modeling and must be reported for every evaluation split.
 - **`class_weight='balanced'`:** reweights training loss; it does not make the observed population balanced.
 - **`precision_recall_curve(y, score)`:** shows threshold trade-offs; selecting a threshold still requires a decision rule and validation boundary.
-
-Read an API call from the inside out: identify the data entering the
-operation, the state learned (if any), the value returned, and the
-evidence that would make the result trustworthy. A method returning
-without an exception proves only that the syntax and immediate runtime
-path worked.
 
 ### Focused example A: expose the majority-class accuracy trap
 
@@ -161,9 +145,6 @@ assert recall_score(y_true, always_negative) == 0.0
 **Assumption to name:** Positive cases are the operational focus; missing all of them is unacceptable.
 
 ### Focused example B: choose a threshold from an explicit recall constraint
-
-This second example changes one important condition. Compare it with
-Example A instead of reading it as unrelated syntax.
 
 ```python
 import numpy as np
@@ -209,15 +190,15 @@ print({"threshold": chosen[0], "precision": chosen[1], "recall": chosen[2]})
 
 1. Compare `class_weight="balanced"` with a SMOTE strategy.
 
-**Verify:** Practice 1; rare-class metrics, training interventions, and threshold policy; compare class_weight='balanced' and SMOTE using identical stratified folds, estimator, threshold, and metrics; prove SMOTE is inside the training pipeline and print class support, confusion counts, PR AUC, and minority F1 for both.
+**Verify:** Compare class_weight='balanced' and SMOTE using identical stratified folds, estimator, threshold, and metrics; prove SMOTE is inside the training pipeline and print class support, confusion counts, PR AUC, and minority F1 for both.
 
 2. Tune the threshold to maximize minority-class F1.
 
-**Verify:** Practice 2; rare-class metrics, training interventions, and threshold policy; choose the threshold from validation predictions only; print the selected threshold, precision, recall, F1, and TP/FP/FN counts, then evaluate that frozen threshold once on untouched test predictions.
+**Verify:** Choose the threshold from validation predictions only; print the selected threshold, precision, recall, F1, and TP/FP/FN counts, then evaluate that frozen threshold once on untouched test predictions.
 
-3. Plot precision–recall curves and discuss the tradeoff.
+3. Plot precision-recall curves and discuss the tradeoff.
 
-**Verify:** Practice 3; rare-class metrics, training interventions, and threshold policy; save a labeled precision-recall curve with no-skill prevalence baseline and chosen threshold marker; print average precision and the marker's precision/recall rather than judging the plot alone.
+**Verify:** Save a labeled precision-recall curve with no-skill prevalence baseline and chosen threshold marker; print average precision and the marker's precision/recall rather than judging the plot alone.
 
 ### Progressive hints
 
@@ -292,7 +273,7 @@ The lesson is complete without an AI assistant. If you want optional
 coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
-Tutor me through `python-41` — Day 41 — Handling Class Imbalance.
+Tutor me through `python-41` (Day 41: Handling Class Imbalance).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize rare-class metrics, training interventions, and threshold policy. Use exactly these maintained learner materials:

@@ -1,4 +1,4 @@
-# Day 26: Solutions: Interactive Visualization (Plotly / Altair)
+# Day 26 Solutions: Interactive Visualization with Plotly and Altair
 
 The classroom displays captured Plotly figures. Altair examples here build
 and validate a Vega-Lite specification, which the reference publishes as a
@@ -51,13 +51,13 @@ export self-contained content and test it while disconnected.
 For this lesson's **interactive visual encodings, bounded interaction, and portable HTML export** model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.
 <!-- END BEGINNER SOLUTION REVIEW -->
 
-## Exercises 1–2: Worked answers
+## Exercises 1-2: Worked answers
 
 ### Exercise 1: worked answer
 
 **Learner contract:** Create an interactive histogram whose bin count can be changed only within sensible bounds. **Plotly route:** isolate a builder accepting `bins`; **Altair route:** bind a range input to a parameter. **Expected behavior:** changing bins alters aggregation without changing the underlying observations. **Verify:** test minimum/default/maximum settings and show the displayed total count remains the number of non-missing values.
 
-**Reasoning:** Implement this exact contract as written: Create an interactive histogram whose bin count can be changed only within sensible bounds. Plotly route: isolate a builder accepting `bins`; Altair route: bind a range input to a parameter. Expected behavior: changing bins alters aggregation without changing the underlying observations. Keep the prompt's named data and constraints visible in the code, then establish this specific result: test minimum/default/maximum settings and show the displayed total count remains the number of non-missing values. That connects the answer to interactive visual encodings, bounded interaction, and portable HTML export.
+**Reasoning:** Validating `bins` before plotting turns an unreasonable request into a clear `ValueError` instead of a misleading chart: one bin hides the shape, and hundreds of bins on six values show only noise. Changing `bins` changes only how the observations are grouped, so for the minimum, default, and maximum settings the test checks that the trace still holds all six values and that the source frame is unchanged. The out-of-range values 1 and 101 are tested explicitly because boundaries are where off-by-one mistakes hide.
 
 ```python
 import pandas as pd
@@ -90,13 +90,11 @@ for invalid_bins in (1, 101):
 The source observations do not change; only the displayed aggregation
 granularity changes.
 
-**Verification evidence:** test minimum/default/maximum settings and show the displayed total count remains the number of non-missing values.
-
 ### Exercise 2: worked answer
 
 **Learner contract:** Export the chart to a self-contained HTML file under an ignored learner artifact directory. **Constraints:** embed required JavaScript/data, use no remote font/analytics dependency, and document payload size. **Verify:** disconnect network access or use browser offline mode, reopen the file, and confirm tooltips/controls still function.
 
-**Reasoning:** Implement this exact contract as written: Export the chart to a self-contained HTML file under an ignored learner artifact directory. Constraints: embed required JavaScript/data, use no remote font/analytics dependency, and document payload size. Keep the prompt's named data and constraints visible in the code, then establish this specific result: disconnect network access or use browser offline mode, reopen the file, and confirm tooltips/controls still function. That connects the answer to interactive visual encodings, bounded interaction, and portable HTML export.
+**Reasoning:** `include_plotlyjs=True` writes the whole plotly.js library into the HTML file, so the chart works offline and where external scripts are blocked; the price is a file of several megabytes, which is why the payload size is recorded. The regular expression checks that no `<script>` tag loads code from an external `http` or `https` address, which would break offline use. Opening the file in a browser with networking disabled remains the final, manual check that tooltips and toolbar controls still work.
 
 ```python
 from pathlib import Path
@@ -125,61 +123,86 @@ interactive without a Content Delivery Network. Record
 `payload_bytes` when comparing portability with file size; browser
 offline mode should still show hover tooltips and toolbar controls.
 
-**Verification evidence:** disconnect network access or use browser offline mode, reopen the file, and confirm tooltips/controls still function.
-
-## Exercises 3–7: Expanded mastery answers
+## Exercises 3-7: Expanded mastery answers
 
 ### Exercise 3: answer contract
 
 **Learner contract:** **Prediction:** Predict the portability difference between Plotly HTML that embeds its JavaScript and HTML that loads a CDN copy. **Progressive hint:** A CDN reference needs network access when opened. **Verify:** Export embedded and CDN versions, inspect asset references/file sizes, and confirm only the embedded version remains interactive with network disabled.
 
-**Reasoning:** Predict this named state change before running it: Prediction: Predict the portability difference between Plotly HTML that embeds its JavaScript and HTML that loads a CDN copy. Progressive hint: A CDN reference needs network access when opened. Then compare the prediction with this proof target: Export embedded and CDN versions, inspect asset references/file sizes, and confirm only the embedded version remains interactive with network disabled. This makes interactive visual encodings, bounded interaction, and portable HTML export observable instead of relying on intuition.
-
-**Evidence to locate in the grouped implementation:** Export embedded and CDN versions, inspect asset references/file sizes, and confirm only the embedded version remains interactive with network disabled.
+**Reasoning:** An HTML file with embedded JavaScript carries the full plotly.js library, so it is large but self-contained; a file written with `include_plotlyjs="cdn"` holds only a `<script>` tag that downloads the library when opened, so it is tiny but draws nothing without network access. The shared implementation for Exercises 3-4 writes both versions, compares their sizes, about 4.9 MB against under 10 KB, and checks which one loads an external script. Reopening both files in a browser with the network disabled confirms the difference in practice.
 
 ### Exercise 4: answer contract
 
 **Learner contract:** **Tracing:** Trace one row into x, y, color, and hover fields and explain what the reader can infer from each visible encoding. **Progressive hint:** A field retained only in source data is not visibly encoded. **Verify:** For one known row, assert its x/y values, visible group, and bounded hover fields; explain one source field intentionally not encoded.
 
-**Reasoning:** Trace the concrete values in this contract one step at a time: Tracing: Trace one row into x, y, color, and hover fields and explain what the reader can infer from each visible encoding. Progressive hint: A field retained only in source data is not visibly encoded. Record the named value, shape, label, or iterator position needed to establish: For one known row, assert its x/y values, visible group, and bounded hover fields; explain one source field intentionally not encoded. The trace exposes interactive visual encodings, bounded interaction, and portable HTML export directly.
-
-**Evidence to locate in the grouped implementation:** For one known row, assert its x/y values, visible group, and bounded hover fields; explain one source field intentionally not encoded.
+**Reasoning:** Each visible channel answers a different question: x and y positions give the bill and tip of each point, color tells which meal it belongs to, and the hover box shows the fields named in its template on demand. The shared implementation for Exercises 3-4 finds the second row in the Dinner trace at the expected x and y values and checks the hover template. `table_id` exists in the data but is encoded nowhere, so a reader cannot infer it from the chart; it is left out deliberately because an identifier adds no analytical meaning.
 
 ### Exercise 5: answer contract
 
 **Learner contract:** **Implementation:** Implement a Plotly scatter builder that validates required columns, bounds hover fields, and returns a figure without writing files. **Progressive hint:** Separate figure construction from export. **Verify:** Test valid data and missing-column data; assert the valid builder returns a figure with expected traces while the invalid path lists exact missing names and writes nothing.
 
-**Reasoning:** Trace the concrete values in this contract one step at a time: Implementation: Implement a Plotly scatter builder that validates required columns, bounds hover fields, and returns a figure without writing files. Progressive hint: Separate figure construction from export. Record the named value, shape, label, or iterator position needed to establish: Test valid data and missing-column data; assert the valid builder returns a figure with expected traces while the invalid path lists exact missing names and writes nothing. The trace exposes interactive visual encodings, bounded interaction, and portable HTML export directly.
-
-**Evidence to locate in the grouped implementation:** Test valid data and missing-column data; assert the valid builder returns a figure with expected traces while the invalid path lists exact missing names and writes nothing.
+**Reasoning:** Validating the required columns before calling Plotly turns a deep library error into one message that lists every missing name, and returning the figure without writing files keeps construction separate from export, so the builder is easy to test. Limiting hover fields to five keeps tooltips readable. The shared implementation for Exercises 5-7 asserts that a valid call returns two traces, one per meal, and that `write_html` is never called during construction.
 
 ### Exercise 6: answer contract
 
 **Learner contract:** **Debugging:** Repair a chart-builder failure caused by a misspelled column and return an actionable error listing missing names. **Progressive hint:** Validate the schema before calling the plotting library. **Verify:** Pass two misspelled/missing fields and assert one actionable pre-plot error names both before Plotly receives the frame.
 
-**Reasoning:** Reproduce the exact failure described here before changing code: Debugging: Repair a chart-builder failure caused by a misspelled column and return an actionable error listing missing names. Progressive hint: Validate the schema before calling the plotting library. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Pass two misspelled/missing fields and assert one actionable pre-plot error names both before Plotly receives the frame. The diagnosis depends on interactive visual encodings, bounded interaction, and portable HTML export.
-
-**Evidence to locate in the grouped implementation:** Pass two misspelled/missing fields and assert one actionable pre-plot error names both before Plotly receives the frame.
+**Reasoning:** A misspelled column passed straight to Plotly fails inside the library, one name at a time, after work has started. Comparing the requested names with `frame.columns` first reports every problem at once in a stable, sorted order: `missing chart columns: bil, meals`. The shared implementation for Exercises 5-7 replaces `px.scatter` with a mock and asserts that it was never called, which proves the error happens before Plotly receives the frame.
 
 ### Exercise 7: answer contract
 
 **Learner contract:** **Edge case and explanation:** Design deterministic sampling or aggregation for a million-row interactive chart while preserving important groups. **Progressive hint:** Browser rendering and HTML size are part of the data contract. **Verify:** Apply the deterministic reduction twice and assert identical rows/group representation, bounded payload size, and retained important-group counts.
 
-**Reasoning:** Make this boundary unambiguous in code: Edge case and explanation: Design deterministic sampling or aggregation for a million-row interactive chart while preserving important groups. Progressive hint: Browser rendering and HTML size are part of the data contract. Values below, at, and above the named boundary must produce the evidence Apply the deterministic reduction twice and assert identical rows/group representation, bounded payload size, and retained important-group counts. Those cases show how interactive visual encodings, bounded interaction, and portable HTML export behaves at its edge.
-
-**Evidence to locate in the grouped implementation:** Apply the deterministic reduction twice and assert identical rows/group representation, bounded payload size, and retained important-group counts.
+**Reasoning:** A browser cannot draw a million points responsively, and an HTML file holding them all would be very large, so the chart needs a reduction that is deterministic and keeps the groups that matter. The `reduce_for_chart` helper ranks rows by a seeded random key within each group and keeps up to 2,000 per group, so a rare group with about a thousand rows keeps every row instead of being sampled away. The shared implementation for Exercises 5-7 runs it twice and gets identical rows, prints the original and displayed row counts, and checks that the figure's JSON stays small.
 
 ## Expanded mastery lab solutions
 
 Use interaction to answer a question, not to decorate a chart. Keep tooltips, filters, payload size, and offline HTML behavior intentional.
 
-### Shared implementation for Exercises 3–4: Portability and visible encodings
+### Shared implementation for Exercises 3-4: Portability and visible encodings
 
 Embedded Plotly JavaScript makes a larger standalone file that works offline;
 a CDN-based file is smaller but needs network access. A reader can interpret
 only fields encoded on axes, color/shape, facets, labels, or tooltips.
 
-### Shared implementation for Exercises 5–7: Validate before rendering
+```python
+import re
+from pathlib import Path
+
+import pandas as pd
+import plotly.express as px
+
+points = pd.DataFrame(
+    {
+        "bill": [10.0, 20.0, 30.0],
+        "tip": [1.0, 4.0, 5.0],
+        "meal": ["Lunch", "Dinner", "Dinner"],
+        "table_id": ["t1", "t2", "t3"],
+    }
+)
+chart = px.scatter(points, x="bill", y="tip", color="meal", hover_data=["meal"])
+
+export_dir = Path("artifacts/day26")
+export_dir.mkdir(parents=True, exist_ok=True)
+embedded = export_dir / "scatter-embedded.html"
+cdn = export_dir / "scatter-cdn.html"
+chart.write_html(embedded, include_plotlyjs=True)
+chart.write_html(cdn, include_plotlyjs="cdn")
+external_script = re.compile(r"<script[^>]+src=['\"]https?://", flags=re.IGNORECASE)
+print({path.name: path.stat().st_size for path in (embedded, cdn)})
+assert external_script.search(embedded.read_text(encoding="utf-8")) is None
+assert external_script.search(cdn.read_text(encoding="utf-8")) is not None
+assert embedded.stat().st_size > 100 * cdn.stat().st_size
+
+row = points.iloc[1]
+dinner = next(trace for trace in chart.data if trace.name == "Dinner")  # color group
+position = list(dinner.x).index(row["bill"])  # x encodes bill
+assert dinner.y[position] == row["tip"]  # y encodes tip
+assert "meal=" in dinner.hovertemplate  # meal is shown on hover
+assert "table_id" not in dinner.hovertemplate  # kept in the data, not encoded
+```
+
+### Shared implementation for Exercises 5-7: Validate before rendering
 
 ```python
 from collections.abc import Sequence
@@ -207,9 +230,51 @@ def build_scatter(
     return px.scatter(frame, x=x, y=y, color=color, hover_data=bounded_hover)
 
 
+from unittest import mock
+
 sample = pd.DataFrame({"bill": [10, 20, 30], "tip": [1, 4, 5], "meal": ["L", "D", "D"]})
-figure = build_scatter(sample, x="bill", y="tip", color="meal", hover=["meal"])
+with mock.patch.object(Figure, "write_html") as fake_write:
+    figure = build_scatter(sample, x="bill", y="tip", color="meal", hover=["meal"])
+fake_write.assert_not_called()  # construction does no I/O
 assert len(figure.data) == 2
+
+with mock.patch.object(px, "scatter") as fake_scatter:
+    try:
+        build_scatter(sample, x="bil", y="tip", color="meals")
+    except ValueError as error:
+        message = str(error)
+    else:
+        raise AssertionError("misspelled columns should fail before plotting")
+fake_scatter.assert_not_called()  # Plotly never received the frame
+assert message == "missing chart columns: bil, meals"
+
+# Deterministic reduction that keeps a rare group intact.
+import numpy as np
+
+rng = np.random.default_rng(26)
+large = pd.DataFrame(
+    {
+        "group": np.where(rng.random(1_000_000) < 0.001, "rare", "common"),
+        "value": rng.normal(size=1_000_000),
+    }
+)
+
+
+def reduce_for_chart(frame: pd.DataFrame, *, per_group: int, seed: int) -> pd.DataFrame:
+    """Keep up to per_group rows from every group, chosen by a seeded key."""
+    keys = pd.Series(np.random.default_rng(seed).random(len(frame)), index=frame.index)
+    rank = keys.groupby(frame["group"]).rank(method="first")
+    return frame.loc[rank <= per_group]
+
+
+first = reduce_for_chart(large, per_group=2_000, seed=7)
+pd.testing.assert_frame_equal(first, reduce_for_chart(large, per_group=2_000, seed=7))
+counts = first["group"].value_counts()
+assert counts["common"] == 2_000
+assert counts["rare"] == (large["group"] == "rare").sum()  # every rare row kept
+print({"original_rows": len(large), "displayed_rows": len(first)})
+payload = len(px.scatter(first, x=first.index, y="value", color="group").to_json())
+assert payload < 1_000_000  # bounded HTML payload
 ```
 
 For very large data, use a fixed-seed stratified sample by important groups or

@@ -1,4 +1,4 @@
-# Day 2 - Variables and Core Types
+# Day 2: Variables and Core Types
 
 **Level:** Beginner
 
@@ -12,7 +12,8 @@ By the end of this lesson, you can:
 - distinguish `str`, `int`, `float`, `bool`, and `None`;
 - convert compatible values deliberately instead of relying on guesswork;
 - use comparisons, truthiness, string methods, and f-strings; and
-- explain why an input value is text until it is parsed.
+- explain why typed input is text until it is parsed, and why this lesson
+  supplies that text in a variable instead of calling `input()`.
 
 ## Prerequisites
 
@@ -70,8 +71,7 @@ They are separate from the browser's saved pads, notes and progress in Docker
 volumes. Neither route automatically copies attempts or completion markers to
 the other; record progress in the interface you actually used.
 
-**Lesson outcome:** use day 2 - variables and core types to practice objects, names, built-in types, conversion, and truthiness
-and explain the evidence produced by your code.
+**Outcome:** Convert text to numbers and Booleans on purpose, then format the result.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
@@ -90,6 +90,16 @@ intended type, then calculate. Formatting turns a result back into text
 for a person. Truthiness is a separate idea: zero, empty collections,
 empty strings, and `None` are false-like, but the non-empty string
 `"False"` is truthy.
+
+**Typed input in this classroom.** `input("Prompt: ")` pauses a program
+until someone types a line, then returns that line as a `str`. The
+classroom Run executes your pad as a finished program with no keyboard
+attached, so `input()` stops there with `EOFError: EOF when reading a
+line`. This lesson therefore supplies the typed text in a variable, for
+example `left_text = "12.5"`. That value has exactly the type `input()`
+would return, so every conversion step is the same. In an interactive
+terminal or a contributor Jupyter notebook, `input()` waits for you
+instead.
 
 ### Vocabulary in plain language
 
@@ -123,14 +133,7 @@ total = quantity * price
 (quantity, price, total, f"${total:.2f}")
 ```
 
-**Expected observation**
-
-```text
-`(3, 4.5, 13.5, '$13.50')`. The final string is presentation; `total` remains numeric.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** `(3, 4.5, 13.5, '$13.50')`. The final string is presentation; `total` remains numeric.
 
 ### Worked example 2 - Make Boolean parsing explicit
 
@@ -144,14 +147,7 @@ enabled = normalized == "true"
 (normalized, enabled, bool(raw_enabled))
 ```
 
-**Expected observation**
-
-```text
-`('false', False, True)`. `bool(raw_enabled)` is `True` because the original string contains characters.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** `('false', False, True)`. `bool(raw_enabled)` is `True` because the original string contains characters.
 
 ### A debugging routine for this topic
 
@@ -178,7 +174,7 @@ of them as blank-code prompts:
 5. **Retrieval:** close the guide and explain the core model from memory
    before moving on.
 
-**Useful alternative:** Explicit conversions are usually clearer than relying on implicit coercion; a small parsing function is useful when accepted spellings form a real input contract.
+**Useful alternative:** Explicit conversions are usually clearer than relying on implicit coercion. When the same accepted spellings are needed in many places, Day 5 shows how to package the conversion in a small function.
 
 **Boundary to remember:** Empty text, whitespace-only text, `None`, zero, and non-ASCII text often reveal assumptions hidden by happy-path examples.
 <!-- END BEGINNER DEEP DIVE -->
@@ -215,8 +211,8 @@ expected behavior, constraints, and verification into your work cell. A
 result is not complete merely because it “looks right”; run the stated
 assertion or inspection and explain what it proves.
 
-1. Prompt twice with `input()` for numbers such as `12.5` and `7.25`, convert both strings to `float`, and print `19.75`. **Constraints:** display a short label with the result and do not concatenate the raw strings.
-   **Verify:** first show that `type(input(...))` is `str`, then test whole-number and decimal text.
+1. Treat `left_text = "12.5"` and `right_text = "7.25"` as two values a user typed. Convert both to `float`, add them, and print `Sum: 19.75`. **Constraints:** keep the text values and the numbers in different names, and do not join the strings.
+   **Verify:** show that `type(left_text).__name__` is `'str'` before conversion and assert that the sum equals `19.75`; then change the texts to `"12"` and `"7"` and confirm the output is `Sum: 19.0`.
 
 2. Starting from `raw = ' Data Science '`, create a new value exactly equal to `'data science'`. **Constraints:** use string methods rather than slicing or a hard-coded replacement.
    **Verify:** assert the normalized result and show that `raw` itself is unchanged because strings are immutable.
@@ -237,15 +233,15 @@ code; these extend rather than replace the original practice above.
 5. **Tracing:** Trace `raw = ' 0042 '; cleaned = raw.strip(); number = int(cleaned)` and record the value/type after every assignment.
    **Progressive hint:** String methods return new strings; conversion constructs an integer.
    **Verify:** Record `repr(value)` and `type(value).__name__` after `raw`, `cleaned`, and `number`; confirm the original string still contains spaces.
-6. **Implementation:** Implement `parse_temperature(text)` so surrounding whitespace is accepted and the result is a float, then format one decimal place.
-   **Progressive hint:** Keep parsing separate from f-string presentation.
-   **Verify:** Assert whitespace inputs such as `' 32.5 '` return `32.5` and format as `'32.5'`; prove invalid text follows the documented exception path.
-7. **Debugging:** Repair `enabled = bool(raw)` for inputs such as `"true"`, `"false"`, and `" FALSE "`. Reject unknown spellings.
-   **Progressive hint:** Normalize the text and compare explicit accepted tokens.
-   **Verify:** Assert accepted case/whitespace variants map to the intended Booleans and that an unknown token such as `'yes-ish'` raises a specific `ValueError`.
+6. **Implementation:** Given `raw_temperature = " 32.5 "`, create a `float` named `temperature` and a display string named `shown` with one decimal place. Then run `float("warm")` once to see what invalid text does.
+   **Progressive hint:** `float()` ignores surrounding spaces; formatting with `:.1f` produces text, not a new number.
+   **Verify:** Assert `temperature == 32.5`, `type(temperature) is float`, and `shown == "32.5"`; record the last line of the `float("warm")` error, `ValueError: could not convert string to float: 'warm'`. Day 3 shows how to handle that error.
+7. **Debugging:** `enabled = bool(raw)` gives `True` for `raw = " FALSE "` because any non-empty string is truthy. Repair the conversion so `"true"`, `"false"`, and `" FALSE "` map to the intended Booleans, and flag any other spelling as unknown.
+   **Progressive hint:** Normalize with `strip()` and `lower()`, then compare the result with `==`.
+   **Verify:** Compute `enabled = normalized == "true"` and `is_known = normalized == "true" or normalized == "false"`; assert that `"true"` gives `enabled is True`, `" FALSE "` gives `enabled is False` with `is_known is True`, and `"yes-ish"` gives `is_known is False`. Day 3 shows how to reject unknown text with an exception.
 8. **Edge case and explanation:** Model an optional discount where `None` means not supplied and `0.0` means supplied but zero. Explain why a truthiness check loses meaning.
-   **Progressive hint:** Use `is None` when absence is distinct from a numeric zero.
-   **Verify:** Test `None`, `0.0`, and `0.25` separately; assert the first is absent while the latter two remain supplied numeric discounts.
+   **Progressive hint:** `discount is None` asks about absence; `bool(discount)` asks about truthiness.
+   **Verify:** For `discount` set to `None`, `0.0`, and `0.25`, record `discount is None` and `bool(discount)`; assert that `is None` is `True` only for `None`, while `bool()` is `False` for both `None` and `0.0`.
 
 Before opening the reference solution, write one sentence explaining
 which contract or mental model each result confirms.
@@ -265,6 +261,9 @@ original string unchanged, and formatted output is readable.
 - **Numbers concatenate:** print their types; one or both values are strings.
 - **`ValueError` during conversion:** show the original value with `repr(...)`
   to reveal spaces or unexpected characters. Day 3 adds recovery logic.
+- **`EOFError: EOF when reading a line`:** the program called `input()`, but
+  no keyboard is attached to the run, as in the classroom Run. Supply the
+  text in a variable such as `raw = "12.5"` instead.
 - **Unexpected integer result assumptions:** `/` returns a float; `//` performs
   floor division, which differs from truncation for negative numbers.
 - **Variable names shadow built-ins:** avoid names such as `str`, `list`, and

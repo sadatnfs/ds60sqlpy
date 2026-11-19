@@ -1,4 +1,4 @@
-# Day 39: Gradient Boosting, XGBoost, and LightGBM
+# Day 39: Gradient Boosting with XGBoost and LightGBM
 
 **Lesson ID:** `python-39` · **Level:** intermediate · **Dependencies:** `ml` · **Network:** offline
 
@@ -95,21 +95,11 @@ for opening this lesson in the Docker classroom.
    lesson complete. A clean run catches hidden state and stale
    variables.
 
-Windows PowerShell:
-
-```powershell
-.\.venv\Scripts\python.exe -m jupyter lab
-```
-
-macOS/Linux:
+Linux, macOS, or Ubuntu in Windows WSL 2:
 
 ```bash
 .venv/bin/python -m jupyter lab
 ```
-
-If the Windows environment uses the documented conda-prefix fallback,
-use `.\.venv\python.exe` in place of
-`.\.venv\Scripts\python.exe`.
 
 ## Concept deep dive: sequential boosting, learning-rate budgets, and validation control
 
@@ -132,12 +122,6 @@ them.
 - **`n_estimators`:** sets the maximum boosting rounds; it interacts strongly with learning rate.
 - **`learning_rate`:** shrinks each new tree, often requiring more rounds for similar fit.
 - **validation/early stopping:** uses a training-external validation boundary to choose round count; the final test remains untouched.
-
-Read an API call from the inside out: identify the data entering the
-operation, the state learned (if any), the value returned, and the
-evidence that would make the result trustworthy. A method returning
-without an exception proves only that the syntax and immediate runtime
-path worked.
 
 ### Focused example A: watch staged predictions reduce residual error
 
@@ -165,9 +149,6 @@ assert staged_mse[-1] < staged_mse[0]
 **Assumption to name:** The squared-error loss and shallow trees are suitable for this smooth synthetic relationship.
 
 ### Focused example B: compare two learning-rate and round-count budgets
-
-This second example changes one important condition. Compare it with
-Example A instead of reading it as unrelated syntax.
 
 ```python
 from sklearn.datasets import load_breast_cancer
@@ -213,11 +194,11 @@ for rate, rounds in ((0.2, 30), (0.03, 200)):
 
 1. Tune `learning_rate` and `n_estimators` with a simple loop.
 
-**Verify:** Practice 1; sequential boosting, learning-rate budgets, and validation control; evaluate every (learning_rate, n_estimators) pair on one frozen training/validation split and scorer; print the complete score table, selected pair, fit count, and validation metric without consulting final-test labels.
+**Verify:** Evaluate every (learning_rate, n_estimators) pair on one frozen training/validation split and scorer; print the complete score table, selected pair, fit count, and validation metric without consulting final-test labels.
 
 2. Compare XGBoost with LightGBM if the `ml` dependency group is installed.
 
-**Verify:** Practice 2; sequential boosting, learning-rate budgets, and validation control; first print an explicit installed/skipped capability result for XGBoost and LightGBM; when both run, use identical rows, splits, metric, seed, and search budget and report validation score, best iteration, and elapsed time for each.
+**Verify:** First print an explicit installed/skipped capability result for XGBoost and LightGBM; when both run, use identical rows, splits, metric, seed, and search budget and report validation score, best iteration, and elapsed time for each.
 
 ### Progressive hints
 
@@ -294,7 +275,7 @@ The lesson is complete without an AI assistant. If you want optional
 coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
-Tutor me through `python-39` : Day 39 : Gradient Boosting, XGBoost, and LightGBM.
+Tutor me through `python-39` (Day 39: Gradient Boosting, XGBoost, and LightGBM).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize sequential boosting, learning-rate budgets, and validation control. Use exactly these maintained learner materials:

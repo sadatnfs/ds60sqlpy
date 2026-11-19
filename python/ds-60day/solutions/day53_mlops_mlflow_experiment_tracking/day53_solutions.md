@@ -1,4 +1,4 @@
-# Day 53: Solutions: MLOps with MLflow Experiment Tracking
+# Day 53 Solutions: Experiment Tracking with MLflow
 
 We track a scikit‑learn grid search with MLflow, log the best model as an artifact, and load it for reuse.
 
@@ -43,7 +43,7 @@ else:
 mlflow.set_experiment(experiment_id=experiment_id)
 ```
 
-Worked reference for Exercise 1; Grid search with autologging
+Worked reference for Exercise 1: Grid search with autologging
 ```python
 mlflow.sklearn.autolog(log_models=False, log_input_examples=False, silent=True)
 
@@ -67,7 +67,7 @@ Explanation
 
 ---
 
-Worked reference for Exercise 2; Log and load best model
+Worked reference for Exercise 2: Log and load best model
 ```python
 with mlflow.start_run(run_name="rf_best_model") as run:
     best = RandomForestClassifier(random_state=0, **cv.best_params_).fit(Xtr, ytr)
@@ -96,7 +96,7 @@ Notes
 
 ---
 
-Worked reference for Exercise 3; Model Registry (concepts)
+Worked reference for Exercise 3: Model Registry (concepts)
 - Register models for stages: Staging → Production
 - Transition approvals and CI checks gate promotions
 - Versioned artifacts allow rollbacks and auditability
@@ -152,7 +152,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1; MLflow run identity, params, metrics, artifacts, and reproducible evidence; query the exact run IDs and print each LogisticRegression C, split/data hash, ROC AUC, status, and artifact URI; assert the comparison uses the same split and metric definition.
+**Verify:** Query the exact run IDs and print each LogisticRegression C, split/data hash, ROC AUC, status, and artifact URI; assert the comparison uses the same split and metric definition.
 
 ### Exercise 2: Original lesson practice
 
@@ -164,7 +164,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2; MLflow run identity, params, metrics, artifacts, and reproducible evidence; save a confusion-matrix PNG with labeled axes, log it under the selected run, fetch its artifact listing, and assert the downloaded file is a valid nonempty PNG tied to that run ID.
+**Verify:** Save a confusion-matrix PNG with labeled axes, log it under the selected run, fetch its artifact listing, and assert the downloaded file is a valid nonempty PNG tied to that run ID.
 
 ### Exercise 3: Original lesson practice
 
@@ -176,7 +176,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 3; MLflow run identity, params, metrics, artifacts, and reproducible evidence; run RandomForest and the baseline on the same data/split/metric, print both run IDs, parameters, ROC AUC, and fit status, and state that the final test was not used to choose between them.
+**Verify:** Run RandomForest and the baseline on the same data/split/metric, print both run IDs, parameters, ROC AUC, and fit status, and state that the final test was not used to choose between them.
 
 ### Exercise 4: Failure-state handling
 

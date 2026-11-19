@@ -1,4 +1,4 @@
-# Day 12: OOP Basics and Dataclasses
+# Day 12: Classes and Dataclasses
 
 **Level:** Beginner
 
@@ -71,8 +71,7 @@ They are separate from the browser's saved pads, notes and progress in Docker
 volumes. Neither route automatically copies attempts or completion markers to
 the other; record progress in the interface you actually used.
 
-**Lesson outcome:** use day 12; oop basics and dataclasses to practice objects that keep related state and behavior together
-and explain the evidence produced by your code.
+**Outcome:** Model related data and behavior with classes and dataclasses.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
@@ -137,14 +136,7 @@ item = LineItem("notebook", 4.5, 3)
 (item, item.subtotal())
 ```
 
-**Expected observation**
-
-```text
-`LineItem(name='notebook', unit_price=4.5, quantity=3)` and `13.5`. Construction enforces the invariant.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** `LineItem(name='notebook', unit_price=4.5, quantity=3)` and `13.5`. Construction enforces the invariant.
 
 ### Worked example 2: Show that fields belong to each instance
 
@@ -158,14 +150,7 @@ first.quantity = 5
 (first.quantity, second.quantity, first == second)
 ```
 
-**Expected observation**
-
-```text
-`(5, 2, False)`. Each instance owns its quantity; dataclass equality compares current field values.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** `(5, 2, False)`. Each instance owns its quantity; dataclass equality compares current field values.
 
 ### A debugging routine for this topic
 
@@ -305,7 +290,7 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-12`
-(Day 12 — OOP Basics and Dataclasses). Direct catalog prerequisites: `python-11`.
+(Day 12: OOP Basics and Dataclasses). Direct catalog prerequisites: `python-11`.
 I have completed the direct prerequisites: `python-11`. Emphasize objects that keep related state and behavior together.
 Read `python/ds-60day/companion-guides/day12_oop_dataclasses.md` and use the learner notebook
 `python/ds-60day/notebooks/day12_oop_dataclasses.ipynb`. Do not open or quote anything under `solutions/` unless

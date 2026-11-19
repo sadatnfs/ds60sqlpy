@@ -1,4 +1,4 @@
-# Day 35: Solutions: Model Evaluation and Cross-Validation
+# Day 35 Solutions: Model Evaluation and Cross-Validation
 
 We evaluate models with appropriate metrics, perform k-fold CV, and discuss bias/variance and leakage.
 
@@ -9,7 +9,7 @@ Contents
 
 ---
 
-Worked reference for Exercise 1; Metrics with CV
+Worked reference for Exercise 1: Metrics with CV
 ```python
 from sklearn.datasets import load_breast_cancer
 from sklearn.linear_model import LogisticRegression
@@ -43,25 +43,54 @@ Notes
 
 ---
 
-Worked reference for Exercise 2; 5-fold vs 10-fold
+Worked reference for Exercise 2: 5-fold vs 10-fold
 ```python
+import numpy as np
+
 cv5 = StratifiedKFold(n_splits=5, shuffle=True, random_state=0)
 cv10 = StratifiedKFold(n_splits=10, shuffle=True, random_state=0)
 auc5 = cross_val_score(clf, X, y, cv=cv5, scoring="roc_auc")
 auc10 = cross_val_score(clf, X, y, cv=cv10, scoring="roc_auc")
+
+# The spread of one run's fold scores describes single folds, not the CV estimate.
+# Rerun each design over 20 shuffles and measure how much its mean score moves.
+mean_spread = {}
+for k in (5, 10):
+    means = [
+        cross_val_score(
+            clf,
+            X,
+            y,
+            cv=StratifiedKFold(n_splits=k, shuffle=True, random_state=seed),
+            scoring="roc_auc",
+        ).mean()
+        for seed in range(20)
+    ]
+    mean_spread[f"cv{k}_mean_std_over_shuffles"] = round(float(np.std(means)), 5)
+
 {
-    "auc5_mean": auc5.mean(),
-    "auc5_std": auc5.std(),
-    "auc10_mean": auc10.mean(),
-    "auc10_std": auc10.std(),
+    "auc5_mean": round(float(auc5.mean()), 4),
+    "auc5_fold_std": round(float(auc5.std()), 4),
+    "auc10_mean": round(float(auc10.mean()), 4),
+    "auc10_fold_std": round(float(auc10.std()), 4),
+    **mean_spread,
 }
 ```
 Observation
-- 10-fold gives more train data per fold (less bias), but more variance across folds; compare stds
+- Expected output: `{'auc5_mean': 0.9955, 'auc5_fold_std': 0.0056, 'auc10_mean': 0.9953,
+  'auc10_fold_std': 0.0078, 'cv5_mean_std_over_shuffles': 0.00076,
+  'cv10_mean_std_over_shuffles': 0.00043}`.
+- 10-fold trains each model on 90% of the rows instead of 80%, so its estimate is
+  slightly less pessimistic (less bias from the smaller training sets).
+- Its individual fold scores spread more (0.0078 versus 0.0056) because each
+  validation fold is half as large. That spread is not the variance of the CV
+  estimate: across 20 reshuffles the 10-fold mean moves less (standard deviation
+  0.00043 versus 0.00076). Compare designs by repeating them over several shuffle
+  seeds and measuring how much the mean moves.
 
 ---
 
-Worked reference for Exercise 3; Leakage and pipelines
+Worked reference for Exercise 3: Leakage and pipelines
 - Scaling and other preprocessing must be fit within each CV fold to avoid peeking at test fold
 - Pipelines ensure transform.fit is applied only on training split; transforms then apply to held-out split via transform
 
@@ -119,19 +148,19 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1; metrics, resampling design, and honest generalization estimates; on the same declared stratified folds, print every accuracy, F1, and ROC-AUC fold score plus mean and standard deviation; include positive-class support and use probability/decision scores, not hard labels, for ROC AUC.
+**Verify:** On the same declared stratified folds, print every accuracy, F1, and ROC-AUC fold score plus mean and standard deviation; include positive-class support and use probability/decision scores, not hard labels, for ROC AUC.
 
 ### Exercise 2: Original lesson practice
 
 **Prompt:** Compare the variability from 5-fold and 10-fold cross-validation.
 
-**How to reason about it:** Five and ten folds trade training-set size against compute and fold variance. Compare the paired fold procedure across repeated seeds rather than announcing a universal winner from one split.
+**How to reason about it:** Ten folds give each model more training rows and cost twice the fits, but each validation fold is half as large, so single fold scores are noisier. Judge the designs by how much their mean score moves across repeated shuffle seeds rather than announcing a universal winner from one split.
 
 Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2; metrics, resampling design, and honest generalization estimates; use identical data, estimator, scorer, shuffle policy, and seed for 5 and 10 folds; print both score vectors, means, and standard deviations, and confirm every row appears in validation exactly once per run.
+**Verify:** Use identical data, estimator, scorer, and shuffle policy for 5 and 10 folds; print both score vectors with their means and fold standard deviations, and confirm every row appears in validation exactly once per run. Then rerun each design over at least ten shuffle seeds and compare how much the mean moves: the fold spread within one run is not the variance of the cross-validation estimate.
 
 ### Exercise 3: Original lesson practice
 
@@ -143,7 +172,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 3; metrics, resampling design, and honest generalization estimates; show fold indices or a fit counter proving preprocessing is fitted separately inside each training fold; contrast with one deliberately pre-fitted transformation and explain why its validation score is contaminated.
+**Verify:** Show fold indices or a fit counter proving preprocessing is fitted separately inside each training fold; contrast with one deliberately pre-fitted transformation and explain why its validation score is contaminated.
 
 ### Exercise 4: Threshold analysis
 

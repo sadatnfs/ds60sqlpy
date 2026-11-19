@@ -1,4 +1,4 @@
-# Day 52: Solutions: Scalability with Dask
+# Day 52 Solutions: Scaling with Dask and Chunked pandas
 
 We build a local CSV fixture, verify a Dask reduction against pandas, measure persisted reuse, and show an optional local-client boundary.
 
@@ -9,7 +9,7 @@ Contents
 
 ---
 
-Worked reference for Exercise 1; Port pandas to Dask
+Worked reference for Exercise 1: Port pandas to Dask
 ```python
 from pathlib import Path
 
@@ -59,7 +59,7 @@ Explanation
 
 ---
 
-Worked reference for Exercise 2; Persisted reuse timing
+Worked reference for Exercise 2: Persisted reuse timing
 ```python
 import time
 
@@ -91,7 +91,7 @@ Notes
 
 ---
 
-Worked reference for Exercise 3; Dashboard
+Worked reference for Exercise 3: Dashboard
 ```python
 from dask.distributed import Client
 
@@ -168,7 +168,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1; lazy task graphs, partitions, bounded reducers, and scale evidence; generate/read a named local CSV, print Dask partition count and groupby result, and assert keys/values match pandas within 1e-10 after deterministic sorting.
+**Verify:** Generate/read a named local CSV, print Dask partition count and groupby result, and assert keys/values match pandas within 1e-10 after deterministic sorting.
 
 ### Exercise 2: Original lesson practice
 
@@ -180,7 +180,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2; lazy task graphs, partitions, bounded reducers, and scale evidence; record at least three uncached and persisted repeated timings for the same aggregation, Dask graph/partition sizes, and result equality; close the local client and avoid claiming a speedup from one run.
+**Verify:** Record at least three uncached and persisted repeated timings for the same aggregation, Dask graph/partition sizes, and result equality; close the local client and avoid claiming a speedup from one run.
 
 ### Exercise 3: Original lesson practice
 
@@ -192,7 +192,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 3; lazy task graphs, partitions, bounded reducers, and scale evidence; for identical CSV and aggregation, print pandas-chunked and Dask results, elapsed-time samples, and measured peak memory; assert sorted numeric outputs match within 1e-10.
+**Verify:** For identical CSV and aggregation, print pandas-chunked and Dask results, elapsed-time samples, and measured peak memory; assert sorted numeric outputs match within 1e-10.
 
 ### Exercise 4: Task-graph tracing
 

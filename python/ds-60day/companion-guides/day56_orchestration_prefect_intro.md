@@ -1,4 +1,4 @@
-# Day 56: Orchestration with Prefect 3
+# Day 56: Workflow Orchestration with Prefect
 
 **Offline teaching data:** The [original synthetic fixtures](../../fixtures/README.md) replace first-run sample-data downloads. Their values are not historical or observational evidence. Keep numerical conclusions scoped to the declared teaching input.
 
@@ -87,16 +87,10 @@ operations that can safely repeat and whose failures are plausibly transient.
 
 Start the local server in the separately prepared environment. Set its displayed loopback API URL with `prefect config set PREFECT_API_URL=http://127.0.0.1:4200/api` only after verifying that this is the server you started. Do not use a hosted or unrelated profile for this exercise.
 
-macOS/Linux:
+Linux, macOS, or Ubuntu in Windows WSL 2:
 
 ```bash
 .venv/bin/prefect server start --host 127.0.0.1
-```
-
-Windows PowerShell:
-
-```powershell
-.\.venv\Scripts\prefect.exe server start --host 127.0.0.1
 ```
 
 Follow the CLI output for the local API URL and open the displayed local UI
@@ -130,21 +124,11 @@ for opening this lesson in the Docker classroom.
    lesson complete. A clean run catches hidden state and stale
    variables.
 
-Windows PowerShell:
-
-```powershell
-.\.venv\Scripts\python.exe -m jupyter lab
-```
-
-macOS/Linux:
+Linux, macOS, or Ubuntu in Windows WSL 2:
 
 ```bash
 .venv/bin/python -m jupyter lab
 ```
-
-If the Windows environment uses the documented conda-prefix fallback,
-use `.\.venv\python.exe` in place of
-`.\.venv\Scripts\python.exe`.
 
 ## Concept deep dive: observable task boundaries, retries, caching, and idempotent orchestration
 
@@ -166,12 +150,6 @@ effect idempotent automatically.
 - **`@flow`:** creates the orchestration boundary and run-level parameters/state.
 - **`@task(retries=..., retry_delay_seconds=...)`:** declares task-level retry policy; exception classification still matters.
 - **cache key + result persistence:** reuses a completed result only when identity and storage semantics are deliberate.
-
-Read an API call from the inside out: identify the data entering the
-operation, the state learned (if any), the value returned, and the
-evidence that would make the result trustworthy. A method returning
-without an exception proves only that the syntax and immediate runtime
-path worked.
 
 ### Focused example A: derive an idempotent local output identity
 
@@ -196,9 +174,6 @@ assert key in output_path
 **Assumption to name:** The key includes every input that changes result meaning, including data and code/version identity where needed.
 
 ### Focused example B: separate retryable from permanent failures
-
-This second example changes one important condition. Compare it with
-Example A instead of reading it as unrelated syntax.
 
 ```python
 class TemporaryUnavailable(RuntimeError):
@@ -247,16 +222,16 @@ assert decisions == [True, True, False]
 
 1. Add `test_size` and `random_state` parameters to the training flow.
 
-**Verify:** Practice 1; observable task boundaries, retries, caching, and idempotent orchestration; run the flow twice with two explicit test_size/random_state pairs, print parameter values, split row counts/hashes, and metrics, and assert a repeated identical pair reproduces the same split.
+**Verify:** Run the flow twice with two explicit test_size/random_state pairs, print parameter values, split row counts/hashes, and metrics, and assert a repeated identical pair reproduces the same split.
 
 2. Split the training task into separate train and evaluate tasks with explicit
    outputs.
 
-**Verify:** Practice 2; observable task boundaries, retries, caching, and idempotent orchestration; make train return a model/artifact identity and evaluate accept that explicit value; print task states and metric, and inject a train failure to prove evaluate does not run on missing output.
+**Verify:** Make train return a model/artifact identity and evaluate accept that explicit value; print task states and metric, and inject a train failure to prove evaluate does not run on missing output.
 
 3. Explore the optional local Prefect UI and scheduling basics.
 
-**Verify:** Practice 3; observable task boundaries, retries, caching, and idempotent orchestration; either print an explicit offline-skip result or start the local UI, record the local URL and one completed flow-run ID/state, then stop it cleanly; scheduling remains optional and must not require a cloud account.
+**Verify:** Either print an explicit offline-skip result or start the local UI, record the local URL and one completed flow-run ID/state, then stop it cleanly; scheduling remains optional and must not require a cloud account.
 
 ### Progressive hints
 
@@ -334,7 +309,7 @@ The lesson is complete without an AI assistant. If you want optional
 coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
-Tutor me through `python-56` : Day 56 : Orchestration with Prefect 3.
+Tutor me through `python-56` (Day 56: Orchestration with Prefect 3).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize observable task boundaries, retries, caching, and idempotent orchestration. Use exactly these maintained learner materials:

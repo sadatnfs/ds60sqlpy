@@ -74,8 +74,7 @@ They are separate from the browser's saved pads, notes and progress in Docker
 volumes. Neither route automatically copies attempts or completion markers to
 the other; record progress in the interface you actually used.
 
-**Lesson outcome:** use day 17; pandas series, dataframes, and indexing to practice labeled tabular data, row grain, indexes, selection, and vectorized columns
-and explain the evidence produced by your code.
+**Outcome:** Select pandas rows and columns by label, position, and Boolean mask.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
@@ -130,14 +129,7 @@ sales = pd.DataFrame(
 (sales.shape, sales.dtypes.astype(str).to_dict(), sales["order_id"].is_unique)
 ```
 
-**Expected observation**
-
-```text
-`((3, 3), {...}, True)`. The dtype spellings may vary slightly; each row represents one order and `order_id` is unique here.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** `((3, 3), {...}, True)`. The dtype spellings may vary slightly; each row represents one order and `order_id` is unique here.
 
 ### Worked example 2: Filter rows and derive a column without a loop
 
@@ -150,14 +142,7 @@ sales = sales.assign(amount_with_tax=sales["amount"] * 1.08)
 (west["order_id"].tolist(), sales["amount_with_tax"].round(2).tolist())
 ```
 
-**Expected observation**
-
-```text
-`([101, 103], [21.6, 37.8, 16.2])`. The original row index is retained in `west`.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** `([101, 103], [21.6, 37.8, 16.2])`. The original row index is retained in `west`.
 
 ### A debugging routine for this topic
 
@@ -230,6 +215,12 @@ expected behavior, constraints, and verification into your work cell. A
 result is not complete merely because it “looks right”; run the stated
 assertion or inspection and explain what it proves.
 
+**Dataset:** every exercise uses the offline `restaurant-bills` fixture,
+loaded with `from ds60sqlpy.teaching_data import load_teaching_frame` and
+`df = load_teaching_frame("restaurant-bills")`. It has 240 synthetic bills and
+the columns `total_bill`, `tip`, `sex`, `smoker`, `day`, `time`, and `size`; no
+bill is zero (the smallest `total_bill` is 11.43).
+
 1. Using the lesson DataFrame, select rows where `time == 'Dinner'`, then compute the mean of the selected `tip` values. **Before code:** state the row grain and write the mask separately.
    **Expected behavior:** the result is one scalar equal to `dinner_rows['tip'].mean()`. **Constraints:** use `.loc` and do not loop.
    **Verify:** assert every selected row is Dinner and the selection is non-empty before reporting the mean.
@@ -253,9 +244,9 @@ code; these extend rather than replace the original practice above.
 5. **Tracing:** Trace a boolean mask through creation, alignment by index, and row selection. What happens if mask/index labels differ?
    **Progressive hint:** Pandas aligns many labeled objects by index.
    **Verify:** Display mask and frame indexes side by side, then assert aligned selection for matching labels and the documented error/reindex policy for mismatches.
-6. **Implementation:** Create a safe `tip_rate` column that yields missing values rather than infinity when `total_bill` is zero.
-   **Progressive hint:** Mask or replace the zero denominator before division.
-   **Verify:** Assert zero bills yield missing rates, positive bills yield the calculated ratio, and the entire column contains no positive/negative infinity.
+6. **Implementation:** The fixture has no zero bills, so construct the edge case: append one row with `total_bill = 0.0` and `tip = 1.0` to a copy of `df`, then compute `tip_rate` so that the zero bill yields a missing value instead of infinity.
+   **Progressive hint:** Replace a zero denominator with a missing value, for example with `.where(total_bill != 0)`, before dividing.
+   **Verify:** Assert the new row's rate is missing, the 240 original rows equal `tip / total_bill` exactly, `df` itself still has 240 rows, and the column contains no positive or negative infinity.
 7. **Debugging:** Repair chained assignment on a filtered DataFrame and explain when to use `.loc` or an explicit `.copy()`.
    **Progressive hint:** Make ownership and target rows explicit.
    **Verify:** Turn chained-assignment warnings into explicit `.loc` or `.copy()` ownership; assert the intended frame changes and the unintended frame does not.
@@ -282,6 +273,13 @@ boolean, and the highest valid tip percentage appears first.
   whitespace, capitalization, and index levels.
 - **`SettingWithCopyWarning`:** combine row/column selection in one `.loc[...]`
   assignment or make an intentional `.copy()`.
+- **pandas 3 note:** pandas 3.0 always uses Copy-on-Write. Every selection then
+  behaves as a copy, so chained assignment such as `df["col"][mask] = value`
+  never updates `df`, and `SettingWithCopyWarning` no longer exists; write one
+  `df.loc[mask, "col"] = value` instead. Text columns also become the `str`
+  dtype rather than `object`. The classroom's pandas 2.3 can preview both
+  behaviors with `pd.options.mode.copy_on_write = True` and
+  `pd.options.future.infer_string = True`.
 - **Unexpected missing values after arithmetic:** inspect both indexes; pandas
   aligned labels rather than positions.
 - **`df.info()` prints `None` afterward:** it prints its report and returns
@@ -302,7 +300,7 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-17`
-(Day 17 — pandas Series, DataFrames, and Indexing). Direct catalog prerequisites: `python-16`.
+(Day 17: pandas Series, DataFrames, and Indexing). Direct catalog prerequisites: `python-16`.
 I have completed the direct prerequisites: `python-16`. Emphasize labeled tabular data, row grain, indexes, selection, and vectorized columns.
 Read `python/ds-60day/companion-guides/day17_pandas_intro.md` and use the learner notebook
 `python/ds-60day/notebooks/day17_pandas_intro.ipynb`. Do not open or quote anything under `solutions/` unless

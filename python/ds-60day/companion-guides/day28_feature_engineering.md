@@ -76,8 +76,7 @@ They are separate from the browser's saved pads, notes and progress in Docker
 volumes. Neither route automatically copies attempts or completion markers to
 the other; record progress in the interface you actually used.
 
-**Lesson outcome:** use day 28; feature engineering with scikit-learn to practice reproducible feature transformations without information leakage
-and explain the evidence produced by your code.
+**Outcome:** Encode, scale, and bin features in scikit-learn without leaking test data.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
@@ -129,14 +128,7 @@ scaler = StandardScaler().fit(train)
 (scaler.mean_.tolist(), scaler.transform(test).round(2).tolist())
 ```
 
-**Expected observation**
-
-```text
-The training mean is `[2.0]`; the held-out value becomes a large positive standardized value. Test data did not influence the mean.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** The training mean is `[2.0]`; the held-out value becomes a large positive standardized value. Test data did not influence the mean.
 
 ### Worked example 2: Handle an unseen category explicitly
 
@@ -152,14 +144,7 @@ encoded = encoder.transform([["green"], ["red"]])
 (encoder.categories_[0].tolist(), encoded.tolist())
 ```
 
-**Expected observation**
-
-```text
-Known levels are `['blue', 'red']`; unseen `green` becomes all zeros while `red` activates its learned column.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** Known levels are `['blue', 'red']`; unseen `green` becomes all zeros while `red` activates its learned column.
 
 ### A debugging routine for this topic
 
@@ -305,7 +290,7 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-28`
-(Day 28 — Feature Engineering with scikit-learn). Direct catalog prerequisites: `python-27`.
+(Day 28: Feature Engineering with scikit-learn). Direct catalog prerequisites: `python-27`.
 I have completed the direct prerequisites: `python-27`. Emphasize reproducible feature transformations without information leakage.
 Read `python/ds-60day/companion-guides/day28_feature_engineering.md` and use the learner notebook
 `python/ds-60day/notebooks/day28_feature_engineering.ipynb`. Do not open or quote anything under `solutions/` unless

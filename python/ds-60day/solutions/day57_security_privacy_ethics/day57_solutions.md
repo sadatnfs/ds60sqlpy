@@ -1,4 +1,4 @@
-# Day 57: Solutions: Security, Privacy, and Ethics
+# Day 57 Solutions: Security, Privacy, and Ethics
 
 We build a data classification matrix, compute group metrics for fairness, and provide a model card template.
 
@@ -9,7 +9,7 @@ Contents
 
 ---
 
-Worked reference for Exercise 1; Data classification matrix
+Worked reference for Exercise 1: Data classification matrix
 ```markdown
 | Data class | Examples | Storage | Access | Retention |
 |-----------:|----------|---------|--------|-----------|
@@ -23,21 +23,22 @@ Guidance
 
 ---
 
-Worked reference for Exercise 2; Group metrics
+Worked reference for Exercise 2: Group metrics
 ```python
 import numpy as np, pandas as pd
 from sklearn.metrics import precision_score, recall_score
 
-# Synthetic predictions grouped by sensitive attr 'group'
+# Synthetic predictions grouped by sensitive attr 'group'; seeded so reruns match
+rng = np.random.default_rng(57)
 df = pd.DataFrame(
     {
-        "y_true": np.random.randint(0, 2, size=1000),
-        "y_pred": np.random.randint(0, 2, size=1000),
-        "group": np.random.choice(["A", "B"], size=1000),
+        "y_true": rng.integers(0, 2, size=1000),
+        "y_pred": rng.integers(0, 2, size=1000),
+        "group": rng.choice(["A", "B"], size=1000),
     }
 )
 
-metrics = df.groupby("group").apply(
+metrics = df.groupby("group")[["y_true", "y_pred"]].apply(
     lambda g: pd.Series(
         {
             "precision": precision_score(g.y_true, g.y_pred, zero_division=0),
@@ -58,9 +59,9 @@ Notes
 
 ---
 
-Worked reference for Exercise 3; Model card template
+Worked reference for Exercise 3: Model card template
 ```markdown
-# Model Card — <model name>
+# Model Card: <model name>
 
 ## Overview
 - Intended use: ...
@@ -139,7 +140,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1; data minimization, privacy boundaries, fairness evidence, and accountable controls; run the scanner on named columns and free-text fixtures containing email, phone, clean text, and a deliberate false positive; print row/field/finding type without raw PII and report misses/false hits.
+**Verify:** Run the scanner on named columns and free-text fixtures containing email, phone, clean text, and a deliberate false positive; print row/field/finding type without raw PII and report misses/false hits.
 
 ### Exercise 2: Original lesson practice
 
@@ -151,7 +152,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2; data minimization, privacy boundaries, fairness evidence, and accountable controls; assert masking replaces complete email and phone fixtures with declared placeholders, preserves surrounding non-PII text, is idempotent on a second pass, and handles malformed/boundary strings explicitly.
+**Verify:** Assert masking replaces complete email and phone fixtures with declared placeholders, preserves surrounding non-PII text, is idempotent on a second pass, and handles malformed/boundary strings explicitly.
 
 ### Exercise 3: Original lesson practice
 
@@ -163,7 +164,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 3; data minimization, privacy boundaries, fairness evidence, and accountable controls; for each subgroup, print TP/FP/FN, support, precision, recall, and uncertainty or minimum-support warning; verify each rate from its counts and avoid ranking groups with insufficient denominators.
+**Verify:** For each subgroup, print TP/FP/FN, support, precision, recall, and uncertainty or minimum-support warning; verify each rate from its counts and avoid ranking groups with insufficient denominators.
 
 ### Exercise 4: Original lesson practice
 
@@ -175,7 +176,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 4; data minimization, privacy boundaries, fairness evidence, and accountable controls; save a one-page Markdown checklist file with owner and evidence for collection purpose, minimization, consent/legal basis, access, retention/deletion, security, bias evaluation, incident response, and stop/go approval.
+**Verify:** Save a one-page Markdown checklist file with owner and evidence for collection purpose, minimization, consent/legal basis, access, retention/deletion, security, bias evaluation, incident response, and stop/go approval.
 
 ### Exercise 5: Threat modeling
 

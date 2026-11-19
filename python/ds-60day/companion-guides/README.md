@@ -1,4 +1,4 @@
-# Companion Guides for 60-Day Python Data Science Notebooks
+# Python and Data Science Companion Guides
 
 This folder contains narrative, text-only companion guides for each daily notebook in `../notebooks`. Each guide includes:
 
@@ -16,51 +16,51 @@ Naming matches the notebooks, e.g.:
 
 ## Data and modeling sequence, Days 16 through 60
 
-- 16: NumPy fundamentals; arrays, vectorization, broadcasting
-- 17: Pandas intro; Series, DataFrame, Index
-- 18: Pandas I/O and cleaning
-- 19: GroupBy, aggregation, pivoting
-- 20: Merging and joins
-- 21: Time series with pandas
-- 22: Advanced pandas; apply/pipe/query/eval
-- 23: Data pipelines and generators
-- 24: EDA best practices
-- 25: Viz with Matplotlib/Seaborn
-- 26: Interactive viz with Plotly/Altair
-- 27: Geospatial/domain viz
-- 28: Feature engineering
-- 29: Data validation with schemas
-- 30: Project: EDA and preprocessing
-- 31: Probability basics
-- 32: Statistical inference
-- 33: Linear algebra for DS
-- 34: sklearn intro and pipelines
-- 35: Model evaluation and CV
-- 36: PCA and dimensionality reduction
-- 37: Regularization and linear models
-- 38: Trees and random forests
-- 39: Gradient boosting (XGBoost/LightGBM)
-- 40: Hyperparameter tuning (SearchCV)
-- 41: Class imbalance
-- 42: Unsupervised: k-means/anomaly
-- 43: Interpretation: SHAP/PDP
-- 44: Deployment with FastAPI
-- 45: End-to-end modeling project
-- 46: Deep learning overview
-- 47: PyTorch basics and training loop
-- 48: Transfer learning with CNNs
-- 49: NLP basics with HF and spaCy
-- 50: Time series modeling
-- 51: Advanced feature engineering: target encoding
-- 52: Scalability with Dask
-- 53: MLOps with MLflow tracking
-- 54: Monitoring and governance
-- 55: APIs and Docker
-- 56: Orchestration with Prefect
-- 57: Security, privacy, ethics
-- 58: Code review, refactor, tests
-- 59: Capstone kickoff
-- 60: Capstone completion & presentation
+- 16: NumPy Arrays, Vectorization, and Broadcasting
+- 17: pandas Series, DataFrames, and Indexing
+- 18: Loading and Cleaning Data with pandas
+- 19: Grouping, Pivoting, and Melting in pandas
+- 20: Merging and Joining DataFrames
+- 21: Time Series with pandas
+- 22: Advanced pandas: Vectorization, query, and Categoricals
+- 23: Streaming Data Pipelines with Generators
+- 24: Exploratory Data Analysis Best Practices
+- 25: Visualization with Matplotlib and seaborn
+- 26: Interactive Visualization with Plotly and Altair
+- 27: Geospatial and Domain-Specific Visualization
+- 28: Feature Engineering with scikit-learn
+- 29: Data Validation with Schemas
+- 30: Project: Reproducible EDA and Preprocessing
+- 31: Probability Basics
+- 32: Statistical Inference: Intervals and Tests
+- 33: Linear Algebra and Matrices
+- 34: scikit-learn Estimators and Pipelines
+- 35: Model Evaluation and Cross-Validation
+- 36: PCA and Feature Selection
+- 37: Regularized Linear Models
+- 38: Decision Trees and Random Forests
+- 39: Gradient Boosting with XGBoost and LightGBM
+- 40: Hyperparameter Tuning with Grid and Randomized Search
+- 41: Handling Class Imbalance
+- 42: K-Means Clustering and Anomaly Detection
+- 43: Model Interpretation with SHAP and Partial Dependence
+- 44: Serving a Model with FastAPI
+- 45: Project: End-to-End Modeling
+- 46: Deep Learning Overview
+- 47: PyTorch Tensors, Modules, and Training Loops
+- 48: Transfer Learning with CNNs
+- 49: NLP Basics with Hugging Face and spaCy
+- 50: Time-Series Forecasting and Evaluation
+- 51: Target Encoding and Leakage-Safe Features
+- 52: Scaling with Dask and Chunked pandas
+- 53: Experiment Tracking with MLflow
+- 54: Model Monitoring and Governance
+- 55: Containerizing a FastAPI Model Service
+- 56: Workflow Orchestration with Prefect
+- 57: Security, Privacy, and Ethics
+- 58: Code Review, Refactoring, and Tests
+- 59: Capstone Kickoff and Planning
+- 60: Capstone Completion and Presentation
 
 Use the [Python track entrypoint](../README.md) to study these guides in the
 Docker classroom and continue into the named foundations, NumPy, pandas,

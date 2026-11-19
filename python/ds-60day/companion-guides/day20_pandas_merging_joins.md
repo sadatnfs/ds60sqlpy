@@ -1,4 +1,4 @@
-# Day 20: Merging and Joins
+# Day 20: Merging and Joining DataFrames
 
 **Level:** Intermediate
 
@@ -71,8 +71,7 @@ They are separate from the browser's saved pads, notes and progress in Docker
 volumes. Neither route automatically copies attempts or completion markers to
 the other; record progress in the interface you actually used.
 
-**Lesson outcome:** use day 20; merging and joins to practice relational keys, join types, cardinality, and reconciliation
-and explain the evidence produced by your code.
+**Outcome:** Join tables on keys and check row counts and unmatched records.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
@@ -122,14 +121,7 @@ priced = items.merge(products, on="sku", how="left", validate="many_to_one", ind
 (len(priced), priced["_merge"].value_counts().to_dict())
 ```
 
-**Expected observation**
-
-```text
-`(3, {'both': 3, ...})`; category counts may include zero-valued labels. No item row was lost or multiplied.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** `(3, {'both': 3, ...})`; category counts may include zero-valued labels. No item row was lost or multiplied.
 
 ### Worked example 2: Make an orphan visible
 
@@ -142,14 +134,7 @@ checked = more_items.merge(products, on="sku", how="left", validate="many_to_one
 checked[["sku", "_merge"]].to_dict("records")
 ```
 
-**Expected observation**
-
-```text
-`[{'sku': 'A', '_merge': 'both'}, {'sku': 'C', '_merge': 'left_only'}]`. Product `C` is an orphan.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** `[{'sku': 'A', '_merge': 'both'}, {'sku': 'C', '_merge': 'left_only'}]`. Product `C` is an orphan.
 
 ### A debugging routine for this topic
 
@@ -293,7 +278,7 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-20`
-(Day 20 — Merging and Joins). Direct catalog prerequisites: `python-19`.
+(Day 20: Merging and Joins). Direct catalog prerequisites: `python-19`.
 I have completed the direct prerequisites: `python-19`. Emphasize relational keys, join types, cardinality, and reconciliation.
 Read `python/ds-60day/companion-guides/day20_pandas_merging_joins.md` and use the learner notebook
 `python/ds-60day/notebooks/day20_pandas_merging_joins.ipynb`. Do not open or quote anything under `solutions/` unless

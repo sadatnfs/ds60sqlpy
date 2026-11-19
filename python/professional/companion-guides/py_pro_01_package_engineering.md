@@ -4,12 +4,12 @@
 
 **Level:** intermediate
 
-**Estimated time:** 120–180 minutes
+**Estimated time:** 120-180 minutes
 
 ## Level and prerequisites
 
 - **Catalog prerequisite:** `python-15`
-- Python Days 1–15, especially modules, testing, tooling, and the CLI project
+- Python Days 1-15, especially modules, testing, tooling, and the CLI project
 - The repository environment created during connected setup
 - Comfort running a Python file from the repository root
 
@@ -105,7 +105,7 @@ Both artifacts are valuable:
 ## How to run this lesson
 
 **Primary browser route:** run `./classroom` from the repository root and
-choose **Python** on `/classroom`. Open this lesson in the shared workspace,
+choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
 read its capability notice, and use its supported coding or reading workflow.
 The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
 
@@ -364,8 +364,9 @@ build tools were not bootstrapped.
 - **The distribution cannot be found:** distribution names use metadata
   lookup; import names use Python identifiers. Use
   `distribution("ds60-tiny-greeter")` but `import ds60_tiny_greeter`.
-- **PowerShell treats a path as a command:** invoke the interpreter explicitly
-  with `.\.venv\Scripts\python.exe`.
+- **The shell runs the wrong `python`:** invoke the prepared interpreter
+  explicitly, for example `.venv/bin/python -m build`, and print
+  `sys.executable` when in doubt.
 - **A dependency group appears at runtime:** it was incorrectly copied into
   `[project.dependencies]`. Development tools should not burden users.
 - **Generated `dist/`, `build/`, or `*.egg-info` appears in Git:** the build
@@ -386,7 +387,7 @@ The lesson is complete without an AI assistant. If you want optional
 coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
-Tutor me through `python-pro-01` — Package engineering and a local release workflow.
+Tutor me through `python-pro-01`: Package engineering and a local release workflow.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize src-layout packaging, build artifacts, metadata, and clean installation. Use exactly these maintained learner materials:

@@ -1,4 +1,4 @@
-# Day 9 - Modules, Packages, Imports, and `__main__`
+# Day 9: Modules, Packages, and Imports
 
 **Level:** Beginner
 
@@ -71,8 +71,7 @@ They are separate from the browser's saved pads, notes and progress in Docker
 volumes. Neither route automatically copies attempts or completion markers to
 the other; record progress in the interface you actually used.
 
-**Lesson outcome:** use day 9 - modules, packages, imports, and `__main__` to practice modules, package namespaces, imports, and safe entry points
-and explain the evidence produced by your code.
+**Outcome:** Split code into modules and packages and run a package with `python -m`.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
@@ -122,14 +121,7 @@ values = [2, 3, 100]
 (stats.mean(values), median(values), stats.__name__)
 ```
 
-**Expected observation**
-
-```text
-`(35, 3, 'statistics')` (the mean may display as `35`). The alias still refers to the module object.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** `(35, 3, 'statistics')` (the mean may display as `35`). The alias still refers to the module object.
 
 ### Worked example 2 - Observe the import cache
 
@@ -146,14 +138,7 @@ import json as second
 (first is second, sys.modules["json"] is first)
 ```
 
-**Expected observation**
-
-```text
-`(True, True)`. Python reuses the successfully loaded module from `sys.modules`.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** `(True, True)`. Python reuses the successfully loaded module from `sys.modules`.
 
 ### A debugging routine for this topic
 
@@ -218,19 +203,60 @@ from demo.formatters import title
 print(title("  daily report  "))
 ```
 
-Run from the directory containing `demo`.
+### Run the package from the classroom pad
 
-Windows PowerShell:
+A package is a folder, so the single-file pad cannot hold it directly. The
+recipe below writes the three files into a temporary folder and runs two
+child processes from the package's parent folder: `python -m demo`, which
+executes `demo/__main__.py`, and `python -c "import demo.formatters"`, which
+only imports. Predict both captured outputs before running it.
 
-```powershell
-.\.venv\Scripts\python.exe -m demo
+```python
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+files = {
+    "demo/__init__.py": "",
+    "demo/formatters.py": "def title(text: str) -> str:\n    return text.strip().title()\n",
+    "demo/__main__.py": 'from demo.formatters import title\n\nprint(title("  daily report  "))\n',
+}
+
+# Build the package in a temporary folder, then run it the way a terminal would.
+with tempfile.TemporaryDirectory(prefix="day09-") as folder:
+    for name, text in files.items():
+        path = Path(folder) / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(text, encoding="utf-8")
+    as_program = subprocess.run(
+        [sys.executable, "-m", "demo"], cwd=folder, capture_output=True, text=True, timeout=30
+    )
+    as_import = subprocess.run(
+        [sys.executable, "-c", "import demo.formatters"],
+        cwd=folder,
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+
+print("python -m demo printed:", repr(as_program.stdout))
+print("import demo.formatters printed:", repr(as_import.stdout))
+assert as_program.stdout == "Daily Report\n", as_program.stderr
+assert as_import.stdout == ""
 ```
 
-macOS/Linux:
+**Expected observation:** `python -m demo printed: 'Daily Report\n'` and
+`import demo.formatters printed: ''`. Running the package executes its
+`__main__.py`; importing a module defines `title` but prints nothing. Change the
+working directory of the first call to `Path(folder) / "demo"` and rerun: the
+child now fails with `No module named demo`, because `python -m` resolves names
+from the folder it starts in.
 
-```bash
-.venv/bin/python -m demo
-```
+**Optional local workflow:** in a prepared contributor checkout, create the
+same three files in a scratch folder outside the repository, change to that
+scratch folder (the parent of `demo/`), and run
+`/path/to/repository/.venv/bin/python -m demo`.
 
 ## Exercises and progressive hints
 
@@ -244,7 +270,7 @@ assertion or inspection and explain what it proves.
    **Verify:** From the package parent, import `textutils`, assert the slug result, and print `textutils.slugify.__module__` to prove the public name reaches `slug.py`.
 
 2. Add `textutils/cli.py` that uses an absolute import when called from outside and a package-relative import for an internal sibling example. **Run:** `python -m textutils.cli 'Hello World'`. **Expected output:** `hello-world`. **Constraints:** protect CLI execution with `if __name__ == '__main__':` and demonstrate that `import textutils.cli` produces no CLI output.
-   **Verify:** Capture `hello-world` from module execution and capture no output from ordinary import in a fresh interpreter.
+   **Verify:** Extend the pad recipe's `files` with your package, capture `hello-world` from `[sys.executable, "-m", "textutils.cli", "Hello World"]`, and capture no output from `[sys.executable, "-c", "import textutils.cli"]`.
 
 ### Additional mastery practice
 

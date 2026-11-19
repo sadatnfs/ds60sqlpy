@@ -1,4 +1,4 @@
-# Day 27: Geospatial or Domain-Specific Visualization
+# Day 27: Geospatial and Domain-Specific Visualization
 
 **Level:** Intermediate
 
@@ -94,8 +94,7 @@ They are separate from the browser's saved pads, notes and progress in Docker
 volumes. Neither route automatically copies attempts or completion markers to
 the other; record progress in the interface you actually used.
 
-**Lesson outcome:** use day 27; geospatial or domain-specific visualization to practice geospatial semantics, coordinate reference systems, valid geometry, and offline fallback
-and explain the evidence produced by your code.
+**Outcome:** Map geographic data with the right coordinate reference system.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
@@ -149,14 +148,7 @@ places = gpd.GeoDataFrame(
 (str(places.crs), places.total_bounds.round(1).tolist())
 ```
 
-**Expected observation**
-
-```text
-The CRS is WGS 84/EPSG:4326 and bounds are approximately `[-122.4, 37.8, -73.9, 40.7]` in longitude/latitude degrees.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** The CRS is WGS 84/EPSG:4326 and bounds are approximately `[-122.4, 37.8, -73.9, 40.7]` in longitude/latitude degrees.
 
 ### Worked example 2: Reproject rather than relabel
 
@@ -177,9 +169,6 @@ projected = places.to_crs("EPSG:3857")
 ```text
 All checks are true; the coordinates are transformed to meter-like Web Mercator values.
 ```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
 
 ### A debugging routine for this topic
 
@@ -332,7 +321,7 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-27`
-(Day 27 : Geospatial or Domain-Specific Visualization). Direct catalog prerequisites: `python-26`.
+(Day 27: Geospatial or Domain-Specific Visualization). Direct catalog prerequisites: `python-26`.
 I have completed the direct prerequisites: `python-26`. Emphasize geospatial semantics, coordinate reference systems, valid geometry, and offline fallback.
 Read `python/ds-60day/companion-guides/day27_geospatial_or_domain_viz.md` and use the learner notebook
 `python/ds-60day/notebooks/day27_geospatial_or_domain_viz.ipynb`. Do not open or quote anything under `solutions/` unless

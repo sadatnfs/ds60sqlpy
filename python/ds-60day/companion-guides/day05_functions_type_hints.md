@@ -71,8 +71,7 @@ They are separate from the browser's saved pads, notes and progress in Docker
 volumes. Neither route automatically copies attempts or completion markers to
 the other; record progress in the interface you actually used.
 
-**Lesson outcome:** use day 5; functions, docstrings, and type hints to practice function contracts, parameters, return values, scope, and type hints
-and explain the evidence produced by your code.
+**Outcome:** Write functions with clear parameters, return values, docstrings, and type hints.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
@@ -126,14 +125,7 @@ def mean(values: list[float]) -> float:
 mean([2.0, 4.0, 9.0])
 ```
 
-**Expected observation**
-
-```text
-`5.0`. Empty input follows a deliberate exception path instead of dividing by zero accidentally.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** `5.0`. Empty input follows a deliberate exception path instead of dividing by zero accidentally.
 
 ### Worked example 2: Use keyword-only parameters to make calls readable
 
@@ -150,14 +142,7 @@ def discounted(price: float, *, rate: float = 0.0) -> float:
 discounted(80.0, rate=0.25)
 ```
 
-**Expected observation**
-
-```text
-`60.0`. The call labels `rate`, making `0.25` hard to confuse with another quantity.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** `60.0`. The call labels `rate`, making `0.25` hard to confuse with another quantity.
 
 ### A debugging routine for this topic
 
@@ -298,7 +283,7 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-05`
-(Day 5 — Functions, Docstrings, and Type Hints). Direct catalog prerequisites: `python-04`.
+(Day 5: Functions, Docstrings, and Type Hints). Direct catalog prerequisites: `python-04`.
 I have completed the direct prerequisites: `python-04`. Emphasize function contracts, parameters, return values, scope, and type hints.
 Read `python/ds-60day/companion-guides/day05_functions_type_hints.md` and use the learner notebook
 `python/ds-60day/notebooks/day05_functions_type_hints.ipynb`. Do not open or quote anything under `solutions/` unless

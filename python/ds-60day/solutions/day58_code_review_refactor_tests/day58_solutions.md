@@ -1,4 +1,4 @@
-# Day 58: Solutions: Code Review, Refactoring, and Tests
+# Day 58 Solutions: Code Review, Refactoring, and Tests
 
 The notebook reference creates a real, owned temporary `src/myproj`
 package and runs a fresh pytest process against it. The test output establishes
@@ -17,7 +17,7 @@ Contents
 
 ---
 
-Worked reference for Exercise 1; Extract and test
+Worked reference for Exercise 1: Extract and test
 ```python
 # src/myproj/fe.py
 from __future__ import annotations
@@ -46,19 +46,14 @@ def test_scale_constant():
     assert scale_minmax([3, 3, 3]) == [0.0, 0.0, 0.0]
 ```
 Run tests
-```powershell
-# Windows PowerShell
-.\.venv\Scripts\python.exe -m pytest -q
-```
-
 ```bash
-# macOS or Linux
+# Linux, macOS, or Ubuntu in Windows WSL 2
 .venv/bin/python -m pytest -q
 ```
 
 ---
 
-Worked reference for Exercise 2; pre‑commit
+Worked reference for Exercise 2: pre‑commit
 ```yaml
 # .pre-commit-config.yaml
 repos:
@@ -77,21 +72,15 @@ repos:
 ```
 Core setup already installs pre-commit. Install the local hook and run it:
 
-```powershell
-# Windows PowerShell
-.\.venv\Scripts\python.exe -m pre_commit install
-.\.venv\Scripts\python.exe -m pre_commit run --all-files
-```
-
 ```bash
-# macOS or Linux
+# Linux, macOS, or Ubuntu in Windows WSL 2
 .venv/bin/python -m pre_commit install
 .venv/bin/python -m pre_commit run --all-files
 ```
 
 ---
 
-Worked reference for Exercise 3; CI workflow
+Worked reference for Exercise 3: CI workflow
 ```yaml
 # .github/workflows/ci.yml
 name: CI
@@ -161,7 +150,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1; behavior-preserving refactoring, seams, tests, and compatibility review; import two moved functions from src in a fresh process and run focused normal/boundary/failure tests with exit code 0; prove the notebook now calls those imports and no copied implementation remains.
+**Verify:** Import two moved functions from src in a fresh process and run focused normal/boundary/failure tests with exit code 0; prove the notebook now calls those imports and no copied implementation remains.
 
 ### Exercise 2: Original lesson practice
 
@@ -173,7 +162,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2; behavior-preserving refactoring, seams, tests, and compatibility review; run mypy on the exact src/test paths with exit code 0 and save its transcript; include parameter/return annotations and docstrings that state errors/side effects, plus one negative typing fixture that fails as expected.
+**Verify:** Run mypy on the exact src/test paths with exit code 0 and save its transcript; include parameter/return annotations and docstrings that state errors/side effects, plus one negative typing fixture that fails as expected.
 
 ### Exercise 3: Original lesson practice
 
@@ -185,7 +174,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 3; behavior-preserving refactoring, seams, tests, and compatibility review; write a maintainer guide containing clean setup, test/lint/type commands, architecture/data flow, artifact locations, release/rollback, and troubleshooting; have another clean shell execute every command successfully.
+**Verify:** Write a maintainer guide containing clean setup, test/lint/type commands, architecture/data flow, artifact locations, release/rollback, and troubleshooting; have another clean shell execute every command successfully.
 
 ### Exercise 4: Characterization testing
 

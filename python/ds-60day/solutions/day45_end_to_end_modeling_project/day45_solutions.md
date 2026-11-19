@@ -1,4 +1,4 @@
-# Day 45: Solutions: End-to-End Modeling Project
+# Day 45 Solutions: Project: End-to-End Modeling
 
 **Offline teaching data:** The [original synthetic fixtures](../../../fixtures/README.md) replace first-run sample-data downloads. Their values are not historical or observational evidence. Keep numerical conclusions scoped to the declared teaching input.
 
@@ -12,7 +12,7 @@ Contents
 
 ---
 
-Worked reference for Exercise 1; Problem framing and Pipeline
+Worked reference for Exercise 1: Problem framing and Pipeline
 ```python
 from sklearn.datasets import load_breast_cancer
 from sklearn.model_selection import train_test_split
@@ -34,7 +34,7 @@ Notes
 
 ---
 
-Worked reference for Exercise 2; CV/tuning and holdout evaluation
+Worked reference for Exercise 2: CV/tuning and holdout evaluation
 ```python
 from sklearn.model_selection import StratifiedKFold, GridSearchCV
 from sklearn.metrics import roc_auc_score, precision_recall_curve, average_precision_score
@@ -70,7 +70,7 @@ Interpretation
 
 ---
 
-Worked reference for Exercise 3; Save artifacts and serve via FastAPI
+Worked reference for Exercise 3: Save artifacts and serve via FastAPI
 ```python
 import json
 from pathlib import Path
@@ -183,7 +183,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1; an end-to-end evidence chain from decision to reproducible artifact; record dataset identity/hash, target, row count, and frozen train/validation/test indices; assert the three index sets are pairwise disjoint and their counts sum to the validated rows.
+**Verify:** Record dataset identity/hash, target, row count, and frozen train/validation/test indices; assert the three index sets are pairwise disjoint and their counts sum to the validated rows.
 
 ### Exercise 2: Original lesson practice
 
@@ -195,7 +195,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2; an end-to-end evidence chain from decision to reproducible artifact; fit one ColumnTransformer inside the training pipeline, print output feature names/order and transformed shapes, and predict a validation row containing the declared missing/unknown-category boundary.
+**Verify:** Fit one ColumnTransformer inside the training pipeline, print output feature names/order and transformed shapes, and predict a validation row containing the declared missing/unknown-category boundary.
 
 ### Exercise 3: Original lesson practice
 
@@ -207,7 +207,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 3; an end-to-end evidence chain from decision to reproducible artifact; fit a declared naive/simple baseline on training rows, print validation metric and denominator/support, and save its parameters and seed before trying a more complex candidate.
+**Verify:** Fit a declared naive/simple baseline on training rows, print validation metric and denominator/support, and save its parameters and seed before trying a more complex candidate.
 
 ### Exercise 4: Original lesson practice
 
@@ -219,7 +219,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 4; an end-to-end evidence chain from decision to reproducible artifact; print every cross-validation score plus mean/std on training data and one frozen validation comparison; reserve the test set for one final evaluation and report the metric formula and support.
+**Verify:** Print every cross-validation score plus mean/std on training data and one frozen validation comparison; reserve the test set for one final evaluation and report the metric formula and support.
 
 ### Exercise 5: Original lesson practice
 
@@ -231,7 +231,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 5; an end-to-end evidence chain from decision to reproducible artifact; save one joblib pipeline containing preprocessing and model, compute its SHA-256, reload it in a fresh process, and assert predictions and feature metadata match the pre-save values.
+**Verify:** Save one joblib pipeline containing preprocessing and model, compute its SHA-256, reload it in a fresh process, and assert predictions and feature metadata match the pre-save values.
 
 ### Exercise 6: Original lesson practice
 
@@ -243,7 +243,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 6; an end-to-end evidence chain from decision to reproducible artifact; include runnable setup/train/test commands, data provenance/hash, baseline/candidate metrics, limitations, and next step; have a clean-shell replay finish with exit code 0.
+**Verify:** Include runnable setup/train/test commands, data provenance/hash, baseline/candidate metrics, limitations, and next step; have a clean-shell replay finish with exit code 0.
 
 ### Exercise 7: Original lesson practice
 
@@ -255,7 +255,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 7; an end-to-end evidence chain from decision to reproducible artifact; if the API extension is attempted, run Day 44 health/valid/invalid TestClient cases against the reloaded artifact; otherwise record an explicit skipped result and keep the capstone complete.
+**Verify:** If the API extension is attempted, run Day 44 health/valid/invalid TestClient cases against the reloaded artifact; otherwise record an explicit skipped result and keep the capstone complete.
 
 ### Exercise 8: Data-contract gate
 

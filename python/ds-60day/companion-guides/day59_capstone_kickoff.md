@@ -1,4 +1,4 @@
-# Day 59: Capstone Kickoff
+# Day 59: Capstone Kickoff and Planning
 
 **Lesson ID:** `python-59` · **Level:** advanced · **Dependencies:** `advanced` · **Network:** offline
 
@@ -89,7 +89,7 @@ lock is the more complete project form taught by the current repository.
 ## How to run this lesson
 
 **Primary browser route:** run `./classroom` from the repository root and
-choose **Python** on `/classroom`. Open this lesson in the shared workspace,
+choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
 read its capability notice, and use its supported coding or reading workflow.
 The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
 
@@ -108,21 +108,11 @@ for opening this lesson in the Docker classroom.
    lesson complete. A clean run catches hidden state and stale
    variables.
 
-Windows PowerShell:
-
-```powershell
-.\.venv\Scripts\python.exe -m jupyter lab
-```
-
-macOS/Linux:
+Linux, macOS, or Ubuntu in Windows WSL 2:
 
 ```bash
 .venv/bin/python -m jupyter lab
 ```
-
-If the Windows environment uses the documented conda-prefix fallback,
-use `.\.venv\python.exe` in place of
-`.\.venv\Scripts\python.exe`.
 
 ## Concept deep dive: capstone scope, decision framing, data contracts, and early stop rules
 
@@ -145,12 +135,6 @@ cannot support the proposed claim.
 - **decision statement:** names stakeholder, action, prediction time, and consequence before selecting a model.
 - **acceptance matrix:** connects each success/guardrail threshold to data, metric, owner, and verification command.
 - **milestone checkpoint:** produces a reviewable artifact and explicit continue/pivot/stop decision.
-
-Read an API call from the inside out: identify the data entering the
-operation, the state learned (if any), the value returned, and the
-evidence that would make the result trustworthy. A method returning
-without an exception proves only that the syntax and immediate runtime
-path worked.
 
 ### Focused example A: validate a project charter as data
 
@@ -187,9 +171,6 @@ assert not missing
 **Assumption to name:** The stakeholder confirms the metric and capacity actually reflect the intended action.
 
 ### Focused example B: turn a claim into predeclared acceptance checks
-
-This second example changes one important condition. Compare it with
-Example A instead of reading it as unrelated syntax.
 
 ```python
 acceptance = [
@@ -240,15 +221,15 @@ assert all(results.values())
 
 1. Write the problem statement and success metric in the notebook.
 
-**Verify:** Practice 1; capstone scope, decision framing, data contracts, and early stop rules; write a decision, population, prediction/analysis unit, target, primary metric formula, baseline, success threshold, guardrail, and out-of-scope list; include an owner and stop condition for each threshold.
+**Verify:** Write a decision, population, prediction/analysis unit, target, primary metric formula, baseline, success threshold, guardrail, and out-of-scope list; include an owner and stop condition for each threshold.
 
 2. Create the project skeleton.
 
-**Verify:** Practice 2; capstone scope, decision framing, data contracts, and early stop rules; create the declared src/tests/notebooks/data-or-config layout plus README and ignored local artifact paths; print a tree and run one smoke import/test from a clean process with exit code 0.
+**Verify:** Create the declared src/tests/notebooks/data-or-config layout plus README and ignored local artifact paths; print a tree and run one smoke import/test from a clean process with exit code 0.
 
 3. Build a baseline and record metrics.
 
-**Verify:** Practice 3; capstone scope, decision framing, data contracts, and early stop rules; save a baseline metric file containing dataset/split hash, seed, model parameters, metric value, denominator/support, and timestamp; reload it and reproduce the metric on the same frozen split.
+**Verify:** Save a baseline metric file containing dataset/split hash, seed, model parameters, metric value, denominator/support, and timestamp; reload it and reproduce the metric on the same frozen split.
 
 ### Progressive hints
 
@@ -320,7 +301,7 @@ The lesson is complete without an AI assistant. If you want optional
 coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
-Tutor me through `python-59` — Day 59 — Capstone Kickoff.
+Tutor me through `python-59` (Day 59: Capstone Kickoff).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize capstone scope, decision framing, data contracts, and early stop rules. Use exactly these maintained learner materials:

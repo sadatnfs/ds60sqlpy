@@ -1,4 +1,4 @@
-# Day 23: Solutions: Data Pipelines and Generators
+# Day 23 Solutions: Streaming Data Pipelines with Generators
 
 <!-- BEGIN BEGINNER SOLUTION REVIEW -->
 ## Concept review before comparing answers
@@ -32,13 +32,13 @@ stop the stream, are skipped with evidence, or go to quarantine.
 For this lesson's **lazy, composable data-pipeline stages with explicit resource and error policy** model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.
 <!-- END BEGINNER SOLUTION REVIEW -->
 
-## Exercises 1–2: Worked answers
+## Exercises 1-2: Worked answers
 
 ### Exercise 1: worked answer
 
 **Learner contract:** Build `stream_clean_csv(path)` that opens a UTF-8 CSV inside the generator, yields one normalized row dictionary at a time, and follows a written malformed-row policy. **Constraints:** use `csv.DictReader`, keep the file open during iteration, and do not return a list. **Verify:** partially consume two rows, consume the rest, test an empty file, and confirm the handle closes after completion/failure.
 
-**Reasoning:** Implement this exact contract as written: Build `stream_clean_csv(path)` that opens a UTF-8 CSV inside the generator, yields one normalized row dictionary at a time, and follows a written malformed-row policy. Constraints: use `csv.DictReader`, keep the file open during iteration, and do not return a list. Keep the prompt's named data and constraints visible in the code, then establish this specific result: partially consume two rows, consume the rest, test an empty file, and confirm the handle closes after completion/failure. That connects the answer to lazy, composable data-pipeline stages with explicit resource and error policy.
+**Reasoning:** A generator function's body runs only while someone iterates, so putting the `with` block inside it keeps the file open exactly while rows are being read and closes it when the loop finishes or the consumer calls `close()`. `csv.DictReader` gives each row as a dictionary keyed by the header, and `newline=""` lets the csv module handle line endings inside quoted fields correctly. The checks consume two rows, then the rest, and inspect `gi_frame`, which becomes `None` once the generator has finished or been closed: that is the evidence that the `with` block exited. The malformed-row policy, skip rows without a name or status, is written in the docstring, so behaviour for bad input is part of the contract.
 
 ```python
 import csv
@@ -89,13 +89,11 @@ with tempfile.TemporaryDirectory() as temporary:
 Because the `with` block surrounds `yield`, the file remains open while
 iteration is active and closes on exhaustion or generator close.
 
-**Verification evidence:** partially consume two rows, consume the rest, test an empty file, and confirm the handle closes after completion/failure.
-
 ### Exercise 2: worked answer
 
 **Learner contract:** Compose separate generator stages to filter, map, and batch clean rows. **Contract:** every stage documents input/output shape; batch size must be positive; the final partial batch is yielded. **Verify:** on a five-row fixture with size two, assert exact batches, source order, and input = accepted + quarantined + deliberately filtered counts.
 
-**Reasoning:** Implement this exact contract as written: Compose separate generator stages to filter, map, and batch clean rows. Contract: every stage documents input/output shape; batch size must be positive; the final partial batch is yielded. Keep the prompt's named data and constraints visible in the code, then establish this specific result: on a five-row fixture with size two, assert exact batches, source order, and input = accepted + quarantined + deliberately filtered counts. That connects the answer to lazy, composable data-pipeline stages with explicit resource and error policy.
+**Reasoning:** Each stage has one job with a documented input and output: `active` filters and audits, `add_label` maps one row to one new row without changing its input, and `batch` groups rows into tuples of at most `size`. Because every stage pulls one row at a time from the previous one, the whole pipeline is lazy and rows keep their source order. The audit dictionary accounts for every input row, so `accepted + filtered + quarantined == 5` proves that none were lost silently, and the final partial batch, containing only Guido, is yielded rather than dropped.
 
 ```python
 from collections.abc import Iterable, Iterator
@@ -164,61 +162,71 @@ else:
     raise AssertionError("non-positive batch size should fail")
 ```
 
-**Verification evidence:** on a five-row fixture with size two, assert exact batches, source order, and input = accepted + quarantined + deliberately filtered counts.
-
-## Exercises 3–7: Expanded mastery answers
+## Exercises 3-7: Expanded mastery answers
 
 ### Exercise 3: answer contract
 
 **Learner contract:** **Prediction:** Predict when side effects inside a generator body occur: at function call, first iteration, or full materialization. **Progressive hint:** Calling a generator function creates an iterator; its body starts on iteration. **Verify:** Append an event inside the generator body and assert no event at construction, one at first `next`, and all remaining events only after full consumption.
 
-**Reasoning:** Predict this named state change before running it: Prediction: Predict when side effects inside a generator body occur: at function call, first iteration, or full materialization. Progressive hint: Calling a generator function creates an iterator; its body starts on iteration. Then compare the prediction with this proof target: Append an event inside the generator body and assert no event at construction, one at first `next`, and all remaining events only after full consumption. This makes lazy, composable data-pipeline stages with explicit resource and error policy observable instead of relying on intuition.
-
-**Evidence to locate in the grouped implementation:** Append an event inside the generator body and assert no event at construction, one at first `next`, and all remaining events only after full consumption.
+**Reasoning:** Calling `numbers(5)` only creates a generator object; none of the body runs, so the event list is still empty. The first `next` runs the body up to the first `yield` and records one event, and the remaining events appear only as later values are requested. The shared implementation for Exercises 3-4 asserts each of those three moments, which shows that side effects in a generator happen at iteration time, not at call time.
 
 ### Exercise 4: answer contract
 
 **Learner contract:** **Tracing:** Consume two items from a five-item generator, then pass it onward. Trace which values the next stage can still see. **Progressive hint:** Consumption is stateful and does not rewind automatically. **Verify:** Assert the first consumer sees values 0 and 1 and the downstream stage sees exactly 2, 3, and 4, never a restarted sequence.
 
-**Reasoning:** Trace the concrete values in this contract one step at a time: Tracing: Consume two items from a five-item generator, then pass it onward. Trace which values the next stage can still see. Progressive hint: Consumption is stateful and does not rewind automatically. Record the named value, shape, label, or iterator position needed to establish: Assert the first consumer sees values 0 and 1 and the downstream stage sees exactly 2, 3, and 4, never a restarted sequence. The trace exposes lazy, composable data-pipeline stages with explicit resource and error policy directly.
-
-**Evidence to locate in the grouped implementation:** Assert the first consumer sees values 0 and 1 and the downstream stage sees exactly 2, 3, and 4, never a restarted sequence.
+**Reasoning:** A generator remembers its position and never rewinds: after the first consumer takes 0 and 1, any later stage that receives the same object continues from 2 and sees exactly 2, 3, and 4. Once exhausted, it yields nothing more, as the final `list(stream) == []` check shows. When two stages each need the full sequence, create a fresh generator for each, or keep the values in a list if they fit in memory.
 
 ### Exercise 5: answer contract
 
 **Learner contract:** **Implementation:** Implement `batch_rows(rows, size)` yielding tuples and preserving the final partial batch. **Progressive hint:** Validate positive size and reset the accumulator after each yield. **Verify:** Assert five rows at size two produce `[(0, 1), (2, 3), (4,)]`, empty input produces none, and nonpositive size raises.
 
-**Reasoning:** Implement this exact contract as written: Implementation: Implement `batch_rows(rows, size)` yielding tuples and preserving the final partial batch. Progressive hint: Validate positive size and reset the accumulator after each yield. Keep the prompt's named data and constraints visible in the code, then establish this specific result: Assert five rows at size two produce `[(0, 1), (2, 3), (4,)]`, empty input produces none, and nonpositive size raises. That connects the answer to lazy, composable data-pipeline stages with explicit resource and error policy.
-
-**Evidence to locate in the grouped implementation:** Assert five rows at size two produce `[(0, 1), (2, 3), (4,)]`, empty input produces none, and nonpositive size raises.
+**Reasoning:** The accumulator collects rows until it holds `size` items, yields them as a tuple, and is then cleared, so each batch starts empty; rows left over when the input ends form the final partial batch, `(4,)`. Without the size check, a size of 0 would never equal the batch length, so every row would end up in one oversized final batch. Because `batch_rows` is a generator, the check runs on the first `next`, which is why the test wraps the call in `list(...)`; the shared implementation for Exercises 5-7 asserts the three batches, the empty result for empty input, and the `ValueError` for size 0.
 
 ### Exercise 6: answer contract
 
 **Learner contract:** **Debugging:** Repair a function that returns a generator expression over a file after the surrounding `with` block has already closed the file. **Progressive hint:** Own the `with` block inside the generator that performs iteration. **Verify:** Partially consume the repaired file generator and then finish it; assert rows remain readable until exhaustion and the handle closes afterward.
 
-**Reasoning:** Reproduce the exact failure described here before changing code: Debugging: Repair a function that returns a generator expression over a file after the surrounding `with` block has already closed the file. Progressive hint: Own the `with` block inside the generator that performs iteration. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Partially consume the repaired file generator and then finish it; assert rows remain readable until exhaustion and the handle closes afterward. The diagnosis depends on lazy, composable data-pipeline stages with explicit resource and error policy.
-
-**Evidence to locate in the grouped implementation:** Partially consume the repaired file generator and then finish it; assert rows remain readable until exhaustion and the handle closes afterward.
+**Reasoning:** In the broken version, the `with` block closes the file as soon as the function returns the generator expression, but the expression reads from the file only later, so the first `next` raises `ValueError: I/O operation on closed file`. Moving the `with` block inside a generator function ties the file's lifetime to the iteration: it stays open while values are requested and closes when the generator finishes. The shared implementation for Exercises 5-7 reproduces the error, then consumes the repaired generator partially and fully and checks `gi_frame` afterwards.
 
 ### Exercise 7: answer contract
 
 **Learner contract:** **Edge case and explanation:** Add a quarantine side channel for malformed rows without making the clean stream eagerly load the entire file. **Progressive hint:** Pass a callback/list for bounded error records or yield tagged results. **Verify:** Feed valid/invalid/valid rows and assert the clean stream remains lazy, output order is preserved, and accepted plus quarantined counts equal input.
 
-**Reasoning:** Make this boundary unambiguous in code: Edge case and explanation: Add a quarantine side channel for malformed rows without making the clean stream eagerly load the entire file. Progressive hint: Pass a callback/list for bounded error records or yield tagged results. Values below, at, and above the named boundary must produce the evidence Feed valid/invalid/valid rows and assert the clean stream remains lazy, output order is preserved, and accepted plus quarantined counts equal input. Those cases show how lazy, composable data-pipeline stages with explicit resource and error policy behaves at its edge.
-
-**Evidence to locate in the grouped implementation:** Feed valid/invalid/valid rows and assert the clean stream remains lazy, output order is preserved, and accepted plus quarantined counts equal input.
+**Reasoning:** Appending malformed-line evidence to a caller-supplied list keeps the clean stream lazy: the generator still yields one line at a time, and the side channel grows only when a bad line is actually read. Capping it at 100 entries keeps memory bounded even when a file is mostly bad. The shared implementation for Exercises 5-7 shows that the blank second line is not recorded until iteration reaches it, that valid lines keep their order, and that accepted plus rejected lines equal the input line count.
 
 ## Expanded mastery lab solutions
 
 Build one-responsibility lazy stages with explicit resource ownership, error policy, and final-partial-batch behavior.
 
-### Shared implementation for Exercises 3–4: Laziness is stateful
+### Shared implementation for Exercises 3-4: Laziness is stateful
 
 A generator body starts on the first `next`, not at function call. After two
 items are consumed, downstream stages can see only the remaining three unless a
 fresh iterator is constructed.
 
-### Shared implementation for Exercises 5–7: Batching and correct resource lifetime
+```python
+from collections.abc import Iterator
+
+events: list[str] = []
+
+
+def numbers(limit: int) -> Iterator[int]:
+    for value in range(limit):
+        events.append(f"produce {value}")
+        yield value
+
+
+stream = numbers(5)
+assert events == []  # calling the function only creates the generator
+assert next(stream) == 0 and events == ["produce 0"]
+assert next(stream) == 1
+downstream = list(stream)  # the next stage continues from 2
+assert downstream == [2, 3, 4]
+assert len(events) == 5
+assert list(stream) == []  # an exhausted generator does not restart
+```
+
+### Shared implementation for Exercises 5-7: Batching and correct resource lifetime
 
 ```python
 from __future__ import annotations
@@ -260,6 +268,42 @@ def nonblank_lines(path: Path, rejected: list[tuple[int, str]]) -> Iterator[str]
 
 
 assert list(batch_rows(range(5), 2)) == [(0, 1), (2, 3), (4,)]
+assert list(batch_rows([], 2)) == []
+try:
+    list(batch_rows(range(3), 0))
+except ValueError:
+    pass
+else:
+    raise AssertionError("size 0 must be rejected")
+
+import tempfile
+
+
+def broken_lines(path: Path) -> Iterator[str]:
+    """Bug: the with block closes the file before anyone iterates."""
+    with path.open(encoding="utf-8") as handle:
+        return (line.strip() for line in handle)
+
+
+with tempfile.TemporaryDirectory() as temporary:
+    source = Path(temporary) / "lines.txt"
+    source.write_text("alpha\n\nbeta\ngamma\n", encoding="utf-8")
+    try:
+        next(broken_lines(source))
+    except ValueError as error:
+        print("broken:", error)
+    else:
+        raise AssertionError("the closed file should not be readable")
+
+    rejected: list[tuple[int, str]] = []
+    lines = nonblank_lines(source, rejected)
+    accepted = [next(lines)]
+    assert accepted == ["alpha"] and rejected == []  # line 2 not read yet
+    accepted.extend(lines)
+    assert accepted == ["alpha", "beta", "gamma"]  # source order kept
+    assert rejected == [(2, "blank line")]
+    assert lines.gi_frame is None  # finished, so the with block closed the file
+    assert len(accepted) + len(rejected) == len(source.read_text(encoding="utf-8").splitlines())
 ```
 
 The bounded quarantine prevents unbounded memory growth while leaving the

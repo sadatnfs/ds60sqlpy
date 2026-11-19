@@ -74,8 +74,7 @@ They are separate from the browser's saved pads, notes and progress in Docker
 volumes. Neither route automatically copies attempts or completion markers to
 the other; record progress in the interface you actually used.
 
-**Lesson outcome:** use day 29; data validation with schemas to practice turning data contracts into executable schemas and informative failures
-and explain the evidence produced by your code.
+**Outcome:** Turn data expectations into pandera schemas that fail with clear messages.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
@@ -139,14 +138,7 @@ checked = schema.validate(valid)
 checked.to_dict("records")
 ```
 
-**Expected observation**
-
-```text
-The two records are returned after successful validation; `price` follows the declared floating representation.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** The two records are returned after successful validation; `price` follows the declared floating representation.
 
 ### Worked example 2: Show that validation guards persistence
 
@@ -160,17 +152,10 @@ def validated_for_output(frame: pd.DataFrame) -> pd.DataFrame:
 
 
 output_ready = validated_for_output(valid)
-(len(output_ready), output_ready["quantity"].min())
+(len(output_ready), int(output_ready["quantity"].min()))
 ```
 
-**Expected observation**
-
-```text
-`(2, 0)`. An invalid frame would raise before any output-writing code is reached.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** `(2, 0)`. An invalid frame would raise before any output-writing code is reached.
 
 ### A debugging routine for this topic
 
@@ -314,7 +299,7 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-29`
-(Day 29 — Data Validation with Schemas). Direct catalog prerequisites: `python-28`.
+(Day 29: Data Validation with Schemas). Direct catalog prerequisites: `python-28`.
 I have completed the direct prerequisites: `python-28`. Emphasize turning data contracts into executable schemas and informative failures.
 Read `python/ds-60day/companion-guides/day29_data_validation_schemas.md` and use the learner notebook
 `python/ds-60day/notebooks/day29_data_validation_schemas.ipynb`. Do not open or quote anything under `solutions/` unless

@@ -95,21 +95,11 @@ for opening this lesson in the Docker classroom.
    lesson complete. A clean run catches hidden state and stale
    variables.
 
-Windows PowerShell:
-
-```powershell
-.\.venv\Scripts\python.exe -m jupyter lab
-```
-
-macOS/Linux:
+Linux, macOS, or Ubuntu in Windows WSL 2:
 
 ```bash
 .venv/bin/python -m jupyter lab
 ```
-
-If the Windows environment uses the documented conda-prefix fallback,
-use `.\.venv\python.exe` in place of
-`.\.venv\Scripts\python.exe`.
 
 ## Concept deep dive: offline-safe transfer learning, frozen parameters, and cautious fine-tuning
 
@@ -132,12 +122,6 @@ learner.
 - **`models.resnet18(weights=...)`:** constructs the architecture and optionally loads a specific versioned weight bundle.
 - **`parameter.requires_grad = False`:** excludes a parameter from autograd updates but does not change module mode.
 - **`model.fc = nn.Linear(model.fc.in_features, classes)`:** replaces the classifier head while preserving the backbone feature width.
-
-Read an API call from the inside out: identify the data entering the
-operation, the state learned (if any), the value returned, and the
-evidence that would make the result trustworthy. A method returning
-without an exception proves only that the syntax and immediate runtime
-path worked.
 
 ### Focused example A: build and verify a no-download frozen backbone
 
@@ -164,9 +148,6 @@ assert trainable == ["fc.weight", "fc.bias"]
 **Assumption to name:** Random backbone features are a mechanics fallback, not equivalent to pretrained transfer performance.
 
 ### Focused example B: apply the matching tensor normalization contract
-
-This second example changes one important condition. Compare it with
-Example A instead of reading it as unrelated syntax.
 
 ```python
 import torch
@@ -210,15 +191,15 @@ assert transformed.shape == image.shape
 
 1. Load a small image folder with `ImageFolder` and `DataLoader`.
 
-**Verify:** Practice 1; offline-safe transfer learning, frozen parameters, and cautious fine-tuning; print train/validation class_to_idx mappings, dataset sizes, batch image/label shapes, and transform sizes; assert mappings agree and handle a missing image folder with the documented local FakeData fallback.
+**Verify:** Print train/validation class_to_idx mappings, dataset sizes, batch image/label shapes, and transform sizes; assert mappings agree and handle a missing image folder with the documented local FakeData fallback.
 
 2. Train only the classifier head for a few epochs.
 
-**Verify:** Practice 2; offline-safe transfer learning, frozen parameters, and cautious fine-tuning; freeze all backbone parameters, assert only classifier-head parameters enter the optimizer, print train/validation loss and accuracy per epoch, and save artifact/weight provenance.
+**Verify:** Freeze all backbone parameters, assert only classifier-head parameters enter the optimizer, print train/validation loss and accuracy per epoch, and save artifact/weight provenance.
 
 3. Unfreeze the final ResNet block and fine-tune it with a lower learning rate.
 
-**Verify:** Practice 3; offline-safe transfer learning, frozen parameters, and cautious fine-tuning; unfreeze only the final ResNet block plus head, print every trainable parameter and its learning rate, and compare frozen versus fine-tuned validation metrics from the same split while recording the best checkpoint.
+**Verify:** Unfreeze only the final ResNet block plus head, print every trainable parameter and its learning rate, and compare frozen versus fine-tuned validation metrics from the same split while recording the best checkpoint.
 
 ### Progressive hints
 
@@ -295,7 +276,7 @@ The lesson is complete without an AI assistant. If you want optional
 coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
-Tutor me through `python-48` : Day 48 : Transfer Learning with CNNs.
+Tutor me through `python-48` (Day 48: Transfer Learning with CNNs).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize offline-safe transfer learning, frozen parameters, and cautious fine-tuning. Use exactly these maintained learner materials:

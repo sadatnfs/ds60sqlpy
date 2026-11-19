@@ -1,4 +1,4 @@
-# Day 51: Solutions: Advanced Feature Engineering (Target Encoding, Hashing, Groups)
+# Day 51 Solutions: Target Encoding and Leakage-Safe Features
 
 **Offline teaching data:** The [original synthetic fixtures](../../../fixtures/README.md) replace first-run sample-data downloads. Their values are not historical or observational evidence. Keep numerical conclusions scoped to the declared teaching input.
 
@@ -43,7 +43,7 @@ train_df = train_df.reset_index(drop=True)
 test_df = test_df.reset_index(drop=True)
 ```
 
-Worked reference for Exercise 1; K‑fold target encoding
+Worked reference for Exercise 1: K‑fold target encoding
 ```python
 def fit_target_map(cat: pd.Series, y: pd.Series, smoothing=10):
     """Fit smoothed category means and a prior using only these training rows."""
@@ -156,7 +156,7 @@ smoothing or split-choice tuning when reporting an outer CV score.
 
 ---
 
-Worked reference for Exercise 2; Feature hashing
+Worked reference for Exercise 2: Feature hashing
 ```python
 from sklearn.feature_extraction import FeatureHasher
 
@@ -189,7 +189,7 @@ Notes
 
 ---
 
-Worked reference for Exercise 3; Rolling group means in time without leakage
+Worked reference for Exercise 3: Rolling group means in time without leakage
 ```python
 # Add a time column and group id
 T = len(df)
@@ -259,7 +259,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1; out-of-fold target encoding, smoothing, and transform-time unknowns; produce one out-of-fold encoded value per training row, assert that row's target was excluded from its category statistic, and test missing/unseen categories through the fitted pipeline without NaN or leakage.
+**Verify:** Produce one out-of-fold encoded value per training row, assert that row's target was excluded from its category statistic, and test missing/unseen categories through the fitted pipeline without NaN or leakage.
 
 ### Exercise 2: Original lesson practice
 
@@ -271,7 +271,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2; out-of-fold target encoding, smoothing, and transform-time unknowns; print global prior, smoothing formula, n_splits, category count/support, and encoded values for rare/common/unseen categories; compare at least three n_splits values on identical folds.
+**Verify:** Print global prior, smoothing formula, n_splits, category count/support, and encoded values for rare/common/unseen categories; compare at least three n_splits values on identical folds.
 
 ### Exercise 3: Original lesson practice
 
@@ -283,7 +283,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 3; out-of-fold target encoding, smoothing, and transform-time unknowns; over multiple declared seeded splits, print ROC-AUC pairs for target encoding and one-hot encoding plus mean/std/difference; keep all encoding fits inside each training fold.
+**Verify:** Over multiple declared seeded splits, print ROC-AUC pairs for target encoding and one-hot encoding plus mean/std/difference; keep all encoding fits inside each training fold.
 
 ### Exercise 4: Out-of-fold invariant
 

@@ -1,4 +1,4 @@
-# Day 54: Monitoring and Model Governance
+# Day 54: Model Monitoring and Governance
 
 **Lesson ID:** `python-54` · **Level:** advanced · **Dependencies:** `data` · **Network:** offline
 
@@ -64,7 +64,7 @@ values, and tiny samples need explicit handling in real code.
 ## How to run this lesson
 
 **Primary browser route:** run `./classroom` from the repository root and
-choose **Python** on `/classroom`. Open this lesson in the shared workspace,
+choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
 read its capability notice, and use its supported coding or reading workflow.
 The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
 
@@ -83,21 +83,11 @@ for opening this lesson in the Docker classroom.
    lesson complete. A clean run catches hidden state and stale
    variables.
 
-Windows PowerShell:
-
-```powershell
-.\.venv\Scripts\python.exe -m jupyter lab
-```
-
-macOS/Linux:
+Linux, macOS, or Ubuntu in Windows WSL 2:
 
 ```bash
 .venv/bin/python -m jupyter lab
 ```
-
-If the Windows environment uses the documented conda-prefix fallback,
-use `.\.venv\python.exe` in place of
-`.\.venv\Scripts\python.exe`.
 
 ## Concept deep dive: monitoring layers, drift signals, delayed labels, and governance decisions
 
@@ -120,12 +110,6 @@ and an incident path.
 - **fixed reference bins:** keep comparison semantics stable; recomputing bins on current data changes the question.
 - **`(actual - expected) * log(actual / expected)`:** accumulates PSI contributions after a declared zero-count smoothing policy.
 - **monitor → investigate → decide:** separates automated signal detection from causal diagnosis and authorized action.
-
-Read an API call from the inside out: identify the data entering the
-operation, the state learned (if any), the value returned, and the
-evidence that would make the result trustworthy. A method returning
-without an exception proves only that the syntax and immediate runtime
-path worked.
 
 ### Focused example A: calculate PSI with fixed reference quantile bins
 
@@ -154,9 +138,6 @@ assert psi >= 0
 **Assumption to name:** Reference quantiles, smoothing, population, and sample window are documented and remain comparable.
 
 ### Focused example B: keep label-available and label-delayed evidence separate
-
-This second example changes one important condition. Compare it with
-Example A instead of reading it as unrelated syntax.
 
 ```python
 monitoring_snapshot = {
@@ -204,15 +185,15 @@ assert label_coverage == 0.12
 
 1. Compute PSI for multiple features or score windows over time.
 
-**Verify:** Practice 1; monitoring layers, drift signals, delayed labels, and governance decisions; for each named feature/window, print reference/current counts, fixed bin edges, PSI contributions, and total; assert bins/reference remain frozen and independently recompute one total within 1e-12.
+**Verify:** For each named feature/window, print reference/current counts, fixed bin edges, PSI contributions, and total; assert bins/reference remain frozen and independently recompute one total within 1e-12.
 
 2. Build a small pandas/Matplotlib dashboard of weekly AUC and PSI.
 
-**Verify:** Practice 2; monitoring layers, drift signals, delayed labels, and governance decisions; save a dashboard with weekly AUC and PSI on labeled separate axes, and print the underlying week/support/AUC/PSI table; mark missing-label weeks rather than silently treating them as zero.
+**Verify:** Save a dashboard with weekly AUC and PSI on labeled separate axes, and print the underlying week/support/AUC/PSI table; mark missing-label weeks rather than silently treating them as zero.
 
 3. Draft a governance policy covering roles, approvals, alerts, and rollback.
 
-**Verify:** Practice 3; monitoring layers, drift signals, delayed labels, and governance decisions; produce a policy table naming model owner, approver, metric/window/threshold, minimum support, alert route, investigation SLA, rollback trigger, artifact ID, and audit evidence; walk one breached alert through named owners and actions.
+**Verify:** Produce a policy table naming model owner, approver, metric/window/threshold, minimum support, alert route, investigation SLA, rollback trigger, artifact ID, and audit evidence; walk one breached alert through named owners and actions.
 
 ### Progressive hints
 
@@ -230,7 +211,7 @@ Design monitoring around observable data, delayed truth, action thresholds, owne
 Predict or plan before you run code. Use the hint only after an honest
 attempt, and record the evidence that would prove your result correct.
 
-4. **Label-delay analysis:** Simulate labels arriving 14–30 days after predictions. Build separate views for immediate input/score health and matured performance cohorts.
+4. **Label-delay analysis:** Simulate labels arriving 14-30 days after predictions. Build separate views for immediate input/score health and matured performance cohorts.
    **Progressive hint:** Join outcomes by stable prediction ID and evaluate only cohorts whose label window has matured; report label coverage and censoring.
 
 **Verify:** Label-delay analysis; print prediction week, label-available date, immediate-health metrics/support, and matured-cohort AUC/support; assert immature weeks show unavailable performance rather than zero or forward-filled values.
@@ -288,7 +269,7 @@ The lesson is complete without an AI assistant. If you want optional
 coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
-Tutor me through `python-54` — Day 54 — Monitoring and Model Governance.
+Tutor me through `python-54` (Day 54: Monitoring and Model Governance).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize monitoring layers, drift signals, delayed labels, and governance decisions. Use exactly these maintained learner materials:

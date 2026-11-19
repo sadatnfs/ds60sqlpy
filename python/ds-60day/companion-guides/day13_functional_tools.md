@@ -1,4 +1,4 @@
-# Day 13: Functional Tools: `itertools` and `functools`
+# Day 13: Functional Tools: itertools and functools
 
 **Level:** Beginner
 
@@ -72,8 +72,7 @@ They are separate from the browser's saved pads, notes and progress in Docker
 volumes. Neither route automatically copies attempts or completion markers to
 the other; record progress in the interface you actually used.
 
-**Lesson outcome:** use day 13; functional tools: `itertools` and `functools` to practice functions as values and composable iterable tools
-and explain the evidence produced by your code.
+**Outcome:** Compose iterators with itertools and functools instead of hand-written loops.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
@@ -126,14 +125,7 @@ normalized_iter = map(normalize_name, raw_names)
 list(normalized_iter)
 ```
 
-**Expected observation**
-
-```text
-`['Ada Lovelace', 'Grace Hopper']`. `map` is lazy; `list` consumes it.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** `['Ada Lovelace', 'Grace Hopper']`. `map` is lazy; `list` consumes it.
 
 ### Worked example 2: Compose lazy filtering and slicing
 
@@ -148,14 +140,7 @@ even_squares = filter(lambda value: value % 2 == 0, squares)
 list(islice(even_squares, 5))
 ```
 
-**Expected observation**
-
-```text
-`[0, 4, 16, 36, 64]`. `islice` stops after five accepted values rather than consuming all 100 squares.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** `[0, 4, 16, 36, 64]`. `islice` stops after five accepted values rather than consuming all 100 squares.
 
 ### A debugging routine for this topic
 
@@ -295,7 +280,7 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-13`
-(Day 13 — Functional Tools: `itertools` and `functools`). Direct catalog prerequisites: `python-12`.
+(Day 13: Functional Tools: `itertools` and `functools`). Direct catalog prerequisites: `python-12`.
 I have completed the direct prerequisites: `python-12`. Emphasize functions as values and composable iterable tools.
 Read `python/ds-60day/companion-guides/day13_functional_tools.md` and use the learner notebook
 `python/ds-60day/notebooks/day13_functional_tools.ipynb`. Do not open or quote anything under `solutions/` unless

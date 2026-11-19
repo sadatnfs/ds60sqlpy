@@ -1,4 +1,4 @@
-# Day 33: Solutions: Linear Algebra & Matrices for ML Intuition
+# Day 33 Solutions: Linear Algebra and Matrices
 
 We implement the normal equation (closed-form least squares), add an intercept, and compare to scikit-learn. We also discuss numerical stability and when to prefer iterative methods.
 
@@ -21,7 +21,7 @@ true_w = np.array([2.0, -1.0, 0.5])
 y = X @ true_w + rng.normal(scale=0.5, size=n)
 ```
 
-Worked reference for Exercise 1; Add intercept and recompute w
+Worked reference for Exercise 1: Add intercept and recompute w
 ```python
 # Add a column of ones for intercept
 X1 = np.c_[np.ones((n, 1)), X]  # shape (n, d+1)
@@ -32,11 +32,11 @@ w_hat
 ```
 Line-by-line
 - np.c_ concatenates a column of 1s to X to model an intercept term
-- pinv (Moore–Penrose) is numerically safer than explicit inverse
+- pinv (Moore-Penrose) is numerically safer than explicit inverse
 
 ---
 
-Worked reference for Exercise 2; Compare to sklearn LinearRegression
+Worked reference for Exercise 2: Compare to sklearn LinearRegression
 ```python
 from sklearn.linear_model import LinearRegression
 
@@ -54,7 +54,7 @@ Notes
 
 ---
 
-Worked reference for Exercise 3; Stability and iterative methods
+Worked reference for Exercise 3: Stability and iterative methods
 - Normal equation inverts \(X^{\mathsf T}X\) (or solves a system); if X has multicollinearity or large condition number, numerical errors grow
 - Use np.linalg.lstsq or pinv to mitigate; better yet, rely on QR/SVD inside libraries
 - For large n,d or online learning, gradient-based solvers (SGD, coordinate descent) scale better (avoid \(O(d^3)\) inversion)
@@ -112,7 +112,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1; matrix shapes, linear transformations, rank, and stable least squares; assert the augmented design has one more column and its first column is all ones; print intercept, slopes, rank, and residual norm, then verify matrix predictions equal the fitted values within 1e-10.
+**Verify:** Assert the augmented design has one more column and its first column is all ones; print intercept, slopes, rank, and residual norm, then verify matrix predictions equal the fitted values within 1e-10.
 
 ### Exercise 2: Original lesson practice
 
@@ -124,7 +124,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2; matrix shapes, linear transformations, rank, and stable least squares; fit both methods to identical X and y with matching intercept policy; print both coefficient vectors and maximum prediction difference, and require predictions to agree within 1e-10.
+**Verify:** Fit both methods to identical X and y with matching intercept policy; print both coefficient vectors and maximum prediction difference, and require predictions to agree within 1e-10.
 
 ### Exercise 3: Original lesson practice
 
@@ -136,7 +136,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 3; matrix shapes, linear transformations, rank, and stable least squares; construct a duplicate or nearly duplicate column, report matrix rank and condition number, and show that a stable least-squares/SVD prediction remains usable while direct normal-equation coefficients become unstable.
+**Verify:** Construct a duplicate or nearly duplicate column, report matrix rank and condition number, and show that a stable least-squares/SVD prediction remains usable while direct normal-equation coefficients become unstable.
 
 ### Exercise 4: Shape tracing
 

@@ -69,7 +69,7 @@ evaluation.
 ## How to run this lesson
 
 **Primary browser route:** run `./classroom` from the repository root and
-choose **Python** on `/classroom`. Open this lesson in the shared workspace,
+choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
 read its capability notice, and use its supported coding or reading workflow.
 The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
 
@@ -88,21 +88,11 @@ for opening this lesson in the Docker classroom.
    lesson complete. A clean run catches hidden state and stale
    variables.
 
-Windows PowerShell:
-
-```powershell
-.\.venv\Scripts\python.exe -m jupyter lab
-```
-
-macOS/Linux:
+Linux, macOS, or Ubuntu in Windows WSL 2:
 
 ```bash
 .venv/bin/python -m jupyter lab
 ```
-
-If the Windows environment uses the documented conda-prefix fallback,
-use `.\.venv\python.exe` in place of
-`.\.venv\Scripts\python.exe`.
 
 ## Concept deep dive: the scikit-learn estimator contract and leakage-safe pipelines
 
@@ -125,12 +115,6 @@ selection, or other learned state.
 - **`Pipeline([('scale', ...), ('model', ...)])`:** names ordered steps so nested parameters and learned attributes remain inspectable.
 - **`.fit(X_train, y_train)`:** fits every transformer on training rows, transforms those rows, then fits the final estimator.
 - **`.predict(X_new)`:** uses already learned preprocessing and model state; it must not refit on new data.
-
-Read an API call from the inside out: identify the data entering the
-operation, the state learned (if any), the value returned, and the
-evidence that would make the result trustworthy. A method returning
-without an exception proves only that the syntax and immediate runtime
-path worked.
 
 ### Focused example A: prove that the scaler learned only training data
 
@@ -161,9 +145,6 @@ assert learned_mean == X_train.mean()
 **Assumption to name:** Train/test membership was decided before any learned transformation.
 
 ### Focused example B: handle an unseen category at prediction time
-
-This second example changes one important condition. Compare it with
-Example A instead of reading it as unrelated syntax.
 
 ```python
 import numpy as np
@@ -206,12 +187,12 @@ assert transformed[0].sum() == 0
 
 1. Swap `LinearRegression` for `Ridge` and compare test scores.
 
-**Verify:** Practice 1; the scikit-learn estimator contract and leakage-safe pipelines; use one frozen train/test split and one preprocessing pipeline; report Ridge alpha, baseline and Ridge R² plus RMSE, and assert model selection never reads the test labels.
+**Verify:** Use one frozen train/test split and one preprocessing pipeline; report Ridge alpha, baseline and Ridge R² plus RMSE, and assert model selection never reads the test labels.
 
 2. Inspect the coefficients and discuss how feature scaling changes their
    numeric values and interpretation.
 
-**Verify:** Practice 2; the scikit-learn estimator contract and leakage-safe pipelines; print feature names in coefficient order and both scaled-space coefficients and coefficients converted back to original units; verify the two representations produce equal predictions within 1e-10.
+**Verify:** Print feature names in coefficient order and both scaled-space coefficients and coefficients converted back to original units; verify the two representations produce equal predictions within 1e-10.
 
 ### Progressive hints
 
@@ -290,7 +271,7 @@ The lesson is complete without an AI assistant. If you want optional
 coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
-Tutor me through `python-34` — Day 34 — scikit-learn Estimators and Pipelines.
+Tutor me through `python-34` (Day 34: scikit-learn Estimators and Pipelines).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize the scikit-learn estimator contract and leakage-safe pipelines. Use exactly these maintained learner materials:

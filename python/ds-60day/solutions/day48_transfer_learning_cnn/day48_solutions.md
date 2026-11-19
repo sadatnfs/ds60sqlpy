@@ -1,4 +1,4 @@
-# Day 48: Solutions: Transfer Learning with CNNs
+# Day 48 Solutions: Transfer Learning with CNNs
 
 We fine-tune a pretrained ResNet on an ImageFolder dataset. We first train a linear head, then unfreeze the last block. We also add data augmentation and use OneCycleLR. Each block is followed by a step‑by‑step explanation.
 
@@ -81,7 +81,7 @@ Explanation
 
 ---
 
-Worked reference for Exercise 1; Linear head then unfreeze last block
+Worked reference for Exercise 1: Linear head then unfreeze last block
 ```python
 # 1) Reuse cached weights without making a surprise network request
 weights = models.ResNet18_Weights.DEFAULT
@@ -166,7 +166,7 @@ Line‑by‑line
 
 ---
 
-Worked reference for Exercise 2; Augmentation
+Worked reference for Exercise 2: Augmentation
 ```python
 aug_tfms = transforms.Compose(
     [
@@ -210,7 +210,7 @@ Notes
 
 ---
 
-Worked reference for Exercise 3; OneCycleLR
+Worked reference for Exercise 3: OneCycleLR
 ```python
 # Reset optimizer for OneCycle
 max_lr = 1e-3
@@ -295,7 +295,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1; offline-safe transfer learning, frozen parameters, and cautious fine-tuning; print train/validation class_to_idx mappings, dataset sizes, batch image/label shapes, and transform sizes; assert mappings agree and handle a missing image folder with the documented local FakeData fallback.
+**Verify:** Print train/validation class_to_idx mappings, dataset sizes, batch image/label shapes, and transform sizes; assert mappings agree and handle a missing image folder with the documented local FakeData fallback.
 
 ### Exercise 2: Original lesson practice
 
@@ -307,7 +307,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2; offline-safe transfer learning, frozen parameters, and cautious fine-tuning; freeze all backbone parameters, assert only classifier-head parameters enter the optimizer, print train/validation loss and accuracy per epoch, and save artifact/weight provenance.
+**Verify:** Freeze all backbone parameters, assert only classifier-head parameters enter the optimizer, print train/validation loss and accuracy per epoch, and save artifact/weight provenance.
 
 ### Exercise 3: Original lesson practice
 
@@ -319,7 +319,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 3; offline-safe transfer learning, frozen parameters, and cautious fine-tuning; unfreeze only the final ResNet block plus head, print every trainable parameter and its learning rate, and compare frozen versus fine-tuned validation metrics from the same split while recording the best checkpoint.
+**Verify:** Unfreeze only the final ResNet block plus head, print every trainable parameter and its learning rate, and compare frozen versus fine-tuned validation metrics from the same split while recording the best checkpoint.
 
 ### Exercise 4: Transform mismatch diagnosis
 

@@ -1,4 +1,4 @@
-# Day 40: Solutions: Hyperparameter Tuning with SearchCV
+# Day 40 Solutions: Hyperparameter Tuning with Grid and Randomized Search
 
 We build a Pipeline, perform parameter search with GridSearchCV/RandomizedSearchCV, and discuss nested CV for unbiased estimates.
 
@@ -9,7 +9,7 @@ Contents
 
 ---
 
-Worked reference for Exercise 1; GridSearchCV + Pipeline (SVC)
+Worked reference for Exercise 1: GridSearchCV + Pipeline (SVC)
 ```python
 from sklearn.model_selection import GridSearchCV, StratifiedKFold
 from sklearn.pipeline import Pipeline
@@ -39,7 +39,7 @@ Line-by-line
 
 ---
 
-Worked reference for Exercise 2; RandomizedSearchCV
+Worked reference for Exercise 2: RandomizedSearchCV
 ```python
 from sklearn.model_selection import RandomizedSearchCV
 from scipy.stats import loguniform
@@ -69,7 +69,7 @@ Notes
 
 ---
 
-Worked reference for Exercise 3; Nested CV (sketch)
+Worked reference for Exercise 3: Nested CV (sketch)
 ```python
 from sklearn.model_selection import cross_val_score
 
@@ -137,7 +137,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1; hyperparameter search spaces, fit budgets, and nested evaluation; declare parameter distributions, n_iter, scorer, CV splitter, and seed; print candidate count, expected fit count, best parameters, best CV score, failed-fit count, and one untouched-test metric.
+**Verify:** Declare parameter distributions, n_iter, scorer, CV splitter, and seed; print candidate count, expected fit count, best parameters, best CV score, failed-fit count, and one untouched-test metric.
 
 ### Exercise 2: Original lesson practice
 
@@ -149,7 +149,7 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2; hyperparameter search spaces, fit budgets, and nested evaluation; print every outer-fold score from a search fitted only inside that fold, its mean/std, and the optimistic non-nested best-CV score; assert outer validation indices never enter their inner search.
+**Verify:** Print every outer-fold score from a search fitted only inside that fold, its mean/std, and the optimistic non-nested best-CV score; assert outer validation indices never enter their inner search.
 
 ### Exercise 3: Search-budget calculation
 

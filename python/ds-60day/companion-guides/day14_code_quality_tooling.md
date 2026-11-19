@@ -72,8 +72,7 @@ They are separate from the browser's saved pads, notes and progress in Docker
 volumes. Neither route automatically copies attempts or completion markers to
 the other; record progress in the interface you actually used.
 
-**Lesson outcome:** use day 14; code quality with ruff, mypy, and pytest to practice automated formatting, linting, and static type feedback
-and explain the evidence produced by your code.
+**Outcome:** Format, lint, and type-check code with Ruff and mypy.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
@@ -126,14 +125,7 @@ def total(values: list[float]) -> float:
 (get_type_hints(total), total([1.5, 2.0]))
 ```
 
-**Expected observation**
-
-```text
-`({'values': list[float], 'return': float}, 3.5)` (representation may vary slightly). A type checker uses the hints before execution.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** `({'values': list[float], 'return': float}, 3.5)` (representation may vary slightly). A type checker uses the hints before execution.
 
 ### Worked example 2: Refactor a long expression into named facts
 
@@ -148,14 +140,7 @@ discounted_total = subtotal * (1 - discount_rate)
 round(discounted_total, 2)
 ```
 
-**Expected observation**
-
-```text
-`18.0`. A formatter controls whitespace; the names make the calculation explainable.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** `18.0`. A formatter controls whitespace; the names make the calculation explainable.
 
 ### A debugging routine for this topic
 
@@ -212,24 +197,72 @@ def display_total(total: float | None) -> str:
 The explicit branch narrows `float | None` to `float` before formatting. This is
 both a type-checker proof and useful runtime behavior.
 
-## Run the quality gates
+## Run the quality gates from the classroom pad
 
-Windows PowerShell:
+Ruff and mypy are command-line programs that read files, so the recipe below
+writes one deliberately messy scratch file into a temporary folder and runs
+each tool on it as a child process: `ruff format --diff` (layout),
+`ruff check` (lint rules), and `mypy` (types). It then repeats the three
+checks on a repaired version. `--isolated` and `--config-file=` keep both
+tools from reading settings outside the folder. Predict which tool reports
+which defect before running it.
 
-```powershell
-.\.venv\Scripts\python.exe -m ruff check .
-.\.venv\Scripts\python.exe -m ruff format --check .
-.\.venv\Scripts\python.exe -m mypy .
-.\.venv\Scripts\python.exe -m pytest
+```python
+import os
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+messy = "import os\ndef shout(name:str|None)->str:\n    return name.upper()\n"
+repaired = 'def shout(name: str | None) -> str:\n    if name is None:\n        return ""\n    return name.upper()\n'
+tools = {
+    "ruff format": ["ruff", "format", "--isolated", "--diff", "scratch.py"],
+    "ruff check": ["ruff", "check", "--isolated", "--output-format=concise", "scratch.py"],
+    "mypy": ["mypy", "--config-file=", f"--cache-dir={os.devnull}", "scratch.py"],
+}
+
+# Plain-text reports: notebook kernels can force colour codes into child processes.
+environment = {key: value for key, value in os.environ.items() if "COLOR" not in key}
+environment["NO_COLOR"] = "1"
+
+# Each tool runs as a child process on one scratch file in a temporary folder.
+with tempfile.TemporaryDirectory(prefix="day14-") as folder:
+    scratch = Path(folder) / "scratch.py"
+    for label, source in (("messy", messy), ("repaired", repaired)):
+        scratch.write_text(source, encoding="utf-8")
+        for tool, arguments in tools.items():
+            result = subprocess.run(
+                [sys.executable, "-m", *arguments],
+                cwd=folder,
+                env=environment,
+                capture_output=True,
+                text=True,
+                timeout=120,
+            )
+            report = (result.stdout + result.stderr).strip()
+            print(f"--- {label} file, {tool}: exit {result.returncode}")
+            print(report)
 ```
 
-macOS/Linux:
+**Expected observation:** for the messy file, `ruff format` exits 1 and shows a
+diff that adds two blank lines after the import and spaces after `:` and
+around `|` and `->`; `ruff check`
+exits 1 with `F401` for the unused `os` import (current Ruff versions also
+report `I001` for the import block); and `mypy` exits 1 with
+`Item "None" of "str | None" has no attribute "upper"  [union-attr]`. For the
+repaired file all three exit 0 with `1 file already formatted`,
+`All checks passed!`, and `Success: no issues found in 1 source file`. No
+tool found the others' problems, and none of them checks that `shout`
+returns the right text: that still needs a test (Day 10's pytest recipe).
+
+**Optional local workflow:** in a prepared contributor checkout, run the same
+checks on your own scratch file from the repository root:
 
 ```bash
-.venv/bin/python -m ruff check .
-.venv/bin/python -m ruff format --check .
-.venv/bin/python -m mypy .
-.venv/bin/python -m pytest
+uv run --no-sync python -m ruff format --diff path/to/scratch.py
+uv run --no-sync python -m ruff check path/to/scratch.py
+uv run --no-sync python -m mypy path/to/scratch.py
 ```
 
 ## Exercises and progressive hints
@@ -240,7 +273,7 @@ result is not complete merely because it “looks right”; run the stated
 assertion or inspection and explain what it proves.
 
 1. Run Ruff formatting and lint checks on a small intentionally messy Python file. **Evidence:** record at least one formatter change and one lint diagnostic with its rule code. **Constraints:** understand each automatic fix, do not run broad fixes over unrelated repository files, and delete only the scratch file you created.
-   **Verify:** both `ruff format --check` and `ruff check` pass afterward.
+   **Verify:** use the pad recipe in "Run the quality gates from the classroom pad" with your own messy source; afterwards `ruff format --diff` reports `1 file already formatted` and `ruff check` reports `All checks passed!`.
 
 2. Add useful type hints to a function that accepts records and returns a numeric total, then run mypy on the file. **Introduce:** one wrong caller argument and one wrong return in scratch code so you can read both diagnostics.
    **Expected behavior:** mypy rejects both; after repair it reports success while runtime tests still pass.
@@ -308,7 +341,7 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-14`
-(Day 14 — Code Quality with Ruff, mypy, and pytest). Direct catalog prerequisites: `python-13`.
+(Day 14: Code Quality with Ruff, mypy, and pytest). Direct catalog prerequisites: `python-13`.
 I have completed the direct prerequisites: `python-13`. Emphasize automated formatting, linting, and static type feedback.
 Read `python/ds-60day/companion-guides/day14_code_quality_tooling.md` and use the learner notebook
 `python/ds-60day/notebooks/day14_code_quality_tooling.ipynb`. Do not open or quote anything under `solutions/` unless

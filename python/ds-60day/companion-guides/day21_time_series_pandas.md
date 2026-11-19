@@ -71,8 +71,7 @@ They are separate from the browser's saved pads, notes and progress in Docker
 volumes. Neither route automatically copies attempts or completion markers to
 the other; record progress in the interface you actually used.
 
-**Lesson outcome:** use day 21; time series with pandas to practice time-aware indexes, timezone policy, resampling, rolling windows, and lag features
-and explain the evidence produced by your code.
+**Outcome:** Resample, roll, and lag time-stamped data with an explicit time zone.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
@@ -120,21 +119,18 @@ import pandas as pd
 
 daily = pd.Series(
     [2, 3, 5, 7, 11],
-    index=pd.date_range("2025-01-01", periods=5, freq="D"),
+    index=pd.date_range("2025-01-03", periods=5, freq="D"),
     name="sales",
 )
 weekly = daily.resample("W-SUN").sum()
-(daily.sum(), weekly.to_dict())
+(int(daily.sum()), {str(label.date()): int(total) for label, total in weekly.items()})
 ```
 
-**Expected observation**
-
-```text
-Both weekly bins together sum to `28`, preserving the additive total. The keys are Sunday-labeled timestamps.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** `(28, {'2025-01-05': 10, '2025-01-12': 18})`. Friday
+3 January through Sunday 5 January (2 + 3 + 5) fall in the week labeled
+Sunday 5 January; Monday 6 and Tuesday 7 January (7 + 11) fall in the week
+labeled Sunday 12 January. Both weekly bins together sum to `28`, preserving the
+additive total, and each key is the Sunday that closes its bin.
 
 ### Worked example 2: Compare rolling and lagged values
 
@@ -152,14 +148,7 @@ time_features = pd.DataFrame(
 time_features.round(2)
 ```
 
-**Expected observation**
-
-```text
-The first rolling mean is `2.0`; the first previous-day value is missing because no earlier row exists.
-```
-
-Do not memorize the surface syntax. Point from the input, through
-each transformation or decision, to the final evidence.
+**Expected observation:** The first rolling mean is `2.0`; the first previous-day value is missing because no earlier row exists.
 
 ### A debugging routine for this topic
 
@@ -298,7 +287,7 @@ root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-21`
-(Day 21 — Time Series with pandas). Direct catalog prerequisites: `python-20`.
+(Day 21: Time Series with pandas). Direct catalog prerequisites: `python-20`.
 I have completed the direct prerequisites: `python-20`. Emphasize time-aware indexes, timezone policy, resampling, rolling windows, and lag features.
 Read `python/ds-60day/companion-guides/day21_time_series_pandas.md` and use the learner notebook
 `python/ds-60day/notebooks/day21_time_series_pandas.ipynb`. Do not open or quote anything under `solutions/` unless

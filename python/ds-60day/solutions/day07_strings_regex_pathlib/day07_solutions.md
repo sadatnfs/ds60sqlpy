@@ -1,4 +1,4 @@
-# Day 07: Solutions: Strings, Regex, Pathlib
+# Day 7 Solutions: Strings, Regular Expressions, and pathlib
 
 <!-- BEGIN BEGINNER SOLUTION REVIEW -->
 ## Concept review before comparing answers
@@ -32,13 +32,13 @@ collisions.
 For this lesson's **text normalization, bounded pattern matching, and portable paths** model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.
 <!-- END BEGINNER SOLUTION REVIEW -->
 
-## Exercises 1–2: Worked answers
+## Exercises 1-2: Worked answers
 
 ### Exercise 1: worked answer
 
 **Learner contract:** From the supplied multiline text, extract email-shaped values, normalize them to lowercase, and return first-seen unique addresses. **Constraints:** use one bounded regex for extraction, then separate normalization and de-duplication steps; do not attempt full Internet-email validation. **Verify:** assert differently cased duplicates collapse to one lowercase address in first-seen order and a no-match string returns `[]`.
 
-**Reasoning:** Implement this exact contract as written: From the supplied multiline text, extract email-shaped values, normalize them to lowercase, and return first-seen unique addresses. Constraints: use one bounded regex for extraction, then separate normalization and de-duplication steps; do not attempt full Internet-email validation. Keep the prompt's named data and constraints visible in the code, then establish this specific result: assert differently cased duplicates collapse to one lowercase address in first-seen order and a no-match string returns `[]`. That connects the answer to text normalization, bounded pattern matching, and portable paths.
+**Reasoning:** Extraction, normalization, and de-duplication are separate steps, so each can be checked on its own. The lookarounds `(?<![\w.+-])` and `(?![\w.-])` stop the pattern from starting or ending inside a longer token, which keeps surrounding punctuation such as the `;` out of the match. `casefold()` makes `Ada@Example.com` and `ADA@example.com` identical, and `dict.fromkeys` removes repeats while keeping first-seen order (a `set` would lose the order). The pattern recognizes an email shape only; trying to validate every legal address with one regex produces an unreadable pattern that still accepts mailboxes that do not exist.
 
 ```python
 import re
@@ -65,13 +65,11 @@ The bounded pattern extracts a useful email *shape* only. Normalization
 and first-seen de-duplication are separate steps, and no claim is made
 that the domain or mailbox exists.
 
-**Verification evidence:** assert differently cased duplicates collapse to one lowercase address in first-seen order and a no-match string returns `[]`.
-
 ### Exercise 2: worked answer
 
 **Learner contract:** Write `plan_kebab_renames(folder: Path)` that returns source/destination pairs for regular files such as `Quarterly Report.CSV` without renaming them. **Rules:** normalize the stem to lowercase hyphen-separated words, preserve the suffix, skip unchanged names, and reject collisions including case-normalized collisions. **Verify:** use a temporary directory and inspect the complete plan before implementing a separate apply step.
 
-**Reasoning:** Implement this exact contract as written: Write `plan_kebab_renames(folder: Path)` that returns source/destination pairs for regular files such as `Quarterly Report.CSV` without renaming them. Rules: normalize the stem to lowercase hyphen-separated words, preserve the suffix, skip unchanged names, and reject collisions including case-normalized collisions. Keep the prompt's named data and constraints visible in the code, then establish this specific result: use a temporary directory and inspect the complete plan before implementing a separate apply step. That connects the answer to text normalization, bounded pattern matching, and portable paths.
+**Reasoning:** The function only plans and never renames, which makes it safe to run and easy to test. Each target keeps the original suffix (`.CSV` stays uppercase, as the assertion shows), and the stem becomes lowercase words joined by hyphens. Collisions are checked against both the other planned targets and the files already present, comparing `casefold()` names because many file systems treat `A-B.txt` and `a-b.txt` as the same file. Unchanged names are filtered out so that applying the plan cannot touch them. Renaming inside the loop would be the risky alternative: a collision found halfway leaves the folder half renamed.
 
 ```python
 import re
@@ -126,61 +124,66 @@ with tempfile.TemporaryDirectory() as temporary:
 Applying `Path.rename` is a separate, deliberate mutation after this
 complete plan passes collision checks.
 
-**Verification evidence:** use a temporary directory and inspect the complete plan before implementing a separate apply step.
-
-## Exercises 3–7: Expanded mastery answers
+## Exercises 3-7: Expanded mastery answers
 
 ### Exercise 3: answer contract
 
 **Learner contract:** **Prediction:** Compare `"\n"` with `r"\n"` and predict their lengths and printed representations. **Progressive hint:** A raw string preserves the backslash needed by many regex patterns. **Verify:** Record `len`, `repr`, and printed behavior for both strings; confirm the newline has length 1 and the raw backslash-n has length 2.
 
-**Reasoning:** Predict this named state change before running it: Prediction: Compare `"\n"` with `r"\n"` and predict their lengths and printed representations. Progressive hint: A raw string preserves the backslash needed by many regex patterns. Then compare the prediction with this proof target: Record `len`, `repr`, and printed behavior for both strings; confirm the newline has length 1 and the raw backslash-n has length 2. This makes text normalization, bounded pattern matching, and portable paths observable instead of relying on intuition.
-
-**Evidence to locate in the grouped implementation:** Record `len`, `repr`, and printed behavior for both strings; confirm the newline has length 1 and the raw backslash-n has length 2.
+**Reasoning:** In an ordinary string, `\n` is an escape sequence for one newline character, so `len("\n")` is 1 and printing it moves to the next line. A raw string keeps the backslash as a character, so `r"\n"` has two characters, a backslash and `n`, and prints exactly that. Regular expressions use backslashes for their own escapes such as `\d` and `\w`, which is why patterns are written as raw strings: without `r`, Python would turn some sequences, such as `\b`, into different characters before the regex engine sees them. The shared implementation for Exercises 3-4 prints both `repr` values and asserts the lengths.
 
 ### Exercise 4: answer contract
 
 **Learner contract:** **Tracing:** Trace named regex groups while parsing `order-2048.csv`; distinguish `group(0)` from the named capture. **Progressive hint:** The whole match and captured subparts are different values. **Verify:** Assert `group(0)` is `'order-2048.csv'` while the named ID capture is `'2048'`; add a nonmatching filename returning no match.
 
-**Reasoning:** Trace the concrete values in this contract one step at a time: Tracing: Trace named regex groups while parsing `order-2048.csv`; distinguish `group(0)` from the named capture. Progressive hint: The whole match and captured subparts are different values. Record the named value, shape, label, or iterator position needed to establish: Assert `group(0)` is `'order-2048.csv'` while the named ID capture is `'2048'`; add a nonmatching filename returning no match. The trace exposes text normalization, bounded pattern matching, and portable paths directly.
-
-**Evidence to locate in the grouped implementation:** Assert `group(0)` is `'order-2048.csv'` while the named ID capture is `'2048'`; add a nonmatching filename returning no match.
+**Reasoning:** `group(0)` is the whole text the pattern matched, here `order-2048.csv`; a named group such as `(?P<order_id>\d+)` returns only the part inside its parentheses, `2048`. Naming the group keeps the code readable where the value is used (`match.group("order_id")` rather than `match.group(1)`). `re.fullmatch` returns `None` for a name like `invoice-2048.csv`, so the code must check for `None` before calling `.group`, otherwise it fails with `AttributeError`. The shared implementation for Exercises 3-4 asserts the whole match, the capture, and the non-match.
 
 ### Exercise 5: answer contract
 
 **Learner contract:** **Implementation:** Implement `parse_report_name(Path)` returning a date and region for names like `sales_2025-07-01_west.csv`, rejecting mismatches. **Progressive hint:** Use `fullmatch` so extra suffix text cannot pass silently. **Verify:** Assert the valid filename returns the stated date/region and near misses with trailing text, bad date shape, or wrong suffix are rejected.
 
-**Reasoning:** Implement this exact contract as written: Implementation: Implement `parse_report_name(Path)` returning a date and region for names like `sales_2025-07-01_west.csv`, rejecting mismatches. Progressive hint: Use `fullmatch` so extra suffix text cannot pass silently. Keep the prompt's named data and constraints visible in the code, then establish this specific result: Assert the valid filename returns the stated date/region and near misses with trailing text, bad date shape, or wrong suffix are rejected. That connects the answer to text normalization, bounded pattern matching, and portable paths.
-
-**Evidence to locate in the grouped implementation:** Assert the valid filename returns the stated date/region and near misses with trailing text, bad date shape, or wrong suffix are rejected.
+**Reasoning:** `fullmatch` requires the entire filename to fit the pattern, so `sales_2025-07-01_west.csv.bak` is rejected; `search` would accept it because it only needs a matching substring. The pattern encodes the date shape and an escaped dot before `csv`, so `sales_2025-7-01_west.csv` and a `.txt` suffix also fail. A shape check does not prove the date exists: `2025-02-30` matches the pattern, so a stricter answer passes the captured text to `date.fromisoformat`, which raises for impossible dates. The shared implementation for Exercises 5-7 asserts the valid case and three near misses.
 
 ### Exercise 6: answer contract
 
 **Learner contract:** **Debugging:** Repair a greedy `<.*>` pattern that consumes multiple tags in one line, then explain why a real HTML parser is safer for HTML. **Progressive hint:** Use a constrained or non-greedy pattern only for a bounded format. **Verify:** Demonstrate the greedy overmatch, then assert the bounded repair returns separate intended tags; state why the fixture is not a general HTML parser.
 
-**Reasoning:** Reproduce the exact failure described here before changing code: Debugging: Repair a greedy `<.*>` pattern that consumes multiple tags in one line, then explain why a real HTML parser is safer for HTML. Progressive hint: Use a constrained or non-greedy pattern only for a bounded format. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Demonstrate the greedy overmatch, then assert the bounded repair returns separate intended tags; state why the fixture is not a general HTML parser. The diagnosis depends on text normalization, bounded pattern matching, and portable paths.
-
-**Evidence to locate in the grouped implementation:** Demonstrate the greedy overmatch, then assert the bounded repair returns separate intended tags; state why the fixture is not a general HTML parser.
+**Reasoning:** `.*` is greedy: it takes as much text as possible and then backs off only enough for the final `>` to match, so `<.*>` swallows everything from the first `<` to the last `>` on the line. Excluding angle brackets from the middle, `<[^<>]*>`, makes each match stop at the first closing `>` and yields the four separate tags; the non-greedy `<.*?>` works here too. Both are acceptable only because the input is a tiny, known format: real HTML has comments, attributes that contain `>`, and nesting that regular expressions cannot handle, so use `html.parser` or a parsing library for HTML. The shared implementation for Exercises 5-7 shows the greedy overmatch and the bounded repair.
 
 ### Exercise 7: answer contract
 
 **Learner contract:** **Edge case and explanation:** Build a rename plan to kebab-case that detects collisions before changing any files, including `A B.txt` and `a-b.txt`. **Progressive hint:** Separate planning/validation from filesystem mutation. **Verify:** Generate a plan containing both colliding names and assert validation raises before any directory entry is renamed.
 
-**Reasoning:** Make this boundary unambiguous in code: Edge case and explanation: Build a rename plan to kebab-case that detects collisions before changing any files, including `A B.txt` and `a-b.txt`. Progressive hint: Separate planning/validation from filesystem mutation. Values below, at, and above the named boundary must produce the evidence Generate a plan containing both colliding names and assert validation raises before any directory entry is renamed. Those cases show how text normalization, bounded pattern matching, and portable paths behaves at its edge.
-
-**Evidence to locate in the grouped implementation:** Generate a plan containing both colliding names and assert validation raises before any directory entry is renamed.
+**Reasoning:** Planning before mutating turns a dangerous operation into a value that can be checked: the plan is built in memory, validated, and only then applied. `A B.txt` and `a-b.txt` both become `a-b.txt`, so the destinations collide, and comparing `casefold()` names catches this even on case-insensitive file systems. Because `plan_renames` raises before any rename is attempted, no file can end up half renamed. Detecting the collision after renaming the first file would leave a folder that neither the old nor the new naming scheme describes.
 
 ## Expanded mastery lab solutions
 
 Use ordinary string operations for fixed syntax, regular expressions for patterns, and `pathlib` for portable path semantics.
 
-### Shared implementation for Exercises 3–4: Escapes and groups
+### Shared implementation for Exercises 3-4: Escapes and groups
 
 An ordinary `"\n"` is one newline character. The raw `r"\n"` is two characters:
 a backslash and `n`. `group(0)` is the full match; a named group returns only
 its captured portion.
 
-### Shared implementation for Exercises 5–7: Parse and plan before mutating paths
+```python
+import re
+
+newline = "\n"
+raw = r"\n"
+print(len(newline), repr(newline))
+print(len(raw), repr(raw))
+assert (len(newline), len(raw)) == (1, 2)
+
+ORDER_FILE = re.compile(r"order-(?P<order_id>\d+)\.csv")
+match = ORDER_FILE.fullmatch("order-2048.csv")
+assert match is not None
+assert match.group(0) == "order-2048.csv"
+assert match.group("order_id") == "2048"
+assert ORDER_FILE.fullmatch("invoice-2048.csv") is None
+```
+
+### Shared implementation for Exercises 5-7: Parse and plan before mutating paths
 
 ```python
 from __future__ import annotations
@@ -201,7 +204,20 @@ def parse_report_name(path: Path) -> tuple[str, str]:
 
 
 assert parse_report_name(Path("sales_2025-07-01_west.csv")) == ("2025-07-01", "west")
+for near_miss in (
+    "sales_2025-07-01_west.csv.bak",
+    "sales_2025-7-01_west.csv",
+    "sales_2025-07-01_west.txt",
+):
+    try:
+        parse_report_name(Path(near_miss))
+    except ValueError:
+        pass
+    else:
+        raise AssertionError(f"{near_miss} should be rejected")
 
+greedy = re.findall(r"<.*>", "<b>one</b><i>two</i>")
+assert greedy == ["<b>one</b><i>two</i>"]  # one overlong match
 bounded_tags = re.findall(r"<[^<>]*>", "<b>one</b><i>two</i>")
 assert bounded_tags == ["<b>", "</b>", "<i>", "</i>"]
 
