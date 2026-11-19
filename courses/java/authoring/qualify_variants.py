@@ -7,7 +7,7 @@ Run from the repository root after changing any exercise code:
     python courses/java/authoring/qualify_variants.py
 
 It needs a local Docker engine and the prepared worker image (default
-ds60sqlpy-worker-java21:1.4.0, override with JAVA_VARIANT_IMAGE). Programs compile
+ds60sqlpy-worker-java21:1.4.1, override with JAVA_VARIANT_IMAGE). Programs compile
 with the classroom's javac flags and run with assertions enabled, offline and with
 no repository mount; they are passed on standard input. For identification only,
 each assertion of the mutated exercise is rewritten as a numbered always-on check.
@@ -27,7 +27,7 @@ import render  # noqa: E402
 import specs  # noqa: E402,F401  (registers the lessons)
 import variants  # noqa: E402
 
-IMAGE = os.environ.get("JAVA_VARIANT_IMAGE", "ds60sqlpy-worker-java21:1.4.0")
+IMAGE = os.environ.get("JAVA_VARIANT_IMAGE", "ds60sqlpy-worker-java21:1.4.1")
 LIMIT = 10
 
 DRIVER = r"""

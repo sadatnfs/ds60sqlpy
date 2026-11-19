@@ -20,11 +20,11 @@ same push does not select a release. `js` is a short alias for the
 `[publish-javascript-node]` publishes both workers after qualification. The
 `python-core` group selects only App and Core.
 
-The accepted full 1.1.0 release is described in the
-[release/image guide](dockerhub.md#published-release-and-its-evidence). It has distinct
+Accepted full releases, such as 1.4.0, are described in the
+[release/image guide](dockerhub.md#published-release-and-its-evidence). Each has distinct
 canonical tags for every ordinary profile. Selecting fewer workers when
-installing that full release is supported and does not require a new partial
-publication. For example, `--profile r-statistics --from-hub sadatnfs --tag 1.1.0`
+installing a full release is supported and does not require a new partial
+publication. For example, `--profile r-statistics --from-hub sadatnfs --tag 1.4.1`
 selects the existing App/Core/R images plus PostgreSQL.
 
 ## Using a partial release
@@ -68,8 +68,12 @@ Docker Hub tags. Look for the native `seed-checks` or `worker-checks` artifact
 for the failing group and architecture. Private `.workshop` directories,
 credential files and raw service logs are not uploaded by this step.
 
-Publication waits for the exact marked revision's source checks and portable
-starter job, then rechecks them before canonical writes. Native App/Core and
+Publication waits for the exact marked revision's source checks, portable
+starter job and dispatch-only
+[PyTorch package verification](dockerhub.md#dispatch-the-pytorch-package-verification),
+then rechecks them before canonical writes. The first wait allows 90 minutes, so
+dispatch the verification right after pushing the marked commit.
+Native App/Core and
 selected worker receipts bind their source revision, workflow run and attempt,
 platform, tested image IDs, qualification reports and selected seed digests.
 Promotion requires both native platforms and every selected group receipt.
