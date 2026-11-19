@@ -153,12 +153,15 @@ GENERIC_AUTHORING_RESIDUE = (
     "before/after rows keyed by",
 )
 TRUNCATED_TASK_LABEL = re.compile(r"for\s+task\s+`[^`\n]*\.\.\.`", re.IGNORECASE)
+# A learner starter comment that ends in "..." directly after a word was cut
+# mid-sentence by a generator, e.g. "# Short contract: ... do not concatena...".
+TRUNCATED_CODE_COMMENT = re.compile(r"^[ \t]*#.*\S\.\.\.[ \t]*$", re.MULTILINE)
 PRACTICE_HEADING = re.compile(
     r"^(?:(?:additional|extended|guided|independent|learner|mastery|professional)\s+)*"
     r"(?:exercises?|practice(?:\s+(?:set|problems?|tasks?|lab))?|"
     r"challenges?|project\s+tasks?|checkpoints?)"
     r"(?:\s+(?:and|with)\s+(?:progressive\s+)?hints?)?"
-    r"(?:\s*[:—-].*)?$",
+    r"(?:\s*[:\u2014-].*)?$",
     re.IGNORECASE,
 )
 
@@ -403,6 +406,34 @@ def _template_residue(source: str) -> tuple[str, ...]:
     if TRUNCATED_TASK_LABEL.search(source):
         residue.append("truncated `For task ...` label")
     return tuple(residue)
+
+
+def _learner_code(path: Path) -> str:
+    """Return the runnable learner code of a Python notebook or module."""
+
+    if path.suffix.lower() == ".py":
+        return path.read_text(encoding="utf-8")
+    if path.suffix.lower() != ".ipynb":
+        return ""
+    payload: Any = json.loads(path.read_text(encoding="utf-8"))
+    raw_cells = payload.get("cells", []) if isinstance(payload, dict) else []
+    blocks: list[str] = []
+    for raw_cell in raw_cells:
+        if not isinstance(raw_cell, dict) or raw_cell.get("cell_type") != "code":
+            continue
+        raw_source = raw_cell.get("source", [])
+        blocks.append(
+            "".join(str(part) for part in raw_source)
+            if isinstance(raw_source, list)
+            else str(raw_source)
+        )
+    return "\n".join(blocks)
+
+
+def _truncated_code_comments(source: str) -> tuple[str, ...]:
+    """Return starter comments that a generator cut off with a trailing ellipsis."""
+
+    return tuple(match.group(0).strip() for match in TRUNCATED_CODE_COMMENT.finditer(source))
 
 
 def _malformed_final_orders(source: str) -> tuple[str, ...]:
@@ -710,6 +741,14 @@ def measure_lesson(catalog: Catalog, lesson: Lesson) -> LessonDepth:
                 f"{lesson.lesson_path} contains {len(malformed_orders)} SQL exercise "
                 "contracts that confuse a nested window/subquery clause with the "
                 "final ORDER BY"
+            )
+    if lesson.runner == "python":
+        truncated_comments = _truncated_code_comments(_learner_code(lesson_path))
+        if truncated_comments:
+            issues.append(
+                f"{lesson.lesson_path} has {len(truncated_comments)} truncated starter "
+                f"comments ending in '...'; write each task as a complete sentence: "
+                f"{truncated_comments[0]}"
             )
     if lesson.runner == "python" and lesson_path.suffix.lower() == ".ipynb":
         notebook = _notebook_depth(lesson_path)

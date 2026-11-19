@@ -117,6 +117,23 @@ def test_real_http_submit_poll_and_private_health() -> None:
         assert request(base + "/health?token=anything")[0] == 404
 
 
+def test_terminal_snapshot_adds_the_raw_log_only_when_runner_lines_were_hidden() -> None:
+    raw = "Picked up JAVA_TOOL_OPTIONS: -XX:ActiveProcessorCount=2\n42\n"
+
+    def hidden(*args: Any, **kwargs: Any) -> OperationResult:
+        return OperationResult(0, "42\n", False, "succeeded", "Done.", raw_output=raw)
+
+    for executor, expected in ((hidden, raw), (successful, None)):
+        state = WorkerState("java21", executor=executor, ready=True, isolate_jobs=False)
+        body = payload(profile="java21", language="java", source="class Main {}")
+        try:
+            state.submit(body)
+            done = wait_done(state, body["job_id"])
+        finally:
+            state.close()
+        assert done["output"] == "42\n" and done.get("raw_output") == expected
+
+
 @pytest.mark.parametrize(
     "change",
     [

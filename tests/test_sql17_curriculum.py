@@ -22,7 +22,10 @@ LESSONS = [Lesson.from_mapping(record) for record in RECORDS]
 @pytest.mark.parametrize("lesson", LESSONS, ids=lambda lesson: lesson.id)
 def test_postgresql17_lessons_have_complete_teaching_and_practice(lesson: Lesson) -> None:
     catalog = Catalog.load(ROOT)
-    assert catalog.get(lesson.id) == lesson
+    admitted = catalog.get(lesson.id)
+    # Extension records omit the learner outcome; the catalog builder derives it.
+    assert admitted.outcome
+    assert admitted == replace(lesson, outcome=admitted.outcome)
     assert not measure_lesson(catalog, lesson).issues
     assert practice_targets()[lesson.id]["target"] == 6
     for name in (lesson.lesson_path, lesson.guide_path, *lesson.solution_paths):

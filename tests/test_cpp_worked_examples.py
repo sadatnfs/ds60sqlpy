@@ -6,6 +6,7 @@ import json
 import re
 import shutil
 import subprocess
+import tomllib
 from pathlib import Path
 
 import pytest
@@ -97,9 +98,10 @@ def test_assert_configuration_example_has_distinct_release_observation(tmp_path:
 
 def test_docker_project_guide_has_real_install_targets_and_scoped_persistent_mounts() -> None:
     guide = (BASE / "compile-and-run.md").read_text()
+    version = tomllib.loads((ROOT / "pyproject.toml").read_text())["project"]["version"]
     for fragment in (
         "Docker-only CMake project route",
-        "ds60sqlpy-worker-cpp20:0.4.1",
+        f"ds60sqlpy-worker-cpp20:{version}",
         "--network none",
         "--pull never",
         "--entrypoint",

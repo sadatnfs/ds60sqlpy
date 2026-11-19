@@ -50,6 +50,16 @@ def test_authoring_prose_slots_preserve_embedded_programs_and_helper_strings() -
     assert "and correction" in output
 
 
+def test_repaired_prose_keeps_the_formatters_double_quotes() -> None:
+    output, _ = PIPELINE.repair_authoring(
+        'add("id", "An afinitething.", "It\'s afinitething.", \'Say "afinitething".\')\n',
+        {"afinitething": "a finite thing"},
+    )
+    assert output == (
+        'add("id", "An a finite thing.", "It\'s a finite thing.", \'Say "a finite thing".\')\n'
+    )
+
+
 def test_display_metadata_changes_do_not_mutate_identity_or_execution(tmp_path: Path) -> None:
     (tmp_path / "curriculum").mkdir()
     (tmp_path / "courses/example").mkdir(parents=True)

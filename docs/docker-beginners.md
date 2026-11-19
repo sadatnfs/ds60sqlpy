@@ -71,7 +71,7 @@ it. If opening the browser is unavailable, copy the printed URL into your
 browser. Use `./classroom status` to recover the current address. Avoid assuming
 that a previous port number is still correct.
 
-Choose a subject from **All learning paths**, then a lesson. Read its guide,
+Choose a subject from **All subjects**, then a lesson. Read its guide,
 select the learner artifact, predict what it should do, edit the pad and run
 it. Wait for the saved confirmation before closing. The
 [first successful session](setup/first-success.md) walks through Python and SQL.

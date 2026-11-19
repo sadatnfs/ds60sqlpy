@@ -173,7 +173,10 @@ def verify_failure(
             or observed_seconds < 14
             or "timeout-probe-started" not in output
             or "timeout-probe-unexpected-completion" in output
-            or "deadline exceeded" not in str(job.get("detail", "")).lower()
+            or not any(
+                phrase in str(job.get("detail", "")).lower()
+                for phrase in ("time limit", "deadline exceeded")
+            )
         ):
             raise QualificationError("The receipt does not establish the real 15-second timeout.")
     elif not all(marker in output.lower() for marker in DIAGNOSTICS[profile]):

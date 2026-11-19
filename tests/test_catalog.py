@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from ds60sqlpy.catalog import Catalog, find_repo_root
-from ds60sqlpy.catalog_builder import PROFESSIONAL_LESSON_SPECS
+from ds60sqlpy.catalog_builder import PROFESSIONAL_LESSON_SPECS, _derived_outcome
 from ds60sqlpy.curriculum_framework import load_extensions
 
 
@@ -80,3 +80,20 @@ def test_catalog_prerequisite_graph_is_acyclic() -> None:
 
     for lesson_id in graph:
         visit(lesson_id)
+
+
+def test_lesson_outcomes_come_from_the_lesson_itself(tmp_path: Path) -> None:
+    (tmp_path / "day.sql").write_text(
+        "-- Focus: Combine row sets with explicit duplicate semantics:\n"
+        "--        `UNION` and `UNION ALL`\n-- Prereqs: sql-05\nSELECT 1;\n"
+    )
+    (tmp_path / "guide.md").write_text(
+        "# Title\n\n## Learning objectives\n\nBy the end, you can:\n\n"
+        "1. distinguish line and cell\n   magics;\n2. Something else.\n"
+    )
+    focus = {"lesson_path": "day.sql", "guide_path": "guide.md"}
+    assert _derived_outcome(tmp_path, focus) == (
+        "Combine row sets with explicit duplicate semantics: UNION and UNION ALL."
+    )
+    objective = {"lesson_path": "missing.ipynb", "guide_path": "guide.md"}
+    assert _derived_outcome(tmp_path, objective) == "Distinguish line and cell magics."

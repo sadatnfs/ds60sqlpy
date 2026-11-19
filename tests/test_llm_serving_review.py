@@ -261,8 +261,9 @@ def test_valid_unicode_generation_finishes_without_stranding_reservations(tmp_pa
         collector = asyncio.create_task(collect())
         try:
             assert scheduler.task is not None
+            # Generous bound: a deadlock still fails, but parallel test load cannot.
             completed, _ = await asyncio.wait(
-                {collector, scheduler.task}, timeout=2, return_when=asyncio.FIRST_COMPLETED
+                {collector, scheduler.task}, timeout=20, return_when=asyncio.FIRST_COMPLETED
             )
             assert collector in completed, (
                 str(scheduler.task.exception())

@@ -266,19 +266,23 @@ HELP
     image="ds60-formatting:$fingerprint"
     if [[ "$force_build" == 1 ]] || ! docker image inspect "$image" >/dev/null 2>&1; then
       echo 'Preparing the formatting tools. Downloads are needed only for this build.'
-      registry=${DS60_FORMAT_NPM_REGISTRY:-https://registry.npmjs.org}
-      case "$registry" in
-        https://*'@'* | https://*'?'* | https://*'#'* | https://*' '* | https://*$'\n'*)
-          echo 'Use a public HTTPS npm registry URL without credentials or query parameters.' >&2
-          exit 2
-          ;;
-        https://*) ;;
-        *)
-          echo 'The optional npm registry must use HTTPS.' >&2
-          exit 2
-          ;;
-      esac
-      docker build --progress=plain --build-arg "NPM_REGISTRY=$registry" -t "$image" "$root/docker/formatting"
+      registry=${DS60_FORMAT_NPM_REGISTRY:-${DS60_NPM_REGISTRY:-https://registry.npmjs.org}}
+      python_index=${DS60_FORMAT_PYTHON_INDEX_URL:-${DS60_PYTHON_INDEX_URL:-https://pypi.org/simple}}
+      for url in "$registry" "$python_index"; do
+        case "$url" in
+          https://*'@'* | https://*'?'* | https://*'#'* | https://*' '* | https://*$'\n'*)
+            echo 'Use a public HTTPS package mirror URL without credentials or query parameters.' >&2
+            exit 2
+            ;;
+          https://*) ;;
+          *)
+            echo 'An optional package mirror must use HTTPS.' >&2
+            exit 2
+            ;;
+        esac
+      done
+      docker build --progress=plain --build-arg "NPM_REGISTRY=$registry" \
+        --build-arg "PYTHON_INDEX_URL=$python_index" -t "$image" "$root/docker/formatting"
     fi
   fi
   run_tools "$image" ${args[@]+"${args[@]}"}

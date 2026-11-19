@@ -223,6 +223,16 @@ training, state and export machinery in comparable depth. The
 modeling, experimentation and causal reasoning needed to judge a data-science
 assistant's outputs.
 
+Use [LLM evaluation and alignment](../../courses/llm-evaluation/README.md) for
+evaluation contracts, annotation agreement, paired and clustered uncertainty,
+judge calibration, reward models, DPO, PPO with generalized advantage
+estimation (GAE), GRPO and off-policy evaluation. It extends chapters
+llm-027, llm-033, llm-040, llm-applied-012, llm-applied-013 and llm-applied-019
+with the statistical and policy-gradient mechanisms they summarize. Use
+[CUDA and GPU computing](../../courses/cuda/README.md) for actual device
+execution, memory and kernel mechanics; every chapter in this route runs on a
+CPU.
+
 These are connected learning resources, not a certification that reading alone
 creates expertise. Reconstruct a mechanism, run the experiment, explain a failure
 case, and then apply it to a new question with its assumptions made explicit.

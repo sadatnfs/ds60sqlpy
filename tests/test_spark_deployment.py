@@ -192,6 +192,43 @@ def test_generated_route_matches_maintained_chapters() -> None:
         assert path.read_text() == expected, str(path)
 
 
+@pytest.mark.parametrize("subject", ["spark-deployment", "apache-data-platforms"])
+def test_python_includes_print_whole_statements_as_the_fence_check_does(
+    subject: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    author = module(subject.replace("-", "_"), ROOT / "courses" / subject / "authoring/build.py")
+    base = tmp_path.resolve()
+    (base / "projects").mkdir()
+    (base / "projects/probe.py").write_text(
+        "def check(share):\n"
+        "    _, _, body = control(\n"
+        '        "/shares/" + urllib.parse.quote(share, safe="") + "/schemas?maxResults=100"\n'
+        "    )\n"
+        "    command = [\n"
+        '        "--master",\n'
+        '        "spark://master:7077",\n'
+        "    ]\n"
+        "    return command\n"
+    )
+    monkeypatch.setattr(author, "BASE", base)
+
+    def include(selection: str) -> str:
+        match = author.INCLUDE.match(f"<!-- include: projects/probe.py {selection} python -->")
+        assert match is not None
+        return str(author.excerpt(match)).split("```python\n", 1)[1].removesuffix("\n```")
+
+    # Dedenting lets the wrapped call fit, so it is printed as the fence check prints it.
+    assert include('from="_, _, body" until="command = ["') == (
+        '_, _, body = control("/shares/" + urllib.parse.quote(share, safe="") '
+        '+ "/schemas?maxResults=100")'
+    )
+    # List elements parse only as one-item tuples; the include must cover whole statements.
+    with pytest.raises(ValueError, match="whole Python statements"):
+        include("from='\"--master\",' to='\"spark://master:7077\",'")
+    # A fragment the check cannot admit as a program stays verbatim.
+    assert include('to="def check(share):"') == "def check(share):"
+
+
 def test_remote_docker_endpoint_is_rejected_without_contact(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

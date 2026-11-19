@@ -28,6 +28,9 @@ ASSETS = {
     "/assets/classroom.css": "src/ds60sqlpy/assets/classroom.css",
     "/assets/classroom.js": "src/ds60sqlpy/assets/classroom.js",
     "/assets/browser-preview.js": "src/ds60sqlpy/assets/browser-preview.js",
+    "/assets/classroom-editor.js": "src/ds60sqlpy/assets/classroom-editor.js",
+    "/assets/classroom-shell.js": "src/ds60sqlpy/assets/classroom-shell.js",
+    "/assets/codemirror.js": "src/ds60sqlpy/assets/vendor/codemirror.v6.min.js",
     "/src/ds60sqlpy/assets/vendor/textbook/fonts.css": (
         "src/ds60sqlpy/assets/vendor/textbook/fonts.css"
     ),

@@ -54,19 +54,31 @@ def test_app_launcher_compose_and_core_base_use_current_version() -> None:
 
 
 def test_maintained_owned_project_image_defaults_follow_current_release() -> None:
-    paths = [ROOT / "examples/native-ad-core/Dockerfile"]
-    for path in (ROOT / "courses").rglob("*"):
-        if any(
-            part in {".workshop", "__pycache__", "qualification-history"} for part in path.parts
-        ):
-            continue
-        if path.is_file() and (
-            path.name.startswith("Dockerfile") or path.name in {"run.sh", "workshop"}
-        ):
-            paths.append(path)
+    # Commands, defaults and docs learners copy must name images that exist.
+    # Dated evidence records (validation notes, qualification history and frozen
+    # snapshots) keep the versions they observed.
+    text_suffixes = {".md", ".in", ".py", ".json", ".yaml", ".yml", ".sh", ".txt", ".toml"}
+    paths = []
+    for base in ("courses", "examples", "packages"):
+        for path in (ROOT / base).rglob("*"):
+            if (
+                any(
+                    part in {".workshop", "__pycache__", "qualification-history"}
+                    for part in path.parts
+                )
+                or path.name == "VALIDATION.md"
+                or path.suffix == ".snapshot"
+            ):
+                continue
+            if path.is_file() and (
+                path.name.startswith("Dockerfile")
+                or path.name in {"run.sh", "workshop"}
+                or path.suffix in text_suffixes
+            ):
+                paths.append(path)
     seen = 0
     for path in paths:
-        versions = OWN_IMAGE.findall(path.read_text())
+        versions = OWN_IMAGE.findall(path.read_text(encoding="utf-8", errors="replace"))
         if versions:
             seen += 1
             assert set(versions) == {VERSION}, str(path.relative_to(ROOT))

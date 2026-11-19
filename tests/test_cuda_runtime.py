@@ -281,10 +281,10 @@ def test_gpu_execution_rejects_oversized_source_before_writing(tmp_path: Path) -
             "cuda-cpp",
             "timed_out",
             "",
-            "Total execution deadline exceeded; child processes reaped.",
+            "Stopped at the time limit.",
             True,
         ),
-        ("cuda-python", "cancelled", "", "Cancelled and child processes reaped.", True),
+        ("cuda-python", "cancelled", "", "Cancelled; the program was stopped.", True),
         (
             "pytorch-cuda",
             "failed",
@@ -313,7 +313,7 @@ def test_gpu_execution_rejects_oversized_source_before_writing(tmp_path: Path) -
             "python-core",
             "timed_out",
             "",
-            "Total execution deadline exceeded; child processes reaped.",
+            "Stopped at the time limit.",
             False,
         ),
     ],
@@ -362,9 +362,9 @@ def test_device_fault_quarantine_blocks_next_job_but_retains_result(
 @pytest.mark.parametrize(
     "detail,returncode,quarantined",
     [
-        ("Scratch allowance exceeded; child processes reaped.", -15, True),
-        ("Execution completed; no verifier was requested.", -9, True),
-        ("Execution completed; no verifier was requested.", -11, True),
+        ("Scratch allowance exceeded; the program was stopped.", -15, True),
+        ("The program was stopped by the system (signal 9).", -9, True),
+        ("The program was stopped by the system (signal 11).", -11, True),
         ("Compilation did not produce a runnable artifact.", -9, False),
     ],
 )

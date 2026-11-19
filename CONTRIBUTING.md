@@ -147,8 +147,10 @@ SQLfmt instead of PostgreSQL formatting. The tool wrapper prepares missing
 images on first use, with visible build logs, then reuses them. Use `./scripts/format-repo --build` after
 changing the toolchain or when deliberately rebuilding that image. It does not
 rebuild or restart classroom services or change their saved volumes.
-If the default npm registry is unreachable during tool-image preparation, set
-`DS60_FORMAT_NPM_REGISTRY` to a public HTTPS registry mirror for that build:
+If the default npm or Python package registry is unreachable during tool-image
+preparation, set `DS60_FORMAT_NPM_REGISTRY` or `DS60_FORMAT_PYTHON_INDEX_URL` to
+an HTTPS mirror for that build. Without them, the wrapper falls back to the
+classroom's `DS60_NPM_REGISTRY` and `DS60_PYTHON_INDEX_URL` settings:
 
 ```sh
 DS60_FORMAT_NPM_REGISTRY=https://registry.yarnpkg.com ./scripts/format-repo --build

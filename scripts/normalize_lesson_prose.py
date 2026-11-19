@@ -144,6 +144,14 @@ def prose_constants(tree: ast.AST) -> list[ast.Constant]:
     return list(selected.values())
 
 
+def string_literal(value: str) -> str:
+    """Quote repaired prose the way the repository formatter does (double quotes)."""
+    literal = repr(value)
+    if literal.startswith("'") and "'" not in value and '"' not in value:
+        return '"' + literal[1:-1] + '"'
+    return literal
+
+
 def repair_authoring(source: str, repairs: dict[str, str]) -> tuple[str, Counter[str]]:
     tree = ast.parse(source)
     lines = source.encode().splitlines(keepends=True)
@@ -160,7 +168,7 @@ def repair_authoring(source: str, repairs: dict[str, str]) -> tuple[str, Counter
         assert node.end_lineno is not None and node.end_col_offset is not None
         start = offsets[node.lineno - 1] + node.col_offset
         end = offsets[node.end_lineno - 1] + node.end_col_offset
-        edits.append((start, end, repr(cleaned).encode()))
+        edits.append((start, end, string_literal(cleaned).encode()))
         hits.update(changed)
     raw = source.encode()
     for start, end, replacement in sorted(edits, reverse=True):

@@ -43,9 +43,11 @@ def test_valid_worker_output_and_figures_fit_the_controller_wire_limit() -> None
         returncode=0,
         output="\x01" * 128_000,
         artifacts=figures,
+        raw_output="\x01" * 128_000,
     )
     # The worker emits JSON, so a legal control-character transcript expands
-    # sixfold on the wire before the valid plot payload is included.
+    # sixfold on the wire before the valid plot payload is included. A job whose
+    # shown log hides runner lines also carries the complete raw log.
     encoded = json.dumps(job.snapshot(), ensure_ascii=False, allow_nan=False).encode()
     assert len(encoded) <= MAX_RESPONSE
 
