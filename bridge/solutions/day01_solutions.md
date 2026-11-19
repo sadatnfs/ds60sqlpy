@@ -201,15 +201,17 @@ redaction helper.
 
 ### Exercise 10: Portability
 
-**Prompt:** Write equivalent Windows PowerShell and POSIX invocations that set environment
-values outside Python and pass CLI overrides through `argv`; identify what remains
-platform-neutral.
+**Prompt:** Write two Bash invocations that set the same environment values outside Python,
+one with a session-wide `export` and one with a single-command `NAME=value` prefix, and pass
+identical CLI overrides through `argv`; identify what stays the same.
 
-**Approach:** Use `$env:NAME = ...` in PowerShell and `export NAME=...` in a POSIX shell, then
-invoke the same `python -m ... --log-level ...` arguments. The parser and precedence tests stay
-platform-neutral because they use injected mappings and sequences.
+**Approach:** Run `export DS60_LOG_LEVEL=DEBUG` followed by the program, then in a fresh shell
+run `DS60_LOG_LEVEL=DEBUG .venv/bin/python bridge/solutions/day01_solution.py --log-level INFO`.
+Both runs receive the same mapping, so the same CLI override wins. The parser and precedence
+tests stay shell-neutral because they use injected mappings and sequences. The same Bash
+commands work on Linux, macOS, and Windows through WSL 2.
 
-**Why this boundary matters:** Environment-setting syntax differs, but `argparse`, `Mapping`,
-and the Python entry point do not.
+**Why this boundary matters:** The shell decides how long a variable lives, but `argparse`,
+`Mapping`, and the Python entry point do not change.
 
-**Verification evidence:** Record one PowerShell `$env:DS60_LOG_LEVEL=...` run and one POSIX `export ...` run; assert the same `Settings` values result when identical CLI overrides are supplied.
+**Verification evidence:** Record one `export DS60_LOG_LEVEL=...` run and one `DS60_LOG_LEVEL=... python ...` run; assert the same `Settings` values result with identical CLI overrides, and that a fresh shell prints `unset` for `echo "${DS60_LOG_LEVEL-unset}"` after the prefix form.

@@ -95,8 +95,8 @@ LIMIT 40;
 --    Hint ladder, rung 1: For sql-19 Exercise 5, inspect one window partition before projecting; then check `e.category, e.expense_date, e.expense_id` before applying the row cap.
 -- 6. [Extension] Prove the final cumulative stored revenue equals the ordinary stored-revenue sum.
 --    Hint: Select the last ordered cumulative value and compare it with an independent aggregate.
---    Inputs: For sql-19 Exercise 6, read from `orders`. Build the answer toward `final_cumulative`, `aggregate_total`, and `difference`; keep `cumulative_revenue` visible whenever the result has row-level grain.
+--    Inputs: For sql-19 Exercise 6, read from `orders`; compute `SUM(total_amount) OVER (ORDER BY order_date, order_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)` in the CTE `running`, keep the cumulative value of the last order, and compare it with an ordinary `SUM(total_amount)`.
 --    Expected result/shape: For sql-19 Exercise 6, expected output: One row with zero difference. The final columns are `final_cumulative`, `aggregate_total`, and `difference`.
---    Verify: For sql-19 Exercise 6, independently aggregate `orders` by `cumulative_revenue`; require one output row for every distinct `cumulative_revenue` tuple and compare `aggregate_total` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `aggregate_total` for the existing `cumulative_revenue` tuple and verify the new tuple appears exactly once.
---    Hint ladder, rung 1: For sql-19 Exercise 6, run `running`, and `final_running` one at a time. Record each CTE's row count and `cumulative_revenue` uniqueness before the next stage uses it.
+--    Verify: For sql-19 Exercise 6, confirm one row where `final_cumulative` and `aggregate_total` are both 2355646.89 and `difference` is 0.00; `running` must keep all 4362 orders, and its last row by `order_date DESC, order_id DESC` must carry the full total.
+--    Hint ladder, rung 1: For sql-19 Exercise 6, check that `running` returns 4362 rows and that its last row by `order_date DESC, order_id DESC` holds the largest cumulative value.
 ROLLBACK;

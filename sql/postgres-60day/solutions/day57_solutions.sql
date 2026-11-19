@@ -1,5 +1,5 @@
 -- Day 57 solutions: forecast accuracy and robust anomaly detection
--- SOLUTION READING MAP — sql-57: Project4 BI Part3
+-- SOLUTION READING MAP for sql-57: BI Project, Part 3: Trends and Anomalies
 -- Explanation: sql/postgres-60day/solutions/day57_solutions.md
 -- Run from the repository root only against advanced_sql_training:
 --   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day57_solutions.sql

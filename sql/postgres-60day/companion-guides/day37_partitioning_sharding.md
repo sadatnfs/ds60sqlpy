@@ -11,16 +11,16 @@ the saved project selection. No host Python or PostgreSQL installation is
 required for this browser route.
 
 1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database. A simple snippet
-   such as `SELECT 1;` needs no training-schema reset.
+   the local disposable `advanced_sql_training` database.
 2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
    preserves the lesson's reviewed psql directives, relative includes and
    transaction behavior. **SQL snippet** is appropriate for ordinary SQL
    statements, but is not a replacement for an entire script's setup.
-3. When the lesson requires the course training data, use the explicit
-   preparation action and read its reset acknowledgement. It replaces the
-   course-owned `training` schema. Do not reset unrelated data or prepare
-   every lesson by habit; stateful sequences have their own ordering.
+3. The **Course database** panel above the code shows whether the course
+   training tables are loaded. Missing tables load automatically before your
+   first run (or choose **Load course tables**) and stay loaded for later
+   lessons. **Reset training data** restores the original rows only when your
+   own changes made results differ; it keeps your saved code and notes.
 4. Edit the learner copy in the classroom and save your prediction before
    running. Its whole-script workspace is
    `.learning/sql/sql-37/lesson/workspace/sql/postgres-60day/day37_partitioning_sharding.sql`.
@@ -86,39 +86,63 @@ row count. For a normal analytical `SELECT`, use this logical reading order:
 window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
 different physical plan while preserving those semantics.
 
-The worked walkthrough's lesson-specific task is: Map the January and February bounds on a timeline, then plan a January-15-to-February-15 query. Both partitions are required. Change the range to a January-only half-open interval and inspect EXPLAIN to prove February is pruned rather than assuming it.
-The first runnable example has a concrete contract: Example 1 must print the expected DDL command tag for `big_events`. Verify the object in `pg_catalog.pg_inherits`, and `pg_catalog.pg_class`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state. Its final projection is the columns written in the final `SELECT`. Verify the command tag in `pg_catalog`/`information_schema`, run one accepted value and one value the declared rule rejects, and confirm the lesson rollback removes the course-owned object. Where this query can emit `NULL`, identify the exact source expression and explain whether the output preserves, classifies, or rejects it.
+The worked walkthrough's lesson-specific task is: Map the January and February bounds on a timeline, then plan a January-15-to-February-15 query. Both partitions are required. Change the range to a January-only half-open interval and inspect `EXPLAIN` to prove February is pruned rather than assuming it.
+The learner script loads 1,000 rows, 537 in January and 463 in February, then
+plans two counts. The first worked example spans both months, so neither
+partition can be pruned; the second stays inside January, so the plan reads
+only the January partition.
 
 ## Two worked SQL examples
 
 These worked excerpts come from `sql/postgres-60day/day37_partitioning_sharding.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
 
-### Example 1
+### Example 1: a range that needs both partitions
 
 ```sql
-CREATE TABLE big_events (
-  id BIGSERIAL,
-  event_time TIMESTAMPTZ NOT NULL,
-  customer_id INT,
-  payload JSONB
-)
-PARTITION BY RANGE (event_time);
+EXPLAIN ANALYZE
+SELECT
+  COUNT(*)
+FROM
+  big_events
+WHERE
+  event_time >= timestamptz '2025-01-15 00:00:00+00'
+  AND event_time < timestamptz '2025-02-15 00:00:00+00';
 ```
 
-**How to read it:** Example 1 is data definition language (DDL). `psql` prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.
+**How to read it:** the half-open range `[2025-01-15, 2025-02-15)` overlaps the
+January partition `[2025-01-01, 2025-02-01)` and the February partition
+`[2025-02-01, 2025-03-01)`. The planner therefore keeps both partitions under
+one `Append` node and applies the `Filter` inside each scan. The literals carry
+an explicit `+00` offset, so the result does not depend on the session time
+zone.
 
-**Expected result/shape:** Example 1 must print the expected DDL command tag for `big_events`. Verify the object in `pg_catalog.pg_inherits`, and `pg_catalog.pg_class`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.
+**Expected result/shape:** `EXPLAIN ANALYZE` prints one text column,
+`QUERY PLAN`. On the course seed it shows an `Append` with two scans:
+`big_events_2025_01` with `actual ... rows=295` and `big_events_2025_02` with
+`actual ... rows=243`. Running the query without `EXPLAIN` returns one row whose
+count is `538`.
 
-### Example 2
+### Example 2: a January-only range is pruned
 
 ```sql
-CREATE TABLE big_events_2025_01 PARTITION OF big_events
-FOR VALUES FROM ('2025-01-01 00:00:00+00') TO ('2025-02-01 00:00:00+00');
+EXPLAIN ANALYZE
+SELECT
+  COUNT(*)
+FROM
+  big_events
+WHERE
+  event_time >= timestamptz '2025-01-15 00:00:00+00'
+  AND event_time < timestamptz '2025-01-20 00:00:00+00';
 ```
 
-**How to read it:** Example 2 is data definition language (DDL). `psql` prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.
+**How to read it:** the only change is the upper bound. No February timestamp
+can satisfy `event_time < '2025-01-20'`, so the planner removes
+`big_events_2025_02` before execution. This is partition pruning: the evidence
+is the partition name that is missing from the plan, not a faster timing.
 
-**Expected result/shape:** Example 2 must print the expected DDL command tag for `big_events_2025_01`. Verify the object in `pg_catalog.pg_inherits`, and `pg_catalog.pg_class`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.
+**Expected result/shape:** the plan has no `Append` node and one scan,
+`Seq Scan on big_events_2025_01`, with `actual ... rows=87`. Running the query
+without `EXPLAIN` returns one row whose count is `87`.
 
 ## Learning objectives
 
@@ -144,29 +168,29 @@ pruned rather than assuming it.
 Complete these in the [learner SQL](../day37_partitioning_sharding.sql):
 
 1. Add partitions and test pruning.
-   **Inputs/evidence:** For sql-37 Exercise 1, run the underlying read-only query over `solution_big_events` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
-   **Expected result/shape:** For sql-37 Exercise 1, expected output: one row per `big_events`. The final columns are `big_events`.
-   **Verify:** For sql-37 Exercise 1, run the underlying query without `EXPLAIN` and preserve its `big_events` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+   **Inputs/evidence:** For sql-37 Exercise 1, extend `solution_events` (January and February partitions) with March and April partitions, load the 5,000 deterministic rows spread from 2025-01-01 to 2025-04-30, then run `EXPLAIN (ANALYZE, BUFFERS)` on a March-only `COUNT(*)` with constant `timestamptz` bounds.
+   **Expected result/shape:** For sql-37 Exercise 1, expected output: a plan whose only scan node reads `solution_events_2025_03`, with `actual ... rows=950`; January, February, and April are pruned at planning time. `EXPLAIN` prints one text column named `QUERY PLAN`, not business rows.
+   **Verify:** For sql-37 Exercise 1, run the same `SELECT COUNT(*)` without `EXPLAIN` and confirm it returns `950`, the scan node's actual rows; then plan a count with no `WHERE` clause and confirm that all four monthly partitions appear under one `Append` node.
 2. Add local indexes and compare plans.
-   **Inputs/evidence:** For sql-37 Exercise 2, run the underlying read-only query over `indexed_big_events`, `indexed_big_events_2025_01_time_idx`, `indexed_big_events_2025_02_time_idx`, `indexed_big_events_2025_03_time_idx`, and `indexed_big_events_2025_01` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
-   **Expected result/shape:** For sql-37 Exercise 2, expected output: one row per `plan_node`. The final columns are `plan_node`, `estimated_rows`, `actual_rows`, `loops`, and `buffers`.
-   **Verify:** For sql-37 Exercise 2, run the underlying query without `EXPLAIN` and preserve its `plan_node` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+   **Inputs/evidence:** For sql-37 Exercise 2, create one index on the partitioned parent, `solution_events (customer_id, event_time)`, then run `EXPLAIN (ANALYZE, BUFFERS)` on `SELECT *` for `customer_id = 42` in March.
+   **Expected result/shape:** For sql-37 Exercise 2, expected output: `pg_indexes` lists the parent index plus one `(customer_id, event_time)` index for each of the four monthly partitions, and the plan reads only `solution_events_2025_03`, returning `rows=2`. On this seed the scan uses `solution_events_2025_03_customer_id_event_time_idx`; another access path is acceptable when statistics differ.
+   **Verify:** For sql-37 Exercise 2, query `SELECT tablename, indexname FROM pg_indexes WHERE tablename LIKE 'solution_events%' ORDER BY tablename` and confirm five rows; then run the query without `EXPLAIN` and confirm it returns the same two rows that the plan reports.
 3. Predict partition scans with and without a time predicate.
-   **Inputs/evidence:** For sql-37 Exercise 3, run the underlying read-only query over `solution_events` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
-   **Expected result/shape:** For sql-37 Exercise 3, expected output: exactly one aggregate summary row. The final columns are `plan_node`, `estimated_rows`, `actual_rows`, `loops`, and `buffers`.
-   **Verify:** For sql-37 Exercise 3, run the underlying query without `EXPLAIN` and preserve its `plan_node` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+   **Inputs/evidence:** For sql-37 Exercise 3, run plain `EXPLAIN` (without `ANALYZE`) on `SELECT COUNT(*) FROM solution_events` with no predicate, then on the same count restricted to the March half-open range.
+   **Expected result/shape:** For sql-37 Exercise 3, expected output: the unfiltered plan lists four scans, one per monthly partition, under one `Append`; the March plan lists only `solution_events_2025_03` and has no `Append` node.
+   **Verify:** For sql-37 Exercise 3, write the predicted number of scanned partitions (4 and 1) before running both plans, then count the `Seq Scan on solution_events_...` lines in each plan and compare them with the prediction.
 4. Add a DEFAULT partition and inspect row placement via `tableoid`.
-   **Inputs/evidence:** For sql-37 Exercise 4, read from `solution_events`, and `solution_events_default`. Build the answer toward `physical_partition`, and `event_time`; keep `physical_partition` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-37 Exercise 4, expected output: one row per `physical_partition`. The final columns are `physical_partition`, and `event_time`.
-   **Verify:** For sql-37 Exercise 4, run an anti-check that counts rows where NOT ((event_time = timestamptz '2025-06-15 00:00:00+00')); require unique `physical_partition` where the expected grain is one row per key and confirm the projected `physical_partition`, and `event_time` against `solution_events`, and `solution_events_default`. Add one row for which `(event_time = timestamptz '2025-06-15 00:00:00+00')` is true and one for which it is false; verify only the matching `physical_partition` value is returned.
+   **Inputs/evidence:** For sql-37 Exercise 4, add `solution_events_default` as the DEFAULT partition and insert one event dated `2025-06-15 00:00:00+00`, which no monthly partition covers.
+   **Expected result/shape:** For sql-37 Exercise 4, expected output: one row, `physical_partition` = `solution_events_default` and `event_time` = `2025-06-15 00:00:00+00`.
+   **Verify:** For sql-37 Exercise 4, before the DEFAULT partition exists, the same insert fails with SQLSTATE `23514` (`no partition of relation "solution_events" found for row`); after it exists, `SELECT COUNT(*) FROM solution_events_default` returns `1`.
 5. Diagnose an insert into an uncovered range.
-   **Inputs/evidence:** For sql-37 Exercise 5, read the target keys from `pg_class` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
-   **Expected result/shape:** For sql-37 Exercise 5, expected output: the command tag and an independently counted set of affected `partition_name` values. The final columns are `partition_name`, and `partition_bound`. The final order is `c.relname`.
-   **Verify:** For sql-37 Exercise 5, materialize the intended `partition_name` target set first; require the command tag/`RETURNING` set to match it, then query `pg_class` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `partition_name` values in both cases.
+   **Inputs/evidence:** For sql-37 Exercise 5, list the leaf partitions of `solution_events` and their bounds from `pg_partition_tree('solution_events')` joined to `pg_class`, after Exercises 1 to 4 created four monthly partitions and the DEFAULT partition.
+   **Expected result/shape:** For sql-37 Exercise 5, expected output: five rows ordered by `c.relname`, with columns `partition_name` and `partition_bound`: four `FOR VALUES FROM (...) TO (...)` rows for January to April and one `DEFAULT` row for `solution_events_default`.
+   **Verify:** For sql-37 Exercise 5, compare the bound text with the dates you wrote in Exercise 1; then, in a scratch transaction before any DEFAULT partition exists, insert a `2025-07-01 00:00:00+00` row and confirm SQLSTATE `23514`, which this catalog query explains because no listed bound covers July.
 6. Test the inclusive-FROM/exclusive-TO boundary at February 1.
-   **Inputs/evidence:** For sql-37 Exercise 6, read from `solution_events`. Build the answer toward `physical_partition`, and `event_time`; keep `physical_partition` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-37 Exercise 6, expected output: one row per `physical_partition`. The final columns are `physical_partition`, and `event_time`.
-   **Verify:** For sql-37 Exercise 6, run an anti-check that counts rows where NOT ((payload->>'source' = 'boundary')); require unique `physical_partition` where the expected grain is one row per key and confirm the projected `physical_partition`, and `event_time` against `solution_events`. Insert rows immediately before, exactly at, and immediately after the literal lower and upper comparisons in the final `WHERE` clause; identify which rows pass each inclusive or exclusive comparison.
+   **Inputs/evidence:** For sql-37 Exercise 6, insert one row at exactly `2025-02-01 00:00:00+00` with `payload` `{"source":"boundary"}`, then read it back by that payload value.
+   **Expected result/shape:** For sql-37 Exercise 6, expected output: one row, `physical_partition` = `solution_events_2025_02` and `event_time` = `2025-02-01 00:00:00+00`, because `FROM` bounds are inclusive and `TO` bounds are exclusive.
+   **Verify:** For sql-37 Exercise 6, insert a second row at `2025-01-31 23:59:59.999999+00` and confirm that `tableoid::regclass` reports `solution_events_2025_01` for it, so the two instants one microsecond apart land in different partitions.
 
 Test every boundary and one value without a matching named partition.
 
@@ -191,8 +215,10 @@ Continue to [Day 38; transactions and isolation](day38_transactions_isolation.md
 ## How the learner script works
 
 The rollback-only demo creates `big_events` partitioned by `event_time`, with
-January and February 2025 partitions. It inserts 1,000 deterministic rows across
-those two months and plans a half-open January-15-to-February-15 count.
+January and February 2025 partitions. It inserts 1,000 deterministic rows, one
+every 83 minutes (537 in January and 463 in February), then plans a
+January-15-to-February-15 count that needs both partitions and a January-only
+count that prunes February.
 
 Partition pruning removes partitions whose bounds cannot satisfy a predicate.
 Use the raw partition key in sargable ranges. Partitioning is primarily a data
@@ -217,8 +243,10 @@ Use the numbered **Exercises** section above as the single authoritative practic
 - An inserted row with no matching partition fails unless a default partition
   exists.
 - Too many tiny partitions increase planning and maintenance overhead.
-- PostgreSQL indexes are implemented per partition; plan index creation for new
-  partitions.
+- An index created on the partitioned parent is created on every partition,
+  including partitions attached later; each partition stores its own physical
+  index. `CREATE INDEX CONCURRENTLY` cannot target the parent, so large online
+  builds use `CREATE INDEX ... ON ONLY` plus `ALTER INDEX ... ATTACH PARTITION`.
 - All demo tables and indexes disappear at the learner script's `ROLLBACK`.
 
 ## Expanded practice lab
@@ -239,7 +267,7 @@ enough to complete the lesson offline. If you want a patient tutor, copy this
 prompt after opening the repository in the AI tutor:
 
 ```text
-Tutor me through sql-37 — Partitioning Sharding.
+Tutor me through sql-37: Partitioning and Sharding.
 
 I have completed the direct catalog prerequisite: `sql-36`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day37_partitioning_sharding.md
@@ -249,7 +277,7 @@ Key terms to teach in context: Partition bound, Partition pruning, Sharding. Fir
 language and explain table, row, column, result set, row grain, SQL NULL, and
 deterministic ordering where they apply. Then explain the important clauses in
 logical order and state the expected row grain/shape before asking me to run
-anything. The guide's lesson-specific worked-model focus is: Map the January and February bounds on a timeline, then plan a January-15-to-February-15 query. Both partitions are required. Change the range to a January-only half-open interval and inspect EXPLAIN to prove February is pruned rather than assuming it.
+anything. The guide's lesson-specific worked-model focus is: Map the January and February bounds on a timeline, then plan a January-15-to-February-15 query. Both partitions are required. Change the range to a January-only half-open interval and inspect `EXPLAIN` to prove February is pruned rather than assuming it.
 
 Use only the local disposable advanced_sql_training database. Prefer the
 Docker classroom's Whole SQL lesson (psql) workspace and its ignored

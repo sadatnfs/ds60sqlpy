@@ -11,16 +11,16 @@ the saved project selection. No host Python or PostgreSQL installation is
 required for this browser route.
 
 1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database. A simple snippet
-   such as `SELECT 1;` needs no training-schema reset.
+   the local disposable `advanced_sql_training` database.
 2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
    preserves the lesson's reviewed psql directives, relative includes and
    transaction behavior. **SQL snippet** is appropriate for ordinary SQL
    statements, but is not a replacement for an entire script's setup.
-3. When the lesson requires the course training data, use the explicit
-   preparation action and read its reset acknowledgement. It replaces the
-   course-owned `training` schema. Do not reset unrelated data or prepare
-   every lesson by habit; stateful sequences have their own ordering.
+3. The **Course database** panel above the code shows whether the course
+   training tables are loaded. Missing tables load automatically before your
+   first run (or choose **Load course tables**) and stay loaded for later
+   lessons. **Reset training data** restores the original rows only when your
+   own changes made results differ; it keeps your saved code and notes.
 4. Edit the learner copy in the classroom and save your prediction before
    running. Its whole-script workspace is
    `.learning/sql/sql-28/lesson/workspace/sql/postgres-60day/day28_json_xml.sql`.
@@ -86,8 +86,8 @@ row count. For a normal analytical `SELECT`, use this logical reading order:
 window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
 different physical plan while preserving those semantics.
 
-The worked walkthrough's lesson-specific task is: Extract metadata->>'campaign' as text, keep the raw JSONB beside it, and group missing values separately. For XML, extract the first XPath result, validate its text form, cast to integer, and left-join orders so malformed or unmatched documents remain visible.
-The expected contract is that One row per customer. Predict keys, row count, `NULL` behavior,
+The worked walkthrough's lesson-specific task is: Extract `metadata->>'campaign'` as text, keep the raw JSONB beside it, and group missing values separately. For XML, extract the first XPath result, validate its text form, cast to integer, and left-join orders so malformed or unmatched documents remain visible.
+Exercise 1 expects this result: one row per customer. Predict keys, row count, `NULL` behavior,
 and ordering before running. Afterwards, compare keys/counts/totals with an
 independent control. A blank string, SQL `NULL`, numeric zero, and a missing row
 are different facts; use `COALESCE` only after choosing which meaning the
@@ -186,9 +186,9 @@ For every result, write its row grain and expected shape first.
    **Verify:** For sql-28 Exercise 2, run an anti-check that counts rows where NOT ((c.attributes @> '{"channel": "mobile"}'::jsonb)); require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id`, `full_name`, and `attributes` against `customers`. Add one row for which `(c.attributes @> '{"channel": "mobile"}'::jsonb)` is true and one for which it is false; verify only the matching `customer_id` value is returned.
 3. **Query writing:** Count event rows with missing device metadata separately from present values.
    **Progressive hint:** Use `?` to test key existence rather than comparing extracted text to NULL.
-   **Inputs/evidence:** For sql-28 Exercise 3, read from `events`. Build the answer toward `has_device_key`, `missing_device_key`, and `all_events`; keep `has_device_key` visible whenever the result has row-level grain.
+   **Inputs/evidence:** For sql-28 Exercise 3, read from `events` and count rows whose `metadata` contains the key `device` (`metadata ? 'device'`), rows without that key, and all rows.
    **Expected result/shape:** For sql-28 Exercise 3, expected output: One summary row. The final columns are `has_device_key`, `missing_device_key`, and `all_events`.
-   **Verify:** For sql-28 Exercise 3, reselect the returned keys directly from the source; require unique `has_device_key` where the expected grain is one row per key and confirm the projected `has_device_key`, `missing_device_key`, and `all_events` against `events`. Add one source row with a new `has_device_key`; verify the result gains exactly one row carrying that `has_device_key` value.
+   **Verify:** For sql-28 Exercise 3, confirm one row with `has_device_key` 20000, `missing_device_key` 0, and `all_events` 20000; then test `VALUES ('{"device": null}'::jsonb), ('{}'::jsonb)`: `?` returns true and false, while `->> 'device' IS NULL` is true for both, so only `?` separates a present JSON null from a missing key.
 4. **Prediction:** Aggregate event-type counts into a JSONB object per customer and predict key ordering expectations.
    **Progressive hint:** JSON objects are mappings; do not treat key order as a semantic contract.
    **Inputs/evidence:** For sql-28 Exercise 4, read from `events`. Build the answer toward `customer_id`, and `counts_by_type`; keep `customer_id` visible whenever the result has row-level grain.
@@ -201,9 +201,9 @@ For every result, write its row grain and expected shape first.
    **Verify:** For sql-28 Exercise 5, reselect the returned keys directly from the source; require unique `doc_id` where the expected grain is one row per key and confirm the projected `doc_id`, `order_id`, and `order_status` against `xml_docs`. Add one source row with a new `doc_id`; verify the result gains exactly one row carrying that `doc_id` value.
 6. **Extension:** Safely cast a numeric JSON text field from sample payloads, returning NULL for missing or malformed values.
    **Progressive hint:** Validate extracted text with a numeric regex before casting.
-   **Inputs/evidence:** For sql-28 Exercise 6, read from `payloads`. Build the answer toward `payload`, and `safe_amount`; keep `payload` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-28 Exercise 6, expected output: One row per sample payload. The final columns are `payload`, and `safe_amount`.
-   **Verify:** For sql-28 Exercise 6, reselect the returned keys directly from the source; require unique `payload` where the expected grain is one row per key and confirm the projected `payload`, and `safe_amount` against `payloads`. Repeat with `NULL` in `payload`, and `safe_amount` and state whether the row is kept, rejected, or classified.
+   **Inputs/evidence:** For sql-28 Exercise 6, read three sample documents from the inline `payloads` relation: `{"amount": "12.50"}`, `{"amount": "bad"}`, and `{}`, and cast `payload ->> 'amount'` to `numeric` only when the text passes the numeric pattern.
+   **Expected result/shape:** For sql-28 Exercise 6, expected output: three rows with columns `payload` and `safe_amount`, one per sample document: `12.50`, `NULL`, and `NULL`. No row is removed, and no cast error stops the query.
+   **Verify:** For sql-28 Exercise 6, confirm that a bare `(payload ->> 'amount')::numeric` over the same rows fails with SQLSTATE `22P02` (`invalid input syntax for type numeric: "bad"`); then add `{"amount": "1e3"}` and observe that the pattern returns `NULL` although `pg_input_is_valid('1e3', 'numeric')` returns `true`.
 
 ## Common mistakes and how to recover
 
@@ -249,6 +249,7 @@ Core concepts and deep dive (JSONB)
   - jsonb_set(target, path, value[, create_missing])
 - Indexing
   - GIN on jsonb_col with default jsonb_ops supports @>, ?, ?|, ?& efficiently
+  - `jsonb_path_ops` builds a smaller GIN index that supports only `@>`, `@?`, and `@@`
   - Expression indexes on jsonb_col->>'field' for selective predicates
 - Patterns
   - Event filtering: `WHERE metadata @> '{"device":"web"}'`
@@ -266,16 +267,10 @@ Pitfalls
 - Casting: ->> returns text; cast to numeric/date before arithmetic/comparison
 - Overusing schemaless: retain core relational columns for keys, dates, and major filters; use JSONB for optional/rare attributes
 
-Current practice map
-- The authoritative six prompts, progressive hints, and expected shapes
-  are maintained in **Exercises** above. They map
-  one-for-one to both solution companions; older short exercise lists
-  were removed to prevent prompt drift.
-
 Further reading
-- JSON functions: https://www.postgresql.org/docs/current/functions-json.html
-- GIN indexing: https://www.postgresql.org/docs/current/textsearch-indexes.html
-- XML: https://www.postgresql.org/docs/current/functions-xml.html
+- JSON functions: https://www.postgresql.org/docs/17/functions-json.html
+- JSONB indexing: https://www.postgresql.org/docs/17/datatype-json.html#JSON-INDEXING
+- XML: https://www.postgresql.org/docs/17/functions-xml.html
 
 ## Ask an AI tutor about this lesson
 
@@ -284,7 +279,7 @@ enough to complete the lesson offline. If you want a patient tutor, copy this
 prompt after opening the repository in the AI tutor:
 
 ```text
-Tutor me through sql-28 — JSON XML.
+Tutor me through sql-28: JSONB and XML in PostgreSQL.
 
 I have completed the direct catalog prerequisite: `sql-27`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day28_json_xml.md
@@ -294,7 +289,7 @@ Key terms to teach in context: JSONB, Containment, Path extraction. First define
 language and explain table, row, column, result set, row grain, SQL NULL, and
 deterministic ordering where they apply. Then explain the important clauses in
 logical order and state the expected row grain/shape before asking me to run
-anything. The guide's lesson-specific worked-model focus is: Extract metadata->>'campaign' as text, keep the raw JSONB beside it, and group missing values separately. For XML, extract the first XPath result, validate its text form, cast to integer, and left-join orders so malformed or unmatched documents remain visible.
+anything. The guide's lesson-specific worked-model focus is: Extract `metadata->>'campaign'` as text, keep the raw JSONB beside it, and group missing values separately. For XML, extract the first XPath result, validate its text form, cast to integer, and left-join orders so malformed or unmatched documents remain visible.
 
 Use only the local disposable advanced_sql_training database. Prefer the
 Docker classroom's Whole SQL lesson (psql) workspace and its ignored

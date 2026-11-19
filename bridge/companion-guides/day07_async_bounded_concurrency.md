@@ -28,14 +28,8 @@ Start at the repository root. The answer-free starter is deliberately safe to
 run: it prints orientation text and does not call unfinished functions or
 contact PostgreSQL.
 
-```powershell
-# Windows PowerShell
-.\.venv\Scripts\python.exe bridge\lessons\day07_async_bounded_concurrency.py
-.\.venv\Scripts\python.exe -m pytest bridge\tests -q
-```
-
 ```bash
-# macOS/Linux
+# Linux, macOS, or Windows through WSL 2
 .venv/bin/python bridge/lessons/day07_async_bounded_concurrency.py
 .venv/bin/python -m pytest bridge/tests -q
 ```
@@ -86,6 +80,46 @@ tasks: it waits for all on success and cancels siblings when one fails.
 Do not put `time.sleep()`, synchronous HTTP, or a synchronous Psycopg call inside
 an async function. Those block the event loop. Use an async API or deliberately
 move blocking work to a thread when the library is thread-safe.
+
+### The real driver: a pool is also a limit
+
+One Psycopg connection runs one statement at a time; tasks that share it are
+serialized and also share its transaction. `psycopg_pool.AsyncConnectionPool`
+(installed with the `bridge` extra) gives each task its own connection and makes
+a task wait while `max_size` connections are busy, so the pool size is itself a
+concurrency limit. Match it to your semaphore, or let the pool be the only
+limit. Results are stored by input index, so output order follows input order.
+
+```python
+import asyncio
+import os
+
+from psycopg_pool import AsyncConnectionPool
+
+
+async def lookup_all(customer_ids: list[int], limit: int) -> list[str]:
+    results: list[str] = [""] * len(customer_ids)
+
+    async def lookup(index: int, customer_id: int) -> None:
+        async with pool.connection() as conn:  # waits while `limit` connections are busy
+            cur = await conn.execute(
+                "SELECT country FROM training.customers WHERE customer_id = %s",
+                (customer_id,),
+            )
+            row = await cur.fetchone()
+            results[index] = "" if row is None else row[0]
+
+    async with AsyncConnectionPool(
+        os.environ["DS60_DATABASE_URL"], min_size=1, max_size=limit
+    ) as pool:
+        async with asyncio.TaskGroup() as group:
+            for index, customer_id in enumerate(customer_ids):
+                group.create_task(lookup(index, customer_id))
+    return results
+
+
+print(asyncio.run(lookup_all([1, 2, 3, 4, 5], limit=2)))  # ['US', 'CA', 'GB', 'DE', 'FR']
+```
 
 
 <!-- BEGIN BRIDGE ENRICHMENT: DEEP DIVE -->
@@ -242,13 +276,14 @@ finally:
 
 Set `DS60_DATABASE_URL` in the shell, but never print it:
 
-```powershell
-$env:DS60_DATABASE_URL = "postgresql://USER:PASSWORD@localhost:5432/advanced_sql_training"
+```bash
+export DS60_DATABASE_URL="postgresql://admin@127.0.0.1:PORT/advanced_sql_training"
 ```
 
-```bash
-export DS60_DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/advanced_sql_training"
-```
+Replace `PORT` with the forwarded PostgreSQL port that `./classroom status`
+reports (55432 by default). Keep the password out of the URL: supply it
+through a private libpq password file as the
+[JupySQL setup guide](../../docs/setup/jupyter-postgresql.md) shows.
 
 For concurrent queries, pool size and semaphore limit must agree. A concurrency
 limit of 50 does not help if a pool of 5 causes 45 tasks to wait while still
@@ -282,7 +317,7 @@ prompt below deliberately names exact paths so a new AI tutoring session can ori
 itself without guessing.
 
 ```text
-Tutor me through stable lesson ID bridge-07: Async Bounded Concurrency.
+Tutor me through stable lesson ID bridge-07: Async I/O and Bounded Concurrency.
 Direct catalog prerequisites: bridge-06. Assume I completed exactly those
 prerequisites, then begin with one short Retrieval question that connects each
 prerequisite to this lesson.
@@ -295,12 +330,12 @@ Do not open, quote, summarize, or copy anything under solutions/ until I
 explicitly say I have finished my attempt and ask to compare.
 
 Use these coaching phases in order:
-1. Predict — ask what I expect before I run or change code.
-2. Attempt — let me implement or explain one numbered exercise at a time.
-3. Hint — give the smallest useful conceptual hint, never a finished answer.
-4. Evidence — ask for the exact return value, exception type, recorded calls,
+1. Predict: ask what I expect before I run or change code.
+2. Attempt: let me implement or explain one numbered exercise at a time.
+3. Hint: give the smallest useful conceptual hint, never a finished answer.
+4. Evidence: ask for the exact return value, exception type, recorded calls,
    query plus bound parameters, or written decision required by that exercise.
-5. Retrieval — close with two no-notes questions and one transfer problem.
+5. Retrieval: close with two no-notes questions and one transfer problem.
 
 Keep the default path offline and fake-first. If the lesson has an optional
 PostgreSQL step, require my explicit opt-in, DS60_DATABASE_URL, and the

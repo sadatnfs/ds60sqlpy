@@ -1,5 +1,5 @@
 -- Day 37 solutions: partitioning
--- SOLUTION READING MAP — sql-37: Partitioning Sharding
+-- SOLUTION READING MAP for sql-37: Partitioning and Sharding
 -- Explanation: sql/postgres-60day/solutions/day37_solutions.md
 -- Run from the repository root only against advanced_sql_training:
 --   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day37_solutions.sql
@@ -71,6 +71,18 @@ WHERE
   customer_id = 42
   AND event_time >= timestamptz '2025-03-01 00:00:00+00'
   AND event_time < timestamptz '2025-04-01 00:00:00+00';
+
+-- The parent index plus one child index per monthly partition: five rows.
+SELECT
+  tablename,
+  indexname
+FROM
+  pg_indexes
+WHERE
+  schemaname = 'training'
+  AND tablename LIKE 'solution_events%'
+ORDER BY
+  tablename;
 
 -- Exercise 3: the unbounded query can visit every partition; the bounded query
 -- lets PostgreSQL prune to March.

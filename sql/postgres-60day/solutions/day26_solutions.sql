@@ -1,5 +1,5 @@
 -- Day 26 executable solutions
--- SOLUTION READING MAP — sql-26: CTEs with Windows
+-- SOLUTION READING MAP for sql-26: CTEs with Window Functions
 -- Explanation: sql/postgres-60day/solutions/day26_solutions.md
 -- Run from the repository root only against advanced_sql_training:
 --   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day26_solutions.sql

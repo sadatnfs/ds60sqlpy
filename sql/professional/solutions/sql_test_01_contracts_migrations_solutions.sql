@@ -1,5 +1,5 @@
 -- SQL-TEST-01 executable solutions
--- SOLUTION READING MAP — sql-test-01: SQL Tests, Migration Checks, and Data Contracts
+-- SOLUTION READING MAP for sql-test-01: SQL Tests, Migration Checks, and Data Contracts
 -- Explanation: sql/professional/solutions/sql_test_01_contracts_migrations_solutions.md
 -- Run from the repository root only against advanced_sql_training:
 --   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solutions/sql_test_01_contracts_migrations_solutions.sql

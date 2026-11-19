@@ -7,13 +7,8 @@
 Open this explanation only after making an honest attempt. The executable
 companion runs solely against the disposable `advanced_sql_training` database:
 
-```powershell
-# Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f "sql\postgres-60day\solutions\day16_solutions.sql"
-```
-
 ```bash
-# macOS/Linux, from the repository root
+# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day16_solutions.sql
 ```
@@ -26,7 +21,7 @@ ordering with the explanation before comparing syntax.
 ## Clause-by-clause reading map
 
 The lesson's main concepts are Window, Partition, Frame. Its worked-model focus is:
-Pre-aggregate net revenue to one row per category, then calculate SUM(revenue) OVER () beside each category. The ordinary aggregate establishes the category grain; the window exposes the grand total without removing those category rows.
+Pre-aggregate net revenue to one row per category, then calculate `SUM(revenue) OVER ()` beside each category. The ordinary aggregate establishes the category grain; the window exposes the grand total without removing those category rows.
 
 - Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
   before adding aggregates; a one-to-many join is allowed to multiply rows only
@@ -259,13 +254,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-16 Exercise 4, read from `orders`. Build the answer toward `method`, and `row_count`; keep `order_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-16 Exercise 4, expected output: Two labeled count rows. The final columns are `method`, and `row_count`. The final order is `method`.
-- **Independent verification:** For sql-16 Exercise 4, reselect the returned keys directly from the source; require unique `order_id` where the expected grain is one row per key and confirm the projected `method`, and `row_count` against `orders`. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
-- **Intermediate relation check:** For sql-16 Exercise 4, run `grouped`, and `windowed` one at a time. Record each CTE's row count and `order_id` uniqueness before the next stage uses it.
-- **Clause check:** For sql-16 Exercise 4, the solution actually uses `WITH`, `FROM`, `GROUP BY`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `order_id`, and finish with `method`, and `row_count` ordered by `method`.
-- **Alternative/trade-off:** For sql-16 Exercise 4, the chosen form is justified by this lesson-specific rationale: Grouping collapses to one row per customer; a window preserves every order row. Evaluate another form against the concrete expected result (Two labeled count rows) and the verification above.
-- **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+- **Inputs/evidence:** For sql-16 Exercise 4, compare a `grouped` CTE (`AVG(o.total_amount) ... GROUP BY o.customer_id`) with a `windowed` CTE (`AVG(o.total_amount) OVER (PARTITION BY o.customer_id)`) over `orders`, then count the rows of each.
+- **Expected result/shape:** For sql-16 Exercise 4, expected output: two rows ordered by `method`, with columns `method` and `row_count`: `('grouped', 438)` and `('windowed', 4362)` on the course seed.
+- **Independent verification:** For sql-16 Exercise 4, confirm that the `grouped` count equals `SELECT COUNT(DISTINCT customer_id) FROM orders` and the `windowed` count equals `SELECT COUNT(*) FROM orders`; grouping keeps one row per ordering customer, while the window keeps every order row.
+- **Intermediate relation check:** For sql-16 Exercise 4, run each CTE body alone: `grouped` has unique `customer_id` values, while `windowed` repeats each customer's average on every one of that customer's orders.
+- **Clause check:** For sql-16 Exercise 4, the solution uses two CTEs, one `GROUP BY` and one `AVG(...) OVER (PARTITION BY ...)`, and combines two labeled `COUNT(*)` rows with `UNION ALL` before `ORDER BY method`.
+- **Alternative/trade-off:** For sql-16 Exercise 4, `SELECT COUNT(DISTINCT customer_id), COUNT(*) FROM orders` returns the same two numbers in one row, but it does not show that the window query itself preserves row count.
+- **Edge case:** A customer with no orders appears in neither CTE, because both read `orders`; joining from `customers` first would be needed to report that customer.
 
 ## Exercise 5: Debugging
 
@@ -314,13 +309,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-16 Exercise 5, read from `orders`. Build the answer toward `order_id`, `customer_id`, `total_amount`, and `customer_average`; keep `order_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-16 Exercise 5, expected output: Order rows above their customer mean. The final columns are `order_id`, `customer_id`, `total_amount`, and `customer_average`. The final order is `customer_id, total_amount DESC, order_id`.
-- **Independent verification:** For sql-16 Exercise 5, run an anti-check that counts rows where NOT ((total_amount > customer_average)); require unique `order_id` where the expected grain is one row per key and confirm the projected `order_id`, `customer_id`, `total_amount`, and `customer_average` against `orders`. Insert rows immediately before, exactly at, and immediately after the literal lower and upper comparisons in the final `WHERE` clause; identify which rows pass each inclusive or exclusive comparison.
-- **Intermediate relation check:** For sql-16 Exercise 5, run `scored` one at a time. Record each CTE's row count and `order_id` uniqueness before the next stage uses it.
-- **Clause check:** For sql-16 Exercise 5, the solution actually uses `WITH`, `FROM`, `WHERE`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `order_id`, and finish with `order_id`, `customer_id`, `total_amount`, and `customer_average` ordered by `customer_id, total_amount DESC, order_id`.
-- **Alternative/trade-off:** For sql-16 Exercise 5, the chosen form is justified by this lesson-specific rationale: Compute the window value in a CTE, then filter the named column outside. Evaluate another form against the concrete expected result (Order rows above their customer mean) and the verification above.
-- **Edge case:** Insert rows immediately before, exactly at, and immediately after the literal lower and upper comparisons in the final `WHERE` clause; identify which rows pass each inclusive or exclusive comparison.
+- **Inputs/evidence:** For sql-16 Exercise 5, compute `AVG(o.total_amount) OVER (PARTITION BY o.customer_id)` as `customer_average` in a `scored` CTE over `orders`, then filter `total_amount > customer_average` in the outer query.
+- **Expected result/shape:** For sql-16 Exercise 5, expected output: one row per `order_id` whose `total_amount` is strictly above its customer's mean (2,249 rows on the course seed), with columns `order_id`, `customer_id`, `total_amount`, and `customer_average` (rounded to 2 places), ordered by `customer_id, total_amount DESC, order_id`.
+- **Independent verification:** For sql-16 Exercise 5, compare the row count with `SELECT COUNT(*) FROM orders o WHERE o.total_amount > (SELECT AVG(i.total_amount) FROM orders i WHERE i.customer_id = o.customer_id)` (2,249), require unique `order_id`, and confirm that moving the window expression into `WHERE` fails with `window functions are not allowed in WHERE`.
+- **Intermediate relation check:** For sql-16 Exercise 5, `SELECT COUNT(*) FROM scored` returns 4,362, one row per order, before the outer filter keeps the 2,249 above-average orders.
+- **Clause check:** For sql-16 Exercise 5, the solution uses a `scored` CTE with `AVG(...) OVER (PARTITION BY o.customer_id)`, an outer `WHERE total_amount > customer_average`, and `ORDER BY customer_id, total_amount DESC, order_id`.
+- **Alternative/trade-off:** For sql-16 Exercise 5, a correlated subquery returns the same rows, but it restates the average for every order; the window computes each customer's average once per partition.
+- **Edge case:** An order whose total equals its customer's average is excluded by the strict `>`; a customer with a single order can never qualify, because that order is its own average.
 
 ## Exercise 6: Extension
 

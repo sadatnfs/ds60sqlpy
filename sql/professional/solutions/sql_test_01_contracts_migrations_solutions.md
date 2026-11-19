@@ -7,13 +7,8 @@
 Open this explanation only after making an honest attempt. The executable
 companion runs solely against the disposable `advanced_sql_training` database:
 
-```powershell
-# Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f "sql\professional\solutions\sql_test_01_contracts_migrations_solutions.sql"
-```
-
 ```bash
-# macOS/Linux, from the repository root
+# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/professional/solutions/sql_test_01_contracts_migrations_solutions.sql
 ```
@@ -26,7 +21,7 @@ ordering with the explanation before comparing syntax.
 ## Clause-by-clause reading map
 
 The lesson's main concepts are Assertion, Fixture, Negative control, Contract, Invariant test, Reconciliation. Its worked-model focus is:
-asserttrue(name, condition, detail) treats both false and NULL as failure, raises an exception, and emits a PASS notice only after success. With ONERRORSTOP=1, an uncaught failed assertion gives the command a nonzero exit status, CI cannot mistake printed warnings for success.
+`assert_true(name, condition, detail)` treats both false and NULL as failure, raises an exception, and emits a PASS notice only after success. With `ON_ERROR_STOP=1`, an uncaught failed assertion gives the command a nonzero exit status, CI cannot mistake printed warnings for success.
 
 - Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
   before adding aggregates; a one-to-many join is allowed to multiply rows only

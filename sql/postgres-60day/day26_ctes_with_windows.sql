@@ -66,10 +66,10 @@ ORDER BY
 -- Keep answers in your own scratch file; this learner script remains answer-free.
 -- 1. [Query writing] Calculate monthly stored revenue and its prior-month value/change.
 --    Hint: Aggregate to month in a CTE, then lag the monthly measure.
---    Inputs: For sql-26 Exercise 1, read from `orders`. Build the answer toward `month_start`, `revenue`, `previous_revenue`, and `change`; keep `order_id` visible whenever the result has row-level grain.
+--    Inputs: For sql-26 Exercise 1, read from `orders`, aggregate `SUM(total_amount)` to one row per UTC month in the CTE `monthly`, then use `LAG(revenue) OVER (ORDER BY month_start)` in `compared` and return `change = revenue - previous_revenue`.
 --    Expected result/shape: For sql-26 Exercise 1, expected output: One row per observed month. The final columns are `month_start`, `revenue`, `previous_revenue`, and `change`. The final order is `month_start`.
---    Verify: For sql-26 Exercise 1, reselect the returned keys directly from the source; require unique `order_id` where the expected grain is one row per key and confirm the projected `month_start`, `revenue`, `previous_revenue`, and `change` against `orders`. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
---    Hint ladder, rung 1: For sql-26 Exercise 1, run `monthly`, and `compared` one at a time. Record each CTE's row count and `order_id` uniqueness before the next stage uses it.
+--    Verify: For sql-26 Exercise 1, confirm that `month_start` is unique and that the row count equals `SELECT COUNT(DISTINCT date_trunc('month', order_date AT TIME ZONE 'UTC')) FROM orders`; exactly one row, the earliest month, has NULL `previous_revenue` and `change`, and the `revenue` values add up to 2355646.89.
+--    Hint ladder, rung 1: For sql-26 Exercise 1, run `monthly` alone and confirm one row per `month_start` before `compared` applies `LAG`.
 -- 2. [Query writing] Rank product categories by net revenue within each UTC order month.
 --    Hint: Aggregate month/category first, then rank the stable aggregate.
 --    Inputs: For sql-26 Exercise 2, read from `orders`, `order_items`, and `products`. Build the answer toward `month_start`, `category`, `revenue`, and `revenue_rank`; keep `category` visible whenever the result has row-level grain.
@@ -96,8 +96,8 @@ ORDER BY
 --    Hint ladder, rung 1: For sql-26 Exercise 5, run `bounds`, `calendar`, `monthly`, and `dense` one at a time. Record each CTE's row count and `order_id` uniqueness before the next stage uses it.
 -- 6. [Extension] Reconcile the final cumulative monthly revenue with the independent order total.
 --    Hint: Compare at the end of the CTE/window chain instead of assuming transformations preserved totals.
---    Inputs: For sql-26 Exercise 6, read from `orders`. Build the answer toward `final_cumulative`, `independent_total`, and `difference`; keep `cumulative_revenue` visible whenever the result has row-level grain.
+--    Inputs: For sql-26 Exercise 6, read from `orders`; aggregate to UTC months in `monthly`, accumulate the monthly revenue with `SUM(revenue) OVER (ORDER BY month_start)` in `running`, keep the last month's cumulative value in `final`, and compare it with an independent `SUM(total_amount)`.
 --    Expected result/shape: For sql-26 Exercise 6, expected output: One row with zero difference. The final columns are `final_cumulative`, `independent_total`, and `difference`.
---    Verify: For sql-26 Exercise 6, independently aggregate `orders` by `cumulative_revenue`; require one output row for every distinct `cumulative_revenue` tuple and compare `independent_total` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `independent_total` for the existing `cumulative_revenue` tuple and verify the new tuple appears exactly once.
---    Hint ladder, rung 1: For sql-26 Exercise 6, run `monthly`, `running`, and `final` one at a time. Record each CTE's row count and `cumulative_revenue` uniqueness before the next stage uses it.
+--    Verify: For sql-26 Exercise 6, confirm one row where `final_cumulative` and `independent_total` are both 2355646.89 and `difference` is 0.00; the `monthly` revenues must already add up to that total before the window is applied.
+--    Hint ladder, rung 1: For sql-26 Exercise 6, check that the `monthly` revenues add up to 2355646.89 before you build `running` and `final`.
 ROLLBACK;

@@ -7,13 +7,8 @@
 Open this explanation only after making an honest attempt. The executable
 companion runs solely against the disposable `advanced_sql_training` database:
 
-```powershell
-# Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f "sql\professional\solutions\sql_analytics_01_query_patterns_solutions.sql"
-```
-
 ```bash
-# macOS/Linux, from the repository root
+# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/professional/solutions/sql_analytics_01_query_patterns_solutions.sql
 ```
@@ -26,7 +21,7 @@ ordering with the explanation before comparing syntax.
 ## Clause-by-clause reading map
 
 The lesson's main concepts are Grain, Canonical row, Session, Gap/island, Funnel, Attribution window. Its worked-model focus is:
-The raw event grain is one ingestion attempt, so sourceeventid can repeat. The canonical view partitions by source ID and chooses latest ingestedat, then identity as a final tie-break. Deduplication happens before every downstream pattern to avoid double-counting retries.
+The raw event grain is one ingestion attempt, so `source_event_id` can repeat. The canonical view partitions by source ID and chooses latest `ingested_at`, then identity as a final tie-break. Deduplication happens before every downstream pattern to avoid double-counting retries.
 
 - Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
   before adding aggregates; a one-to-many join is allowed to multiply rows only

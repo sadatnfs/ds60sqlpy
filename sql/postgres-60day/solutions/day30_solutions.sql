@@ -1,5 +1,5 @@
 -- Day 30 executable solutions
--- SOLUTION READING MAP — sql-30: Phase2 Project
+-- SOLUTION READING MAP for sql-30: Phase 2 Project: Cohort Retention and Customer Lifetime Value
 -- Explanation: sql/postgres-60day/solutions/day30_solutions.md
 -- Run from the repository root only against advanced_sql_training:
 --   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day30_solutions.sql

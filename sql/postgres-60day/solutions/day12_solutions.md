@@ -7,13 +7,8 @@
 Open this explanation only after making an honest attempt. The executable
 companion runs solely against the disposable `advanced_sql_training` database:
 
-```powershell
-# Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f "sql\postgres-60day\solutions\day12_solutions.sql"
-```
-
 ```bash
-# macOS/Linux, from the repository root
+# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day12_solutions.sql
 ```
@@ -26,7 +21,7 @@ ordering with the explanation before comparing syntax.
 ## Clause-by-clause reading map
 
 The lesson's main concepts are Normalization, Delimiter, Regular expression. Its worked-model focus is:
-Compare a raw email with lower(trim(email)). Use the normalized expression for duplicate grouping, but keep the original column visible so a reviewer can audit what changed. Explain why silently overwriting the raw value would lose evidence.
+Compare a raw email with `lower(trim(email))`. Use the normalized expression for duplicate grouping, but keep the original column visible so a reviewer can audit what changed. Explain why silently overwriting the raw value would lose evidence.
 
 - Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
   before adding aggregates; a one-to-many join is allowed to multiply rows only
@@ -192,13 +187,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-12 Exercise 3, read from `departments`, and `employees`. Build the answer toward `department_id`, `department_name`, and `employees`; keep `department_id`, and `name` visible whenever the result has row-level grain.
+- **Inputs/evidence:** For sql-12 Exercise 3, read from `departments` left-joined to `employees` and list each department's employee names with `string_agg(e.full_name, ', ' ORDER BY e.full_name, e.employee_id)`.
 - **Expected result/shape:** For sql-12 Exercise 3, expected output: One row per department. The final columns are `department_id`, `department_name`, and `employees`. The final order is `d.department_id`.
-- **Independent verification:** For sql-12 Exercise 3, independently aggregate `departments`, and `employees` by `department_id`, and `name`; require one output row for every distinct `department_id`, and `name` tuple and compare `employees` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `employees` for the existing `department_id`, and `name` tuple and verify the new tuple appears exactly once.
-- **Intermediate relation check:** For sql-12 Exercise 3, start with the first relation in `departments`, and `employees`; after each join, record total rows and distinct `department_id`, and `name` so the exact fanout or loss is visible.
-- **Clause check:** For sql-12 Exercise 3, the solution actually uses `FROM`, `JOIN ... ON`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `departments`, and `employees`, preserve one row per `department_id`, and `name`, and finish with `department_id`, `department_name`, and `employees` ordered by `d.department_id`.
+- **Independent verification:** For sql-12 Exercise 3, confirm 6 rows, one per `department_id`, matching `SELECT COUNT(*) FROM departments`; for one department, compare the number of names in `employees` with `SELECT COUNT(*) FROM employees WHERE department_id = <that id>` (17 for departments 1 to 4 and 16 for departments 5 and 6).
+- **Intermediate relation check:** For sql-12 Exercise 3, start from `departments`, `LEFT JOIN` employees, and check that grouping by `department_id` and `name` still returns 6 rows.
+- **Clause check:** For sql-12 Exercise 3, the solution actually uses `FROM`, `JOIN ... ON`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `departments`, and `employees`, preserve one row per department, and finish with `department_id`, `department_name`, and `employees` ordered by `d.department_id`.
 - **Alternative/trade-off:** For sql-12 Exercise 3, the chosen form is justified by this lesson-specific rationale: Put `ORDER BY` inside `string_agg` so concatenation order is deliberate. Evaluate another form against the concrete expected result (One row per department) and the verification above.
-- **Edge case:** Add one row to an existing group and one row for a new group; recompute `employees` for the existing `department_id`, and `name` tuple and verify the new tuple appears exactly once.
+- **Edge case:** The names sort as text, so `Employee 13` comes before `Employee 7`; order the aggregate by `employee_id` when numeric order matters.
 
 ## Exercise 4: Prediction
 

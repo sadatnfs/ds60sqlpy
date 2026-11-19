@@ -1,5 +1,5 @@
 -- Day 51 solutions: cash flow and operating margin
--- SOLUTION READING MAP — sql-51: Project2 Finance Part3
+-- SOLUTION READING MAP for sql-51: Finance Project, Part 3: Cash Flow
 -- Explanation: sql/postgres-60day/solutions/day51_solutions.md
 -- Run from the repository root only against advanced_sql_training:
 --   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day51_solutions.sql

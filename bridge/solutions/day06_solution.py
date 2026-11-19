@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from datetime import date
-from decimal import Decimal, InvalidOperation
+from decimal import ROUND_HALF_EVEN, Decimal, InvalidOperation
 from typing import Protocol, TypeVar
 
 T = TypeVar("T")
@@ -73,7 +73,7 @@ def parse_sale(raw: Mapping[str, str]) -> Sale:
         raise RowValidationError("amount must be a decimal number") from exc
     if not amount.is_finite() or amount <= 0:
         raise RowValidationError("amount must be finite and positive")
-    amount = amount.quantize(Decimal("0.01"))
+    amount = amount.quantize(Decimal("0.01"), rounding=ROUND_HALF_EVEN)
 
     try:
         occurred_on = date.fromisoformat(raw.get("occurred_on", ""))

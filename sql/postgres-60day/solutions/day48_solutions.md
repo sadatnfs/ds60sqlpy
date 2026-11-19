@@ -7,13 +7,8 @@
 Open this explanation only after making an honest attempt. The executable
 companion runs solely against the disposable `advanced_sql_training` database:
 
-```powershell
-# Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f "sql\postgres-60day\solutions\day48_solutions.sql"
-```
-
 ```bash
-# macOS/Linux, from the repository root
+# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day48_solutions.sql
 ```
@@ -26,7 +21,7 @@ ordering with the explanation before comparing syntax.
 ## Clause-by-clause reading map
 
 The lesson's main concepts are Market basket, Attribution window, Fractional credit. Its worked-model focus is:
-Deduplicate products within each order, self-join with a.productid < b.productid, and count orders per pair. For attribution, deduplicate campaigns per purchase before dividing one credit by the distinct campaign count; verify allocated credit sums to one for every assisted purchase.
+Deduplicate products within each order, self-join with `a.product_id < b.product_id`, and count orders per pair. For attribution, deduplicate campaigns per purchase before dividing one credit by the distinct campaign count; verify allocated credit sums to one for every assisted purchase.
 
 - Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
   before adding aggregates; a one-to-many join is allowed to multiply rows only

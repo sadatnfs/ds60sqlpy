@@ -11,16 +11,16 @@ the saved project selection. No host Python or PostgreSQL installation is
 required for this browser route.
 
 1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database. A simple snippet
-   such as `SELECT 1;` needs no training-schema reset.
+   the local disposable `advanced_sql_training` database.
 2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
    preserves the lesson's reviewed psql directives, relative includes and
    transaction behavior. **SQL snippet** is appropriate for ordinary SQL
    statements, but is not a replacement for an entire script's setup.
-3. When the lesson requires the course training data, use the explicit
-   preparation action and read its reset acknowledgement. It replaces the
-   course-owned `training` schema. Do not reset unrelated data or prepare
-   every lesson by habit; stateful sequences have their own ordering.
+3. The **Course database** panel above the code shows whether the course
+   training tables are loaded. Missing tables load automatically before your
+   first run (or choose **Load course tables**) and stay loaded for later
+   lessons. **Reset training data** restores the original rows only when your
+   own changes made results differ; it keeps your saved code and notes.
 4. Edit the learner copy in the classroom and save your prediction before
    running. Its whole-script workspace is
    `.learning/sql/sql-33/lesson/workspace/sql/postgres-60day/day33_index_optimization_strategies.sql`.
@@ -86,8 +86,8 @@ row count. For a normal analytical `SELECT`, use this logical reading order:
 window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
 different physical plan while preserving those semantics.
 
-The worked walkthrough's lesson-specific task is: For a query filtering customerid and a date range, compare (customerid, orderdate) with the reversed key order. Then check whether the query predicate logically implies a partial-index predicate; mere overlap is not enough for PostgreSQL to use that index safely.
-The first runnable example has a concrete contract: Example 1 must print the expected DDL command tag for `idx_orders_customer_date`, and `orders`. Verify the object in `pg_catalog.pg_index`, and `pg_catalog.pg_indexes`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state. Its final projection is the columns written in the final `SELECT`. Verify the command tag in `pg_catalog`/`information_schema`, run one accepted value and one value the declared rule rejects, and confirm the lesson rollback removes the course-owned object.
+The worked walkthrough's lesson-specific task is: For a query filtering `customer_id` and a date range, compare `(customer_id, order_date)` with the reversed key order. Then check whether the query predicate logically implies a partial-index predicate; mere overlap is not enough for PostgreSQL to use that index safely.
+The first runnable example has a concrete contract: Example 1 must print the expected DDL command tag for `idx_orders_customer_date`, and `orders`. Verify the object in `pg_catalog.pg_index`, and `pg_catalog.pg_indexes`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.
 
 ## Two worked SQL examples
 
@@ -158,9 +158,9 @@ Complete these in the
    **Expected result/shape:** For sql-33 Exercise 5, expected output: one row per `order_id`. The final columns are `order_id`.
    **Verify:** For sql-33 Exercise 5, run the underlying query without `EXPLAIN` and preserve its `order_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
 6. Evaluate a NULL-only partial index for `customers.segment`.
-   **Inputs/evidence:** For sql-33 Exercise 6, run the underlying read-only query over `customers`, `idx_customers_null_segment_solution`, and `customers.segment` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
-   **Expected result/shape:** For sql-33 Exercise 6, expected output: one row per `customer_id`. The final columns are `all_customers`, and `null_segments`.
-   **Verify:** For sql-33 Exercise 6, run the underlying query without `EXPLAIN` and preserve its `customer_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+   **Inputs/evidence:** For sql-33 Exercise 6, count all customers and those with `segment IS NULL`, create the partial index `idx_customers_null_segment_solution ON customers (customer_id) WHERE segment IS NULL`, and read the plan of `SELECT customer_id FROM customers WHERE segment IS NULL`.
+   **Expected result/shape:** For sql-33 Exercise 6, expected output: one row with `all_customers` 500 and `null_segments` 0, then a plan for the `IS NULL` query that can use the partial index (a `Bitmap Index Scan on idx_customers_null_segment_solution` on the course data). The final columns of the count are `all_customers` and `null_segments`.
+   **Verify:** For sql-33 Exercise 6, confirm that the `IS NULL` query returns 0 rows, matching `null_segments`, whatever plan it uses; then confirm that `SELECT indexdef FROM pg_indexes WHERE indexname = 'idx_customers_null_segment_solution'` ends with `WHERE (segment IS NULL)`, because only a query whose `WHERE` implies that predicate can use the index.
 
 For each candidate, name the exact query and maintenance tradeoff.
 
@@ -238,7 +238,7 @@ enough to complete the lesson offline. If you want a patient tutor, copy this
 prompt after opening the repository in the AI tutor:
 
 ```text
-Tutor me through sql-33 — Index Optimization Strategies.
+Tutor me through sql-33: Composite, Covering, and Partial Indexes.
 
 I have completed the direct catalog prerequisite: `sql-32`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day33_index_optimization_strategies.md
@@ -248,7 +248,7 @@ Key terms to teach in context: Leftmost prefix, Included column, Partial index. 
 language and explain table, row, column, result set, row grain, SQL NULL, and
 deterministic ordering where they apply. Then explain the important clauses in
 logical order and state the expected row grain/shape before asking me to run
-anything. The guide's lesson-specific worked-model focus is: For a query filtering customerid and a date range, compare (customerid, orderdate) with the reversed key order. Then check whether the query predicate logically implies a partial-index predicate; mere overlap is not enough for PostgreSQL to use that index safely.
+anything. The guide's lesson-specific worked-model focus is: For a query filtering `customer_id` and a date range, compare `(customer_id, order_date)` with the reversed key order. Then check whether the query predicate logically implies a partial-index predicate; mere overlap is not enough for PostgreSQL to use that index safely.
 
 Use only the local disposable advanced_sql_training database. Prefer the
 Docker classroom's Whole SQL lesson (psql) workspace and its ignored

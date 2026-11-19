@@ -19,16 +19,17 @@
 BEGIN;
 SET search_path TO training, public;
 
--- Logical export/import examples with COPY (server must have file access; adjust paths)
--- Export:
--- COPY customers TO '/tmp/customers.csv' CSV HEADER;
--- COPY orders    TO '/tmp/orders.csv'    CSV HEADER;
+-- Logical export/import. Server-side COPY TO a file needs superuser or the
+-- pg_write_server_files role; the course role gets SQLSTATE 42501. Export
+-- through the client instead: COPY (query) TO STDOUT (whole-lesson mode prints
+-- the rows; the SQL pad cannot run COPY), or psql's \copy in a psql terminal,
+-- which reads and writes files on the machine where psql runs.
 -- Import into staging tables (demo only)
 CREATE TEMP TABLE customers_stg (
   LIKE customers INCLUDING ALL
 );
 
--- COPY customers_stg FROM '/tmp/customers.csv' CSV HEADER; -- example only
+-- A client-side import would be: \copy customers_stg FROM 'customers.csv' WITH (FORMAT csv, HEADER true)
 -- Verify counts between base and staged
 SELECT
   'customers' AS table,
@@ -48,37 +49,37 @@ FROM
 -- Exercises
 -- 1. Export/import a subset. COPY table has no WHERE clause; use
 --    COPY (SELECT ... WHERE ...) TO STDOUT or client-side \copy in psql.
---    Inputs: For sql-43 Exercise 1, read from `training.customers`. Build the answer toward `staged_rows`, and `customers_restore_stage`; keep `customer_id` visible whenever the result has row-level grain.
---    Expected result/shape: For sql-43 Exercise 1, expected output: CSV rows are streamed to the client, and `staged_rows` equals the number of US customers. A real import would create an explicit staging table and run `\copy customers_restore_stage FROM. The final columns are `staged_rows`, and `customers_restore_stage`.
---    Verify: For sql-43 Exercise 1, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `staged_rows`, and `customers_restore_stage` against `training.customers`. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
---    Hint ladder, rung 1: For sql-43 Exercise 1, inspect the source keys that survive `WHERE`.
+--    Inputs: For sql-43 Exercise 1, export the US subset of `training.customers` with `COPY (SELECT customer_id, full_name, email, country, created_at, segment, attributes FROM customers WHERE country = 'US' ORDER BY customer_id) TO STDOUT WITH (FORMAT csv, HEADER true)`, then model the later `\copy ... FROM` import by creating the temporary table `customers_restore_stage` from the same rows.
+--    Expected result/shape: For sql-43 Exercise 1, expected output: one CSV header line and 63 data lines streamed to the client, ordered by `customer_id`, then `SELECT 63` for the staging table.
+--    Verify: For sql-43 Exercise 1, confirm that `SELECT COUNT(*) FROM training.customers WHERE country = 'US'` and `SELECT COUNT(*) FROM customers_restore_stage` both return 63; then confirm that `COPY customers TO STDOUT WHERE country = 'US'` fails with SQLSTATE `42601` (`WHERE clause not allowed with COPY TO`), because only the query form can filter an export.
+--    Hint ladder, rung 1: For sql-43 Exercise 1, `COPY (query) TO STDOUT` sends rows to the client connection; `\copy` is the psql command that writes that stream to a client-side file.
 -- 2. Restore customers from staged into base with conflict handling (ON CONFLICT DO UPDATE) in a transaction.
---    Inputs: For sql-43 Exercise 2, use `customers`, and `customers_restore_stage` in a disposable restore target. Record artifact identity, PostgreSQL/tool versions, command exit status, start/end time, and the requested recovery point.
---    Expected result/shape: For sql-43 Exercise 2, expected output: a restore manifest, object/count reconciliation, recovery-point evidence, smoke-test result, and cleanup record. The final columns are `full_name`, `email`, `country`, `created_at`, `segment`, and `attributes`.
---    Verify: For sql-43 Exercise 2, restore into an isolated target and reconcile `customers`, and `customers_restore_stage` using schema inventory, object/row counts, key samples, critical aggregates/checksums, application smoke tests, and an explicit cleanup result. Inject one missing or invalid artifact in the disposable target and prove validation stops before cutover.
---    Hint ladder, rung 1: For sql-43 Exercise 2, restore into an isolated target and reconcile `customers`, and `customers_restore_stage` using schema inventory, object/row counts, key samples, critical aggregates/checksums, application smoke tests, and an explicit cleanup result.
+--    Inputs: For sql-43 Exercise 2, mark one staged row as changed (`full_name || ' [restored]'` for `customer1@example.com`), then load `customers_restore_stage` into `customers` with `INSERT ... SELECT ... ON CONFLICT (email) DO UPDATE` inside the lesson transaction.
+--    Expected result/shape: For sql-43 Exercise 2, expected output: `UPDATE 1` for the staged change, then `INSERT 0 63`, because all 63 staged emails already exist and each conflicting row is updated; the `staged_rows` check returns 63, and `customers` still has 500 rows.
+--    Verify: For sql-43 Exercise 2, confirm that `SELECT full_name FROM customers WHERE email = 'customer1@example.com'` returns `Customer 1 [restored]` and `SELECT COUNT(*) FROM customers` returns 500 inside the transaction; rerun the same upsert and confirm that the row count and values do not change, which is the idempotency evidence.
+--    Hint ladder, rung 1: For sql-43 Exercise 2, the conflict target must be the unique key that identifies the same customer in both copies; here that is `email`.
 -- 3. Prediction: decide whether COPY TO '/server/path' or psql \copy writes on
 --    the database server. Explain which is usually appropriate for a learner PC.
---    Inputs: For sql-43 Exercise 3, complete the explain server-side copy versus client-side copy written analysis and support its claims with read-only evidence from `customers`, `customers_stg`, and `customers_restore_stage`. Mark unverified assumptions explicitly.
---    Expected result/shape: For sql-43 Exercise 3, expected output: a completed the explain server-side copy versus client-side copy written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `copy`.
---    Verify: For sql-43 Exercise 3, check the explain server-side copy versus client-side copy written analysis against `copy`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
---    Hint ladder, rung 1: For sql-43 Exercise 3, check the explain server-side copy versus client-side copy written analysis against `copy`.
+--    Inputs: For sql-43 Exercise 3, compare server-side `COPY customers TO '/var/lib/postgresql/customers.csv'` with psql's `\copy customers TO 'customers.csv'`, using the course role's privileges and the classroom layout as evidence.
+--    Expected result/shape: For sql-43 Exercise 3, expected output: a short written answer: `COPY ... TO 'file'` runs in the database server process and writes on the server's file system, which needs superuser or `pg_write_server_files`; `\copy` streams the rows to the `psql` client, which writes the file. In the classroom, `psql` runs in a Linux container, so `\copy` writes into the learning volume, not onto your desktop.
+--    Verify: For sql-43 Exercise 3, run the server-side `COPY customers TO '/var/lib/postgresql/customers.csv'` as the course role and confirm that it fails with SQLSTATE `42501` (`permission denied to COPY to a file`), while `COPY (SELECT 1) TO STDOUT` succeeds, because any role may copy to the client stream.
+--    Hint ladder, rung 1: For sql-43 Exercise 3, ask which process opens the file: the database server, or the `psql` client you are typing into.
 -- 4. Construction: generate a deterministic manifest with table name, row
 --    count, minimum key, maximum key, and export timestamp.
---    Inputs: For sql-43 Exercise 4, read from `customers`. Build the answer toward `table_name`, `row_count`, `min_key`, `max_key`, and `observed_at`; keep `customer_id` visible whenever the result has row-level grain.
---    Expected result/shape: For sql-43 Exercise 4, expected output: one row per `customer_id`. The final columns are `table_name`, `row_count`, `min_key`, `max_key`, and `observed_at`.
---    Verify: For sql-43 Exercise 4, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `table_name`, `row_count`, `min_key`, `max_key`, and `observed_at` against `customers`. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
---    Hint ladder, rung 1: For sql-43 Exercise 4, select `customer_id` from `customers` before adding derived columns.
+--    Inputs: For sql-43 Exercise 4, summarize `customers` in one manifest row: `'training.customers' AS table_name`, `COUNT(*) AS row_count`, `MIN(customer_id) AS min_key`, `MAX(customer_id) AS max_key`, and `clock_timestamp() AS observed_at`.
+--    Expected result/shape: For sql-43 Exercise 4, expected output: exactly one row with columns `table_name`, `row_count`, `min_key`, `max_key`, and `observed_at`: `('training.customers', 500, 1, 500, <timestamp>)` on the course seed.
+--    Verify: For sql-43 Exercise 4, rerun the manifest and confirm that every column except `observed_at` is identical; then compare `row_count` with the number of data lines in an exported CSV of the same table (500).
+--    Hint ladder, rung 1: For sql-43 Exercise 4, a manifest is one aggregate row; every value except the timestamp must be reproducible from the same snapshot.
 -- 5. Debugging: stage duplicate emails and make the restore deterministic
 --    before ON CONFLICT, rather than letting one arbitrary duplicate win.
---    Inputs: For sql-43 Exercise 5, read from `customers_restore_stage`. Build the answer toward `full_name`, `email`, and `country`; keep `country` visible whenever the result has row-level grain.
---    Expected result/shape: For sql-43 Exercise 5, expected output: one row per `country`. The final columns are `full_name`, `email`, and `country`. The final order is `email`.
---    Verify: For sql-43 Exercise 5, run an anti-check that counts rows where NOT ((winner_rank = 1)); require unique `country` where the expected grain is one row per key and confirm the projected `full_name`, `email`, and `country` against `customers_restore_stage`. Add duplicate source candidates for `country`; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.
---    Hint ladder, rung 1: For sql-43 Exercise 5, run `staged_duplicates` one at a time. Record each CTE's row count and `country` uniqueness before the next stage uses it.
+--    Inputs: For sql-43 Exercise 5, rank `customers_restore_stage` rows with `ROW_NUMBER() OVER (PARTITION BY lower(trim(email)) ORDER BY created_at DESC, full_name, email)` and keep `winner_rank = 1`.
+--    Expected result/shape: For sql-43 Exercise 5, expected output: one row per normalized email with columns `full_name`, `email`, and `country`, ordered by `email`; the course stage has no duplicates, so all 63 rows survive.
+--    Verify: For sql-43 Exercise 5, add a second staged row for `customer1@example.com` with an older `created_at` and confirm that the result still has 63 rows and keeps the newer row; without this step, the Exercise 2 upsert fails with SQLSTATE `21000` (`ON CONFLICT DO UPDATE command cannot affect row a second time`).
+--    Hint ladder, rung 1: For sql-43 Exercise 5, decide which duplicate should win before loading; `ON CONFLICT` cannot choose between two staged rows for the same key.
 -- 6. Edge case: compare source and restored rows with IS DISTINCT FROM so NULL
 --    values are compared safely.
---    Inputs: For sql-43 Exercise 6, use `customers_restore_stage`, `customers`, `c.country`, and `c.segment` in a disposable restore target. Record artifact identity, PostgreSQL/tool versions, command exit status, start/end time, and the requested recovery point.
---    Expected result/shape: For sql-43 Exercise 6, expected output: a restore manifest, object/count reconciliation, recovery-point evidence, smoke-test result, and cleanup record. The final columns are `email`, `staged_name`, and `restored_name`. The final order is `s.email`.
---    Verify: For sql-43 Exercise 6, restore into an isolated target and reconcile `customers_restore_stage`, `customers`, `c.country`, and `c.segment` using schema inventory, object/row counts, key samples, critical aggregates/checksums, application smoke tests, and an explicit cleanup result. Inject one missing or invalid artifact in the disposable target and prove validation stops before cutover.
---    Hint ladder, rung 1: For sql-43 Exercise 6, start with the first relation in `customers_restore_stage`, `customers`, `c.country`, and `c.segment`; after each join, record total rows and distinct `customer_id` so the exact fanout or loss is visible.
+--    Inputs: For sql-43 Exercise 6, join `customers_restore_stage` to `customers` by `email` and keep rows where `full_name`, `country`, or `segment` differ according to `IS DISTINCT FROM`.
+--    Expected result/shape: For sql-43 Exercise 6, expected output: zero rows with columns `email`, `staged_name`, and `restored_name`, ordered by `s.email`, because the Exercise 2 upsert copied every staged value into `customers`.
+--    Verify: For sql-43 Exercise 6, after a savepoint, run `UPDATE customers SET segment = NULL WHERE email = 'customer9@example.com'`, rerun the comparison, and confirm that exactly one row appears; the same check written with `<>` returns no row, because a comparison with NULL is unknown.
+--    Hint ladder, rung 1: For sql-43 Exercise 6, `a IS DISTINCT FROM b` treats two NULLs as equal and one NULL as different, so it never returns unknown.
 ROLLBACK;

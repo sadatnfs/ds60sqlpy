@@ -34,7 +34,7 @@ SELECT
   revenue,
   ROUND(AVG(revenue) OVER (ORDER BY d ROWS BETWEEN 14 PRECEDING AND CURRENT ROW), 2) AS ma15,
   ROUND(STDDEV_SAMP(revenue) OVER (ORDER BY d ROWS BETWEEN 14 PRECEDING AND CURRENT ROW), 2) AS sd15,
-  ROUND(VAR_POP(revenue) OVER (ORDER BY d ROWS BETWEEN 14 PRECEDING AND CURRENT ROW), 2) AS var15
+  ROUND(VAR_SAMP(revenue) OVER (ORDER BY d ROWS BETWEEN 14 PRECEDING AND CURRENT ROW), 2) AS var15
 FROM
   daily
 ORDER BY
@@ -84,21 +84,21 @@ ORDER BY
 
 -- Exercises
 -- 1. Compute z-score for daily revenue: (rev - avg15)/sd15.
---    Inputs: For sql-40 Exercise 1, read from `orders`. Compute `order_day`, `revenue`, `avg15`, `sd15`, and `z_score` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+--    Inputs: For sql-40 Exercise 1, read from `orders`, sum `total_amount` per UTC day in the CTE `daily`, then compute a trailing 15-row mean and sample standard deviation (`ROWS BETWEEN 14 PRECEDING AND CURRENT ROW`) in `rolling` and the z-score `(revenue - avg15) / NULLIF(sd15, 0)`.
 --    Expected result/shape: For sql-40 Exercise 1, expected output: one row per day with orders. A positive z-score is above the rolling mean; a negative score is below it. The final columns are `order_day`, `revenue`, `avg15`, `sd15`, and `z_score`. The final order is `order_day`.
---    Verify: For sql-40 Exercise 1, evaluate each of `order_day`, `revenue`, `sd15`, and `z_score` in a separate control `SELECT` over `orders`; require one final row and compare every value. Add one source row with a new `day`; verify the result gains exactly one row carrying that `day` value.
---    Hint ladder, rung 1: For sql-40 Exercise 1, run `daily`, and `rolling` one at a time. Record each CTE's row count and `day` uniqueness before the next stage uses it.
+--    Verify: For sql-40 Exercise 1, confirm one row per `order_day`, so the row count equals `SELECT COUNT(DISTINCT date_trunc('day', order_date)) FROM orders`; the first row has NULL `sd15` and `z_score` because a one-row sample has no standard deviation, and for one later day recompute `avg15` as the mean of that day's and the 14 previous days' `revenue` in `daily`.
+--    Hint ladder, rung 1: For sql-40 Exercise 1, run `daily` alone and check one row per `order_day` before `rolling` adds the window statistics.
 -- 2. For each category, compute P50 and P90 of order totals.
---    Inputs: For sql-40 Exercise 2, read from `order_items`, and `products`. Compute `category`, `p50_order_value`, `p90_order_value`, and `category_orders` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+--    Inputs: For sql-40 Exercise 2, read from `order_items` joined to `products`, sum each order's net lines per category in `category_order_values`, then compute `PERCENTILE_CONT(0.5)` and `PERCENTILE_CONT(0.9)` of those per-order category values and count them per category.
 --    Expected result/shape: For sql-40 Exercise 2, expected output: one row per sold category. `PERCENTILE_CONT` can interpolate between observed values, so a percentile need not equal an actual order value. The final columns are `category`, `p50_order_value`, `p90_order_value`, and `category_orders`. The final order is `category`.
---    Verify: For sql-40 Exercise 2, evaluate each of `p50_order_value`, `p90_order_value`, and `category_orders` in a separate control `SELECT` over `order_items`, and `products`; require one final row and compare every value. Add one row to an existing group and one row for a new group; recompute `p50_order_value`, `p90_order_value`, and `category_orders` for the existing `category` tuple and verify the new tuple appears exactly once.
---    Hint ladder, rung 1: For sql-40 Exercise 2, run `category_order_values` one at a time. Record each CTE's row count and `category` uniqueness before the next stage uses it.
+--    Verify: For sql-40 Exercise 2, confirm 6 rows, one per category, and that `category_orders` equals `SELECT COUNT(DISTINCT oi.order_id) FROM order_items oi JOIN products p USING (product_id) WHERE p.category = <that category>` (for example 2192 for `Apparel`); `p90_order_value` must be at least `p50_order_value` in every row.
+--    Hint ladder, rung 1: For sql-40 Exercise 2, run `category_order_values` alone and check that (`category`, `order_id`) is unique before you compute percentiles.
 -- 3. Prediction: compare percentile_disc(0.5) with percentile_cont(0.5) for
 --    the values (10, 20, 100, 200). Predict both medians before running.
---    Inputs: For sql-40 Exercise 3, read from the inline `VALUES` fixture. Build the answer toward `discrete_median`, and `continuous_median`; keep `discrete_median` visible whenever the result has row-level grain.
---    Expected result/shape: For sql-40 Exercise 3, expected output: one row per `discrete_median`. The final columns are `discrete_median`, and `continuous_median`.
---    Verify: For sql-40 Exercise 3, reselect the returned keys directly from the source; require unique `discrete_median` where the expected grain is one row per key and confirm the projected `discrete_median`, and `continuous_median` against the inline `VALUES` fixture. Add one source row with a new `discrete_median`; verify the result gains exactly one row carrying that `discrete_median` value.
---    Hint ladder, rung 1: For sql-40 Exercise 3, select `discrete_median` from the inline `VALUES` fixture before adding derived columns.
+--    Inputs: For sql-40 Exercise 3, use the inline `VALUES` fixture 10, 20, 100, 200 and compute `percentile_disc(0.5)` and `percentile_cont(0.5)` over it.
+--    Expected result/shape: For sql-40 Exercise 3, expected output: one row with `discrete_median` 20 and `continuous_median` 60. The final columns are `discrete_median` and `continuous_median`.
+--    Verify: For sql-40 Exercise 3, confirm by hand that `percentile_disc(0.5)` returns the first value whose cumulative share reaches 0.5, the second of four values (20), while `percentile_cont(0.5)` interpolates halfway between 20 and 100 (60); add the value 300 and expect both medians to become 100.
+--    Hint ladder, rung 1: For sql-40 Exercise 3, list the sorted values with their positions first; with an even count, the two medians differ unless the two middle values are equal.
 -- 4. Construction: calculate each category's revenue share within its month,
 --    with a deterministic rank for equal revenue.
 --    Inputs: For sql-40 Exercise 4, read from `orders`, `order_items`, and `products`. Build the answer toward `month`, `category`, `revenue`, `month_share`, and `category_rank`; keep `month`, and `category` visible whenever the result has row-level grain.

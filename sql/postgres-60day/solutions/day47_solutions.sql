@@ -1,5 +1,5 @@
 -- Day 47 solutions: cohort retention
--- SOLUTION READING MAP — sql-47: Project1 Ecommerce Part2
+-- SOLUTION READING MAP for sql-47: E-Commerce Project, Part 2: Cohort Retention
 -- Explanation: sql/postgres-60day/solutions/day47_solutions.md
 -- Run from the repository root only against advanced_sql_training:
 --   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day47_solutions.sql

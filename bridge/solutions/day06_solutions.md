@@ -152,7 +152,39 @@ instead of hand-built delimited text.
 
 **Approach:** Open a COPY context for typed columns, call `write_row` per validated `Sale`, then
 merge staging rows into the target in the same transaction. Never concatenate
-tab/newline-delimited source strings.
+tab/newline-delimited source strings. One concrete shape, run on a live connection
+whose session already holds the `pg_temp.bridge_sales` target:
+
+```python
+def copy_sales(conn: psycopg.Connection, sales: Sequence[Sale]) -> int:
+    with conn.transaction():
+        conn.execute(
+            "CREATE TEMP TABLE bridge_sales_stage ("
+            " source_id text PRIMARY KEY, customer_id int NOT NULL,"
+            " amount numeric(12, 2) NOT NULL, occurred_on date NOT NULL"
+            ") ON COMMIT DROP"
+        )
+        with conn.cursor() as cur:
+            with cur.copy(
+                "COPY bridge_sales_stage (source_id, customer_id, amount, occurred_on) FROM STDIN"
+            ) as copy:
+                for sale in sales:
+                    copy.write_row(
+                        (sale.source_id, sale.customer_id, sale.amount, sale.occurred_on)
+                    )
+            cur.execute(
+                "INSERT INTO pg_temp.bridge_sales (source_id, customer_id, amount, occurred_on)"
+                " SELECT source_id, customer_id, amount, occurred_on FROM bridge_sales_stage"
+                " ON CONFLICT (source_id) DO UPDATE"
+                " SET customer_id = EXCLUDED.customer_id, amount = EXCLUDED.amount,"
+                " occurred_on = EXCLUDED.occurred_on"
+            )
+            return cur.rowcount
+```
+
+The stage's primary key rejects a duplicate `source_id` inside one load (SQLSTATE
+`23505`) before the merge, where it would otherwise fail with `21000`; the
+temporary stage disappears at commit.
 
 **Why this boundary matters:** COPY handles transport; a later set-based statement owns merge
 semantics.

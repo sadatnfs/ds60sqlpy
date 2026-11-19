@@ -11,16 +11,16 @@ the saved project selection. No host Python or PostgreSQL installation is
 required for this browser route.
 
 1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database. A simple snippet
-   such as `SELECT 1;` needs no training-schema reset.
+   the local disposable `advanced_sql_training` database.
 2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
    preserves the lesson's reviewed psql directives, relative includes and
    transaction behavior. **SQL snippet** is appropriate for ordinary SQL
    statements, but is not a replacement for an entire script's setup.
-3. When the lesson requires the course training data, use the explicit
-   preparation action and read its reset acknowledgement. It replaces the
-   course-owned `training` schema. Do not reset unrelated data or prepare
-   every lesson by habit; stateful sequences have their own ordering.
+3. The **Course database** panel above the code shows whether the course
+   training tables are loaded. Missing tables load automatically before your
+   first run (or choose **Load course tables**) and stay loaded for later
+   lessons. **Reset training data** restores the original rows only when your
+   own changes made results differ; it keeps your saved code and notes.
 4. Edit the learner copy in the classroom and save your prediction before
    running. Its whole-script workspace is
    `.learning/sql/sql-analytics-01/lesson/workspace/sql/professional/lessons/sql_analytics_01_query_patterns.sql`.
@@ -98,8 +98,8 @@ row count. For a normal analytical `SELECT`, use this logical reading order:
 window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
 different physical plan while preserving those semantics.
 
-The worked walkthrough's lesson-specific task is: The raw event grain is one ingestion attempt, so sourceeventid can repeat. The canonical view partitions by source ID and chooses latest ingestedat, then identity as a final tie-break. Deduplication happens before every downstream pattern to avoid double-counting retries.
-The first runnable example has a concrete contract: Example 1 must print the expected DDL command tag for `pro_analytics_lab.users`. Verify the object in `pg_catalog.pg_class`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state. Its final projection is the columns written in the final `SELECT`. Verify the command tag in `pg_catalog`/`information_schema`, run one accepted value and one value the declared rule rejects, and confirm the lesson rollback removes the course-owned object. Where this query can emit `NULL`, identify the exact source expression and explain whether the output preserves, classifies, or rejects it.
+The worked walkthrough's lesson-specific task is: The raw event grain is one ingestion attempt, so `source_event_id` can repeat. The canonical view partitions by source ID and chooses latest `ingested_at`, then identity as a final tie-break. Deduplication happens before every downstream pattern to avoid double-counting retries.
+The first runnable example has a concrete contract: Example 1 must print the expected DDL command tag for `pro_analytics_lab.users`. Verify the object in `pg_catalog.pg_class`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.
 
 ## Two worked SQL examples
 
@@ -303,7 +303,7 @@ enough to complete the lesson offline. If you want a patient tutor, copy this
 prompt after opening the repository in the AI tutor:
 
 ```text
-Tutor me through sql-analytics-01 — Reusable Analytical Query Patterns.
+Tutor me through sql-analytics-01: Reusable Analytical Query Patterns.
 
 I have completed the direct catalog prerequisites: `sql-30`, `sql-test-01`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/professional/companion-guides/sql_analytics_01_query_patterns.md
@@ -313,7 +313,7 @@ Key terms to teach in context: Grain, Canonical row, Session, Gap/island, Funnel
 language and explain table, row, column, result set, row grain, SQL NULL, and
 deterministic ordering where they apply. Then explain the important clauses in
 logical order and state the expected row grain/shape before asking me to run
-anything. The guide's lesson-specific worked-model focus is: The raw event grain is one ingestion attempt, so sourceeventid can repeat. The canonical view partitions by source ID and chooses latest ingestedat, then identity as a final tie-break. Deduplication happens before every downstream pattern to avoid double-counting retries.
+anything. The guide's lesson-specific worked-model focus is: The raw event grain is one ingestion attempt, so `source_event_id` can repeat. The canonical view partitions by source ID and chooses latest `ingested_at`, then identity as a final tie-break. Deduplication happens before every downstream pattern to avoid double-counting retries.
 
 Use only the local disposable advanced_sql_training database. Prefer the
 Docker classroom's Whole SQL lesson (psql) workspace and its ignored

@@ -18,9 +18,12 @@
 --
 -- Target: PostgreSQL 16+
 --
--- The role-admin path creates NOLOGIN course roles inside one transaction and
--- rolls the transaction back. If the connected role lacks CREATEROLE (and is
--- not a superuser), psql prints a safe instructional skip.
+-- The lab takes one of three paths. In the classroom, ./classroom prepares
+-- plain NOLOGIN course roles that this login may adopt with SET ROLE, and the
+-- lab uses them. A role-administering login (superuser or CREATEROLE) without
+-- those roles creates them inside the lab transaction instead. Every lab
+-- object, and every role created here, is rolled back. With neither, psql
+-- prints a safe instructional skip and runs a role-free RLS demonstration.
 \set ON_ERROR_STOP on
 SELECT
   COALESCE((
@@ -31,7 +34,21 @@ SELECT
     WHERE
       r.rolname = CURRENT_USER), false) AS ds60_can_manage_roles
 \gset
-\if :ds60_can_manage_roles
+-- Prepared roles count only as plain NOLOGIN roles that this login may SET.
+SELECT
+  COUNT(*) = 3 AS ds60_prepared_roles_available
+FROM
+  pg_catalog.pg_roles AS r
+WHERE
+  r.rolname IN ('ds60_sec_owner', 'ds60_sec_north', 'ds60_sec_south')
+  AND NOT (r.rolcanlogin
+    OR r.rolsuper
+    OR r.rolcreaterole
+    OR r.rolcreatedb
+    OR r.rolreplication
+    OR r.rolbypassrls)
+  AND pg_catalog.pg_has_role(CURRENT_USER, r.oid, 'SET')
+\gset
 SELECT
   NOT EXISTS (
     SELECT
@@ -41,6 +58,12 @@ SELECT
     WHERE
       r.rolname IN ('ds60_sec_owner', 'ds60_sec_north', 'ds60_sec_south')) AS ds60_role_names_available
 \gset
+\set ds60_run_role_lab false
+\if :ds60_prepared_roles_available
+\echo 'SQL-SEC-01: using the prepared NOLOGIN course roles; starting disposable lab'
+BEGIN;
+\set ds60_run_role_lab true
+\elif :ds60_can_manage_roles
 \if :ds60_role_names_available
 \echo 'SQL-SEC-01: role capability available; starting disposable lab'
 BEGIN;
@@ -50,10 +73,111 @@ CREATE ROLE ds60_sec_north NOLOGIN;
 
 CREATE ROLE ds60_sec_south NOLOGIN;
 
--- Membership allows this course session to SET ROLE to the object owner.
--- The transaction rollback removes this membership and all three roles.
-GRANT ds60_sec_owner TO CURRENT_USER WITH ADMIN OPTION;
+-- Membership allows this course session to SET ROLE to the object owner and
+-- the tenant roles. A non-superuser CREATEROLE creator already holds ADMIN
+-- OPTION on roles it created (PostgreSQL 16+) and cannot grant ADMIN back to
+-- itself, so these grants request only membership. The transaction rollback
+-- removes these memberships and all three roles.
+GRANT ds60_sec_owner TO CURRENT_USER;
 
+GRANT ds60_sec_north, ds60_sec_south TO CURRENT_USER WITH INHERIT FALSE,
+SET TRUE;
+
+\set ds60_run_role_lab true
+\else
+\echo 'SAFE SKIP: course role names already exist; no objects were changed'
+\echo 'Remove only known disposable course roles before retrying.'
+\endif
+\else
+\echo 'SAFE SKIP: this login has no prepared course roles and cannot administer roles.'
+\echo 'In the classroom, restart with ./classroom (it prepares the lab roles), then rerun.'
+\echo 'Elsewhere, ask a local administrator for a disposable CREATEROLE training account.'
+SELECT
+  CURRENT_USER AS connected_role,
+  r.rolsuper,
+  r.rolcreaterole,
+  r.rolbypassrls
+FROM
+  pg_catalog.pg_roles AS r
+WHERE
+  r.rolname = CURRENT_USER;
+
+-- Role-free default path: one owner and a policy keyed by a session setting.
+-- FORCE ROW LEVEL SECURITY makes the table owner obey its own policy. This
+-- shows the RLS mechanics without CREATEROLE; it is not a tenant boundary on
+-- its own, because any client that can run SQL can change app.tenant.
+\echo 'Role-free RLS demonstration: FORCE RLS and a policy keyed by app.tenant'
+BEGIN;
+CREATE TEMP TABLE rls_demo_documents (
+  document_id int PRIMARY KEY,
+  tenant_key text NOT NULL,
+  title text NOT NULL
+);
+
+INSERT INTO rls_demo_documents
+VALUES
+  (1, 'north', 'North plan'),
+  (2, 'south', 'South plan'),
+  (3, 'north', 'North budget');
+
+ALTER TABLE rls_demo_documents ENABLE ROW LEVEL SECURITY;
+
+-- ENABLE alone does not bind the owner: this count is still 3.
+SELECT
+  COUNT(*) AS owner_count_rls_enabled
+FROM
+  rls_demo_documents;
+
+ALTER TABLE rls_demo_documents FORCE ROW LEVEL SECURITY;
+
+CREATE POLICY rls_demo_tenant ON rls_demo_documents
+  USING (tenant_key = current_setting('app.tenant', TRUE));
+
+-- No tenant chosen yet: the policy matches nothing, so the count is 0.
+SELECT
+  COUNT(*) AS visible_without_tenant
+FROM
+  rls_demo_documents;
+
+SET LOCAL app.tenant = 'north';
+
+SELECT
+  current_setting('app.tenant') AS tenant,
+  d.document_id,
+  d.title
+FROM
+  rls_demo_documents AS d
+ORDER BY
+  d.document_id;
+
+SET LOCAL app.tenant = 'south';
+
+SELECT
+  current_setting('app.tenant') AS tenant,
+  d.document_id,
+  d.title
+FROM
+  rls_demo_documents AS d
+ORDER BY
+  d.document_id;
+
+-- The same USING expression also checks new rows, so a south session cannot
+-- insert a north row (SQLSTATE 42501).
+DO $cross_tenant$
+BEGIN
+  INSERT INTO rls_demo_documents
+    VALUES (4, 'north', 'Cross-tenant write');
+  RAISE EXCEPTION 'cross-tenant insert unexpectedly succeeded';
+EXCEPTION
+  WHEN insufficient_privilege THEN
+    RAISE NOTICE 'cross-tenant insert rejected: %', SQLERRM;
+END
+$cross_tenant$;
+
+ROLLBACK;
+
+\endif
+\if :ds60_run_role_lab
 CREATE SCHEMA pro_security_lab AUTHORIZATION ds60_sec_owner;
 
 REVOKE ALL ON SCHEMA pro_security_lab FROM PUBLIC;
@@ -425,23 +549,5 @@ ORDER BY
 --    Hint ladder, rung 1: For sql-sec-01 Exercise 10, check the revocation runbook written analysis against `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`.
 ROLLBACK;
 
-\echo 'SQL-SEC-01 complete: roles and pro_security_lab were rolled back'
-\else
-\echo 'SAFE SKIP: course role names already exist; no objects were changed'
-\echo 'Remove only known disposable course roles before retrying.'
-\endif
-\else
-\echo 'SAFE SKIP: the connected PostgreSQL role cannot administer roles.'
-\echo 'Read the guide and learner SQL; ask a local administrator for a disposable'
-\echo 'CREATEROLE training account only if hands-on role testing is appropriate.'
-SELECT
-  CURRENT_USER AS connected_role,
-  r.rolsuper,
-  r.rolcreaterole,
-  r.rolbypassrls
-FROM
-  pg_catalog.pg_roles AS r
-WHERE
-  r.rolname = CURRENT_USER;
-
+\echo 'SQL-SEC-01 complete: pro_security_lab and any roles created here were rolled back'
 \endif

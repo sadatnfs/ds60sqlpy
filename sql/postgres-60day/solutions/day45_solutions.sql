@@ -1,5 +1,5 @@
 -- Day 45 solution: optimization project
--- SOLUTION READING MAP — sql-45: Phase3 Optimization Project
+-- SOLUTION READING MAP for sql-45: Phase 3 Project: Query Optimization
 -- Explanation: sql/postgres-60day/solutions/day45_solutions.md
 -- Run from the repository root only against advanced_sql_training:
 --   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day45_solutions.sql

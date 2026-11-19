@@ -1,4 +1,4 @@
-# Day 20 solutions: FIRST_VALUE, LAST_VALUE, NTH_VALUE
+# Day 20 solutions: FIRST_VALUE, LAST_VALUE, and Window Frames
 
 
 <!-- beginner-solution-enrichment -->
@@ -7,13 +7,8 @@
 Open this explanation only after making an honest attempt. The executable
 companion runs solely against the disposable `advanced_sql_training` database:
 
-```powershell
-# Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f "sql\postgres-60day\solutions\day20_solutions.sql"
-```
-
 ```bash
-# macOS/Linux, from the repository root
+# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day20_solutions.sql
 ```
@@ -26,7 +21,7 @@ ordering with the explanation before comparing syntax.
 ## Clause-by-clause reading map
 
 The lesson's main concepts are Boundary value, Current-row frame, Full-partition frame. Its worked-model focus is:
-Order a customer's orders by date and compare default LASTVALUE(totalamount) with the same function over ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING. The default often returns the current row's value; the full frame exposes the true final value.
+Order a customer's orders by date and compare default `LAST_VALUE(total_amount)` with the same function over `ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING`. The default often returns the current row's value; the full frame exposes the true final value.
 
 - Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
   before adding aggregates; a one-to-many join is allowed to multiply rows only
@@ -106,13 +101,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-20 Exercise 1, read from `orders`. Compute `order_id`, `customer_id`, `order_date`, `first_order_date`, and `last_order_date` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+- **Inputs/evidence:** For sql-20 Exercise 1, read from `orders` and return, for every order, its customer's first and last `order_date` with `FIRST_VALUE` and `LAST_VALUE` over a named window partitioned by `customer_id`, ordered by `order_date, order_id`, with the frame `ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING`.
 - **Expected result/shape:** For sql-20 Exercise 1, expected output: One row per order with constant first/last values per customer. The final columns are `order_id`, `customer_id`, `order_date`, `first_order_date`, and `last_order_date`. The final order is `o.customer_id, o.order_date, o.order_id`.
-- **Independent verification:** For sql-20 Exercise 1, evaluate each of `order_date`, `first_order_date`, and `last_order_date` in a separate control `SELECT` over `orders`; require one final row and compare every value. Tie two rows on `o.customer_id` and give them different `o.order_id` values; verify `o.customer_id, o.order_date, o.order_id` chooses a stable first/last row.
-- **Intermediate relation check:** For sql-20 Exercise 1, check `o.customer_id, o.order_date, o.order_id` before applying the row cap.
-- **Clause check:** For sql-20 Exercise 1, the solution actually uses `FROM`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve exactly one summary row, and finish with `order_id`, `customer_id`, `order_date`, `first_order_date`, and `last_order_date` ordered by `o.customer_id, o.order_date, o.order_id`.
+- **Independent verification:** For sql-20 Exercise 1, confirm 4362 rows and compare them with `SELECT customer_id, MIN(order_date), MAX(order_date) FROM orders GROUP BY customer_id` (438 customers): no row may differ. With the default frame instead, `LAST_VALUE` returns each row's own `order_date` on all 4362 rows.
+- **Intermediate relation check:** For sql-20 Exercise 1, write the window with an explicit full frame first, then remove the frame clause once and watch `LAST_VALUE` change.
+- **Clause check:** For sql-20 Exercise 1, the solution actually uses `FROM`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per order, and finish with `order_id`, `customer_id`, `order_date`, `first_order_date`, and `last_order_date` ordered by `o.customer_id, o.order_date, o.order_id`.
 - **Alternative/trade-off:** For sql-20 Exercise 1, the chosen form is justified by this lesson-specific rationale: Use one full-partition frame from unbounded preceding through unbounded following. Evaluate another form against the concrete expected result (One row per order with constant first/last values per customer) and the verification above.
-- **Edge case:** Tie two rows on `o.customer_id` and give them different `o.order_id` values; verify `o.customer_id, o.order_date, o.order_id` chooses a stable first/last row.
+- **Edge case:** The default frame ends at the current row and its peers, so `LAST_VALUE` without a full frame returns the current row's value rather than the partition's last value.
 
 ## Exercise 2: Query writing
 
@@ -152,13 +147,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-20 Exercise 2, read from `products`. Compute `product_id`, `category`, `price`, `category_min_price`, and `category_max_price` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+- **Inputs/evidence:** For sql-20 Exercise 2, read from `products` and show each product with the lowest and highest `price` in its `category`, using `FIRST_VALUE` and `LAST_VALUE` over a window ordered by `price, product_id` with a full frame.
 - **Expected result/shape:** For sql-20 Exercise 2, expected output: One row per product. The final columns are `product_id`, `category`, `price`, `category_min_price`, and `category_max_price`. The final order is `p.category, p.price, p.product_id`.
-- **Independent verification:** For sql-20 Exercise 2, evaluate each of `category_min_price`, and `category_max_price` in a separate control `SELECT` over `products`; require one final row and compare every value. Add one source row with a new `product_id`; verify the result gains exactly one row carrying that `product_id` value.
-- **Intermediate relation check:** For sql-20 Exercise 2, check `p.category, p.price, p.product_id` before applying the row cap.
-- **Clause check:** For sql-20 Exercise 2, the solution actually uses `FROM`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `products`, preserve exactly one summary row, and finish with `product_id`, `category`, `price`, `category_min_price`, and `category_max_price` ordered by `p.category, p.price, p.product_id`.
+- **Independent verification:** For sql-20 Exercise 2, confirm 300 rows and compare the two window columns with `SELECT category, MIN(price), MAX(price) FROM products GROUP BY category`; for example, every `Apparel` row must show 10.37 and 119.15.
+- **Intermediate relation check:** For sql-20 Exercise 2, compute `MIN(price)` and `MAX(price)` per category with `GROUP BY` first; the window columns must repeat those values on every product row.
+- **Clause check:** For sql-20 Exercise 2, the solution actually uses `FROM`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `products`, preserve one row per product, and finish with `product_id`, `category`, `price`, `category_min_price`, and `category_max_price` ordered by `p.category, p.price, p.product_id`.
 - **Alternative/trade-off:** For sql-20 Exercise 2, the chosen form is justified by this lesson-specific rationale: Order by price and use a full frame; values tie without needing row identity. Evaluate another form against the concrete expected result (One row per product) and the verification above.
-- **Edge case:** Add one source row with a new `product_id`; verify the result gains exactly one row carrying that `product_id` value.
+- **Edge case:** If two products tie on the lowest price, `FIRST_VALUE` still returns that price; the `product_id` tiebreaker only decides which tied row comes first.
 
 ## Exercise 3: Query writing
 
@@ -199,13 +194,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-20 Exercise 3, read from `payments`. Compute `payment_id`, `order_id`, `payment_date`, `amount`, `first_payment_amount`, and `last_payment_amount` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+- **Inputs/evidence:** For sql-20 Exercise 3, read from `payments` and compare every payment with the first and last payment `amount` of its order, using a window partitioned by `order_id`, ordered by `payment_date, payment_id`, with a full frame.
 - **Expected result/shape:** For sql-20 Exercise 3, expected output: One row per payment. The final columns are `payment_id`, `order_id`, `payment_date`, `amount`, `first_payment_amount`, and `last_payment_amount`. The final order is `p.order_id, p.payment_date, p.payment_id`.
-- **Independent verification:** For sql-20 Exercise 3, evaluate each of `payment_date`, `amount`, `first_payment_amount`, and `last_payment_amount` in a separate control `SELECT` over `payments`; require one final row and compare every value. Tie two rows on `p.order_id` and give them different `p.payment_id` values; verify `p.order_id, p.payment_date, p.payment_id` chooses a stable first/last row.
-- **Intermediate relation check:** For sql-20 Exercise 3, check `p.order_id, p.payment_date, p.payment_id` before applying the row cap.
-- **Clause check:** For sql-20 Exercise 3, the solution actually uses `FROM`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `payments`, preserve exactly one summary row, and finish with `payment_id`, `order_id`, `payment_date`, `amount`, `first_payment_amount`, and `last_payment_amount` ordered by `p.order_id, p.payment_date, p.payment_id`.
+- **Independent verification:** For sql-20 Exercise 3, confirm 3836 rows, one per `payment_id`; 3489 orders have payments, 347 of them have two payments, and only 20 orders have a first amount that differs from the last, so check one of those 20 orders by hand.
+- **Intermediate relation check:** For sql-20 Exercise 3, count payments per `order_id` first; only orders with two payments can show different first and last amounts.
+- **Clause check:** For sql-20 Exercise 3, the solution actually uses `FROM`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `payments`, preserve one row per payment, and finish with `payment_id`, `order_id`, `payment_date`, `amount`, `first_payment_amount`, and `last_payment_amount` ordered by `p.order_id, p.payment_date, p.payment_id`.
 - **Alternative/trade-off:** For sql-20 Exercise 3, the chosen form is justified by this lesson-specific rationale: Partition by order, order by timestamp/payment ID, and keep the full frame. Evaluate another form against the concrete expected result (One row per payment) and the verification above.
-- **Edge case:** Tie two rows on `p.order_id` and give them different `p.payment_id` values; verify `p.order_id, p.payment_date, p.payment_id` chooses a stable first/last row.
+- **Edge case:** For an order with a single payment, the first and last amounts come from the same row; the window matters only for split payments.
 
 ## Exercise 4: Prediction
 
@@ -294,13 +289,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-20 Exercise 5, read from `orders`. Compute `customer_id`, `first_order_id`, and `last_order_id` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+- **Inputs/evidence:** For sql-20 Exercise 5, read from `orders`, compute each customer's first and last `order_id` with full-frame `FIRST_VALUE` and `LAST_VALUE` windows ordered by `order_date, order_id` in the CTE `annotated`, then return one row per customer with `SELECT DISTINCT`.
 - **Expected result/shape:** For sql-20 Exercise 5, expected output: One row per customer with orders. The final columns are `customer_id`, `first_order_id`, and `last_order_id`. The final order is `customer_id`.
-- **Independent verification:** For sql-20 Exercise 5, evaluate each of `first_order_id`, and `last_order_id` in a separate control `SELECT` over `orders`; require one final row and compare every value. Tie two rows on `customer_id` and give them different `customer_id` values; verify `customer_id` chooses a stable first/last row.
-- **Intermediate relation check:** For sql-20 Exercise 5, run `annotated` one at a time. Record each CTE's row count and `customer_id` uniqueness before the next stage uses it.
-- **Clause check:** For sql-20 Exercise 5, the solution actually uses `WITH`, `FROM`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve exactly one summary row, and finish with `customer_id`, `first_order_id`, and `last_order_id` ordered by `customer_id`.
+- **Independent verification:** For sql-20 Exercise 5, confirm 438 rows, one per customer with orders, equal to `SELECT COUNT(DISTINCT customer_id) FROM orders`; without `DISTINCT`, the same query returns 4362 rows, one per order, with each customer's values repeated.
+- **Intermediate relation check:** For sql-20 Exercise 5, run `annotated` alone and count its rows (4362) before you collapse it to one row per `customer_id`.
+- **Clause check:** For sql-20 Exercise 5, the solution actually uses `WITH`, `FROM`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per customer with orders, and finish with `customer_id`, `first_order_id`, and `last_order_id` ordered by `customer_id`.
 - **Alternative/trade-off:** For sql-20 Exercise 5, the chosen form is justified by this lesson-specific rationale: Compute first/last IDs with full-frame windows, then select distinct customer-level output. Evaluate another form against the concrete expected result (One row per customer with orders) and the verification above.
-- **Edge case:** Tie two rows on `customer_id` and give them different `customer_id` values; verify `customer_id` chooses a stable first/last row.
+- **Edge case:** `DISTINCT` works here only because the window values are constant within each customer; selecting a column that varies per order, such as `order_id`, would bring the duplicates back.
 
 ## Exercise 6: Extension
 

@@ -11,16 +11,16 @@ the saved project selection. No host Python or PostgreSQL installation is
 required for this browser route.
 
 1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database. A simple snippet
-   such as `SELECT 1;` needs no training-schema reset.
+   the local disposable `advanced_sql_training` database.
 2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
    preserves the lesson's reviewed psql directives, relative includes and
    transaction behavior. **SQL snippet** is appropriate for ordinary SQL
    statements, but is not a replacement for an entire script's setup.
-3. When the lesson requires the course training data, use the explicit
-   preparation action and read its reset acknowledgement. It replaces the
-   course-owned `training` schema. Do not reset unrelated data or prepare
-   every lesson by habit; stateful sequences have their own ordering.
+3. The **Course database** panel above the code shows whether the course
+   training tables are loaded. Missing tables load automatically before your
+   first run (or choose **Load course tables**) and stay loaded for later
+   lessons. **Reset training data** restores the original rows only when your
+   own changes made results differ; it keeps your saved code and notes.
 4. Edit the learner copy in the classroom and save your prediction before
    running. Its whole-script workspace is
    `.learning/sql/sql-29/lesson/workspace/sql/postgres-60day/day29_pattern_matching.sql`.
@@ -86,8 +86,8 @@ row count. For a normal analytical `SELECT`, use this logical reading order:
 window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
 different physical plan while preserving those semantics.
 
-The worked walkthrough's lesson-specific task is: Compare email ~ 'customer1[0-9]{2}' with the anchored email ~ '^customer1[0-9]{2}@example\\.com$'. Add surrounding text to a test value and show why an unanchored validation can accept only a matching substring.
-The expected contract is that Matching customer rows in stable ID order. Predict keys, row count, `NULL` behavior,
+The worked walkthrough's lesson-specific task is: Compare `email ~ 'customer1[0-9]{2}'` with the anchored `email ~ '^customer1[0-9]{2}@example[.]com$'`. Add surrounding text to a test value and show why an unanchored validation can accept only a matching substring.
+Exercise 1 expects this result: matching customer rows in stable ID order. Predict keys, row count, `NULL` behavior,
 and ordering before running. Afterwards, compare keys/counts/totals with an
 independent control. A blank string, SQL `NULL`, numeric zero, and a missing row
 are different facts; use `COALESCE` only after choosing which meaning the
@@ -152,7 +152,7 @@ LIMIT 20;
 ## Worked example / walkthrough
 
 Compare `email ~ 'customer1[0-9]{2}'` with the anchored
-`email ~ '^customer1[0-9]{2}@example\\.com$'`. Add surrounding text to a test
+`email ~ '^customer1[0-9]{2}@example[.]com$'`. Add surrounding text to a test
 value and show why an unanchored validation can accept only a matching
 substring.
 
@@ -194,14 +194,14 @@ For every result, write its row grain and expected shape first.
    **Verify:** For sql-29 Exercise 4, run an anti-check that counts rows where NOT ((value LIKE '%\%%' ESCAPE '\' OR value LIKE '%\_%' ESCAPE '\')); require unique `value` where the expected grain is one row per key and confirm the projected `value` against the inline `VALUES` fixture. Add one row for which `(value LIKE '%\%%' ESCAPE '\' OR value LIKE '%\_%' ESCAPE '\')` is true and one for which it is false; verify only the matching `value` value is returned.
 5. **Debugging:** Extract the captured numeric suffix from a valid customer name without replacing the entire string blindly.
    **Progressive hint:** First assert the anchored grammar, then use `substring(... FROM regex)`.
-   **Inputs/evidence:** For sql-29 Exercise 5, read from `customers`. Compute `customer_id`, and `name_number` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+   **Inputs/evidence:** For sql-29 Exercise 5, read from `customers`, keep only names that match the anchored pattern `^Customer [0-9]+$`, and extract the number with `substring(full_name FROM '^Customer ([0-9]+)$')::integer`.
    **Expected result/shape:** For sql-29 Exercise 5, expected output: One row per valid course customer name. The final columns are `customer_id`, and `name_number`. The final order is `c.customer_id`.
-   **Verify:** For sql-29 Exercise 5, evaluate each of `name_number` in a separate control `SELECT` over `customers` using `(c.full_name ~ '^Customer [0-9]+$')`; require one final row and compare every value. Add one row for which `(c.full_name ~ '^Customer [0-9]+$')` is true and one for which it is false; verify only the matching `customer_id` value is returned.
+   **Verify:** For sql-29 Exercise 5, confirm 500 rows, because every seeded name matches, and that `name_number` equals `customer_id` on every row; the same `substring` returns NULL for `'Customer 12a'` and 7 for `'Customer 7'`.
 6. **Extension:** Classify emails as course example, other valid-looking, missing, or malformed using ordered patterns.
    **Progressive hint:** Handle NULL first, then most specific anchored pattern, then a bounded general pattern.
-   **Inputs/evidence:** For sql-29 Exercise 6, read from `customers`. Compute `customer_id`, `email`, and `email_class` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+   **Inputs/evidence:** For sql-29 Exercise 6, read from `customers` and classify each `email` with ordered `CASE` branches: `missing` for NULL, `course_example` for an address at `example.com`, `other_valid_looking` for any other `name@domain.tld`, otherwise `malformed`.
    **Expected result/shape:** For sql-29 Exercise 6, expected output: One row per customer with one classification. The final columns are `customer_id`, `email`, and `email_class`. The final order is `c.customer_id`.
-   **Verify:** For sql-29 Exercise 6, evaluate each of `email`, and `email_class` in a separate control `SELECT` over `customers`; require one final row and compare every value. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
+   **Verify:** For sql-29 Exercise 6, confirm 500 rows, one per customer, all `course_example` on the seed; then run the same `CASE` on `VALUES (NULL), ('ann@example.com'), ('ann@school.org'), ('ann@examplexcom'), ('not-an-email')` and expect `missing`, `course_example`, `other_valid_looking`, `malformed`, and `malformed`.
 
 ## Common mistakes and how to recover
 
@@ -263,15 +263,9 @@ Pitfalls
 - Locale issues in case-folding; consider citext for equality semantics
 - Regex backtracking on catastrophic patterns; keep patterns simple and specific
 
-Current practice map
-- The authoritative six prompts, progressive hints, and expected shapes
-  are maintained in **Exercises** above. They map
-  one-for-one to both solution companions; older short exercise lists
-  were removed to prevent prompt drift.
-
 Further reading
-- Pattern matching: https://www.postgresql.org/docs/current/functions-matching.html
-- pg_trgm: https://www.postgresql.org/docs/current/pgtrgm.html
+- Pattern matching: https://www.postgresql.org/docs/17/functions-matching.html
+- pg_trgm: https://www.postgresql.org/docs/17/pgtrgm.html
 
 ## Ask an AI tutor about this lesson
 
@@ -280,7 +274,7 @@ enough to complete the lesson offline. If you want a patient tutor, copy this
 prompt after opening the repository in the AI tutor:
 
 ```text
-Tutor me through sql-29 — Pattern Matching.
+Tutor me through sql-29: Pattern Matching: LIKE, Regular Expressions, and Full-Text Search.
 
 I have completed the direct catalog prerequisite: `sql-28`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day29_pattern_matching.md
@@ -290,7 +284,7 @@ Key terms to teach in context: Wildcard, Anchor, Sargable predicate. First defin
 language and explain table, row, column, result set, row grain, SQL NULL, and
 deterministic ordering where they apply. Then explain the important clauses in
 logical order and state the expected row grain/shape before asking me to run
-anything. The guide's lesson-specific worked-model focus is: Compare email ~ 'customer1[0-9]{2}' with the anchored email ~ '^customer1[0-9]{2}@example\\.com$'. Add surrounding text to a test value and show why an unanchored validation can accept only a matching substring.
+anything. The guide's lesson-specific worked-model focus is: Compare `email ~ 'customer1[0-9]{2}'` with the anchored `email ~ '^customer1[0-9]{2}@example[.]com$'`. Add surrounding text to a test value and show why an unanchored validation can accept only a matching substring.
 
 Use only the local disposable advanced_sql_training database. Prefer the
 Docker classroom's Whole SQL lesson (psql) workspace and its ignored

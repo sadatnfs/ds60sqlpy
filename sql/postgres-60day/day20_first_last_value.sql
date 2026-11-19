@@ -68,22 +68,22 @@ LIMIT 100;
 -- Keep answers in your own scratch file; this learner script remains answer-free.
 -- 1. [Query writing] Show every order with the customer's first and last order timestamps.
 --    Hint: Use one full-partition frame from unbounded preceding through unbounded following.
---    Inputs: For sql-20 Exercise 1, read from `orders`. Compute `order_id`, `customer_id`, `order_date`, `first_order_date`, and `last_order_date` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+--    Inputs: For sql-20 Exercise 1, read from `orders` and return, for every order, its customer's first and last `order_date` with `FIRST_VALUE` and `LAST_VALUE` over a named window partitioned by `customer_id`, ordered by `order_date, order_id`, with the frame `ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING`.
 --    Expected result/shape: For sql-20 Exercise 1, expected output: One row per order with constant first/last values per customer. The final columns are `order_id`, `customer_id`, `order_date`, `first_order_date`, and `last_order_date`. The final order is `o.customer_id, o.order_date, o.order_id`.
---    Verify: For sql-20 Exercise 1, evaluate each of `order_date`, `first_order_date`, and `last_order_date` in a separate control `SELECT` over `orders`; require one final row and compare every value. Tie two rows on `o.customer_id` and give them different `o.order_id` values; verify `o.customer_id, o.order_date, o.order_id` chooses a stable first/last row.
---    Hint ladder, rung 1: For sql-20 Exercise 1, check `o.customer_id, o.order_date, o.order_id` before applying the row cap.
+--    Verify: For sql-20 Exercise 1, confirm 4362 rows and compare them with `SELECT customer_id, MIN(order_date), MAX(order_date) FROM orders GROUP BY customer_id` (438 customers): no row may differ. With the default frame instead, `LAST_VALUE` returns each row's own `order_date` on all 4362 rows.
+--    Hint ladder, rung 1: For sql-20 Exercise 1, write the window with an explicit full frame first, then remove the frame clause once and watch `LAST_VALUE` change.
 -- 2. [Query writing] Show each product with the cheapest and most expensive price in its category.
 --    Hint: Order by price and use a full frame; values tie without needing row identity.
---    Inputs: For sql-20 Exercise 2, read from `products`. Compute `product_id`, `category`, `price`, `category_min_price`, and `category_max_price` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+--    Inputs: For sql-20 Exercise 2, read from `products` and show each product with the lowest and highest `price` in its `category`, using `FIRST_VALUE` and `LAST_VALUE` over a window ordered by `price, product_id` with a full frame.
 --    Expected result/shape: For sql-20 Exercise 2, expected output: One row per product. The final columns are `product_id`, `category`, `price`, `category_min_price`, and `category_max_price`. The final order is `p.category, p.price, p.product_id`.
---    Verify: For sql-20 Exercise 2, evaluate each of `category_min_price`, and `category_max_price` in a separate control `SELECT` over `products`; require one final row and compare every value. Add one source row with a new `product_id`; verify the result gains exactly one row carrying that `product_id` value.
---    Hint ladder, rung 1: For sql-20 Exercise 2, check `p.category, p.price, p.product_id` before applying the row cap.
+--    Verify: For sql-20 Exercise 2, confirm 300 rows and compare the two window columns with `SELECT category, MIN(price), MAX(price) FROM products GROUP BY category`; for example, every `Apparel` row must show 10.37 and 119.15.
+--    Hint ladder, rung 1: For sql-20 Exercise 2, compute `MIN(price)` and `MAX(price)` per category with `GROUP BY` first; the window columns must repeat those values on every product row.
 -- 3. [Query writing] Compare every payment with the first and last payment amount for its order.
 --    Hint: Partition by order, order by timestamp/payment ID, and keep the full frame.
---    Inputs: For sql-20 Exercise 3, read from `payments`. Compute `payment_id`, `order_id`, `payment_date`, `amount`, `first_payment_amount`, and `last_payment_amount` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+--    Inputs: For sql-20 Exercise 3, read from `payments` and compare every payment with the first and last payment `amount` of its order, using a window partitioned by `order_id`, ordered by `payment_date, payment_id`, with a full frame.
 --    Expected result/shape: For sql-20 Exercise 3, expected output: One row per payment. The final columns are `payment_id`, `order_id`, `payment_date`, `amount`, `first_payment_amount`, and `last_payment_amount`. The final order is `p.order_id, p.payment_date, p.payment_id`.
---    Verify: For sql-20 Exercise 3, evaluate each of `payment_date`, `amount`, `first_payment_amount`, and `last_payment_amount` in a separate control `SELECT` over `payments`; require one final row and compare every value. Tie two rows on `p.order_id` and give them different `p.payment_id` values; verify `p.order_id, p.payment_date, p.payment_id` chooses a stable first/last row.
---    Hint ladder, rung 1: For sql-20 Exercise 3, check `p.order_id, p.payment_date, p.payment_id` before applying the row cap.
+--    Verify: For sql-20 Exercise 3, confirm 3836 rows, one per `payment_id`; 3489 orders have payments, 347 of them have two payments, and only 20 orders have a first amount that differs from the last, so check one of those 20 orders by hand.
+--    Hint ladder, rung 1: For sql-20 Exercise 3, count payments per `order_id` first; only orders with two payments can show different first and last amounts.
 -- 4. [Prediction] Demonstrate the default `LAST_VALUE` result versus a full-partition frame on values 10, 20, 30.
 --    Hint: The default ends at the current row; explicit following reaches the true last row.
 --    Inputs: For sql-20 Exercise 4, read from the inline `VALUES` fixture. Build the answer toward `value`, `default_last_value`, and `partition_last_value`; keep `value` visible whenever the result has row-level grain.
@@ -92,10 +92,10 @@ LIMIT 100;
 --    Hint ladder, rung 1: For sql-20 Exercise 4, inspect one window partition before projecting; then check `value` before applying the row cap.
 -- 5. [Debugging] Return one first and one last order per customer without using window output as an accidental duplicate report.
 --    Hint: Compute first/last IDs with full-frame windows, then select distinct customer-level output.
---    Inputs: For sql-20 Exercise 5, read from `orders`. Compute `customer_id`, `first_order_id`, and `last_order_id` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+--    Inputs: For sql-20 Exercise 5, read from `orders`, compute each customer's first and last `order_id` with full-frame `FIRST_VALUE` and `LAST_VALUE` windows ordered by `order_date, order_id` in the CTE `annotated`, then return one row per customer with `SELECT DISTINCT`.
 --    Expected result/shape: For sql-20 Exercise 5, expected output: One row per customer with orders. The final columns are `customer_id`, `first_order_id`, and `last_order_id`. The final order is `customer_id`.
---    Verify: For sql-20 Exercise 5, evaluate each of `first_order_id`, and `last_order_id` in a separate control `SELECT` over `orders`; require one final row and compare every value. Tie two rows on `customer_id` and give them different `customer_id` values; verify `customer_id` chooses a stable first/last row.
---    Hint ladder, rung 1: For sql-20 Exercise 5, run `annotated` one at a time. Record each CTE's row count and `customer_id` uniqueness before the next stage uses it.
+--    Verify: For sql-20 Exercise 5, confirm 438 rows, one per customer with orders, equal to `SELECT COUNT(DISTINCT customer_id) FROM orders`; without `DISTINCT`, the same query returns 4362 rows, one per order, with each customer's values repeated.
+--    Hint ladder, rung 1: For sql-20 Exercise 5, run `annotated` alone and count its rows (4362) before you collapse it to one row per `customer_id`.
 -- 6. [Extension] Solve latest order per customer with PostgreSQL `DISTINCT ON` and compare its ordering contract with row number.
 --    Hint: `DISTINCT ON` keeps the first row under its mandatory leading order keys.
 --    Inputs: For sql-20 Exercise 6, read from `orders`. Build the answer toward `customer_id`, `order_id`, `order_date`, and `total_amount`; keep `order_id` visible whenever the result has row-level grain.

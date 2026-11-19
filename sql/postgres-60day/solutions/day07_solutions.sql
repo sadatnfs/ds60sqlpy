@@ -1,5 +1,5 @@
 -- Day 07 executable solutions
--- SOLUTION READING MAP — sql-07: Week1 Project
+-- SOLUTION READING MAP for sql-07: Week 1 Project: From Questions to Queries
 -- Explanation: sql/postgres-60day/solutions/day07_solutions.md
 -- Run from the repository root only against advanced_sql_training:
 --   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day07_solutions.sql

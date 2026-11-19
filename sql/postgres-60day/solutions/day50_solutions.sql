@@ -1,5 +1,5 @@
 -- Day 50 solutions: expense and budget variance
--- SOLUTION READING MAP — sql-50: Project2 Finance Part2
+-- SOLUTION READING MAP for sql-50: Finance Project, Part 2: Budget Variance
 -- Explanation: sql/postgres-60day/solutions/day50_solutions.md
 -- Run from the repository root only against advanced_sql_training:
 --   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day50_solutions.sql

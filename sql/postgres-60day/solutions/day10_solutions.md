@@ -7,13 +7,8 @@
 Open this explanation only after making an honest attempt. The executable
 companion runs solely against the disposable `advanced_sql_training` database:
 
-```powershell
-# Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f "sql\postgres-60day\solutions\day10_solutions.sql"
-```
-
 ```bash
-# macOS/Linux, from the repository root
+# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day10_solutions.sql
 ```
@@ -26,7 +21,7 @@ ordering with the explanation before comparing syntax.
 ## Clause-by-clause reading map
 
 The lesson's main concepts are DML, Upsert, Idempotent. Its worked-model focus is:
-Run the candidate-selection SELECT before the matching UPDATE. Compare its keys with UPDATE ... RETURNING, verify the affected count, and leave the course transaction at ROLLBACK. This preview/modify/reconcile pattern is safer than starting with an unbounded write.
+Run the candidate-selection `SELECT` before the matching `UPDATE`. Compare its keys with `UPDATE ... RETURNING`, verify the affected count, and leave the course transaction at `ROLLBACK`. This preview/modify/reconcile pattern is safer than starting with an unbounded write.
 
 - Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
   before adding aggregates; a one-to-many join is allowed to multiply rows only
@@ -123,13 +118,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-10 Exercise 1, read the target keys from `exercise_category_revenue`, `order_items`, and `products` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
-- **Expected result/shape:** For sql-10 Exercise 1, expected output: One temporary row per product category. The final columns are `category`. The final order is `revenue DESC, category`.
-- **Independent verification:** For sql-10 Exercise 1, materialize the intended `category` target set first; require the command tag/`RETURNING` set to match it, then query `exercise_category_revenue`, `order_items`, and `products` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `category` values in both cases.
-- **Intermediate relation check:** For sql-10 Exercise 1, start with the first relation in `exercise_category_revenue`, `order_items`, and `products`; after each join, record total rows and distinct `category` so the exact fanout or loss is visible.
-- **Clause check:** For sql-10 Exercise 1, the solution actually uses `FROM`, `JOIN ... ON`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `exercise_category_revenue`, `order_items`, and `products`, preserve one row per `category`, and finish with `category` ordered by `revenue DESC, category`.
-- **Alternative/trade-off:** For sql-10 Exercise 1, the chosen form is justified by this lesson-specific rationale: Declare the temporary schema and aggregate source rows before inserting. Evaluate another form against the concrete expected result (One temporary row per product category) and the verification above.
-- **Edge case:** Use an empty target set and a multi-row target set; reconcile the affected `category` values in both cases.
+- **Inputs/evidence:** For sql-10 Exercise 1, aggregate net revenue, `unit_price * quantity * (1 - discount)`, from `order_items` joined to `products` by `p.category`, and load it with `INSERT ... SELECT` into the temporary table `exercise_category_revenue (category text PRIMARY KEY, revenue numeric NOT NULL)`.
+- **Expected result/shape:** For sql-10 Exercise 1, expected output: the command tag `INSERT 0 6`, then six rows, one per product category, with columns `category` and `revenue` (rounded to 2 places), ordered by `revenue DESC, category`; `Sports` leads on the course seed.
+- **Independent verification:** For sql-10 Exercise 1, rerun the aggregate as a plain `SELECT` and compare each category's revenue with the stored row; confirm that `SELECT COUNT(DISTINCT p.category) FROM order_items oi JOIN products p ON p.product_id = oi.product_id` returns 6, and that the savepoint rollback leaves no `exercise_category_revenue` table.
+- **Intermediate relation check:** For sql-10 Exercise 1, run the `SELECT ... GROUP BY p.category` alone and confirm six rows before inserting them.
+- **Clause check:** For sql-10 Exercise 1, the solution uses `SAVEPOINT`, `CREATE TEMP TABLE ... ON COMMIT DROP`, `INSERT ... SELECT ... JOIN ... GROUP BY p.category`, a check `SELECT ... ORDER BY revenue DESC, category`, and `ROLLBACK TO SAVEPOINT`.
+- **Alternative/trade-off:** For sql-10 Exercise 1, `CREATE TEMP TABLE ... AS SELECT` creates and fills the table in one statement, but it cannot declare the primary key that rejects a duplicate category.
+- **Edge case:** Running the same `INSERT ... SELECT` twice fails on the second run with SQLSTATE `23505`, because `category` is the primary key; that is the intended protection against double loading.
 
 ## Exercise 2: Query writing
 
@@ -177,13 +172,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-10 Exercise 2, read the target keys from `employees`, and `departments` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
-- **Expected result/shape:** For sql-10 Exercise 2, expected output: Affected employee rows only; no change persists. The final columns are `returning`, `update`, `from`, and `where`.
-- **Independent verification:** For sql-10 Exercise 2, materialize the intended `employee_id` target set first; require the command tag/`RETURNING` set to match it, then query `employees`, and `departments` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `employee_id` values in both cases.
-- **Intermediate relation check:** For sql-10 Exercise 2, materialize the intended `employee_id` target set first; require the command tag/`RETURNING` set to match it, then query `employees`, and `departments` again and prove rollback or idempotent retry.
-- **Clause check:** For sql-10 Exercise 2, the solution actually uses `FROM`, `WHERE`, `SELECT`, and `RETURNING`. Read only those operations: begin at `employees`, and `departments`, preserve one row per `employee_id`, and finish with `returning`, `update`, `from`, and `where`.
-- **Alternative/trade-off:** For sql-10 Exercise 2, the chosen form is justified by this lesson-specific rationale: Select departments by key, round exact numeric salary, and inspect `RETURNING`. Evaluate another form against the concrete expected result (Affected employee rows only; no change persists) and the verification above.
-- **Edge case:** Use an empty target set and a multi-row target set; reconcile the affected `employee_id` values in both cases.
+- **Inputs/evidence:** For sql-10 Exercise 2, raise `salary` by 5% (rounded to 2 places) for employees whose `department_id` belongs to the `departments` named `Sales` or `Engineering`, selected with an `IN (SELECT ...)` subquery, inside a savepoint.
+- **Expected result/shape:** For sql-10 Exercise 2, expected output: the command tag `UPDATE 34` and 34 returned rows with columns `employee_id`, `full_name`, and `salary` (the new value); after `ROLLBACK TO SAVEPOINT`, no salary has changed.
+- **Independent verification:** For sql-10 Exercise 2, before the update, count the targets with `SELECT COUNT(*) FROM employees e JOIN departments d ON d.department_id = e.department_id WHERE d.name IN ('Sales', 'Engineering')` (34) and compare with the command tag; after the rollback, compare one returned `employee_id`'s salary with its original value.
+- **Intermediate relation check:** For sql-10 Exercise 2, the department subquery returns two `department_id` values; the `UPDATE` must touch only employees in those two departments.
+- **Clause check:** For sql-10 Exercise 2, the solution uses `UPDATE employees AS e SET salary = ROUND(e.salary * 1.05, 2) WHERE e.department_id IN (SELECT ...) RETURNING e.employee_id, e.full_name, e.salary`.
+- **Alternative/trade-off:** For sql-10 Exercise 2, `UPDATE ... FROM departments d WHERE d.department_id = e.department_id AND d.name IN (...)` is equivalent here because each employee matches at most one department row.
+- **Edge case:** A misspelled department name, such as `'Engineers'`, matches nothing and produces `UPDATE 17` for Sales only; compare the command tag with the preview count to catch it.
 
 ## Exercise 3: Query writing
 
@@ -228,13 +223,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-10 Exercise 3, read the target keys from `orders`, and `payments` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
-- **Expected result/shape:** For sql-10 Exercise 3, expected output: Deleted-candidate order rows, then fully restored state. The final columns are `from`, `where`, and `returning`.
-- **Independent verification:** For sql-10 Exercise 3, materialize the intended `order_id` target set first; require the command tag/`RETURNING` set to match it, then query `orders`, and `payments` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `order_id` values in both cases.
-- **Intermediate relation check:** For sql-10 Exercise 3, materialize the intended `order_id` target set first; require the command tag/`RETURNING` set to match it, then query `orders`, and `payments` again and prove rollback or idempotent retry.
-- **Clause check:** For sql-10 Exercise 3, the solution actually uses `FROM`, `WHERE`, `SELECT`, and `RETURNING`. Read only those operations: begin at `orders`, and `payments`, preserve one row per `order_id`, and finish with `from`, `where`, and `returning`.
-- **Alternative/trade-off:** For sql-10 Exercise 3, the chosen form is justified by this lesson-specific rationale: Use correlated `NOT EXISTS`; foreign-key cascades remain rollback-protected. Evaluate another form against the concrete expected result (Deleted-candidate order rows, then fully restored state) and the verification above.
-- **Edge case:** Use an empty target set and a multi-row target set; reconcile the affected `order_id` values in both cases.
+- **Inputs/evidence:** For sql-10 Exercise 3, delete orders with `order_date` older than one year that have no row in `payments`, using a correlated `NOT EXISTS`, inside a savepoint.
+- **Expected result/shape:** For sql-10 Exercise 3, expected output: a `DELETE` command tag and returned rows with columns `order_id`, `customer_id`, and `order_date`, all older than one year (362 rows on a freshly seeded database); after `ROLLBACK TO SAVEPOINT`, every order and its cascaded `order_items` are restored.
+- **Independent verification:** For sql-10 Exercise 3, count the candidates first with the same `WHERE` clause in a `SELECT COUNT(*)` and compare with the command tag; after the rollback, confirm that `SELECT COUNT(*) FROM orders` is back to 4,362 and that a deleted `order_id` exists again.
+- **Intermediate relation check:** For sql-10 Exercise 3, `SELECT COUNT(*) FROM order_items WHERE order_id IN (...candidates...)` shows how many line items the `ON DELETE CASCADE` foreign key would remove with the orders.
+- **Clause check:** For sql-10 Exercise 3, the solution uses `DELETE FROM orders AS o WHERE o.order_date < CURRENT_TIMESTAMP - INTERVAL '1 year' AND NOT EXISTS (SELECT 1 FROM payments AS p WHERE p.order_id = o.order_id) RETURNING ...`.
+- **Alternative/trade-off:** For sql-10 Exercise 3, `NOT IN (SELECT order_id FROM payments)` gives the same result only while `payments.order_id` can never be NULL; `NOT EXISTS` stays correct either way.
+- **Edge case:** Because the cutoff uses `CURRENT_TIMESTAMP`, the candidate count grows as the seed ages; compare the preview and the command tag in the same transaction.
 
 ## Exercise 4: Prediction
 
@@ -292,13 +287,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-10 Exercise 4, read the target keys from `exercise_feed` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
-- **Expected result/shape:** For sql-10 Exercise 4, expected output: One row for `source_a` with the second value. The final columns are `source_key`, and `source_value`. The final order is `source_key`.
-- **Independent verification:** For sql-10 Exercise 4, materialize the intended `source_key` target set first; require the command tag/`RETURNING` set to match it, then query `exercise_feed` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `source_key` values in both cases.
-- **Intermediate relation check:** For sql-10 Exercise 4, materialize the intended `source_key` target set first; require the command tag/`RETURNING` set to match it, then query `exercise_feed` again and prove rollback or idempotent retry.
-- **Clause check:** For sql-10 Exercise 4, the solution actually uses `FROM`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `exercise_feed`, preserve one row per `source_key`, and finish with `source_key`, and `source_value` ordered by `source_key`.
-- **Alternative/trade-off:** For sql-10 Exercise 4, the chosen form is justified by this lesson-specific rationale: A primary key supplies the conflict target; the second statement updates rather than inserts. Evaluate another form against the concrete expected result (One row for `source_a` with the second value) and the verification above.
-- **Edge case:** Use an empty target set and a multi-row target set; reconcile the affected `source_key` values in both cases.
+- **Inputs/evidence:** For sql-10 Exercise 4, create the temporary table `exercise_feed (source_key text PRIMARY KEY, source_value numeric NOT NULL)` and run `INSERT ... ON CONFLICT (source_key) DO UPDATE SET source_value = EXCLUDED.source_value` twice for `source_a`, first with `10` and then with `12`.
+- **Expected result/shape:** For sql-10 Exercise 4, expected output: both statements print `INSERT 0 1`, and the final `SELECT` returns one row ordered by `source_key` with columns `source_key` and `source_value`: `('source_a', 12)`.
+- **Independent verification:** For sql-10 Exercise 4, confirm that `SELECT COUNT(*) FROM exercise_feed WHERE source_key = 'source_a'` returns 1 after the second run; add `RETURNING (xmax = 0) AS inserted` to each upsert to see `true` for the first run and `false` for the second.
+- **Intermediate relation check:** For sql-10 Exercise 4, select the table after the first upsert: it holds `('source_a', 10)`, so the second statement must update that row rather than add one.
+- **Clause check:** For sql-10 Exercise 4, the solution uses `CREATE TEMP TABLE ... PRIMARY KEY`, two `INSERT ... VALUES ... ON CONFLICT (source_key) DO UPDATE SET source_value = EXCLUDED.source_value`, and `SELECT ... ORDER BY source_key`.
+- **Alternative/trade-off:** For sql-10 Exercise 4, `ON CONFLICT DO NOTHING` would keep `10` and silently ignore the new value; `MERGE` can express the same upsert but does not use `ON CONFLICT`'s concurrency guarantee.
+- **Edge case:** Without a unique index on `source_key`, `ON CONFLICT (source_key)` fails with SQLSTATE `42P10` (no unique or exclusion constraint matching the specification).
 
 ## Exercise 5: Debugging
 
@@ -368,13 +363,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-10 Exercise 5, read the target keys from `products`, and `exercise_product_candidates` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
-- **Expected result/shape:** For sql-10 Exercise 5, expected output: One summary row with equal candidate and updated counts. The final columns are `product_id`. The final order is `p.product_id`.
-- **Independent verification:** For sql-10 Exercise 5, materialize the intended `product_id` target set first; require the command tag/`RETURNING` set to match it, then query `products`, and `exercise_product_candidates` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `product_id` values in both cases.
-- **Intermediate relation check:** For sql-10 Exercise 5, run `updated` one at a time. Record each CTE's row count and `product_id` uniqueness before the next stage uses it.
-- **Clause check:** For sql-10 Exercise 5, the solution actually uses `WITH`, `FROM`, `WHERE`, `SELECT`, `ORDER BY`, `LIMIT`, and `RETURNING`. Read only those operations: begin at `products`, and `exercise_product_candidates`, preserve one row per `product_id`, and finish with `product_id` ordered by `p.product_id`.
-- **Alternative/trade-off:** For sql-10 Exercise 5, the chosen form is justified by this lesson-specific rationale: Store candidate keys in a temporary table and update only through that reviewed set. Evaluate another form against the concrete expected result (One summary row with equal candidate and updated counts) and the verification above.
-- **Edge case:** Use an empty target set and a multi-row target set; reconcile the affected `product_id` values in both cases.
+- **Inputs/evidence:** For sql-10 Exercise 5, store the first five `Books` product keys in the temporary table `exercise_product_candidates`, then lower those products' `price` by 1% through a data-modifying CTE that updates only keys in that table.
+- **Expected result/shape:** For sql-10 Exercise 5, expected output: one summary row with columns `candidate_count` and `updated_count`, both `5`.
+- **Independent verification:** For sql-10 Exercise 5, list the candidate `product_id` values before the update and compare them with the keys returned by the `UPDATE`'s `RETURNING` clause; after `ROLLBACK TO SAVEPOINT`, confirm that each candidate's `price` equals its original value.
+- **Intermediate relation check:** For sql-10 Exercise 5, `SELECT product_id FROM exercise_product_candidates ORDER BY product_id` returns the five reviewed keys before any price changes.
+- **Clause check:** For sql-10 Exercise 5, the solution uses `CREATE TEMP TABLE ... AS SELECT ... ORDER BY p.product_id LIMIT 5`, then `WITH updated AS (UPDATE ... WHERE p.product_id IN (SELECT ...) RETURNING p.product_id)` and an outer `SELECT` of the two counts.
+- **Alternative/trade-off:** For sql-10 Exercise 5, updating with `WHERE p.category = 'Books'` directly would change all 50 books; the candidate table bounds the write to the five reviewed keys.
+- **Edge case:** If a candidate key were deleted before the update, `updated_count` would be lower than `candidate_count`, which is exactly the mismatch this reconciliation is designed to expose.
 
 ## Exercise 6: Extension
 
@@ -438,13 +433,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-10 Exercise 6, read the target keys from `exercise_price_stage`, `products`, and `stage.new_price` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
-- **Expected result/shape:** For sql-10 Exercise 6, expected output: Returned rows only for valid changed products. The final columns are `product_id`. The final order is `p.product_id`.
-- **Independent verification:** For sql-10 Exercise 6, materialize the intended `product_id` target set first; require the command tag/`RETURNING` set to match it, then query `exercise_price_stage`, `products`, and `stage.new_price` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `product_id` values in both cases.
-- **Intermediate relation check:** For sql-10 Exercise 6, materialize the intended `product_id` target set first; require the command tag/`RETURNING` set to match it, then query `exercise_price_stage`, `products`, and `stage.new_price` again and prove rollback or idempotent retry.
-- **Clause check:** For sql-10 Exercise 6, the solution actually uses `FROM`, `WHERE`, `SELECT`, `ORDER BY`, `LIMIT`, and `RETURNING`. Read only those operations: begin at `exercise_price_stage`, `products`, and `stage.new_price`, preserve one row per `product_id`, and finish with `product_id` ordered by `p.product_id`.
-- **Alternative/trade-off:** For sql-10 Exercise 6, the chosen form is justified by this lesson-specific rationale: Use `UPDATE ... FROM`, validate the stage predicate, and compare with `IS DISTINCT FROM`. Evaluate another form against the concrete expected result (Returned rows only for valid changed products) and the verification above.
-- **Edge case:** Use an empty target set and a multi-row target set; reconcile the affected `product_id` values in both cases.
+- **Inputs/evidence:** For sql-10 Exercise 6, stage new prices for the first three products in the temporary table `exercise_price_stage`, then run `UPDATE products ... FROM exercise_price_stage` only where `stage.new_price >= 0` and `p.price IS DISTINCT FROM stage.new_price`.
+- **Expected result/shape:** For sql-10 Exercise 6, expected output: the command tag `UPDATE 3` and three returned rows ordered by `p.product_id` with columns `product_id` and `price`: `(1, 10.47)`, `(2, 10.85)`, and `(3, 11.22)` on the course seed.
+- **Independent verification:** For sql-10 Exercise 6, add a staged row with a negative price and one whose price equals the current price, rerun the update after a savepoint, and confirm that neither key is returned; then confirm the original prices after `ROLLBACK TO SAVEPOINT`.
+- **Intermediate relation check:** For sql-10 Exercise 6, `SELECT stage.product_id, p.price, stage.new_price FROM exercise_price_stage stage JOIN products p USING (product_id)` shows the three before/after pairs that the update should apply.
+- **Clause check:** For sql-10 Exercise 6, the solution uses `CREATE TEMP TABLE`, `INSERT ... SELECT ... LIMIT 3`, and `UPDATE products AS p SET price = stage.new_price FROM exercise_price_stage AS stage WHERE ... RETURNING p.product_id, p.price`.
+- **Alternative/trade-off:** For sql-10 Exercise 6, `p.price <> stage.new_price` behaves the same only when neither side is NULL; `IS DISTINCT FROM` also treats a change to or from NULL as a difference.
+- **Edge case:** A staged `new_price` of NULL fails `stage.new_price >= 0` (unknown is not true), so it is skipped instead of reaching the `NOT NULL` price column.
 
 ## Final self-check
 

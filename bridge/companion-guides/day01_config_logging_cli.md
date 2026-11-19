@@ -29,14 +29,8 @@ Start at the repository root. The answer-free starter is deliberately safe to
 run: it prints orientation text and does not call unfinished functions or
 contact PostgreSQL.
 
-```powershell
-# Windows PowerShell
-.\.venv\Scripts\python.exe bridge\lessons\day01_config_logging_cli.py
-.\.venv\Scripts\python.exe -m pytest bridge\tests -q
-```
-
 ```bash
-# macOS/Linux
+# Linux, macOS, or Windows through WSL 2
 .venv/bin/python bridge/lessons/day01_config_logging_cli.py
 .venv/bin/python -m pytest bridge/tests -q
 ```
@@ -100,9 +94,8 @@ For this course, use these settings:
 <!-- BEGIN BRIDGE ENRICHMENT: DEEP DIVE -->
 ## Mental model: turn strings into trusted state once
 
-Everything outside the program arrives as untrusted text. PowerShell
-environment variables, POSIX environment variables, command-line arguments,
-and copied connection URLs are all strings, even when they represent a Boolean
+Everything outside the program arrives as untrusted text. Environment
+variables, command-line arguments, and copied connection URLs are all strings, even when they represent a Boolean
 or a log level. A **configuration boundary** performs four jobs in a visible
 order: collect candidate values, apply precedence, validate and normalize the
 chosen values, and return one typed object. The rest of the application should
@@ -205,12 +198,12 @@ and model adapters.
    - **Progressive hint:** Test the emitted boundary, not only the return value of the redaction
      helper.
    - **Verify:** Capture startup, success, and validation-failure logs with password/query sentinels; assert every sentinel and the full URL are absent and the safe host/database label remains.
-10. **Portability:** Write equivalent Windows PowerShell and POSIX invocations that set
-   environment values outside Python and pass CLI overrides through `argv`; identify what
-   remains platform-neutral.
-   - **Progressive hint:** Environment-setting syntax differs, but `argparse`, `Mapping`, and
-     the Python entry point do not.
-   - **Verify:** Record one PowerShell `$env:DS60_LOG_LEVEL=...` run and one POSIX `export ...` run; assert the same `Settings` values result when identical CLI overrides are supplied.
+10. **Portability:** Write two Bash invocations that set the same environment values outside
+   Python, one with a session-wide `export` and one with a single-command `NAME=value`
+   prefix, and pass identical CLI overrides through `argv`; identify what stays the same.
+   - **Progressive hint:** The shell decides how long a variable lives, but `argparse`,
+     `Mapping`, and the Python entry point do not change.
+   - **Verify:** Record one `export DS60_LOG_LEVEL=...` run and one `DS60_LOG_LEVEL=... python ...` run; assert the same `Settings` values result with identical CLI overrides, and that a fresh shell prints `unset` for `echo "${DS60_LOG_LEVEL-unset}"` after the prefix form.
 
 ### Before opening the solution
 
@@ -253,7 +246,7 @@ prompt below deliberately names exact paths so a new AI tutoring session can ori
 itself without guessing.
 
 ```text
-Tutor me through stable lesson ID bridge-01: Config Logging CLI.
+Tutor me through stable lesson ID bridge-01: Configuration, Logging, and Typed CLI Boundaries.
 Direct catalog prerequisites: python-15, sql-15. Assume I completed exactly those
 prerequisites, then begin with one short Retrieval question that connects each
 prerequisite to this lesson.
@@ -266,12 +259,12 @@ Do not open, quote, summarize, or copy anything under solutions/ until I
 explicitly say I have finished my attempt and ask to compare.
 
 Use these coaching phases in order:
-1. Predict — ask what I expect before I run or change code.
-2. Attempt — let me implement or explain one numbered exercise at a time.
-3. Hint — give the smallest useful conceptual hint, never a finished answer.
-4. Evidence — ask for the exact return value, exception type, recorded calls,
+1. Predict: ask what I expect before I run or change code.
+2. Attempt: let me implement or explain one numbered exercise at a time.
+3. Hint: give the smallest useful conceptual hint, never a finished answer.
+4. Evidence: ask for the exact return value, exception type, recorded calls,
    query plus bound parameters, or written decision required by that exercise.
-5. Retrieval — close with two no-notes questions and one transfer problem.
+5. Retrieval: close with two no-notes questions and one transfer problem.
 
 Keep the default path offline and fake-first. If the lesson has an optional
 PostgreSQL step, require my explicit opt-in, DS60_DATABASE_URL, and the

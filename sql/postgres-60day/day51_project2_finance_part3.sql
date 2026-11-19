@@ -120,10 +120,10 @@ j AS (
 --    Hint ladder, rung 1: For sql-51 Exercise 2, run `cash`, `expense`, `historical`, and `future` one at a time. Record each CTE's row count and `forecast_month` uniqueness before the next stage uses it.
 -- 3. Prediction: compare cash-basis payments with order revenue and explain why
 --    timing differences make them unsuitable for one unlabeled margin metric.
---    Inputs: For sql-51 Exercise 3, read from `orders`, and `payments`. Build the answer toward `month`, `booked_order_revenue`, and `cash_received`; keep `cash_received` visible whenever the result has row-level grain.
---    Expected result/shape: For sql-51 Exercise 3, expected output: one row per `cash_received`. The final columns are `month`, `booked_order_revenue`, and `cash_received`. The final order is `month`.
---    Verify: For sql-51 Exercise 3, independently aggregate `orders`, and `payments` by `cash_received`; require one output row for every distinct `cash_received` tuple and compare `booked_order_revenue` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `booked_order_revenue` for the existing `cash_received` tuple and verify the new tuple appears exactly once.
---    Hint ladder, rung 1: For sql-51 Exercise 3, start with the first relation in `orders`, and `payments`; after each join, record total rows and distinct `cash_received` so the exact fanout or loss is visible.
+--    Inputs: For sql-51 Exercise 3, read from `orders` and `payments`; sum `total_amount` by order month as `booked_order_revenue` and left join the payments summed by payment month as `cash_received`, using `COALESCE(..., 0)` for months without payments.
+--    Expected result/shape: For sql-51 Exercise 3, expected output: one row per order month, ordered by `month`; `cash_received` is lower than `booked_order_revenue` in most months because unpaid orders bring no cash. The final columns are `month`, `booked_order_revenue`, and `cash_received`. The final order is `month`.
+--    Verify: For sql-51 Exercise 3, confirm that `month` is unique and that `SUM(booked_order_revenue)` is 2355646.89; compare `SUM(cash_received)` with `SELECT SUM(amount) FROM payments` (1831900.81): they match only when every payment month also has orders, because the query starts from order months.
+--    Hint ladder, rung 1: For sql-51 Exercise 3, aggregate `orders` and `payments` to month grain separately and compare their row counts before you join them.
 -- 4. Construction: produce monthly beginning cash, inflows, outflows, net cash,
 --    and ending cash with a running window.
 --    Inputs: For sql-51 Exercise 4, read from `payments`, and `expenses`. Build the answer toward `month`, `beginning_cash`, `cash_in`, `cash_out`, `net_cash`, and `ending_cash`; keep `month` visible whenever the result has row-level grain.

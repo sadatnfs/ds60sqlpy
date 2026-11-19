@@ -92,14 +92,14 @@ ORDER BY
 --    Hint ladder, rung 1: For sql-29 Exercise 4, inspect the source keys that survive `WHERE`; then check `value` before applying the row cap.
 -- 5. [Debugging] Extract the captured numeric suffix from a valid customer name without replacing the entire string blindly.
 --    Hint: First assert the anchored grammar, then use `substring(... FROM regex)`.
---    Inputs: For sql-29 Exercise 5, read from `customers`. Compute `customer_id`, and `name_number` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+--    Inputs: For sql-29 Exercise 5, read from `customers`, keep only names that match the anchored pattern `^Customer [0-9]+$`, and extract the number with `substring(full_name FROM '^Customer ([0-9]+)$')::integer`.
 --    Expected result/shape: For sql-29 Exercise 5, expected output: One row per valid course customer name. The final columns are `customer_id`, and `name_number`. The final order is `c.customer_id`.
---    Verify: For sql-29 Exercise 5, evaluate each of `name_number` in a separate control `SELECT` over `customers` using `(c.full_name ~ '^Customer [0-9]+$')`; require one final row and compare every value. Add one row for which `(c.full_name ~ '^Customer [0-9]+$')` is true and one for which it is false; verify only the matching `customer_id` value is returned.
---    Hint ladder, rung 1: For sql-29 Exercise 5, inspect the source keys that survive `WHERE`; then check `c.customer_id` before applying the row cap.
+--    Verify: For sql-29 Exercise 5, confirm 500 rows, because every seeded name matches, and that `name_number` equals `customer_id` on every row; the same `substring` returns NULL for `'Customer 12a'` and 7 for `'Customer 7'`.
+--    Hint ladder, rung 1: For sql-29 Exercise 5, run the `WHERE full_name ~ '^Customer [0-9]+$'` filter alone and count the matches before you add the extraction.
 -- 6. [Extension] Classify emails as course example, other valid-looking, missing, or malformed using ordered patterns.
 --    Hint: Handle NULL first, then most specific anchored pattern, then a bounded general pattern.
---    Inputs: For sql-29 Exercise 6, read from `customers`. Compute `customer_id`, `email`, and `email_class` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+--    Inputs: For sql-29 Exercise 6, read from `customers` and classify each `email` with ordered `CASE` branches: `missing` for NULL, `course_example` for an address at `example.com`, `other_valid_looking` for any other `name@domain.tld`, otherwise `malformed`.
 --    Expected result/shape: For sql-29 Exercise 6, expected output: One row per customer with one classification. The final columns are `customer_id`, `email`, and `email_class`. The final order is `c.customer_id`.
---    Verify: For sql-29 Exercise 6, evaluate each of `email`, and `email_class` in a separate control `SELECT` over `customers`; require one final row and compare every value. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
---    Hint ladder, rung 1: For sql-29 Exercise 6, check `c.customer_id` before applying the row cap.
+--    Verify: For sql-29 Exercise 6, confirm 500 rows, one per customer, all `course_example` on the seed; then run the same `CASE` on `VALUES (NULL), ('ann@example.com'), ('ann@school.org'), ('ann@examplexcom'), ('not-an-email')` and expect `missing`, `course_example`, `other_valid_looking`, `malformed`, and `malformed`.
+--    Hint ladder, rung 1: For sql-29 Exercise 6, test the `CASE` on the five sample values first; the `IS NULL` branch must come first and the `example[.]com` branch before the general one.
 ROLLBACK;

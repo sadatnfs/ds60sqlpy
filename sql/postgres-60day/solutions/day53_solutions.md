@@ -7,13 +7,8 @@
 Open this explanation only after making an honest attempt. The executable
 companion runs solely against the disposable `advanced_sql_training` database:
 
-```powershell
-# Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f "sql\postgres-60day\solutions\day53_solutions.sql"
-```
-
 ```bash
-# macOS/Linux, from the repository root
+# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day53_solutions.sql
 ```
@@ -26,7 +21,7 @@ ordering with the explanation before comparing syntax.
 ## Clause-by-clause reading map
 
 The lesson's main concepts are SCD Type 2, Business key, Validity interval. Its worked-model focus is:
-For one changed customer, locate exactly one current row, set its validto to the day before the new version, and insert the successor at CURRENTDATE. Then as-of join a fact date using inclusive bounds and verify it resolves to one surrogate key, not zero and not two.
+For one changed customer, locate exactly one current row, set its `valid_to` to the day before the new version, and insert the successor at `CURRENT_DATE`. Then as-of join a fact date using inclusive bounds and verify it resolves to one surrogate key, not zero and not two.
 
 - Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
   before adding aggregates; a one-to-many join is allowed to multiply rows only
@@ -53,9 +48,12 @@ same grain, `NULL` semantics, deterministic ordering, and safety. Prefer the
 form whose intermediate relations a reviewer can verify; optimize only after
 correctness is established with evidence.
 
-Run [`day52_solutions.sql`](day52_solutions.sql) first in the same database.
-Day 53 reads that committed `dwh` state but wraps its own changes in a
-transaction and rolls them back. The full answer is
+Run Day 52 first in the same database, either
+[`day52_solutions.sql`](day52_solutions.sql) or the Day 52 learner file. Day 53
+reads that committed `dwh` state but wraps its own changes in a transaction and
+rolls them back. Its first statements restore the Day 52 Exercise 1 contract, a
+`NOT NULL` `country_sk` that points at `dim_country`; they change nothing when
+the warehouse already has it. The full answer is
 [`day53_solutions.sql`](day53_solutions.sql).
 
 ## Exercise 1: Resolve dimension versions by fact date
@@ -114,13 +112,13 @@ new current row, and then performs this temporal mapping.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-53 Exercise 1, read from `training.orders`, `training.order_items`, `dim_date`, `dim_customer`, and `dim_product`. Build the answer toward `order_id`, `order_item_id`, `date_key`, `customer_sk`, `product_sk`, `quantity`, `unit_price`, `discount`, and `amount`; keep `order_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-53 Exercise 1, expected output: one row per `order_id`. The final columns are `order_id`, `order_item_id`, `date_key`, `customer_sk`, `product_sk`, `quantity`, `unit_price`, `discount`, and `amount`.
-- **Independent verification:** For sql-53 Exercise 1, project `order_id` plus the raw source columns from `training.orders`, `training.order_items`, `dim_date`, `dim_customer`, and `dim_product` at each join stage; record row count and distinct `order_id`, then assert the final `order_id`, `order_item_id`, `date_key`, `customer_sk`, `product_sk`, `quantity`, `unit_price`, `discount`, and `amount` values match those staged rows without unintended fanout or loss. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
-- **Intermediate relation check:** For sql-53 Exercise 1, start with the first relation in `training.orders`, `training.order_items`, `dim_date`, `dim_customer`, and `dim_product`; after each join, record total rows and distinct `order_id` so the exact fanout or loss is visible.
-- **Clause check:** For sql-53 Exercise 1, the solution actually uses `FROM`, `JOIN ... ON`, and `SELECT`. Read only those operations: begin at `training.orders`, `training.order_items`, `dim_date`, `dim_customer`, and `dim_product`, preserve one row per `order_id`, and finish with `order_id`, `order_item_id`, `date_key`, `customer_sk`, `product_sk`, `quantity`, `unit_price`, `discount`, and `amount`.
-- **Alternative/trade-off:** For sql-53 Exercise 1, the chosen form is justified by this lesson-specific rationale: The exercise requires the customer and product surrogate keys whose validity intervals contain each source order date. Evaluate another form against the concrete expected result (one row per `order_id`) and the verification above.
-- **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+- **Inputs/evidence:** For sql-53 Exercise 1, map every `training.order_items` row to `dim_date`, to the `dim_customer` version whose `valid_from <= order_date::date <= COALESCE(valid_to, 'infinity')`, and to the matching `dim_product` version, after the Exercise 2 change gave customer 1 a second version.
+- **Expected result/shape:** For sql-53 Exercise 1, expected output: the temporary table `fact_sales_temporal_solution`, one row per `order_item_id`, with columns `order_id`, `order_item_id`, `date_key`, `customer_sk`, `product_sk`, `quantity`, `unit_price`, `discount`, and `amount`; the check row reports `mapped_fact_rows = 13085`, `source_item_rows = 13085`, and `customer_versions = 2`.
+- **Independent verification:** For sql-53 Exercise 1, confirm that `SELECT COUNT(DISTINCT order_item_id) FROM fact_sales_temporal_solution` also returns 13,085, so no item was duplicated by overlapping versions or lost in a validity gap; for customer 1, check that orders dated before the change map to the closed version's `customer_sk` and later orders to the current one.
+- **Intermediate relation check:** For sql-53 Exercise 1, count rows after the `orders` to `order_items` join (13,085) and again after each dimension join; any change in the count points at a missing date row or an overlapping or missing version.
+- **Clause check:** For sql-53 Exercise 1, the solution uses `CREATE TEMP TABLE ... AS SELECT` over `training.orders JOIN training.order_items USING (order_id)` plus three dimension joins with validity predicates, followed by a scalar-subquery check row.
+- **Alternative/trade-off:** For sql-53 Exercise 1, storing `daterange(valid_from, valid_to, '[]')` and joining with `@> o.order_date::date` expresses the same rule and can use a GiST index, at the cost of a range column the rest of the warehouse must understand.
+- **Edge case:** An order dated exactly on a version's `valid_to` still matches that closed version, because the date ranges are inclusive at both ends; the next version starts the following day.
 
 ## Exercise 2: Audit columns
 
@@ -147,13 +145,13 @@ lesson.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-53 Exercise 2, change only `dim_customer`, and `dim_product` inside the lesson rollback/cleanup boundary. Capture the DDL command tag and the relevant `information_schema.columns` rows.
-- **Expected result/shape:** For sql-53 Exercise 2, expected output: the requested DDL command tag plus catalog rows and one accepted and one rejected behavior. The final columns are `updated_by`, and `day53_solution`.
-- **Independent verification:** For sql-53 Exercise 2, inspect `information_schema.columns` for `dim_customer`, and `dim_product`; run one accepted and one rejected operation, record the SQLSTATE, and confirm rollback/cleanup removes the course-owned object. Run one value that satisfies the new rule and one value that must fail; record the catalog definition and SQLSTATE.
-- **Intermediate relation check:** For sql-53 Exercise 2, inspect `information_schema.columns` for `dim_customer`, and `dim_product`; run one accepted and one rejected operation, record the SQLSTATE, and confirm rollback/cleanup removes the course-owned object.
-- **Clause check:** For sql-53 Exercise 2, this is a written operational artifact rather than a clause-reading exercise; trace each claim to `dim_customer`, and `dim_product` or label it as proposed policy.
-- **Alternative/trade-off:** For sql-53 Exercise 2, the chosen form is justified by this lesson-specific rationale: Inside the Day 53 transaction, the answer adds: The SCD close and insert explicitly stamp `updated_by = 'day53_solution'`. Evaluate another form against the concrete expected result (the requested DDL command tag plus catalog rows and one accepted and one rejected behavior) and the verification above.
-- **Edge case:** Run one value that satisfies the new rule and one value that must fail; record the catalog definition and SQLSTATE.
+- **Inputs/evidence:** For sql-53 Exercise 2, add `updated_by text NOT NULL DEFAULT CURRENT_USER` and `updated_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP` to `dim_customer` and `dim_product`, then apply one staged segment change for customer 1 as an SCD2 close-and-insert whose new version also carries `country_sk`.
+- **Expected result/shape:** For sql-53 Exercise 2, expected output: two `ALTER TABLE` command tags for the audit columns, then `SELECT 1`, `UPDATE 1`, and `INSERT 0 1` for the staged change; the closed and the new customer 1 rows both carry `updated_by = 'day53_solution'`.
+- **Independent verification:** For sql-53 Exercise 2, query `information_schema.columns` for `table_schema = 'dwh'` and both tables and confirm the two new columns with `is_nullable = 'NO'`; after a savepoint, `UPDATE dim_customer SET updated_by = NULL WHERE customer_id = 1` must fail with SQLSTATE `23502` (not-null violation), then roll back to the savepoint.
+- **Intermediate relation check:** For sql-53 Exercise 2, `SELECT customer_sk, valid_from, valid_to, is_current, updated_by FROM dim_customer WHERE customer_id = 1 ORDER BY valid_from` shows one row before the change and two rows after it.
+- **Clause check:** For sql-53 Exercise 2, the solution uses two `ALTER TABLE ... ADD COLUMN ... NOT NULL DEFAULT ...` statements, `CREATE TEMP TABLE staged_customer_change AS SELECT ...`, an `UPDATE ... FROM` that closes the current version, and an `INSERT ... SELECT` that opens the new one and looks up its `country_sk` with a scalar subquery on `dim_country`.
+- **Alternative/trade-off:** For sql-53 Exercise 2, a `BEFORE UPDATE` trigger could set `updated_at` automatically, but it hides the audit write from the reader of the load script; this lesson sets the values explicitly.
+- **Edge case:** `DEFAULT CURRENT_USER` records the role that ran the statement (`admin` in the classroom); a shared service login therefore needs an explicit `updated_by` value to identify the real actor.
 
 ## Reasoning, state, and pitfalls
 
@@ -165,6 +163,11 @@ lesson.
   with a partial unique index on the business key where `is_current`.
 - Audit defaults cover inserts, not meaningful update actors; set audit values
   explicitly when closing versions.
+- Every new version must carry `country_sk`, the Day 52 Exercise 1 key. The
+  scalar lookup returns NULL for an unknown country, which the `NOT NULL` rule
+  rejects with SQLSTATE `23502`, so the whole close-and-insert statement fails
+  instead of an inner join silently dropping the new version after its old row
+  was closed. A repeated country code raises SQLSTATE `21000`.
 - Do not run this before Day 52; the executable file raises a clear exception if
   `dwh.dim_customer` is absent.
 
@@ -175,13 +178,13 @@ invalid close-before-open interval. The answer surfaces invalid ranges.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-53 Exercise 3, read from `dim_customer`. Build the answer toward `customer_id`, `valid_from`, `valid_to`, and `invalid_range`; keep `customer_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-53 Exercise 3, expected output: one row per `customer_id`. The final columns are `customer_id`, `valid_from`, `valid_to`, and `invalid_range`. The final order is `valid_from`.
-- **Independent verification:** For sql-53 Exercise 3, run an anti-check that counts rows where NOT ((customer_id = 1)); require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id`, `valid_from`, `valid_to`, and `invalid_range` against `dim_customer`. Add one row for which `(customer_id = 1)` is true and one for which it is false; verify only the matching `customer_id` value is returned.
-- **Intermediate relation check:** For sql-53 Exercise 3, inspect the source keys that survive `WHERE`; then check `valid_from` before applying the row cap.
-- **Clause check:** For sql-53 Exercise 3, the solution actually uses `FROM`, `WHERE`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `dim_customer`, preserve one row per `customer_id`, and finish with `customer_id`, `valid_from`, `valid_to`, and `invalid_range` ordered by `valid_from`.
-- **Alternative/trade-off:** For sql-53 Exercise 3, the chosen form is justified by this lesson-specific rationale: Inclusive DATE ranges cannot order two changes on one day without overlap or an invalid close-before-open interval. Evaluate another form against the concrete expected result (one row per `customer_id`) and the verification above.
-- **Edge case:** Add one row for which `(customer_id = 1)` is true and one for which it is false; verify only the matching `customer_id` value is returned.
+- **Inputs/evidence:** For sql-53 Exercise 3, list customer 1's versions from `dim_customer` with `valid_from`, `valid_to`, and the flag `invalid_range = (valid_to IS NOT NULL AND valid_to < valid_from)`.
+- **Expected result/shape:** For sql-53 Exercise 3, expected output: two rows ordered by `valid_from`, both with `invalid_range = false`; the closed version ends on `CURRENT_DATE - 31`, the day before the current version begins on `CURRENT_DATE - 30`.
+- **Independent verification:** For sql-53 Exercise 3, after a savepoint, apply a second change for customer 1 with the same effective date: closing the current version at `effective_date - 1` gives it a `valid_to` earlier than its `valid_from`, so the flag becomes `true` for that row. That is why date-grain versions cannot order two changes on one date.
+- **Intermediate relation check:** For sql-53 Exercise 3, `SELECT COUNT(*) FROM dim_customer WHERE customer_id = 1 AND is_current` returns 1 before and after the change, so exactly one version is current at any time.
+- **Clause check:** For sql-53 Exercise 3, the solution uses one `SELECT` with a Boolean expression for `invalid_range`, `WHERE customer_id = 1`, and `ORDER BY valid_from`.
+- **Alternative/trade-off:** For sql-53 Exercise 3, a `CHECK (valid_to IS NULL OR valid_to >= valid_from)` constraint would reject the invalid close instead of only reporting it; the report form keeps the load running so the problem can be inspected.
+- **Edge case:** A change effective on the same day the customer was first loaded closes the first version at `valid_from - 1`, which is also an invalid range; the load must merge or sequence such changes.
 
 ## Exercise 4: Detect overlapping versions
 
@@ -190,13 +193,13 @@ overlap condition. Any row can map one fact date to multiple surrogates.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-53 Exercise 4, read from `dim_customer`. Build the answer toward `customer_id`, `version_a`, `version_b`, `a_from`, `a_to`, `b_from`, and `b_to`; keep `customer_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-53 Exercise 4, expected output: one row per `customer_id`. The final columns are `customer_id`, `version_a`, `version_b`, `a_from`, `a_to`, `b_from`, and `b_to`. The final order is `a.customer_id, version_a, version_b`.
-- **Independent verification:** For sql-53 Exercise 4, project `customer_id` plus the raw source columns from `dim_customer` at each join stage; record row count and distinct `customer_id`, then assert the final `customer_id`, `version_a`, `version_b`, `a_from`, `a_to`, `b_from`, and `b_to` values match those staged rows without unintended fanout or loss. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
-- **Intermediate relation check:** For sql-53 Exercise 4, start with the first relation in `dim_customer`; after each join, record total rows and distinct `customer_id` so the exact fanout or loss is visible.
-- **Clause check:** For sql-53 Exercise 4, the solution actually uses `FROM`, `JOIN ... ON`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `dim_customer`, preserve one row per `customer_id`, and finish with `customer_id`, `version_a`, `version_b`, `a_from`, `a_to`, `b_from`, and `b_to` ordered by `a.customer_id, version_a, version_b`.
-- **Alternative/trade-off:** For sql-53 Exercise 4, the chosen form is justified by this lesson-specific rationale: The self-join compares each customer-version pair once and applies the inclusive overlap condition. Evaluate another form against the concrete expected result (one row per `customer_id`) and the verification above.
-- **Edge case:** Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
+- **Inputs/evidence:** For sql-53 Exercise 4, self-join `dim_customer` on `customer_id` with `b.customer_sk > a.customer_sk`, keeping pairs whose inclusive ranges overlap: `a.valid_from <= COALESCE(b.valid_to, 'infinity')` and `b.valid_from <= COALESCE(a.valid_to, 'infinity')`.
+- **Expected result/shape:** For sql-53 Exercise 4, expected output: zero rows with columns `customer_id`, `version_a`, `version_b`, `a_from`, `a_to`, `b_from`, and `b_to`, ordered by `a.customer_id, version_a, version_b`, because every customer's versions are disjoint after the Exercise 2 change.
+- **Independent verification:** For sql-53 Exercise 4, after a savepoint, set the closed version's `valid_to` to the new version's `valid_from` and confirm that exactly one row appears for `customer_id = 1`; each overlapping pair is reported once because of `b.customer_sk > a.customer_sk`.
+- **Intermediate relation check:** For sql-53 Exercise 4, run the self-join without the two overlap predicates for `customer_id = 1`: it returns one pair, the two versions, which the overlap test then rejects.
+- **Clause check:** For sql-53 Exercise 4, the solution uses `FROM dim_customer a JOIN dim_customer b ON b.customer_id = a.customer_id AND b.customer_sk > a.customer_sk AND ...` with two range predicates and `ORDER BY a.customer_id, version_a, version_b`.
+- **Alternative/trade-off:** For sql-53 Exercise 4, an exclusion constraint `EXCLUDE USING gist (customer_id WITH =, daterange(valid_from, valid_to, '[]') WITH &&)` prevents overlaps at write time, but it needs the `btree_gist` extension for the equality part.
+- **Edge case:** A version with `valid_to = NULL` is open-ended, so `COALESCE(valid_to, 'infinity')` makes it overlap any later version of the same customer until it is closed.
 
 ## Exercise 5: Gate unchanged reruns
 
@@ -233,7 +236,7 @@ WHERE
 - **Independent verification:** For sql-53 Exercise 5, rerun the nullable-safe attribute comparison against `desired_customer_state`; the result must report zero differences. Then alter one staged attribute and require a result of exactly one difference before applying any close/insert statements.
 - **Intermediate relation check:** For sql-53 Exercise 5, prove `desired_customer_state` and the current dimension are each unique on `customer_id` before comparing attributes.
 - **Clause check:** For sql-53 Exercise 5, `IS DISTINCT FROM` compares nullable attributes, while `dc.is_current` restricts the check to the one version that a replay would consider.
-- **Alternative/trade-off:** For sql-53 Exercise 5, the chosen form is justified by this lesson-specific rationale: `IS DISTINCT FROM` compares nullable attributes safely. Evaluate another form against the concrete expected result (one row per `customer_id`) and the verification above.
+- **Alternative/trade-off:** For sql-53 Exercise 5, comparing `md5(ROW(full_name, country, segment)::text)` on both sides detects the same differences in one comparison, but a reordered attribute list silently changes every hash; the explicit `IS DISTINCT FROM` list is easier to review.
 - **Edge case:** A duplicate `customer_id` in desired state must fail a uniqueness gate before versioning; do not let the join multiply candidate changes.
 
 ## Exercise 6: Define a same-day policy
@@ -243,10 +246,10 @@ They require trustworthy source effective time or sequence, not load-time guessw
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-53 Exercise 6, read from `training.customers`, `dim_customer`, and `changed_customers`. Compute `first_version`, and `ROLLBACK` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
-- **Expected result/shape:** For sql-53 Exercise 6, expected output: exactly one aggregate summary row. The final columns are `first_version`, and `ROLLBACK`.
-- **Independent verification:** For sql-53 Exercise 6, evaluate each of `first_version`, and `ROLLBACK` in a separate control `SELECT` over `training.customers`, `dim_customer`, and `changed_customers`; require one final row and compare every value. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
-- **Intermediate relation check:** For sql-53 Exercise 6, select `customer_id` from `training.customers`, `dim_customer`, and `changed_customers` before adding derived columns.
-- **Clause check:** For sql-53 Exercise 6, the solution actually uses `SELECT`. Read only those operations: begin at `training.customers`, `dim_customer`, and `changed_customers`, preserve exactly one summary row, and finish with `first_version`, and `ROLLBACK`.
-- **Alternative/trade-off:** For sql-53 Exercise 6, the chosen form is justified by this lesson-specific rationale: Half-open `tstzrange` examples show how effective timestamps can order changes. Evaluate another form against the concrete expected result (exactly one aggregate summary row) and the verification above.
-- **Edge case:** Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
+- **Inputs/evidence:** For sql-53 Exercise 6, model two same-day versions with half-open `tstzrange` values, `[2026-01-15 09:00+00, 2026-01-15 12:00+00)` and `[2026-01-15 12:00+00, infinity)`, instead of inclusive date ranges.
+- **Expected result/shape:** For sql-53 Exercise 6, expected output: one row with columns `first_version` and `second_version` showing the two ranges; they meet at 12:00 without overlapping, because the `)` upper bound is exclusive.
+- **Independent verification:** For sql-53 Exercise 6, confirm that `first_version && second_version` returns `false`, `first_version -|- second_version` (adjacent) returns `true`, and that `'2026-01-15 12:00+00'::timestamptz <@ second_version` returns `true` while the same test against `first_version` returns `false`.
+- **Intermediate relation check:** For sql-53 Exercise 6, `SELECT lower(first_version), upper(first_version), lower(second_version)` shows that the first upper bound equals the second lower bound.
+- **Clause check:** For sql-53 Exercise 6, the solution is one `SELECT` of two `tstzrange` literals labelled `first_version` and `second_version`.
+- **Alternative/trade-off:** For sql-53 Exercise 6, a source sequence number orders same-day changes without timestamps, but it needs the source system to supply that sequence; load time is not a substitute, because it records when data arrived, not when it became true.
+- **Edge case:** Two changes with the same source timestamp still cannot be ordered; the load must reject them or apply a documented tie-break such as the source sequence.

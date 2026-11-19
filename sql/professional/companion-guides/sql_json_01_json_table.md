@@ -13,16 +13,16 @@ the saved project selection. No host Python or PostgreSQL installation is
 required for this browser route.
 
 1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database. A simple snippet
-   such as `SELECT 1;` needs no training-schema reset.
+   the local disposable `advanced_sql_training` database.
 2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
    preserves the lesson's reviewed psql directives, relative includes and
    transaction behavior. **SQL snippet** is appropriate for ordinary SQL
    statements, but is not a replacement for an entire script's setup.
-3. When the lesson requires the course training data, use the explicit
-   preparation action and read its reset acknowledgement. It replaces the
-   course-owned `training` schema. Do not reset unrelated data or prepare
-   every lesson by habit; stateful sequences have their own ordering.
+3. The **Course database** panel above the code shows whether the course
+   training tables are loaded. Missing tables load automatically before your
+   first run (or choose **Load course tables**) and stay loaded for later
+   lessons. **Reset training data** restores the original rows only when your
+   own changes made results differ; it keeps your saved code and notes.
 4. Edit the learner copy in the classroom and save your prediction before
    running. Its whole-script workspace is
    `.learning/sql/sql-json-01/lesson/workspace/sql/professional/lessons/sql_json_01_json_table.sql`.
@@ -226,7 +226,7 @@ Keep each supplied savepoint rollback and write the answer inside its slot.
 
 1. **Prediction:** Compare CROSS and LEFT expansion for document IDs one through three.
    **Inputs:** For sql-json-01 Exercise 1, inspect document IDs 1, 2 and 3 in j17_practice_documents. They contain two items, an empty items array and an absent items field respectively.
-   **Expected result/shape:** For sql-json-01 Exercise 1, cROSS yields two item rows; LEFT yields four outer-preserving rows. Display document_id, item_no, sku ordered by document_id, item_no. Actual child identity is (document_id,item_no); documents 2 and 3 have NULL item positions in the LEFT result.
+   **Expected result/shape:** For sql-json-01 Exercise 1, CROSS yields two item rows; LEFT yields four outer-preserving rows. Display document_id, item_no, sku ordered by document_id, item_no. Actual child identity is (document_id,item_no); documents 2 and 3 have NULL item positions in the LEFT result.
    **Verify:** For sql-json-01 Exercise 1, count non-NULL item_no independently and inspect the original field presence and type. A preserved outer placeholder is not an item, and empty and absent arrays are different source states.
 2. **Query writing:** Produce all typed actual item rows from the four-document practice fixture.
    **Inputs:** For sql-json-01 Exercise 2, project every declared items array in the four-document fixture. Missing qty defaults to one, explicit JSON null remains unknown, and prices use the declared exact numeric type.
@@ -281,7 +281,7 @@ Apply the resulting grain and coverage checks in [analytical query patterns](sql
 ## Ask an AI tutor about this lesson
 
 ```text
-Use $guide-ds60sqlpy-learning to coach me through sql-json-01: PostgreSQL 17 JSON_TABLE: Typed Projection and Result Grain.
+Use $guide-ds60sqlpy-learning to coach me through sql-json-01: JSON_TABLE: Typed Projection and Result Grain.
 Read sql/professional/companion-guides/sql_json_01_json_table.md and sql/professional/lessons/sql_json_01_json_table.sql. Direct prerequisites: sql-types-01 and sql-deep-02.
 Explain JSON row paths, typed columns, ordinality, missing/null/error policies, outer-row preservation and parent/child grain. Ask me to predict exact rows and values before my attempt, give progressive hints, review my evidence, then ask retrieval questions in my own words.
 Do not read solutions/ until I ask or have attempted the relevant exercise. Use only the disposable advanced_sql_training PostgreSQL 17 database; keep the savepoint and final ROLLBACK boundaries. I use the unified classroom Whole SQL lesson (psql) mode.

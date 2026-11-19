@@ -7,13 +7,8 @@
 Open this explanation only after making an honest attempt. The executable
 companion runs solely against the disposable `advanced_sql_training` database:
 
-```powershell
-# Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f "sql\postgres-60day\solutions\day07_solutions.sql"
-```
-
 ```bash
-# macOS/Linux, from the repository root
+# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day07_solutions.sql
 ```
@@ -316,13 +311,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-07 Exercise 5, read from `orders`. Build the answer toward `order_month`, `order_count`, and `stored_revenue`; keep `order_id` visible whenever the result has row-level grain.
+- **Inputs/evidence:** For sql-07 Exercise 5, read from `orders`, group by `date_trunc('month', order_date)`, and return each month's `order_count` and `stored_revenue` (`SUM(total_amount)` rounded to 2 places).
 - **Expected result/shape:** For sql-07 Exercise 5, expected output: One row per observed order month. The final columns are `order_month`, `order_count`, and `stored_revenue`. The final order is `order_month`.
-- **Independent verification:** For sql-07 Exercise 5, independently aggregate `orders` by `order_id`; require one output row for every distinct `order_id` tuple and compare `order_month`, `order_count`, and `stored_revenue` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `order_month`, `order_count`, and `stored_revenue` for the existing `order_id` tuple and verify the new tuple appears exactly once.
-- **Intermediate relation check:** For sql-07 Exercise 5, confirm the groups are `order_id`; then check `order_month` before applying the row cap.
-- **Clause check:** For sql-07 Exercise 5, the solution actually uses `FROM`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `order_id`, and finish with `order_month`, `order_count`, and `stored_revenue` ordered by `order_month`.
+- **Independent verification:** For sql-07 Exercise 5, confirm that `order_month` is unique, that `SUM(order_count)` equals `SELECT COUNT(*) FROM orders` (4362), and that the monthly `stored_revenue` values add up to `SELECT ROUND(SUM(total_amount), 2) FROM orders` (2355646.89).
+- **Intermediate relation check:** For sql-07 Exercise 5, group by the same `date_trunc('month', order_date)` expression you select; grouping by `order_id` would return one row per order.
+- **Clause check:** For sql-07 Exercise 5, the solution actually uses `FROM`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `order_month`, and finish with `order_month`, `order_count`, and `stored_revenue` ordered by `order_month`.
 - **Alternative/trade-off:** For sql-07 Exercise 5, the chosen form is justified by this lesson-specific rationale: Grouping observed orders alone cannot create empty calendar months. Evaluate another form against the concrete expected result (One row per observed order month) and the verification above.
-- **Edge case:** Add one row to an existing group and one row for a new group; recompute `order_month`, `order_count`, and `stored_revenue` for the existing `order_id` tuple and verify the new tuple appears exactly once.
+- **Edge case:** `date_trunc('month', order_date)` on a `timestamptz` uses the session `TimeZone` (UTC in the classroom), so an order near midnight can move to another month under a different time zone.
 
 ## Exercise 6: Extension
 

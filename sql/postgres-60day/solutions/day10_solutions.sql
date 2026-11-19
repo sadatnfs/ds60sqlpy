@@ -1,5 +1,5 @@
 -- Day 10 executable solutions
--- SOLUTION READING MAP — sql-10: DML with Subqueries
+-- SOLUTION READING MAP for sql-10: Changing Data with Subqueries: INSERT, UPDATE, DELETE, and Upsert
 -- Explanation: sql/postgres-60day/solutions/day10_solutions.md
 -- Run from the repository root only against advanced_sql_training:
 --   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day10_solutions.sql

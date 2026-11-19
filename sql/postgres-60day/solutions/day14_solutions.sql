@@ -1,5 +1,5 @@
 -- Day 14 executable solutions
--- SOLUTION READING MAP — sql-14: Numeric and Casting
+-- SOLUTION READING MAP for sql-14: Numeric Types, Casting, and Precision
 -- Explanation: sql/postgres-60day/solutions/day14_solutions.md
 -- Run from the repository root only against advanced_sql_training:
 --   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day14_solutions.sql

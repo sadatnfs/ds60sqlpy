@@ -7,13 +7,8 @@
 Open this explanation only after making an honest attempt. The executable
 companion runs solely against the disposable `advanced_sql_training` database:
 
-```powershell
-# Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f "sql\postgres-60day\solutions\day56_solutions.sql"
-```
-
 ```bash
-# macOS/Linux, from the repository root
+# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day56_solutions.sql
 ```
@@ -26,7 +21,7 @@ ordering with the explanation before comparing syntax.
 ## Clause-by-clause reading map
 
 The lesson's main concepts are Dimensional explosion, Primary payment method, Continuous percentile. Its worked-model focus is:
-Aggregate payments at (orderid, method), select one method by greatest total with a stable tie-breaker, and only then join line revenue. Separately aggregate line value at (month, category, orderid) before computing p50/p90; whole order totals would repeat across categories.
+Aggregate payments at `(order_id, method)`, select one method by greatest total with a stable tie-breaker, and only then join line revenue. Separately aggregate line value at `(month, category, order_id)` before computing p50/p90; whole order totals would repeat across categories.
 
 - Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
   before adding aggregates; a one-to-many join is allowed to multiply rows only
@@ -223,13 +218,13 @@ with several rows on both sides demonstrate the multiplication risk.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-56 Exercise 3, read from `orders`, `order_items`, and `payments`. Build the answer toward `raw_join_rows`, `distinct_items`, and `distinct_payments`; keep `order_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-56 Exercise 3, expected output: one row per `order_id`. The final columns are `raw_join_rows`, `distinct_items`, and `distinct_payments`.
-- **Independent verification:** For sql-56 Exercise 3, project `order_id` plus the raw source columns from `orders`, `order_items`, and `payments` at each join stage; record row count and distinct `order_id`, then assert the final `raw_join_rows`, `distinct_items`, and `distinct_payments` values match those staged rows without unintended fanout or loss. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
-- **Intermediate relation check:** For sql-56 Exercise 3, start with the first relation in `orders`, `order_items`, and `payments`; after each join, record total rows and distinct `order_id` so the exact fanout or loss is visible.
-- **Clause check:** For sql-56 Exercise 3, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, and `SELECT`. Read only those operations: begin at `orders`, `order_items`, and `payments`, preserve one row per `order_id`, and finish with `raw_join_rows`, `distinct_items`, and `distinct_payments`.
+- **Inputs/evidence:** For sql-56 Exercise 3, join `orders` to `order_items` and to `payments` on `order_id` without pre-aggregation and count the joined rows, the distinct `order_item_id` values, and the distinct `payment_id` values.
+- **Expected result/shape:** For sql-56 Exercise 3, expected output: one row with `raw_join_rows` 10816, `distinct_items` 10469, and `distinct_payments` 3836; an order with two payments repeats each of its items, so the joined rows exceed the distinct items. The final columns are `raw_join_rows`, `distinct_items`, and `distinct_payments`.
+- **Independent verification:** For sql-56 Exercise 3, confirm that `raw_join_rows` equals `SELECT SUM(i.n * p.n) FROM (SELECT order_id, COUNT(*) n FROM order_items GROUP BY order_id) i JOIN (SELECT order_id, COUNT(*) n FROM payments GROUP BY order_id) p USING (order_id)` (10816); summing item revenue over this join would count every line once per payment of its order.
+- **Intermediate relation check:** For sql-56 Exercise 3, count `order_items` and `payments` per `order_id` first; the join produces their product for each order.
+- **Clause check:** For sql-56 Exercise 3, the solution inner-joins `orders` to `order_items` and to `payments` with `USING (order_id)` and returns `COUNT(*)`, `COUNT(DISTINCT oi.order_item_id)`, and `COUNT(DISTINCT p.payment_id)` in one row.
 - **Alternative/trade-off:** For sql-56 Exercise 3, the chosen form is justified by this lesson-specific rationale: The raw payment/item join reports joined rows and distinct source keys. Evaluate another form against the concrete expected result (one row per `order_id`) and the verification above.
-- **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+- **Edge case:** Orders without payments disappear from this inner join, so `distinct_items` (10469) is lower than the 13085 lines in `order_items`; a fan-out check must also notice lost rows.
 
 ## Exercise 4: Attribute at order grain
 
@@ -238,13 +233,13 @@ reduces to one order row. The windowed grand total reconciles attribution.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-56 Exercise 4, read from `payments`, and `order_items`. Build the answer toward `reporting_method`, `revenue`, and `reconciled_total`; keep `payment_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-56 Exercise 4, expected output: one row per `payment_id`. The final columns are `reporting_method`, `revenue`, and `reconciled_total`. The final order is `reporting_method`.
-- **Independent verification:** For sql-56 Exercise 4, choose one complete partition from `payments`, and `order_items`; hand-calculate its first, middle, and final window values for `revenue`, and `reconciled_total`, then verify output keys remain `payment_id`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
-- **Intermediate relation check:** For sql-56 Exercise 4, run `method`, `lines`, and `attributed` one at a time. Record each CTE's row count and `payment_id` uniqueness before the next stage uses it.
-- **Clause check:** For sql-56 Exercise 4, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `GROUP BY`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `payments`, and `order_items`, preserve one row per `payment_id`, and finish with `reporting_method`, `revenue`, and `reconciled_total` ordered by `reporting_method`.
+- **Inputs/evidence:** For sql-56 Exercise 4, reduce `payments` to one `reporting_method` per order (`MIN(method)`) and `order_items` to one revenue total per order, left-join them at order grain with `unpaid` for orders without payments, and sum revenue per reporting method.
+- **Expected result/shape:** For sql-56 Exercise 4, expected output: 5 rows, one per `reporting_method` (`bank`, `card`, `credit`, `paypal`, and `unpaid`), whose `revenue` values add up to `reconciled_total` (2355647.1235), the exact line revenue repeated on every row. The final columns are `reporting_method`, `revenue`, and `reconciled_total`. The final order is `reporting_method`.
+- **Independent verification:** For sql-56 Exercise 4, confirm that the five `revenue` values add up to `SELECT SUM(quantity * unit_price * (1 - discount)) FROM order_items` (2355647.1235) and that `method` has one row per paid order (3489), so no order's revenue is counted twice.
+- **Intermediate relation check:** For sql-56 Exercise 4, run `method` and `lines` alone and confirm one row per `order_id` in each before you join them.
+- **Clause check:** For sql-56 Exercise 4, the solution aggregates `payments` to one `reporting_method` per order in `method` and `order_items` to one `revenue` per order in `lines`, left-joins them in `attributed` with `COALESCE(m.reporting_method, 'unpaid')`, and adds `SUM(revenue) OVER ()` as the reconciled total.
 - **Alternative/trade-off:** For sql-56 Exercise 4, the chosen form is justified by this lesson-specific rationale: Payment policy reduces methods to one order-level label; line revenue also reduces to one order row. Evaluate another form against the concrete expected result (one row per `payment_id`) and the verification above.
-- **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
+- **Edge case:** `MIN(method)` picks one method for an order paid two ways, which is a reporting rule, not a fact; split the revenue by payment amount if mixed-method orders matter.
 
 ## Exercise 5: Match percentile grain
 

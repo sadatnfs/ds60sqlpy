@@ -11,16 +11,16 @@ the saved project selection. No host Python or PostgreSQL installation is
 required for this browser route.
 
 1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database. A simple snippet
-   such as `SELECT 1;` needs no training-schema reset.
+   the local disposable `advanced_sql_training` database.
 2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
    preserves the lesson's reviewed psql directives, relative includes and
    transaction behavior. **SQL snippet** is appropriate for ordinary SQL
    statements, but is not a replacement for an entire script's setup.
-3. When the lesson requires the course training data, use the explicit
-   preparation action and read its reset acknowledgement. It replaces the
-   course-owned `training` schema. Do not reset unrelated data or prepare
-   every lesson by habit; stateful sequences have their own ordering.
+3. The **Course database** panel above the code shows whether the course
+   training tables are loaded. Missing tables load automatically before your
+   first run (or choose **Load course tables**) and stay loaded for later
+   lessons. **Reset training data** restores the original rows only when your
+   own changes made results differ; it keeps your saved code and notes.
 4. Edit the learner copy in the classroom and save your prediction before
    running. Its whole-script workspace is
    `.learning/sql/sql-32/lesson/workspace/sql/postgres-60day/day32_index_fundamentals.sql`.
@@ -86,8 +86,8 @@ row count. For a normal analytical `SELECT`, use this logical reading order:
 window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
 different physical plan while preserving those semantics.
 
-The worked walkthrough's lesson-specific task is: Capture a category-filter plan before creating products(category), create the index inside the rollback-only transaction, and rerun the identical query. Record the plan even if PostgreSQL keeps the sequential scan: the compact seed can make reading the table cheaper than traversing an index.
-The first runnable example has a concrete contract: Example 1 must print the expected DDL command tag for `idx_orders_total_amount`, and `orders`. Verify the object in `pg_catalog.pg_index`, and `pg_catalog.pg_indexes`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state. Its final projection is the columns written in the final `SELECT`. Verify the command tag in `pg_catalog`/`information_schema`, run one accepted value and one value the declared rule rejects, and confirm the lesson rollback removes the course-owned object.
+The worked walkthrough's lesson-specific task is: Capture a category-filter plan before creating `products(category)`, create the index inside the rollback-only transaction, and rerun the identical query. Record the plan even if PostgreSQL keeps the sequential scan: the compact seed can make reading the table cheaper than traversing an index.
+The first runnable example has a concrete contract: Example 1 must print the expected DDL command tag for `idx_orders_total_amount`, and `orders`. Verify the object in `pg_catalog.pg_index`, and `pg_catalog.pg_indexes`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.
 
 ## Two worked SQL examples
 
@@ -188,9 +188,14 @@ Inside a rollback-only transaction, the script creates indexes on
 executes matching filters with `EXPLAIN ANALYZE`. No course index persists after
 the final `ROLLBACK`.
 
-B-tree is PostgreSQL's default and supports equality, ranges, ordering, `IN`,
-and prefix pattern searches. A hash index is mentioned only as a contrast;
-B-tree already handles the equality lookup on `customers.email`.
+B-tree is PostgreSQL's default and supports equality, ranges, ordering, `IN`
+and `IS NULL`. It serves an anchored pattern such as `LIKE 'abc%'` only in the
+`C` collation or through a `text_pattern_ops` index. The classroom's
+`advanced_sql_training` database uses the `en_US.utf8` collation (check with
+`SELECT datcollate FROM pg_database WHERE datname = current_database();`), so a
+default B-tree on a text column does not help that predicate. A hash index is
+mentioned only as a contrast; B-tree already handles the equality lookup on
+`customers.email`.
 
 ## Planner and index concepts
 
@@ -232,7 +237,7 @@ enough to complete the lesson offline. If you want a patient tutor, copy this
 prompt after opening the repository in the AI tutor:
 
 ```text
-Tutor me through sql-32 — Index Fundamentals.
+Tutor me through sql-32: B-Tree Index Fundamentals.
 
 I have completed the direct catalog prerequisite: `sql-31`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day32_index_fundamentals.md
@@ -242,7 +247,7 @@ Key terms to teach in context: Selectivity, Index scan, Index-only scan. First d
 language and explain table, row, column, result set, row grain, SQL NULL, and
 deterministic ordering where they apply. Then explain the important clauses in
 logical order and state the expected row grain/shape before asking me to run
-anything. The guide's lesson-specific worked-model focus is: Capture a category-filter plan before creating products(category), create the index inside the rollback-only transaction, and rerun the identical query. Record the plan even if PostgreSQL keeps the sequential scan: the compact seed can make reading the table cheaper than traversing an index.
+anything. The guide's lesson-specific worked-model focus is: Capture a category-filter plan before creating `products(category)`, create the index inside the rollback-only transaction, and rerun the identical query. Record the plan even if PostgreSQL keeps the sequential scan: the compact seed can make reading the table cheaper than traversing an index.
 
 Use only the local disposable advanced_sql_training database. Prefer the
 Docker classroom's Whole SQL lesson (psql) workspace and its ignored

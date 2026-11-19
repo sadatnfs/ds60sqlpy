@@ -7,13 +7,8 @@
 Open this explanation only after making an honest attempt. The executable
 companion runs solely against the disposable `advanced_sql_training` database:
 
-```powershell
-# Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f "sql\postgres-60day\solutions\day02_solutions.sql"
-```
-
 ```bash
-# macOS/Linux, from the repository root
+# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day02_solutions.sql
 ```
@@ -26,7 +21,7 @@ ordering with the explanation before comparing syntax.
 ## Clause-by-clause reading map
 
 The lesson's main concepts are Aggregate, Group grain, Grouping set. Its worked-model focus is:
-In the category-revenue query, first identify one joined row as an order line. Next group those rows by product category, calculate the revenue aggregate, and only then apply HAVING. Compare that flow with a date predicate in WHERE, which removes rows before the category totals are computed.
+In the category-revenue query, first identify one joined row as an order line. Next group those rows by product category, calculate the revenue aggregate, and only then apply `HAVING`. Compare that flow with a date predicate in `WHERE`, which removes rows before the category totals are computed.
 
 - Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
   before adding aggregates; a one-to-many join is allowed to multiply rows only
@@ -233,13 +228,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-02 Exercise 4, read from `customers`. Build the answer toward `all_rows`, `nonnull_email_rows`, and `missing_email_rows`; keep `customer_id` visible whenever the result has row-level grain.
+- **Inputs/evidence:** For sql-02 Exercise 4, read from `customers` and count, in one aggregate query, all rows as `all_rows`, rows with a non-null `email` as `nonnull_email_rows`, and rows whose `email` is NULL as `missing_email_rows`.
 - **Expected result/shape:** For sql-02 Exercise 4, expected output: One row; present plus missing equals total. The final columns are `all_rows`, `nonnull_email_rows`, and `missing_email_rows`.
-- **Independent verification:** For sql-02 Exercise 4, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `all_rows`, `nonnull_email_rows`, and `missing_email_rows` against `customers`. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
-- **Intermediate relation check:** For sql-02 Exercise 4, inspect the source keys that survive `WHERE`.
-- **Clause check:** For sql-02 Exercise 4, the solution actually uses `FROM`, `WHERE`, aggregate `FILTER`, and `SELECT`. Read only those operations: begin at `customers`, preserve one row per `customer_id`, and finish with `all_rows`, `nonnull_email_rows`, and `missing_email_rows`.
+- **Independent verification:** For sql-02 Exercise 4, confirm `nonnull_email_rows + missing_email_rows = all_rows`; the seed returns 500, 500, and 0 because every seeded customer has an email. In a transaction you roll back, set one customer's `email` to NULL and rerun: expect 500, 499, and 1.
+- **Intermediate relation check:** For sql-02 Exercise 4, write `COUNT(*)` and `COUNT(email)` first and compare them; their difference is the number of NULL emails.
+- **Clause check:** For sql-02 Exercise 4, the solution actually uses `FROM`, `WHERE`, aggregate `FILTER`, and `SELECT`. Read only those operations: begin at `customers`, preserve exactly one summary row, and finish with `all_rows`, `nonnull_email_rows`, and `missing_email_rows`.
 - **Alternative/trade-off:** For sql-02 Exercise 4, the chosen form is justified by this lesson-specific rationale: `COUNT(email)` ignores NULL, while a filtered count makes missingness explicit. Evaluate another form against the concrete expected result (One row; present plus missing equals total) and the verification above.
-- **Edge case:** Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
+- **Edge case:** `COUNT(email)` skips NULL, so a NULL email lowers `nonnull_email_rows` but not `all_rows`; `COUNT(*) FILTER (WHERE email IS NULL)` counts the missing rows explicitly.
 
 ## Exercise 5: Debugging
 
@@ -326,13 +321,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-02 Exercise 6, read from `orders`. Build the answer toward `order_month`, `order_count`, `order_revenue`, and `returned_orders`; keep `order_id` visible whenever the result has row-level grain.
+- **Inputs/evidence:** For sql-02 Exercise 6, read from `orders` placed on or after `date_trunc('month', CURRENT_TIMESTAMP) - INTERVAL '11 months'`, group them by `date_trunc('month', order_date)`, and return each month's order count, summed `total_amount`, and count of `returned` orders.
 - **Expected result/shape:** For sql-02 Exercise 6, expected output: Up to 12 month rows in chronological order. The final columns are `order_month`, `order_count`, `order_revenue`, and `returned_orders`. The final order is `order_month`.
-- **Independent verification:** For sql-02 Exercise 6, independently aggregate `orders` by `order_id`; require one output row for every distinct `order_id` tuple satisfying `(o.order_date >= date_trunc('month', CURRENT_TIMESTAMP) - INTERVAL '11 months')` and compare `order_month`, `order_count`, `order_revenue`, and `returned_orders` tuple by tuple. Tie two rows on `order_month` and give them different `order_month` values; verify `order_month` chooses a stable first/last row.
-- **Intermediate relation check:** For sql-02 Exercise 6, inspect the source keys that survive `WHERE`; then confirm the groups are `order_id`; then check `order_month` before applying the row cap.
-- **Clause check:** For sql-02 Exercise 6, the solution actually uses `FROM`, `WHERE`, aggregate `FILTER`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `order_id`, and finish with `order_month`, `order_count`, `order_revenue`, and `returned_orders` ordered by `order_month`.
+- **Independent verification:** For sql-02 Exercise 6, confirm that `order_month` values are unique and that `SUM(order_count)` equals `SELECT COUNT(*) FROM orders WHERE order_date >= date_trunc('month', CURRENT_TIMESTAMP) - INTERVAL '11 months'`; for one month, recount its `returned` orders directly and compare the result with `returned_orders`.
+- **Intermediate relation check:** For sql-02 Exercise 6, run the `WHERE` filter alone and check the earliest `order_date` it keeps before you group by month.
+- **Clause check:** For sql-02 Exercise 6, the solution actually uses `FROM`, `WHERE`, aggregate `FILTER`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `order_month`, and finish with `order_month`, `order_count`, `order_revenue`, and `returned_orders` ordered by `order_month`.
 - **Alternative/trade-off:** For sql-02 Exercise 6, the chosen form is justified by this lesson-specific rationale: Group by a month expression, use conditional aggregation, and keep the timestamp predicate sargable. Evaluate another form against the concrete expected result (Up to 12 month rows in chronological order) and the verification above.
-- **Edge case:** Tie two rows on `order_month` and give them different `order_month` values; verify `order_month` chooses a stable first/last row.
+- **Edge case:** The window starts on the first day of the month eleven months ago, so the current, partial month is included; at most 12 rows appear, and a month without orders is absent rather than shown with zero.
 
 ## Final self-check
 

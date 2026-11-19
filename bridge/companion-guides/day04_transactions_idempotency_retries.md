@@ -27,14 +27,8 @@ Start at the repository root. The answer-free starter is deliberately safe to
 run: it prints orientation text and does not call unfinished functions or
 contact PostgreSQL.
 
-```powershell
-# Windows PowerShell
-.\.venv\Scripts\python.exe bridge\lessons\day04_transactions_idempotency_retries.py
-.\.venv\Scripts\python.exe -m pytest bridge\tests -q
-```
-
 ```bash
-# macOS/Linux
+# Linux, macOS, or Windows through WSL 2
 .venv/bin/python bridge/lessons/day04_transactions_idempotency_retries.py
 .venv/bin/python -m pytest bridge/tests -q
 ```
@@ -85,6 +79,42 @@ exercise uses a deterministic custom exception.
 
 For idempotency, the database must enforce uniqueness. An application-side
 “check then insert” has a race between the two statements.
+
+### The real driver: transactions and error classes
+
+`conn.transaction()` is Psycopg's transaction owner. On an `autocommit=True`
+connection, the outermost block issues `BEGIN` and then `COMMIT`, or `ROLLBACK`
+when the block raises; a nested block becomes a `SAVEPOINT` that is released or
+rolled back on its own. Retry classification uses the exception classes in
+`psycopg.errors`, each tied to one SQLSTATE: `SerializationFailure` (`40001`),
+`DeadlockDetected` (`40P01`), and `LockNotAvailable` (`55P03`). The reference
+`run_with_retry()` accepts that tuple unchanged through `retry_on`, and
+`exc.sqlstate` gives the same classification when you prefer codes. Exercise 8
+asks where these blocks belong relative to the retry loop.
+
+```python
+import os
+
+import psycopg
+from psycopg import errors
+
+RETRYABLE = (errors.SerializationFailure, errors.DeadlockDetected, errors.LockNotAvailable)
+
+with psycopg.connect(os.environ["DS60_DATABASE_URL"], autocommit=True) as conn:
+    conn.execute(
+        "CREATE TEMP TABLE bridge_jobs (idempotency_key text PRIMARY KEY, payload text NOT NULL)"
+    )
+    with conn.transaction():  # BEGIN; COMMIT on success, ROLLBACK on an exception
+        conn.execute("INSERT INTO bridge_jobs VALUES (%s, %s)", ("job-1", "first"))
+        try:
+            with conn.transaction():  # SAVEPOINT; ROLLBACK TO SAVEPOINT on an exception
+                conn.execute("INSERT INTO bridge_jobs VALUES (%s, %s)", ("job-1", "again"))
+        except errors.UniqueViolation as exc:
+            print("duplicate rejected:", exc.sqlstate)  # 23505
+```
+
+The outer transaction still commits `job-1` once: the failed nested block rolled
+back only its own savepoint.
 
 
 <!-- BEGIN BRIDGE ENRICHMENT: DEEP DIVE -->
@@ -234,13 +264,14 @@ Call your insert twice with the same key and verify that the second result is
 
 Set the URL in the current shell only:
 
-```powershell
-$env:DS60_DATABASE_URL = "postgresql://USER:PASSWORD@localhost:5432/advanced_sql_training"
+```bash
+export DS60_DATABASE_URL="postgresql://admin@127.0.0.1:PORT/advanced_sql_training"
 ```
 
-```bash
-export DS60_DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/advanced_sql_training"
-```
+Replace `PORT` with the forwarded PostgreSQL port that `./classroom status`
+reports (55432 by default). Keep the password out of the URL: supply it
+through a private libpq password file as the
+[JupySQL setup guide](../../docs/setup/jupyter-postgresql.md) shows.
 
 ## Self-check
 
@@ -271,7 +302,7 @@ prompt below deliberately names exact paths so a new AI tutoring session can ori
 itself without guessing.
 
 ```text
-Tutor me through stable lesson ID bridge-04: Transactions Idempotency Retries.
+Tutor me through stable lesson ID bridge-04: Transactions, Idempotency, and Retries.
 Direct catalog prerequisites: bridge-03. Assume I completed exactly those
 prerequisites, then begin with one short Retrieval question that connects each
 prerequisite to this lesson.
@@ -284,12 +315,12 @@ Do not open, quote, summarize, or copy anything under solutions/ until I
 explicitly say I have finished my attempt and ask to compare.
 
 Use these coaching phases in order:
-1. Predict — ask what I expect before I run or change code.
-2. Attempt — let me implement or explain one numbered exercise at a time.
-3. Hint — give the smallest useful conceptual hint, never a finished answer.
-4. Evidence — ask for the exact return value, exception type, recorded calls,
+1. Predict: ask what I expect before I run or change code.
+2. Attempt: let me implement or explain one numbered exercise at a time.
+3. Hint: give the smallest useful conceptual hint, never a finished answer.
+4. Evidence: ask for the exact return value, exception type, recorded calls,
    query plus bound parameters, or written decision required by that exercise.
-5. Retrieval — close with two no-notes questions and one transfer problem.
+5. Retrieval: close with two no-notes questions and one transfer problem.
 
 Keep the default path offline and fake-first. If the lesson has an optional
 PostgreSQL step, require my explicit opt-in, DS60_DATABASE_URL, and the

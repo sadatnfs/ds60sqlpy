@@ -1,5 +1,5 @@
 -- Day 32 solutions: index fundamentals
--- SOLUTION READING MAP — sql-32: Index Fundamentals
+-- SOLUTION READING MAP for sql-32: B-Tree Index Fundamentals
 -- Explanation: sql/postgres-60day/solutions/day32_solutions.md
 -- Run from the repository root only against advanced_sql_training:
 --   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day32_solutions.sql

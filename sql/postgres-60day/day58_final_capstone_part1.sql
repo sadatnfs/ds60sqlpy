@@ -171,15 +171,15 @@ FROM
 
 -- Exercises
 -- 1. Extend the parser to handle additional datetime formats.
---    Inputs: For sql-58 Exercise 1, read from `stg_customers_raw`, `customers`, and `country_map`. Build the answer toward `parse_additional_datetime_formats_safely_answer`; keep `customer_id` visible whenever the result has row-level grain.
---    Expected result/shape: For sql-58 Exercise 1, expected output: one row per `customer_id`. The final columns are `parse_additional_datetime_formats_safely_answer`.
---    Verify: For sql-58 Exercise 1, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `parse_additional_datetime_formats_safely_answer` against `stg_customers_raw`, `customers`, and `country_map`. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
---    Hint ladder, rung 1: For sql-58 Exercise 1, select `customer_id` from `stg_customers_raw`, `customers`, and `country_map` before adding derived columns.
+--    Inputs: For sql-58 Exercise 1, parse the four staged `created_at` strings in `stg_customer_ingest_solution` with the temporary function `pg_temp.try_parse_customer_timestamp`, which accepts `YYYY/MM/DD HH24:MI`, `MM/DD/YYYY HH24:MI`, `DD-Mon-YYYY HH24:MI`, and ISO `YYYY-MM-DD HH24:MI` text and returns NULL for anything else.
+--    Expected result/shape: For sql-58 Exercise 1, expected output: in `cleaned_customer_ingest_solution`, `created_at` is 2026-01-03 10:00, 2026-01-15 08:30, and 2026-01-15 12:00 UTC for the first three staged rows and NULL for `not-a-date`.
+--    Verify: For sql-58 Exercise 1, call the function directly with the session time zone set to UTC on `'2026/01/03 10:00'`, `'01/15/2026 08:30'`, `'15-Jan-2026 12:00'`, and `'not-a-date'` and expect the three timestamps above and NULL; an impossible date such as `'2026/02/30 10:00'` must also return NULL instead of rolling over into March.
+--    Hint ladder, rung 1: For sql-58 Exercise 1, call `pg_temp.try_parse_customer_timestamp` on each staged string by itself before you run the cleaning step.
 -- 2. Add phone number and normalize it using regex; flag invalid formats.
---    Inputs: For sql-58 Exercise 2, read from `training.customers`. Build the answer toward `normalizevalidate_staged_phone_values_answer`; keep `customer_id` visible whenever the result has row-level grain.
---    Expected result/shape: For sql-58 Exercise 2, expected output: one row per `customer_id`. The final columns are `normalizevalidate_staged_phone_values_answer`.
---    Verify: For sql-58 Exercise 2, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `normalizevalidate_staged_phone_values_answer` against `training.customers`. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
---    Hint ladder, rung 1: For sql-58 Exercise 2, select `customer_id` from `training.customers` before adding derived columns.
+--    Inputs: For sql-58 Exercise 2, strip every non-digit from the staged `phone` with `regexp_replace(phone, '[^0-9]', '', 'g')` and flag the result valid when it has 10 to 15 digits (`phone_digits ~ '^[0-9]{10,15}$'`).
+--    Expected result/shape: For sql-58 Exercise 2, expected output: `phone_digits` 4155550101, 442079460958, 0301234567, and 123, with `phone_valid` true, true, true, and false, stored in `cleaned_customer_ingest_solution`.
+--    Verify: For sql-58 Exercise 2, confirm that `SELECT phone_digits, phone_valid FROM cleaned_customer_ingest_solution ORDER BY source_row_number` returns those four pairs and that only the `123` row is invalid; then test `'+1 (415) 555-0101 ext. 9'`, which becomes 141555501019 and still passes the length rule, so an extension needs its own handling.
+--    Hint ladder, rung 1: For sql-58 Exercise 2, run the `regexp_replace` on the four staged phone strings in a plain `SELECT` before you add the validity flag.
 -- 3. Write a stored procedure that ingests stg_ rows, cleans, validates, and upserts, returning a DQ summary.
 --    Inputs: For sql-58 Exercise 3, stage every source row with `source_row_number` and raw text/JSON evidence; derive normalized fields plus timestamp, phone, email, and country validity flags, then upsert exactly one validated winner per normalized email.
 --    Expected result/shape: For sql-58 Exercise 3, expected output: the procedure CALL returns one row with `upserted_rows` and `invalid_rows` (3 and 1 for the seed), while the cleaned detail remains one row per staged source row with raw evidence, normalized fields, and all four validity decisions.
@@ -199,10 +199,10 @@ FROM
 --    Hint ladder, rung 1: For sql-58 Exercise 5, run `classified` one at a time. Record each CTE's row count and `outcome` uniqueness before the next stage uses it.
 -- 6. Debugging: normalize email before deduplication so case-only variants do
 --    not become two competing records.
---    Inputs: For sql-58 Exercise 6, read from `cleaned_customer_ingest_solution`. Build the answer toward `normalized_email`, and `candidate_rows`; keep `email` visible whenever the result has row-level grain.
---    Expected result/shape: For sql-58 Exercise 6, expected output: one row per `email`. The final columns are `normalized_email`, and `candidate_rows`. The final order is `email`.
---    Verify: For sql-58 Exercise 6, independently aggregate `cleaned_customer_ingest_solution` by `email`; require one output row for every distinct `email` tuple and compare `candidate_rows` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `candidate_rows` for the existing `email` tuple and verify the new tuple appears exactly once.
---    Hint ladder, rung 1: For sql-58 Exercise 6, confirm the groups are `email`; then check `email` before applying the row cap.
+--    Inputs: For sql-58 Exercise 6, group `cleaned_customer_ingest_solution`, whose `email` is already `lower(trim(...))`, by that normalized `email` and count the candidate rows per address.
+--    Expected result/shape: For sql-58 Exercise 6, expected output: 4 rows, one per normalized `email`, each with `candidate_rows` 1 on the staged data. The final columns are `normalized_email` and `candidate_rows`. The final order is `email`.
+--    Verify: For sql-58 Exercise 6, confirm that the staged `CUSTOMER601@EXAMPLE.COM ` (upper case with a trailing space) appears as `customer601@example.com`; on `VALUES ('A@x.com'), ('a@x.com ')`, `COUNT(DISTINCT e)` is 2 but `COUNT(DISTINCT lower(trim(e)))` is 1, which is the duplicate that normalization must catch before deduplication.
+--    Hint ladder, rung 1: For sql-58 Exercise 6, compare `COUNT(DISTINCT email)` with `COUNT(DISTINCT lower(trim(email)))` on the staging table before you group the cleaned rows.
 -- 7. Edge case: distinguish a missing country from an unrecognized country and
 --    preserve the raw value for audit rather than coercing both to one default.
 --    Inputs: For sql-58 Exercise 7, read from `stg_customer_ingest_solution`. Build the answer toward `raw_country`, `normalized_candidate`, and `country_status`; keep `raw_country` visible whenever the result has row-level grain.
@@ -211,10 +211,10 @@ FROM
 --    Hint ladder, rung 1: For sql-58 Exercise 7, check `raw_country NULLS FIRST` before applying the row cap.
 -- 8. Construction: make the staging load idempotent by assigning a source batch
 --    ID and source row number, then reject repeated natural source records.
---    Inputs: For sql-58 Exercise 8, read from `staged_batch_identity`, and `stg_customer_ingest_solution`. Build the answer toward `email`; keep `email` visible whenever the result has row-level grain.
---    Expected result/shape: For sql-58 Exercise 8, expected output: one row per `email`. The final columns are `email`.
---    Verify: For sql-58 Exercise 8, choose one complete partition from `staged_batch_identity`, and `stg_customer_ingest_solution`; hand-calculate its first, middle, and final window values for `row_count`, then verify output keys remain `email`. Add duplicate source candidates for `email`; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.
---    Hint ladder, rung 1: For sql-58 Exercise 8, inspect one window partition before projecting.
+--    Inputs: For sql-58 Exercise 8, load the four staged rows into `staged_batch_identity`, keyed by (`batch_id`, `source_row_number`), twice with `INSERT ... ON CONFLICT (batch_id, source_row_number) DO NOTHING`, then count the stored rows.
+--    Expected result/shape: For sql-58 Exercise 8, expected output: `INSERT 0 4` for the first load, `INSERT 0 0` for the replay, and one row with `replay_safe_rows` 4. The final columns are `replay_safe_rows`.
+--    Verify: For sql-58 Exercise 8, confirm that the replay inserts nothing and that `SELECT COUNT(*) FROM staged_batch_identity` equals `SELECT COUNT(*) FROM stg_customer_ingest_solution` (4); load the same rows under a new `batch_id` and expect 8 rows, because the key identifies a batch and a source row, not a customer.
+--    Hint ladder, rung 1: For sql-58 Exercise 8, run the `INSERT ... ON CONFLICT DO NOTHING` twice and read both command tags before you count.
 -- 9. Debugging: prevent a single malformed JSON value from aborting the whole
 --    batch; preserve the raw text and emit an invalid_json reason code.
 --    Inputs: For sql-58 Exercise 9, read from `stg_customer_ingest_solution`. Build the answer toward `email`, `raw_attributes`, and `json_status`; keep `email` visible whenever the result has row-level grain.
@@ -223,8 +223,8 @@ FROM
 --    Hint ladder, rung 1: For sql-58 Exercise 9, check `email` before applying the row cap.
 -- 10. Explanation: reconcile staged, accepted, rejected, inserted, and updated
 --     counts, and state why each row must end in exactly one outcome.
---    Inputs: For sql-58 Exercise 10, read from `cleaned_customer_ingest_solution`, and `stg_customer_ingest_solution`. Build the answer toward `staged_rows`, `accepted_rows`, `rejected_rows`, and `reconciled_rows`; keep `staged_rows` visible whenever the result has row-level grain.
---    Expected result/shape: For sql-58 Exercise 10, expected output: one row per `staged_rows`. The final columns are `staged_rows`, `accepted_rows`, `rejected_rows`, and `reconciled_rows`.
---    Verify: For sql-58 Exercise 10, reselect the returned keys directly from the source; require unique `staged_rows` where the expected grain is one row per key and confirm the projected `staged_rows`, `accepted_rows`, `rejected_rows`, and `reconciled_rows` against `cleaned_customer_ingest_solution`, and `stg_customer_ingest_solution`. Add one source row with a new `staged_rows`; verify the result gains exactly one row carrying that `staged_rows` value.
---    Hint ladder, rung 1: For sql-58 Exercise 10, run `classified` one at a time. Record each CTE's row count and `staged_rows` uniqueness before the next stage uses it.
+--    Inputs: For sql-58 Exercise 10, classify every row of `cleaned_customer_ingest_solution` as accepted only when its email, country, phone, JSON, timestamp, and name checks all pass, then count staged, accepted, and rejected rows and their reconciled sum.
+--    Expected result/shape: For sql-58 Exercise 10, expected output: one row with `staged_rows` 4, `accepted_rows` 3, `rejected_rows` 1, and `reconciled_rows` 4. The final columns are `staged_rows`, `accepted_rows`, `rejected_rows`, and `reconciled_rows`.
+--    Verify: For sql-58 Exercise 10, confirm `accepted_rows + rejected_rows = staged_rows` and that `staged_rows` equals `SELECT COUNT(*) FROM stg_customer_ingest_solution`; the rejected row is `Customer bad`, which fails the email, country, phone, JSON, and timestamp checks at once but is counted once.
+--    Hint ladder, rung 1: For sql-58 Exercise 10, run `classified` alone and count the rows where `accepted` is true and false before you build the summary.
 ROLLBACK;

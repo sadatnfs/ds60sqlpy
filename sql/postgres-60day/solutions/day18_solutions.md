@@ -7,13 +7,8 @@
 Open this explanation only after making an honest attempt. The executable
 companion runs solely against the disposable `advanced_sql_training` database:
 
-```powershell
-# Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f "sql\postgres-60day\solutions\day18_solutions.sql"
-```
-
 ```bash
-# macOS/Linux, from the repository root
+# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day18_solutions.sql
 ```
@@ -26,7 +21,7 @@ ordering with the explanation before comparing syntax.
 ## Clause-by-clause reading map
 
 The lesson's main concepts are Offset, Default value, Calendar spine. Its worked-model focus is:
-At monthly grain, place revenue beside LAG(revenue) OVER (ORDER BY month). The first row has no predecessor and returns NULL. If a month is absent, the previous row is not necessarily the previous calendar month, so build a month spine before interpreting the difference as month-over-month.
+At monthly grain, place `revenue` beside `LAG(revenue) OVER (ORDER BY month)`. The first row has no predecessor and returns `NULL`. If a month is absent, the previous row is not necessarily the previous calendar month, so build a month spine before interpreting the difference as month-over-month.
 
 - Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
   before adding aggregates; a one-to-many join is allowed to multiply rows only
@@ -316,13 +311,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-18 Exercise 5, read from `orders`. Build the answer toward `month_start`, `revenue`, `previous_revenue`, and `revenue_change`; keep `month` visible whenever the result has row-level grain.
+- **Inputs/evidence:** For sql-18 Exercise 5, read from `orders`, aggregate `SUM(total_amount)` to one row per UTC month in the CTE `monthly`, then apply `LAG(revenue) OVER (ORDER BY month_start)` to those monthly rows and compute `revenue_change = revenue - previous_revenue`.
 - **Expected result/shape:** For sql-18 Exercise 5, expected output: One row per month with nullable first change. The final columns are `month_start`, `revenue`, `previous_revenue`, and `revenue_change`. The final order is `month_start`.
-- **Independent verification:** For sql-18 Exercise 5, reselect the returned keys directly from the source; require unique `month` where the expected grain is one row per key and confirm the projected `month_start`, `revenue`, `previous_revenue`, and `revenue_change` against `orders`. Add one source row with a new `month`; verify the result gains exactly one row carrying that `month` value.
-- **Intermediate relation check:** For sql-18 Exercise 5, run `monthly`, and `compared` one at a time. Record each CTE's row count and `month` uniqueness before the next stage uses it.
-- **Clause check:** For sql-18 Exercise 5, the solution actually uses `WITH`, `FROM`, `GROUP BY`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `month`, and finish with `month_start`, `revenue`, `previous_revenue`, and `revenue_change` ordered by `month_start`.
+- **Independent verification:** For sql-18 Exercise 5, confirm that `month_start` is unique and that the row count equals `SELECT COUNT(DISTINCT date_trunc('month', order_date AT TIME ZONE 'UTC')) FROM orders`; exactly one row, the earliest month, has NULL `previous_revenue` and `revenue_change`, and the `revenue` values add up to 2355646.89, the total of `orders.total_amount`.
+- **Intermediate relation check:** For sql-18 Exercise 5, run `monthly` alone and check that it has one row per month before `compared` applies `LAG`; applying `LAG` to raw orders would compare adjacent orders, not months.
+- **Clause check:** For sql-18 Exercise 5, the solution actually uses `WITH`, `FROM`, `GROUP BY`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `month_start`, and finish with `month_start`, `revenue`, `previous_revenue`, and `revenue_change` ordered by `month_start`.
 - **Alternative/trade-off:** For sql-18 Exercise 5, the chosen form is justified by this lesson-specific rationale: Aggregate first; applying lag to raw orders would compare adjacent orders rather than months. Evaluate another form against the concrete expected result (One row per month with nullable first change) and the verification above.
-- **Edge case:** Add one source row with a new `month`; verify the result gains exactly one row carrying that `month` value.
+- **Edge case:** `LAG` reads the previous observed month; if a month had no orders, the next month would be compared with an older month, so a dense calendar is needed when gaps matter.
 
 ## Exercise 6: Extension
 

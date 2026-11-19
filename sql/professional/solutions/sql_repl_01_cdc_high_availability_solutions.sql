@@ -1,5 +1,5 @@
 -- SQL-REPL-01 executable solutions: local simulation only.
--- SOLUTION READING MAP — sql-repl-01: Replication, Change Data Capture, and High Availability
+-- SOLUTION READING MAP for sql-repl-01: Replication, Change Data Capture, and High Availability
 -- Explanation: sql/professional/solutions/sql_repl_01_cdc_high_availability_solutions.md
 -- Run from the repository root only against advanced_sql_training:
 --   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solutions/sql_repl_01_cdc_high_availability_solutions.sql

@@ -80,14 +80,14 @@ ORDER BY
 --    Hint ladder, rung 1: For sql-14 Exercise 4, select `order_id` from `orders`, `order_items`, and `products` before adding derived columns.
 -- 5. [Debugging] Calculate average payment amount per paid order without dividing by zero or counting payment rows as orders.
 --    Hint: Aggregate payment amount and count distinct order IDs at one common scope.
---    Inputs: For sql-14 Exercise 5, read from `payments`. Build the answer toward `average_paid_amount_per_order`; keep `payment_id` visible whenever the result has row-level grain.
+--    Inputs: For sql-14 Exercise 5, read from `payments` and divide the total paid amount by the number of distinct paid orders, `SUM(amount) / NULLIF(COUNT(DISTINCT order_id), 0)`, rounded to 2 places.
 --    Expected result/shape: For sql-14 Exercise 5, expected output: Exactly one summary row. The final columns are `average_paid_amount_per_order`.
---    Verify: For sql-14 Exercise 5, reselect the returned keys directly from the source; require unique `payment_id` where the expected grain is one row per key and confirm the projected `average_paid_amount_per_order` against `payments`. Add one source row with a new `payment_id`; verify the result gains exactly one row carrying that `payment_id` value.
---    Hint ladder, rung 1: For sql-14 Exercise 5, select `payment_id` from `payments` before adding derived columns.
+--    Verify: For sql-14 Exercise 5, confirm one row with 525.05, which is 1831900.81 divided by 3489 distinct paid orders; compare it with `ROUND(AVG(amount), 2)` (477.55), which divides by the 3836 payment rows instead.
+--    Hint ladder, rung 1: For sql-14 Exercise 5, compute `COUNT(*)` and `COUNT(DISTINCT order_id)` from `payments` first; a per-order average needs the distinct count as its denominator.
 -- 6. [Extension] Compare sum-of-rounded line values with rounded exact total and quantify the rounding difference.
 --    Hint: This diagnostic makes the consequence of early rounding visible.
---    Inputs: For sql-14 Exercise 6, read from `order_items`. Build the answer toward `sum_of_rounded_lines`, `rounded_exact_total`, and `rounding_difference`; keep `order_item_id` visible whenever the result has row-level grain.
+--    Inputs: For sql-14 Exercise 6, read from `order_items` and compare the sum of line totals rounded per line, `SUM(ROUND(unit_price * quantity * (1 - discount), 2))`, with the exact sum rounded once, `ROUND(SUM(unit_price * quantity * (1 - discount)), 2)`.
 --    Expected result/shape: For sql-14 Exercise 6, expected output: One row with two totals and their signed difference. The final columns are `sum_of_rounded_lines`, `rounded_exact_total`, and `rounding_difference`.
---    Verify: For sql-14 Exercise 6, reselect the returned keys directly from the source; require unique `order_item_id` where the expected grain is one row per key and confirm the projected `sum_of_rounded_lines`, `rounded_exact_total`, and `rounding_difference` against `order_items`. Add one source row with a new `order_item_id`; verify the result gains exactly one row carrying that `order_item_id` value.
---    Hint ladder, rung 1: For sql-14 Exercise 6, select `order_item_id` from `order_items` before adding derived columns.
+--    Verify: For sql-14 Exercise 6, confirm one row with 2355648.13, 2355647.12, and a `rounding_difference` of 1.01; the difference is the per-line rounding accumulated over 13085 lines, so a report must state which rounding rule it uses.
+--    Hint ladder, rung 1: For sql-14 Exercise 6, compute both totals in separate `SELECT` statements first; round inside the `SUM` for one and outside it for the other.
 ROLLBACK;

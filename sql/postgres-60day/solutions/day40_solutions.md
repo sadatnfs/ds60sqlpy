@@ -7,13 +7,8 @@
 Open this explanation only after making an honest attempt. The executable
 companion runs solely against the disposable `advanced_sql_training` database:
 
-```powershell
-# Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f "sql\postgres-60day\solutions\day40_solutions.sql"
-```
-
 ```bash
-# macOS/Linux, from the repository root
+# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day40_solutions.sql
 ```
@@ -26,7 +21,7 @@ ordering with the explanation before comparing syntax.
 ## Clause-by-clause reading map
 
 The lesson's main concepts are Ordered-set aggregate, Z-score, Interpolation. Its worked-model focus is:
-Aggregate to one row per observed order date, calculate a 15-observation mean and standard deviation, then derive (revenue - avg15) / NULLIF(sd15, 0). Keep the observation count beside the score so early, undersized windows are visible.
+Aggregate to one row per observed order date, calculate a 15-observation mean and standard deviation, then derive `(revenue - avg15) / NULLIF(sd15, 0)`. Keep the observation count beside the score so early, undersized windows are visible.
 
 - Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
   before adding aggregates; a one-to-many join is allowed to multiply rows only
@@ -101,13 +96,13 @@ and decide whether missing days mean zero or unknown.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-40 Exercise 1, read from `orders`. Compute `order_day`, `revenue`, `avg15`, `sd15`, and `z_score` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+- **Inputs/evidence:** For sql-40 Exercise 1, read from `orders`, sum `total_amount` per UTC day in the CTE `daily`, then compute a trailing 15-row mean and sample standard deviation (`ROWS BETWEEN 14 PRECEDING AND CURRENT ROW`) in `rolling` and the z-score `(revenue - avg15) / NULLIF(sd15, 0)`.
 - **Expected result/shape:** For sql-40 Exercise 1, expected output: one row per day with orders. A positive z-score is above the rolling mean; a negative score is below it. The final columns are `order_day`, `revenue`, `avg15`, `sd15`, and `z_score`. The final order is `order_day`.
-- **Independent verification:** For sql-40 Exercise 1, evaluate each of `order_day`, `revenue`, `sd15`, and `z_score` in a separate control `SELECT` over `orders`; require one final row and compare every value. Add one source row with a new `day`; verify the result gains exactly one row carrying that `day` value.
-- **Intermediate relation check:** For sql-40 Exercise 1, run `daily`, and `rolling` one at a time. Record each CTE's row count and `day` uniqueness before the next stage uses it.
-- **Clause check:** For sql-40 Exercise 1, the solution actually uses `WITH`, `FROM`, `GROUP BY`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve exactly one summary row, and finish with `order_day`, `revenue`, `avg15`, `sd15`, and `z_score` ordered by `order_day`.
+- **Independent verification:** For sql-40 Exercise 1, confirm one row per `order_day`, so the row count equals `SELECT COUNT(DISTINCT date_trunc('day', order_date)) FROM orders`; the first row has NULL `sd15` and `z_score` because a one-row sample has no standard deviation, and for one later day recompute `avg15` as the mean of that day's and the 14 previous days' `revenue` in `daily`.
+- **Intermediate relation check:** For sql-40 Exercise 1, run `daily` alone and check one row per `order_day` before `rolling` adds the window statistics.
+- **Clause check:** For sql-40 Exercise 1, the solution actually uses `WITH`, `FROM`, `GROUP BY`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `order_day`, and finish with `order_day`, `revenue`, `avg15`, `sd15`, and `z_score` ordered by `order_day`.
 - **Alternative/trade-off:** For sql-40 Exercise 1, the chosen form is justified by this lesson-specific rationale: Expected shape: one row per day with orders. Evaluate another form against the concrete expected result (one row per day with orders. A positive z-score is above the rolling mean; a negative score is below it) and the verification above.
-- **Edge case:** Add one source row with a new `day`; verify the result gains exactly one row carrying that `day` value.
+- **Edge case:** The frame counts 15 observed days, not 15 calendar days; a day without orders is skipped, so a calendar-based window needs a dense date series first.
 
 ## Exercise 2: Category P50 and P90 of order values
 
@@ -148,13 +143,13 @@ between observed values, so a percentile need not equal an actual order value.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-40 Exercise 2, read from `order_items`, and `products`. Compute `category`, `p50_order_value`, `p90_order_value`, and `category_orders` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+- **Inputs/evidence:** For sql-40 Exercise 2, read from `order_items` joined to `products`, sum each order's net lines per category in `category_order_values`, then compute `PERCENTILE_CONT(0.5)` and `PERCENTILE_CONT(0.9)` of those per-order category values and count them per category.
 - **Expected result/shape:** For sql-40 Exercise 2, expected output: one row per sold category. `PERCENTILE_CONT` can interpolate between observed values, so a percentile need not equal an actual order value. The final columns are `category`, `p50_order_value`, `p90_order_value`, and `category_orders`. The final order is `category`.
-- **Independent verification:** For sql-40 Exercise 2, evaluate each of `p50_order_value`, `p90_order_value`, and `category_orders` in a separate control `SELECT` over `order_items`, and `products`; require one final row and compare every value. Add one row to an existing group and one row for a new group; recompute `p50_order_value`, `p90_order_value`, and `category_orders` for the existing `category` tuple and verify the new tuple appears exactly once.
-- **Intermediate relation check:** For sql-40 Exercise 2, run `category_order_values` one at a time. Record each CTE's row count and `category` uniqueness before the next stage uses it.
+- **Independent verification:** For sql-40 Exercise 2, confirm 6 rows, one per category, and that `category_orders` equals `SELECT COUNT(DISTINCT oi.order_id) FROM order_items oi JOIN products p USING (product_id) WHERE p.category = <that category>` (for example 2192 for `Apparel`); `p90_order_value` must be at least `p50_order_value` in every row.
+- **Intermediate relation check:** For sql-40 Exercise 2, run `category_order_values` alone and check that (`category`, `order_id`) is unique before you compute percentiles.
 - **Clause check:** For sql-40 Exercise 2, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `order_items`, and `products`, preserve one row per `category`, and finish with `category`, `p50_order_value`, `p90_order_value`, and `category_orders` ordered by `category`.
 - **Alternative/trade-off:** For sql-40 Exercise 2, the chosen form is justified by this lesson-specific rationale: An order can contain several categories. Evaluate another form against the concrete expected result (one row per sold category. `PERCENTILE_CONT` can interpolate between observed values, so a percentile need not equal an actual order value) and the verification above.
-- **Edge case:** Add one row to an existing group and one row for a new group; recompute `p50_order_value`, `p90_order_value`, and `category_orders` for the existing `category` tuple and verify the new tuple appears exactly once.
+- **Edge case:** An order with lines in several categories contributes one value to each of those categories; using the whole order total instead would count a mixed order at full value in every category.
 
 ## Pitfalls
 
@@ -174,13 +169,13 @@ difference deterministic.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-40 Exercise 3, read from the inline `VALUES` fixture. Build the answer toward `discrete_median`, and `continuous_median`; keep `discrete_median` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-40 Exercise 3, expected output: one row per `discrete_median`. The final columns are `discrete_median`, and `continuous_median`.
-- **Independent verification:** For sql-40 Exercise 3, reselect the returned keys directly from the source; require unique `discrete_median` where the expected grain is one row per key and confirm the projected `discrete_median`, and `continuous_median` against the inline `VALUES` fixture. Add one source row with a new `discrete_median`; verify the result gains exactly one row carrying that `discrete_median` value.
-- **Intermediate relation check:** For sql-40 Exercise 3, select `discrete_median` from the inline `VALUES` fixture before adding derived columns.
-- **Clause check:** For sql-40 Exercise 3, the solution actually uses `WITH`, `FROM`, `SELECT`, and `ORDER BY`. Read only those operations: begin at the inline `VALUES` fixture, preserve one row per `discrete_median`, and finish with `discrete_median`, and `continuous_median`.
+- **Inputs/evidence:** For sql-40 Exercise 3, use the inline `VALUES` fixture 10, 20, 100, 200 and compute `percentile_disc(0.5)` and `percentile_cont(0.5)` over it.
+- **Expected result/shape:** For sql-40 Exercise 3, expected output: one row with `discrete_median` 20 and `continuous_median` 60. The final columns are `discrete_median` and `continuous_median`.
+- **Independent verification:** For sql-40 Exercise 3, confirm by hand that `percentile_disc(0.5)` returns the first value whose cumulative share reaches 0.5, the second of four values (20), while `percentile_cont(0.5)` interpolates halfway between 20 and 100 (60); add the value 300 and expect both medians to become 100.
+- **Intermediate relation check:** For sql-40 Exercise 3, list the sorted values with their positions first; with an even count, the two medians differ unless the two middle values are equal.
+- **Clause check:** For sql-40 Exercise 3, the solution names the four values in a `WITH values (value)` CTE and computes both ordered-set aggregates, `percentile_disc(0.5) WITHIN GROUP (ORDER BY value)` and `percentile_cont(0.5) WITHIN GROUP (ORDER BY value)`, in one `SELECT` without `GROUP BY`.
 - **Alternative/trade-off:** For sql-40 Exercise 3, the chosen form is justified by this lesson-specific rationale: For four values, the discrete median chooses an observed central value while the continuous median interpolates. Evaluate another form against the concrete expected result (one row per `discrete_median`) and the verification above.
-- **Edge case:** Add one source row with a new `discrete_median`; verify the result gains exactly one row carrying that `discrete_median` value.
+- **Edge case:** `percentile_disc` always returns an observed value, which suits prices or labels that must exist; `percentile_cont` can return a value that no row contains.
 
 ## Exercise 4: Share and rank within month
 

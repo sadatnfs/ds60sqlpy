@@ -11,16 +11,16 @@ the saved project selection. No host Python or PostgreSQL installation is
 required for this browser route.
 
 1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database. A simple snippet
-   such as `SELECT 1;` needs no training-schema reset.
+   the local disposable `advanced_sql_training` database.
 2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
    preserves the lesson's reviewed psql directives, relative includes and
    transaction behavior. **SQL snippet** is appropriate for ordinary SQL
    statements, but is not a replacement for an entire script's setup.
-3. When the lesson requires the course training data, use the explicit
-   preparation action and read its reset acknowledgement. It replaces the
-   course-owned `training` schema. Do not reset unrelated data or prepare
-   every lesson by habit; stateful sequences have their own ordering.
+3. The **Course database** panel above the code shows whether the course
+   training tables are loaded. Missing tables load automatically before your
+   first run (or choose **Load course tables**) and stay loaded for later
+   lessons. **Reset training data** restores the original rows only when your
+   own changes made results differ; it keeps your saved code and notes.
 4. Edit the learner copy in the classroom and save your prediction before
    running. Its whole-script workspace is
    `.learning/sql/sql-start-01/lesson/workspace/sql/professional/lessons/sql_start_01_tables_and_grain.sql`.
@@ -142,6 +142,26 @@ surrounding `BEGIN` and `ROLLBACK` ensure the fixture disappears at the end.
 When experimenting interactively, run setup and your queries in the same
 connection, then run `ROLLBACK`. A new connection cannot see another
 connection's temporary table.
+
+A `VALUES` list builds a small table inside one query, with no
+`CREATE TABLE` at all:
+
+```sql
+SELECT
+  v.n,
+  v.label
+FROM (
+  VALUES (1, 'a'),
+    (2, 'b')) AS v (n, label)
+ORDER BY
+  v.n;
+```
+
+Each parenthesized group is one row. `AS v` names the derived table, and the
+column list `(n, label)` names its columns in order, so `v.n` and `v.label` can
+be selected and sorted. Without that list PostgreSQL calls the columns
+`column1` and `column2`. The query returns two rows, `(1, a)` and `(2, b)`.
+Exercise 6 uses the same form for a new collection.
 
 ## Worked example / walkthrough
 

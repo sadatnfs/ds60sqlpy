@@ -100,8 +100,8 @@ ORDER BY
 --    Hint ladder, rung 1: For sql-08 Exercise 5, confirm the groups are `category`; then check `p.category` before applying the row cap.
 -- 6. [Extension] Rewrite a repeated scalar aggregate as a one-row CTE crossed into a customer-country report.
 --    Hint: Compute the global total once, then cross join the guaranteed one-row relation.
---    Inputs: For sql-08 Exercise 6, read from `customers`. Build the answer toward `country`, `country_customers`, and `customer_share`; keep `country`, and `customer_count` visible whenever the result has row-level grain.
+--    Inputs: For sql-08 Exercise 6, read from `customers`; compute the overall customer count once in a one-row CTE named `global`, then return each `country` with `country_customers` and `customer_share`, its fraction of all customers rounded to 4 places.
 --    Expected result/shape: For sql-08 Exercise 6, expected output: One row per country with country share. The final columns are `country`, `country_customers`, and `customer_share`. The final order is `customer_share DESC, c.country`.
---    Verify: For sql-08 Exercise 6, independently aggregate `customers` by `country`, and `customer_count`; require one output row for every distinct `country`, and `customer_count` tuple and compare `country_customers`, and `customer_share` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `country_customers`, and `customer_share` for the existing `country`, and `customer_count` tuple and verify the new tuple appears exactly once.
---    Hint ladder, rung 1: For sql-08 Exercise 6, run `global` one at a time. Record each CTE's row count and `country`, and `customer_count` uniqueness before the next stage uses it.
+--    Verify: For sql-08 Exercise 6, confirm 8 rows whose `country_customers` add up to `SELECT COUNT(*) FROM customers` (500) and whose `customer_share` values add up to 1.0000; on the seed, CA, DE, GB, and US have 63 customers (0.1260) and AU, BR, FR, and IN have 62 (0.1240).
+--    Hint ladder, rung 1: For sql-08 Exercise 6, run `global` alone and confirm it returns one row; cross joining a one-row relation does not multiply the grouped rows.
 ROLLBACK;

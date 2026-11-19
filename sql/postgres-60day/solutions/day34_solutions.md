@@ -7,13 +7,8 @@
 Open this explanation only after making an honest attempt. The executable
 companion runs solely against the disposable `advanced_sql_training` database:
 
-```powershell
-# Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f "sql\postgres-60day\solutions\day34_solutions.sql"
-```
-
 ```bash
-# macOS/Linux, from the repository root
+# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day34_solutions.sql
 ```
@@ -195,13 +190,13 @@ faster.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-34 Exercise 3, run the underlying read-only query over `orders`, `recent`, and `customers` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
-- **Expected result/shape:** For sql-34 Exercise 3, expected output: one row per `order_id`. The final columns are `materialized`.
-- **Independent verification:** For sql-34 Exercise 3, run the underlying query without `EXPLAIN` and preserve its `order_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
-- **Intermediate relation check:** For sql-34 Exercise 3, start with the first relation in `orders`, `recent`, and `customers`; after each join, record total rows and distinct `order_id` so the exact fanout or loss is visible.
-- **Clause check:** For sql-34 Exercise 3, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `WHERE`, and `SELECT`. Read only those operations: begin at `orders`, `recent`, and `customers`, preserve one row per `order_id`, and finish with `materialized`.
+- **Inputs/evidence:** For sql-34 Exercise 3, run `EXPLAIN` on the same recent-orders count twice, once with `WITH recent AS MATERIALIZED (...)` and once with `AS NOT MATERIALIZED`, where `recent` keeps orders from the last 30 days and is joined to `customers`.
+- **Expected result/shape:** For sql-34 Exercise 3, expected output: two plans. The `MATERIALIZED` plan computes `CTE recent` separately and reads it through a `CTE Scan on recent`; the `NOT MATERIALIZED` plan folds the date filter into a `Seq Scan on orders` under the join. Both queries return the same count.
+- **Independent verification:** For sql-34 Exercise 3, run both queries without `EXPLAIN` and confirm that they return the same `count`; then confirm that only the `MATERIALIZED` plan contains a `CTE recent` node, and treat the estimated costs as plan evidence, not as a universal speed ranking.
+- **Intermediate relation check:** For sql-34 Exercise 3, run the CTE's `SELECT` alone and count its rows before you compare the two plans.
+- **Clause check:** For sql-34 Exercise 3, the solution runs `EXPLAIN` on two copies of one query that differ only in `AS MATERIALIZED` versus `AS NOT MATERIALIZED`; each joins the 30-day `recent` CTE to `customers` with `USING (customer_id)` and returns `COUNT(*)`.
 - **Alternative/trade-off:** For sql-34 Exercise 3, the chosen form is justified by this lesson-specific rationale: `MATERIALIZED` computes/stores the CTE as a boundary. Evaluate another form against the concrete expected result (one row per `order_id`) and the verification above.
-- **Edge case:** Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+- **Edge case:** PostgreSQL inlines a side-effect-free CTE referenced once by default, so a plain `WITH recent AS (...)` plans like `NOT MATERIALIZED` here; the keyword matters when you want a fence or the CTE is referenced more than once.
 
 ## Exercise 4: Pre-aggregate to order grain
 

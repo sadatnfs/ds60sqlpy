@@ -7,13 +7,8 @@
 Open this explanation only after making an honest attempt. The executable
 companion runs solely against the disposable `advanced_sql_training` database:
 
-```powershell
-# Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f "sql\postgres-60day\solutions\day36_solutions.sql"
-```
-
 ```bash
-# macOS/Linux, from the repository root
+# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day36_solutions.sql
 ```
@@ -97,13 +92,13 @@ on Monday under `date_trunc('week', ...)`.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-36 Exercise 1, read from `orders`, `customers`, `order_items`, and `mv_weekly_country_revenue_solution`. Compute `week_start`, `country`, and `revenue` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
-- **Expected result/shape:** For sql-36 Exercise 1, expected output: one row per observed week-country pair. PostgreSQL weeks begin on Monday under `date_trunc('week',. The final columns are `week_start`, `country`, and `revenue`. The final order is `week_start DESC, revenue DESC`.
-- **Independent verification:** For sql-36 Exercise 1, evaluate each of `revenue` in a separate control `SELECT` over `orders`, `customers`, `order_items`, and `mv_weekly_country_revenue_solution`; require one final row and compare every value. Add one row to an existing group and one row for a new group; recompute `revenue` for the existing `country` tuple and verify the new tuple appears exactly once.
-- **Intermediate relation check:** For sql-36 Exercise 1, start with the first relation in `orders`, `customers`, `order_items`, and `mv_weekly_country_revenue_solution`; after each join, record total rows and distinct `country` so the exact fanout or loss is visible.
-- **Clause check:** For sql-36 Exercise 1, the solution actually uses `FROM`, `JOIN ... ON`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, `customers`, `order_items`, and `mv_weekly_country_revenue_solution`, preserve one row per `country`, and finish with `week_start`, `country`, and `revenue` ordered by `week_start DESC, revenue DESC`.
+- **Inputs/evidence:** For sql-36 Exercise 1, read from `orders` joined to `customers` and create the materialized view `mv_weekly_country_revenue_solution` with one row per Monday-based `week` (`date_trunc('week', order_date)::date`) and `country`, carrying `revenue` (`SUM(total_amount)`) and `orders` (`COUNT(*)`), then add a unique index on `(week, country)`.
+- **Expected result/shape:** For sql-36 Exercise 1, expected output: a `SELECT n` command tag for the view build, one row per observed week-country pair, then `CREATE INDEX`. The view's columns are `week`, `country`, `revenue`, and `orders`.
+- **Independent verification:** For sql-36 Exercise 1, confirm that the view's row count equals `SELECT COUNT(*) FROM (SELECT DISTINCT date_trunc('week', o.order_date), c.country FROM orders o JOIN customers c USING (customer_id)) d`, that `SUM(revenue)` is 2355646.89 and `SUM(orders)` is 4362, and that `EXTRACT(ISODOW FROM week)` is 1 (Monday) on every row.
+- **Intermediate relation check:** For sql-36 Exercise 1, run the `SELECT` behind the view first and check that (`week`, `country`) is unique in its output before you create the view and its unique index.
+- **Clause check:** For sql-36 Exercise 1, the solution actually uses `FROM`, `JOIN ... ON`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, `customers`, `order_items`, and `mv_weekly_country_revenue_solution`, preserve one row per `week` and `country`, and finish with `week_start`, `country`, and `revenue` ordered by `week_start DESC, revenue DESC`.
 - **Alternative/trade-off:** For sql-36 Exercise 1, the chosen form is justified by this lesson-specific rationale: This demonstration is transactional and leaves no materialized view behind. Evaluate another form against the concrete expected result (one row per observed week-country pair. PostgreSQL weeks begin on Monday under `date_trunc('week',) and the verification above.
-- **Edge case:** Add one row to an existing group and one row for a new group; recompute `revenue` for the existing `country` tuple and verify the new tuple appears exactly once.
+- **Edge case:** `date_trunc('week', ...)` on a `timestamptz` uses the session `TimeZone`; an order placed late on a Sunday in one zone can belong to the next week in another.
 
 ## Exercise 2: Compare base-table and snapshot plans
 
@@ -162,9 +157,9 @@ buffers as well as execution time.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-36 Exercise 2, run the underlying read-only query over `orders`, `customers`, `order_items`, and `mv_weekly_country_revenue_compare` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
-- **Expected result/shape:** For sql-36 Exercise 2, expected output: one row per `country`. The final columns are `week_start`, `country`, and `revenue`.
-- **Independent verification:** For sql-36 Exercise 2, run the underlying query without `EXPLAIN` and preserve its `country` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+- **Inputs/evidence:** For sql-36 Exercise 2, run `EXPLAIN (ANALYZE, BUFFERS)` on the base-table aggregate that defines the view, then on `SELECT week, country, revenue, orders FROM mv_weekly_country_revenue_solution`.
+- **Expected result/shape:** For sql-36 Exercise 2, expected output: two plans. The base-table plan aggregates all 4362 joined orders in a `HashAggregate`, while the view plan is a single `Seq Scan` on the materialized view; both top nodes report the same number of actual rows.
+- **Independent verification:** For sql-36 Exercise 2, compare the top node's actual `rows` in both plans (they must match) and the buffers each plan touched; then run both queries without `EXPLAIN` and confirm that `EXCEPT` in both directions returns no rows. Timings vary from run to run, so compare buffers and row counts rather than milliseconds.
 - **Intermediate relation check:** For sql-36 Exercise 2, start with the first relation in `orders`, `customers`, `order_items`, and `mv_weekly_country_revenue_compare`; after each join, record total rows and distinct `country` so the exact fanout or loss is visible.
 - **Clause check:** For sql-36 Exercise 2, the solution actually uses `FROM`, `JOIN ... ON`, `GROUP BY`, and `SELECT`. Read only those operations: begin at `orders`, `customers`, `order_items`, and `mv_weekly_country_revenue_compare`, preserve one row per `country`, and finish with `week_start`, `country`, and `revenue`.
 - **Alternative/trade-off:** For sql-36 Exercise 2, the chosen form is justified by this lesson-specific rationale: The materialized-view plan should avoid source joins and aggregation. Evaluate another form against the concrete expected result (one row per `country`) and the verification above.
@@ -173,8 +168,10 @@ buffers as well as execution time.
 ## Pitfalls
 
 - A normal `REFRESH MATERIALIZED VIEW` blocks concurrent reads of that view.
-  `REFRESH ... CONCURRENTLY` requires a qualifying unique index and cannot run
-  inside an explicit transaction block.
+  `REFRESH ... CONCURRENTLY` keeps the view readable, but needs an already
+  populated view and a unique index on plain columns covering every row (for
+  example `(category, month)`); only one refresh per view runs at a time.
+  Unlike `CREATE INDEX CONCURRENTLY`, it may run inside a transaction block.
 - Refresh is not automatic. Define freshness ownership and monitoring before
   using a materialized view for reporting.
 - Materialized views duplicate data and add refresh cost; they are not a default
@@ -199,8 +196,12 @@ visible instead of merely described.
 ## Exercise 4: Explain concurrent-refresh eligibility
 
 The unique `(week, country)` index supplies a stable row identity required by
-concurrent refresh. Initial population and this rollback lab still use ordinary
-refresh; concurrent refresh also has transaction restrictions.
+concurrent refresh. Initial population still uses an ordinary refresh, because
+`CONCURRENTLY` requires an already populated view. This rollback lab also keeps
+the ordinary refresh because the view was created inside the uncommitted
+lesson transaction: no other session can read it, so there is no read
+availability to preserve, and the concurrent diff-and-apply refresh would only
+add work.
 
 ### Reasoning and verification
 

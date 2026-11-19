@@ -1,5 +1,5 @@
 -- Day 59 solution: integrated stakeholder analytics
--- SOLUTION READING MAP — sql-59: Final Capstone Part2
+-- SOLUTION READING MAP for sql-59: Final Capstone, Part 2: Stakeholder Analytics
 -- Explanation: sql/postgres-60day/solutions/day59_solutions.md
 -- Run from the repository root only against advanced_sql_training:
 --   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day59_solutions.sql

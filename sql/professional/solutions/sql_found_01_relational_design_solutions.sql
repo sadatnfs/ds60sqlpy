@@ -1,5 +1,5 @@
 -- SQL-FOUND-01 executable solutions
--- SOLUTION READING MAP — sql-found-01: Relational Design, DDL, and Integrity Constraints
+-- SOLUTION READING MAP for sql-found-01: Relational Design, DDL, and Integrity Constraints
 -- Explanation: sql/professional/solutions/sql_found_01_relational_design_solutions.md
 -- Run from the repository root only against advanced_sql_training:
 --   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solutions/sql_found_01_relational_design_solutions.sql

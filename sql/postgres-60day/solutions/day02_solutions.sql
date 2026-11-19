@@ -1,5 +1,5 @@
 -- Day 02 executable solutions
--- SOLUTION READING MAP — sql-02: Aggregates Groupby Having
+-- SOLUTION READING MAP for sql-02: Aggregates, GROUP BY, and HAVING
 -- Explanation: sql/postgres-60day/solutions/day02_solutions.md
 -- Run from the repository root only against advanced_sql_training:
 --   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day02_solutions.sql

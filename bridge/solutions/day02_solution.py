@@ -13,7 +13,7 @@ R = TypeVar("R")
 
 
 class Connection(Protocol):
-    """The behavior needed by the transaction context—not a concrete driver class."""
+    """The behavior needed by the transaction context, not a concrete driver class."""
 
     def commit(self) -> None: ...
 

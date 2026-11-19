@@ -11,16 +11,16 @@ the saved project selection. No host Python or PostgreSQL installation is
 required for this browser route.
 
 1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database. A simple snippet
-   such as `SELECT 1;` needs no training-schema reset.
+   the local disposable `advanced_sql_training` database.
 2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
    preserves the lesson's reviewed psql directives, relative includes and
    transaction behavior. **SQL snippet** is appropriate for ordinary SQL
    statements, but is not a replacement for an entire script's setup.
-3. When the lesson requires the course training data, use the explicit
-   preparation action and read its reset acknowledgement. It replaces the
-   course-owned `training` schema. Do not reset unrelated data or prepare
-   every lesson by habit; stateful sequences have their own ordering.
+3. The **Course database** panel above the code shows whether the course
+   training tables are loaded. Missing tables load automatically before your
+   first run (or choose **Load course tables**) and stay loaded for later
+   lessons. **Reset training data** restores the original rows only when your
+   own changes made results differ; it keeps your saved code and notes.
 4. Edit the learner copy in the classroom and save your prediction before
    running. Its whole-script workspace is
    `.learning/sql/sql-35/lesson/workspace/sql/postgres-60day/day35_avoiding_pitfalls.sql`.
@@ -86,7 +86,7 @@ row count. For a normal analytical `SELECT`, use this logical reading order:
 window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
 different physical plan while preserving those semantics.
 
-The worked walkthrough's lesson-specific task is: Compare datetrunc('day', orderdate) = targetday with orderdate >= targetday AND orderdate < targetday + interval '1 day'. Test timestamps at both boundaries, reconcile row IDs, and compare plans with a matching orderdate index.
+The worked walkthrough's lesson-specific task is: Compare `date_trunc('day', order_date) = target_day` with `order_date >= target_day AND order_date < target_day + interval '1 day'`. Test timestamps at both boundaries, reconcile row IDs, and compare plans with a matching `order_date` index.
 The first runnable example has a concrete contract: Example 1 prints a plan tree, not business rows. Run the underlying `SELECT` separately and reconcile its the primary/business key of `orders` key set and row count over `orders`; then compare node estimates, actual rows × loops, buffers, and timing without requiring one fixed plan. Its final projection is `*`. Run the underlying query without `EXPLAIN` first; preserve its keys and row count, then compare estimates with actual rows × loops and read buffer/timing evidence without requiring one fixed node type.
 
 ## Two worked SQL examples
@@ -169,9 +169,9 @@ Complete these in the [learner SQL](../day35_avoiding_pitfalls.sql):
    **Expected result/shape:** For sql-35 Exercise 5, expected output: at most 20 rows keyed by `order_id`. The final columns are `order_id`, `paid`, and `sold`. The final order is `o.order_id`.
    **Verify:** For sql-35 Exercise 5, assert no more than 20 rows, no duplicate `order_id`, and no adjacent pair that violates `o.order_id`. Rejoin the returned keys to `payments`, `order_items`, and `orders` to confirm `order_id`, `paid`, and `sold` came from the same source rows. Run with 20 minus one and 20 plus one eligible rows; require the output cap of 20 while retaining `o.order_id`.
 6. Explain `COUNT(*)` versus `COUNT(email)` with NULLs.
-   **Inputs/evidence:** For sql-35 Exercise 6, read from `customers`. Build the answer toward `customer_rows`, `customers_with_email`, and `customers_without_email`; keep `customer_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-35 Exercise 6, expected output: one row per `customer_id`. The final columns are `customer_rows`, `customers_with_email`, and `customers_without_email`.
-   **Verify:** For sql-35 Exercise 6, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_rows`, `customers_with_email`, and `customers_without_email` against `customers`. Repeat with `NULL` in `customer_rows`, and `customers_with_email` and state whether the row is kept, rejected, or classified.
+   **Inputs/evidence:** For sql-35 Exercise 6, read from `customers` and count, in one aggregate, all rows, rows with an `email`, and rows without one.
+   **Expected result/shape:** For sql-35 Exercise 6, expected output: one row with `customer_rows` 500, `customers_with_email` 500, and `customers_without_email` 0. The final columns are `customer_rows`, `customers_with_email`, and `customers_without_email`.
+   **Verify:** For sql-35 Exercise 6, confirm `customers_with_email + customers_without_email = customer_rows`; in a transaction you roll back, set one `email` to NULL and expect 500, 499, and 1, because `COUNT(email)` skips NULL while `COUNT(*)` counts every row.
 
 Add an edge-case result check before every performance comparison.
 
@@ -244,7 +244,7 @@ enough to complete the lesson offline. If you want a patient tutor, copy this
 prompt after opening the repository in the AI tutor:
 
 ```text
-Tutor me through sql-35 — Avoiding Pitfalls.
+Tutor me through sql-35: Avoiding Common Performance Pitfalls.
 
 I have completed the direct catalog prerequisite: `sql-34`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day35_avoiding_pitfalls.md
@@ -254,7 +254,7 @@ Key terms to teach in context: Sargability, Half-open range, Set-based rewrite. 
 language and explain table, row, column, result set, row grain, SQL NULL, and
 deterministic ordering where they apply. Then explain the important clauses in
 logical order and state the expected row grain/shape before asking me to run
-anything. The guide's lesson-specific worked-model focus is: Compare datetrunc('day', orderdate) = targetday with orderdate >= targetday AND orderdate < targetday + interval '1 day'. Test timestamps at both boundaries, reconcile row IDs, and compare plans with a matching orderdate index.
+anything. The guide's lesson-specific worked-model focus is: Compare `date_trunc('day', order_date) = target_day` with `order_date >= target_day AND order_date < target_day + interval '1 day'`. Test timestamps at both boundaries, reconcile row IDs, and compare plans with a matching `order_date` index.
 
 Use only the local disposable advanced_sql_training database. Prefer the
 Docker classroom's Whole SQL lesson (psql) workspace and its ignored

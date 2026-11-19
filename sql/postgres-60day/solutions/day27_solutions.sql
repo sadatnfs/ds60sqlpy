@@ -1,5 +1,5 @@
 -- Day 27 executable solutions
--- SOLUTION READING MAP — sql-27: Pivot Unpivot
+-- SOLUTION READING MAP for sql-27: Pivoting and Unpivoting
 -- Explanation: sql/postgres-60day/solutions/day27_solutions.md
 -- Run from the repository root only against advanced_sql_training:
 --   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day27_solutions.sql

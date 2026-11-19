@@ -108,10 +108,10 @@ LIMIT 36;
 --    Hint ladder, rung 1: For sql-18 Exercise 4, run `sequenced` one at a time. Record each CTE's row count and `order_id` uniqueness before the next stage uses it.
 -- 5. [Debugging] Compute month-over-month stored-revenue change after aggregating to month grain.
 --    Hint: Aggregate first; applying lag to raw orders would compare adjacent orders rather than months.
---    Inputs: For sql-18 Exercise 5, read from `orders`. Build the answer toward `month_start`, `revenue`, `previous_revenue`, and `revenue_change`; keep `month` visible whenever the result has row-level grain.
+--    Inputs: For sql-18 Exercise 5, read from `orders`, aggregate `SUM(total_amount)` to one row per UTC month in the CTE `monthly`, then apply `LAG(revenue) OVER (ORDER BY month_start)` to those monthly rows and compute `revenue_change = revenue - previous_revenue`.
 --    Expected result/shape: For sql-18 Exercise 5, expected output: One row per month with nullable first change. The final columns are `month_start`, `revenue`, `previous_revenue`, and `revenue_change`. The final order is `month_start`.
---    Verify: For sql-18 Exercise 5, reselect the returned keys directly from the source; require unique `month` where the expected grain is one row per key and confirm the projected `month_start`, `revenue`, `previous_revenue`, and `revenue_change` against `orders`. Add one source row with a new `month`; verify the result gains exactly one row carrying that `month` value.
---    Hint ladder, rung 1: For sql-18 Exercise 5, run `monthly`, and `compared` one at a time. Record each CTE's row count and `month` uniqueness before the next stage uses it.
+--    Verify: For sql-18 Exercise 5, confirm that `month_start` is unique and that the row count equals `SELECT COUNT(DISTINCT date_trunc('month', order_date AT TIME ZONE 'UTC')) FROM orders`; exactly one row, the earliest month, has NULL `previous_revenue` and `revenue_change`, and the `revenue` values add up to 2355646.89, the total of `orders.total_amount`.
+--    Hint ladder, rung 1: For sql-18 Exercise 5, run `monthly` alone and check that it has one row per month before `compared` applies `LAG`; applying `LAG` to raw orders would compare adjacent orders, not months.
 -- 6. [Extension] Compare each product price with the next higher price in its category.
 --    Hint: Use ascending price order and product ID to define adjacency; equal prices remain separate rows.
 --    Inputs: For sql-18 Exercise 6, read from `products`. Build the answer toward `product_id`, `category`, `price`, and `next_price`; keep `product_id` visible whenever the result has row-level grain.

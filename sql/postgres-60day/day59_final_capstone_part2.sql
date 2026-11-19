@@ -337,8 +337,8 @@ LIMIT 20;
 --    Hint ladder, rung 1: For sql-59 Exercise 7, run `baskets`, `totals`, `product_baskets`, and `pairs` one at a time. Record each CTE's row count and `order_item_id` uniqueness before the next stage uses it.
 -- 8. Sign-off: assemble one result set that reconciles the customer, finance,
 --    funnel, attribution, and market-basket outputs to named control totals.
---    Inputs: For sql-59 Exercise 8, read from `customers`, `orders`, `order_items`, and `payments`. Build the answer toward `control_name`, and `observed_value`; keep `customer_id` visible whenever the result has row-level grain.
---    Expected result/shape: For sql-59 Exercise 8, expected output: one row per `customer_id`. The final columns are `control_name`, and `observed_value`. The final order is `control_name`.
---    Verify: For sql-59 Exercise 8, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `control_name`, and `observed_value` against `customers`, `orders`, `order_items`, and `payments`. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
---    Hint ladder, rung 1: For sql-59 Exercise 8, check `control_name` before applying the row cap.
+--    Inputs: For sql-59 Exercise 8, build a control-total result with `UNION ALL`: one labeled row each for the customer count, the order count, the stored order revenue, the line revenue, and the payment total, with every value cast to `numeric`.
+--    Expected result/shape: For sql-59 Exercise 8, expected output: 5 rows, one per `control_name`: `customers` 500, `line_revenue` 2355647.12, `orders` 4362, `payments` 1831900.81, and `stored_order_revenue` 2355646.89. The final columns are `control_name` and `observed_value`. The final order is `control_name`.
+--    Verify: For sql-59 Exercise 8, confirm that each `observed_value` equals its standalone query, for example `SELECT ROUND(SUM(amount), 2) FROM payments` for `payments`; `stored_order_revenue` is 0.23 lower than `line_revenue` because each order stores its own line total rounded to cents, so record that gap as a known difference rather than a defect.
+--    Hint ladder, rung 1: For sql-59 Exercise 8, run each control query alone first and cast it to `numeric`, so every `UNION ALL` branch returns the same column types.
 ROLLBACK;

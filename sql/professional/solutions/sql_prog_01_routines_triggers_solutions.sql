@@ -1,5 +1,5 @@
 -- SQL-PROG-01 executable solutions
--- SOLUTION READING MAP — sql-prog-01: Functions, Procedures, and Triggers
+-- SOLUTION READING MAP for sql-prog-01: Functions, Procedures, and Triggers
 -- Explanation: sql/professional/solutions/sql_prog_01_routines_triggers_solutions.md
 -- Run from the repository root only against advanced_sql_training:
 --   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solutions/sql_prog_01_routines_triggers_solutions.sql

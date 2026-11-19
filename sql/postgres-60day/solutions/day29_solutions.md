@@ -7,13 +7,8 @@
 Open this explanation only after making an honest attempt. The executable
 companion runs solely against the disposable `advanced_sql_training` database:
 
-```powershell
-# Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f "sql\postgres-60day\solutions\day29_solutions.sql"
-```
-
 ```bash
-# macOS/Linux, from the repository root
+# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day29_solutions.sql
 ```
@@ -26,7 +21,7 @@ ordering with the explanation before comparing syntax.
 ## Clause-by-clause reading map
 
 The lesson's main concepts are Wildcard, Anchor, Sargable predicate. Its worked-model focus is:
-Compare email ~ 'customer1[0-9]{2}' with the anchored email ~ '^customer1[0-9]{2}@example\\.com$'. Add surrounding text to a test value and show why an unanchored validation can accept only a matching substring.
+Compare `email ~ 'customer1[0-9]{2}'` with the anchored `email ~ '^customer1[0-9]{2}@example[.]com$'`. Add surrounding text to a test value and show why an unanchored validation can accept only a matching substring.
 
 - Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
   before adding aggregates; a one-to-many join is allowed to multiply rows only
@@ -273,13 +268,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-29 Exercise 5, read from `customers`. Compute `customer_id`, and `name_number` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+- **Inputs/evidence:** For sql-29 Exercise 5, read from `customers`, keep only names that match the anchored pattern `^Customer [0-9]+$`, and extract the number with `substring(full_name FROM '^Customer ([0-9]+)$')::integer`.
 - **Expected result/shape:** For sql-29 Exercise 5, expected output: One row per valid course customer name. The final columns are `customer_id`, and `name_number`. The final order is `c.customer_id`.
-- **Independent verification:** For sql-29 Exercise 5, evaluate each of `name_number` in a separate control `SELECT` over `customers` using `(c.full_name ~ '^Customer [0-9]+$')`; require one final row and compare every value. Add one row for which `(c.full_name ~ '^Customer [0-9]+$')` is true and one for which it is false; verify only the matching `customer_id` value is returned.
-- **Intermediate relation check:** For sql-29 Exercise 5, inspect the source keys that survive `WHERE`; then check `c.customer_id` before applying the row cap.
-- **Clause check:** For sql-29 Exercise 5, the solution actually uses `FROM`, `WHERE`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `customers`, preserve exactly one summary row, and finish with `customer_id`, and `name_number` ordered by `c.customer_id`.
+- **Independent verification:** For sql-29 Exercise 5, confirm 500 rows, because every seeded name matches, and that `name_number` equals `customer_id` on every row; the same `substring` returns NULL for `'Customer 12a'` and 7 for `'Customer 7'`.
+- **Intermediate relation check:** For sql-29 Exercise 5, run the `WHERE full_name ~ '^Customer [0-9]+$'` filter alone and count the matches before you add the extraction.
+- **Clause check:** For sql-29 Exercise 5, the solution actually uses `FROM`, `WHERE`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `customers`, preserve one row per valid customer name, and finish with `customer_id`, and `name_number` ordered by `c.customer_id`.
 - **Alternative/trade-off:** For sql-29 Exercise 5, the chosen form is justified by this lesson-specific rationale: First assert the anchored grammar, then use `substring(... FROM regex)`. Evaluate another form against the concrete expected result (One row per valid course customer name) and the verification above.
-- **Edge case:** Add one row for which `(c.full_name ~ '^Customer [0-9]+$')` is true and one for which it is false; verify only the matching `customer_id` value is returned.
+- **Edge case:** Anchors matter: an unanchored pattern such as `'[0-9]+'` would extract 12 from the invalid name `'Customer 12a'`.
 
 ## Exercise 6: Extension
 
@@ -322,13 +317,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-29 Exercise 6, read from `customers`. Compute `customer_id`, `email`, and `email_class` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+- **Inputs/evidence:** For sql-29 Exercise 6, read from `customers` and classify each `email` with ordered `CASE` branches: `missing` for NULL, `course_example` for an address at `example.com`, `other_valid_looking` for any other `name@domain.tld`, otherwise `malformed`.
 - **Expected result/shape:** For sql-29 Exercise 6, expected output: One row per customer with one classification. The final columns are `customer_id`, `email`, and `email_class`. The final order is `c.customer_id`.
-- **Independent verification:** For sql-29 Exercise 6, evaluate each of `email`, and `email_class` in a separate control `SELECT` over `customers`; require one final row and compare every value. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
-- **Intermediate relation check:** For sql-29 Exercise 6, check `c.customer_id` before applying the row cap.
-- **Clause check:** For sql-29 Exercise 6, the solution actually uses `FROM`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `customers`, preserve exactly one summary row, and finish with `customer_id`, `email`, and `email_class` ordered by `c.customer_id`.
+- **Independent verification:** For sql-29 Exercise 6, confirm 500 rows, one per customer, all `course_example` on the seed; then run the same `CASE` on `VALUES (NULL), ('ann@example.com'), ('ann@school.org'), ('ann@examplexcom'), ('not-an-email')` and expect `missing`, `course_example`, `other_valid_looking`, `malformed`, and `malformed`.
+- **Intermediate relation check:** For sql-29 Exercise 6, test the `CASE` on the five sample values first; the `IS NULL` branch must come first and the `example[.]com` branch before the general one.
+- **Clause check:** For sql-29 Exercise 6, the solution actually uses `FROM`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `customers`, preserve one row per customer, and finish with `customer_id`, `email`, and `email_class` ordered by `c.customer_id`.
 - **Alternative/trade-off:** For sql-29 Exercise 6, the chosen form is justified by this lesson-specific rationale: Handle NULL first, then most specific anchored pattern, then a bounded general pattern. Evaluate another form against the concrete expected result (One row per customer with one classification) and the verification above.
-- **Edge case:** Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
+- **Edge case:** In a regular expression an unescaped `.` matches any character, so `example.com` would accept `examplexcom`; `[.]` matches only a literal dot.
 
 ## Final self-check
 

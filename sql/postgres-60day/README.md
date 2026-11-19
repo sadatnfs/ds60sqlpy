@@ -47,11 +47,23 @@ resets or lesson scripts at a shared or valuable database.
 
 ## Training setup and stateful projects
 
-The explicit training reset establishes the standard fixtures. It replaces
-course-owned training data and is not an everyday startup action. Most lesson
-experiments clean up or roll back according to their own script. Warehouse
-Days 52 through 54 deliberately form a stateful sequence; follow those guides
-in order rather than resetting between steps. See
+In the classroom, the **Course database** panel above each SQL lesson shows
+whether the course `training` tables are loaded. Missing tables load
+automatically before your first run (or choose **Load course tables**) and stay
+loaded for later lessons. **Reset training data** asks for confirmation and
+restores the original rows; use it only when your own changes made results
+differ. It keeps your saved code and notes.
+
+Most lesson experiments clean up or roll back according to their own script.
+Warehouse Days 52 through 54 deliberately form a stateful sequence: the
+classroom builds the `dwh` schema from sql-52 for sql-53 and sql-54, and you
+should follow those guides in order rather than resetting between steps.
+
+Outside the classroom, on an explicitly prepared local database, run
+`00_setup.sql` and then `00_verify.sql` with
+`psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f ...` as described in the
+[setup companion](companion-guides/00_setup.md). Re-running setup drops and
+recreates the course-owned `training` schema. See
 [PostgreSQL setup](../../docs/setup/postgresql.md) for the exact boundary.
 
 ## Keep your work

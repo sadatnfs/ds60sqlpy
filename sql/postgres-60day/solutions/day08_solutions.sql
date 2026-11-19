@@ -1,5 +1,5 @@
 -- Day 08 executable solutions
--- SOLUTION READING MAP — sql-08: Scalar Inline Subqueries
+-- SOLUTION READING MAP for sql-08: Scalar and Inline Subqueries
 -- Explanation: sql/postgres-60day/solutions/day08_solutions.md
 -- Run from the repository root only against advanced_sql_training:
 --   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day08_solutions.sql

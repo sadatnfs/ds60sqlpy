@@ -1,5 +1,5 @@
 -- Day 33 solutions: index optimization strategies
--- SOLUTION READING MAP — sql-33: Index Optimization Strategies
+-- SOLUTION READING MAP for sql-33: Composite, Covering, and Partial Indexes
 -- Explanation: sql/postgres-60day/solutions/day33_solutions.md
 -- Run from the repository root only against advanced_sql_training:
 --   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day33_solutions.sql

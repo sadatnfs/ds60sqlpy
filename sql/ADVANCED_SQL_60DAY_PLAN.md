@@ -15,10 +15,13 @@ and worked answers are described in the
 
 For each lesson:
 
-1. Prepare and verify the disposable course database as documented in the
-   PostgreSQL track README.
+1. In the classroom, the **Course database** panel loads the course tables
+   automatically before your first run. Outside the classroom, prepare and
+   verify the disposable course database as documented in the PostgreSQL track
+   README.
 2. Read the matching companion guide.
-3. Run the learner `.sql` file with `psql -X -v ON_ERROR_STOP=1`.
+3. Run the learner `.sql` file as a whole script: **Whole SQL lesson (psql)** in
+   the classroom, or `psql -X -v ON_ERROR_STOP=1` on a prepared database.
 4. Solve the exercises in a scratch transaction and explain the result's grain,
    assumptions, and edge cases.
 5. Compare your work with the Markdown explanation and executable solution.
@@ -58,14 +61,18 @@ PostgreSQL 17, while the curriculum is validated on PostgreSQL 16+.
   filter customers and products, create derived columns, and return
   deterministic top-N results.
 - [Day 2 - aggregates, `GROUP BY`, and `HAVING`](postgres-60day/day02_aggregates_groupby_having.sql):
-  payment totals, customer tenure, and category gross-margin summaries.
+  count customers by country, filter category revenue and status groups with
+  `HAVING`, compare `COUNT(*)` with `COUNT(email)`, and build a 12-month order
+  summary.
 - [Day 3 - inner joins](postgres-60day/day03_inner_joins.sql):
   traverse customers, orders, lines, products, payments, departments, and the
   employee hierarchy while watching join fanout.
 - [Day 4 - outer joins and NULL-aware reconciliation](postgres-60day/day04_outer_joins.sql):
   find unpaid orders, unsold products, and customers without recent orders.
 - [Day 5 - cross joins and self-joins](postgres-60day/day05_cross_self_joins.sql):
-  create category-country combinations and three-level employee hierarchies.
+  pair employees with managers, find non-managers, build a month by expense
+  category grid, list unordered same-department pairs, and walk a three-level
+  management chain.
 - [Day 6 - `UNION`, `UNION ALL`, `INTERSECT`, and `EXCEPT`](postgres-60day/day06_set_operations.sql):
   compare customer, product, promotion, and order sets with compatible result
   shapes.
@@ -103,31 +110,35 @@ PostgreSQL 17, while the curriculum is validated on PostgreSQL 16+.
 ### Window functions
 
 - [Day 16 - window fundamentals](postgres-60day/day16_window_functions_fundamentals.sql):
-  compute customer lifetime totals and product share of category revenue
-  without collapsing detail rows.
+  add customer averages, department salary ranges, and revenue shares to detail
+  rows, compare `GROUP BY` with a window's row count, and filter a window value
+  one query level out.
 - [Day 17 - `ROW_NUMBER`, `RANK`, and `DENSE_RANK`](postgres-60day/day17_rank_functions.sql):
   compare tie behavior and return top customers within country.
 - [Day 18 - `LAG` and `LEAD`](postgres-60day/day18_lag_lead.sql):
   compare dense product-month sales and find the next strictly higher
   department salary.
 - [Day 19 - running and moving aggregates](postgres-60day/day19_running_aggregates.sql):
-  build a dense daily calendar for literal 30-day revenue windows and
-  cumulative product quantities.
+  build cumulative revenue overall and per customer, a trailing seven-order
+  average, and per-category monthly expense totals, and compare `ROWS` with
+  `RANGE` when ordering values tie.
 - [Day 20 - `FIRST_VALUE` and `LAST_VALUE`](postgres-60day/day20_first_last_value.sql):
-  compare product revenue with its first observed month and study frame
-  boundaries. The employee exercise explicitly simulates history because the
-  schema has no salary-history table.
+  attach first and last order, price, and payment values within partitions,
+  show why the default frame changes `LAST_VALUE`, and compare `DISTINCT ON`
+  with `ROW_NUMBER` for the latest order per customer.
 - [Day 21 - `NTILE` and `PERCENT_RANK`](postgres-60day/day21_distribution_functions.sql):
   assign product sales deciles and rank orders within customer.
 - [Day 22 - multi-level windows](postgres-60day/day22_advanced_windows.sql):
-  rank category revenue within country and overall, then compare department and
-  company salary ranks.
+  reuse named windows, compare salaries with the rest of a department, sessionize
+  events with a 30-minute gap, and find consecutive-day order islands.
 
 ### CTE pipelines, reshaping, JSONB, XML, and text search
 
 - [Day 23 - common table expressions](postgres-60day/day23_ctes_intro.sql):
-  name monthly-revenue and Electronics-revenue stages and understand
-  PostgreSQL's CTE inlining behavior.
+  stage order-level and customer-level revenue, reuse one category CTE, reconcile
+  payments at order grain, and compare `MATERIALIZED` with `NOT MATERIALIZED`
+  (a CTE referenced once is inlined by default; one referenced more than once
+  is materialized).
 - [Day 24 - recursive CTEs](postgres-60day/day24_recursive_ctes.sql):
   enumerate every manager's direct and indirect reports with cycle-safe paths,
   then generate and sum integers 1 through 100.

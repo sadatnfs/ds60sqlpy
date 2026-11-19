@@ -1,5 +1,5 @@
 -- Day 09 executable solutions
--- SOLUTION READING MAP — sql-09: Correlated Subqueries
+-- SOLUTION READING MAP for sql-09: Correlated Subqueries and EXISTS
 -- Explanation: sql/postgres-60day/solutions/day09_solutions.md
 -- Run from the repository root only against advanced_sql_training:
 --   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day09_solutions.sql

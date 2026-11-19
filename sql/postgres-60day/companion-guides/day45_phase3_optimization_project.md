@@ -11,16 +11,16 @@ the saved project selection. No host Python or PostgreSQL installation is
 required for this browser route.
 
 1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database. A simple snippet
-   such as `SELECT 1;` needs no training-schema reset.
+   the local disposable `advanced_sql_training` database.
 2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
    preserves the lesson's reviewed psql directives, relative includes and
    transaction behavior. **SQL snippet** is appropriate for ordinary SQL
    statements, but is not a replacement for an entire script's setup.
-3. When the lesson requires the course training data, use the explicit
-   preparation action and read its reset acknowledgement. It replaces the
-   course-owned `training` schema. Do not reset unrelated data or prepare
-   every lesson by habit; stateful sequences have their own ordering.
+3. The **Course database** panel above the code shows whether the course
+   training tables are loaded. Missing tables load automatically before your
+   first run (or choose **Load course tables**) and stay loaded for later
+   lessons. **Reset training data** restores the original rows only when your
+   own changes made results differ; it keeps your saved code and notes.
 4. Edit the learner copy in the classroom and save your prediction before
    running. Its whole-script workspace is
    `.learning/sql/sql-45/lesson/workspace/sql/postgres-60day/day45_phase3_optimization_project.sql`.
@@ -165,9 +165,9 @@ Complete these in the
    **Expected result/shape:** For sql-45 Exercise 3, expected output: one row per `order_id`. The final columns are `order_id`, `customer_id`, `order_date`, `status`, and `total_amount`.
    **Verify:** For sql-45 Exercise 3, project `order_id` plus the raw source columns from `orders`, `customers`, and `order_items` at each join stage; record row count and distinct `order_id`, then assert the final `order_id`, `customer_id`, `order_date`, `status`, and `total_amount` values match those staged rows without unintended fanout or loss. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 4. Test an empty-window boundary.
-   **Inputs/evidence:** For sql-45 Exercise 4, read from `orders`. Build the answer toward `impossible_window_rows`; keep `order_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-45 Exercise 4, expected output: one row per `order_id`. The final columns are `impossible_window_rows`.
-   **Verify:** For sql-45 Exercise 4, run an anti-check that counts rows where NOT ((order_date >= timestamptz '1900-01-01 00:00:00+00' AND order_date < timestamptz '1900-01-02 00:00:00+00')); require unique `order_id` where the expected grain is one row per key and confirm the projected `impossible_window_rows` against `orders`. Insert rows immediately before, exactly at, and immediately after `order_date >= timestamptz '1900-01-01 00:00:00+00'`, and `order_date < timestamptz '1900-01-02 00:00:00+00'`; identify which rows pass each inclusive or exclusive comparison.
+   **Inputs/evidence:** For sql-45 Exercise 4, read from `orders` with a window that matches no rows, `order_date >= TIMESTAMPTZ '1900-01-01 00:00:00+00' AND order_date < TIMESTAMPTZ '1900-01-02 00:00:00+00'`, and count the matching orders.
+   **Expected result/shape:** For sql-45 Exercise 4, expected output: one row with `impossible_window_rows` 0. The final columns are `impossible_window_rows`.
+   **Verify:** For sql-45 Exercise 4, confirm the count is 0, then run a grouped form of the same filter, such as `SELECT c.country, COUNT(*) FROM orders o JOIN customers c USING (customer_id) WHERE <same window> GROUP BY c.country`, and confirm it returns no rows: an ungrouped aggregate always returns one row, while a grouped query over empty input returns none, so every rewrite of the report must keep the same shape.
 5. Design and justify one workload-specific index.
    **Inputs/evidence:** For sql-45 Exercise 5, read from `pg_indexes`. Build the answer toward `indexname`, and `indexdef`; keep `indexname` visible whenever the result has row-level grain.
    **Expected result/shape:** For sql-45 Exercise 5, expected output: one row per `indexname`. The final columns are `indexname`, and `indexdef`. The final order is `indexname`.
@@ -269,7 +269,7 @@ enough to complete the lesson offline. If you want a patient tutor, copy this
 prompt after opening the repository in the AI tutor:
 
 ```text
-Tutor me through sql-45 — Phase3 Optimization Project.
+Tutor me through sql-45: Phase 3 Project: Query Optimization.
 
 I have completed the direct catalog prerequisite: `sql-44`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day45_phase3_optimization_project.md

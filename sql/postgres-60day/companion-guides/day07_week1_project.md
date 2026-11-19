@@ -11,16 +11,16 @@ the saved project selection. No host Python or PostgreSQL installation is
 required for this browser route.
 
 1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database. A simple snippet
-   such as `SELECT 1;` needs no training-schema reset.
+   the local disposable `advanced_sql_training` database.
 2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
    preserves the lesson's reviewed psql directives, relative includes and
    transaction behavior. **SQL snippet** is appropriate for ordinary SQL
    statements, but is not a replacement for an entire script's setup.
-3. When the lesson requires the course training data, use the explicit
-   preparation action and read its reset acknowledgement. It replaces the
-   course-owned `training` schema. Do not reset unrelated data or prepare
-   every lesson by habit; stateful sequences have their own ordering.
+3. The **Course database** panel above the code shows whether the course
+   training tables are loaded. Missing tables load automatically before your
+   first run (or choose **Load course tables**) and stay loaded for later
+   lessons. **Reset training data** restores the original rows only when your
+   own changes made results differ; it keeps your saved code and notes.
 4. Edit the learner copy in the classroom and save your prediction before
    running. Its whole-script workspace is
    `.learning/sql/sql-07/lesson/workspace/sql/postgres-60day/day07_week1_project.sql`.
@@ -88,7 +88,7 @@ window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may exec
 different physical plan while preserving those semantics.
 
 The worked walkthrough's lesson-specific task is: Build the report in checkpoints: aggregate net line revenue to order/category, reduce payments to the declared order/method grain, join those stable inputs, and only then roll up country, category, and method. Reconcile revenue before adding cohort month so a new dimension cannot hide fanout.
-The expected contract is that One row per order status. Predict keys, row count, `NULL` behavior,
+Exercise 1 expects this result: one row per order status. Predict keys, row count, `NULL` behavior,
 and ordering before running. Afterwards, compare keys/counts/totals with an
 independent control. A blank string, SQL `NULL`, numeric zero, and a missing row
 are different facts; use `COALESCE` only after choosing which meaning the
@@ -250,9 +250,9 @@ For every result, write its row grain and expected shape first.
    **Verify:** For sql-07 Exercise 4, project `order_id` plus the raw source columns from `order_items`, `payments`, and `orders` at each join stage; record row count and distinct `order_id`, then assert the final `order_id`, `status`, `stored_total`, `line_total`, `storage_difference`, `paid_total`, and `unpaid_balance` values match those staged rows without unintended fanout or loss. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 5. **Prediction:** Build a monthly order trend and explain which months are absent rather than zero.
    **Progressive hint:** Grouping observed orders alone cannot create empty calendar months.
-   **Inputs/evidence:** For sql-07 Exercise 5, read from `orders`. Build the answer toward `order_month`, `order_count`, and `stored_revenue`; keep `order_id` visible whenever the result has row-level grain.
+   **Inputs/evidence:** For sql-07 Exercise 5, read from `orders`, group by `date_trunc('month', order_date)`, and return each month's `order_count` and `stored_revenue` (`SUM(total_amount)` rounded to 2 places).
    **Expected result/shape:** For sql-07 Exercise 5, expected output: One row per observed order month. The final columns are `order_month`, `order_count`, and `stored_revenue`. The final order is `order_month`.
-   **Verify:** For sql-07 Exercise 5, independently aggregate `orders` by `order_id`; require one output row for every distinct `order_id` tuple and compare `order_month`, `order_count`, and `stored_revenue` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `order_month`, `order_count`, and `stored_revenue` for the existing `order_id` tuple and verify the new tuple appears exactly once.
+   **Verify:** For sql-07 Exercise 5, confirm that `order_month` is unique, that `SUM(order_count)` equals `SELECT COUNT(*) FROM orders` (4362), and that the monthly `stored_revenue` values add up to `SELECT ROUND(SUM(total_amount), 2) FROM orders` (2355646.89).
 6. **Extension:** Create a compact one-row audit of customer, order, item, and payment coverage.
    **Progressive hint:** Use scalar subqueries for independent counts; this avoids accidental cross multiplication.
    **Inputs/evidence:** For sql-07 Exercise 6, read from `customers`, `orders`, `order_items`, and `payments`. Compute `customer_rows`, `order_rows`, `order_item_rows`, `payment_rows`, and `customers_without_orders` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
@@ -290,10 +290,10 @@ Goal
 - Extend the starter report of last-90-day revenue and buyers by country and
   category using the joins, aggregates, and set reasoning from Days 01–06.
 
-Current practice map
-- Use the six maintained prompts above as the project acceptance checklist.
-  They now cover KPI grain, product and customer coverage, fanout-safe
-  reconciliation, missing months, and a compact population audit.
+Deliverable checklist
+- Use the six prompts above as the project acceptance checklist. They cover
+  KPI grain, product and customer coverage, fanout-safe reconciliation,
+  missing months, and a compact population audit.
 
 Further extension: payment ambiguity
 - `payments` can contain multiple rows per order. Joining raw payments to raw
@@ -321,7 +321,7 @@ enough to complete the lesson offline. If you want a patient tutor, copy this
 prompt after opening the repository in the AI tutor:
 
 ```text
-Tutor me through sql-07 — Week1 Project.
+Tutor me through sql-07: Week 1 Project: From Questions to Queries.
 
 I have completed the direct catalog prerequisite: `sql-06`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day07_week1_project.md

@@ -11,16 +11,16 @@ the saved project selection. No host Python or PostgreSQL installation is
 required for this browser route.
 
 1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database. A simple snippet
-   such as `SELECT 1;` needs no training-schema reset.
+   the local disposable `advanced_sql_training` database.
 2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
    preserves the lesson's reviewed psql directives, relative includes and
    transaction behavior. **SQL snippet** is appropriate for ordinary SQL
    statements, but is not a replacement for an entire script's setup.
-3. When the lesson requires the course training data, use the explicit
-   preparation action and read its reset acknowledgement. It replaces the
-   course-owned `training` schema. Do not reset unrelated data or prepare
-   every lesson by habit; stateful sequences have their own ordering.
+3. The **Course database** panel above the code shows whether the course
+   training tables are loaded. Missing tables load automatically before your
+   first run (or choose **Load course tables**) and stay loaded for later
+   lessons. **Reset training data** restores the original rows only when your
+   own changes made results differ; it keeps your saved code and notes.
 4. Edit the learner copy in the classroom and save your prediction before
    running. Its whole-script workspace is
    `.learning/sql/sql-51/lesson/workspace/sql/postgres-60day/day51_project2_finance_part3.sql`.
@@ -226,9 +226,9 @@ Complete these in the [learner SQL](../day51_project2_finance_part3.sql):
    **Expected result/shape:** For sql-51 Exercise 2, expected output: exactly three future month rows. The count column shows how much history supports each estimate; a `NULL` projection means there was none. The final columns are `forecast_month`, `projected_net_cash`, and `matching_historical_months`. The final order is `f.forecast_month`.
    **Verify:** For sql-51 Exercise 2, independently aggregate `payments`, `expenses`, `h.month`, and `f.forecast_month` by `forecast_month`; require one output row for every distinct `forecast_month` tuple and compare `projected_net_cash`, and `matching_historical_months` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `projected_net_cash`, and `matching_historical_months` for the existing `forecast_month` tuple and verify the new tuple appears exactly once.
 3. Explain cash-basis versus order-revenue timing.
-   **Inputs/evidence:** For sql-51 Exercise 3, read from `orders`, and `payments`. Build the answer toward `month`, `booked_order_revenue`, and `cash_received`; keep `cash_received` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-51 Exercise 3, expected output: one row per `cash_received`. The final columns are `month`, `booked_order_revenue`, and `cash_received`. The final order is `month`.
-   **Verify:** For sql-51 Exercise 3, independently aggregate `orders`, and `payments` by `cash_received`; require one output row for every distinct `cash_received` tuple and compare `booked_order_revenue` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `booked_order_revenue` for the existing `cash_received` tuple and verify the new tuple appears exactly once.
+   **Inputs/evidence:** For sql-51 Exercise 3, read from `orders` and `payments`; sum `total_amount` by order month as `booked_order_revenue` and left join the payments summed by payment month as `cash_received`, using `COALESCE(..., 0)` for months without payments.
+   **Expected result/shape:** For sql-51 Exercise 3, expected output: one row per order month, ordered by `month`; `cash_received` is lower than `booked_order_revenue` in most months because unpaid orders bring no cash. The final columns are `month`, `booked_order_revenue`, and `cash_received`. The final order is `month`.
+   **Verify:** For sql-51 Exercise 3, confirm that `month` is unique and that `SUM(booked_order_revenue)` is 2355646.89; compare `SUM(cash_received)` with `SELECT SUM(amount) FROM payments` (1831900.81): they match only when every payment month also has orders, because the query starts from order months.
 4. Produce beginning cash, flows, net cash, and ending cash.
    **Inputs/evidence:** For sql-51 Exercise 4, read from `payments`, and `expenses`. Build the answer toward `month`, `beginning_cash`, `cash_in`, `cash_out`, `net_cash`, and `ending_cash`; keep `month` visible whenever the result has row-level grain.
    **Expected result/shape:** For sql-51 Exercise 4, expected output: one row per `month`. The final columns are `month`, `beginning_cash`, `cash_in`, `cash_out`, `net_cash`, and `ending_cash`. The final order is `month`.
@@ -313,7 +313,7 @@ enough to complete the lesson offline. If you want a patient tutor, copy this
 prompt after opening the repository in the AI tutor:
 
 ```text
-Tutor me through sql-51 — Project2 Finance Part3.
+Tutor me through sql-51: Finance Project, Part 3: Cash Flow.
 
 I have completed the direct catalog prerequisite: `sql-50`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day51_project2_finance_part3.md

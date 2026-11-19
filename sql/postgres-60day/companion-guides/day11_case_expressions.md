@@ -11,16 +11,16 @@ the saved project selection. No host Python or PostgreSQL installation is
 required for this browser route.
 
 1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database. A simple snippet
-   such as `SELECT 1;` needs no training-schema reset.
+   the local disposable `advanced_sql_training` database.
 2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
    preserves the lesson's reviewed psql directives, relative includes and
    transaction behavior. **SQL snippet** is appropriate for ordinary SQL
    statements, but is not a replacement for an entire script's setup.
-3. When the lesson requires the course training data, use the explicit
-   preparation action and read its reset acknowledgement. It replaces the
-   course-owned `training` schema. Do not reset unrelated data or prepare
-   every lesson by habit; stateful sequences have their own ordering.
+3. The **Course database** panel above the code shows whether the course
+   training tables are loaded. Missing tables load automatically before your
+   first run (or choose **Load course tables**) and stay loaded for later
+   lessons. **Reset training data** restores the original rows only when your
+   own changes made results differ; it keeps your saved code and notes.
 4. Edit the learner copy in the classroom and save your prediction before
    running. Its whole-script workspace is
    `.learning/sql/sql-11/lesson/workspace/sql/postgres-60day/day11_case_expressions.sql`.
@@ -86,8 +86,8 @@ row count. For a normal analytical `SELECT`, use this logical reading order:
 window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
 different physical plan while preserving those semantics.
 
-The worked walkthrough's lesson-specific task is: Take a three-tier amount classification and test values just below, exactly at, and just above each boundary. Because CASE stops at the first match, place the most specific or highest-threshold conditions before broader ones.
-The expected contract is that One row per order with exactly one size label. Predict keys, row count, `NULL` behavior,
+The worked walkthrough's lesson-specific task is: Take a three-tier amount classification and test values just below, exactly at, and just above each boundary. Because `CASE` stops at the first match, place the most specific or highest-threshold conditions before broader ones.
+Exercise 1 expects this result: one row per order with exactly one size label. Predict keys, row count, `NULL` behavior,
 and ordering before running. Afterwards, compare keys/counts/totals with an
 independent control. A blank string, SQL `NULL`, numeric zero, and a missing row
 are different facts; use `COALESCE` only after choosing which meaning the
@@ -191,9 +191,9 @@ For every result, write its row grain and expected shape first.
 
 1. **Query writing:** Classify orders as small, medium, or large by total amount.
    **Progressive hint:** Validate boundaries and place the highest threshold first.
-   **Inputs/evidence:** For sql-11 Exercise 1, read from `orders`. Compute `order_id`, `total_amount`, and `order_size` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+   **Inputs/evidence:** For sql-11 Exercise 1, read from `orders` and label every order with a searched `CASE`: `large` when `total_amount >= 500`, `medium` when it is at least 100, otherwise `small`; no `GROUP BY` is needed.
    **Expected result/shape:** For sql-11 Exercise 1, expected output: One row per order with exactly one size label. The final columns are `order_id`, `total_amount`, and `order_size`. The final order is `o.order_id`.
-   **Verify:** For sql-11 Exercise 1, evaluate each of `total_amount`, and `order_size` in a separate control `SELECT` over `orders`; require one final row and compare every value. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+   **Verify:** For sql-11 Exercise 1, confirm 4362 rows, one per `order_id`, and that counting the labels gives 2410 `large`, 1603 `medium`, and 349 `small`; then evaluate the same `CASE` on `VALUES (99.99), (100), (499.99), (500)` and expect `small`, `medium`, `medium`, and `large`.
 2. **Query writing:** Count order statuses in paid-like, open, returned, and other buckets with conditional aggregation.
    **Progressive hint:** Each `COUNT(*) FILTER` or `SUM(CASE...)` should state its denominator.
    **Inputs/evidence:** For sql-11 Exercise 2, read from `orders`. Compute `paid_like`, `open_orders`, `returned_orders`, and `all_orders` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
@@ -201,9 +201,9 @@ For every result, write its row grain and expected shape first.
    **Verify:** For sql-11 Exercise 2, evaluate each of `open_orders`, `returned_orders`, and `all_orders` in a separate control `SELECT` over `orders`; require one final row and compare every value. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 3. **Query writing:** Label missing customer segments separately from known segment values.
    **Progressive hint:** Test `IS NULL` before comparing text values.
-   **Inputs/evidence:** For sql-11 Exercise 3, read from `customers`. Compute `customer_id`, `segment`, and `segment_group` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+   **Inputs/evidence:** For sql-11 Exercise 3, read from `customers` and label each `segment` as `missing` when it is NULL, `premium` for `gold` or `platinum`, and `core` otherwise; return one row per customer.
    **Expected result/shape:** For sql-11 Exercise 3, expected output: One row per customer with an explicit segment label. The final columns are `customer_id`, `segment`, and `segment_group`. The final order is `c.customer_id`.
-   **Verify:** For sql-11 Exercise 3, evaluate each of `segment`, and `segment_group` in a separate control `SELECT` over `customers`; require one final row and compare every value. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
+   **Verify:** For sql-11 Exercise 3, confirm 500 rows, one per `customer_id`; the seed gives 250 `premium` and 250 `core` rows and no `missing` row because every seeded customer has a segment. In a transaction you roll back, set one `segment` to NULL and confirm that customer becomes `missing`, not `core`.
 4. **Prediction:** Predict the label for 500 when `>= 100` appears before `>= 500`, then repair the branch order.
    **Progressive hint:** First-match wins, so specific/high thresholds must precede broader/lower ones.
    **Inputs/evidence:** For sql-11 Exercise 4, read from the inline `VALUES` fixture. Build the answer toward `amount`, and `corrected_label`; keep `corrected_label` visible whenever the result has row-level grain.
@@ -216,13 +216,13 @@ For every result, write its row grain and expected shape first.
    **Verify:** For sql-11 Exercise 5, reselect the returned keys directly from the source; require unique `value` where the expected grain is one row per key and confirm the projected `value`, and `value_state` against the inline `VALUES` fixture. Add one source row with a new `value`; verify the result gains exactly one row carrying that `value` value.
 6. **Extension:** Create payment-method display labels and preserve unknown future methods with an explicit fallback.
    **Progressive hint:** A simple CASE fits equality mapping; `ELSE` prevents silent NULL labels.
-   **Inputs/evidence:** For sql-11 Exercise 6, read from `payments`. Compute `method`, `method_label`, and `payment_count` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+   **Inputs/evidence:** For sql-11 Exercise 6, read from `payments`, group by `method`, count payments per method, and map each method to a display label with a simple `CASE p.method WHEN ... END` that keeps an `ELSE 'Other'` fallback.
    **Expected result/shape:** For sql-11 Exercise 6, expected output: One row per payment method and display label. The final columns are `method`, `method_label`, and `payment_count`. The final order is `p.method`.
-   **Verify:** For sql-11 Exercise 6, evaluate each of `payment_count` in a separate control `SELECT` over `payments`; require one final row and compare every value. Add one row to an existing group and one row for a new group; recompute `payment_count` for the existing `method` tuple and verify the new tuple appears exactly once.
+   **Verify:** For sql-11 Exercise 6, confirm 4 rows (`bank` 886, `card` 860, `credit` 1050, `paypal` 1040) whose counts add up to `SELECT COUNT(*) FROM payments` (3836); then evaluate the same `CASE` on `VALUES ('crypto')` and confirm it returns `Other`, not NULL.
 
 ## Common mistakes and how to recover
 
-- **Lesson-specific semantic mistake:** Overlapping broad conditions placed first make later branches unreachable; an omitted ELSE produces NULL.
+- **Lesson-specific semantic mistake:** Overlapping broad conditions placed first make later branches unreachable; an omitted `ELSE` produces NULL.
 - **Unexpected row count:** display keys before aggregates, count rows after
   each join/filter stage, and find the first stage whose grain differs from the
   contract. Do not hide fanout with `DISTINCT`.
@@ -266,14 +266,8 @@ Pitfalls
 - Overlapping conditions in searched CASE; first match wins. Order matters.
 - Returning mixed types; ensure consistent result types across branches.
 
-Current practice map
-- The authoritative six prompts, progressive hints, and expected shapes
-  are maintained in **Exercises** above. They map
-  one-for-one to both solution companions; older short exercise lists
-  were removed to prevent prompt drift.
-
 Further reading
-- CASE: https://www.postgresql.org/docs/current/functions-conditional.html
+- CASE: https://www.postgresql.org/docs/17/functions-conditional.html
 
 ## Ask an AI tutor about this lesson
 
@@ -282,7 +276,7 @@ enough to complete the lesson offline. If you want a patient tutor, copy this
 prompt after opening the repository in the AI tutor:
 
 ```text
-Tutor me through sql-11 — Case Expressions.
+Tutor me through sql-11: CASE Expressions and Conditional Logic.
 
 I have completed the direct catalog prerequisite: `sql-10`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day11_case_expressions.md
@@ -292,7 +286,7 @@ Key terms to teach in context: Searched CASE, Simple CASE, Short-circuit orderin
 language and explain table, row, column, result set, row grain, SQL NULL, and
 deterministic ordering where they apply. Then explain the important clauses in
 logical order and state the expected row grain/shape before asking me to run
-anything. The guide's lesson-specific worked-model focus is: Take a three-tier amount classification and test values just below, exactly at, and just above each boundary. Because CASE stops at the first match, place the most specific or highest-threshold conditions before broader ones.
+anything. The guide's lesson-specific worked-model focus is: Take a three-tier amount classification and test values just below, exactly at, and just above each boundary. Because `CASE` stops at the first match, place the most specific or highest-threshold conditions before broader ones.
 
 Use only the local disposable advanced_sql_training database. Prefer the
 Docker classroom's Whole SQL lesson (psql) workspace and its ignored

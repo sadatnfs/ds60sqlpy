@@ -77,10 +77,10 @@ GROUP BY
 --    Hint ladder, rung 1: For sql-34 Exercise 2, start with the first relation in `orders`, `customers`, and `top_orders`; after each join, record total rows and distinct `order_id` so the exact fanout or loss is visible.
 -- 3. Prediction: compare a MATERIALIZED CTE with NOT MATERIALIZED for a recent
 --    orders query. Predict which version permits more planner reordering.
---    Inputs: For sql-34 Exercise 3, run the underlying read-only query over `orders`, `recent`, and `customers` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
---    Expected result/shape: For sql-34 Exercise 3, expected output: one row per `order_id`. The final columns are `materialized`.
---    Verify: For sql-34 Exercise 3, run the underlying query without `EXPLAIN` and preserve its `order_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
---    Hint ladder, rung 1: For sql-34 Exercise 3, start with the first relation in `orders`, `recent`, and `customers`; after each join, record total rows and distinct `order_id` so the exact fanout or loss is visible.
+--    Inputs: For sql-34 Exercise 3, run `EXPLAIN` on the same recent-orders count twice, once with `WITH recent AS MATERIALIZED (...)` and once with `AS NOT MATERIALIZED`, where `recent` keeps orders from the last 30 days and is joined to `customers`.
+--    Expected result/shape: For sql-34 Exercise 3, expected output: two plans. The `MATERIALIZED` plan computes `CTE recent` separately and reads it through a `CTE Scan on recent`; the `NOT MATERIALIZED` plan folds the date filter into a `Seq Scan on orders` under the join. Both queries return the same count.
+--    Verify: For sql-34 Exercise 3, run both queries without `EXPLAIN` and confirm that they return the same `count`; then confirm that only the `MATERIALIZED` plan contains a `CTE recent` node, and treat the estimated costs as plan evidence, not as a universal speed ranking.
+--    Hint ladder, rung 1: For sql-34 Exercise 3, run the CTE's `SELECT` alone and count its rows before you compare the two plans.
 -- 4. Construction: pre-aggregate order_items to one row per order before
 --    joining orders and customers; verify that totals match the direct join.
 --    Inputs: For sql-34 Exercise 4, read from `order_items`, `orders`, and `customers`. Build the answer toward `country`, and `units`; keep `country` visible whenever the result has row-level grain.

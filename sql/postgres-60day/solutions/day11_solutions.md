@@ -7,13 +7,8 @@
 Open this explanation only after making an honest attempt. The executable
 companion runs solely against the disposable `advanced_sql_training` database:
 
-```powershell
-# Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f "sql\postgres-60day\solutions\day11_solutions.sql"
-```
-
 ```bash
-# macOS/Linux, from the repository root
+# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day11_solutions.sql
 ```
@@ -26,7 +21,7 @@ ordering with the explanation before comparing syntax.
 ## Clause-by-clause reading map
 
 The lesson's main concepts are Searched CASE, Simple CASE, Short-circuit ordering. Its worked-model focus is:
-Take a three-tier amount classification and test values just below, exactly at, and just above each boundary. Because CASE stops at the first match, place the most specific or highest-threshold conditions before broader ones.
+Take a three-tier amount classification and test values just below, exactly at, and just above each boundary. Because `CASE` stops at the first match, place the most specific or highest-threshold conditions before broader ones.
 
 - Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
   before adding aggregates; a one-to-many join is allowed to multiply rows only
@@ -106,13 +101,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-11 Exercise 1, read from `orders`. Compute `order_id`, `total_amount`, and `order_size` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+- **Inputs/evidence:** For sql-11 Exercise 1, read from `orders` and label every order with a searched `CASE`: `large` when `total_amount >= 500`, `medium` when it is at least 100, otherwise `small`; no `GROUP BY` is needed.
 - **Expected result/shape:** For sql-11 Exercise 1, expected output: One row per order with exactly one size label. The final columns are `order_id`, `total_amount`, and `order_size`. The final order is `o.order_id`.
-- **Independent verification:** For sql-11 Exercise 1, evaluate each of `total_amount`, and `order_size` in a separate control `SELECT` over `orders`; require one final row and compare every value. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
-- **Intermediate relation check:** For sql-11 Exercise 1, check `o.order_id` before applying the row cap.
-- **Clause check:** For sql-11 Exercise 1, the solution actually uses `FROM`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve exactly one summary row, and finish with `order_id`, `total_amount`, and `order_size` ordered by `o.order_id`.
+- **Independent verification:** For sql-11 Exercise 1, confirm 4362 rows, one per `order_id`, and that counting the labels gives 2410 `large`, 1603 `medium`, and 349 `small`; then evaluate the same `CASE` on `VALUES (99.99), (100), (499.99), (500)` and expect `small`, `medium`, `medium`, and `large`.
+- **Intermediate relation check:** For sql-11 Exercise 1, test the `CASE` on the four boundary values first; the highest threshold must come first because the first true branch wins.
+- **Clause check:** For sql-11 Exercise 1, the solution actually uses `FROM`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per order, and finish with `order_id`, `total_amount`, and `order_size` ordered by `o.order_id`.
 - **Alternative/trade-off:** For sql-11 Exercise 1, the chosen form is justified by this lesson-specific rationale: Validate boundaries and place the highest threshold first. Evaluate another form against the concrete expected result (One row per order with exactly one size label) and the verification above.
-- **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+- **Edge case:** If `total_amount` were NULL, every comparison would be unknown and `ELSE` would label the order `small`; a nullable measure needs its own `IS NULL` branch.
 
 ## Exercise 2: Query writing
 
@@ -190,13 +185,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-11 Exercise 3, read from `customers`. Compute `customer_id`, `segment`, and `segment_group` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+- **Inputs/evidence:** For sql-11 Exercise 3, read from `customers` and label each `segment` as `missing` when it is NULL, `premium` for `gold` or `platinum`, and `core` otherwise; return one row per customer.
 - **Expected result/shape:** For sql-11 Exercise 3, expected output: One row per customer with an explicit segment label. The final columns are `customer_id`, `segment`, and `segment_group`. The final order is `c.customer_id`.
-- **Independent verification:** For sql-11 Exercise 3, evaluate each of `segment`, and `segment_group` in a separate control `SELECT` over `customers`; require one final row and compare every value. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
-- **Intermediate relation check:** For sql-11 Exercise 3, check `c.customer_id` before applying the row cap.
-- **Clause check:** For sql-11 Exercise 3, the solution actually uses `FROM`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `customers`, preserve exactly one summary row, and finish with `customer_id`, `segment`, and `segment_group` ordered by `c.customer_id`.
+- **Independent verification:** For sql-11 Exercise 3, confirm 500 rows, one per `customer_id`; the seed gives 250 `premium` and 250 `core` rows and no `missing` row because every seeded customer has a segment. In a transaction you roll back, set one `segment` to NULL and confirm that customer becomes `missing`, not `core`.
+- **Intermediate relation check:** For sql-11 Exercise 3, put the `IS NULL` branch first; `segment IN ('gold', 'platinum')` is unknown for NULL, so without that branch a NULL segment falls through to `ELSE`.
+- **Clause check:** For sql-11 Exercise 3, the solution actually uses `FROM`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `customers`, preserve one row per customer, and finish with `customer_id`, `segment`, and `segment_group` ordered by `c.customer_id`.
 - **Alternative/trade-off:** For sql-11 Exercise 3, the chosen form is justified by this lesson-specific rationale: Test `IS NULL` before comparing text values. Evaluate another form against the concrete expected result (One row per customer with an explicit segment label) and the verification above.
-- **Edge case:** Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
+- **Edge case:** Comparing NULL with `=` or `IN` yields unknown, never true, so only `IS NULL` detects a missing segment.
 
 ## Exercise 4: Prediction
 
@@ -340,13 +335,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-11 Exercise 6, read from `payments`. Compute `method`, `method_label`, and `payment_count` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
+- **Inputs/evidence:** For sql-11 Exercise 6, read from `payments`, group by `method`, count payments per method, and map each method to a display label with a simple `CASE p.method WHEN ... END` that keeps an `ELSE 'Other'` fallback.
 - **Expected result/shape:** For sql-11 Exercise 6, expected output: One row per payment method and display label. The final columns are `method`, `method_label`, and `payment_count`. The final order is `p.method`.
-- **Independent verification:** For sql-11 Exercise 6, evaluate each of `payment_count` in a separate control `SELECT` over `payments`; require one final row and compare every value. Add one row to an existing group and one row for a new group; recompute `payment_count` for the existing `method` tuple and verify the new tuple appears exactly once.
-- **Intermediate relation check:** For sql-11 Exercise 6, confirm the groups are `method`; then check `p.method` before applying the row cap.
+- **Independent verification:** For sql-11 Exercise 6, confirm 4 rows (`bank` 886, `card` 860, `credit` 1050, `paypal` 1040) whose counts add up to `SELECT COUNT(*) FROM payments` (3836); then evaluate the same `CASE` on `VALUES ('crypto')` and confirm it returns `Other`, not NULL.
+- **Intermediate relation check:** For sql-11 Exercise 6, group by `method` and count first; add the label `CASE` only after the counts add up to 3836.
 - **Clause check:** For sql-11 Exercise 6, the solution actually uses `FROM`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `payments`, preserve one row per `method`, and finish with `method`, `method_label`, and `payment_count` ordered by `p.method`.
 - **Alternative/trade-off:** For sql-11 Exercise 6, the chosen form is justified by this lesson-specific rationale: A simple CASE fits equality mapping; `ELSE` prevents silent NULL labels. Evaluate another form against the concrete expected result (One row per payment method and display label) and the verification above.
-- **Edge case:** Add one row to an existing group and one row for a new group; recompute `payment_count` for the existing `method` tuple and verify the new tuple appears exactly once.
+- **Edge case:** The `CHECK` constraint on `payments.method` blocks unknown methods today, but the `ELSE 'Other'` branch keeps the report readable if that constraint ever changes.
 
 ## Final self-check
 

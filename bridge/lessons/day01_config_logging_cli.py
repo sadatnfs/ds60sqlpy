@@ -109,13 +109,14 @@ def build_parser() -> argparse.ArgumentParser:
 #    Verify: Capture startup, success, and validation-failure logs with password/query
 #    sentinels; assert every sentinel and the full URL are absent and the safe host/database
 #    label remains.
-# 10. [Portability] Write equivalent Windows PowerShell and POSIX invocations that set
-#    environment values outside Python and pass CLI overrides through `argv`; identify what
-#    remains platform-neutral.
-#    Hint: Environment-setting syntax differs, but `argparse`, `Mapping`, and the Python entry
-#    point do not.
-#    Verify: Record one PowerShell `$env:DS60_LOG_LEVEL=...` run and one POSIX `export ...` run;
-#    assert the same `Settings` values result when identical CLI overrides are supplied.
+# 10. [Portability] Write two Bash invocations that set the same environment values outside
+#    Python, one with a session-wide `export` and one with a single-command `NAME=value`
+#    prefix, and pass identical CLI overrides through `argv`; identify what stays the same.
+#    Hint: The shell decides how long a variable lives, but `argparse`, `Mapping`, and the
+#    Python entry point do not change.
+#    Verify: Record one `export DS60_LOG_LEVEL=...` run and one `DS60_LOG_LEVEL=... python ...`
+#    run; assert the same `Settings` values result with identical CLI overrides, and that a
+#    fresh shell prints `unset` for `echo "${DS60_LOG_LEVEL-unset}"` after the prefix form.
 
 
 def main(argv: Sequence[str] | None = None) -> int:

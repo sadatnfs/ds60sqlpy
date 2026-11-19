@@ -11,16 +11,16 @@ the saved project selection. No host Python or PostgreSQL installation is
 required for this browser route.
 
 1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database. A simple snippet
-   such as `SELECT 1;` needs no training-schema reset.
+   the local disposable `advanced_sql_training` database.
 2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
    preserves the lesson's reviewed psql directives, relative includes and
    transaction behavior. **SQL snippet** is appropriate for ordinary SQL
    statements, but is not a replacement for an entire script's setup.
-3. When the lesson requires the course training data, use the explicit
-   preparation action and read its reset acknowledgement. It replaces the
-   course-owned `training` schema. Do not reset unrelated data or prepare
-   every lesson by habit; stateful sequences have their own ordering.
+3. The **Course database** panel above the code shows whether the course
+   training tables are loaded. Missing tables load automatically before your
+   first run (or choose **Load course tables**) and stay loaded for later
+   lessons. **Reset training data** restores the original rows only when your
+   own changes made results differ; it keeps your saved code and notes.
 4. Edit the learner copy in the classroom and save your prediction before
    running. Its whole-script workspace is
    `.learning/sql/sql-sec-01/lesson/workspace/sql/professional/lessons/sql_sec_01_roles_privileges_rls.sql`.
@@ -72,14 +72,30 @@ authorize a reset.
   [SQL-FOUND-02; migrations](sql_found_02_versioned_migrations.md), SQL Day 38
   transactions, [SQL Day 39 locks and deadlocks](../../postgres-60day/companion-guides/day39_locks_deadlocks.md),
   and the disposable `advanced_sql_training` database.
-- **Optional capability:** hands-on role tests require the connected PostgreSQL
-  role to have `CREATEROLE` or superuser status. The default script checks first
-  and safely skips without creating anything when that capability is absent.
+- **Optional capability:** the role lab acts as separate NOLOGIN roles. The
+  script uses prepared course roles when the connected login may `SET ROLE` to
+  them, creates disposable roles inside its transaction when the login has
+  `CREATEROLE` or superuser status, and otherwise safely skips the role lab.
+- **What the classroom runs:** the classroom login `admin` deliberately has
+  neither `CREATEROLE` nor superuser status. Instead, `./classroom` prepares
+  six plain NOLOGIN roles (`ds60_sec_owner`, `ds60_sec_other_owner`,
+  `ds60_sec_north`, `ds60_sec_south`, `ds60_sec_auditor` and
+  `ds60_sec_writer`) each time it starts, and grants `admin` only the right to
+  `SET ROLE` to them. So the full role lab runs: privilege inspection, north and
+  south tenant isolation, an expected row-policy denial, an expected `DELETE`
+  privilege denial, and owner bypass compared with `FORCE ROW LEVEL SECURITY`.
+  The lab schema and its policies are rolled back; the six roles remain and
+  own nothing. Every exercise can use the same roles, including the auditor,
+  writer and second owner. If the roles are missing (for example, a database
+  started without `./classroom`), the script prints `SAFE SKIP` and runs a
+  role-free demonstration instead: a temporary table with `ENABLE` plus
+  `FORCE ROW LEVEL SECURITY` and a policy keyed by the session setting
+  `app.tenant`. Restart with `./classroom` and rerun to get the full lab.
 - **Artifacts:** [learner SQL](../lessons/sql_sec_01_roles_privileges_rls.sql) ·
   [solution reasoning](../solutions/sql_sec_01_roles_privileges_rls_solutions.md) ·
   [executable solution](../solutions/sql_sec_01_roles_privileges_rls_solutions.sql)
 
-This command is portable across Windows PowerShell, macOS, and Linux:
+The same command works on Linux, macOS, and Windows through WSL 2:
 
 ```text
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_sec_01_roles_privileges_rls.sql
@@ -104,7 +120,7 @@ row count. For a normal analytical `SELECT`, use this logical reading order:
 window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
 different physical plan while preserving those semantics.
 
-The worked walkthrough's lesson-specific task is: The script first queries pgroles and stores a Boolean for a psql \if. Restricted installations print a safe skip and current capability summary. No attempted CREATE ROLE is used as feature detection, so an expected denial does not leave a failed transaction or noisy partial setup.
+The worked walkthrough's lesson-specific task is: The script first queries `pg_roles` and stores a Boolean for a `psql` `\if`. Restricted installations print a safe skip and current capability summary. No attempted `CREATE ROLE` is used as feature detection, so an expected denial does not leave a failed transaction or noisy partial setup.
 The first runnable example has a concrete contract: Example 1 returns one row per `rolcreaterole` with columns `rolcreaterole` from `pg_catalog.pg_roles`. Compare the key set and row count with a simpler control over the same filter/window; inspect `NULL` versus zero/absent-row meaning and verify the final ordering/tie-breaker when present. Its final projection is `rolcreaterole`. Reselect the returned key columns from `pg_catalog.pg_roles`, reject duplicate keys when the grain is one row per entity, and check the stated row cap and sort direction only when this example includes them.
 
 ## Two worked SQL examples
@@ -350,7 +366,7 @@ enough to complete the lesson offline. If you want a patient tutor, copy this
 prompt after opening the repository in the AI tutor:
 
 ```text
-Tutor me through sql-sec-01 — Schemas, Roles, Privileges, and Row-Level Security.
+Tutor me through sql-sec-01: Schemas, Roles, Privileges, and Row-Level Security.
 
 I have completed the direct catalog prerequisites: `sql-found-02`, `sql-39`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/professional/companion-guides/sql_sec_01_roles_privileges_rls.md
@@ -360,7 +376,7 @@ Key terms to teach in context: Role, Owner, Privilege, Least privilege, Schema U
 language and explain table, row, column, result set, row grain, SQL NULL, and
 deterministic ordering where they apply. Then explain the important clauses in
 logical order and state the expected row grain/shape before asking me to run
-anything. The guide's lesson-specific worked-model focus is: The script first queries pgroles and stores a Boolean for a psql \if. Restricted installations print a safe skip and current capability summary. No attempted CREATE ROLE is used as feature detection, so an expected denial does not leave a failed transaction or noisy partial setup.
+anything. The guide's lesson-specific worked-model focus is: The script first queries `pg_roles` and stores a Boolean for a `psql` `\if`. Restricted installations print a safe skip and current capability summary. No attempted `CREATE ROLE` is used as feature detection, so an expected denial does not leave a failed transaction or noisy partial setup.
 
 Use only the local disposable advanced_sql_training database. Prefer the
 Docker classroom's Whole SQL lesson (psql) workspace and its ignored

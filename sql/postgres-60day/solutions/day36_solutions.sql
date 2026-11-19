@@ -1,5 +1,5 @@
 -- Day 36 solutions: materialized views
--- SOLUTION READING MAP — sql-36: Materialized Views
+-- SOLUTION READING MAP for sql-36: Materialized Views and Caching
 -- Explanation: sql/postgres-60day/solutions/day36_solutions.md
 -- Run from the repository root only against advanced_sql_training:
 --   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day36_solutions.sql

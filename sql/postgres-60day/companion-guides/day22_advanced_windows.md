@@ -11,16 +11,16 @@ the saved project selection. No host Python or PostgreSQL installation is
 required for this browser route.
 
 1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database. A simple snippet
-   such as `SELECT 1;` needs no training-schema reset.
+   the local disposable `advanced_sql_training` database.
 2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
    preserves the lesson's reviewed psql directives, relative includes and
    transaction behavior. **SQL snippet** is appropriate for ordinary SQL
    statements, but is not a replacement for an entire script's setup.
-3. When the lesson requires the course training data, use the explicit
-   preparation action and read its reset acknowledgement. It replaces the
-   course-owned `training` schema. Do not reset unrelated data or prepare
-   every lesson by habit; stateful sequences have their own ordering.
+3. The **Course database** panel above the code shows whether the course
+   training tables are loaded. Missing tables load automatically before your
+   first run (or choose **Load course tables**) and stay loaded for later
+   lessons. **Reset training data** restores the original rows only when your
+   own changes made results differ; it keeps your saved code and notes.
 4. Edit the learner copy in the classroom and save your prediction before
    running. Its whole-script workspace is
    `.learning/sql/sql-22/lesson/workspace/sql/postgres-60day/day22_advanced_windows.sql`.
@@ -86,8 +86,8 @@ row count. For a normal analytical `SELECT`, use this logical reading order:
 window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
 different physical plan while preserving those semantics.
 
-The worked walkthrough's lesson-specific task is: Aggregate revenue to (country, category) first. Rank categories within each country from that relation, then calculate a separate category-total relation for the overall rank. Joining those stable grains avoids incorrectly ranking every country/category pair as though it were one global category.
-The expected contract is that One row per order. Predict keys, row count, `NULL` behavior,
+The worked walkthrough's lesson-specific task is: Aggregate revenue to `(country, category)` first. Rank categories within each country from that relation, then calculate a separate category-total relation for the overall rank. Joining those stable grains avoids incorrectly ranking every country/category pair as though it were one global category.
+Exercise 1 expects this result: one row per order. Predict keys, row count, `NULL` behavior,
 and ordering before running. Afterwards, compare keys/counts/totals with an
 independent control. A blank string, SQL `NULL`, numeric zero, and a missing row
 are different facts; use `COALESCE` only after choosing which meaning the
@@ -215,9 +215,9 @@ For every result, write its row grain and expected shape first.
    **Verify:** For sql-22 Exercise 4, choose one complete partition from `events`; hand-calculate its first, middle, and final window values for `event_time`, then verify output keys remain `event_id`. Use a one-row partition and a partition tied on `customer_id`; verify `event_id` and `customer_id, event_time, event_id` preserve the intended first/last row.
 5. **Debugging:** Find consecutive calendar-day islands in customer order dates without nesting windows.
    **Progressive hint:** Deduplicate dates, use row number to derive a stable grouping key, then aggregate islands.
-   **Inputs/evidence:** For sql-22 Exercise 5, read from `orders`. Build the answer toward `customer_id`, `island_start`, `island_end`, and `days_in_island`; keep `customer_id`, and `island_key` visible whenever the result has row-level grain.
+   **Inputs/evidence:** For sql-22 Exercise 5, read from `orders`, reduce them to distinct (`customer_id`, UTC order day) pairs, number each customer's days with `ROW_NUMBER()`, and group by `order_day - day_number` to find runs of consecutive days.
    **Expected result/shape:** For sql-22 Exercise 5, expected output: One row per customer/date island. The final columns are `customer_id`, `island_start`, `island_end`, and `days_in_island`. The final order is `customer_id, island_start`.
-   **Verify:** For sql-22 Exercise 5, independently aggregate `orders` by `customer_id`, and `island_key`; require one output row for every distinct `customer_id`, and `island_key` tuple and compare `island_start`, `island_end`, and `days_in_island` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `island_start`, `island_end`, and `days_in_island` for the existing `customer_id`, and `island_key` tuple and verify the new tuple appears exactly once.
+   **Verify:** For sql-22 Exercise 5, confirm that `SUM(days_in_island)` equals the number of distinct customer order days, `SELECT COUNT(*) FROM (SELECT DISTINCT customer_id, (order_date AT TIME ZONE 'UTC')::date FROM orders) d`; on the seed almost every island is one day long because a customer's orders are usually more than a day apart, so also run the same CTEs on `VALUES (1, DATE '2025-01-01'), (1, DATE '2025-01-02'), (1, DATE '2025-01-04')` and expect two islands of 2 and 1 days.
 6. **Extension:** Summarize sessions from the sessionized event stream with start, end, event count, and duration.
    **Progressive hint:** Aggregate only after session IDs exist at event grain.
    **Inputs/evidence:** For sql-22 Exercise 6, read from `events`. Build the answer toward `customer_id`, `session_number`, `session_start`, `session_end`, `event_count`, and `session_duration`; keep `customer_id`, and `session_number` visible whenever the result has row-level grain.
@@ -273,15 +273,9 @@ Pitfalls
 - Window after GROUP BY changes row cardinality; ensure you window the intended grain.
 - Excessive repeated specs without WINDOW harms readability.
 
-Current practice map
-- The authoritative six prompts, progressive hints, and expected shapes
-  are maintained in **Exercises** above. They map
-  one-for-one to both solution companions; older short exercise lists
-  were removed to prevent prompt drift.
-
 Further reading
-- WINDOW clause: https://www.postgresql.org/docs/current/sql-select.html#SQL-WINDOW
-- Exclusion: https://www.postgresql.org/docs/current/sql-expressions.html#SYNTAX-WINDOW-FUNCTIONS
+- WINDOW clause: https://www.postgresql.org/docs/17/sql-select.html#SQL-WINDOW
+- Exclusion: https://www.postgresql.org/docs/17/sql-expressions.html#SYNTAX-WINDOW-FUNCTIONS
 
 ## Ask an AI tutor about this lesson
 
@@ -290,7 +284,7 @@ enough to complete the lesson offline. If you want a patient tutor, copy this
 prompt after opening the repository in the AI tutor:
 
 ```text
-Tutor me through sql-22 — Advanced Windows.
+Tutor me through sql-22: Advanced Windows: Named Windows, Multiple Partitions, and Exclusions.
 
 I have completed the direct catalog prerequisite: `sql-21`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day22_advanced_windows.md
@@ -300,7 +294,7 @@ Key terms to teach in context: Named window, Peer exclusion, Mixed grain. First 
 language and explain table, row, column, result set, row grain, SQL NULL, and
 deterministic ordering where they apply. Then explain the important clauses in
 logical order and state the expected row grain/shape before asking me to run
-anything. The guide's lesson-specific worked-model focus is: Aggregate revenue to (country, category) first. Rank categories within each country from that relation, then calculate a separate category-total relation for the overall rank. Joining those stable grains avoids incorrectly ranking every country/category pair as though it were one global category.
+anything. The guide's lesson-specific worked-model focus is: Aggregate revenue to `(country, category)` first. Rank categories within each country from that relation, then calculate a separate category-total relation for the overall rank. Joining those stable grains avoids incorrectly ranking every country/category pair as though it were one global category.
 
 Use only the local disposable advanced_sql_training database. Prefer the
 Docker classroom's Whole SQL lesson (psql) workspace and its ignored

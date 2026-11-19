@@ -1,5 +1,5 @@
 -- Day 20 executable solutions
--- SOLUTION READING MAP — sql-20: First Last Value
+-- SOLUTION READING MAP for sql-20: FIRST_VALUE, LAST_VALUE, and Window Frames
 -- Explanation: sql/postgres-60day/solutions/day20_solutions.md
 -- Run from the repository root only against advanced_sql_training:
 --   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day20_solutions.sql

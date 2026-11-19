@@ -11,16 +11,16 @@ the saved project selection. No host Python or PostgreSQL installation is
 required for this browser route.
 
 1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database. A simple snippet
-   such as `SELECT 1;` needs no training-schema reset.
+   the local disposable `advanced_sql_training` database.
 2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
    preserves the lesson's reviewed psql directives, relative includes and
    transaction behavior. **SQL snippet** is appropriate for ordinary SQL
    statements, but is not a replacement for an entire script's setup.
-3. When the lesson requires the course training data, use the explicit
-   preparation action and read its reset acknowledgement. It replaces the
-   course-owned `training` schema. Do not reset unrelated data or prepare
-   every lesson by habit; stateful sequences have their own ordering.
+3. The **Course database** panel above the code shows whether the course
+   training tables are loaded. Missing tables load automatically before your
+   first run (or choose **Load course tables**) and stay loaded for later
+   lessons. **Reset training data** restores the original rows only when your
+   own changes made results differ; it keeps your saved code and notes.
 4. Edit the learner copy in the classroom and save your prediction before
    running. Its whole-script workspace is
    `.learning/sql/sql-21/lesson/workspace/sql/postgres-60day/day21_distribution_functions.sql`.
@@ -86,8 +86,8 @@ row count. For a normal analytical `SELECT`, use this logical reading order:
 window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
 different physical plan while preserving those semantics.
 
-The worked walkthrough's lesson-specific task is: Apply NTILE(4), PERCENTRANK, and CUMEDIST to a five-row VALUES set containing a tie. Observe that buckets need not have equal value ranges and that peer-aware distribution functions treat equal ordering values together.
-The expected contract is that One row per ordering customer with bucket 1–4. Predict keys, row count, `NULL` behavior,
+The worked walkthrough's lesson-specific task is: Apply `NTILE(4)`, `PERCENT_RANK`, and `CUME_DIST` to a five-row `VALUES` set containing a tie. Observe that buckets need not have equal value ranges and that peer-aware distribution functions treat equal ordering values together.
+Exercise 1 expects this result: one row per ordering customer with bucket 1 to 4. Predict keys, row count, `NULL` behavior,
 and ordering before running. Afterwards, compare keys/counts/totals with an
 independent control. A blank string, SQL `NULL`, numeric zero, and a missing row
 are different facts; use `COALESCE` only after choosing which meaning the
@@ -234,7 +234,7 @@ For every result, write its row grain and expected shape first.
 
 ## Common mistakes and how to recover
 
-- **Lesson-specific semantic mistake:** A percentile rank is not a probability or causal score, and NTILE(10) does not guarantee equal value ranges.
+- **Lesson-specific semantic mistake:** A percentile rank is not a probability or causal score, and `NTILE(10)` does not guarantee equal value ranges.
 - **Unexpected row count:** display keys before aggregates, count rows after
   each join/filter stage, and find the first stage whose grain differs from the
   contract. Do not hide fanout with `DISTINCT`.
@@ -281,14 +281,8 @@ Pitfalls
 - Non-unique ORDER BY yields arbitrary rankings among ties; define tie policy.
 - NTILE with small partitions creates imbalanced tiles; consider minimum partition size.
 
-Current practice map
-- The authoritative six prompts, progressive hints, and expected shapes
-  are maintained in **Exercises** above. They map
-  one-for-one to both solution companions; older short exercise lists
-  were removed to prevent prompt drift.
-
 Further reading
-- Distribution: https://www.postgresql.org/docs/current/functions-window.html#FUNCTIONS-WINDOW
+- Distribution: https://www.postgresql.org/docs/17/functions-window.html#FUNCTIONS-WINDOW
 
 ## Ask an AI tutor about this lesson
 
@@ -297,7 +291,7 @@ enough to complete the lesson offline. If you want a patient tutor, copy this
 prompt after opening the repository in the AI tutor:
 
 ```text
-Tutor me through sql-21 — Distribution Functions.
+Tutor me through sql-21: Distribution Functions: NTILE, PERCENT_RANK, and CUME_DIST.
 
 I have completed the direct catalog prerequisite: `sql-20`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day21_distribution_functions.md
@@ -307,7 +301,7 @@ Key terms to teach in context: Quantile bucket, Percent rank, Cumulative distrib
 language and explain table, row, column, result set, row grain, SQL NULL, and
 deterministic ordering where they apply. Then explain the important clauses in
 logical order and state the expected row grain/shape before asking me to run
-anything. The guide's lesson-specific worked-model focus is: Apply NTILE(4), PERCENTRANK, and CUMEDIST to a five-row VALUES set containing a tie. Observe that buckets need not have equal value ranges and that peer-aware distribution functions treat equal ordering values together.
+anything. The guide's lesson-specific worked-model focus is: Apply `NTILE(4)`, `PERCENT_RANK`, and `CUME_DIST` to a five-row `VALUES` set containing a tie. Observe that buckets need not have equal value ranges and that peer-aware distribution functions treat equal ordering values together.
 
 Use only the local disposable advanced_sql_training database. Prefer the
 Docker classroom's Whole SQL lesson (psql) workspace and its ignored

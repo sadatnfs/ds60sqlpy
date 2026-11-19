@@ -7,13 +7,8 @@
 Open this explanation only after making an honest attempt. The executable
 companion runs solely against the disposable `advanced_sql_training` database:
 
-```powershell
-# Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f "sql\postgres-60day\solutions\day33_solutions.sql"
-```
-
 ```bash
-# macOS/Linux, from the repository root
+# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day33_solutions.sql
 ```
@@ -26,7 +21,7 @@ ordering with the explanation before comparing syntax.
 ## Clause-by-clause reading map
 
 The lesson's main concepts are Leftmost prefix, Included column, Partial index. Its worked-model focus is:
-For a query filtering customerid and a date range, compare (customerid, orderdate) with the reversed key order. Then check whether the query predicate logically implies a partial-index predicate; mere overlap is not enough for PostgreSQL to use that index safely.
+For a query filtering `customer_id` and a date range, compare `(customer_id, order_date)` with the reversed key order. Then check whether the query predicate logically implies a partial-index predicate; mere overlap is not enough for PostgreSQL to use that index safely.
 
 - Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
   before adding aggregates; a one-to-many join is allowed to multiply rows only
@@ -212,10 +207,10 @@ write/storage cost, not on syntax alone.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-33 Exercise 6, run the underlying read-only query over `customers`, `idx_customers_null_segment_solution`, and `customers.segment` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
-- **Expected result/shape:** For sql-33 Exercise 6, expected output: one row per `customer_id`. The final columns are `all_customers`, and `null_segments`.
-- **Independent verification:** For sql-33 Exercise 6, run the underlying query without `EXPLAIN` and preserve its `customer_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
-- **Intermediate relation check:** For sql-33 Exercise 6, run the underlying query without `EXPLAIN` and preserve its `customer_id` rows.
-- **Clause check:** For sql-33 Exercise 6, the solution actually uses `FROM`, `WHERE`, aggregate `FILTER`, and `SELECT`. Read only those operations: begin at `customers`, `idx_customers_null_segment_solution`, and `customers.segment`, preserve one row per `customer_id`, and finish with `all_customers`, and `null_segments`.
+- **Inputs/evidence:** For sql-33 Exercise 6, count all customers and those with `segment IS NULL`, create the partial index `idx_customers_null_segment_solution ON customers (customer_id) WHERE segment IS NULL`, and read the plan of `SELECT customer_id FROM customers WHERE segment IS NULL`.
+- **Expected result/shape:** For sql-33 Exercise 6, expected output: one row with `all_customers` 500 and `null_segments` 0, then a plan for the `IS NULL` query that can use the partial index (a `Bitmap Index Scan on idx_customers_null_segment_solution` on the course data). The final columns of the count are `all_customers` and `null_segments`.
+- **Independent verification:** For sql-33 Exercise 6, confirm that the `IS NULL` query returns 0 rows, matching `null_segments`, whatever plan it uses; then confirm that `SELECT indexdef FROM pg_indexes WHERE indexname = 'idx_customers_null_segment_solution'` ends with `WHERE (segment IS NULL)`, because only a query whose `WHERE` implies that predicate can use the index.
+- **Intermediate relation check:** For sql-33 Exercise 6, run the count first; a partial index on `segment IS NULL` stores only those rows, so an empty count means an empty index.
+- **Clause check:** For sql-33 Exercise 6, the solution counts `customers` with `COUNT(*)` and `COUNT(*) FILTER (WHERE segment IS NULL)`, creates the partial index `ON customers (customer_id) WHERE segment IS NULL`, and runs `EXPLAIN` on a query whose `WHERE segment IS NULL` matches the index predicate.
 - **Alternative/trade-off:** For sql-33 Exercise 6, the chosen form is justified by this lesson-specific rationale: The answer first measures NULL prevalence, then builds a NULL-only index. Evaluate another form against the concrete expected result (one row per `customer_id`) and the verification above.
-- **Edge case:** Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+- **Edge case:** B-tree indexes also store NULLs, so a full index on `segment` can serve `IS NULL` too; the partial index is smaller because it keeps only the NULL rows.

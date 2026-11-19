@@ -7,13 +7,8 @@
 Open this explanation only after making an honest attempt. The executable
 companion runs solely against the disposable `advanced_sql_training` database:
 
-```powershell
-# Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f "sql\postgres-60day\solutions\day43_solutions.sql"
-```
-
 ```bash
-# macOS/Linux, from the repository root
+# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day43_solutions.sql
 ```
@@ -26,7 +21,7 @@ ordering with the explanation before comparing syntax.
 ## Clause-by-clause reading map
 
 The lesson's main concepts are Logical backup, Staging table, Idempotent merge. Its worked-model focus is:
-Use \copy (SELECT ... WHERE ...) TO ... from a path owned by the learner, import into a staging table, and compare count, keys, types, and sample rows. Only then merge inside BEGIN/ROLLBACK with an explicit email conflict policy.
+Use `\copy (SELECT ... WHERE ...) TO ...` from a path owned by the learner, import into a staging table, and compare count, keys, types, and sample rows. Only then merge inside `BEGIN`/`ROLLBACK` with an explicit email conflict policy.
 
 - Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
   before adding aggregates; a one-to-many join is allowed to multiply rows only
@@ -66,9 +61,10 @@ In interactive `psql`, `\copy` writes on the client machine:
 \copy (SELECT * FROM training.customers WHERE country = 'US' ORDER BY customer_id) TO 'customers_us.csv' WITH (FORMAT csv, HEADER true)
 ```
 
-Replace that filename with a path the learner owns. Path syntax, directory
-creation, and write permission are environment-specific on Windows, macOS, and
-Linux; the repository cannot choose or create that destination safely.
+Replace that filename with a path the learner owns and run the command in a psql
+terminal; the classroom's browser modes do not run an added `\copy`. Path
+syntax, directory creation, and write permission depend on the machine that runs
+psql, so the repository cannot choose or create that destination safely.
 
 The executable solution uses SQL-standard server output instead:
 
@@ -122,13 +118,13 @@ table and run `\copy customers_restore_stage FROM ...`.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-43 Exercise 1, read from `training.customers`. Build the answer toward `staged_rows`, and `customers_restore_stage`; keep `customer_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-43 Exercise 1, expected output: CSV rows are streamed to the client, and `staged_rows` equals the number of US customers. A real import would create an explicit staging table and run `\copy customers_restore_stage FROM. The final columns are `staged_rows`, and `customers_restore_stage`.
-- **Independent verification:** For sql-43 Exercise 1, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `staged_rows`, and `customers_restore_stage` against `training.customers`. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
-- **Intermediate relation check:** For sql-43 Exercise 1, inspect the source keys that survive `WHERE`.
-- **Clause check:** For sql-43 Exercise 1, the solution actually uses `WITH`, `FROM`, `WHERE`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `training.customers`, preserve one row per `customer_id`, and finish with `staged_rows`, and `customers_restore_stage`.
-- **Alternative/trade-off:** For sql-43 Exercise 1, the chosen form is justified by this lesson-specific rationale: In interactive `psql`, `\copy` writes on the client machine: Replace that filename with a path the learner owns. Evaluate another form against the concrete expected result (CSV rows are streamed to the client, and `staged_rows` equals the number of US customers. A real import would create an explicit staging table and run `\copy customers_restore_stage FROM) and the verification above.
-- **Edge case:** Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
+- **Inputs/evidence:** For sql-43 Exercise 1, export the US subset of `training.customers` with `COPY (SELECT customer_id, full_name, email, country, created_at, segment, attributes FROM customers WHERE country = 'US' ORDER BY customer_id) TO STDOUT WITH (FORMAT csv, HEADER true)`, then model the later `\copy ... FROM` import by creating the temporary table `customers_restore_stage` from the same rows.
+- **Expected result/shape:** For sql-43 Exercise 1, expected output: one CSV header line and 63 data lines streamed to the client, ordered by `customer_id`, then `SELECT 63` for the staging table.
+- **Independent verification:** For sql-43 Exercise 1, confirm that `SELECT COUNT(*) FROM training.customers WHERE country = 'US'` and `SELECT COUNT(*) FROM customers_restore_stage` both return 63; then confirm that `COPY customers TO STDOUT WHERE country = 'US'` fails with SQLSTATE `42601` (`WHERE clause not allowed with COPY TO`), because only the query form can filter an export.
+- **Intermediate relation check:** For sql-43 Exercise 1, run the inner `SELECT ... WHERE country = 'US'` alone and confirm 63 rows before wrapping it in `COPY`.
+- **Clause check:** For sql-43 Exercise 1, the solution uses `COPY (SELECT ... WHERE country = 'US' ORDER BY customer_id) TO STDOUT WITH (FORMAT csv, HEADER true)` and `CREATE TEMP TABLE customers_restore_stage AS SELECT ...`.
+- **Alternative/trade-off:** For sql-43 Exercise 1, `pg_dump --table=training.customers` exports a whole table with its definition, but it cannot select a row subset; a filtered `COPY` exports data only.
+- **Edge case:** The `attributes` JSONB column is quoted in CSV because it contains commas and double quotes; a CSV reader must honour that quoting to import it again.
 
 ## Exercise 2: Idempotent restore with conflict handling
 
@@ -183,13 +179,13 @@ data unchanged.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-43 Exercise 2, use `customers`, and `customers_restore_stage` in a disposable restore target. Record artifact identity, PostgreSQL/tool versions, command exit status, start/end time, and the requested recovery point.
-- **Expected result/shape:** For sql-43 Exercise 2, expected output: a restore manifest, object/count reconciliation, recovery-point evidence, smoke-test result, and cleanup record. The final columns are `full_name`, `email`, `country`, `created_at`, `segment`, and `attributes`.
-- **Independent verification:** For sql-43 Exercise 2, restore into an isolated target and reconcile `customers`, and `customers_restore_stage` using schema inventory, object/row counts, key samples, critical aggregates/checksums, application smoke tests, and an explicit cleanup result. Inject one missing or invalid artifact in the disposable target and prove validation stops before cutover.
-- **Intermediate relation check:** For sql-43 Exercise 2, restore into an isolated target and reconcile `customers`, and `customers_restore_stage` using schema inventory, object/row counts, key samples, critical aggregates/checksums, application smoke tests, and an explicit cleanup result.
-- **Clause check:** For sql-43 Exercise 2, the solution actually uses `FROM`, `WHERE`, and `SELECT`. Read only those operations: begin at `customers`, and `customers_restore_stage`, preserve one row per `country`, and `segment`, and finish with `full_name`, `email`, `country`, `created_at`, `segment`, and `attributes`.
-- **Alternative/trade-off:** For sql-43 Exercise 2, the chosen form is justified by this lesson-specific rationale: Email is the current schema's unique business key for this exercise. Evaluate another form against the concrete expected result (a restore manifest, object/count reconciliation, recovery-point evidence, smoke-test result, and cleanup record) and the verification above.
-- **Edge case:** Inject one missing or invalid artifact in the disposable target and prove validation stops before cutover.
+- **Inputs/evidence:** For sql-43 Exercise 2, mark one staged row as changed (`full_name || ' [restored]'` for `customer1@example.com`), then load `customers_restore_stage` into `customers` with `INSERT ... SELECT ... ON CONFLICT (email) DO UPDATE` inside the lesson transaction.
+- **Expected result/shape:** For sql-43 Exercise 2, expected output: `UPDATE 1` for the staged change, then `INSERT 0 63`, because all 63 staged emails already exist and each conflicting row is updated; the `staged_rows` check returns 63, and `customers` still has 500 rows.
+- **Independent verification:** For sql-43 Exercise 2, confirm that `SELECT full_name FROM customers WHERE email = 'customer1@example.com'` returns `Customer 1 [restored]` and `SELECT COUNT(*) FROM customers` returns 500 inside the transaction; rerun the same upsert and confirm that the row count and values do not change, which is the idempotency evidence.
+- **Intermediate relation check:** For sql-43 Exercise 2, `SELECT COUNT(*) FROM customers_restore_stage s JOIN customers c USING (email)` returns 63 before the load, which predicts that every staged row will update rather than insert.
+- **Clause check:** For sql-43 Exercise 2, the solution uses one `UPDATE customers_restore_stage ...` and one `INSERT INTO customers (...) SELECT ... FROM customers_restore_stage ON CONFLICT (email) DO UPDATE SET ... = EXCLUDED....`.
+- **Alternative/trade-off:** For sql-43 Exercise 2, `MERGE INTO customers USING customers_restore_stage ON ... WHEN MATCHED THEN UPDATE WHEN NOT MATCHED THEN INSERT` expresses the same restore and can also handle deletions, but it does not use `ON CONFLICT`'s arbiter index.
+- **Edge case:** A staged row whose email is NULL never conflicts, because NULLs are distinct for a `UNIQUE` constraint, so it is inserted as a new customer; filter or reject NULL keys before loading.
 
 ## Reasoning, safety, and pitfalls
 
@@ -210,13 +206,13 @@ workflow.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-43 Exercise 3, complete the explain server-side copy versus client-side copy written analysis and support its claims with read-only evidence from `customers`, `customers_stg`, and `customers_restore_stage`. Mark unverified assumptions explicitly.
-- **Expected result/shape:** For sql-43 Exercise 3, expected output: a completed the explain server-side copy versus client-side copy written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `copy`.
-- **Independent verification:** For sql-43 Exercise 3, check the explain server-side copy versus client-side copy written analysis against `copy`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
-- **Intermediate relation check:** For sql-43 Exercise 3, check the explain server-side copy versus client-side copy written analysis against `copy`.
-- **Clause check:** For sql-43 Exercise 3, the solution actually uses `FROM`. Read only those operations: begin at `customers`, `customers_stg`, and `customers_restore_stage`, preserve one row per `customer_id`, and finish with `copy`.
-- **Alternative/trade-off:** For sql-43 Exercise 3, the chosen form is justified by this lesson-specific rationale: Server-side `COPY` accesses the database server's filesystem. Evaluate another form against the concrete expected result (a completed the explain server-side copy versus client-side copy written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields) and the verification above.
-- **Edge case:** Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+- **Inputs/evidence:** For sql-43 Exercise 3, compare server-side `COPY customers TO '/var/lib/postgresql/customers.csv'` with psql's `\copy customers TO 'customers.csv'`, using the course role's privileges and the classroom layout as evidence.
+- **Expected result/shape:** For sql-43 Exercise 3, expected output: a short written answer: `COPY ... TO 'file'` runs in the database server process and writes on the server's file system, which needs superuser or `pg_write_server_files`; `\copy` streams the rows to the `psql` client, which writes the file. In the classroom, `psql` runs in a Linux container, so `\copy` writes into the learning volume, not onto your desktop.
+- **Independent verification:** For sql-43 Exercise 3, run the server-side `COPY customers TO '/var/lib/postgresql/customers.csv'` as the course role and confirm that it fails with SQLSTATE `42501` (`permission denied to COPY to a file`), while `COPY (SELECT 1) TO STDOUT` succeeds, because any role may copy to the client stream.
+- **Intermediate relation check:** For sql-43 Exercise 3, `SELECT pg_has_role(current_user, 'pg_write_server_files', 'MEMBER')` returns `false` for the course role, which predicts the permission error.
+- **Clause check:** For sql-43 Exercise 3, the evidence is the same `COPY` statement aimed at a server path and at `STDOUT`; the answer itself is written prose.
+- **Alternative/trade-off:** For sql-43 Exercise 3, granting `pg_write_server_files` would let the server write files, but it gives a role access to the server's file system; `\copy` keeps the file on the client side without that privilege.
+- **Edge case:** `\copy` paths are resolved on the machine that runs `psql`, so the same path can work in one terminal and fail in another; the classroom's browser modes do not run an added `\copy` at all.
 
 ## Exercise 4: Build a manifest
 
@@ -225,13 +221,13 @@ automation should also hash the exported file outside SQL.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-43 Exercise 4, read from `customers`. Build the answer toward `table_name`, `row_count`, `min_key`, `max_key`, and `observed_at`; keep `customer_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-43 Exercise 4, expected output: one row per `customer_id`. The final columns are `table_name`, `row_count`, `min_key`, `max_key`, and `observed_at`.
-- **Independent verification:** For sql-43 Exercise 4, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `table_name`, `row_count`, `min_key`, `max_key`, and `observed_at` against `customers`. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
-- **Intermediate relation check:** For sql-43 Exercise 4, select `customer_id` from `customers` before adding derived columns.
-- **Clause check:** For sql-43 Exercise 4, the solution actually uses `FROM`, and `SELECT`. Read only those operations: begin at `customers`, preserve one row per `customer_id`, and finish with `table_name`, `row_count`, `min_key`, `max_key`, and `observed_at`.
-- **Alternative/trade-off:** For sql-43 Exercise 4, the chosen form is justified by this lesson-specific rationale: The manifest records table, count, key range, and observation time. Evaluate another form against the concrete expected result (one row per `customer_id`) and the verification above.
-- **Edge case:** Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
+- **Inputs/evidence:** For sql-43 Exercise 4, summarize `customers` in one manifest row: `'training.customers' AS table_name`, `COUNT(*) AS row_count`, `MIN(customer_id) AS min_key`, `MAX(customer_id) AS max_key`, and `clock_timestamp() AS observed_at`.
+- **Expected result/shape:** For sql-43 Exercise 4, expected output: exactly one row with columns `table_name`, `row_count`, `min_key`, `max_key`, and `observed_at`: `('training.customers', 500, 1, 500, <timestamp>)` on the course seed.
+- **Independent verification:** For sql-43 Exercise 4, rerun the manifest and confirm that every column except `observed_at` is identical; then compare `row_count` with the number of data lines in an exported CSV of the same table (500).
+- **Intermediate relation check:** For sql-43 Exercise 4, `SELECT COUNT(DISTINCT customer_id) FROM customers` also returns 500, so `min_key` and `max_key` bound a gap-free key range on this seed.
+- **Clause check:** For sql-43 Exercise 4, the solution uses one aggregate `SELECT` with `COUNT(*)`, `MIN(customer_id)`, `MAX(customer_id)`, and `clock_timestamp()`, and no `GROUP BY`.
+- **Alternative/trade-off:** For sql-43 Exercise 4, adding `md5(string_agg(customer_id::text, ',' ORDER BY customer_id))` gives a content fingerprint of the key set, which detects swapped keys that the minimum and maximum cannot.
+- **Edge case:** `clock_timestamp()` changes between calls even inside one transaction; use `now()` when the manifest must record the transaction's start time instead.
 
 ## Exercise 5: Deduplicate deterministically
 
@@ -240,13 +236,13 @@ tie-break policy. Upsert never receives arbitrary duplicate winners.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-43 Exercise 5, read from `customers_restore_stage`. Build the answer toward `full_name`, `email`, and `country`; keep `country` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-43 Exercise 5, expected output: one row per `country`. The final columns are `full_name`, `email`, and `country`. The final order is `email`.
-- **Independent verification:** For sql-43 Exercise 5, run an anti-check that counts rows where NOT ((winner_rank = 1)); require unique `country` where the expected grain is one row per key and confirm the projected `full_name`, `email`, and `country` against `customers_restore_stage`. Add duplicate source candidates for `country`; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.
-- **Intermediate relation check:** For sql-43 Exercise 5, run `staged_duplicates` one at a time. Record each CTE's row count and `country` uniqueness before the next stage uses it.
-- **Clause check:** For sql-43 Exercise 5, the solution actually uses `WITH`, `FROM`, `WHERE`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `customers_restore_stage`, preserve one row per `country`, and finish with `full_name`, `email`, and `country` ordered by `email`.
-- **Alternative/trade-off:** For sql-43 Exercise 5, the chosen form is justified by this lesson-specific rationale: `ROW_NUMBER` partitions by normalized email and orders by an explicit newest/ tie-break policy. Evaluate another form against the concrete expected result (one row per `country`) and the verification above.
-- **Edge case:** Add duplicate source candidates for `country`; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.
+- **Inputs/evidence:** For sql-43 Exercise 5, rank `customers_restore_stage` rows with `ROW_NUMBER() OVER (PARTITION BY lower(trim(email)) ORDER BY created_at DESC, full_name, email)` and keep `winner_rank = 1`.
+- **Expected result/shape:** For sql-43 Exercise 5, expected output: one row per normalized email with columns `full_name`, `email`, and `country`, ordered by `email`; the course stage has no duplicates, so all 63 rows survive.
+- **Independent verification:** For sql-43 Exercise 5, add a second staged row for `customer1@example.com` with an older `created_at` and confirm that the result still has 63 rows and keeps the newer row; without this step, the Exercise 2 upsert fails with SQLSTATE `21000` (`ON CONFLICT DO UPDATE command cannot affect row a second time`).
+- **Intermediate relation check:** For sql-43 Exercise 5, `SELECT lower(trim(email)), COUNT(*) FROM customers_restore_stage GROUP BY 1 HAVING COUNT(*) > 1` lists the duplicate keys before ranking; it is empty on the course stage.
+- **Clause check:** For sql-43 Exercise 5, the solution uses a `staged_duplicates` CTE with `ROW_NUMBER() OVER (PARTITION BY lower(trim(email)) ORDER BY created_at DESC, full_name, email)`, an outer `WHERE winner_rank = 1`, and `ORDER BY email`.
+- **Alternative/trade-off:** For sql-43 Exercise 5, `SELECT DISTINCT ON (lower(trim(email))) ... ORDER BY lower(trim(email)), created_at DESC, full_name, email` keeps the same winners in PostgreSQL-specific syntax.
+- **Edge case:** The `email` sort order follows the database collation (`en_US.utf8`), so `customer105@example.com` sorts before `customer17@example.com`; add `COLLATE "C"` when byte order matters.
 
 ## Exercise 6: Compare NULL safely
 
@@ -255,10 +251,10 @@ therefore reports real source/restore differences without UNKNOWN results.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-43 Exercise 6, use `customers_restore_stage`, `customers`, `c.country`, and `c.segment` in a disposable restore target. Record artifact identity, PostgreSQL/tool versions, command exit status, start/end time, and the requested recovery point.
-- **Expected result/shape:** For sql-43 Exercise 6, expected output: a restore manifest, object/count reconciliation, recovery-point evidence, smoke-test result, and cleanup record. The final columns are `email`, `staged_name`, and `restored_name`. The final order is `s.email`.
-- **Independent verification:** For sql-43 Exercise 6, restore into an isolated target and reconcile `customers_restore_stage`, `customers`, `c.country`, and `c.segment` using schema inventory, object/row counts, key samples, critical aggregates/checksums, application smoke tests, and an explicit cleanup result. Inject one missing or invalid artifact in the disposable target and prove validation stops before cutover.
-- **Intermediate relation check:** For sql-43 Exercise 6, start with the first relation in `customers_restore_stage`, `customers`, `c.country`, and `c.segment`; after each join, record total rows and distinct `customer_id` so the exact fanout or loss is visible.
-- **Clause check:** For sql-43 Exercise 6, the solution actually uses `FROM`, `JOIN ... ON`, `WHERE`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `customers_restore_stage`, `customers`, `c.country`, and `c.segment`, preserve one row per `customer_id`, and finish with `email`, `staged_name`, and `restored_name` ordered by `s.email`.
-- **Alternative/trade-off:** For sql-43 Exercise 6, the chosen form is justified by this lesson-specific rationale: `IS DISTINCT FROM` treats two NULLs as equal and one NULL as different. Evaluate another form against the concrete expected result (a restore manifest, object/count reconciliation, recovery-point evidence, smoke-test result, and cleanup record) and the verification above.
-- **Edge case:** Inject one missing or invalid artifact in the disposable target and prove validation stops before cutover.
+- **Inputs/evidence:** For sql-43 Exercise 6, join `customers_restore_stage` to `customers` by `email` and keep rows where `full_name`, `country`, or `segment` differ according to `IS DISTINCT FROM`.
+- **Expected result/shape:** For sql-43 Exercise 6, expected output: zero rows with columns `email`, `staged_name`, and `restored_name`, ordered by `s.email`, because the Exercise 2 upsert copied every staged value into `customers`.
+- **Independent verification:** For sql-43 Exercise 6, after a savepoint, run `UPDATE customers SET segment = NULL WHERE email = 'customer9@example.com'`, rerun the comparison, and confirm that exactly one row appears; the same check written with `<>` returns no row, because a comparison with NULL is unknown.
+- **Intermediate relation check:** For sql-43 Exercise 6, the join alone returns 63 rows, one per staged email; the `WHERE` clause then keeps only the rows with a real difference.
+- **Clause check:** For sql-43 Exercise 6, the solution uses `FROM customers_restore_stage s JOIN customers c USING (email)`, a `WHERE` with three `IS DISTINCT FROM` comparisons joined by `OR`, and `ORDER BY s.email`.
+- **Alternative/trade-off:** For sql-43 Exercise 6, `(SELECT full_name, email, country, segment FROM customers_restore_stage) EXCEPT (SELECT full_name, email, country, segment FROM customers)` also treats NULLs as equal, but it reports only the staged side of each difference.
+- **Edge case:** A staged email that is missing from `customers` disappears from this inner join; reconcile missing keys separately with a `LEFT JOIN ... WHERE c.email IS NULL`.

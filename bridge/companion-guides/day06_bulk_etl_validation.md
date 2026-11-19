@@ -28,14 +28,8 @@ Start at the repository root. The answer-free starter is deliberately safe to
 run: it prints orientation text and does not call unfinished functions or
 contact PostgreSQL.
 
-```powershell
-# Windows PowerShell
-.\.venv\Scripts\python.exe bridge\lessons\day06_bulk_etl_validation.py
-.\.venv\Scripts\python.exe -m pytest bridge\tests -q
-```
-
 ```bash
-# macOS/Linux
+# Linux, macOS, or Windows through WSL 2
 .venv/bin/python bridge/lessons/day06_bulk_etl_validation.py
 .venv/bin/python -m pytest bridge/tests -q
 ```
@@ -76,10 +70,12 @@ raw_amount = "12.345"
 amount = Decimal(raw_amount)
 if not amount.is_finite() or amount <= 0:
     raise RowValidationError("amount must be finite and positive")
-normalized = amount.quantize(Decimal("0.01"))
+normalized = amount.quantize(Decimal("0.01"), rounding=ROUND_HALF_EVEN)
 ```
 
-This creates a declared rounding policy and rejects `NaN` or infinity. Binary
+This creates a declared rounding policy and rejects `NaN` or infinity. Under
+`ROUND_HALF_EVEN`, `"12.345"` becomes `Decimal("12.34")` because the kept digit,
+4, is even; `ROUND_HALF_UP` would give `12.35`. Binary
 `float` is a poor money boundary because values such as `0.1` are not exact.
 
 Decide separately:
@@ -88,6 +84,31 @@ Decide separately:
 - **batch policy:** how many validated rows are submitted together?
 - **load semantics:** insert-only, upsert, or reject duplicates?
 - **transaction policy:** all rows, one batch, or another recovery unit?
+
+### The real driver: COPY with typed rows
+
+Psycopg's `cursor.copy()` streams rows through PostgreSQL's `COPY` protocol.
+`write_row()` takes a Python tuple and adapts each value itself, so tabs,
+newlines and `None` never need hand-built escaping. Since Psycopg 3.1,
+`executemany()` also batches its statements in pipeline mode, but `COPY` still
+moves large volumes faster. Exercise 7 asks you to design the staging, validation
+and merge steps around this call.
+
+```python
+import os
+
+import psycopg
+
+with psycopg.connect(os.environ["DS60_DATABASE_URL"]) as conn:
+    conn.execute("CREATE TEMP TABLE copy_demo (id int, label text)")
+    with conn.cursor() as cur:
+        with cur.copy("COPY copy_demo (id, label) FROM STDIN") as copy:
+            copy.write_row((1, "tab\there"))
+            copy.write_row((2, None))
+        print(cur.rowcount)  # 2
+    print(conn.execute("SELECT id, label FROM copy_demo ORDER BY id").fetchall())
+    # [(1, 'tab\there'), (2, None)]
+```
 
 
 <!-- BEGIN BRIDGE ENRICHMENT: DEEP DIVE -->
@@ -237,13 +258,14 @@ Load a tiny valid batch twice, verify the stable final row count, and explicitly
 roll back. The reference SQL uses `pg_temp.bridge_sales`, which cannot resolve
 to a persistent production table.
 
-```powershell
-$env:DS60_DATABASE_URL = "postgresql://USER:PASSWORD@localhost:5432/advanced_sql_training"
+```bash
+export DS60_DATABASE_URL="postgresql://admin@127.0.0.1:PORT/advanced_sql_training"
 ```
 
-```bash
-export DS60_DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/advanced_sql_training"
-```
+Replace `PORT` with the forwarded PostgreSQL port that `./classroom status`
+reports (55432 by default). Keep the password out of the URL: supply it
+through a private libpq password file as the
+[JupySQL setup guide](../../docs/setup/jupyter-postgresql.md) shows.
 
 ## Self-check
 
@@ -274,7 +296,7 @@ prompt below deliberately names exact paths so a new AI tutoring session can ori
 itself without guessing.
 
 ```text
-Tutor me through stable lesson ID bridge-06: Bulk ETL Validation.
+Tutor me through stable lesson ID bridge-06: Bulk ETL and Data Validation.
 Direct catalog prerequisites: bridge-05. Assume I completed exactly those
 prerequisites, then begin with one short Retrieval question that connects each
 prerequisite to this lesson.
@@ -287,12 +309,12 @@ Do not open, quote, summarize, or copy anything under solutions/ until I
 explicitly say I have finished my attempt and ask to compare.
 
 Use these coaching phases in order:
-1. Predict — ask what I expect before I run or change code.
-2. Attempt — let me implement or explain one numbered exercise at a time.
-3. Hint — give the smallest useful conceptual hint, never a finished answer.
-4. Evidence — ask for the exact return value, exception type, recorded calls,
+1. Predict: ask what I expect before I run or change code.
+2. Attempt: let me implement or explain one numbered exercise at a time.
+3. Hint: give the smallest useful conceptual hint, never a finished answer.
+4. Evidence: ask for the exact return value, exception type, recorded calls,
    query plus bound parameters, or written decision required by that exercise.
-5. Retrieval — close with two no-notes questions and one transfer problem.
+5. Retrieval: close with two no-notes questions and one transfer problem.
 
 Keep the default path offline and fake-first. If the lesson has an optional
 PostgreSQL step, require my explicit opt-in, DS60_DATABASE_URL, and the

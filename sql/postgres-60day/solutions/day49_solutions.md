@@ -7,13 +7,8 @@
 Open this explanation only after making an honest attempt. The executable
 companion runs solely against the disposable `advanced_sql_training` database:
 
-```powershell
-# Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f "sql\postgres-60day\solutions\day49_solutions.sql"
-```
-
 ```bash
-# macOS/Linux, from the repository root
+# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day49_solutions.sql
 ```
@@ -26,7 +21,7 @@ ordering with the explanation before comparing syntax.
 ## Clause-by-clause reading map
 
 The lesson's main concepts are Backtest, Target leakage, MAPE. Its worked-model focus is:
-At complete monthly grain, compute MA(6) with a frame ending at 1 PRECEDING, place it beside actual revenue, and score only months with a forecast and nonzero actual. Compare seasonal naive on that same scoring set and retain the number of evaluated months.
+At complete monthly grain, compute MA(6) with a frame ending at `1 PRECEDING`, place it beside actual revenue, and score only months with a forecast and nonzero actual. Compare seasonal naive on that same scoring set and retain the number of evaluated months.
 
 - Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
   before adding aggregates; a one-to-many join is allowed to multiply rows only
@@ -254,13 +249,13 @@ both scored and excluded observations. Never publish MAPE without that context.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-49 Exercise 5, read from `toy`. Build the answer toward `mape`, `scored_rows`, and `excluded_zero_actuals`; keep `mape` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-49 Exercise 5, expected output: one row per `mape`. The final columns are `mape`, `scored_rows`, and `excluded_zero_actuals`.
-- **Independent verification:** For sql-49 Exercise 5, reselect the returned keys directly from the source; require unique `mape` where the expected grain is one row per key and confirm the projected `mape`, `scored_rows`, and `excluded_zero_actuals` against `toy`. Add one source row with a new `mape`; verify the result gains exactly one row carrying that `mape` value.
-- **Intermediate relation check:** For sql-49 Exercise 5, inspect the source keys that survive `WHERE`.
-- **Clause check:** For sql-49 Exercise 5, the solution actually uses `WITH`, `FROM`, `WHERE`, aggregate `FILTER`, and `SELECT`. Read only those operations: begin at `toy`, preserve one row per `mape`, and finish with `mape`, `scored_rows`, and `excluded_zero_actuals`.
+- **Inputs/evidence:** For sql-49 Exercise 5, use the `toy` `VALUES` fixture `(100, 90), (0, 10), (50, 60)` of `actual` and `forecast` and compute MAPE as `AVG(ABS(actual - forecast) / NULLIF(actual, 0))`, counting scored rows and excluded zero actuals.
+- **Expected result/shape:** For sql-49 Exercise 5, expected output: one row with `mape` 0.1500, `scored_rows` 2, and `excluded_zero_actuals` 1. The final columns are `mape`, `scored_rows`, and `excluded_zero_actuals`.
+- **Independent verification:** For sql-49 Exercise 5, confirm by hand that the two scored errors are 10/100 = 0.10 and 10/50 = 0.20, whose mean is 0.15, and that the zero-actual row adds nothing because `NULLIF(actual, 0)` makes its ratio NULL, which `AVG` skips.
+- **Intermediate relation check:** For sql-49 Exercise 5, compute each row's ratio `ABS(actual - forecast) / NULLIF(actual, 0)` in a plain `SELECT` before you average it.
+- **Clause check:** For sql-49 Exercise 5, the solution actually uses `WITH`, `FROM`, `WHERE`, aggregate `FILTER`, and `SELECT`. Read only those operations: begin at `toy`, preserve exactly one summary row, and finish with `mape`, `scored_rows`, and `excluded_zero_actuals`.
 - **Alternative/trade-off:** For sql-49 Exercise 5, the chosen form is justified by this lesson-specific rationale: `NULLIF(actual, 0)` excludes undefined percentage errors, and FILTER counts both scored and excluded observations. Evaluate another form against the concrete expected result (one row per `mape`) and the verification above.
-- **Edge case:** Add one source row with a new `mape`; verify the result gains exactly one row carrying that `mape` value.
+- **Edge case:** Without `NULLIF`, the zero-actual row raises `division by zero`; with it, MAPE silently ignores that row, so report `excluded_zero_actuals` beside the percentage.
 
 ## Exercise 6: Compare MAE and MAPE
 
@@ -269,10 +264,10 @@ MAPE can be dominated by a modest miss on a very small actual.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-49 Exercise 6, read from `toy`. Build the answer toward `mae`, and `mape`; keep `mae` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-49 Exercise 6, expected output: one row per `mae`. The final columns are `mae`, and `mape`.
-- **Independent verification:** For sql-49 Exercise 6, reselect the returned keys directly from the source; require unique `mae` where the expected grain is one row per key and confirm the projected `mae`, and `mape` against `toy`. Add one source row with a new `mae`; verify the result gains exactly one row carrying that `mae` value.
-- **Intermediate relation check:** For sql-49 Exercise 6, select `mae` from `toy` before adding derived columns.
-- **Clause check:** For sql-49 Exercise 6, the solution actually uses `WITH`, `FROM`, and `SELECT`. Read only those operations: begin at `toy`, preserve one row per `mae`, and finish with `mae`, and `mape`.
+- **Inputs/evidence:** For sql-49 Exercise 6, use the `toy` fixture `(1000, 900), (10, 20)` and compute MAE, `AVG(ABS(actual - forecast))`, and MAPE, `AVG(ABS(actual - forecast) / NULLIF(actual, 0))`.
+- **Expected result/shape:** For sql-49 Exercise 6, expected output: one row with `mae` 55 and `mape` 0.55. The final columns are `mae` and `mape`.
+- **Independent verification:** For sql-49 Exercise 6, confirm by hand that the absolute errors are 100 and 10 (mean 55) and the percentage errors are 0.10 and 1.00 (mean 0.55); the output shows that the small month's modest miss dominates MAPE, while the large month dominates MAE.
+- **Intermediate relation check:** For sql-49 Exercise 6, list each row's absolute and percentage error in a plain `SELECT` before you average them.
+- **Clause check:** For sql-49 Exercise 6, the solution actually uses `WITH`, `FROM`, and `SELECT`. Read only those operations: begin at `toy`, preserve exactly one summary row, and finish with `mae`, and `mape`.
 - **Alternative/trade-off:** For sql-49 Exercise 6, the chosen form is justified by this lesson-specific rationale: The deterministic fixture shows that MAE reflects currency-scale error while MAPE can be dominated by a modest miss on a very small actual. Evaluate another form against the concrete expected result (one row per `mae`) and the verification above.
-- **Edge case:** Add one source row with a new `mae`; verify the result gains exactly one row carrying that `mae` value.
+- **Edge case:** MAPE weights each row by the inverse of its actual value, so low-revenue months can dominate it; report MAE beside MAPE when months differ widely in size.

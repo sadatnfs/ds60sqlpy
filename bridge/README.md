@@ -71,7 +71,7 @@ The fifth named unit, [bridge-capstone-01](professional/companion-guides/bridge_
 combines independent fixtures, correctness checks and an evidence review.
 
 The Jupyter module has its own
-[Windows/macOS/Linux setup guide](../docs/setup/jupyter-postgresql.md). It uses
+[Linux, macOS, and Windows WSL 2 setup guide](../docs/setup/jupyter-postgresql.md). It uses
 the same disposable `advanced_sql_training` database and reads the connection
 string from `DS60_DATABASE_URL`; the notebook never stores a password.
 

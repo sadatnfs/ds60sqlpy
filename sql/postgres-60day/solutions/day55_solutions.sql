@@ -1,5 +1,5 @@
 -- Day 55 solutions: BI drill-down and subtotal design
--- SOLUTION READING MAP — sql-55: Project4 BI Part1
+-- SOLUTION READING MAP for sql-55: BI Project, Part 1: Drill-Downs and Subtotals
 -- Explanation: sql/postgres-60day/solutions/day55_solutions.md
 -- Run from the repository root only against advanced_sql_training:
 --   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day55_solutions.sql

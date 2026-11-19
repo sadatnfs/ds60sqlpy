@@ -1,5 +1,5 @@
 -- Day 16 executable solutions
--- SOLUTION READING MAP — sql-16: Window Functions Fundamentals
+-- SOLUTION READING MAP for sql-16: Window Function Fundamentals: OVER, PARTITION BY, and Frames
 -- Explanation: sql/postgres-60day/solutions/day16_solutions.md
 -- Run from the repository root only against advanced_sql_training:
 --   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day16_solutions.sql

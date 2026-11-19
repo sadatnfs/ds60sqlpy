@@ -100,10 +100,10 @@ ORDER BY
 -- Keep answers in your own scratch file; this learner script remains answer-free.
 -- 1. [Query writing] Pivot order counts by status into one summary row.
 --    Hint: Use one filtered count per known status and keep an all-orders denominator.
---    Inputs: For sql-27 Exercise 1, read from `orders`. Build the answer toward `placed_orders`, `paid_orders`, `shipped_orders`, `delivered_orders`, `returned_orders`, and `all_orders`; keep `order_id` visible whenever the result has row-level grain.
+--    Inputs: For sql-27 Exercise 1, read from `orders` and pivot the status counts into one row, with one `COUNT(*) FILTER (WHERE status = ...)` column per known status plus `all_orders`.
 --    Expected result/shape: For sql-27 Exercise 1, expected output: Exactly one row. The final columns are `placed_orders`, `paid_orders`, `shipped_orders`, `delivered_orders`, `returned_orders`, and `all_orders`.
---    Verify: For sql-27 Exercise 1, reselect the returned keys directly from the source; require unique `order_id` where the expected grain is one row per key and confirm the projected `placed_orders`, `paid_orders`, `shipped_orders`, `delivered_orders`, `returned_orders`, and `all_orders` against `orders`. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
---    Hint ladder, rung 1: For sql-27 Exercise 1, inspect the source keys that survive `WHERE`.
+--    Verify: For sql-27 Exercise 1, confirm one row with `placed_orders` 873, `paid_orders` 872, `shipped_orders` 873, `delivered_orders` 872, `returned_orders` 872, and `all_orders` 4362; the five status columns must add up to `all_orders`, or an unknown status exists.
+--    Hint ladder, rung 1: For sql-27 Exercise 1, run `SELECT status, COUNT(*) FROM orders GROUP BY status` first; each pivot column must match one of those counts.
 -- 2. [Query writing] Pivot customer counts for US, CA, GB, and DE by segment.
 --    Hint: Group at segment grain and use filtered counts for known country columns.
 --    Inputs: For sql-27 Exercise 2, read from `customers`. Build the answer toward `segment`, `us_customers`, `ca_customers`, `gb_customers`, `de_customers`, and `all_customers`; keep `segment` visible whenever the result has row-level grain.

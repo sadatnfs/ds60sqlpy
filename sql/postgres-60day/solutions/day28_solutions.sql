@@ -1,5 +1,5 @@
 -- Day 28 executable solutions
--- SOLUTION READING MAP — sql-28: JSON XML
+-- SOLUTION READING MAP for sql-28: JSONB and XML in PostgreSQL
 -- Explanation: sql/postgres-60day/solutions/day28_solutions.md
 -- Run from the repository root only against advanced_sql_training:
 --   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day28_solutions.sql

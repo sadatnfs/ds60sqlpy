@@ -93,10 +93,10 @@ LIMIT 50;
 --    Hint ladder, rung 1: For sql-07 Exercise 4, run `item_totals`, and `payment_totals` one at a time. Record each CTE's row count and `order_id` uniqueness before the next stage uses it.
 -- 5. [Prediction] Build a monthly order trend and explain which months are absent rather than zero.
 --    Hint: Grouping observed orders alone cannot create empty calendar months.
---    Inputs: For sql-07 Exercise 5, read from `orders`. Build the answer toward `order_month`, `order_count`, and `stored_revenue`; keep `order_id` visible whenever the result has row-level grain.
+--    Inputs: For sql-07 Exercise 5, read from `orders`, group by `date_trunc('month', order_date)`, and return each month's `order_count` and `stored_revenue` (`SUM(total_amount)` rounded to 2 places).
 --    Expected result/shape: For sql-07 Exercise 5, expected output: One row per observed order month. The final columns are `order_month`, `order_count`, and `stored_revenue`. The final order is `order_month`.
---    Verify: For sql-07 Exercise 5, independently aggregate `orders` by `order_id`; require one output row for every distinct `order_id` tuple and compare `order_month`, `order_count`, and `stored_revenue` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `order_month`, `order_count`, and `stored_revenue` for the existing `order_id` tuple and verify the new tuple appears exactly once.
---    Hint ladder, rung 1: For sql-07 Exercise 5, confirm the groups are `order_id`; then check `order_month` before applying the row cap.
+--    Verify: For sql-07 Exercise 5, confirm that `order_month` is unique, that `SUM(order_count)` equals `SELECT COUNT(*) FROM orders` (4362), and that the monthly `stored_revenue` values add up to `SELECT ROUND(SUM(total_amount), 2) FROM orders` (2355646.89).
+--    Hint ladder, rung 1: For sql-07 Exercise 5, group by the same `date_trunc('month', order_date)` expression you select; grouping by `order_id` would return one row per order.
 -- 6. [Extension] Create a compact one-row audit of customer, order, item, and payment coverage.
 --    Hint: Use scalar subqueries for independent counts; this avoids accidental cross multiplication.
 --    Inputs: For sql-07 Exercise 6, read from `customers`, `orders`, `order_items`, and `payments`. Compute `customer_rows`, `order_rows`, `order_item_rows`, `payment_rows`, and `customers_without_orders` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.

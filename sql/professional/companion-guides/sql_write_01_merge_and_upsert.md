@@ -13,16 +13,16 @@ the saved project selection. No host Python or PostgreSQL installation is
 required for this browser route.
 
 1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database. A simple snippet
-   such as `SELECT 1;` needs no training-schema reset.
+   the local disposable `advanced_sql_training` database.
 2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
    preserves the lesson's reviewed psql directives, relative includes and
    transaction behavior. **SQL snippet** is appropriate for ordinary SQL
    statements, but is not a replacement for an entire script's setup.
-3. When the lesson requires the course training data, use the explicit
-   preparation action and read its reset acknowledgement. It replaces the
-   course-owned `training` schema. Do not reset unrelated data or prepare
-   every lesson by habit; stateful sequences have their own ordering.
+3. The **Course database** panel above the code shows whether the course
+   training tables are loaded. Missing tables load automatically before your
+   first run (or choose **Load course tables**) and stay loaded for later
+   lessons. **Reset training data** restores the original rows only when your
+   own changes made results differ; it keeps your saved code and notes.
 4. Edit the learner copy in the classroom and save your prediction before
    running. Its whole-script workspace is
    `.learning/sql/sql-write-01/lesson/workspace/sql/professional/lessons/sql_write_01_merge_and_upsert.sql`.
@@ -215,7 +215,7 @@ savepoint rollback so later exercises do not inherit a previous answer's changes
    **Verify:** For sql-write-01 Exercise 3, show the deduplicated source with exactly one row per sku before mutation. Compare all four final key/value/version tuples; physical source order is not a conflict policy.
 4. **Query writing:** Apply the partial insert/conflict source to the original practice target.
    **Inputs:** For sql-write-01 Exercise 4, use the original target with its sku primary key and partial events (A,14,3), (B,999,1), (D,4,1).
-   **Expected result/shape:** For sql-write-01 Exercise 4, rETURNING contains only changed keys A/D. Display final sku, quantity, source_version ordered by sku as (A,14,3), (B,3,1), (D,4,1), (Z,5,1), one row per sku.
+   **Expected result/shape:** For sql-write-01 Exercise 4, RETURNING contains only changed keys A/D. Display final sku, quantity, source_version ordered by sku as (A,14,3), (B,3,1), (D,4,1), (Z,5,1), one row per sku.
    **Verify:** For sql-write-01 Exercise 4, require B to retain quantity three and version one despite the stale proposed 999. Check Z remains five and distinguish a skipped update from a missing target.
 5. **Verification:** Apply the complete snapshot twice.
    **Inputs:** For sql-write-01 Exercise 5, use the original target and complete three-row w17_practice_feed. Run the same conditional full-snapshot MERGE twice within one exercise slot.
@@ -257,7 +257,7 @@ Continue to the [isolation and optimistic-concurrency lab](sql_concurrency_01_is
 ## Ask an AI tutor about this lesson
 
 ```text
-Use $guide-ds60sqlpy-learning to coach me through sql-write-01: PostgreSQL 17 Change Application: MERGE and ON CONFLICT.
+Use $guide-ds60sqlpy-learning to coach me through sql-write-01: Applying Change Feeds with MERGE and ON CONFLICT.
 Read sql/professional/companion-guides/sql_write_01_merge_and_upsert.md and sql/professional/lessons/sql_write_01_merge_and_upsert.sql. Direct prerequisites: sql-found-02 and sql-deep-05.
 Explain identity matching, version eligibility, complete snapshots, source cardinality and actual returned actions. Ask me to predict exact rows and values before my attempt, give progressive hints, review my evidence, then ask retrieval questions in my own words.
 Do not read solutions/ until I ask or have attempted the relevant exercise. Use only the disposable advanced_sql_training PostgreSQL 17 database; keep the savepoint and final ROLLBACK boundaries. I use the unified classroom Whole SQL lesson (psql) mode.

@@ -1,5 +1,5 @@
 -- Day 23 executable solutions
--- SOLUTION READING MAP — sql-23: CTEs Intro
+-- SOLUTION READING MAP for sql-23: Common Table Expressions (CTEs)
 -- Explanation: sql/postgres-60day/solutions/day23_solutions.md
 -- Run from the repository root only against advanced_sql_training:
 --   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day23_solutions.sql
@@ -18,8 +18,8 @@ BEGIN;
 SET search_path TO training, public;
 
 -- Shared teaching contract
--- Focus: Use CTEs to name grains and decisions in a multi-stage query, while understanding that readability—not forced materialization—is the default goal.
--- Assumptions: Each CTE declares its output grain. PostgreSQL 16 may inline a side-effect-free single-use CTE unless `MATERIALIZED` is requested.
+-- Focus: Use CTEs to name grains and decisions in a multi-stage query, while understanding that readability, not forced materialization, is the default goal.
+-- Assumptions: Each CTE declares its output grain. PostgreSQL inlines a side-effect-free CTE that is referenced once unless `MATERIALIZED` is requested; a CTE referenced more than once is materialized (computed once) by default.
 -- Pitfall: A CTE does not automatically improve performance; duplicated rows or ambiguous names remain logical bugs even when split into stages.
 -- ---------------------------------------------------------------------------
 -- Exercise 1: Query writing

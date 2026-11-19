@@ -1,5 +1,5 @@
 -- Day 48 solutions: attribution
--- SOLUTION READING MAP — sql-48: Project1 Ecommerce Part3
+-- SOLUTION READING MAP for sql-48: E-Commerce Project, Part 3: Product Affinity and Attribution
 -- Explanation: sql/postgres-60day/solutions/day48_solutions.md
 -- Run from the repository root only against advanced_sql_training:
 --   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day48_solutions.sql

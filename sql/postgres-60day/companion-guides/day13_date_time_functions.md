@@ -11,16 +11,16 @@ the saved project selection. No host Python or PostgreSQL installation is
 required for this browser route.
 
 1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database. A simple snippet
-   such as `SELECT 1;` needs no training-schema reset.
+   the local disposable `advanced_sql_training` database.
 2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
    preserves the lesson's reviewed psql directives, relative includes and
    transaction behavior. **SQL snippet** is appropriate for ordinary SQL
    statements, but is not a replacement for an entire script's setup.
-3. When the lesson requires the course training data, use the explicit
-   preparation action and read its reset acknowledgement. It replaces the
-   course-owned `training` schema. Do not reset unrelated data or prepare
-   every lesson by habit; stateful sequences have their own ordering.
+3. The **Course database** panel above the code shows whether the course
+   training tables are loaded. Missing tables load automatically before your
+   first run (or choose **Load course tables**) and stay loaded for later
+   lessons. **Reset training data** restores the original rows only when your
+   own changes made results differ; it keeps your saved code and notes.
 4. Edit the learner copy in the classroom and save your prediction before
    running. Its whole-script workspace is
    `.learning/sql/sql-13/lesson/workspace/sql/postgres-60day/day13_date_time_functions.sql`.
@@ -86,8 +86,8 @@ row count. For a normal analytical `SELECT`, use this logical reading order:
 window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
 different physical plan while preserving those semantics.
 
-The worked walkthrough's lesson-specific task is: Express one day as timestamp >= daystart AND timestamp < nextdaystart. Test a row exactly at each boundary. This half-open form prevents double counting when adjacent daily queries are combined and is friendlier to a normal timestamp index than wrapping the column in a function.
-The expected contract is that Recent order rows in deterministic order. Predict keys, row count, `NULL` behavior,
+The worked walkthrough's lesson-specific task is: Express one day as `timestamp >= day_start AND timestamp < next_day_start`. Test a row exactly at each boundary. This half-open form prevents double counting when adjacent daily queries are combined and is friendlier to a normal timestamp index than wrapping the column in a function.
+Exercise 1 expects this result: recent order rows in deterministic order. Predict keys, row count, `NULL` behavior,
 and ordering before running. Afterwards, compare keys/counts/totals with an
 independent control. A blank string, SQL `NULL`, numeric zero, and a missing row
 are different facts; use `COALESCE` only after choosing which meaning the
@@ -212,7 +212,7 @@ For every result, write its row grain and expected shape first.
 
 ## Common mistakes and how to recover
 
-- **Lesson-specific semantic mistake:** BETWEEN is inclusive at both ends and is often wrong for adjacent time windows; use half-open [start, end) predicates.
+- **Lesson-specific semantic mistake:** `BETWEEN` is inclusive at both ends and is often wrong for adjacent time windows; use half-open `[start, end)` predicates.
 - **Unexpected row count:** display keys before aggregates, count rows after
   each join/filter stage, and find the first stage whose grain differs from the
   contract. Do not hide fanout with `DISTINCT`.
@@ -256,15 +256,9 @@ Pitfalls
 - Mixing TIMESTAMP and TIMESTAMPTZ in comparisons; cast explicitly.
 - DST transitions: avoid local timestamps as primary keys.
 
-Current practice map
-- The authoritative six prompts, progressive hints, and expected shapes
-  are maintained in **Exercises** above. They map
-  one-for-one to both solution companions; older short exercise lists
-  were removed to prevent prompt drift.
-
 Further reading
-- Date/time: https://www.postgresql.org/docs/current/functions-datetime.html
-- generate_series: https://www.postgresql.org/docs/current/functions-srf.html
+- Date/time: https://www.postgresql.org/docs/17/functions-datetime.html
+- generate_series: https://www.postgresql.org/docs/17/functions-srf.html
 
 ## Ask an AI tutor about this lesson
 
@@ -273,7 +267,7 @@ enough to complete the lesson offline. If you want a patient tutor, copy this
 prompt after opening the repository in the AI tutor:
 
 ```text
-Tutor me through sql-13 — Date Time Functions.
+Tutor me through sql-13: Date and Time Functions and Time Zones.
 
 I have completed the direct catalog prerequisite: `sql-12`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day13_date_time_functions.md
@@ -283,7 +277,7 @@ Key terms to teach in context: Half-open interval, Time zone, Calendar bucket. F
 language and explain table, row, column, result set, row grain, SQL NULL, and
 deterministic ordering where they apply. Then explain the important clauses in
 logical order and state the expected row grain/shape before asking me to run
-anything. The guide's lesson-specific worked-model focus is: Express one day as timestamp >= daystart AND timestamp < nextdaystart. Test a row exactly at each boundary. This half-open form prevents double counting when adjacent daily queries are combined and is friendlier to a normal timestamp index than wrapping the column in a function.
+anything. The guide's lesson-specific worked-model focus is: Express one day as `timestamp >= day_start AND timestamp < next_day_start`. Test a row exactly at each boundary. This half-open form prevents double counting when adjacent daily queries are combined and is friendlier to a normal timestamp index than wrapping the column in a function.
 
 Use only the local disposable advanced_sql_training database. Prefer the
 Docker classroom's Whole SQL lesson (psql) workspace and its ignored

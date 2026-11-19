@@ -1,5 +1,5 @@
 -- Day 54 solutions: aggregate tables and refresh procedure
--- SOLUTION READING MAP — sql-54: Project3 DWH Part3 Aggregations
+-- SOLUTION READING MAP for sql-54: Data Warehouse Project, Part 3: Aggregate Tables
 -- Explanation: sql/postgres-60day/solutions/day54_solutions.md
 -- Run from the repository root only against advanced_sql_training:
 --   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day54_solutions.sql
@@ -18,7 +18,7 @@ SET search_path TO dwh, training, public;
 DO $require_day52$
 BEGIN
   IF to_regclass('dwh.fact_sales') IS NULL THEN
-    RAISE EXCEPTION 'Run day52_solutions.sql before Day 54';
+    RAISE EXCEPTION 'Run Day 52 (the learner file or day52_solutions.sql) before Day 54';
   END IF;
 END
 $require_day52$;

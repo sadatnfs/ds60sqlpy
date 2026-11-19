@@ -27,6 +27,11 @@ What this script does
 - Adds primary-key, foreign-key, unique, and check constraints.
 
 How to run and reset safely
+- In the classroom you do not run this file yourself. The **Course database**
+  panel above each SQL lesson loads these tables automatically before your
+  first run (or through **Load course tables**), and **Reset training data**
+  restores the original rows after a confirmation. The commands below are for
+  an explicitly prepared local database outside the classroom.
 - Run setup and its executable invariant checks from the repository root:
   `psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/00_setup.sql`,
   then run the same command with `00_verify.sql`.

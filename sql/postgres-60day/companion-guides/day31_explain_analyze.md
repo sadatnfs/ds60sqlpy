@@ -11,16 +11,16 @@ the saved project selection. No host Python or PostgreSQL installation is
 required for this browser route.
 
 1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database. A simple snippet
-   such as `SELECT 1;` needs no training-schema reset.
+   the local disposable `advanced_sql_training` database.
 2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
    preserves the lesson's reviewed psql directives, relative includes and
    transaction behavior. **SQL snippet** is appropriate for ordinary SQL
    statements, but is not a replacement for an entire script's setup.
-3. When the lesson requires the course training data, use the explicit
-   preparation action and read its reset acknowledgement. It replaces the
-   course-owned `training` schema. Do not reset unrelated data or prepare
-   every lesson by habit; stateful sequences have their own ordering.
+3. The **Course database** panel above the code shows whether the course
+   training tables are loaded. Missing tables load automatically before your
+   first run (or choose **Load course tables**) and stay loaded for later
+   lessons. **Reset training data** restores the original rows only when your
+   own changes made results differ; it keeps your saved code and notes.
 4. Edit the learner copy in the classroom and save your prediction before
    running. Its whole-script workspace is
    `.learning/sql/sql-31/lesson/workspace/sql/postgres-60day/day31_explain_analyze.sql`.
@@ -87,7 +87,7 @@ row count. For a normal analytical `SELECT`, use this logical reading order:
 window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
 different physical plan while preserving those semantics.
 
-The worked walkthrough's lesson-specific task is: Run the same safe filter first with EXPLAIN and then with EXPLAIN (ANALYZE, BUFFERS). Start at the scan leaf, compare estimated rows with actual rows × loops, note rows removed by the filter, and only then read the parent LIMIT or aggregate node.
+The worked walkthrough's lesson-specific task is: Run the same safe filter first with `EXPLAIN` and then with `EXPLAIN (ANALYZE, BUFFERS)`. Start at the scan leaf, compare estimated rows with `actual rows × loops`, note rows removed by the filter, and only then read the parent `LIMIT` or aggregate node.
 The first runnable example has a concrete contract: Example 1 prints a plan tree, not business rows. Run the underlying `SELECT` separately and reconcile its `order_id` key set and row count over `orders`; then compare node estimates, actual rows × loops, buffers, and timing without requiring one fixed plan. Its final projection is `order_id`, and `total_amount`. Run the underlying query without `EXPLAIN` first; preserve its keys and row count, then compare estimates with actual rows × loops and read buffer/timing evidence without requiring one fixed node type.
 
 ## Two worked SQL examples
@@ -153,29 +153,29 @@ the parent `LIMIT` or aggregate node.
 Complete these in the [learner SQL](../day31_explain_analyze.sql):
 
 1. Add predicates and observe selectivity effects.
-   **Inputs/evidence:** For sql-31 Exercise 1, run the underlying read-only query over `orders` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
-   **Expected result/shape:** For sql-31 Exercise 1, expected output: one row per `order_id`. The final columns are `order_id`, and `total_amount`.
-   **Verify:** For sql-31 Exercise 1, run the underlying query without `EXPLAIN` and preserve its `order_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+   **Inputs/evidence:** For sql-31 Exercise 1, plan `SELECT * FROM orders` twice with `EXPLAIN (ANALYZE, BUFFERS)`: once with the broad filter `order_date >= CURRENT_TIMESTAMP - interval '3 years'`, and once with a selective filter that adds `status = 'returned'` and `total_amount >= 1000` to a 7-day window.
+   **Expected result/shape:** For sql-31 Exercise 1, expected output: two plans, each a `Seq Scan on orders` with a `Filter` line; the broad plan reports thousands of actual rows (4,247 of 4,362 on a freshly seeded database) and the selective plan reports `actual ... rows=0`. Both read the same `Buffers: shared hit=` count, because a sequential scan reads every page whatever the filter keeps.
+   **Verify:** For sql-31 Exercise 1, run `SELECT COUNT(*)` with each `WHERE` clause and no `EXPLAIN`, and confirm it equals the plan's actual rows; for each plan, actual rows plus `Rows Removed by Filter` must equal `SELECT COUNT(*) FROM orders` (4,362).
 2. Compare `EXPLAIN` with `EXPLAIN ANALYZE`, including estimated/actual rows.
-   **Inputs/evidence:** For sql-31 Exercise 2, run the underlying read-only query over `orders`, `customers`, and `order_items` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
-   **Expected result/shape:** For sql-31 Exercise 2, expected output: one row per `country`. The final columns are `country`, and `units`.
-   **Verify:** For sql-31 Exercise 2, run the underlying query without `EXPLAIN` and preserve its `country` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+   **Inputs/evidence:** For sql-31 Exercise 2, plan the same revenue query, `SELECT c.country, SUM(o.total_amount) AS revenue FROM customers c JOIN orders o ON o.customer_id = c.customer_id GROUP BY c.country`, first with plain `EXPLAIN` and then with `EXPLAIN (ANALYZE, BUFFERS)`.
+   **Expected result/shape:** For sql-31 Exercise 2, expected output: the same plan tree twice (on the course seed a `HashAggregate` above a `Hash Join`); only the second adds `actual time=... rows=... loops=...`, `Buffers:` lines, `Planning Time`, and `Execution Time`. The aggregate's actual rows are `7`, one per customer country, against an estimate of `8`.
+   **Verify:** For sql-31 Exercise 2, run the query without `EXPLAIN` and confirm it returns 7 rows with columns `country` and `revenue`, matching the aggregate node's actual rows; then compare each node's estimated `rows=` with its actual rows multiplied by `loops`.
 3. Predict and compare plans for `total_amount > 0` and `> 900`.
-   **Inputs/evidence:** For sql-31 Exercise 3, run the underlying read-only query over `orders` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
-   **Expected result/shape:** For sql-31 Exercise 3, expected output: one row per `order_id`. The final columns are `order_id`.
-   **Verify:** For sql-31 Exercise 3, run the underlying query without `EXPLAIN` and preserve its `order_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+   **Inputs/evidence:** For sql-31 Exercise 3, predict which predicate has the smaller row estimate, then run `EXPLAIN (ANALYZE, BUFFERS) SELECT order_id FROM orders WHERE total_amount > 0` and the same query with `total_amount > 900`.
+   **Expected result/shape:** For sql-31 Exercise 3, expected output: with current statistics, `total_amount > 0` is estimated at `rows=4362` and returns 4,362 actual rows, while `total_amount > 900` is estimated near `rows=593` and returns 605; both plans report the same `shared hit` count because both are sequential scans.
+   **Verify:** For sql-31 Exercise 3, confirm the actual counts with `SELECT COUNT(*) FILTER (WHERE total_amount > 0), COUNT(*) FILTER (WHERE total_amount > 900) FROM orders` (4,362 and 605); if both estimates are identical (for example `rows=1454`), the table has no statistics yet, so run `ANALYZE orders;` and plan again.
 4. Explain a country-filtered customer/orders join with `VERBOSE`.
-   **Inputs/evidence:** For sql-31 Exercise 4, run the underlying read-only query over `customers`, and `orders` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
-   **Expected result/shape:** For sql-31 Exercise 4, expected output: one row per `country`. The final columns are `country`, and `order_count`.
-   **Verify:** For sql-31 Exercise 4, run the underlying query without `EXPLAIN` and preserve its `country` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+   **Inputs/evidence:** For sql-31 Exercise 4, run `EXPLAIN (ANALYZE, BUFFERS, VERBOSE)` on `SELECT c.country, COUNT(*) AS order_count FROM customers c JOIN orders o ON o.customer_id = c.customer_id WHERE c.country = 'US' GROUP BY c.country`.
+   **Expected result/shape:** For sql-31 Exercise 4, expected output: on the course seed, a `GroupAggregate` root with 1 actual row, a `Hash Join` with 625 actual rows, a filtered `Seq Scan on training.customers` with 63 actual rows, and a `Seq Scan on training.orders` with 4,362 rows; `VERBOSE` adds `Output:` lines and schema-qualified relation names.
+   **Verify:** For sql-31 Exercise 4, run the query without `EXPLAIN` and confirm one row, `('US', 625)`; then confirm that `SELECT COUNT(*) FROM customers WHERE country = 'US'` returns 63, the actual rows of the `customers` scan.
 5. Safely inspect a no-op `UPDATE` with `ANALYZE` and a savepoint.
-   **Inputs/evidence:** For sql-31 Exercise 5, run the underlying read-only query over `orders` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
-   **Expected result/shape:** For sql-31 Exercise 5, expected output: one row per `order_id`. The final columns are `update`, and `analyze`.
-   **Verify:** For sql-31 Exercise 5, run the underlying query without `EXPLAIN` and preserve its `order_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+   **Inputs/evidence:** For sql-31 Exercise 5, inside the lesson transaction, set a savepoint, run `EXPLAIN (ANALYZE, BUFFERS) UPDATE orders SET status = status WHERE order_id = -1`, then roll back to the savepoint and release it.
+   **Expected result/shape:** For sql-31 Exercise 5, expected output: an `Update on orders` node above an `Index Scan using orders_pkey`, whose actual rows are `0` because no order has `order_id = -1`. The `UPDATE` really executed; only the impossible key and the savepoint keep it harmless.
+   **Verify:** For sql-31 Exercise 5, confirm that `SELECT COUNT(*) FROM orders` returns 4,362 before and after the rollback; in a scratch transaction, compare `SELECT xmin FROM orders WHERE order_id = 1` before and after `EXPLAIN ANALYZE UPDATE orders SET status = status WHERE order_id = 1`: the `xmin` changes, which proves that `ANALYZE` wrote a new row version, then roll back.
 6. Test a zero-row predicate and interpret its estimate.
-   **Inputs/evidence:** For sql-31 Exercise 6, run the underlying read-only query over `orders` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
-   **Expected result/shape:** For sql-31 Exercise 6, expected output: one row per `order_id`. The final columns are `order_id`.
-   **Verify:** For sql-31 Exercise 6, run the underlying query without `EXPLAIN` and preserve its `order_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+   **Inputs/evidence:** For sql-31 Exercise 6, plan `SELECT order_id FROM orders WHERE total_amount < 0` with `EXPLAIN (ANALYZE, BUFFERS)`.
+   **Expected result/shape:** For sql-31 Exercise 6, expected output: `actual ... rows=0` with `Rows Removed by Filter: 4362`, and an estimate of `rows=1` when statistics exist, because the planner never estimates fewer than one row. The seed simply contains no negative totals; `orders.total_amount` has no `CHECK` constraint.
+   **Verify:** For sql-31 Exercise 6, confirm that `SELECT MIN(total_amount) FROM orders` is positive (20.74 on the course seed) and that `SELECT pg_get_constraintdef(oid) FROM pg_constraint WHERE conrelid = 'orders'::regclass` lists only the primary key and the foreign key; then compare the estimate with and without statistics to separate missing statistics from rare data.
 
 Save one plan and a result-control query as the baseline for Day 32.
 
@@ -250,7 +250,7 @@ enough to complete the lesson offline. If you want a patient tutor, copy this
 prompt after opening the repository in the AI tutor:
 
 ```text
-Tutor me through sql-31 — Explain Analyze.
+Tutor me through sql-31: Reading Plans with EXPLAIN and EXPLAIN ANALYZE.
 
 I have completed the direct catalog prerequisite: `sql-30`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day31_explain_analyze.md
@@ -260,7 +260,7 @@ Key terms to teach in context: Plan node, Cost estimate, Loop count. First defin
 language and explain table, row, column, result set, row grain, SQL NULL, and
 deterministic ordering where they apply. Then explain the important clauses in
 logical order and state the expected row grain/shape before asking me to run
-anything. The guide's lesson-specific worked-model focus is: Run the same safe filter first with EXPLAIN and then with EXPLAIN (ANALYZE, BUFFERS). Start at the scan leaf, compare estimated rows with actual rows × loops, note rows removed by the filter, and only then read the parent LIMIT or aggregate node.
+anything. The guide's lesson-specific worked-model focus is: Run the same safe filter first with `EXPLAIN` and then with `EXPLAIN (ANALYZE, BUFFERS)`. Start at the scan leaf, compare estimated rows with `actual rows × loops`, note rows removed by the filter, and only then read the parent `LIMIT` or aggregate node.
 
 Use only the local disposable advanced_sql_training database. Prefer the
 Docker classroom's Whole SQL lesson (psql) workspace and its ignored

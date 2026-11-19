@@ -7,13 +7,8 @@
 Open this explanation only after making an honest attempt. The executable
 companion runs solely against the disposable `advanced_sql_training` database:
 
-```powershell
-# Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f "sql\postgres-60day\solutions\day31_solutions.sql"
-```
-
 ```bash
-# macOS/Linux, from the repository root
+# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day31_solutions.sql
 ```
@@ -26,7 +21,7 @@ ordering with the explanation before comparing syntax.
 ## Clause-by-clause reading map
 
 The lesson's main concepts are Plan node, Cost estimate, Loop count. Its worked-model focus is:
-Run the same safe filter first with EXPLAIN and then with EXPLAIN (ANALYZE, BUFFERS). Start at the scan leaf, compare estimated rows with actual rows × loops, note rows removed by the filter, and only then read the parent LIMIT or aggregate node.
+Run the same safe filter first with `EXPLAIN` and then with `EXPLAIN (ANALYZE, BUFFERS)`. Start at the scan leaf, compare estimated rows with `actual rows × loops`, note rows removed by the filter, and only then read the parent `LIMIT` or aggregate node.
 
 - Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
   before adding aggregates; a one-to-many join is allowed to multiply rows only
@@ -107,13 +102,13 @@ scan.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-31 Exercise 1, run the underlying read-only query over `orders` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
-- **Expected result/shape:** For sql-31 Exercise 1, expected output: one row per `order_id`. The final columns are `order_id`, and `total_amount`.
-- **Independent verification:** For sql-31 Exercise 1, run the underlying query without `EXPLAIN` and preserve its `order_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
-- **Intermediate relation check:** For sql-31 Exercise 1, run the underlying query without `EXPLAIN` and preserve its `order_id` rows.
-- **Clause check:** For sql-31 Exercise 1, the solution actually uses `FROM`, `WHERE`, and `SELECT`. Read only those operations: begin at `orders`, preserve one row per `order_id`, and finish with `order_id`, and `total_amount`.
-- **Alternative/trade-off:** For sql-31 Exercise 1, the chosen form is justified by this lesson-specific rationale: These three queries ask for progressively smaller portions of `orders`. Evaluate another form against the concrete expected result (one row per `order_id`) and the verification above.
-- **Edge case:** Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+- **Inputs/evidence:** For sql-31 Exercise 1, plan `SELECT * FROM orders` twice with `EXPLAIN (ANALYZE, BUFFERS)`: once with the broad filter `order_date >= CURRENT_TIMESTAMP - interval '3 years'`, and once with a selective filter that adds `status = 'returned'` and `total_amount >= 1000` to a 7-day window.
+- **Expected result/shape:** For sql-31 Exercise 1, expected output: two plans, each a `Seq Scan on orders` with a `Filter` line; the broad plan reports thousands of actual rows (4,247 of 4,362 on a freshly seeded database) and the selective plan reports `actual ... rows=0`. Both read the same `Buffers: shared hit=` count, because a sequential scan reads every page whatever the filter keeps.
+- **Independent verification:** For sql-31 Exercise 1, run `SELECT COUNT(*)` with each `WHERE` clause and no `EXPLAIN`, and confirm it equals the plan's actual rows; for each plan, actual rows plus `Rows Removed by Filter` must equal `SELECT COUNT(*) FROM orders` (4,362).
+- **Intermediate relation check:** For sql-31 Exercise 1, run `SELECT MIN(order_date), MAX(order_date) FROM orders` first: the seeded order dates run from each customer's signup up to the moment `00_setup.sql` ran (early 2023 to the setup day on a recent seed), so the 3-year window keeps most rows.
+- **Clause check:** For sql-31 Exercise 1, the solution uses two `EXPLAIN (ANALYZE, BUFFERS) SELECT * FROM orders WHERE ...` statements that differ only in their `WHERE` predicates.
+- **Alternative/trade-off:** For sql-31 Exercise 1, plain `EXPLAIN` would show only the estimates; `ANALYZE` is needed to see actual rows and `Rows Removed by Filter`, and it is safe here because the statements are read-only.
+- **Edge case:** Because `CURRENT_TIMESTAMP` moves, the broad count drifts slowly as the seed ages; compare counts taken in the same session rather than across days.
 
 ## Exercise 2: Compare estimated and actual rows
 
@@ -159,13 +154,13 @@ that ordinary statistics do not model well.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-31 Exercise 2, run the underlying read-only query over `orders`, `customers`, and `order_items` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
-- **Expected result/shape:** For sql-31 Exercise 2, expected output: one row per `country`. The final columns are `country`, and `units`.
-- **Independent verification:** For sql-31 Exercise 2, run the underlying query without `EXPLAIN` and preserve its `country` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
-- **Intermediate relation check:** For sql-31 Exercise 2, start with the first relation in `orders`, `customers`, and `order_items`; after each join, record total rows and distinct `country` so the exact fanout or loss is visible.
-- **Clause check:** For sql-31 Exercise 2, the solution actually uses `FROM`, `JOIN ... ON`, `WHERE`, `GROUP BY`, and `SELECT`. Read only those operations: begin at `orders`, `customers`, and `order_items`, preserve one row per `country`, and finish with `country`, and `units`.
-- **Alternative/trade-off:** For sql-31 Exercise 2, the chosen form is justified by this lesson-specific rationale: `EXPLAIN` plans but does not run the `SELECT`; `EXPLAIN ANALYZE` executes it and adds actual timing, loops, and row counts. Evaluate another form against the concrete expected result (one row per `country`) and the verification above.
-- **Edge case:** Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+- **Inputs/evidence:** For sql-31 Exercise 2, plan the same revenue query, `SELECT c.country, SUM(o.total_amount) AS revenue FROM customers c JOIN orders o ON o.customer_id = c.customer_id GROUP BY c.country`, first with plain `EXPLAIN` and then with `EXPLAIN (ANALYZE, BUFFERS)`.
+- **Expected result/shape:** For sql-31 Exercise 2, expected output: the same plan tree twice (on the course seed a `HashAggregate` above a `Hash Join`); only the second adds `actual time=... rows=... loops=...`, `Buffers:` lines, `Planning Time`, and `Execution Time`. The aggregate's actual rows are `7`, one per customer country, against an estimate of `8`.
+- **Independent verification:** For sql-31 Exercise 2, run the query without `EXPLAIN` and confirm it returns 7 rows with columns `country` and `revenue`, matching the aggregate node's actual rows; then compare each node's estimated `rows=` with its actual rows multiplied by `loops`.
+- **Intermediate relation check:** For sql-31 Exercise 2, the `Hash Join` reports 4,362 actual rows, one per order, before the aggregate collapses them to seven country rows.
+- **Clause check:** For sql-31 Exercise 2, the solution runs one plain `EXPLAIN` and one `EXPLAIN (ANALYZE, BUFFERS)` over the same `SELECT ... JOIN ... GROUP BY c.country`.
+- **Alternative/trade-off:** For sql-31 Exercise 2, `EXPLAIN (ANALYZE, TIMING OFF)` keeps actual row counts but skips per-node clock calls, which reduces measurement overhead on large plans.
+- **Edge case:** A one-row difference between the estimated `8` groups and the actual `7` is normal: the estimate comes from column statistics, not from running the query.
 
 ## Pitfalls
 
@@ -186,13 +181,13 @@ on table size and cost. See the fully runnable query in
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-31 Exercise 3, run the underlying read-only query over `orders` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
-- **Expected result/shape:** For sql-31 Exercise 3, expected output: one row per `order_id`. The final columns are `order_id`.
-- **Independent verification:** For sql-31 Exercise 3, run the underlying query without `EXPLAIN` and preserve its `order_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
-- **Intermediate relation check:** For sql-31 Exercise 3, run the underlying query without `EXPLAIN` and preserve its `order_id` rows.
-- **Clause check:** For sql-31 Exercise 3, the solution actually uses `FROM`, `WHERE`, and `SELECT`. Read only those operations: begin at `orders`, preserve one row per `order_id`, and finish with `order_id`.
-- **Alternative/trade-off:** For sql-31 Exercise 3, the chosen form is justified by this lesson-specific rationale: The two queries differ only in threshold, so estimated/actual rows and buffers are comparable. Evaluate another form against the concrete expected result (one row per `order_id`) and the verification above.
-- **Edge case:** Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+- **Inputs/evidence:** For sql-31 Exercise 3, predict which predicate has the smaller row estimate, then run `EXPLAIN (ANALYZE, BUFFERS) SELECT order_id FROM orders WHERE total_amount > 0` and the same query with `total_amount > 900`.
+- **Expected result/shape:** For sql-31 Exercise 3, expected output: with current statistics, `total_amount > 0` is estimated at `rows=4362` and returns 4,362 actual rows, while `total_amount > 900` is estimated near `rows=593` and returns 605; both plans report the same `shared hit` count because both are sequential scans.
+- **Independent verification:** For sql-31 Exercise 3, confirm the actual counts with `SELECT COUNT(*) FILTER (WHERE total_amount > 0), COUNT(*) FILTER (WHERE total_amount > 900) FROM orders` (4,362 and 605); if both estimates are identical (for example `rows=1454`), the table has no statistics yet, so run `ANALYZE orders;` and plan again.
+- **Intermediate relation check:** For sql-31 Exercise 3, `SELECT MIN(total_amount), MAX(total_amount) FROM orders` (20.74 and 1,432.49 on the course seed) shows that `> 0` keeps every row.
+- **Clause check:** For sql-31 Exercise 3, the solution runs two `EXPLAIN (ANALYZE, BUFFERS) SELECT order_id FROM orders WHERE total_amount > ...` statements with different constants.
+- **Alternative/trade-off:** For sql-31 Exercise 3, an index on `total_amount` would let the selective predicate read fewer pages; without one, row estimates change but the scan and its buffer count do not.
+- **Edge case:** Right after `00_setup.sql`, before autovacuum has analyzed `orders`, both estimates can be the same default value; that is missing statistics, not a planner error.
 
 ## Exercise 4: Read a verbose join plan
 
@@ -202,13 +197,13 @@ faster.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-31 Exercise 4, run the underlying read-only query over `customers`, and `orders` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
-- **Expected result/shape:** For sql-31 Exercise 4, expected output: one row per `country`. The final columns are `country`, and `order_count`.
-- **Independent verification:** For sql-31 Exercise 4, run the underlying query without `EXPLAIN` and preserve its `country` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
-- **Intermediate relation check:** For sql-31 Exercise 4, start with the first relation in `customers`, and `orders`; after each join, record total rows and distinct `country` so the exact fanout or loss is visible.
-- **Clause check:** For sql-31 Exercise 4, the solution actually uses `FROM`, `JOIN ... ON`, `WHERE`, `GROUP BY`, and `SELECT`. Read only those operations: begin at `customers`, and `orders`, preserve one row per `country`, and finish with `country`, and `order_count`.
-- **Alternative/trade-off:** For sql-31 Exercise 4, the chosen form is justified by this lesson-specific rationale: Start at each scan, follow rows into the join, then into the aggregate and root. Evaluate another form against the concrete expected result (one row per `country`) and the verification above.
-- **Edge case:** Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+- **Inputs/evidence:** For sql-31 Exercise 4, run `EXPLAIN (ANALYZE, BUFFERS, VERBOSE)` on `SELECT c.country, COUNT(*) AS order_count FROM customers c JOIN orders o ON o.customer_id = c.customer_id WHERE c.country = 'US' GROUP BY c.country`.
+- **Expected result/shape:** For sql-31 Exercise 4, expected output: on the course seed, a `GroupAggregate` root with 1 actual row, a `Hash Join` with 625 actual rows, a filtered `Seq Scan on training.customers` with 63 actual rows, and a `Seq Scan on training.orders` with 4,362 rows; `VERBOSE` adds `Output:` lines and schema-qualified relation names.
+- **Independent verification:** For sql-31 Exercise 4, run the query without `EXPLAIN` and confirm one row, `('US', 625)`; then confirm that `SELECT COUNT(*) FROM customers WHERE country = 'US'` returns 63, the actual rows of the `customers` scan.
+- **Intermediate relation check:** For sql-31 Exercise 4, the `Hash` node above the `customers` scan holds the 63 US customers; the join probes it once for each of the 4,362 orders and keeps 625 matches.
+- **Clause check:** For sql-31 Exercise 4, the solution uses one `EXPLAIN (ANALYZE, BUFFERS, VERBOSE)` over `SELECT ... FROM customers c JOIN orders o ON ... WHERE c.country = 'US' GROUP BY c.country`.
+- **Alternative/trade-off:** For sql-31 Exercise 4, an index on `orders (customer_id)` could turn the join into a nested loop with 63 index lookups; whether that is cheaper depends on how many orders each customer has.
+- **Edge case:** Filter on a country with no customers, such as `'ZZ'`: the scan returns 0 rows, the join and the grouped aggregate return 0 rows, and the query returns no row at all rather than a count of zero.
 
 ## Exercise 5: Analyze DML safely
 
@@ -217,26 +212,28 @@ and a savepoint, then rolls back to and releases that savepoint.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-31 Exercise 5, run the underlying read-only query over `orders` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
-- **Expected result/shape:** For sql-31 Exercise 5, expected output: one row per `order_id`. The final columns are `update`, and `analyze`.
-- **Independent verification:** For sql-31 Exercise 5, run the underlying query without `EXPLAIN` and preserve its `order_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
-- **Intermediate relation check:** For sql-31 Exercise 5, run the underlying query without `EXPLAIN` and preserve its `order_id` rows.
-- **Clause check:** For sql-31 Exercise 5, the solution actually uses `WHERE`. Read only those operations: begin at `orders`, preserve one row per `order_id`, and finish with `update`, and `analyze`.
-- **Alternative/trade-off:** For sql-31 Exercise 5, the chosen form is justified by this lesson-specific rationale: `EXPLAIN ANALYZE UPDATE` performs the update. Evaluate another form against the concrete expected result (one row per `order_id`) and the verification above.
-- **Edge case:** Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+- **Inputs/evidence:** For sql-31 Exercise 5, inside the lesson transaction, set a savepoint, run `EXPLAIN (ANALYZE, BUFFERS) UPDATE orders SET status = status WHERE order_id = -1`, then roll back to the savepoint and release it.
+- **Expected result/shape:** For sql-31 Exercise 5, expected output: an `Update on orders` node above an `Index Scan using orders_pkey`, whose actual rows are `0` because no order has `order_id = -1`. The `UPDATE` really executed; only the impossible key and the savepoint keep it harmless.
+- **Independent verification:** For sql-31 Exercise 5, confirm that `SELECT COUNT(*) FROM orders` returns 4,362 before and after the rollback; in a scratch transaction, compare `SELECT xmin FROM orders WHERE order_id = 1` before and after `EXPLAIN ANALYZE UPDATE orders SET status = status WHERE order_id = 1`: the `xmin` changes, which proves that `ANALYZE` wrote a new row version, then roll back.
+- **Intermediate relation check:** For sql-31 Exercise 5, run `SELECT COUNT(*) FROM orders WHERE order_id = -1` first: it returns 0, so the `UPDATE` cannot match any row.
+- **Clause check:** For sql-31 Exercise 5, the solution uses `SAVEPOINT`, one `EXPLAIN (ANALYZE, BUFFERS) UPDATE ... SET status = status WHERE order_id = -1`, `ROLLBACK TO SAVEPOINT`, and `RELEASE SAVEPOINT`.
+- **Alternative/trade-off:** For sql-31 Exercise 5, plain `EXPLAIN UPDATE ...` shows the same plan shape without executing; use `ANALYZE` on writes only inside a transaction you will roll back.
+- **Edge case:** The `Update on orders` node always reports `rows=0` without `RETURNING`; count changed rows from the scan below it or from the command tag of a real `UPDATE`.
 
 ## Exercise 6: Interpret an empty result
 
-The negative-total predicate returns zero because the schema forbids negative
-totals. A zero actual with a small nonzero estimate can be ordinary statistical
-uncertainty; it is not, alone, proof statistics are stale.
+The negative-total predicate returns zero because the seed generates no negative
+totals; `orders.total_amount` has no `CHECK` constraint, and the planner does not
+use `CHECK` constraints on plain tables (`constraint_exclusion = partition`). A
+zero actual with an estimate of one row is the planner's floor, not proof that
+statistics are stale.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-31 Exercise 6, run the underlying read-only query over `orders` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
-- **Expected result/shape:** For sql-31 Exercise 6, expected output: one row per `order_id`. The final columns are `order_id`.
-- **Independent verification:** For sql-31 Exercise 6, run the underlying query without `EXPLAIN` and preserve its `order_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
-- **Intermediate relation check:** For sql-31 Exercise 6, run the underlying query without `EXPLAIN` and preserve its `order_id` rows.
-- **Clause check:** For sql-31 Exercise 6, the solution actually uses `WITH`, `FROM`, `WHERE`, and `SELECT`. Read only those operations: begin at `orders`, preserve one row per `order_id`, and finish with `order_id`.
-- **Alternative/trade-off:** For sql-31 Exercise 6, the chosen form is justified by this lesson-specific rationale: The negative-total predicate returns zero because the schema forbids negative totals. Evaluate another form against the concrete expected result (one row per `order_id`) and the verification above.
-- **Edge case:** Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+- **Inputs/evidence:** For sql-31 Exercise 6, plan `SELECT order_id FROM orders WHERE total_amount < 0` with `EXPLAIN (ANALYZE, BUFFERS)`.
+- **Expected result/shape:** For sql-31 Exercise 6, expected output: `actual ... rows=0` with `Rows Removed by Filter: 4362`, and an estimate of `rows=1` when statistics exist, because the planner never estimates fewer than one row. The seed simply contains no negative totals; `orders.total_amount` has no `CHECK` constraint.
+- **Independent verification:** For sql-31 Exercise 6, confirm that `SELECT MIN(total_amount) FROM orders` is positive (20.74 on the course seed) and that `SELECT pg_get_constraintdef(oid) FROM pg_constraint WHERE conrelid = 'orders'::regclass` lists only the primary key and the foreign key; then compare the estimate with and without statistics to separate missing statistics from rare data.
+- **Intermediate relation check:** For sql-31 Exercise 6, `SELECT COUNT(*) FROM orders WHERE total_amount < 0` returns 0 before you read the plan.
+- **Clause check:** For sql-31 Exercise 6, the solution uses one `EXPLAIN (ANALYZE, BUFFERS) SELECT order_id FROM orders WHERE total_amount < 0`.
+- **Alternative/trade-off:** For sql-31 Exercise 6, adding `CHECK (total_amount >= 0)` would make negative totals impossible for future writes, but the planner still would not skip the scan, because `constraint_exclusion = partition` applies constraints only to partitions and inheritance children.
+- **Edge case:** A predicate that is rare rather than impossible, such as `total_amount > 1400`, gets a small but nonzero estimate from the histogram and returns a few rows.

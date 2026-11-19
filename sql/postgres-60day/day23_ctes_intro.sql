@@ -20,8 +20,8 @@ BEGIN;
 SET search_path TO training, public;
 
 -- Study contract
--- Focus: Use CTEs to name grains and decisions in a multi-stage query, while understanding that readability—not forced materialization—is the default goal.
--- Assumptions: Each CTE declares its output grain. PostgreSQL 16 may inline a side-effect-free single-use CTE unless `MATERIALIZED` is requested.
+-- Focus: Use CTEs to name grains and decisions in a multi-stage query, while understanding that readability, not forced materialization, is the default goal.
+-- Assumptions: Each CTE declares its output grain. PostgreSQL inlines a side-effect-free CTE that is referenced once unless `MATERIALIZED` is requested; a CTE referenced more than once is materialized (computed once) by default.
 -- Pitfall: A CTE does not automatically improve performance; duplicated rows or ambiguous names remain logical bugs even when split into stages.
 -- Predict row grain and NULL/order behavior before executing each example.
 -- Rewrite subqueries as CTEs
@@ -79,10 +79,10 @@ LIMIT 20;
 --    Hint ladder, rung 1: For sql-23 Exercise 3, run `paid`, and `reconciled` one at a time. Record each CTE's row count and `order_id` uniqueness before the next stage uses it.
 -- 4. [Prediction] Compare `MATERIALIZED` and `NOT MATERIALIZED` syntax on a side-effect-free filtered order CTE without claiming one is universally faster.
 --    Hint: Both return the same rows; planning effects require `EXPLAIN` evidence in a representative environment.
---    Inputs: For sql-23 Exercise 4, read from `orders`, `materialized_orders`, and `inline_orders`. Build the answer toward `variant`, and `row_count`; keep `order_id` visible whenever the result has row-level grain.
+--    Inputs: For sql-23 Exercise 4, read from `orders` through two side-effect-free CTEs that both keep `delivered` orders, one declared `AS MATERIALIZED` and one `AS NOT MATERIALIZED`, and count the rows each returns.
 --    Expected result/shape: For sql-23 Exercise 4, expected output: Two count rows with equal values. The final columns are `variant`, and `row_count`. The final order is `variant`.
---    Verify: For sql-23 Exercise 4, reselect the returned keys directly from the source; require unique `order_id` where the expected grain is one row per key and confirm the projected `variant`, and `row_count` against `orders`, `materialized_orders`, and `inline_orders`. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
---    Hint ladder, rung 1: For sql-23 Exercise 4, inspect the source keys that survive `WHERE`; then check `variant` before applying the row cap.
+--    Verify: For sql-23 Exercise 4, confirm both `row_count` values are 872, equal to `SELECT COUNT(*) FROM orders WHERE status = 'delivered'`; then run `EXPLAIN` on the query: the `MATERIALIZED` CTE appears as a separate `CTE materialized_orders` step read through a `CTE Scan`, while the `NOT MATERIALIZED` CTE is folded into a `Seq Scan on orders` with the status filter.
+--    Hint ladder, rung 1: For sql-23 Exercise 4, run each CTE's `SELECT` alone and compare the counts before you compare plans.
 -- 5. [Debugging] Repair a multi-stage query whose repeated `total` column names are ambiguous by assigning grain-specific aliases.
 --    Hint: Name measures `order_value`, `customer_revenue`, and similar rather than carrying generic `total`.
 --    Inputs: For sql-23 Exercise 5, read from `orders`, `order_items`, and `customers`. Build the answer toward `country`, and `country_revenue`; keep `country` visible whenever the result has row-level grain.

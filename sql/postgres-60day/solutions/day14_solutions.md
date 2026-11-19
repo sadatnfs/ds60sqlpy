@@ -7,13 +7,8 @@
 Open this explanation only after making an honest attempt. The executable
 companion runs solely against the disposable `advanced_sql_training` database:
 
-```powershell
-# Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f "sql\postgres-60day\solutions\day14_solutions.sql"
-```
-
 ```bash
-# macOS/Linux, from the repository root
+# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day14_solutions.sql
 ```
@@ -26,7 +21,7 @@ ordering with the explanation before comparing syntax.
 ## Clause-by-clause reading map
 
 The lesson's main concepts are Exact numeric, Scale, Type coercion. Its worked-model focus is:
-Evaluate 1 / 3, 1::numeric / 3, and ROUND(1::numeric / NULLIF(3, 0), 2). Explain the result type at each step and why guarding the denominator belongs before rounding.
+Evaluate `1 / 3`, `1::numeric / 3`, and `ROUND(1::numeric / NULLIF(3, 0), 2)`. Explain the result type at each step and why guarding the denominator belongs before rounding.
 
 - Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
   before adding aggregates; a one-to-many join is allowed to multiply rows only
@@ -257,13 +252,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-14 Exercise 5, read from `payments`. Build the answer toward `average_paid_amount_per_order`; keep `payment_id` visible whenever the result has row-level grain.
+- **Inputs/evidence:** For sql-14 Exercise 5, read from `payments` and divide the total paid amount by the number of distinct paid orders, `SUM(amount) / NULLIF(COUNT(DISTINCT order_id), 0)`, rounded to 2 places.
 - **Expected result/shape:** For sql-14 Exercise 5, expected output: Exactly one summary row. The final columns are `average_paid_amount_per_order`.
-- **Independent verification:** For sql-14 Exercise 5, reselect the returned keys directly from the source; require unique `payment_id` where the expected grain is one row per key and confirm the projected `average_paid_amount_per_order` against `payments`. Add one source row with a new `payment_id`; verify the result gains exactly one row carrying that `payment_id` value.
-- **Intermediate relation check:** For sql-14 Exercise 5, select `payment_id` from `payments` before adding derived columns.
-- **Clause check:** For sql-14 Exercise 5, the solution actually uses `FROM`, and `SELECT`. Read only those operations: begin at `payments`, preserve one row per `payment_id`, and finish with `average_paid_amount_per_order`.
+- **Independent verification:** For sql-14 Exercise 5, confirm one row with 525.05, which is 1831900.81 divided by 3489 distinct paid orders; compare it with `ROUND(AVG(amount), 2)` (477.55), which divides by the 3836 payment rows instead.
+- **Intermediate relation check:** For sql-14 Exercise 5, compute `COUNT(*)` and `COUNT(DISTINCT order_id)` from `payments` first; a per-order average needs the distinct count as its denominator.
+- **Clause check:** For sql-14 Exercise 5, the solution actually uses `FROM`, and `SELECT`. Read only those operations: begin at `payments`, preserve exactly one summary row, and finish with `average_paid_amount_per_order`.
 - **Alternative/trade-off:** For sql-14 Exercise 5, the chosen form is justified by this lesson-specific rationale: Aggregate payment amount and count distinct order IDs at one common scope. Evaluate another form against the concrete expected result (Exactly one summary row) and the verification above.
-- **Edge case:** Add one source row with a new `payment_id`; verify the result gains exactly one row carrying that `payment_id` value.
+- **Edge case:** `NULLIF(COUNT(DISTINCT order_id), 0)` turns an empty `payments` table into a NULL average instead of a division-by-zero error.
 
 ## Exercise 6: Extension
 
@@ -293,13 +288,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-14 Exercise 6, read from `order_items`. Build the answer toward `sum_of_rounded_lines`, `rounded_exact_total`, and `rounding_difference`; keep `order_item_id` visible whenever the result has row-level grain.
+- **Inputs/evidence:** For sql-14 Exercise 6, read from `order_items` and compare the sum of line totals rounded per line, `SUM(ROUND(unit_price * quantity * (1 - discount), 2))`, with the exact sum rounded once, `ROUND(SUM(unit_price * quantity * (1 - discount)), 2)`.
 - **Expected result/shape:** For sql-14 Exercise 6, expected output: One row with two totals and their signed difference. The final columns are `sum_of_rounded_lines`, `rounded_exact_total`, and `rounding_difference`.
-- **Independent verification:** For sql-14 Exercise 6, reselect the returned keys directly from the source; require unique `order_item_id` where the expected grain is one row per key and confirm the projected `sum_of_rounded_lines`, `rounded_exact_total`, and `rounding_difference` against `order_items`. Add one source row with a new `order_item_id`; verify the result gains exactly one row carrying that `order_item_id` value.
-- **Intermediate relation check:** For sql-14 Exercise 6, select `order_item_id` from `order_items` before adding derived columns.
-- **Clause check:** For sql-14 Exercise 6, the solution actually uses `FROM`, and `SELECT`. Read only those operations: begin at `order_items`, preserve one row per `order_item_id`, and finish with `sum_of_rounded_lines`, `rounded_exact_total`, and `rounding_difference`.
+- **Independent verification:** For sql-14 Exercise 6, confirm one row with 2355648.13, 2355647.12, and a `rounding_difference` of 1.01; the difference is the per-line rounding accumulated over 13085 lines, so a report must state which rounding rule it uses.
+- **Intermediate relation check:** For sql-14 Exercise 6, compute both totals in separate `SELECT` statements first; round inside the `SUM` for one and outside it for the other.
+- **Clause check:** For sql-14 Exercise 6, the solution actually uses `FROM`, and `SELECT`. Read only those operations: begin at `order_items`, preserve exactly one summary row, and finish with `sum_of_rounded_lines`, `rounded_exact_total`, and `rounding_difference`.
 - **Alternative/trade-off:** For sql-14 Exercise 6, the chosen form is justified by this lesson-specific rationale: This diagnostic makes the consequence of early rounding visible. Evaluate another form against the concrete expected result (One row with two totals and their signed difference) and the verification above.
-- **Edge case:** Add one source row with a new `order_item_id`; verify the result gains exactly one row carrying that `order_item_id` value.
+- **Edge case:** Rounding each line first can move each line by up to half a cent in either direction, so over 13085 lines a difference of about one dollar is expected, not an error.
 
 ## Final self-check
 

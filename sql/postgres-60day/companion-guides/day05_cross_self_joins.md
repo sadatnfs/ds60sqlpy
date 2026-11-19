@@ -11,16 +11,16 @@ the saved project selection. No host Python or PostgreSQL installation is
 required for this browser route.
 
 1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database. A simple snippet
-   such as `SELECT 1;` needs no training-schema reset.
+   the local disposable `advanced_sql_training` database.
 2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
    preserves the lesson's reviewed psql directives, relative includes and
    transaction behavior. **SQL snippet** is appropriate for ordinary SQL
    statements, but is not a replacement for an entire script's setup.
-3. When the lesson requires the course training data, use the explicit
-   preparation action and read its reset acknowledgement. It replaces the
-   course-owned `training` schema. Do not reset unrelated data or prepare
-   every lesson by habit; stateful sequences have their own ordering.
+3. The **Course database** panel above the code shows whether the course
+   training tables are loaded. Missing tables load automatically before your
+   first run (or choose **Load course tables**) and stay loaded for later
+   lessons. **Reset training data** restores the original rows only when your
+   own changes made results differ; it keeps your saved code and notes.
 4. Edit the learner copy in the classroom and save your prediction before
    running. Its whole-script workspace is
    `.learning/sql/sql-05/lesson/workspace/sql/postgres-60day/day05_cross_self_joins.sql`.
@@ -86,8 +86,8 @@ row count. For a normal analytical `SELECT`, use this logical reading order:
 window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
 different physical plan while preserving those semantics.
 
-The worked walkthrough's lesson-specific task is: For product pairs, compare p1.productid <> p2.productid with p1.productid < p2.productid. The first produces both (A,B) and (B,A); the second removes reversed duplicates and self-pairs in one predicate.
-The expected contract is that One row per employee. Predict keys, row count, `NULL` behavior,
+The worked walkthrough's lesson-specific task is: For product pairs, compare `p1.product_id <> p2.product_id` with `p1.product_id < p2.product_id`. The first produces both `(A,B)` and `(B,A)`; the second removes reversed duplicates and self-pairs in one predicate.
+Exercise 1 expects this result: one row per employee. Predict keys, row count, `NULL` behavior,
 and ordering before running. Afterwards, compare keys/counts/totals with an
 independent control. A blank string, SQL `NULL`, numeric zero, and a missing row
 are different facts; use `COALESCE` only after choosing which meaning the
@@ -267,14 +267,8 @@ Performance notes
 - CROSS JOIN blows up quickly; reduce with filters immediately after.
 - Consider generating sequences with generate_series for small domains rather than CROSS of large tables.
 
-Current practice map
-- The authoritative six prompts, progressive hints, and expected shapes
-  are maintained in **Exercises** above. They map
-  one-for-one to both solution companions; older short exercise lists
-  were removed to prevent prompt drift.
-
 Further reading
-- Self-joins: https://www.postgresql.org/docs/current/queries-table-expressions.html#QUERIES-JOINS
+- Self-joins: https://www.postgresql.org/docs/17/queries-table-expressions.html#QUERIES-JOINS
 
 ## Ask an AI tutor about this lesson
 
@@ -283,7 +277,7 @@ enough to complete the lesson offline. If you want a patient tutor, copy this
 prompt after opening the repository in the AI tutor:
 
 ```text
-Tutor me through sql-05 — Cross Self Joins.
+Tutor me through sql-05: Cross Joins and Self-Joins.
 
 I have completed the direct catalog prerequisite: `sql-04`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day05_cross_self_joins.md
@@ -293,7 +287,7 @@ Key terms to teach in context: Cartesian product, Self-join, Canonical pair. Fir
 language and explain table, row, column, result set, row grain, SQL NULL, and
 deterministic ordering where they apply. Then explain the important clauses in
 logical order and state the expected row grain/shape before asking me to run
-anything. The guide's lesson-specific worked-model focus is: For product pairs, compare p1.productid <> p2.productid with p1.productid < p2.productid. The first produces both (A,B) and (B,A); the second removes reversed duplicates and self-pairs in one predicate.
+anything. The guide's lesson-specific worked-model focus is: For product pairs, compare `p1.product_id <> p2.product_id` with `p1.product_id < p2.product_id`. The first produces both `(A,B)` and `(B,A)`; the second removes reversed duplicates and self-pairs in one predicate.
 
 Use only the local disposable advanced_sql_training database. Prefer the
 Docker classroom's Whole SQL lesson (psql) workspace and its ignored

@@ -118,16 +118,16 @@ ORDER BY
 --    Hint ladder, rung 1: For sql-06 Exercise 3, check `customer_id` before applying the row cap.
 -- 4. [Prediction] Compare row counts produced by `UNION` and `UNION ALL` for two overlapping status lists.
 --    Hint: `UNION ALL` preserves every input row; `UNION` returns distinct rows.
---    Inputs: For sql-06 Exercise 4, read from `orders`. Build the answer toward `operation`, and `row_count`; keep `order_id` visible whenever the result has row-level grain.
+--    Inputs: For sql-06 Exercise 4, read `status` from `orders` twice, once for `paid` or `shipped` and once for `shipped` or `delivered`, then count the combined rows under `UNION ALL` and under `UNION`.
 --    Expected result/shape: For sql-06 Exercise 4, expected output: Two labeled summary rows showing all-count >= distinct-count. The final columns are `operation`, and `row_count`. The final order is `operation`.
---    Verify: For sql-06 Exercise 4, reselect the returned keys directly from the source; require unique `order_id` where the expected grain is one row per key and confirm the projected `operation`, and `row_count` against `orders`. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
---    Hint ladder, rung 1: For sql-06 Exercise 4, run `combined_all`, and `combined_distinct` one at a time. Record each CTE's row count and `order_id` uniqueness before the next stage uses it.
+--    Verify: For sql-06 Exercise 4, confirm that `UNION ALL` returns 3490 rows, the sum of the two branch counts (1745 + 1745), while `UNION` returns 3 because it keeps only the distinct statuses `delivered`, `paid`, and `shipped`; the `shipped` rows appear in both branches.
+--    Hint ladder, rung 1: For sql-06 Exercise 4, count each branch separately before combining them; the `UNION ALL` count must equal the sum of the branch counts.
 -- 5. [Debugging] Repair a set operation whose branches return incompatible meanings or types by aligning aliases and casts.
 --    Hint: Each branch below returns one text label and one numeric amount at the same report grain.
---    Inputs: For sql-06 Exercise 5, read from `orders`, and `expenses`. Build the answer toward `measure`, and `amount`; keep `order_id` visible whenever the result has row-level grain.
+--    Inputs: For sql-06 Exercise 5, stack one row labeled `order_revenue` holding `SUM(total_amount)` from `orders` and one row labeled `expense` holding `SUM(amount)` from `expenses` with `UNION ALL`, using a text label column followed by a numeric amount column.
 --    Expected result/shape: For sql-06 Exercise 5, expected output: Rows identify revenue and expense measures with compatible types. The final columns are `measure`, and `amount`. The final order is `measure`.
---    Verify: For sql-06 Exercise 5, reselect the returned keys directly from the source; require unique `order_id` where the expected grain is one row per key and confirm the projected `measure`, and `amount` against `orders`, and `expenses`. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
---    Hint ladder, rung 1: For sql-06 Exercise 5, check `measure` before applying the row cap.
+--    Verify: For sql-06 Exercise 5, confirm exactly two rows, `expense` = 50483850.00 and `order_revenue` = 2355646.89, each equal to its own standalone `SUM`; both branches must list the label first and the amount second, because swapping them in one branch raises `UNION types text and numeric cannot be matched`.
+--    Hint ladder, rung 1: For sql-06 Exercise 5, run each branch alone and check that it returns one row with a `text` label and a `numeric` amount.
 -- 6. [Extension] Return the symmetric difference between customers with orders and customers with support events.
 --    Hint: Subtract each set from the other, then union the two differences.
 --    Inputs: For sql-06 Exercise 6, read from `orders`, and `events`. Build the answer toward `customer_id`, and `source`; keep `customer_id` visible whenever the result has row-level grain.

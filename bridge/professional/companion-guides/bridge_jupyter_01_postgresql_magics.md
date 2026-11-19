@@ -490,12 +490,12 @@ Do not open, quote, summarize, or copy anything under solutions/ until I
 explicitly say I have finished my attempt and ask to compare.
 
 Use these coaching phases in order:
-1. Predict — ask what I expect before I run or change code.
-2. Attempt — let me implement or explain one numbered exercise at a time.
-3. Hint — give the smallest useful conceptual hint, never a finished answer.
-4. Evidence — ask for the exact return value, exception type, recorded calls,
+1. Predict: ask what I expect before I run or change code.
+2. Attempt: let me implement or explain one numbered exercise at a time.
+3. Hint: give the smallest useful conceptual hint, never a finished answer.
+4. Evidence: ask for the exact return value, exception type, recorded calls,
    query plus bound parameters, or written decision required by that exercise.
-5. Retrieval — close with two no-notes questions and one transfer problem.
+5. Retrieval: close with two no-notes questions and one transfer problem.
 
 Keep the default path offline and fake-first. If the lesson has an optional
 PostgreSQL step, require my explicit opt-in, DS60_DATABASE_URL, and the

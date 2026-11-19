@@ -28,13 +28,8 @@ Never run the live lab against a production, shared, or valuable database.
 
 Run the answer-free starter from the repository root:
 
-```powershell
-# Windows PowerShell
-.\.venv\Scripts\python.exe bridge\professional\lessons\bridge_ops_01_migration_observability.py
-```
-
 ```bash
-# macOS/Linux
+# Linux, macOS, or Windows through WSL 2
 .venv/bin/python bridge/professional/lessons/bridge_ops_01_migration_observability.py
 ```
 
@@ -55,14 +50,8 @@ Start at the repository root. The answer-free starter is deliberately safe to
 run: it prints orientation text and does not call unfinished functions or
 contact PostgreSQL.
 
-```powershell
-# Windows PowerShell
-.\.venv\Scripts\python.exe bridge\professional\lessons\bridge_ops_01_migration_observability.py
-.\.venv\Scripts\python.exe -m pytest bridge\professional\tests -q
-```
-
 ```bash
-# macOS/Linux
+# Linux, macOS, or Windows through WSL 2
 .venv/bin/python bridge/professional/lessons/bridge_ops_01_migration_observability.py
 .venv/bin/python -m pytest bridge/professional/tests -q
 ```
@@ -236,16 +225,8 @@ First reset and verify only the disposable course database using the canonical
 PostgreSQL setup instructions. Then provide the connection string only to the
 current process environment.
 
-```powershell
-# Windows PowerShell
-$env:DS60_DATABASE_URL = Read-Host "Paste the disposable course PostgreSQL URL"
-.\.venv\Scripts\python.exe `
-  bridge\professional\solutions\bridge_ops_01_migration_observability_solution.py `
-  --live --request-id learning-bridge-ops-01
-```
-
 ```bash
-# macOS/Linux
+# Linux, macOS, or Windows through WSL 2
 read -r -s -p "Disposable course PostgreSQL URL: " DS60_DATABASE_URL
 export DS60_DATABASE_URL
 printf '\n'
@@ -293,7 +274,7 @@ checksums. Resetting `training` through the course setup removes the lab state.
    happen before injected retry delay.
    - **Progressive hint:** One attempt must acquire, lock, re-check, apply, verify, record,
      commit, close, then report.
-   - **Verify:** Record the nine delivery stages, open, bootstrap/lock, re-check, commands, verify, metadata, commit, close, report, and in failure assert rollback and close occur before the sleeper.
+   - **Verify:** Record the nine delivery stages (open, bootstrap/lock, re-check, commands, verify, metadata, commit, close, report) and, in failure, assert rollback and close occur before the sleeper.
 6. **Commit uncertainty:** Simulate an uncertain commit whose retry sees a matching metadata row
    and prove commands are not applied twice.
    - **Progressive hint:** Re-check immutable metadata under lock before every attempt.
@@ -430,12 +411,12 @@ Do not open, quote, summarize, or copy anything under solutions/ until I
 explicitly say I have finished my attempt and ask to compare.
 
 Use these coaching phases in order:
-1. Predict — ask what I expect before I run or change code.
-2. Attempt — let me implement or explain one numbered exercise at a time.
-3. Hint — give the smallest useful conceptual hint, never a finished answer.
-4. Evidence — ask for the exact return value, exception type, recorded calls,
+1. Predict: ask what I expect before I run or change code.
+2. Attempt: let me implement or explain one numbered exercise at a time.
+3. Hint: give the smallest useful conceptual hint, never a finished answer.
+4. Evidence: ask for the exact return value, exception type, recorded calls,
    query plus bound parameters, or written decision required by that exercise.
-5. Retrieval — close with two no-notes questions and one transfer problem.
+5. Retrieval: close with two no-notes questions and one transfer problem.
 
 Keep the default path offline and fake-first. If the lesson has an optional
 PostgreSQL step, require my explicit opt-in, DS60_DATABASE_URL, and the

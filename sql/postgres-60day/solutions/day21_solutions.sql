@@ -1,5 +1,5 @@
 -- Day 21 executable solutions
--- SOLUTION READING MAP — sql-21: Distribution Functions
+-- SOLUTION READING MAP for sql-21: Distribution Functions: NTILE, PERCENT_RANK, and CUME_DIST
 -- Explanation: sql/postgres-60day/solutions/day21_solutions.md
 -- Run from the repository root only against advanced_sql_training:
 --   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day21_solutions.sql

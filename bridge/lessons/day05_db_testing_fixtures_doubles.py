@@ -106,8 +106,8 @@ def rollback_only(connection: RollbackConnection) -> Iterator[None]:
 # 10. [Database semantics] Explain why SQLite is not a PostgreSQL substitute for `ON CONFLICT`,
 #    numeric, isolation, or driver behavior tests.
 #    Hint: A fast substitute is useful only when it shares the semantics under test.
-#    Verify: List the PostgreSQL behavior under test—conflict handling, exact numeric
-#    adaptation, transaction/isolation, and Psycopg calls—and mark each as unproved by SQLite.
+#    Verify: List the PostgreSQL behavior under test (conflict handling, exact numeric
+#    adaptation, transaction/isolation, and Psycopg calls) and mark each as unproved by SQLite.
 # 11. [Security testing] Pass an injection-shaped value through the cursor adapter and prove it
 #    appears only in the parameter tuple.
 #    Hint: Recording fakes should keep query and parameters in separate fields.

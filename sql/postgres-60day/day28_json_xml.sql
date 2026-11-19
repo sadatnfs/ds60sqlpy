@@ -51,10 +51,19 @@ ORDER BY
   cnt DESC,
   device NULLS LAST;
 
--- JSONB: array expansion example (simulate array in metadata)
--- SELECT e.event_id, x AS tag
--- FROM events e,
--- LATERAL jsonb_array_elements_text(COALESCE(e.metadata->'tags','[]'::jsonb)) AS t(x);
+-- JSONB: array expansion. The seed's event metadata has no arrays, so two
+-- documents are supplied inline; a document without "tags" adds no row.
+SELECT
+  d.doc_id,
+  t.tag
+FROM (
+  VALUES (1, '{"tags": ["new", "promo"]}'::jsonb),
+    (2, '{}'::jsonb)) AS d (doc_id, doc)
+  CROSS JOIN LATERAL jsonb_array_elements_text(COALESCE(d.doc -> 'tags', '[]'::jsonb)) AS t (tag)
+ORDER BY
+  d.doc_id,
+  t.tag;
+
 -- XML: use xpath to extract values
 SELECT
   doc_id,
@@ -83,10 +92,10 @@ LIMIT 20;
 --    Hint ladder, rung 1: For sql-28 Exercise 2, inspect the source keys that survive `WHERE`; then check `c.customer_id` before applying the row cap.
 -- 3. [Query writing] Count event rows with missing device metadata separately from present values.
 --    Hint: Use `?` to test key existence rather than comparing extracted text to NULL.
---    Inputs: For sql-28 Exercise 3, read from `events`. Build the answer toward `has_device_key`, `missing_device_key`, and `all_events`; keep `has_device_key` visible whenever the result has row-level grain.
+--    Inputs: For sql-28 Exercise 3, read from `events` and count rows whose `metadata` contains the key `device` (`metadata ? 'device'`), rows without that key, and all rows.
 --    Expected result/shape: For sql-28 Exercise 3, expected output: One summary row. The final columns are `has_device_key`, `missing_device_key`, and `all_events`.
---    Verify: For sql-28 Exercise 3, reselect the returned keys directly from the source; require unique `has_device_key` where the expected grain is one row per key and confirm the projected `has_device_key`, `missing_device_key`, and `all_events` against `events`. Add one source row with a new `has_device_key`; verify the result gains exactly one row carrying that `has_device_key` value.
---    Hint ladder, rung 1: For sql-28 Exercise 3, inspect the source keys that survive `WHERE`.
+--    Verify: For sql-28 Exercise 3, confirm one row with `has_device_key` 20000, `missing_device_key` 0, and `all_events` 20000; then test `VALUES ('{"device": null}'::jsonb), ('{}'::jsonb)`: `?` returns true and false, while `->> 'device' IS NULL` is true for both, so only `?` separates a present JSON null from a missing key.
+--    Hint ladder, rung 1: For sql-28 Exercise 3, count `metadata ? 'device'` and `NOT metadata ? 'device'` separately first; together they must equal the event count.
 -- 4. [Prediction] Aggregate event-type counts into a JSONB object per customer and predict key ordering expectations.
 --    Hint: JSON objects are mappings; do not treat key order as a semantic contract.
 --    Inputs: For sql-28 Exercise 4, read from `events`. Build the answer toward `customer_id`, and `counts_by_type`; keep `customer_id` visible whenever the result has row-level grain.
@@ -101,8 +110,8 @@ LIMIT 20;
 --    Hint ladder, rung 1: For sql-28 Exercise 5, check `xd.doc_id` before applying the row cap.
 -- 6. [Extension] Safely cast a numeric JSON text field from sample payloads, returning NULL for missing or malformed values.
 --    Hint: Validate extracted text with a numeric regex before casting.
---    Inputs: For sql-28 Exercise 6, read from `payloads`. Build the answer toward `payload`, and `safe_amount`; keep `payload` visible whenever the result has row-level grain.
---    Expected result/shape: For sql-28 Exercise 6, expected output: One row per sample payload. The final columns are `payload`, and `safe_amount`.
---    Verify: For sql-28 Exercise 6, reselect the returned keys directly from the source; require unique `payload` where the expected grain is one row per key and confirm the projected `payload`, and `safe_amount` against `payloads`. Repeat with `NULL` in `payload`, and `safe_amount` and state whether the row is kept, rejected, or classified.
+--    Inputs: For sql-28 Exercise 6, read three sample documents from the inline `payloads` relation: `{"amount": "12.50"}`, `{"amount": "bad"}`, and `{}`, and cast `payload ->> 'amount'` to `numeric` only when the text passes the numeric pattern.
+--    Expected result/shape: For sql-28 Exercise 6, expected output: three rows with columns `payload` and `safe_amount`, one per sample document: `12.50`, `NULL`, and `NULL`. No row is removed, and no cast error stops the query.
+--    Verify: For sql-28 Exercise 6, confirm that a bare `(payload ->> 'amount')::numeric` over the same rows fails with SQLSTATE `22P02` (`invalid input syntax for type numeric: "bad"`); then add `{"amount": "1e3"}` and observe that the pattern returns `NULL` although `pg_input_is_valid('1e3', 'numeric')` returns `true`.
 --    Hint ladder, rung 1: For sql-28 Exercise 6, select `payload` from `payloads` before adding derived columns.
 ROLLBACK;

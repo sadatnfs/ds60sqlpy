@@ -1,5 +1,5 @@
 -- Day 01 executable solutions
--- SOLUTION READING MAP — sql-01: Select Where Orderby
+-- SOLUTION READING MAP for sql-01: SELECT, WHERE, ORDER BY, and LIMIT
 -- Explanation: sql/postgres-60day/solutions/day01_solutions.md
 -- Run from the repository root only against advanced_sql_training:
 --   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day01_solutions.sql

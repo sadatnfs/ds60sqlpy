@@ -1,5 +1,5 @@
 -- Day 31 solutions: EXPLAIN and EXPLAIN ANALYZE
--- SOLUTION READING MAP — sql-31: Explain Analyze
+-- SOLUTION READING MAP for sql-31: Reading Plans with EXPLAIN and EXPLAIN ANALYZE
 -- Explanation: sql/postgres-60day/solutions/day31_solutions.md
 -- Run from the repository root only against advanced_sql_training:
 --   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day31_solutions.sql
@@ -125,8 +125,9 @@ ROLLBACK TO SAVEPOINT before_explained_update;
 
 RELEASE SAVEPOINT before_explained_update;
 
--- Exercise 6: the CHECK constraint makes negative totals impossible. Compare
--- the estimate printed by EXPLAIN with the actual zero rows.
+-- Exercise 6: the seed never produces negative totals (orders.total_amount has
+-- no CHECK constraint). Compare the estimate printed by EXPLAIN with the actual
+-- zero rows.
 EXPLAIN (
   ANALYZE,
   BUFFERS

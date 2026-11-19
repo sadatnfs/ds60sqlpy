@@ -28,14 +28,8 @@ Start at the repository root. The answer-free starter is deliberately safe to
 run: it prints orientation text and does not call unfinished functions or
 contact PostgreSQL.
 
-```powershell
-# Windows PowerShell
-.\.venv\Scripts\python.exe bridge\lessons\day03_safe_psycopg_queries.py
-.\.venv\Scripts\python.exe -m pytest bridge\tests -q
-```
-
 ```bash
-# macOS/Linux
+# Linux, macOS, or Windows through WSL 2
 .venv/bin/python bridge/lessons/day03_safe_psycopg_queries.py
 .venv/bin/python -m pytest bridge/tests -q
 ```
@@ -92,6 +86,42 @@ cursor.execute("SELECT count(*) FROM %s", ("orders",))
 
 For a genuinely dynamic table, first restrict choices, then use
 `sql.Identifier`. Never write your own identifier-quoting function.
+
+### The real driver: identifiers and row factories
+
+`sql.Identifier("training", "customers")` quotes each part of a qualified name,
+and `as_string()` renders the composed statement for a log or a test without a
+connection (Psycopg 3.2 and later). A row factory such as `class_row` builds
+objects from result rows inside the driver. It matches result columns to fields
+by name but validates nothing, so keep the explicit conversions in
+`find_customers()` for rows that come from fakes or other sources; the real
+driver already returns PostgreSQL `numeric` as `Decimal`.
+
+```python
+import os
+from dataclasses import dataclass
+
+import psycopg
+from psycopg import sql
+from psycopg.rows import class_row
+
+
+@dataclass
+class CustomerRow:
+    customer_id: int
+    country: str
+
+
+table = sql.Identifier("training", "customers")
+query = sql.SQL(
+    "SELECT customer_id, country FROM {} WHERE country = %s ORDER BY customer_id"
+).format(table)
+print(query.as_string())  # ... FROM "training"."customers" WHERE country = %s ...
+
+with psycopg.connect(os.environ["DS60_DATABASE_URL"]) as conn:
+    with conn.cursor(row_factory=class_row(CustomerRow)) as cur:
+        rows = cur.execute(query, ("US",)).fetchall()  # 63 rows on the course seed
+```
 
 
 <!-- BEGIN BRIDGE ENRICHMENT: DEEP DIVE -->
@@ -215,15 +245,15 @@ it does not replace these fast boundary tests.
 Only after fake tests pass, set `DS60_DATABASE_URL` to the disposable course
 database and run the read-only function in a Python shell.
 
-```powershell
-$env:DS60_DATABASE_URL = "postgresql://USER:PASSWORD@localhost:5432/advanced_sql_training"
-.\.venv\Scripts\python.exe
-```
-
 ```bash
-export DS60_DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/advanced_sql_training"
+export DS60_DATABASE_URL="postgresql://admin@127.0.0.1:PORT/advanced_sql_training"
 .venv/bin/python
 ```
+
+Replace `PORT` with the forwarded PostgreSQL port that `./classroom status`
+reports (55432 by default). Keep the password out of the URL: supply it
+through a private libpq password file as the
+[JupySQL setup guide](../../docs/setup/jupyter-postgresql.md) shows.
 
 Connect with `psycopg.connect(os.environ["DS60_DATABASE_URL"])`, open a cursor,
 and call your function. Do not print the URL. This step reads only; if you add
@@ -240,11 +270,18 @@ temporary exploratory writes, call `rollback()` before closing.
 ## Common pitfalls
 
 - **Using f-strings or `.format()` for values:** this creates an injection path.
-- **Quoting a placeholder:** `WHERE country = '%s'` binds incorrectly.
+- **Quoting a placeholder:** Psycopg rewrites `'%s'` to the string literal
+  `'$1'`, so the parameter is never used: a text value fails with SQLSTATE
+  `42P18` (`could not determine data type of parameter $1`), and an integer
+  value silently compares with the text `$1`. Write a literal percent sign as
+  `%%`, for example `LIKE 'A%%'`; a single `%` in a parameterized query raises
+  `ProgrammingError` before anything is sent.
 - **Using SQLite for tests:** its placeholders, type behavior, concurrency, and
   SQL dialect do not prove PostgreSQL behavior.
-- **Calling `str(Identifier(...))` as SQL:** composable objects need a Psycopg
-  connection context to render correctly.
+- **Calling `str()` on a composed query:** it returns a debugging repr such as
+  `Composed([...])`, not SQL. Pass the composed object to `execute()`;
+  `query.as_string()` (no connection needed in Psycopg 3.2 and later) is for
+  logs and tests only.
 - **Assuming row shape forever:** map and validate rows at the adapter boundary.
 
 
@@ -257,7 +294,7 @@ prompt below deliberately names exact paths so a new AI tutoring session can ori
 itself without guessing.
 
 ```text
-Tutor me through stable lesson ID bridge-03: Safe Psycopg Queries.
+Tutor me through stable lesson ID bridge-03: Safe Parameterized Queries with Psycopg.
 Direct catalog prerequisites: bridge-02. Assume I completed exactly those
 prerequisites, then begin with one short Retrieval question that connects each
 prerequisite to this lesson.
@@ -270,12 +307,12 @@ Do not open, quote, summarize, or copy anything under solutions/ until I
 explicitly say I have finished my attempt and ask to compare.
 
 Use these coaching phases in order:
-1. Predict — ask what I expect before I run or change code.
-2. Attempt — let me implement or explain one numbered exercise at a time.
-3. Hint — give the smallest useful conceptual hint, never a finished answer.
-4. Evidence — ask for the exact return value, exception type, recorded calls,
+1. Predict: ask what I expect before I run or change code.
+2. Attempt: let me implement or explain one numbered exercise at a time.
+3. Hint: give the smallest useful conceptual hint, never a finished answer.
+4. Evidence: ask for the exact return value, exception type, recorded calls,
    query plus bound parameters, or written decision required by that exercise.
-5. Retrieval — close with two no-notes questions and one transfer problem.
+5. Retrieval: close with two no-notes questions and one transfer problem.
 
 Keep the default path offline and fake-first. If the lesson has an optional
 PostgreSQL step, require my explicit opt-in, DS60_DATABASE_URL, and the

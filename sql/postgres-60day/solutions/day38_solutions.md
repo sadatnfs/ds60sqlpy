@@ -7,13 +7,8 @@
 Open this explanation only after making an honest attempt. The executable
 companion runs solely against the disposable `advanced_sql_training` database:
 
-```powershell
-# Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f "sql\postgres-60day\solutions\day38_solutions.sql"
-```
-
 ```bash
-# macOS/Linux, from the repository root
+# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day38_solutions.sql
 ```
@@ -26,7 +21,7 @@ ordering with the explanation before comparing syntax.
 ## Clause-by-clause reading map
 
 The lesson's main concepts are MVCC, Isolation level, Serialization failure. Its worked-model focus is:
-Open two disposable sessions and write down each statement before running it. Under READ COMMITTED, have session A read a count, session B commit a matching insert, and session A read again. Repeat at REPEATABLE READ and explain the snapshot difference; clean up the shared disposable table afterward.
+Open two disposable sessions and write down each statement before running it. Under `READ COMMITTED`, have session A read a count, session B commit a matching insert, and session A read again. Repeat at `REPEATABLE READ` and explain the snapshot difference; clean up the shared disposable table afterward.
 
 - Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
   before adding aggregates; a one-to-many join is allowed to multiply rows only
@@ -143,13 +138,13 @@ The two reads in A return different committed versions because
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-38 Exercise 1, read from `isolation_lab`. Build the answer toward `qty`; keep `qty` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-38 Exercise 1, expected output: one row per `qty`. The final columns are `qty`.
-- **Independent verification:** For sql-38 Exercise 1, run an anti-check that counts rows where NOT ((id = 1)); require unique `qty` where the expected grain is one row per key and confirm the projected `qty` against `isolation_lab`. Add one row for which `(id = 1)` is true and one for which it is false; verify only the matching `qty` value is returned.
-- **Intermediate relation check:** For sql-38 Exercise 1, inspect the source keys that survive `WHERE`.
-- **Clause check:** For sql-38 Exercise 1, the solution actually uses `FROM`, `WHERE`, and `SELECT`. Read only those operations: begin at `isolation_lab`, preserve one row per `qty`, and finish with `qty`.
-- **Alternative/trade-off:** For sql-38 Exercise 1, the chosen form is justified by this lesson-specific rationale: Session A: While A remains open, Session B: Back in Session A: The two reads in A return different committed versions because `READ COMMITTED` takes a new statement snapshot. Evaluate another form against the concrete expected result (one row per `qty`) and the verification above.
-- **Edge case:** Add one row for which `(id = 1)` is true and one for which it is false; verify only the matching `qty` value is returned.
+- **Inputs/evidence:** For sql-38 Exercise 1, use two terminals and the committed lab table `training.isolation_lab` from the lab setup, seeded with rows `(1, 10)` and `(2, 20)`; Session B changes only the row with `id = 1`.
+- **Expected result/shape:** For sql-38 Exercise 1, expected output: under `READ COMMITTED`, Session A's two `SELECT qty FROM training.isolation_lab WHERE id = 1` statements return one row each, `10` and then `15`, because Session B commits `qty = 15` between them; under `REPEATABLE READ` the second read still returns `10`.
+- **Independent verification:** For sql-38 Exercise 1, record both `qty` values, the commit order, and each session's level from `SHOW transaction_isolation`; after both sessions end, `SELECT id, qty FROM training.isolation_lab ORDER BY id` returns `(1, 15)` and `(2, 20)`. Reset `id = 1` to `10` before repeating the schedule at `REPEATABLE READ`.
+- **Intermediate relation check:** For sql-38 Exercise 1, while Session A waits between its two reads, Session B can run `SELECT pid, state FROM pg_stat_activity WHERE datname = current_database()` and see Session A as `idle in transaction`.
+- **Clause check:** For sql-38 Exercise 1, each session uses `BEGIN ISOLATION LEVEL ...`, one statement on the row with `id = 1` (`SELECT qty` in A, `UPDATE` in B), and `COMMIT` or `ROLLBACK`; the result depends on the interleaving, not on query shape.
+- **Alternative/trade-off:** For sql-38 Exercise 1, `SELECT qty ... WHERE id = 1 FOR SHARE` in Session A makes Session B's `UPDATE` wait until A ends, so A reads `10` twice even under `READ COMMITTED`; that trades concurrency for a stable value.
+- **Edge case:** Run Session B's `UPDATE` without `COMMIT`: Session A's second read still returns `10`, because PostgreSQL never shows uncommitted changes to other sessions (no dirty reads at any level).
 
 ## Exercise 2: Phantom rows between two counts
 
@@ -181,13 +176,13 @@ continue to see its original predicate result.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-38 Exercise 2, read the target keys from `training.isolation_lab` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
-- **Expected result/shape:** For sql-38 Exercise 2, expected output: the command tag and an independently counted set of affected `affected_row_count` values. The final columns are `affected_row_count`, and `command_tag`.
-- **Independent verification:** For sql-38 Exercise 2, materialize the intended `affected_row_count` target set first; require the command tag/`RETURNING` set to match it, then query `training.isolation_lab` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `command_tag` values in both cases.
-- **Intermediate relation check:** For sql-38 Exercise 2, materialize the intended `affected_row_count` target set first; require the command tag/`RETURNING` set to match it, then query `training.isolation_lab` again and prove rollback or idempotent retry.
-- **Clause check:** For sql-38 Exercise 2, the solution actually uses `FROM`, `WHERE`, and `SELECT`. Read only those operations: begin at `training.isolation_lab`, preserve exactly one summary row, and finish with `affected_row_count`, and `command_tag`.
-- **Alternative/trade-off:** For sql-38 Exercise 2, the chosen form is justified by this lesson-specific rationale: Reset, then start Session A: Session B inserts a new qualifying row: Back in Session A: The new qualifying row is a phantom. Evaluate another form against the concrete expected result (the command tag and an independently counted set of affected `affected_row_count` values) and the verification above.
-- **Edge case:** Use an empty target set and a multi-row target set; reconcile the affected `command_tag` values in both cases.
+- **Inputs/evidence:** For sql-38 Exercise 2, start from `training.isolation_lab` with no row whose `id >= 3`; Session A counts rows matching `qty >= 20` twice while Session B inserts and commits `(3, 30)` between the two counts.
+- **Expected result/shape:** For sql-38 Exercise 2, expected output: under `READ COMMITTED`, Session A's two one-row `count` results are `1` and then `2`, because the committed row `(3, 30)` is a phantom; under `REPEATABLE READ`, both counts are `1` until Session A ends.
+- **Independent verification:** For sql-38 Exercise 2, record both `count` values and the commit order at each isolation level; after each run, `SELECT COUNT(*) FROM training.isolation_lab WHERE id = 3` returns `1`, proving Session B's insert was committed. Delete the row with `id = 3` before repeating the schedule.
+- **Intermediate relation check:** For sql-38 Exercise 2, run Session A's count once more after Session B's `INSERT` but before its `COMMIT`: it still returns `1`, because the uncommitted row is invisible.
+- **Clause check:** For sql-38 Exercise 2, Session A uses `SELECT COUNT(*) ... WHERE qty >= 20` twice and Session B uses one `INSERT ... VALUES (3, 30)` followed by `COMMIT`.
+- **Alternative/trade-off:** For sql-38 Exercise 2, `SERIALIZABLE` also hides the phantom from Session A; under `READ COMMITTED`, `LOCK TABLE training.isolation_lab IN SHARE MODE` in Session A would instead make Session B's insert wait.
+- **Edge case:** Insert `(3, 19)` instead: the row does not match `qty >= 20`, so both counts stay `1` at every isolation level.
 
 ## Exercise 3: Serialization failure under contention
 
@@ -227,19 +222,20 @@ COMMIT;
 COMMIT;
 ```
 
-PostgreSQL must abort one transaction with SQLSTATE `40001` to prevent the
-read/write dependency cycle. Real applications retry the entire transaction,
-not just the final statement.
+Each transaction read a row that the other one changed, so the two form a
+read/write dependency cycle. PostgreSQL lets Session A commit and then rejects
+Session B's `COMMIT` with SQLSTATE `40001`. Real applications retry the entire
+transaction, including its reads, not just the final statement.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-38 Exercise 3, read from `training.isolation_lab`. Build the answer toward `serializable`; keep `serializable` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-38 Exercise 3, expected output: one row per `serializable`. The final columns are `serializable`.
-- **Independent verification:** For sql-38 Exercise 3, run an anti-check that counts rows where NOT ((id = 1) OR (id = 2) OR (id >= 3)); require unique `serializable` where the expected grain is one row per key and confirm the projected `serializable` against `training.isolation_lab`. Add one row for which `(id = 1) OR (id = 2) OR (id >= 3)` is true and one for which it is false; verify only the matching `serializable` value is returned.
-- **Intermediate relation check:** For sql-38 Exercise 3, inspect the source keys that survive `WHERE`.
-- **Clause check:** For sql-38 Exercise 3, the solution actually uses `FROM`, `WHERE`, and `SELECT`. Read only those operations: begin at `training.isolation_lab`, preserve one row per `serializable`, and finish with `serializable`.
-- **Alternative/trade-off:** For sql-38 Exercise 3, the chosen form is justified by this lesson-specific rationale: Reset the two rows, then interleave these commands. Evaluate another form against the concrete expected result (one row per `serializable`) and the verification above.
-- **Edge case:** Add one row for which `(id = 1) OR (id = 2) OR (id >= 3)` is true and one for which it is false; verify only the matching `serializable` value is returned.
+- **Inputs/evidence:** For sql-38 Exercise 3, reset `training.isolation_lab` to `(1, 10)` and `(2, 20)`, then open two `SERIALIZABLE` transactions that both read `SUM(qty)` before Session A updates the row with `id = 1` and Session B updates the row with `id = 2`.
+- **Expected result/shape:** For sql-38 Exercise 3, expected output: both sums are `30`; Session A's `COMMIT` succeeds and Session B's `COMMIT` fails with SQLSTATE `40001` (`could not serialize access due to read/write dependencies among transactions`), leaving committed rows `(1, 11)` and `(2, 20)`.
+- **Independent verification:** For sql-38 Exercise 3, capture the error text and SQLSTATE (for example after `\set VERBOSITY verbose`), confirm the committed rows with `SELECT id, qty FROM training.isolation_lab ORDER BY id`, then rerun Session B's whole transaction from `BEGIN ISOLATION LEVEL SERIALIZABLE` and confirm the rows `(1, 11)` and `(2, 21)`.
+- **Intermediate relation check:** For sql-38 Exercise 3, after both updates and before either commit, `SELECT id, qty FROM training.isolation_lab ORDER BY id` in each session shows only that session's own change.
+- **Clause check:** For sql-38 Exercise 3, both sessions use `SELECT SUM(qty)` and one single-row `UPDATE`; the abort comes from the read/write dependency cycle, not from a query error.
+- **Alternative/trade-off:** For sql-38 Exercise 3, running the same schedule at `REPEATABLE READ` lets both commits succeed and produces write skew: each transaction validated a sum that the other one changed.
+- **Edge case:** If Session B updates the row with `id = 1` instead, its `UPDATE` waits for Session A and then fails with SQLSTATE `40001` (`could not serialize access due to concurrent update`) as soon as A commits.
 
 ## Cleanup and cautions
 
@@ -259,13 +255,13 @@ then removes it explicitly before the outer transaction continues.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-38 Exercise 4, read from `isolation_solution`. Build the answer toward `release`; keep `release` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-38 Exercise 4, expected output: one row per `release`. The final columns are `release`. The final order is `id`.
-- **Independent verification:** For sql-38 Exercise 4, run an anti-check that counts rows where NOT ((id = 2)); require unique `release` where the expected grain is one row per key and confirm the projected `release` against `isolation_solution`. Add one row for which `(id = 2)` is true and one for which it is false; verify only the matching `release` value is returned.
-- **Intermediate relation check:** For sql-38 Exercise 4, inspect the source keys that survive `WHERE`; then check `id` before applying the row cap.
-- **Clause check:** For sql-38 Exercise 4, the solution actually uses `FROM`, `WHERE`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `isolation_solution`, preserve one row per `release`, and finish with `release` ordered by `id`.
-- **Alternative/trade-off:** For sql-38 Exercise 4, the chosen form is justified by this lesson-specific rationale: `ROLLBACK TO` reverses later work but retains the named savepoint. Evaluate another form against the concrete expected result (one row per `release`) and the verification above.
-- **Edge case:** Add one row for which `(id = 2)` is true and one for which it is false; verify only the matching `release` value is returned.
+- **Inputs/evidence:** For sql-38 Exercise 4, use the temporary `isolation_solution` rows `(1, 10)` and `(2, 20)` inside the lesson transaction; set a savepoint, add `1` to `quantity` for `id = 2`, roll back to the savepoint, then release it.
+- **Expected result/shape:** For sql-38 Exercise 4, expected output: `RELEASE SAVEPOINT` succeeds because `ROLLBACK TO SAVEPOINT` keeps the savepoint, and the final `SELECT` returns two rows ordered by `id` with columns `id` and `quantity`: `(1, 10)` and `(2, 20)`.
+- **Independent verification:** For sql-38 Exercise 4, compare the row with `id = 2` before the savepoint and after the rollback (both `20`); in a scratch transaction, a second `RELEASE SAVEPOINT reusable_point` fails with SQLSTATE `3B001` (`savepoint "reusable_point" does not exist`), which proves the first `RELEASE` removed it.
+- **Intermediate relation check:** For sql-38 Exercise 4, select `id, quantity` between the `UPDATE` and `ROLLBACK TO SAVEPOINT`: the row with `id = 2` shows `21`, then `20` after the rollback.
+- **Clause check:** For sql-38 Exercise 4, the statements are `SAVEPOINT`, `UPDATE ... WHERE id = 2`, `ROLLBACK TO SAVEPOINT`, `RELEASE SAVEPOINT`, and a final `SELECT ... ORDER BY id`.
+- **Alternative/trade-off:** For sql-38 Exercise 4, when the work after a savepoint succeeds, `RELEASE SAVEPOINT` alone keeps that work and only removes the marker.
+- **Edge case:** Roll back to the same savepoint twice before releasing it: both `ROLLBACK TO SAVEPOINT reusable_point` statements succeed while the savepoint exists.
 
 ## Exercise 5: Transfer atomically
 
@@ -274,13 +270,13 @@ updates both balances in one unit. A final SUM proves conservation of money.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-38 Exercise 5, read from `transfer_accounts`. Build the answer toward `available`; keep `available` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-38 Exercise 5, expected output: one row per `available`. The final columns are `available`.
-- **Independent verification:** For sql-38 Exercise 5, run an anti-check that counts rows where NOT ((account_id = 1 FOR UPDATE) OR (account_id = 1) OR (account_id = 2)); require unique `available` where the expected grain is one row per key and confirm the projected `available` against `transfer_accounts`. Add one row for which `(account_id = 1 FOR UPDATE) OR (account_id = 1) OR (account_id = 2)` is true and one for which it is false; verify only the matching `available` value is returned.
-- **Intermediate relation check:** For sql-38 Exercise 5, inspect the source keys that survive `WHERE`.
-- **Clause check:** For sql-38 Exercise 5, the solution actually uses `FROM`, `WHERE`, and `SELECT`. Read only those operations: begin at `transfer_accounts`, preserve one row per `available`, and finish with `available`.
-- **Alternative/trade-off:** For sql-38 Exercise 5, the chosen form is justified by this lesson-specific rationale: The solution locks/reads the debit account, rejects insufficient funds, and updates both balances in one unit. Evaluate another form against the concrete expected result (one row per `available`) and the verification above.
-- **Edge case:** Add one row for which `(account_id = 1 FOR UPDATE) OR (account_id = 1) OR (account_id = 2)` is true and one for which it is false; verify only the matching `available` value is returned.
+- **Inputs/evidence:** For sql-38 Exercise 5, create the temporary `transfer_accounts` table with rows `(1, 100.00)` and `(2, 40.00)` and `CHECK (balance >= 0)`; move `25.00` from account 1 to account 2 after locking and checking the debit row.
+- **Expected result/shape:** For sql-38 Exercise 5, expected output: one `conserved_total` row equal to `140.00`; the account rows become `(1, 75.00)` and `(2, 65.00)`.
+- **Independent verification:** For sql-38 Exercise 5, list `account_id` and `balance` before and after the transfer and compare their sums; then attempt a `200.00` transfer after a savepoint, confirm the `insufficient balance` exception with SQLSTATE `P0001`, roll back to the savepoint, and confirm both balances are unchanged.
+- **Intermediate relation check:** For sql-38 Exercise 5, in a scratch run that selects both balances between the two `UPDATE` statements, the total is temporarily `115.00`; no other session can observe that state before commit.
+- **Clause check:** For sql-38 Exercise 5, the `DO` block uses `SELECT ... INTO ... FOR UPDATE`, an `IF` guard with `RAISE EXCEPTION`, and two single-row `UPDATE` statements; the check query uses `SUM(balance)`.
+- **Alternative/trade-off:** For sql-38 Exercise 5, one `UPDATE ... SET balance = balance + CASE ... END WHERE account_id IN (1, 2)` also changes both rows atomically; the `CHECK (balance >= 0)` constraint would then reject an overdraft with SQLSTATE `23514` instead of the custom message.
+- **Edge case:** Transfer exactly `100.00`: the debit balance becomes `0.00`, which both the guard and `CHECK (balance >= 0)` allow.
 
 ## Exercise 6: Recover from a constraint error
 
@@ -290,13 +286,13 @@ still execute a query.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-38 Exercise 6, read from `isolation_solution`. Build the answer toward `still_usable`; keep `still_usable` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-38 Exercise 6, expected output: one row per `still_usable`. The final columns are `still_usable`.
-- **Independent verification:** For sql-38 Exercise 6, reselect the returned keys directly from the source; require unique `still_usable` where the expected grain is one row per key and confirm the projected `still_usable` against `isolation_solution`. Add duplicate source candidates for `still_usable`; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.
-- **Intermediate relation check:** For sql-38 Exercise 6, select `still_usable` from `isolation_solution` before adding derived columns.
-- **Clause check:** For sql-38 Exercise 6, the solution actually uses `WITH`, `FROM`, and `SELECT`. Read only those operations: begin at `isolation_solution`, preserve one row per `still_usable`, and finish with `still_usable`.
-- **Alternative/trade-off:** For sql-38 Exercise 6, the chosen form is justified by this lesson-specific rationale: A PL/pgSQL exception block creates an internal subtransaction. Evaluate another form against the concrete expected result (one row per `still_usable`) and the verification above.
-- **Edge case:** Add duplicate source candidates for `still_usable`; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.
+- **Inputs/evidence:** For sql-38 Exercise 6, insert a duplicate `id = 1` into the temporary `isolation_solution` table inside a protected PL/pgSQL block (or after a savepoint), so the unique violation with SQLSTATE `23505` is caught or rolled back to the savepoint.
+- **Expected result/shape:** For sql-38 Exercise 6, expected output: a notice that the duplicate was rejected, then one `still_usable` row whose value is `2`, the number of rows in `isolation_solution`.
+- **Independent verification:** For sql-38 Exercise 6, in a scratch transaction, repeat the duplicate insert without protection and confirm that the next statement fails with SQLSTATE `25P02` (`current transaction is aborted`); the savepoint recovery is what avoids that state.
+- **Intermediate relation check:** For sql-38 Exercise 6, `SELECT id, quantity FROM isolation_solution ORDER BY id` after the block shows the two original rows and no duplicate.
+- **Clause check:** For sql-38 Exercise 6, the `DO` block wraps one `INSERT` in a nested `BEGIN ... EXCEPTION WHEN unique_violation` block; the check query is `SELECT COUNT(*) AS still_usable FROM isolation_solution`.
+- **Alternative/trade-off:** For sql-38 Exercise 6, `SAVEPOINT before_insert` followed by `ROLLBACK TO SAVEPOINT before_insert` gives the same recovery without PL/pgSQL, but an uncaught error stops a script run with `ON_ERROR_STOP`, so the `DO` block keeps the lesson file runnable.
+- **Edge case:** A different error, such as a `CHECK` violation, is not caught by `WHEN unique_violation` and still aborts the transaction.
 
 ## Exercise 7: Choose isolation for read-only work
 
@@ -306,10 +302,10 @@ be correct. “Read-only” does not decide the snapshot contract.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-38 Exercise 7, use two labeled terminals and only `txn_demo`, `isolation_solution`, and `transfer_accounts`. Write the statement order, expected wait/SQLSTATE, and cleanup step before opening either transaction.
-- **Expected result/shape:** For sql-38 Exercise 7, expected output: a statement-by-statement Session A/Session B transcript followed by the committed fixture state and cleanup evidence. The final columns are `session`, `statement_number`, `outcome`, and `sqlstate`.
-- **Independent verification:** For sql-38 Exercise 7, compare every observed value, wait, and SQLSTATE with the written schedule; query `txn_demo`, `isolation_solution`, and `transfer_accounts` after each commit/rollback and finish with both sessions idle and the fixture reset. Repeat the exact interleaving after cleanup and confirm the same wait, SQLSTATE, and committed final rows.
-- **Intermediate relation check:** For sql-38 Exercise 7, compare every observed value, wait, and SQLSTATE with the written schedule; query `txn_demo`, `isolation_solution`, and `transfer_accounts` after each commit/rollback and finish with both sessions idle and the fixture reset.
-- **Clause check:** For sql-38 Exercise 7, this is a written operational artifact rather than a clause-reading exercise; trace each claim to `txn_demo`, `isolation_solution`, and `transfer_accounts` or label it as proposed policy.
-- **Alternative/trade-off:** For sql-38 Exercise 7, the chosen form is justified by this lesson-specific rationale: Several SELECT statements that must describe one consistent snapshot justify `REPEATABLE READ`. Evaluate another form against the concrete expected result (a statement-by-statement Session A/Session B transcript followed by the committed fixture state and cleanup evidence) and the verification above.
-- **Edge case:** Repeat the exact interleaving after cleanup and confirm the same wait, SQLSTATE, and committed final rows.
+- **Inputs/evidence:** For sql-38 Exercise 7, consider a report that runs two statements over `training.isolation_lab`, a `COUNT(*)` and a `SUM(qty)`, while another session may commit changes between them.
+- **Expected result/shape:** For sql-38 Exercise 7, expected output: a short written answer that chooses `REPEATABLE READ` (optionally `READ ONLY`) when both results must describe one snapshot, and `READ COMMITTED` when each statement may show the latest committed data.
+- **Independent verification:** For sql-38 Exercise 7, test the claim with the Exercise 2 schedule: under `READ COMMITTED`, a `SUM(qty)` run after Session B commits includes the new row that the earlier `COUNT(*)` did not count; under `REPEATABLE READ`, both values describe the first snapshot.
+- **Intermediate relation check:** For sql-38 Exercise 7, write down which snapshot each statement of the report uses before choosing a level.
+- **Clause check:** For sql-38 Exercise 7, the answer is a written decision; its evidence is the Exercise 2 schedule rerun with a `COUNT(*)` and a `SUM(qty)` in the same transaction.
+- **Alternative/trade-off:** For sql-38 Exercise 7, `BEGIN ISOLATION LEVEL SERIALIZABLE, READ ONLY, DEFERRABLE` waits for a safe snapshot and then can never fail with a serialization error, at the cost of a possible start-up delay.
+- **Edge case:** A report made of one statement already reads one snapshot under `READ COMMITTED`; the isolation choice matters only when several statements must agree.

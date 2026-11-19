@@ -1,4 +1,4 @@
--- SQL-START-02: Values NULL and Deterministic Order
+-- SQL-START-02: Values, NULL, and Deterministic Order
 -- Guide: sql/professional/companion-guides/sql_start_02_values_null_order.md
 -- Use ./classroom -> PostgreSQL -> sql-start-02 and its saved learner copy.
 -- Select "Whole SQL lesson (psql)"; Docker supplies the client.

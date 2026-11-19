@@ -351,10 +351,10 @@ LIMIT 12;
 --    Hint ladder, rung 1: For sql-60 Exercise 5, run the underlying query without `EXPLAIN` and preserve its `plan_node` rows.
 -- 6. Explanation: produce a release checklist covering rollback, ownership,
 --    permissions, refresh cadence, monitoring, data contracts, and known limits.
---    Inputs: For sql-60 Exercise 6, read from the inline `VALUES` fixture. Build the answer toward `item`, `evidence`, and `owner`; keep `evidence` visible whenever the result has row-level grain.
---    Expected result/shape: For sql-60 Exercise 6, expected output: one row per `evidence`. The final columns are `item`, `evidence`, and `owner`.
---    Verify: For sql-60 Exercise 6, reselect the returned keys directly from the source; require unique `evidence` where the expected grain is one row per key and confirm the projected `item`, `evidence`, and `owner` against the inline `VALUES` fixture. Add one source row with a new `evidence`; verify the result gains exactly one row carrying that `evidence` value.
---    Hint ladder, rung 1: For sql-60 Exercise 6, select `evidence` from the inline `VALUES` fixture before adding derived columns.
+--    Inputs: For sql-60 Exercise 6, list the release checklist as an inline `VALUES` relation with one row per `item`, its current `evidence`, and its `owner`.
+--    Expected result/shape: For sql-60 Exercise 6, expected output: 6 rows, one per checklist `item`: rollback plan, object ownership/privileges, refresh cadence, monitoring and alerts, data contracts, and known limits. The final columns are `item`, `evidence`, and `owner`.
+--    Verify: For sql-60 Exercise 6, confirm 6 rows with no NULL `evidence` or `owner` and no repeated `item`; every row whose `evidence` reads `review required` still needs a named reviewer before release.
+--    Hint ladder, rung 1: For sql-60 Exercise 6, write the `VALUES` list with column aliases first and check that each `item` appears once.
 -- 7. Construction: create a lineage table that maps each published metric to
 --    its source tables, transformation grain, and validation query.
 --    Inputs: For sql-60 Exercise 7, read from the inline `VALUES` fixture. Build the answer toward `metric_name`, `source_tables`, `transformation_grain`, and `validation_query`; keep `metric_name` visible whenever the result has row-level grain.
@@ -369,15 +369,15 @@ LIMIT 12;
 --    Hint ladder, rung 1: For sql-60 Exercise 8, select `order_id` from `v_monthly_revenue_refactored_solution`, and `orders` before adding derived columns.
 -- 9. Edge case: test empty, one-row, NULL-heavy, and duplicate-key fixtures and
 --    record which assumptions prevent each from reaching production.
---    Inputs: For sql-60 Exercise 9, read from `edge_fixture`. Build the answer toward `fixture_rows`, `null_email_rows`, `duplicate_key_rows`, and `nonnull_amount_rows`; keep `fixture_rows` visible whenever the result has row-level grain.
---    Expected result/shape: For sql-60 Exercise 9, expected output: one row per `fixture_rows`. The final columns are `fixture_rows`, `null_email_rows`, `duplicate_key_rows`, and `nonnull_amount_rows`.
---    Verify: For sql-60 Exercise 9, reselect the returned keys directly from the source; require unique `fixture_rows` where the expected grain is one row per key and confirm the projected `fixture_rows`, `null_email_rows`, `duplicate_key_rows`, and `nonnull_amount_rows` against `edge_fixture`. Repeat with `NULL` in `fixture_rows`, and `null_email_rows` and state whether the row is kept, rejected, or classified.
---    Hint ladder, rung 1: For sql-60 Exercise 9, inspect the source keys that survive `WHERE`.
+--    Inputs: For sql-60 Exercise 9, build a three-row `VALUES` fixture `edge_fixture(id, email, amount)` with one row whose email and amount are NULL and two rows that share `id` 2 with emails that differ only in case, then count rows, NULL emails, duplicate keys, and non-null amounts.
+--    Expected result/shape: For sql-60 Exercise 9, expected output: one row with `fixture_rows` 3, `null_email_rows` 1, `duplicate_key_rows` 1, and `nonnull_amount_rows` 2. The final columns are `fixture_rows`, `null_email_rows`, `duplicate_key_rows`, and `nonnull_amount_rows`.
+--    Verify: For sql-60 Exercise 9, confirm that `duplicate_key_rows` equals `COUNT(*) - COUNT(DISTINCT id)` (3 - 2 = 1) and `nonnull_amount_rows` equals `COUNT(amount)` (2); `COUNT(DISTINCT lower(email))` is 1, so the two `id` 2 rows also collide after email normalization.
+--    Hint ladder, rung 1: For sql-60 Exercise 9, count each property in its own `SELECT` over the fixture first; `COUNT(column)` skips NULL, while `COUNT(*)` does not.
 -- 10. Final sign-off: return PASS/FAIL/NOT_RUN for every acceptance criterion;
 --     prose alone must never turn an unexecuted check into PASS.
 -- When ready to persist created views/indexes, replace ROLLBACK with COMMIT.
---    Inputs: For sql-60 Exercise 10, read from `v_dq_customers_solution`, `v_customer_ltv_solution`, and `orders`. Build the answer toward `criterion`, and `result`; keep `order_id` visible whenever the result has row-level grain.
---    Expected result/shape: For sql-60 Exercise 10, expected output: one row per `order_id`. The final columns are `criterion`, and `result`. The final order is `criterion`.
---    Verify: For sql-60 Exercise 10, reselect the returned keys directly from the source; require unique `order_id` where the expected grain is one row per key and confirm the projected `criterion`, and `result` against `v_dq_customers_solution`, `v_customer_ltv_solution`, and `orders`. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
---    Hint ladder, rung 1: For sql-60 Exercise 10, check `criterion` before applying the row cap.
+--    Inputs: For sql-60 Exercise 10, list the acceptance criteria as a `VALUES` relation with `criterion`, an `executed` flag, the `observed` value from the solution views, and the `expected` value, then label each criterion `PASS`, `FAIL`, or `NOT_RUN`.
+--    Expected result/shape: For sql-60 Exercise 10, expected output: 3 rows ordered by `criterion`: `customer DQ` PASS, `LTV reconciliation` PASS, and `Windows CI bootstrap` NOT_RUN. The final columns are `criterion` and `result`. The final order is `criterion`.
+--    Verify: For sql-60 Exercise 10, confirm that each PASS row's observed value matches its expected value when queried directly (`SELECT invalid_email FROM v_dq_customers_solution` returns 0) and that the unexecuted criterion reports `NOT_RUN`, never `PASS`.
+--    Hint ladder, rung 1: For sql-60 Exercise 10, write the `CASE` so that `executed` is tested before the comparison; an unexecuted check must never fall through to `PASS`.
 ROLLBACK;

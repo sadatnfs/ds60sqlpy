@@ -103,8 +103,8 @@ FROM
 --    Hint ladder, rung 1: For sql-35 Exercise 5, run `paid`, and `sold` one at a time. Record each CTE's row count and `order_id` uniqueness before the next stage uses it.
 -- 6. Edge case: compare COUNT(*) and COUNT(email) for customers, and explain
 --    why nullable inputs make the two counts intentionally different.
---    Inputs: For sql-35 Exercise 6, read from `customers`. Build the answer toward `customer_rows`, `customers_with_email`, and `customers_without_email`; keep `customer_id` visible whenever the result has row-level grain.
---    Expected result/shape: For sql-35 Exercise 6, expected output: one row per `customer_id`. The final columns are `customer_rows`, `customers_with_email`, and `customers_without_email`.
---    Verify: For sql-35 Exercise 6, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_rows`, `customers_with_email`, and `customers_without_email` against `customers`. Repeat with `NULL` in `customer_rows`, and `customers_with_email` and state whether the row is kept, rejected, or classified.
---    Hint ladder, rung 1: For sql-35 Exercise 6, select `customer_id` from `customers` before adding derived columns.
+--    Inputs: For sql-35 Exercise 6, read from `customers` and count, in one aggregate, all rows, rows with an `email`, and rows without one.
+--    Expected result/shape: For sql-35 Exercise 6, expected output: one row with `customer_rows` 500, `customers_with_email` 500, and `customers_without_email` 0. The final columns are `customer_rows`, `customers_with_email`, and `customers_without_email`.
+--    Verify: For sql-35 Exercise 6, confirm `customers_with_email + customers_without_email = customer_rows`; in a transaction you roll back, set one `email` to NULL and expect 500, 499, and 1, because `COUNT(email)` skips NULL while `COUNT(*)` counts every row.
+--    Hint ladder, rung 1: For sql-35 Exercise 6, compare `COUNT(*)` with `COUNT(email)` first; the difference is the number of NULL emails.
 ROLLBACK;

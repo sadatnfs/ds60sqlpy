@@ -11,16 +11,16 @@ the saved project selection. No host Python or PostgreSQL installation is
 required for this browser route.
 
 1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database. A simple snippet
-   such as `SELECT 1;` needs no training-schema reset.
+   the local disposable `advanced_sql_training` database.
 2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
    preserves the lesson's reviewed psql directives, relative includes and
    transaction behavior. **SQL snippet** is appropriate for ordinary SQL
    statements, but is not a replacement for an entire script's setup.
-3. When the lesson requires the course training data, use the explicit
-   preparation action and read its reset acknowledgement. It replaces the
-   course-owned `training` schema. Do not reset unrelated data or prepare
-   every lesson by habit; stateful sequences have their own ordering.
+3. The **Course database** panel above the code shows whether the course
+   training tables are loaded. Missing tables load automatically before your
+   first run (or choose **Load course tables**) and stay loaded for later
+   lessons. **Reset training data** restores the original rows only when your
+   own changes made results differ; it keeps your saved code and notes.
 4. Edit the learner copy in the classroom and save your prediction before
    running. Its whole-script workspace is
    `.learning/sql/sql-60/lesson/workspace/sql/postgres-60day/day60_final_capstone_part3.sql`.
@@ -87,7 +87,7 @@ row count. For a normal analytical `SELECT`, use this logical reading order:
 window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
 different physical plan while preserving those semantics.
 
-The worked walkthrough's lesson-specific task is: Take customer LTV through the final evidence loop: state one-customer grain and revenue scope, run the view query, reconcile summed LTV with SUM(orders.totalamount), capture the result and environment, and record any exception with owner and next action. Apply the same loop to each deliverable.
+The worked walkthrough's lesson-specific task is: Take customer LTV through the final evidence loop: state one-customer grain and revenue scope, run the view query, reconcile summed LTV with `SUM(orders.total_amount)`, capture the result and environment, and record any exception with owner and next action. Apply the same loop to each deliverable.
 The first runnable example has a concrete contract: Example 1 returns one row per the primary/business key of `v_dq_customers` from `v_dq_customers`. Compare the key set and row count with a simpler control over the same filter/window; inspect `NULL` versus zero/absent-row meaning and verify the final ordering/tie-breaker when present. Its final projection is `*`. Reselect the returned key columns from `v_dq_customers`, reject duplicate keys when the grain is one row per entity, and check the stated row cap and sort direction only when this example includes them.
 
 ## Two worked SQL examples
@@ -167,9 +167,9 @@ Complete these in the [learner SQL](../day60_final_capstone_part3.sql):
    **Expected result/shape:** For sql-60 Exercise 5, expected output: at most 12 rows keyed by `plan_node`. The final columns are `plan_node`, `estimated_rows`, `actual_rows`, `loops`, and `buffers`. The final order is `month DESC`.
    **Verify:** For sql-60 Exercise 5, run the underlying query without `EXPLAIN` and preserve its `plan_node` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
 6. Produce a release checklist covering operations and known limits.
-   **Inputs/evidence:** For sql-60 Exercise 6, read from the inline `VALUES` fixture. Build the answer toward `item`, `evidence`, and `owner`; keep `evidence` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-60 Exercise 6, expected output: one row per `evidence`. The final columns are `item`, `evidence`, and `owner`.
-   **Verify:** For sql-60 Exercise 6, reselect the returned keys directly from the source; require unique `evidence` where the expected grain is one row per key and confirm the projected `item`, `evidence`, and `owner` against the inline `VALUES` fixture. Add one source row with a new `evidence`; verify the result gains exactly one row carrying that `evidence` value.
+   **Inputs/evidence:** For sql-60 Exercise 6, list the release checklist as an inline `VALUES` relation with one row per `item`, its current `evidence`, and its `owner`.
+   **Expected result/shape:** For sql-60 Exercise 6, expected output: 6 rows, one per checklist `item`: rollback plan, object ownership/privileges, refresh cadence, monitoring and alerts, data contracts, and known limits. The final columns are `item`, `evidence`, and `owner`.
+   **Verify:** For sql-60 Exercise 6, confirm 6 rows with no NULL `evidence` or `owner` and no repeated `item`; every row whose `evidence` reads `review required` still needs a named reviewer before release.
 7. Map metric lineage from source tables through validation.
    **Inputs/evidence:** For sql-60 Exercise 7, read from the inline `VALUES` fixture. Build the answer toward `metric_name`, `source_tables`, `transformation_grain`, and `validation_query`; keep `metric_name` visible whenever the result has row-level grain.
    **Expected result/shape:** For sql-60 Exercise 7, expected output: one row per `metric_name`. The final columns are `metric_name`, `source_tables`, `transformation_grain`, and `validation_query`.
@@ -179,19 +179,19 @@ Complete these in the [learner SQL](../day60_final_capstone_part3.sql):
    **Expected result/shape:** For sql-60 Exercise 8, expected output: exactly one aggregate summary row. The final columns are `dashboard_total`, `source_total`, and `difference`.
    **Verify:** For sql-60 Exercise 8, evaluate each of `dashboard_total`, and `source_total` in a separate control `SELECT` over `v_monthly_revenue_refactored_solution`, and `orders`; require one final row and compare every value. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 9. Test empty, one-row, NULL-heavy, and duplicate-key fixtures.
-   **Inputs/evidence:** For sql-60 Exercise 9, read from `edge_fixture`. Build the answer toward `fixture_rows`, `null_email_rows`, `duplicate_key_rows`, and `nonnull_amount_rows`; keep `fixture_rows` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-60 Exercise 9, expected output: one row per `fixture_rows`. The final columns are `fixture_rows`, `null_email_rows`, `duplicate_key_rows`, and `nonnull_amount_rows`.
-   **Verify:** For sql-60 Exercise 9, reselect the returned keys directly from the source; require unique `fixture_rows` where the expected grain is one row per key and confirm the projected `fixture_rows`, `null_email_rows`, `duplicate_key_rows`, and `nonnull_amount_rows` against `edge_fixture`. Repeat with `NULL` in `fixture_rows`, and `null_email_rows` and state whether the row is kept, rejected, or classified.
+   **Inputs/evidence:** For sql-60 Exercise 9, build a three-row `VALUES` fixture `edge_fixture(id, email, amount)` with one row whose email and amount are NULL and two rows that share `id` 2 with emails that differ only in case, then count rows, NULL emails, duplicate keys, and non-null amounts.
+   **Expected result/shape:** For sql-60 Exercise 9, expected output: one row with `fixture_rows` 3, `null_email_rows` 1, `duplicate_key_rows` 1, and `nonnull_amount_rows` 2. The final columns are `fixture_rows`, `null_email_rows`, `duplicate_key_rows`, and `nonnull_amount_rows`.
+   **Verify:** For sql-60 Exercise 9, confirm that `duplicate_key_rows` equals `COUNT(*) - COUNT(DISTINCT id)` (3 - 2 = 1) and `nonnull_amount_rows` equals `COUNT(amount)` (2); `COUNT(DISTINCT lower(email))` is 1, so the two `id` 2 rows also collide after email normalization.
 10. Return `PASS`/`FAIL`/`NOT_RUN` for every acceptance criterion.
-   **Inputs/evidence:** For sql-60 Exercise 10, read from `v_dq_customers_solution`, `v_customer_ltv_solution`, and `orders`. Build the answer toward `criterion`, and `result`; keep `order_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-60 Exercise 10, expected output: one row per `order_id`. The final columns are `criterion`, and `result`. The final order is `criterion`.
-   **Verify:** For sql-60 Exercise 10, reselect the returned keys directly from the source; require unique `order_id` where the expected grain is one row per key and confirm the projected `criterion`, and `result` against `v_dq_customers_solution`, `v_customer_ltv_solution`, and `orders`. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+   **Inputs/evidence:** For sql-60 Exercise 10, list the acceptance criteria as a `VALUES` relation with `criterion`, an `executed` flag, the `observed` value from the solution views, and the `expected` value, then label each criterion `PASS`, `FAIL`, or `NOT_RUN`.
+   **Expected result/shape:** For sql-60 Exercise 10, expected output: 3 rows ordered by `criterion`: `customer DQ` PASS, `LTV reconciliation` PASS, and `Windows CI bootstrap` NOT_RUN. The final columns are `criterion` and `result`. The final order is `criterion`.
+   **Verify:** For sql-60 Exercise 10, confirm that each PASS row's observed value matches its expected value when queried directly (`SELECT invalid_email FROM v_dq_customers_solution` returns 0) and that the unexecuted criterion reports `NOT_RUN`, never `PASS`.
 
 Link every sign-off claim to executable evidence.
 
 ## Common mistakes and how to recover
 
-- **Lesson-specific semantic mistake:** Do not skip this worked-model requirement: Take customer LTV through the final evidence loop: state one-customer grain and revenue scope, run the view query, reconcile summed LTV with SUM(orders.totalamount), capture the result and environment, and record any exception with owner and next action. Apply the same loop to each deliverable.
+- **Lesson-specific semantic mistake:** Do not skip this worked-model requirement: Take customer LTV through the final evidence loop: state one-customer grain and revenue scope, run the view query, reconcile summed LTV with `SUM(orders.total_amount)`, capture the result and environment, and record any exception with owner and next action. Apply the same loop to each deliverable.
 - **Unexpected row count:** display keys before aggregates, count rows after
   each join/filter stage, and find the first stage whose grain differs from the
   contract. Do not hide fanout with `DISTINCT`.
@@ -279,7 +279,7 @@ enough to complete the lesson offline. If you want a patient tutor, copy this
 prompt after opening the repository in the AI tutor:
 
 ```text
-Tutor me through sql-60 — Final Capstone Part3.
+Tutor me through sql-60: Final Capstone, Part 3: End-to-End Sign-Off.
 
 I have completed the direct catalog prerequisite: `sql-59`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day60_final_capstone_part3.md
@@ -289,7 +289,7 @@ Key terms to teach in context: Acceptance criterion, Evidence bundle, Handoff. F
 language and explain table, row, column, result set, row grain, SQL NULL, and
 deterministic ordering where they apply. Then explain the important clauses in
 logical order and state the expected row grain/shape before asking me to run
-anything. The guide's lesson-specific worked-model focus is: Take customer LTV through the final evidence loop: state one-customer grain and revenue scope, run the view query, reconcile summed LTV with SUM(orders.totalamount), capture the result and environment, and record any exception with owner and next action. Apply the same loop to each deliverable.
+anything. The guide's lesson-specific worked-model focus is: Take customer LTV through the final evidence loop: state one-customer grain and revenue scope, run the view query, reconcile summed LTV with `SUM(orders.total_amount)`, capture the result and environment, and record any exception with owner and next action. Apply the same loop to each deliverable.
 
 Use only the local disposable advanced_sql_training database. Prefer the
 Docker classroom's Whole SQL lesson (psql) workspace and its ignored

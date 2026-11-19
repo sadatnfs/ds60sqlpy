@@ -95,7 +95,7 @@ INSERT INTO j17_practice_documents
 -- Exercises
 -- 1. [Prediction] Compare CROSS and LEFT JSON_TABLE for documents one through three.
 -- Inputs: For sql-json-01 Exercise 1, inspect document IDs 1, 2 and 3 in j17_practice_documents. They contain two items, an empty items array and an absent items field respectively.
--- Expected result/shape: For sql-json-01 Exercise 1, cROSS yields two item rows; LEFT yields four outer-preserving rows. Display document_id, item_no, sku ordered by document_id, item_no. Actual child identity is (document_id,item_no); documents 2 and 3 have NULL item positions in the LEFT result.
+-- Expected result/shape: For sql-json-01 Exercise 1, CROSS yields two item rows; LEFT yields four outer-preserving rows. Display document_id, item_no, sku ordered by document_id, item_no. Actual child identity is (document_id,item_no); documents 2 and 3 have NULL item positions in the LEFT result.
 -- Verify: For sql-json-01 Exercise 1, count non-NULL item_no independently and inspect the original field presence and type. A preserved outer placeholder is not an item, and empty and absent arrays are different source states.
 -- Hint ladder, rung 1: Count matched item_no, not the preserved outer placeholder.
 SAVEPOINT exercise_1;

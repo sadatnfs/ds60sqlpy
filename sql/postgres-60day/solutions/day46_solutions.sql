@@ -1,5 +1,5 @@
 -- Day 46 solutions: e-commerce analytics, Part 1
--- SOLUTION READING MAP — sql-46: Project1 Ecommerce Part1
+-- SOLUTION READING MAP for sql-46: E-Commerce Project, Part 1: Lifetime Value and Cohorts
 -- Explanation: sql/postgres-60day/solutions/day46_solutions.md
 -- Run from the repository root only against advanced_sql_training:
 --   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day46_solutions.sql

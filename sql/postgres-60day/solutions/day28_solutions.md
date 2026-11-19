@@ -7,13 +7,8 @@
 Open this explanation only after making an honest attempt. The executable
 companion runs solely against the disposable `advanced_sql_training` database:
 
-```powershell
-# Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f "sql\postgres-60day\solutions\day28_solutions.sql"
-```
-
 ```bash
-# macOS/Linux, from the repository root
+# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day28_solutions.sql
 ```
@@ -26,7 +21,7 @@ ordering with the explanation before comparing syntax.
 ## Clause-by-clause reading map
 
 The lesson's main concepts are JSONB, Containment, Path extraction. Its worked-model focus is:
-Extract metadata->>'campaign' as text, keep the raw JSONB beside it, and group missing values separately. For XML, extract the first XPath result, validate its text form, cast to integer, and left-join orders so malformed or unmatched documents remain visible.
+Extract `metadata->>'campaign'` as text, keep the raw JSONB beside it, and group missing values separately. For XML, extract the first XPath result, validate its text form, cast to integer, and left-join orders so malformed or unmatched documents remain visible.
 
 - Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
   before adding aggregates; a one-to-many join is allowed to multiply rows only
@@ -178,13 +173,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-28 Exercise 3, read from `events`. Build the answer toward `has_device_key`, `missing_device_key`, and `all_events`; keep `has_device_key` visible whenever the result has row-level grain.
+- **Inputs/evidence:** For sql-28 Exercise 3, read from `events` and count rows whose `metadata` contains the key `device` (`metadata ? 'device'`), rows without that key, and all rows.
 - **Expected result/shape:** For sql-28 Exercise 3, expected output: One summary row. The final columns are `has_device_key`, `missing_device_key`, and `all_events`.
-- **Independent verification:** For sql-28 Exercise 3, reselect the returned keys directly from the source; require unique `has_device_key` where the expected grain is one row per key and confirm the projected `has_device_key`, `missing_device_key`, and `all_events` against `events`. Add one source row with a new `has_device_key`; verify the result gains exactly one row carrying that `has_device_key` value.
-- **Intermediate relation check:** For sql-28 Exercise 3, inspect the source keys that survive `WHERE`.
-- **Clause check:** For sql-28 Exercise 3, the solution actually uses `FROM`, `WHERE`, aggregate `FILTER`, and `SELECT`. Read only those operations: begin at `events`, preserve one row per `has_device_key`, and finish with `has_device_key`, `missing_device_key`, and `all_events`.
+- **Independent verification:** For sql-28 Exercise 3, confirm one row with `has_device_key` 20000, `missing_device_key` 0, and `all_events` 20000; then test `VALUES ('{"device": null}'::jsonb), ('{}'::jsonb)`: `?` returns true and false, while `->> 'device' IS NULL` is true for both, so only `?` separates a present JSON null from a missing key.
+- **Intermediate relation check:** For sql-28 Exercise 3, count `metadata ? 'device'` and `NOT metadata ? 'device'` separately first; together they must equal the event count.
+- **Clause check:** For sql-28 Exercise 3, the solution actually uses `FROM`, `WHERE`, aggregate `FILTER`, and `SELECT`. Read only those operations: begin at `events`, preserve exactly one summary row, and finish with `has_device_key`, `missing_device_key`, and `all_events`.
 - **Alternative/trade-off:** For sql-28 Exercise 3, the chosen form is justified by this lesson-specific rationale: Use `?` to test key existence rather than comparing extracted text to NULL. Evaluate another form against the concrete expected result (One summary row) and the verification above.
-- **Edge case:** Add one source row with a new `has_device_key`; verify the result gains exactly one row carrying that `has_device_key` value.
+- **Edge case:** `metadata ->> 'device' IS NULL` cannot tell a missing key from a key whose value is JSON null; the `?` operator tests key existence.
 
 ## Exercise 4: Prediction
 
@@ -319,13 +314,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-28 Exercise 6, read from `payloads`. Build the answer toward `payload`, and `safe_amount`; keep `payload` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-28 Exercise 6, expected output: One row per sample payload. The final columns are `payload`, and `safe_amount`.
-- **Independent verification:** For sql-28 Exercise 6, reselect the returned keys directly from the source; require unique `payload` where the expected grain is one row per key and confirm the projected `payload`, and `safe_amount` against `payloads`. Repeat with `NULL` in `payload`, and `safe_amount` and state whether the row is kept, rejected, or classified.
-- **Intermediate relation check:** For sql-28 Exercise 6, select `payload` from `payloads` before adding derived columns.
-- **Clause check:** For sql-28 Exercise 6, the solution actually uses `WITH`, `FROM`, and `SELECT`. Read only those operations: begin at `payloads`, preserve one row per `payload`, and finish with `payload`, and `safe_amount`.
-- **Alternative/trade-off:** For sql-28 Exercise 6, the chosen form is justified by this lesson-specific rationale: Validate extracted text with a numeric regex before casting. Evaluate another form against the concrete expected result (One row per sample payload) and the verification above.
-- **Edge case:** Repeat with `NULL` in `payload`, and `safe_amount` and state whether the row is kept, rejected, or classified.
+- **Inputs/evidence:** For sql-28 Exercise 6, read three sample documents from the inline `payloads` relation: `{"amount": "12.50"}`, `{"amount": "bad"}`, and `{}`, and cast `payload ->> 'amount'` to `numeric` only when the text passes the numeric pattern.
+- **Expected result/shape:** For sql-28 Exercise 6, expected output: three rows with columns `payload` and `safe_amount`, one per sample document: `12.50`, `NULL`, and `NULL`. No row is removed, and no cast error stops the query.
+- **Independent verification:** For sql-28 Exercise 6, confirm that a bare `(payload ->> 'amount')::numeric` over the same rows fails with SQLSTATE `22P02` (`invalid input syntax for type numeric: "bad"`); then add `{"amount": "1e3"}` and observe that the pattern returns `NULL` although `pg_input_is_valid('1e3', 'numeric')` returns `true`.
+- **Intermediate relation check:** For sql-28 Exercise 6, select `payload ->> 'amount'` alone first: it returns `'12.50'`, `'bad'`, and `NULL`, the three cases the `CASE` must handle.
+- **Clause check:** For sql-28 Exercise 6, the solution uses a `payloads` CTE built from `VALUES`, then a `CASE WHEN payload ->> 'amount' ~ '...' THEN (payload ->> 'amount')::numeric ELSE NULL END` in the `SELECT` list.
+- **Alternative/trade-off:** For sql-28 Exercise 6, `CASE WHEN pg_input_is_valid(payload ->> 'amount', 'numeric') THEN (payload ->> 'amount')::numeric END` (PostgreSQL 16 and later) asks the numeric input function itself, so it also accepts `1e3` and surrounding spaces that the pattern rejects. On PostgreSQL 17, `JSON_VALUE(payload, '$.amount' RETURNING numeric)` returns `NULL` for both missing and invalid values by default.
+- **Edge case:** The pattern rejects valid numeric input such as `1e3`, ` 7 `, and `NaN`; decide whether those count as malformed for your source before choosing the pattern or `pg_input_is_valid`.
 
 ## Final self-check
 

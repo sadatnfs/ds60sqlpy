@@ -7,13 +7,8 @@
 Open this explanation only after making an honest attempt. The executable
 companion runs solely against the disposable `advanced_sql_training` database:
 
-```powershell
-# Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f "sql\postgres-60day\solutions\day47_solutions.sql"
-```
-
 ```bash
-# macOS/Linux, from the repository root
+# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day47_solutions.sql
 ```
@@ -26,7 +21,7 @@ ordering with the explanation before comparing syntax.
 ## Clause-by-clause reading map
 
 The lesson's main concepts are Cohort size, Active customer, Retention curve. Its worked-model focus is:
-Deduplicate activity to (customerid, ordermonth), count active customers per cohort/offset, and join to cohort size calculated from all customers. Cast before division and build a cohort/offset spine when missing periods must appear as explicit zeros.
+Deduplicate activity to `(customer_id, order_month)`, count active customers per cohort/offset, and join to cohort size calculated from all customers. Cast before division and build a cohort/offset spine when missing periods must appear as explicit zeros.
 
 - Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
   before adding aggregates; a one-to-many join is allowed to multiply rows only
@@ -166,13 +161,13 @@ numerator. Numeric casting prevents integer truncation.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-47 Exercise 1, read from `orders`, `customers`, and `age`. Build the answer toward `cohort_sizes`; keep `order_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-47 Exercise 1, expected output: one row per `order_id`. The final columns are `cohort_sizes`.
-- **Independent verification:** For sql-47 Exercise 1, reselect the returned keys directly from the source; require unique `order_id` where the expected grain is one row per key and confirm the projected `cohort_sizes` against `orders`, `customers`, and `age`. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
-- **Intermediate relation check:** For sql-47 Exercise 1, select `order_id` from `orders`, `customers`, and `age` before adding derived columns.
-- **Clause check:** For sql-47 Exercise 1, the solution actually uses `WITH`. Read only those operations: begin at `orders`, `customers`, and `age`, preserve one row per `order_id`, and finish with `cohort_sizes`.
+- **Inputs/evidence:** For sql-47 Exercise 1, start from the lesson's cohort query over `customers` and `orders`: keep the `cohort_sizes` CTE (one row per signup `cohort_month`) and divide `active_customers` by `cohort_size` as `numeric` to produce `retention_rate`, rounded to 4 places.
+- **Expected result/shape:** For sql-47 Exercise 1, expected output: one row per `cohort_month` and `month_offset` for the latest six cohorts, with every `retention_rate` between 0 and 1. The final columns are `cohort_month`, `month_offset`, `cohort_size`, `active_customers`, and `retention_rate`.
+- **Independent verification:** For sql-47 Exercise 1, for one `cohort_month`, recount its customers with `SELECT COUNT(*) FROM customers WHERE date_trunc('month', created_at)::date = <that month>` and compare the result with `cohort_size`; then confirm that `retention_rate = ROUND(active_customers::numeric / cohort_size, 4)` and `active_customers <= cohort_size` on every row.
+- **Intermediate relation check:** For sql-47 Exercise 1, run `cohort_sizes` alone and check one row per `cohort_month` before you join it to the activity counts.
+- **Clause check:** For sql-47 Exercise 1, the solution actually uses `WITH`. Read only those operations: begin at `orders`, `customers`, and `age`, preserve one row per `cohort_month` and `month_offset`, and finish with `cohort_sizes`.
 - **Alternative/trade-off:** For sql-47 Exercise 1, the chosen form is justified by this lesson-specific rationale: `cohort_sizes` supplies the denominator and active distinct customers supply the numerator. Evaluate another form against the concrete expected result (one row per `order_id`) and the verification above.
-- **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+- **Edge case:** Dividing two integers truncates, so `active_customers / cohort_size` without a `numeric` cast prints 0 for every rate below 1.
 
 ## Exercise 2: Return six tidy curves
 

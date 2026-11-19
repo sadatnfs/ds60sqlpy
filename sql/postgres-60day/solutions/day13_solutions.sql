@@ -1,5 +1,5 @@
 -- Day 13 executable solutions
--- SOLUTION READING MAP — sql-13: Date Time Functions
+-- SOLUTION READING MAP for sql-13: Date and Time Functions and Time Zones
 -- Explanation: sql/postgres-60day/solutions/day13_solutions.md
 -- Run from the repository root only against advanced_sql_training:
 --   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day13_solutions.sql

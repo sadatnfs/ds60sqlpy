@@ -180,3 +180,13 @@ def test_transaction_and_retry_boundaries_are_deterministic() -> None:
 
     with pytest.raises(ValueError, match="at least 1"):
         RetryPolicy(max_attempts=0)
+
+
+@pytest.mark.parametrize("delay", [float("nan"), float("inf"), -1.0])
+def test_retry_policy_rejects_non_finite_or_negative_delay(delay: float) -> None:
+    with pytest.raises(ValueError, match="finite and non-negative"):
+        RetryPolicy(base_delay_seconds=delay)
+
+
+def test_retry_policy_accepts_zero_delay() -> None:
+    assert RetryPolicy(max_attempts=1, base_delay_seconds=0.0).base_delay_seconds == 0.0

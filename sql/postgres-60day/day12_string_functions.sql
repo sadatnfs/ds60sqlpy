@@ -65,10 +65,10 @@ LIMIT 50;
 --    Hint ladder, rung 1: For sql-12 Exercise 2, confirm the groups are `email_domain`; then check `customer_count DESC, email_domain` before applying the row cap.
 -- 3. [Query writing] Create an ordered comma-separated list of department employee names.
 --    Hint: Put `ORDER BY` inside `string_agg` so concatenation order is deliberate.
---    Inputs: For sql-12 Exercise 3, read from `departments`, and `employees`. Build the answer toward `department_id`, `department_name`, and `employees`; keep `department_id`, and `name` visible whenever the result has row-level grain.
+--    Inputs: For sql-12 Exercise 3, read from `departments` left-joined to `employees` and list each department's employee names with `string_agg(e.full_name, ', ' ORDER BY e.full_name, e.employee_id)`.
 --    Expected result/shape: For sql-12 Exercise 3, expected output: One row per department. The final columns are `department_id`, `department_name`, and `employees`. The final order is `d.department_id`.
---    Verify: For sql-12 Exercise 3, independently aggregate `departments`, and `employees` by `department_id`, and `name`; require one output row for every distinct `department_id`, and `name` tuple and compare `employees` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `employees` for the existing `department_id`, and `name` tuple and verify the new tuple appears exactly once.
---    Hint ladder, rung 1: For sql-12 Exercise 3, start with the first relation in `departments`, and `employees`; after each join, record total rows and distinct `department_id`, and `name` so the exact fanout or loss is visible.
+--    Verify: For sql-12 Exercise 3, confirm 6 rows, one per `department_id`, matching `SELECT COUNT(*) FROM departments`; for one department, compare the number of names in `employees` with `SELECT COUNT(*) FROM employees WHERE department_id = <that id>` (17 for departments 1 to 4 and 16 for departments 5 and 6).
+--    Hint ladder, rung 1: For sql-12 Exercise 3, start from `departments`, `LEFT JOIN` employees, and check that grouping by `department_id` and `name` still returns 6 rows.
 -- 4. [Prediction] Normalize repeated internal whitespace in sample text and predict how tabs/newlines are handled.
 --    Hint: Use a POSIX whitespace class and the global regex flag.
 --    Inputs: For sql-12 Exercise 4, read from the inline `VALUES` fixture. Build the answer toward `source_text`, and `normalized_text`; keep `source_text` visible whenever the result has row-level grain.

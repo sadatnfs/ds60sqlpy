@@ -11,16 +11,16 @@ the saved project selection. No host Python or PostgreSQL installation is
 required for this browser route.
 
 1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database. A simple snippet
-   such as `SELECT 1;` needs no training-schema reset.
+   the local disposable `advanced_sql_training` database.
 2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
    preserves the lesson's reviewed psql directives, relative includes and
    transaction behavior. **SQL snippet** is appropriate for ordinary SQL
    statements, but is not a replacement for an entire script's setup.
-3. When the lesson requires the course training data, use the explicit
-   preparation action and read its reset acknowledgement. It replaces the
-   course-owned `training` schema. Do not reset unrelated data or prepare
-   every lesson by habit; stateful sequences have their own ordering.
+3. The **Course database** panel above the code shows whether the course
+   training tables are loaded. Missing tables load automatically before your
+   first run (or choose **Load course tables**) and stay loaded for later
+   lessons. **Reset training data** restores the original rows only when your
+   own changes made results differ; it keeps your saved code and notes.
 4. Edit the learner copy in the classroom and save your prediction before
    running. Its whole-script workspace is
    `.learning/sql/sql-06/lesson/workspace/sql/postgres-60day/day06_set_operations.sql`.
@@ -86,8 +86,8 @@ row count. For a normal analytical `SELECT`, use this logical reading order:
 window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
 different physical plan while preserving those semantics.
 
-The worked walkthrough's lesson-specific task is: Project only orderid from orders and payments before applying EXCEPT. Because set operations compare every projected column, adding an unrelated amount or timestamp would change the meaning from “missing order IDs” to “missing complete tuples.”
-The expected contract is that One distinct customer ID per qualifying customer. Predict keys, row count, `NULL` behavior,
+The worked walkthrough's lesson-specific task is: Project only `order_id` from orders and payments before applying `EXCEPT`. Because set operations compare every projected column, adding an unrelated amount or timestamp would change the meaning from “missing order IDs” to “missing complete tuples.”
+Exercise 1 expects this result: one distinct customer ID per qualifying customer. Predict keys, row count, `NULL` behavior,
 and ordering before running. Afterwards, compare keys/counts/totals with an
 independent control. A blank string, SQL `NULL`, numeric zero, and a missing row
 are different facts; use `COALESCE` only after choosing which meaning the
@@ -218,14 +218,14 @@ For every result, write its row grain and expected shape first.
    **Verify:** For sql-06 Exercise 3, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id` against `customers`, and `orders`. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
 4. **Prediction:** Compare row counts produced by `UNION` and `UNION ALL` for two overlapping status lists.
    **Progressive hint:** `UNION ALL` preserves every input row; `UNION` returns distinct rows.
-   **Inputs/evidence:** For sql-06 Exercise 4, read from `orders`. Build the answer toward `operation`, and `row_count`; keep `order_id` visible whenever the result has row-level grain.
+   **Inputs/evidence:** For sql-06 Exercise 4, read `status` from `orders` twice, once for `paid` or `shipped` and once for `shipped` or `delivered`, then count the combined rows under `UNION ALL` and under `UNION`.
    **Expected result/shape:** For sql-06 Exercise 4, expected output: Two labeled summary rows showing all-count >= distinct-count. The final columns are `operation`, and `row_count`. The final order is `operation`.
-   **Verify:** For sql-06 Exercise 4, reselect the returned keys directly from the source; require unique `order_id` where the expected grain is one row per key and confirm the projected `operation`, and `row_count` against `orders`. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+   **Verify:** For sql-06 Exercise 4, confirm that `UNION ALL` returns 3490 rows, the sum of the two branch counts (1745 + 1745), while `UNION` returns 3 because it keeps only the distinct statuses `delivered`, `paid`, and `shipped`; the `shipped` rows appear in both branches.
 5. **Debugging:** Repair a set operation whose branches return incompatible meanings or types by aligning aliases and casts.
    **Progressive hint:** Each branch below returns one text label and one numeric amount at the same report grain.
-   **Inputs/evidence:** For sql-06 Exercise 5, read from `orders`, and `expenses`. Build the answer toward `measure`, and `amount`; keep `order_id` visible whenever the result has row-level grain.
+   **Inputs/evidence:** For sql-06 Exercise 5, stack one row labeled `order_revenue` holding `SUM(total_amount)` from `orders` and one row labeled `expense` holding `SUM(amount)` from `expenses` with `UNION ALL`, using a text label column followed by a numeric amount column.
    **Expected result/shape:** For sql-06 Exercise 5, expected output: Rows identify revenue and expense measures with compatible types. The final columns are `measure`, and `amount`. The final order is `measure`.
-   **Verify:** For sql-06 Exercise 5, reselect the returned keys directly from the source; require unique `order_id` where the expected grain is one row per key and confirm the projected `measure`, and `amount` against `orders`, and `expenses`. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+   **Verify:** For sql-06 Exercise 5, confirm exactly two rows, `expense` = 50483850.00 and `order_revenue` = 2355646.89, each equal to its own standalone `SUM`; both branches must list the label first and the amount second, because swapping them in one branch raises `UNION types text and numeric cannot be matched`.
 6. **Extension:** Return the symmetric difference between customers with orders and customers with support events.
    **Progressive hint:** Subtract each set from the other, then union the two differences.
    **Inputs/evidence:** For sql-06 Exercise 6, read from `orders`, and `events`. Build the answer toward `customer_id`, and `source`; keep `customer_id` visible whenever the result has row-level grain.
@@ -234,7 +234,7 @@ For every result, write its row grain and expected shape first.
 
 ## Common mistakes and how to recover
 
-- **Lesson-specific semantic mistake:** UNION removes duplicates and can hide data multiplicity; NOT IN is not a safe substitute for EXCEPT when NULL is possible.
+- **Lesson-specific semantic mistake:** `UNION` removes duplicates and can hide data multiplicity; `NOT IN` is not a safe substitute for `EXCEPT` when NULL is possible.
 - **Unexpected row count:** display keys before aggregates, count rows after
   each join/filter stage, and find the first stage whose grain differs from the
   contract. Do not hide fanout with `DISTINCT`.
@@ -281,14 +281,8 @@ Examples in your schema
 - Common high-value customers across two periods can be found by intersecting
   compatible `customer_id` result sets.
 
-Current practice map
-- The authoritative six prompts, progressive hints, and expected shapes
-  are maintained in **Exercises** above. They map
-  one-for-one to both solution companions; older short exercise lists
-  were removed to prevent prompt drift.
-
 Further reading
-- Set operations: https://www.postgresql.org/docs/current/queries-union.html
+- Set operations: https://www.postgresql.org/docs/17/queries-union.html
 
 ## Ask an AI tutor about this lesson
 
@@ -297,7 +291,7 @@ enough to complete the lesson offline. If you want a patient tutor, copy this
 prompt after opening the repository in the AI tutor:
 
 ```text
-Tutor me through sql-06 — Set Operations.
+Tutor me through sql-06: Set Operations: UNION, INTERSECT, and EXCEPT.
 
 I have completed the direct catalog prerequisite: `sql-05`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day06_set_operations.md
@@ -307,7 +301,7 @@ Key terms to teach in context: Set operation, Union compatibility, Duplicate sem
 language and explain table, row, column, result set, row grain, SQL NULL, and
 deterministic ordering where they apply. Then explain the important clauses in
 logical order and state the expected row grain/shape before asking me to run
-anything. The guide's lesson-specific worked-model focus is: Project only orderid from orders and payments before applying EXCEPT. Because set operations compare every projected column, adding an unrelated amount or timestamp would change the meaning from “missing order IDs” to “missing complete tuples.”
+anything. The guide's lesson-specific worked-model focus is: Project only `order_id` from orders and payments before applying `EXCEPT`. Because set operations compare every projected column, adding an unrelated amount or timestamp would change the meaning from “missing order IDs” to “missing complete tuples.”
 
 Use only the local disposable advanced_sql_training database. Prefer the
 Docker classroom's Whole SQL lesson (psql) workspace and its ignored

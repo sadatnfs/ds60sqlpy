@@ -11,16 +11,16 @@ the saved project selection. No host Python or PostgreSQL installation is
 required for this browser route.
 
 1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database. A simple snippet
-   such as `SELECT 1;` needs no training-schema reset.
+   the local disposable `advanced_sql_training` database.
 2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
    preserves the lesson's reviewed psql directives, relative includes and
    transaction behavior. **SQL snippet** is appropriate for ordinary SQL
    statements, but is not a replacement for an entire script's setup.
-3. When the lesson requires the course training data, use the explicit
-   preparation action and read its reset acknowledgement. It replaces the
-   course-owned `training` schema. Do not reset unrelated data or prepare
-   every lesson by habit; stateful sequences have their own ordering.
+3. The **Course database** panel above the code shows whether the course
+   training tables are loaded. Missing tables load automatically before your
+   first run (or choose **Load course tables**) and stay loaded for later
+   lessons. **Reset training data** restores the original rows only when your
+   own changes made results differ; it keeps your saved code and notes.
 4. Edit the learner copy in the classroom and save your prediction before
    running. Its whole-script workspace is
    `.learning/sql/sql-30/lesson/workspace/sql/postgres-60day/day30_phase2_project.sql`.
@@ -88,7 +88,7 @@ window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may exec
 different physical plan while preserving those semantics.
 
 The worked walkthrough's lesson-specific task is: Calculate cohort size directly from customers at one row per signup cohort. Separately deduplicate activity to one row per customer/order month, derive month offset, and count active customers. Join numerator to denominator only after both relations are stable, then guard and range-check the retention rate.
-The expected contract is that One row per cohort month. Predict keys, row count, `NULL` behavior,
+Exercise 1 expects this result: one row per cohort month. Predict keys, row count, `NULL` behavior,
 and ordering before running. Afterwards, compare keys/counts/totals with an
 independent control. A blank string, SQL `NULL`, numeric zero, and a missing row
 are different facts; use `COALESCE` only after choosing which meaning the
@@ -362,10 +362,10 @@ Goal
 - Extend the starter customer-cohort analysis with retention rates and an
   illustrative customer-lifetime-value projection.
 
-Current practice map
-- The six maintained prompts above are the complete deliverable: denominator,
-  activity and revenue, retention, a dense offset spine, a limited teaching
-  projection, and a reconciliation/constraint audit.
+Deliverable checklist
+- The six prompts above are the complete deliverable: denominator, activity
+  and revenue, retention, a dense offset spine, a limited teaching projection,
+  and a reconciliation/constraint audit.
 
 Guidance
 1) Aggregate net order-line value to one row per order before cohort joins.
@@ -398,7 +398,7 @@ enough to complete the lesson offline. If you want a patient tutor, copy this
 prompt after opening the repository in the AI tutor:
 
 ```text
-Tutor me through sql-30 — Phase2 Project.
+Tutor me through sql-30: Phase 2 Project: Cohort Retention and Customer Lifetime Value.
 
 I have completed the direct catalog prerequisite: `sql-29`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day30_phase2_project.md

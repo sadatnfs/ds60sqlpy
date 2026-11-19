@@ -11,16 +11,16 @@ the saved project selection. No host Python or PostgreSQL installation is
 required for this browser route.
 
 1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database. A simple snippet
-   such as `SELECT 1;` needs no training-schema reset.
+   the local disposable `advanced_sql_training` database.
 2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
    preserves the lesson's reviewed psql directives, relative includes and
    transaction behavior. **SQL snippet** is appropriate for ordinary SQL
    statements, but is not a replacement for an entire script's setup.
-3. When the lesson requires the course training data, use the explicit
-   preparation action and read its reset acknowledgement. It replaces the
-   course-owned `training` schema. Do not reset unrelated data or prepare
-   every lesson by habit; stateful sequences have their own ordering.
+3. The **Course database** panel above the code shows whether the course
+   training tables are loaded. Missing tables load automatically before your
+   first run (or choose **Load course tables**) and stay loaded for later
+   lessons. **Reset training data** restores the original rows only when your
+   own changes made results differ; it keeps your saved code and notes.
 4. Edit the learner copy in the classroom and save your prediction before
    running. Its whole-script workspace is
    `.learning/sql/sql-23/lesson/workspace/sql/postgres-60day/day23_ctes_intro.sql`.
@@ -86,8 +86,8 @@ row count. For a normal analytical `SELECT`, use this logical reading order:
 window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
 different physical plan while preserving those semantics.
 
-The worked walkthrough's lesson-specific task is: Trace orderlines at one row per order, then topcustomers at one row per customer, then the final top-N presentation. Run each CTE body independently while developing and verify its key uniqueness before adding the next stage.
-The expected contract is that One row per ordering customer. Predict keys, row count, `NULL` behavior,
+The worked walkthrough's lesson-specific task is: Trace `order_lines` at one row per order, then `top_customers` at one row per customer, then the final top-N presentation. Run each CTE body independently while developing and verify its key uniqueness before adding the next stage.
+Exercise 1 expects this result: one row per ordering customer. Predict keys, row count, `NULL` behavior,
 and ordering before running. Afterwards, compare keys/counts/totals with an
 independent control. A blank string, SQL `NULL`, numeric zero, and a missing row
 are different facts; use `COALESCE` only after choosing which meaning the
@@ -198,7 +198,7 @@ while developing and verify its key uniqueness before adding the next stage.
 ## Practice assumptions and review method
 
 - **Focus:** Use CTEs to name grains and decisions in a multi-stage query, while understanding that readability, not forced materialization, is the default goal.
-- **Assumptions:** Each CTE declares its output grain. PostgreSQL 16 may inline a side-effect-free single-use CTE unless `MATERIALIZED` is requested.
+- **Assumptions:** Each CTE declares its output grain. PostgreSQL inlines a side-effect-free CTE that is referenced once unless `MATERIALIZED` is requested; a CTE referenced more than once is materialized (computed once) by default.
 - **Failure to watch for:** A CTE does not automatically improve performance; duplicated rows or ambiguous names remain logical bugs even when split into stages.
 - **Review loop:** predict the row grain and NULL/order behavior, run the
   query, inspect a bounded sample, and reconcile counts or totals before
@@ -228,9 +228,9 @@ For every result, write its row grain and expected shape first.
    **Verify:** For sql-23 Exercise 3, project `order_id` plus the raw source columns from `payments`, and `orders` at each join stage; record row count and distinct `order_id`, then assert the final `order_id`, `order_total`, `paid_amount`, and `unpaid_balance` values match those staged rows without unintended fanout or loss. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 4. **Prediction:** Compare `MATERIALIZED` and `NOT MATERIALIZED` syntax on a side-effect-free filtered order CTE without claiming one is universally faster.
    **Progressive hint:** Both return the same rows; planning effects require `EXPLAIN` evidence in a representative environment.
-   **Inputs/evidence:** For sql-23 Exercise 4, read from `orders`, `materialized_orders`, and `inline_orders`. Build the answer toward `variant`, and `row_count`; keep `order_id` visible whenever the result has row-level grain.
+   **Inputs/evidence:** For sql-23 Exercise 4, read from `orders` through two side-effect-free CTEs that both keep `delivered` orders, one declared `AS MATERIALIZED` and one `AS NOT MATERIALIZED`, and count the rows each returns.
    **Expected result/shape:** For sql-23 Exercise 4, expected output: Two count rows with equal values. The final columns are `variant`, and `row_count`. The final order is `variant`.
-   **Verify:** For sql-23 Exercise 4, reselect the returned keys directly from the source; require unique `order_id` where the expected grain is one row per key and confirm the projected `variant`, and `row_count` against `orders`, `materialized_orders`, and `inline_orders`. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+   **Verify:** For sql-23 Exercise 4, confirm both `row_count` values are 872, equal to `SELECT COUNT(*) FROM orders WHERE status = 'delivered'`; then run `EXPLAIN` on the query: the `MATERIALIZED` CTE appears as a separate `CTE materialized_orders` step read through a `CTE Scan`, while the `NOT MATERIALIZED` CTE is folded into a `Seq Scan on orders` with the status filter.
 5. **Debugging:** Repair a multi-stage query whose repeated `total` column names are ambiguous by assigning grain-specific aliases.
    **Progressive hint:** Name measures `order_value`, `customer_revenue`, and similar rather than carrying generic `total`.
    **Inputs/evidence:** For sql-23 Exercise 5, read from `orders`, `order_items`, and `customers`. Build the answer toward `country`, and `country_revenue`; keep `country` visible whenever the result has row-level grain.
@@ -274,15 +274,15 @@ Learning objectives
 - Structure multi-step analytical pipelines with clean, named stages
 
 Why this matters
-CTEs make complex queries understandable. By naming intermediate results, you reduce cognitive load and avoid repeating logic. Postgres can inline non-recursive CTEs (since v12), so you often get both clarity and performance.
+CTEs make complex queries understandable. By naming intermediate results, you reduce cognitive load and avoid repeating logic. Since PostgreSQL 12 the planner folds a side-effect-free, non-recursive CTE that is referenced once into the outer query, so you often get both clarity and performance.
 
 Core concepts and deep dive
 - Syntax: WITH name AS (subquery) SELECT ... FROM name ...; Multiple CTEs are comma-separated.
 - Visibility: CTEs are visible only to the main query and to subsequent CTEs defined after them.
 - Evaluation (Postgres specifics):
-  - Pre-v12: non-recursive CTEs were optimization fences (always materialized). v12+ can inline them; the planner may treat them as simple subqueries.
-  - Use MATERIALIZED/NOT MATERIALIZED hints (v12+) to force/forbid materialization if needed.
-- Reuse: you can reference a CTE multiple times to avoid recomputing complex expressions. Be mindful: if inlined, the planner may duplicate work; consider MATERIALIZED.
+  - Before PostgreSQL 12, non-recursive CTEs were optimization fences (always materialized). Since 12, a side-effect-free CTE referenced once is inlined and planned like a subquery; one referenced more than once is still materialized by default.
+  - `MATERIALIZED` and `NOT MATERIALIZED` (PostgreSQL 12 and later) override that default when a measured plan justifies it.
+- Reuse: a side-effect-free CTE referenced once is normally inlined; one referenced more than once is materialized (computed once) by default. NOT MATERIALIZED forces inlining and can repeat the work; MATERIALIZED forces a separate computation even for one reference.
 
 Walkthrough of the day’s script
 - order_lines CTE aggregates order-level revenue by joining orders and order_items, producing one row per order_id and customer_id.
@@ -296,17 +296,11 @@ Design patterns
 
 Pitfalls
 - Overusing CTEs for tiny subqueries can hurt readability and prevent predicate pushdown if forced materialization.
-- Reusing a heavy CTE many times without MATERIALIZED can multiply work if the planner inlines it.
-
-Current practice map
-- The authoritative six prompts, progressive hints, and expected shapes
-  are maintained in **Exercises** above. They map
-  one-for-one to both solution companions; older short exercise lists
-  were removed to prevent prompt drift.
+- Forcing NOT MATERIALIZED on a heavy, multiply referenced CTE can repeat its work, and forcing MATERIALIZED on a single-use CTE can block predicate pushdown. Measure before overriding the default.
 
 Further reading
-- WITH queries: https://www.postgresql.org/docs/current/queries-with.html
-- MATERIALIZED/NOT MATERIALIZED: https://www.postgresql.org/docs/current/queries-with.html#QUERIES-WITH-MATERIALIZED
+- WITH queries: https://www.postgresql.org/docs/17/queries-with.html
+- MATERIALIZED/NOT MATERIALIZED: https://www.postgresql.org/docs/17/queries-with.html#QUERIES-WITH-MATERIALIZED
 
 ## Ask an AI tutor about this lesson
 
@@ -315,7 +309,7 @@ enough to complete the lesson offline. If you want a patient tutor, copy this
 prompt after opening the repository in the AI tutor:
 
 ```text
-Tutor me through sql-23 — CTEs Intro.
+Tutor me through sql-23: Common Table Expressions (CTEs).
 
 I have completed the direct catalog prerequisite: `sql-22`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day23_ctes_intro.md
@@ -325,7 +319,7 @@ Key terms to teach in context: CTE, Inlining, Materialization. First define thos
 language and explain table, row, column, result set, row grain, SQL NULL, and
 deterministic ordering where they apply. Then explain the important clauses in
 logical order and state the expected row grain/shape before asking me to run
-anything. The guide's lesson-specific worked-model focus is: Trace orderlines at one row per order, then topcustomers at one row per customer, then the final top-N presentation. Run each CTE body independently while developing and verify its key uniqueness before adding the next stage.
+anything. The guide's lesson-specific worked-model focus is: Trace `order_lines` at one row per order, then `top_customers` at one row per customer, then the final top-N presentation. Run each CTE body independently while developing and verify its key uniqueness before adding the next stage.
 
 Use only the local disposable advanced_sql_training database. Prefer the
 Docker classroom's Whole SQL lesson (psql) workspace and its ignored

@@ -1,5 +1,5 @@
 -- Day 38 solutions: transactions and isolation
--- SOLUTION READING MAP — sql-38: Transactions Isolation
+-- SOLUTION READING MAP for sql-38: Transactions and Isolation Levels
 -- Explanation: sql/postgres-60day/solutions/day38_solutions.md
 -- Run from the repository root only against advanced_sql_training:
 --   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day38_solutions.sql
@@ -55,27 +55,32 @@ FROM
 ORDER BY
   id;
 
--- Manual Exercise 1, two terminals. Prepare the shared table once in either
--- terminal before opening the two transactions:
--- DROP TABLE IF EXISTS training.isolation_solution_shared;
--- CREATE TABLE training.isolation_solution_shared (
+-- Manual Exercise 1, two terminals. Prepare the committed lab table once in
+-- either terminal before opening the two transactions (temporary tables are
+-- private to one session):
+-- DROP TABLE IF EXISTS training.isolation_lab;
+-- CREATE TABLE training.isolation_lab (
 --   id int PRIMARY KEY,
---   quantity int NOT NULL
+--   qty int NOT NULL
 -- );
--- INSERT INTO training.isolation_solution_shared VALUES (1, 10), (2, 20);
+-- INSERT INTO training.isolation_lab VALUES (1, 10), (2, 20);
 --
 -- A: BEGIN ISOLATION LEVEL READ COMMITTED;
--- A: SELECT quantity FROM isolation_solution_shared WHERE id = 1;
--- B: BEGIN; UPDATE isolation_solution_shared SET quantity=99 WHERE id=1; COMMIT;
--- A: SELECT quantity FROM isolation_solution_shared WHERE id = 1; -- changed
+-- A: SELECT qty FROM training.isolation_lab WHERE id = 1;   -- 10
+-- B: BEGIN; UPDATE training.isolation_lab SET qty = 15 WHERE id = 1; COMMIT;
+-- A: SELECT qty FROM training.isolation_lab WHERE id = 1;   -- 15
+-- A: ROLLBACK;
 --
--- Exercise 2 repeats SELECT COUNT(*) in A while B inserts and commits.
--- Exercise 3 uses BEGIN ISOLATION LEVEL SERIALIZABLE in both sessions and
--- performs conflicting read/modify/write work; retry the transaction that
--- PostgreSQL aborts with SQLSTATE 40001.
+-- Exercise 2 repeats SELECT COUNT(*) ... WHERE qty >= 20 in A while B inserts
+-- and commits (3, 30): 1 then 2 under READ COMMITTED, 1 twice under
+-- REPEATABLE READ.
+-- Exercise 3 uses BEGIN ISOLATION LEVEL SERIALIZABLE in both sessions; both
+-- read SUM(qty), A updates id 1, B updates id 2, A commits, and B's COMMIT
+-- fails with SQLSTATE 40001. Retry B's whole transaction.
 --
--- Clean up after the manual exercises:
--- DROP TABLE training.isolation_solution_shared;
+-- Clean up after the manual exercises, when neither session is in a
+-- transaction:
+-- DROP TABLE training.isolation_lab;
 -- Exercise 4: ROLLBACK TO keeps the named savepoint available. RELEASE removes
 -- it after the partial recovery is complete.
 SAVEPOINT reusable_point;

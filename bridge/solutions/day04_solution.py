@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 import time
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
@@ -38,8 +39,8 @@ class RetryPolicy:
     def __post_init__(self) -> None:
         if self.max_attempts < 1:
             raise ValueError("max_attempts must be at least 1")
-        if self.base_delay_seconds < 0:
-            raise ValueError("base_delay_seconds cannot be negative")
+        if not math.isfinite(self.base_delay_seconds) or self.base_delay_seconds < 0:
+            raise ValueError("base_delay_seconds must be finite and non-negative")
 
 
 DEFAULT_RETRY_POLICY = RetryPolicy()

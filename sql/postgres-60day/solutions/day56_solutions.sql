@@ -1,5 +1,5 @@
 -- Day 56 solutions: CUBE, payment method, and percentiles
--- SOLUTION READING MAP — sql-56: Project4 BI Part2
+-- SOLUTION READING MAP for sql-56: BI Project, Part 2: Percentiles and CUBE
 -- Explanation: sql/postgres-60day/solutions/day56_solutions.md
 -- Run from the repository root only against advanced_sql_training:
 --   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day56_solutions.sql

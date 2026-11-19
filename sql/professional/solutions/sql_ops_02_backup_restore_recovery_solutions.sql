@@ -1,5 +1,5 @@
 -- SQL-OPS-02 executable solutions
--- SOLUTION READING MAP — sql-ops-02: Backup, Restore, and Recovery Rehearsals
+-- SOLUTION READING MAP for sql-ops-02: Backup, Restore, and Recovery Rehearsals
 -- Explanation: sql/professional/solutions/sql_ops_02_backup_restore_recovery_solutions.md
 -- Run from the repository root only against advanced_sql_training:
 --   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solutions/sql_ops_02_backup_restore_recovery_solutions.sql

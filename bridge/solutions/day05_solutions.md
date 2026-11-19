@@ -191,7 +191,7 @@ and Psycopg parameter adaptation.
 **Why this boundary matters:** A fast substitute is useful only when it shares the semantics
 under test.
 
-**Verification evidence:** List the PostgreSQL behavior under test, conflict handling, exact numeric adaptation, transaction/isolation, and Psycopg calls, and mark each as unproved by SQLite.
+**Verification evidence:** List the PostgreSQL behavior under test (conflict handling, exact numeric adaptation, transaction/isolation, and Psycopg calls) and mark each as unproved by SQLite.
 
 ### Exercise 11: Security testing
 

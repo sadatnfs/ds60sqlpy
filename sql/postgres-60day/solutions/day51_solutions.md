@@ -7,13 +7,8 @@
 Open this explanation only after making an honest attempt. The executable
 companion runs solely against the disposable `advanced_sql_training` database:
 
-```powershell
-# Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f "sql\postgres-60day\solutions\day51_solutions.sql"
-```
-
 ```bash
-# macOS/Linux, from the repository root
+# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day51_solutions.sql
 ```
@@ -189,13 +184,13 @@ would be misleading.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-51 Exercise 3, read from `orders`, and `payments`. Build the answer toward `month`, `booked_order_revenue`, and `cash_received`; keep `cash_received` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-51 Exercise 3, expected output: one row per `cash_received`. The final columns are `month`, `booked_order_revenue`, and `cash_received`. The final order is `month`.
-- **Independent verification:** For sql-51 Exercise 3, independently aggregate `orders`, and `payments` by `cash_received`; require one output row for every distinct `cash_received` tuple and compare `booked_order_revenue` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `booked_order_revenue` for the existing `cash_received` tuple and verify the new tuple appears exactly once.
-- **Intermediate relation check:** For sql-51 Exercise 3, start with the first relation in `orders`, and `payments`; after each join, record total rows and distinct `cash_received` so the exact fanout or loss is visible.
-- **Clause check:** For sql-51 Exercise 3, the solution actually uses `FROM`, `JOIN ... ON`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, and `payments`, preserve one row per `cash_received`, and finish with `month`, `booked_order_revenue`, and `cash_received` ordered by `month`.
+- **Inputs/evidence:** For sql-51 Exercise 3, read from `orders` and `payments`; sum `total_amount` by order month as `booked_order_revenue` and left join the payments summed by payment month as `cash_received`, using `COALESCE(..., 0)` for months without payments.
+- **Expected result/shape:** For sql-51 Exercise 3, expected output: one row per order month, ordered by `month`; `cash_received` is lower than `booked_order_revenue` in most months because unpaid orders bring no cash. The final columns are `month`, `booked_order_revenue`, and `cash_received`. The final order is `month`.
+- **Independent verification:** For sql-51 Exercise 3, confirm that `month` is unique and that `SUM(booked_order_revenue)` is 2355646.89; compare `SUM(cash_received)` with `SELECT SUM(amount) FROM payments` (1831900.81): they match only when every payment month also has orders, because the query starts from order months.
+- **Intermediate relation check:** For sql-51 Exercise 3, aggregate `orders` and `payments` to month grain separately and compare their row counts before you join them.
+- **Clause check:** For sql-51 Exercise 3, the solution actually uses `FROM`, `JOIN ... ON`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, and `payments`, preserve one row per order `month`, and finish with `month`, `booked_order_revenue`, and `cash_received` ordered by `month`.
 - **Alternative/trade-off:** For sql-51 Exercise 3, the chosen form is justified by this lesson-specific rationale: Orders are grouped by order month and payments by payment month. Evaluate another form against the concrete expected result (one row per `cash_received`) and the verification above.
-- **Edge case:** Add one row to an existing group and one row for a new group; recompute `booked_order_revenue` for the existing `cash_received` tuple and verify the new tuple appears exactly once.
+- **Edge case:** A payment made in the month after its order raises the next month's cash, so booked revenue and cash received measure different timing and should not be combined into one unlabeled margin.
 
 ## Exercise 4: Build a cash balance
 

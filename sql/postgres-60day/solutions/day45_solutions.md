@@ -7,13 +7,8 @@
 Open this explanation only after making an honest attempt. The executable
 companion runs solely against the disposable `advanced_sql_training` database:
 
-```powershell
-# Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f "sql\postgres-60day\solutions\day45_solutions.sql"
-```
-
 ```bash
-# macOS/Linux, from the repository root
+# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day45_solutions.sql
 ```
@@ -209,13 +204,13 @@ shape. An optimization must not manufacture a zero-valued group.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-45 Exercise 4, read from `orders`. Build the answer toward `impossible_window_rows`; keep `order_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-45 Exercise 4, expected output: one row per `order_id`. The final columns are `impossible_window_rows`.
-- **Independent verification:** For sql-45 Exercise 4, run an anti-check that counts rows where NOT ((order_date >= timestamptz '1900-01-01 00:00:00+00' AND order_date < timestamptz '1900-01-02 00:00:00+00')); require unique `order_id` where the expected grain is one row per key and confirm the projected `impossible_window_rows` against `orders`. Insert rows immediately before, exactly at, and immediately after `order_date >= timestamptz '1900-01-01 00:00:00+00'`, and `order_date < timestamptz '1900-01-02 00:00:00+00'`; identify which rows pass each inclusive or exclusive comparison.
-- **Intermediate relation check:** For sql-45 Exercise 4, inspect the source keys that survive `WHERE`.
-- **Clause check:** For sql-45 Exercise 4, the solution actually uses `FROM`, `WHERE`, and `SELECT`. Read only those operations: begin at `orders`, preserve one row per `order_id`, and finish with `impossible_window_rows`.
+- **Inputs/evidence:** For sql-45 Exercise 4, read from `orders` with a window that matches no rows, `order_date >= TIMESTAMPTZ '1900-01-01 00:00:00+00' AND order_date < TIMESTAMPTZ '1900-01-02 00:00:00+00'`, and count the matching orders.
+- **Expected result/shape:** For sql-45 Exercise 4, expected output: one row with `impossible_window_rows` 0. The final columns are `impossible_window_rows`.
+- **Independent verification:** For sql-45 Exercise 4, confirm the count is 0, then run a grouped form of the same filter, such as `SELECT c.country, COUNT(*) FROM orders o JOIN customers c USING (customer_id) WHERE <same window> GROUP BY c.country`, and confirm it returns no rows: an ungrouped aggregate always returns one row, while a grouped query over empty input returns none, so every rewrite of the report must keep the same shape.
+- **Intermediate relation check:** For sql-45 Exercise 4, run the window predicate with `SELECT COUNT(*)` and with a `GROUP BY` version, and compare the number of result rows.
+- **Clause check:** For sql-45 Exercise 4, the solution actually uses `FROM`, `WHERE`, and `SELECT`. Read only those operations: begin at `orders`, preserve exactly one summary row, and finish with `impossible_window_rows`.
 - **Alternative/trade-off:** For sql-45 Exercise 4, the chosen form is justified by this lesson-specific rationale: An impossible historical window should return no rows for every equivalent shape. Evaluate another form against the concrete expected result (one row per `order_id`) and the verification above.
-- **Edge case:** Insert rows immediately before, exactly at, and immediately after `order_date >= timestamptz '1900-01-01 00:00:00+00'`, and `order_date < timestamptz '1900-01-02 00:00:00+00'`; identify which rows pass each inclusive or exclusive comparison.
+- **Edge case:** An ungrouped `COUNT(*)` over zero rows returns 0, but `SUM` returns NULL; a rewrite that switches between them changes what an empty window looks like.
 
 ## Exercise 5: Document index tradeoffs
 

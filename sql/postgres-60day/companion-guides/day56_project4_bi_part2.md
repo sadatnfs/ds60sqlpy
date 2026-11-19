@@ -11,16 +11,16 @@ the saved project selection. No host Python or PostgreSQL installation is
 required for this browser route.
 
 1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database. A simple snippet
-   such as `SELECT 1;` needs no training-schema reset.
+   the local disposable `advanced_sql_training` database.
 2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
    preserves the lesson's reviewed psql directives, relative includes and
    transaction behavior. **SQL snippet** is appropriate for ordinary SQL
    statements, but is not a replacement for an entire script's setup.
-3. When the lesson requires the course training data, use the explicit
-   preparation action and read its reset acknowledgement. It replaces the
-   course-owned `training` schema. Do not reset unrelated data or prepare
-   every lesson by habit; stateful sequences have their own ordering.
+3. The **Course database** panel above the code shows whether the course
+   training tables are loaded. Missing tables load automatically before your
+   first run (or choose **Load course tables**) and stay loaded for later
+   lessons. **Reset training data** restores the original rows only when your
+   own changes made results differ; it keeps your saved code and notes.
 4. Edit the learner copy in the classroom and save your prediction before
    running. Its whole-script workspace is
    `.learning/sql/sql-56/lesson/workspace/sql/postgres-60day/day56_project4_bi_part2.sql`.
@@ -86,7 +86,7 @@ row count. For a normal analytical `SELECT`, use this logical reading order:
 window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
 different physical plan while preserving those semantics.
 
-The worked walkthrough's lesson-specific task is: Aggregate payments at (orderid, method), select one method by greatest total with a stable tie-breaker, and only then join line revenue. Separately aggregate line value at (month, category, orderid) before computing p50/p90; whole order totals would repeat across categories.
+The worked walkthrough's lesson-specific task is: Aggregate payments at `(order_id, method)`, select one method by greatest total with a stable tie-breaker, and only then join line revenue. Separately aggregate line value at `(month, category, order_id)` before computing p50/p90; whole order totals would repeat across categories.
 The first runnable example has a concrete contract: Example 1 returns one grouped row per `country`, and `month`, capped at 200 rows with columns `country`, `month`, `amt`, `p50`, `p90`, and `p99` from `orders`, and `customers`. Compare the key set and row count with a simpler control over the same filter/window; inspect `NULL` versus zero/absent-row meaning and verify the final ordering/tie-breaker when present. Its final projection is `country`, `month`, `p50`, `p90`, and `p99`. Independently group `orders`, `customers`, and `orders_m` by the shown grouping expressions and compare every displayed aggregate at that exact grain. For tied business values, inspect the final ordering expression and verify its last key makes the displayed order reproducible.
 
 ## Two worked SQL examples
@@ -205,13 +205,13 @@ Complete these in the [learner SQL](../day56_project4_bi_part2.sql):
    **Expected result/shape:** For sql-56 Exercise 2, expected output: one row per represented `(month, category)`. The final columns are `month`, `category`, `p50_order_value`, and `p90_order_value`. The final order is `month DESC, category`.
    **Verify:** For sql-56 Exercise 2, independently aggregate `orders`, `order_items`, and `products` by `month`, and `category`; require one output row for every distinct `month`, and `category` tuple and compare `p50_order_value`, and `p90_order_value` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `p50_order_value`, and `p90_order_value` for the existing `month`, and `category` tuple and verify the new tuple appears exactly once.
 3. Predict raw payment/item join fanout.
-   **Inputs/evidence:** For sql-56 Exercise 3, read from `orders`, `order_items`, and `payments`. Build the answer toward `raw_join_rows`, `distinct_items`, and `distinct_payments`; keep `order_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-56 Exercise 3, expected output: one row per `order_id`. The final columns are `raw_join_rows`, `distinct_items`, and `distinct_payments`.
-   **Verify:** For sql-56 Exercise 3, project `order_id` plus the raw source columns from `orders`, `order_items`, and `payments` at each join stage; record row count and distinct `order_id`, then assert the final `raw_join_rows`, `distinct_items`, and `distinct_payments` values match those staged rows without unintended fanout or loss. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+   **Inputs/evidence:** For sql-56 Exercise 3, join `orders` to `order_items` and to `payments` on `order_id` without pre-aggregation and count the joined rows, the distinct `order_item_id` values, and the distinct `payment_id` values.
+   **Expected result/shape:** For sql-56 Exercise 3, expected output: one row with `raw_join_rows` 10816, `distinct_items` 10469, and `distinct_payments` 3836; an order with two payments repeats each of its items, so the joined rows exceed the distinct items. The final columns are `raw_join_rows`, `distinct_items`, and `distinct_payments`.
+   **Verify:** For sql-56 Exercise 3, confirm that `raw_join_rows` equals `SELECT SUM(i.n * p.n) FROM (SELECT order_id, COUNT(*) n FROM order_items GROUP BY order_id) i JOIN (SELECT order_id, COUNT(*) n FROM payments GROUP BY order_id) p USING (order_id)` (10816); summing item revenue over this join would count every line once per payment of its order.
 4. Pre-aggregate payment methods and reconcile line revenue.
-   **Inputs/evidence:** For sql-56 Exercise 4, read from `payments`, and `order_items`. Build the answer toward `reporting_method`, `revenue`, and `reconciled_total`; keep `payment_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-56 Exercise 4, expected output: one row per `payment_id`. The final columns are `reporting_method`, `revenue`, and `reconciled_total`. The final order is `reporting_method`.
-   **Verify:** For sql-56 Exercise 4, choose one complete partition from `payments`, and `order_items`; hand-calculate its first, middle, and final window values for `revenue`, and `reconciled_total`, then verify output keys remain `payment_id`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
+   **Inputs/evidence:** For sql-56 Exercise 4, reduce `payments` to one `reporting_method` per order (`MIN(method)`) and `order_items` to one revenue total per order, left-join them at order grain with `unpaid` for orders without payments, and sum revenue per reporting method.
+   **Expected result/shape:** For sql-56 Exercise 4, expected output: 5 rows, one per `reporting_method` (`bank`, `card`, `credit`, `paypal`, and `unpaid`), whose `revenue` values add up to `reconciled_total` (2355647.1235), the exact line revenue repeated on every row. The final columns are `reporting_method`, `revenue`, and `reconciled_total`. The final order is `reporting_method`.
+   **Verify:** For sql-56 Exercise 4, confirm that the five `revenue` values add up to `SELECT SUM(quantity * unit_price * (1 - discount)) FROM order_items` (2355647.1235) and that `method` has one row per paid order (3489), so no order's revenue is counted twice.
 5. Repair line-grain percentiles when the metric is order value.
    **Inputs/evidence:** For sql-56 Exercise 5, read from `orders`, `order_items`, and `products`. Build the answer toward `category`, `observations`, and `p50`; keep `category` visible whenever the result has row-level grain.
    **Expected result/shape:** For sql-56 Exercise 5, expected output: one row per `category`. The final columns are `category`, `observations`, and `p50`. The final order is `category`.
@@ -225,7 +225,7 @@ Retain cube and percentile observation counts.
 
 ## Common mistakes and how to recover
 
-- **Lesson-specific semantic mistake:** Three-dimensional cube row count should exceed the two-dimensional count on
+- **Lesson-specific semantic mistake:** Three-dimensional cube row count should exceed the two-dimensional count on this seed.
 - **Unexpected row count:** display keys before aggregates, count rows after
   each join/filter stage, and find the first stage whose grain differs from the
   contract. Do not hide fanout with `DISTINCT`.
@@ -296,7 +296,7 @@ enough to complete the lesson offline. If you want a patient tutor, copy this
 prompt after opening the repository in the AI tutor:
 
 ```text
-Tutor me through sql-56 — Project4 BI Part2.
+Tutor me through sql-56: BI Project, Part 2: Percentiles and CUBE.
 
 I have completed the direct catalog prerequisite: `sql-55`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day56_project4_bi_part2.md
@@ -306,7 +306,7 @@ Key terms to teach in context: Dimensional explosion, Primary payment method, Co
 language and explain table, row, column, result set, row grain, SQL NULL, and
 deterministic ordering where they apply. Then explain the important clauses in
 logical order and state the expected row grain/shape before asking me to run
-anything. The guide's lesson-specific worked-model focus is: Aggregate payments at (orderid, method), select one method by greatest total with a stable tie-breaker, and only then join line revenue. Separately aggregate line value at (month, category, orderid) before computing p50/p90; whole order totals would repeat across categories.
+anything. The guide's lesson-specific worked-model focus is: Aggregate payments at `(order_id, method)`, select one method by greatest total with a stable tie-breaker, and only then join line revenue. Separately aggregate line value at `(month, category, order_id)` before computing p50/p90; whole order totals would repeat across categories.
 
 Use only the local disposable advanced_sql_training database. Prefer the
 Docker classroom's Whole SQL lesson (psql) workspace and its ignored

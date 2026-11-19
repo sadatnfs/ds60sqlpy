@@ -1,5 +1,5 @@
 -- Day 58 solutions: robust staging, normalization, and ingestion
--- SOLUTION READING MAP — sql-58: Final Capstone Part1
+-- SOLUTION READING MAP for sql-58: Final Capstone, Part 1: Ingestion and Data Quality
 -- Explanation: sql/postgres-60day/solutions/day58_solutions.md
 -- Run from the repository root only against advanced_sql_training:
 --   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day58_solutions.sql

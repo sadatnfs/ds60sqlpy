@@ -11,16 +11,16 @@ the saved project selection. No host Python or PostgreSQL installation is
 required for this browser route.
 
 1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database. A simple snippet
-   such as `SELECT 1;` needs no training-schema reset.
+   the local disposable `advanced_sql_training` database.
 2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
    preserves the lesson's reviewed psql directives, relative includes and
    transaction behavior. **SQL snippet** is appropriate for ordinary SQL
    statements, but is not a replacement for an entire script's setup.
-3. When the lesson requires the course training data, use the explicit
-   preparation action and read its reset acknowledgement. It replaces the
-   course-owned `training` schema. Do not reset unrelated data or prepare
-   every lesson by habit; stateful sequences have their own ordering.
+3. The **Course database** panel above the code shows whether the course
+   training tables are loaded. Missing tables load automatically before your
+   first run (or choose **Load course tables**) and stay loaded for later
+   lessons. **Reset training data** restores the original rows only when your
+   own changes made results differ; it keeps your saved code and notes.
 4. Edit the learner copy in the classroom and save your prediction before
    running. Its whole-script workspace is
    `.learning/sql/sql-01/lesson/workspace/sql/postgres-60day/day01_select_where_orderby.sql`.
@@ -229,7 +229,7 @@ If rows change between requests, offset pages can shift. The later
 
 ## Common mistakes and how to recover
 
-- **Lesson-specific semantic mistake:** Never use = NULL, depend on implicit row order, or apply LIMIT without first defining which rows are first.
+- **Lesson-specific semantic mistake:** Never use `= NULL`, depend on implicit row order, or apply `LIMIT` without first defining which rows are first.
 - **Unexpected row count:** display keys before aggregates, count rows after
   each join/filter stage, and find the first stage whose grain differs from the
   contract. Do not hide fanout with `DISTINCT`.
@@ -285,19 +285,13 @@ Anti-patterns and pitfalls
 - Assuming WHERE matches NULLs; use IS NULL/IS NOT NULL explicitly.
 - Depending on implicit order without ORDER BY; SQL does not guarantee row order otherwise.
 
-Current practice map
-- The authoritative six prompts, progressive hints, and expected shapes
-  are maintained in **Exercises** above. They map
-  one-for-one to both solution companions; older short exercise lists
-  were removed to prevent prompt drift.
-
 Check your understanding
 - In what order are WHERE and ORDER BY evaluated, and why does that matter for derived columns?
 - How does SQL treat comparisons with NULL? Provide an example that filters out NULL values.
 
 Further reading
-- Postgres pattern matching: https://www.postgresql.org/docs/current/functions-matching.html
-- NULLs and three-valued logic: https://www.postgresql.org/docs/current/functions-comparison.html
+- Postgres pattern matching: https://www.postgresql.org/docs/17/functions-matching.html
+- NULLs and three-valued logic: https://www.postgresql.org/docs/17/functions-comparison.html
 
 ## Ask an AI tutor about this lesson
 
@@ -306,7 +300,7 @@ enough to complete the lesson offline. If you want a patient tutor, copy this
 prompt after opening the repository in the AI tutor:
 
 ```text
-Tutor me through sql-01 - SELECT, WHERE, ORDER BY and LIMIT.
+Tutor me through sql-01: SELECT, WHERE, ORDER BY, and LIMIT.
 
 I am a beginner who completed the direct catalog prerequisite sql-start-03. Reuse its small-stage debugging workflow and explain new clauses before relying on them. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day01_select_where_orderby.md
@@ -316,7 +310,7 @@ Key terms to teach in context: Projection, Predicate, Deterministic ordering. Fi
 language and explain table, row, column, result set, row grain, SQL NULL, and
 deterministic ordering where they apply. Then explain the important clauses in
 logical order and state the expected row grain/shape before asking me to run
-anything. The guide's lesson-specific worked-model focus is: Trace the first learner query in logical order: FROM training.customers produces candidate rows, WHERE country IN ('US', 'CA') filters them, ORDER BY createdat DESC, customerid DESC fixes their order, and LIMIT 10 keeps the first ten. Remove the customerid tie-breaker and explain why rows with equal timestamps no longer have a guaranteed relative order.
+anything. The guide's lesson-specific worked-model focus is: Trace the first learner query in logical order: `FROM training.customers` produces candidate rows, `WHERE country IN ('US', 'CA')` filters them, `ORDER BY created_at DESC, customer_id DESC` fixes their order, and `LIMIT 10` keeps the first ten. Remove the `customer_id` tie-breaker and explain why rows with equal timestamps no longer have a guaranteed relative order.
 
 Use only the local disposable advanced_sql_training database. Prefer the
 Docker classroom's Whole SQL lesson (psql) workspace and its ignored

@@ -7,13 +7,8 @@
 Open this explanation only after making an honest attempt. The executable
 companion runs solely against the disposable `advanced_sql_training` database:
 
-```powershell
-# Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f "sql\postgres-60day\solutions\day22_solutions.sql"
-```
-
 ```bash
-# macOS/Linux, from the repository root
+# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day22_solutions.sql
 ```
@@ -26,7 +21,7 @@ ordering with the explanation before comparing syntax.
 ## Clause-by-clause reading map
 
 The lesson's main concepts are Named window, Peer exclusion, Mixed grain. Its worked-model focus is:
-Aggregate revenue to (country, category) first. Rank categories within each country from that relation, then calculate a separate category-total relation for the overall rank. Joining those stable grains avoids incorrectly ranking every country/category pair as though it were one global category.
+Aggregate revenue to `(country, category)` first. Rank categories within each country from that relation, then calculate a separate category-total relation for the overall rank. Joining those stable grains avoids incorrectly ranking every country/category pair as though it were one global category.
 
 - Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
   before adding aggregates; a one-to-many join is allowed to multiply rows only
@@ -337,13 +332,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-22 Exercise 5, read from `orders`. Build the answer toward `customer_id`, `island_start`, `island_end`, and `days_in_island`; keep `customer_id`, and `island_key` visible whenever the result has row-level grain.
+- **Inputs/evidence:** For sql-22 Exercise 5, read from `orders`, reduce them to distinct (`customer_id`, UTC order day) pairs, number each customer's days with `ROW_NUMBER()`, and group by `order_day - day_number` to find runs of consecutive days.
 - **Expected result/shape:** For sql-22 Exercise 5, expected output: One row per customer/date island. The final columns are `customer_id`, `island_start`, `island_end`, and `days_in_island`. The final order is `customer_id, island_start`.
-- **Independent verification:** For sql-22 Exercise 5, independently aggregate `orders` by `customer_id`, and `island_key`; require one output row for every distinct `customer_id`, and `island_key` tuple and compare `island_start`, `island_end`, and `days_in_island` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `island_start`, `island_end`, and `days_in_island` for the existing `customer_id`, and `island_key` tuple and verify the new tuple appears exactly once.
-- **Intermediate relation check:** For sql-22 Exercise 5, run `order_days`, `numbered`, and `grouped` one at a time. Record each CTE's row count and `customer_id`, and `island_key` uniqueness before the next stage uses it.
-- **Clause check:** For sql-22 Exercise 5, the solution actually uses `WITH`, `FROM`, `GROUP BY`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `customer_id`, and `island_key`, and finish with `customer_id`, `island_start`, `island_end`, and `days_in_island` ordered by `customer_id, island_start`.
+- **Independent verification:** For sql-22 Exercise 5, confirm that `SUM(days_in_island)` equals the number of distinct customer order days, `SELECT COUNT(*) FROM (SELECT DISTINCT customer_id, (order_date AT TIME ZONE 'UTC')::date FROM orders) d`; on the seed almost every island is one day long because a customer's orders are usually more than a day apart, so also run the same CTEs on `VALUES (1, DATE '2025-01-01'), (1, DATE '2025-01-02'), (1, DATE '2025-01-04')` and expect two islands of 2 and 1 days.
+- **Intermediate relation check:** For sql-22 Exercise 5, run `order_days`, `numbered`, and `grouped` one at a time; within one island, `order_day - day_number` stays constant.
+- **Clause check:** For sql-22 Exercise 5, the solution actually uses `WITH`, `FROM`, `GROUP BY`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per customer and island, and finish with `customer_id`, `island_start`, `island_end`, and `days_in_island` ordered by `customer_id, island_start`.
 - **Alternative/trade-off:** For sql-22 Exercise 5, the chosen form is justified by this lesson-specific rationale: Deduplicate dates, use row number to derive a stable grouping key, then aggregate islands. Evaluate another form against the concrete expected result (One row per customer/date island) and the verification above.
-- **Edge case:** Add one row to an existing group and one row for a new group; recompute `island_start`, `island_end`, and `days_in_island` for the existing `customer_id`, and `island_key` tuple and verify the new tuple appears exactly once.
+- **Edge case:** Deduplicating the days first matters: two orders on the same day would receive two row numbers and split one island into two.
 
 ## Exercise 6: Extension
 

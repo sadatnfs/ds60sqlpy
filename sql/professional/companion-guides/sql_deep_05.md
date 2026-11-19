@@ -13,16 +13,16 @@ the saved project selection. No host Python or PostgreSQL installation is
 required for this browser route.
 
 1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database. A simple snippet
-   such as `SELECT 1;` needs no training-schema reset.
+   the local disposable `advanced_sql_training` database.
 2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
    preserves the lesson's reviewed psql directives, relative includes and
    transaction behavior. **SQL snippet** is appropriate for ordinary SQL
    statements, but is not a replacement for an entire script's setup.
-3. When the lesson requires the course training data, use the explicit
-   preparation action and read its reset acknowledgement. It replaces the
-   course-owned `training` schema. Do not reset unrelated data or prepare
-   every lesson by habit; stateful sequences have their own ordering.
+3. The **Course database** panel above the code shows whether the course
+   training tables are loaded. Missing tables load automatically before your
+   first run (or choose **Load course tables**) and stay loaded for later
+   lessons. **Reset training data** restores the original rows only when your
+   own changes made results differ; it keeps your saved code and notes.
 4. Edit the learner copy in the classroom and save your prediction before
    running. Its whole-script workspace is
    `.learning/sql/sql-deep-05/lesson/workspace/sql/professional/lessons/sql_deep_05.sql`.
@@ -212,7 +212,7 @@ Transfer the same reasoning to a new small fixture before using it on larger dat
 ## Ask an AI tutor about this lesson
 
 ```text
-Use $guide-ds60sqlpy-learning to coach me through sql-deep-05: Predicate Proof, Partial Indexes, and Conditional Mutation Contracts.
+Use $guide-ds60sqlpy-learning to coach me through sql-deep-05: Predicate Implication, Partial Indexes, and Conditional Writes.
 Read sql/professional/companion-guides/sql_deep_05.md and sql/professional/lessons/sql_deep_05.sql. Direct prerequisites: sql-ops-01, sql-concurrency-01.
 Explain the row grain and SQL clauses, then ask me to predict a concrete result before my attempt. Give one hint at a time and review my exact result rows, identity, NULL behavior and boundary evidence. Ask retrieval questions in my own words. Do not read solutions/ until I request it or have made an honest attempt.
 Use only the prepared local disposable advanced_sql_training database and the complete rollback-safe script. Preserve my ignored working copy and do not start services or redirect to another database.

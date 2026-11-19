@@ -11,16 +11,16 @@ the saved project selection. No host Python or PostgreSQL installation is
 required for this browser route.
 
 1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database. A simple snippet
-   such as `SELECT 1;` needs no training-schema reset.
+   the local disposable `advanced_sql_training` database.
 2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
    preserves the lesson's reviewed psql directives, relative includes and
    transaction behavior. **SQL snippet** is appropriate for ordinary SQL
    statements, but is not a replacement for an entire script's setup.
-3. When the lesson requires the course training data, use the explicit
-   preparation action and read its reset acknowledgement. It replaces the
-   course-owned `training` schema. Do not reset unrelated data or prepare
-   every lesson by habit; stateful sequences have their own ordering.
+3. The **Course database** panel above the code shows whether the course
+   training tables are loaded. Missing tables load automatically before your
+   first run (or choose **Load course tables**) and stay loaded for later
+   lessons. **Reset training data** restores the original rows only when your
+   own changes made results differ; it keeps your saved code and notes.
 4. Edit the learner copy in the classroom and save your prediction before
    running. Its whole-script workspace is
    `.learning/sql/sql-55/lesson/workspace/sql/postgres-60day/day55_project4_bi_part1.sql`.
@@ -86,7 +86,7 @@ row count. For a normal analytical `SELECT`, use this logical reading order:
 window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
 different physical plan while preserving those semantics.
 
-The worked walkthrough's lesson-specific task is: Compare ROLLUP(country, category) with CUBE(country, category). Both include detail, country subtotal, and grand total; CUBE also adds category-only subtotals. Use GROUPING(country) and GROUPING(category) to label each level, then reconcile the grand total with source line revenue.
+The worked walkthrough's lesson-specific task is: Compare `ROLLUP(country, category)` with `CUBE(country, category)`. Both include detail, country subtotal, and grand total; `CUBE` also adds category-only subtotals. Use `GROUPING(country)` and `GROUPING(category)` to label each level, then reconcile the grand total with source line revenue.
 The first runnable example has a concrete contract: Example 1 returns one grouped row per `category`, `month`, and `g_country` with columns `category`, `payment_method`, `month`, `revenue`, `qty`, and `units` from `payments`, `orders`, `customers`, `order_items`, and `products`. Compare the key set and row count with a simpler control over the same filter/window; inspect `NULL` versus zero/absent-row meaning and verify the final ordering/tie-breaker when present. Its final projection is `country`, `category`, `payment_method`, `month`, `revenue`, `units`, `g_country`, and `g_category`. Independently group `payments`, `payment_by_method`, `orders`, `customers`, and `order_items` by the shown grouping expressions and compare every displayed aggregate at that exact grain. For tied business values, inspect the final ordering expression and verify its last key makes the displayed order reproducible.
 
 ## Two worked SQL examples
@@ -261,7 +261,7 @@ Test one real NULL/unknown dimension value.
 
 ## Common mistakes and how to recover
 
-- **Lesson-specific semantic mistake:** A raw payment join fans out split-payment orders. Keep the declared primary
+- **Lesson-specific semantic mistake:** A raw payment join fans out split-payment orders. Keep the declared primary method policy, or document a different allocation, before using that dimension.
 - **Unexpected row count:** display keys before aggregates, count rows after
   each join/filter stage, and find the first stage whose grain differs from the
   contract. Do not hide fanout with `DISTINCT`.
@@ -328,7 +328,7 @@ enough to complete the lesson offline. If you want a patient tutor, copy this
 prompt after opening the repository in the AI tutor:
 
 ```text
-Tutor me through sql-55 — Project4 BI Part1.
+Tutor me through sql-55: BI Project, Part 1: Drill-Downs and Subtotals.
 
 I have completed the direct catalog prerequisite: `sql-54`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day55_project4_bi_part1.md
@@ -338,7 +338,7 @@ Key terms to teach in context: ROLLUP, CUBE, GROUPING flag. First define those t
 language and explain table, row, column, result set, row grain, SQL NULL, and
 deterministic ordering where they apply. Then explain the important clauses in
 logical order and state the expected row grain/shape before asking me to run
-anything. The guide's lesson-specific worked-model focus is: Compare ROLLUP(country, category) with CUBE(country, category). Both include detail, country subtotal, and grand total; CUBE also adds category-only subtotals. Use GROUPING(country) and GROUPING(category) to label each level, then reconcile the grand total with source line revenue.
+anything. The guide's lesson-specific worked-model focus is: Compare `ROLLUP(country, category)` with `CUBE(country, category)`. Both include detail, country subtotal, and grand total; `CUBE` also adds category-only subtotals. Use `GROUPING(country)` and `GROUPING(category)` to label each level, then reconcile the grand total with source line revenue.
 
 Use only the local disposable advanced_sql_training database. Prefer the
 Docker classroom's Whole SQL lesson (psql) workspace and its ignored

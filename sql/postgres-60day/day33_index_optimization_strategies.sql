@@ -92,8 +92,8 @@ WHERE
 --    Hint ladder, rung 1: For sql-33 Exercise 5, run the underlying query without `EXPLAIN` and preserve its `order_id` rows.
 -- 6. Edge case: query a nullable column (customers.segment) with IS NULL and
 --    discuss whether a partial index for only NULL rows would be worthwhile.
---    Inputs: For sql-33 Exercise 6, run the underlying read-only query over `customers`, `idx_customers_null_segment_solution`, and `customers.segment` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
---    Expected result/shape: For sql-33 Exercise 6, expected output: one row per `customer_id`. The final columns are `all_customers`, and `null_segments`.
---    Verify: For sql-33 Exercise 6, run the underlying query without `EXPLAIN` and preserve its `customer_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
---    Hint ladder, rung 1: For sql-33 Exercise 6, run the underlying query without `EXPLAIN` and preserve its `customer_id` rows.
+--    Inputs: For sql-33 Exercise 6, count all customers and those with `segment IS NULL`, create the partial index `idx_customers_null_segment_solution ON customers (customer_id) WHERE segment IS NULL`, and read the plan of `SELECT customer_id FROM customers WHERE segment IS NULL`.
+--    Expected result/shape: For sql-33 Exercise 6, expected output: one row with `all_customers` 500 and `null_segments` 0, then a plan for the `IS NULL` query that can use the partial index (a `Bitmap Index Scan on idx_customers_null_segment_solution` on the course data). The final columns of the count are `all_customers` and `null_segments`.
+--    Verify: For sql-33 Exercise 6, confirm that the `IS NULL` query returns 0 rows, matching `null_segments`, whatever plan it uses; then confirm that `SELECT indexdef FROM pg_indexes WHERE indexname = 'idx_customers_null_segment_solution'` ends with `WHERE (segment IS NULL)`, because only a query whose `WHERE` implies that predicate can use the index.
+--    Hint ladder, rung 1: For sql-33 Exercise 6, run the count first; a partial index on `segment IS NULL` stores only those rows, so an empty count means an empty index.
 ROLLBACK;

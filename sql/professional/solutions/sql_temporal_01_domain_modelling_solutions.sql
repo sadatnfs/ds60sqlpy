@@ -1,5 +1,5 @@
 -- SQL-TEMPORAL-01 executable solutions
--- SOLUTION READING MAP — sql-temporal-01: Temporal and Domain Modelling
+-- SOLUTION READING MAP for sql-temporal-01: Temporal Data and Domain Modelling
 -- Explanation: sql/professional/solutions/sql_temporal_01_domain_modelling_solutions.md
 -- Run from the repository root only against advanced_sql_training:
 --   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solutions/sql_temporal_01_domain_modelling_solutions.sql

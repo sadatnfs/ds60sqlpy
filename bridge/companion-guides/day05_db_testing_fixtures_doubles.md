@@ -28,14 +28,8 @@ Start at the repository root. The answer-free starter is deliberately safe to
 run: it prints orientation text and does not call unfinished functions or
 contact PostgreSQL.
 
-```powershell
-# Windows PowerShell
-.\.venv\Scripts\python.exe bridge\lessons\day05_db_testing_fixtures_doubles.py
-.\.venv\Scripts\python.exe -m pytest bridge\tests -q
-```
-
 ```bash
-# macOS/Linux
+# Linux, macOS, or Windows through WSL 2
 .venv/bin/python bridge/lessons/day05_db_testing_fixtures_doubles.py
 .venv/bin/python -m pytest bridge/tests -q
 ```
@@ -196,7 +190,7 @@ twice without leaving learner data behind.
    numeric, isolation, or driver behavior tests.
    - **Progressive hint:** A fast substitute is useful only when it shares the semantics under
      test.
-   - **Verify:** List the PostgreSQL behavior under test, conflict handling, exact numeric adaptation, transaction/isolation, and Psycopg calls, and mark each as unproved by SQLite.
+   - **Verify:** List the PostgreSQL behavior under test (conflict handling, exact numeric adaptation, transaction/isolation, and Psycopg calls) and mark each as unproved by SQLite.
 11. **Security testing:** Pass an injection-shaped value through the cursor adapter and prove it
    appears only in the parameter tuple.
    - **Progressive hint:** Recording fakes should keep query and parameters in separate fields.
@@ -229,17 +223,16 @@ Use the disposable course database only. A fixture can connect, start normal
 test work, and always roll back before closing. Do not use SQLite as a faster
 substitute: it cannot validate PostgreSQL SQL, types, or transaction behavior.
 
-```powershell
-$env:DS60_RUN_LIVE_DB_TESTS = "1"
-$env:DS60_DATABASE_URL = "postgresql://USER:PASSWORD@localhost:5432/advanced_sql_training"
-.\.venv\Scripts\python.exe -m pytest path\to\your_live_test.py -q
-```
-
 ```bash
 export DS60_RUN_LIVE_DB_TESTS=1
-export DS60_DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/advanced_sql_training"
+export DS60_DATABASE_URL="postgresql://admin@127.0.0.1:PORT/advanced_sql_training"
 .venv/bin/python -m pytest path/to/your_live_test.py -q
 ```
+
+Replace `PORT` with the forwarded PostgreSQL port that `./classroom status`
+reports (55432 by default). Keep the password out of the URL: supply it
+through a private libpq password file as the
+[JupySQL setup guide](../../docs/setup/jupyter-postgresql.md) shows.
 
 The opt-in flag prevents an ordinary offline test run from contacting whatever
 database happens to be named in a developer's shell.
@@ -273,7 +266,7 @@ prompt below deliberately names exact paths so a new AI tutoring session can ori
 itself without guessing.
 
 ```text
-Tutor me through stable lesson ID bridge-05: DB Testing Fixtures Doubles.
+Tutor me through stable lesson ID bridge-05: Database Tests, Fixtures, and Test Doubles.
 Direct catalog prerequisites: bridge-04. Assume I completed exactly those
 prerequisites, then begin with one short Retrieval question that connects each
 prerequisite to this lesson.
@@ -286,12 +279,12 @@ Do not open, quote, summarize, or copy anything under solutions/ until I
 explicitly say I have finished my attempt and ask to compare.
 
 Use these coaching phases in order:
-1. Predict — ask what I expect before I run or change code.
-2. Attempt — let me implement or explain one numbered exercise at a time.
-3. Hint — give the smallest useful conceptual hint, never a finished answer.
-4. Evidence — ask for the exact return value, exception type, recorded calls,
+1. Predict: ask what I expect before I run or change code.
+2. Attempt: let me implement or explain one numbered exercise at a time.
+3. Hint: give the smallest useful conceptual hint, never a finished answer.
+4. Evidence: ask for the exact return value, exception type, recorded calls,
    query plus bound parameters, or written decision required by that exercise.
-5. Retrieval — close with two no-notes questions and one transfer problem.
+5. Retrieval: close with two no-notes questions and one transfer problem.
 
 Keep the default path offline and fake-first. If the lesson has an optional
 PostgreSQL step, require my explicit opt-in, DS60_DATABASE_URL, and the

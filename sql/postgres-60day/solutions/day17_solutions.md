@@ -7,13 +7,8 @@
 Open this explanation only after making an honest attempt. The executable
 companion runs solely against the disposable `advanced_sql_training` database:
 
-```powershell
-# Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f "sql\postgres-60day\solutions\day17_solutions.sql"
-```
-
 ```bash
-# macOS/Linux, from the repository root
+# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day17_solutions.sql
 ```
@@ -26,7 +21,7 @@ ordering with the explanation before comparing syntax.
 ## Clause-by-clause reading map
 
 The lesson's main concepts are Peer rows, Gap rank, Dense rank. Its worked-model focus is:
-Rank two products with equal revenue using ROWNUMBER, RANK, and DENSERANK. Add productid as the last ORDER BY key when the requirement is exactly five deterministic rows; omit that tie-breaker when equal metrics must share a business rank.
+Rank two products with equal revenue using `ROW_NUMBER`, `RANK`, and `DENSE_RANK`. Add `product_id` as the last `ORDER BY` key when the requirement is exactly five deterministic rows; omit that tie-breaker when equal metrics must share a business rank.
 
 - Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
   before adding aggregates; a one-to-many join is allowed to multiply rows only

@@ -1,5 +1,5 @@
 -- Day 43 solutions: logical backup and recovery patterns
--- SOLUTION READING MAP — sql-43: Backup Recovery
+-- SOLUTION READING MAP for sql-43: Logical Export, Staging, and Restore Checks
 -- Explanation: sql/postgres-60day/solutions/day43_solutions.md
 -- Run from the repository root only against advanced_sql_training:
 --   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day43_solutions.sql

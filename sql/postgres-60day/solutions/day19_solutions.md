@@ -7,13 +7,8 @@
 Open this explanation only after making an honest attempt. The executable
 companion runs solely against the disposable `advanced_sql_training` database:
 
-```powershell
-# Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f "sql\postgres-60day\solutions\day19_solutions.sql"
-```
-
 ```bash
-# macOS/Linux, from the repository root
+# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day19_solutions.sql
 ```
@@ -26,7 +21,7 @@ ordering with the explanation before comparing syntax.
 ## Clause-by-clause reading map
 
 The lesson's main concepts are Cumulative aggregate, Moving window, Observation. Its worked-model focus is:
-Aggregate orders to daily revenue, then apply ROWS BETWEEN 6 PRECEDING AND CURRENT ROW. This includes at most seven observed order dates, not automatically seven calendar days. Compare it with a date-spined input that includes zero-revenue days.
+Aggregate orders to daily revenue, then apply `ROWS BETWEEN 6 PRECEDING AND CURRENT ROW`. This includes at most seven observed order dates, not automatically seven calendar days. Compare it with a date-spined input that includes zero-revenue days.
 
 - Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
   before adding aggregates; a one-to-many join is allowed to multiply rows only
@@ -353,13 +348,13 @@ cardinality contract.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-19 Exercise 6, read from `orders`. Build the answer toward `final_cumulative`, `aggregate_total`, and `difference`; keep `cumulative_revenue` visible whenever the result has row-level grain.
+- **Inputs/evidence:** For sql-19 Exercise 6, read from `orders`; compute `SUM(total_amount) OVER (ORDER BY order_date, order_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)` in the CTE `running`, keep the cumulative value of the last order, and compare it with an ordinary `SUM(total_amount)`.
 - **Expected result/shape:** For sql-19 Exercise 6, expected output: One row with zero difference. The final columns are `final_cumulative`, `aggregate_total`, and `difference`.
-- **Independent verification:** For sql-19 Exercise 6, independently aggregate `orders` by `cumulative_revenue`; require one output row for every distinct `cumulative_revenue` tuple and compare `aggregate_total` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `aggregate_total` for the existing `cumulative_revenue` tuple and verify the new tuple appears exactly once.
-- **Intermediate relation check:** For sql-19 Exercise 6, run `running`, and `final_running` one at a time. Record each CTE's row count and `cumulative_revenue` uniqueness before the next stage uses it.
-- **Clause check:** For sql-19 Exercise 6, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `GROUP BY`, window `OVER`, `SELECT`, `ORDER BY`, and `LIMIT`. Read only those operations: begin at `orders`, preserve one row per `cumulative_revenue`, and finish with `final_cumulative`, `aggregate_total`, and `difference`.
+- **Independent verification:** For sql-19 Exercise 6, confirm one row where `final_cumulative` and `aggregate_total` are both 2355646.89 and `difference` is 0.00; `running` must keep all 4362 orders, and its last row by `order_date DESC, order_id DESC` must carry the full total.
+- **Intermediate relation check:** For sql-19 Exercise 6, check that `running` returns 4362 rows and that its last row by `order_date DESC, order_id DESC` holds the largest cumulative value.
+- **Clause check:** For sql-19 Exercise 6, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `GROUP BY`, window `OVER`, `SELECT`, `ORDER BY`, and `LIMIT`. Read only those operations: begin at `orders`, preserve exactly one summary row, and finish with `final_cumulative`, `aggregate_total`, and `difference`.
 - **Alternative/trade-off:** For sql-19 Exercise 6, the chosen form is justified by this lesson-specific rationale: Select the last ordered cumulative value and compare it with an independent aggregate. Evaluate another form against the concrete expected result (One row with zero difference) and the verification above.
-- **Edge case:** Add one row to an existing group and one row for a new group; recompute `aggregate_total` for the existing `cumulative_revenue` tuple and verify the new tuple appears exactly once.
+- **Edge case:** Without the `order_id` tiebreaker, orders that share a timestamp would have no defined order, so the row picked as last might not be the window's last row and its cumulative value could fall short of the total.
 
 ## Final self-check
 

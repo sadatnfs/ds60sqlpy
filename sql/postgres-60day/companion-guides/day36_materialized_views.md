@@ -11,16 +11,16 @@ the saved project selection. No host Python or PostgreSQL installation is
 required for this browser route.
 
 1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database. A simple snippet
-   such as `SELECT 1;` needs no training-schema reset.
+   the local disposable `advanced_sql_training` database.
 2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
    preserves the lesson's reviewed psql directives, relative includes and
    transaction behavior. **SQL snippet** is appropriate for ordinary SQL
    statements, but is not a replacement for an entire script's setup.
-3. When the lesson requires the course training data, use the explicit
-   preparation action and read its reset acknowledgement. It replaces the
-   course-owned `training` schema. Do not reset unrelated data or prepare
-   every lesson by habit; stateful sequences have their own ordering.
+3. The **Course database** panel above the code shows whether the course
+   training tables are loaded. Missing tables load automatically before your
+   first run (or choose **Load course tables**) and stay loaded for later
+   lessons. **Reset training data** restores the original rows only when your
+   own changes made results differ; it keeps your saved code and notes.
 4. Edit the learner copy in the classroom and save your prediction before
    running. Its whole-script workspace is
    `.learning/sql/sql-36/lesson/workspace/sql/postgres-60day/day36_materialized_views.sql`.
@@ -142,7 +142,7 @@ LIMIT 50;
   explicitly.
 - **Freshness:** how current cached output is relative to its sources.
 - **Concurrent refresh:** a read-preserving refresh mode with unique-index and
-  transaction restrictions.
+  populated-view requirements.
 
 ## Worked example / walkthrough
 
@@ -156,13 +156,13 @@ become stale and who would own refresh failures.
 Complete these in the [learner SQL](../day36_materialized_views.sql):
 
 1. Create weekly country revenue materialization.
-   **Inputs/evidence:** For sql-36 Exercise 1, read from `orders`, `customers`, `order_items`, and `mv_weekly_country_revenue_solution`. Compute `week_start`, `country`, and `revenue` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
-   **Expected result/shape:** For sql-36 Exercise 1, expected output: one row per observed week-country pair. PostgreSQL weeks begin on Monday under `date_trunc('week',. The final columns are `week_start`, `country`, and `revenue`. The final order is `week_start DESC, revenue DESC`.
-   **Verify:** For sql-36 Exercise 1, evaluate each of `revenue` in a separate control `SELECT` over `orders`, `customers`, `order_items`, and `mv_weekly_country_revenue_solution`; require one final row and compare every value. Add one row to an existing group and one row for a new group; recompute `revenue` for the existing `country` tuple and verify the new tuple appears exactly once.
+   **Inputs/evidence:** For sql-36 Exercise 1, read from `orders` joined to `customers` and create the materialized view `mv_weekly_country_revenue_solution` with one row per Monday-based `week` (`date_trunc('week', order_date)::date`) and `country`, carrying `revenue` (`SUM(total_amount)`) and `orders` (`COUNT(*)`), then add a unique index on `(week, country)`.
+   **Expected result/shape:** For sql-36 Exercise 1, expected output: a `SELECT n` command tag for the view build, one row per observed week-country pair, then `CREATE INDEX`. The view's columns are `week`, `country`, `revenue`, and `orders`.
+   **Verify:** For sql-36 Exercise 1, confirm that the view's row count equals `SELECT COUNT(*) FROM (SELECT DISTINCT date_trunc('week', o.order_date), c.country FROM orders o JOIN customers c USING (customer_id)) d`, that `SUM(revenue)` is 2355646.89 and `SUM(orders)` is 4362, and that `EXTRACT(ISODOW FROM week)` is 1 (Monday) on every row.
 2. Compare source-query and materialized-query plans.
-   **Inputs/evidence:** For sql-36 Exercise 2, run the underlying read-only query over `orders`, `customers`, `order_items`, and `mv_weekly_country_revenue_compare` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
-   **Expected result/shape:** For sql-36 Exercise 2, expected output: one row per `country`. The final columns are `week_start`, `country`, and `revenue`.
-   **Verify:** For sql-36 Exercise 2, run the underlying query without `EXPLAIN` and preserve its `country` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+   **Inputs/evidence:** For sql-36 Exercise 2, run `EXPLAIN (ANALYZE, BUFFERS)` on the base-table aggregate that defines the view, then on `SELECT week, country, revenue, orders FROM mv_weekly_country_revenue_solution`.
+   **Expected result/shape:** For sql-36 Exercise 2, expected output: two plans. The base-table plan aggregates all 4362 joined orders in a `HashAggregate`, while the view plan is a single `Seq Scan` on the materialized view; both top nodes report the same number of actual rows.
+   **Verify:** For sql-36 Exercise 2, compare the top node's actual `rows` in both plans (they must match) and the buffers each plan touched; then run both queries without `EXPLAIN` and confirm that `EXCEPT` in both directions returns no rows. Timings vary from run to run, so compare buffers and row counts rather than milliseconds.
 3. Predict and verify stale results before refresh.
    **Inputs/evidence:** For sql-36 Exercise 3, read from `orders`, and `mv_weekly_country_revenue_solution`. Compute `live_total`, and `refreshed_mv_total` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
    **Expected result/shape:** For sql-36 Exercise 3, expected output: exactly one aggregate summary row. The final columns are `live_total`, and `refreshed_mv_total`.
@@ -211,10 +211,16 @@ stores rows and can be indexed, but those rows are stale until refreshed.
 
 ## Refresh behavior
 
-- `REFRESH MATERIALIZED VIEW` replaces the stored contents and blocks reads of
-  that MV during refresh.
-- `REFRESH ... CONCURRENTLY` permits reads but requires a qualifying unique
-  index and cannot run inside an explicit transaction block.
+- `REFRESH MATERIALIZED VIEW` replaces the stored contents and takes an
+  `ACCESS EXCLUSIVE` lock, so it blocks reads of that MV during refresh.
+- `REFRESH ... CONCURRENTLY` keeps the view readable, but needs an already
+  populated view and a unique index on plain columns covering every row (for
+  example `(category, month)`); only one refresh per view runs at a time.
+  Unlike `CREATE INDEX CONCURRENTLY`, it may run inside a transaction block.
+  It computes a difference against the old contents, so it can be slower than
+  an ordinary refresh when many rows change.
+- PostgreSQL 17 requires the `MAINTAIN` privilege on the view (granted to the
+  owner, or through the predefined `pg_maintain` role) to refresh it.
 - PostgreSQL does not provide general native incremental MV refresh; selective
   rollup tables are a separate design.
 
@@ -249,7 +255,7 @@ enough to complete the lesson offline. If you want a patient tutor, copy this
 prompt after opening the repository in the AI tutor:
 
 ```text
-Tutor me through sql-36 — Materialized Views.
+Tutor me through sql-36: Materialized Views and Caching.
 
 I have completed the direct catalog prerequisite: `sql-35`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day36_materialized_views.md

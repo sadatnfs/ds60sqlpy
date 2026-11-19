@@ -1,5 +1,5 @@
 -- Day 24 executable solutions
--- SOLUTION READING MAP — sql-24: Recursive CTEs
+-- SOLUTION READING MAP for sql-24: Recursive CTEs for Hierarchies and Graphs
 -- Explanation: sql/postgres-60day/solutions/day24_solutions.md
 -- Run from the repository root only against advanced_sql_training:
 --   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day24_solutions.sql

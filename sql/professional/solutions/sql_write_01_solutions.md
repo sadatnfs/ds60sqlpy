@@ -118,7 +118,7 @@ A/B/C/Z target values and versions afterward.
 ## Exercise 4: Use the uniqueness-conflict path and reject stale proposals
 
 **Inputs:** For sql-write-01 Exercise 4, use the original target with its sku primary key and partial events (A,14,3), (B,999,1), (D,4,1).
-**Expected result/shape:** For sql-write-01 Exercise 4, rETURNING contains only changed keys A/D. Display final sku, quantity, source_version ordered by sku as (A,14,3), (B,3,1), (D,4,1), (Z,5,1), one row per sku.
+**Expected result/shape:** For sql-write-01 Exercise 4, RETURNING contains only changed keys A/D. Display final sku, quantity, source_version ordered by sku as (A,14,3), (B,3,1), (D,4,1), (Z,5,1), one row per sku.
 **Verify:** For sql-write-01 Exercise 4, require B to retain quantity three and version one despite the stale proposed 999. Check Z remains five and distinguish a skipped update from a missing target.
 
 The primary key provides a conflict target for each proposed SKU. `excluded`

@@ -1,4 +1,4 @@
-# SQL-START-02: Values NULL and Deterministic Order
+# SQL-START-02: Values, NULL, and Deterministic Order
 
 ## How to run this lesson
 
@@ -11,16 +11,16 @@ the saved project selection. No host Python or PostgreSQL installation is
 required for this browser route.
 
 1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database. A simple snippet
-   such as `SELECT 1;` needs no training-schema reset.
+   the local disposable `advanced_sql_training` database.
 2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
    preserves the lesson's reviewed psql directives, relative includes and
    transaction behavior. **SQL snippet** is appropriate for ordinary SQL
    statements, but is not a replacement for an entire script's setup.
-3. When the lesson requires the course training data, use the explicit
-   preparation action and read its reset acknowledgement. It replaces the
-   course-owned `training` schema. Do not reset unrelated data or prepare
-   every lesson by habit; stateful sequences have their own ordering.
+3. The **Course database** panel above the code shows whether the course
+   training tables are loaded. Missing tables load automatically before your
+   first run (or choose **Load course tables**) and stay loaded for later
+   lessons. **Reset training data** restores the original rows only when your
+   own changes made results differ; it keeps your saved code and notes.
 4. Edit the learner copy in the classroom and save your prediction before
    running. Its whole-script workspace is
    `.learning/sql/sql-start-02/lesson/workspace/sql/professional/lessons/sql_start_02_values_null_order.sql`.
@@ -270,15 +270,15 @@ Concrete next target: [Query construction and debugging](sql_start_03_query_debu
 
 The course works offline after setup. These optional official references describe the PostgreSQL semantics used here:
 
-- [PostgreSQL 16 documentation](https://www.postgresql.org/docs/16/functions-comparisons.html)
-- [PostgreSQL 16 documentation](https://www.postgresql.org/docs/16/queries-limit.html)
+- [PostgreSQL 16 documentation](https://www.postgresql.org/docs/17/functions-comparisons.html)
+- [PostgreSQL 16 documentation](https://www.postgresql.org/docs/17/queries-limit.html)
 
 ## Ask an AI tutor about this lesson
 
 The lesson and expected observations are sufficient offline. For optional coaching, copy:
 
 ```text
-Tutor me through sql-start-02: Values NULL and Deterministic Order using the checked-in $guide-ds60sqlpy-learning skill.
+Tutor me through sql-start-02: Values, NULL, and Deterministic Order using the checked-in $guide-ds60sqlpy-learning skill.
 Guide: sql/professional/companion-guides/sql_start_02_values_null_order.md
 Answer-free learner: sql/professional/lessons/sql_start_02_values_null_order.sql
 Direct prerequisite boundary: sql-start-01.

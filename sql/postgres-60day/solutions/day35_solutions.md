@@ -7,13 +7,8 @@
 Open this explanation only after making an honest attempt. The executable
 companion runs solely against the disposable `advanced_sql_training` database:
 
-```powershell
-# Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f "sql\postgres-60day\solutions\day35_solutions.sql"
-```
-
 ```bash
-# macOS/Linux, from the repository root
+# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day35_solutions.sql
 ```
@@ -26,7 +21,7 @@ ordering with the explanation before comparing syntax.
 ## Clause-by-clause reading map
 
 The lesson's main concepts are Sargability, Half-open range, Set-based rewrite. Its worked-model focus is:
-Compare datetrunc('day', orderdate) = targetday with orderdate >= targetday AND orderdate < targetday + interval '1 day'. Test timestamps at both boundaries, reconcile row IDs, and compare plans with a matching orderdate index.
+Compare `date_trunc('day', order_date) = target_day` with `order_date >= target_day AND order_date < target_day + interval '1 day'`. Test timestamps at both boundaries, reconcile row IDs, and compare plans with a matching `order_date` index.
 
 - Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
   before adding aggregates; a one-to-many join is allowed to multiply rows only
@@ -270,10 +265,10 @@ non-NULL email. The difference is a useful missingness count, not a discrepancy.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-35 Exercise 6, read from `customers`. Build the answer toward `customer_rows`, `customers_with_email`, and `customers_without_email`; keep `customer_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-35 Exercise 6, expected output: one row per `customer_id`. The final columns are `customer_rows`, `customers_with_email`, and `customers_without_email`.
-- **Independent verification:** For sql-35 Exercise 6, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_rows`, `customers_with_email`, and `customers_without_email` against `customers`. Repeat with `NULL` in `customer_rows`, and `customers_with_email` and state whether the row is kept, rejected, or classified.
-- **Intermediate relation check:** For sql-35 Exercise 6, select `customer_id` from `customers` before adding derived columns.
-- **Clause check:** For sql-35 Exercise 6, the solution actually uses `FROM`, and `SELECT`. Read only those operations: begin at `customers`, preserve one row per `customer_id`, and finish with `customer_rows`, `customers_with_email`, and `customers_without_email`.
+- **Inputs/evidence:** For sql-35 Exercise 6, read from `customers` and count, in one aggregate, all rows, rows with an `email`, and rows without one.
+- **Expected result/shape:** For sql-35 Exercise 6, expected output: one row with `customer_rows` 500, `customers_with_email` 500, and `customers_without_email` 0. The final columns are `customer_rows`, `customers_with_email`, and `customers_without_email`.
+- **Independent verification:** For sql-35 Exercise 6, confirm `customers_with_email + customers_without_email = customer_rows`; in a transaction you roll back, set one `email` to NULL and expect 500, 499, and 1, because `COUNT(email)` skips NULL while `COUNT(*)` counts every row.
+- **Intermediate relation check:** For sql-35 Exercise 6, compare `COUNT(*)` with `COUNT(email)` first; the difference is the number of NULL emails.
+- **Clause check:** For sql-35 Exercise 6, the solution actually uses `FROM`, and `SELECT`. Read only those operations: begin at `customers`, preserve exactly one summary row, and finish with `customer_rows`, `customers_with_email`, and `customers_without_email`.
 - **Alternative/trade-off:** For sql-35 Exercise 6, the chosen form is justified by this lesson-specific rationale: `COUNT()` measures customer rows; `COUNT(email)` measures customers with a non-NULL email. Evaluate another form against the concrete expected result (one row per `customer_id`) and the verification above.
-- **Edge case:** Repeat with `NULL` in `customer_rows`, and `customers_with_email` and state whether the row is kept, rejected, or classified.
+- **Edge case:** `COUNT(*) - COUNT(email)` counts only NULLs; an empty-string email still counts as present, so a quality check that treats blanks as missing needs `NULLIF(trim(email), '')`.

@@ -7,13 +7,8 @@
 Open this explanation only after making an honest attempt. The executable
 companion runs solely against the disposable `advanced_sql_training` database:
 
-```powershell
-# Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f "sql\professional\solutions\sql_sec_01_roles_privileges_rls_solutions.sql"
-```
-
 ```bash
-# macOS/Linux, from the repository root
+# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/professional/solutions/sql_sec_01_roles_privileges_rls_solutions.sql
 ```
@@ -26,7 +21,7 @@ ordering with the explanation before comparing syntax.
 ## Clause-by-clause reading map
 
 The lesson's main concepts are Role, Owner, Privilege, Least privilege, Schema USAGE, Search path. Its worked-model focus is:
-The script first queries pgroles and stores a Boolean for a psql \if. Restricted installations print a safe skip and current capability summary. No attempted CREATE ROLE is used as feature detection, so an expected denial does not leave a failed transaction or noisy partial setup.
+The script first queries `pg_roles` and stores Booleans for `psql` `\if`: whether prepared course roles can be adopted with `SET ROLE`, and whether this login can administer roles. Restricted installations print a safe skip and current capability summary. No attempted `CREATE ROLE` is used as feature detection, so an expected denial does not leave a failed transaction or noisy partial setup.
 
 - Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
   before adding aggregates; a one-to-many join is allowed to multiply rows only
@@ -59,10 +54,13 @@ Run the optional hands-on solution with:
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solutions/sql_sec_01_roles_privileges_rls_solutions.sql
 ```
 
-It performs the same capability check as the learner file. With role-admin
-capability it creates NOLOGIN course roles inside one transaction; without that
-capability it prints a read-only skip. Normal completion leaves no roles,
-memberships, grants, or schema.
+It performs the same capability checks as the learner file. In the classroom
+it uses the six NOLOGIN course roles that `./classroom` prepares and adopts
+them with `SET ROLE`; the course login never gains `CREATEROLE`. A
+role-administering login without those roles creates them inside one
+transaction instead; without either capability it prints a read-only skip.
+Normal completion leaves no schema, policies, grants or created roles; the
+prepared roles remain and own nothing.
 
 ## Exercise 1: Prove both privilege layers
 

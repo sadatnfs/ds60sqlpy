@@ -1,5 +1,5 @@
 -- Day 17 executable solutions
--- SOLUTION READING MAP — sql-17: Rank Functions
+-- SOLUTION READING MAP for sql-17: Ranking with ROW_NUMBER, RANK, and DENSE_RANK
 -- Explanation: sql/postgres-60day/solutions/day17_solutions.md
 -- Run from the repository root only against advanced_sql_training:
 --   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day17_solutions.sql

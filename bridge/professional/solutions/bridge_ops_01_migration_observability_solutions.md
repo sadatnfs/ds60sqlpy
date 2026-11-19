@@ -202,7 +202,7 @@ in the attempt's exception path, and let the outer retry call its fake sleeper a
 **Why:** One attempt must acquire, lock, re-check, apply, verify, record, commit, close, then
 report.
 
-**Verification evidence:** Record the nine delivery stages, open, bootstrap/lock, re-check, commands, verify, metadata, commit, close, report, and in failure assert rollback and close occur before the sleeper.
+**Verification evidence:** Record the nine delivery stages (open, bootstrap/lock, re-check, commands, verify, metadata, commit, close, report) and, in failure, assert rollback and close occur before the sleeper.
 
 ### Exercise 6: Commit uncertainty
 

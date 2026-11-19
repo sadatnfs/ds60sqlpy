@@ -11,16 +11,16 @@ the saved project selection. No host Python or PostgreSQL installation is
 required for this browser route.
 
 1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database. A simple snippet
-   such as `SELECT 1;` needs no training-schema reset.
+   the local disposable `advanced_sql_training` database.
 2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
    preserves the lesson's reviewed psql directives, relative includes and
    transaction behavior. **SQL snippet** is appropriate for ordinary SQL
    statements, but is not a replacement for an entire script's setup.
-3. When the lesson requires the course training data, use the explicit
-   preparation action and read its reset acknowledgement. It replaces the
-   course-owned `training` schema. Do not reset unrelated data or prepare
-   every lesson by habit; stateful sequences have their own ordering.
+3. The **Course database** panel above the code shows whether the course
+   training tables are loaded. Missing tables load automatically before your
+   first run (or choose **Load course tables**) and stay loaded for later
+   lessons. **Reset training data** restores the original rows only when your
+   own changes made results differ; it keeps your saved code and notes.
 4. Edit the learner copy in the classroom and save your prediction before
    running. Its whole-script workspace is
    `.learning/sql/sql-24/lesson/workspace/sql/postgres-60day/day24_recursive_ctes.sql`.
@@ -87,7 +87,7 @@ window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may exec
 different physical plan while preserving those semantics.
 
 The worked walkthrough's lesson-specific task is: Seed each direct manager/report edge with a path array containing both keys. Each recursive step joins the current report to its direct reports, increments depth, and rejects a key already present in the path. Inspect the maximum depth and path before trusting the hierarchy.
-The expected contract is that One row per ancestor-descendant pair. Predict keys, row count, `NULL` behavior,
+Exercise 1 expects this result: one row per ancestor-descendant pair. Predict keys, row count, `NULL` behavior,
 and ordering before running. Afterwards, compare keys/counts/totals with an
 independent control. A blank string, SQL `NULL`, numeric zero, and a missing row
 are different facts; use `COALESCE` only after choosing which meaning the
@@ -239,7 +239,7 @@ For every result, write its row grain and expected shape first.
 
 ## Common mistakes and how to recover
 
-- **Lesson-specific semantic mistake:** UNION ALL without a cycle/termination guard can recurse indefinitely; UNION duplicate removal is not a substitute for a path rule.
+- **Lesson-specific semantic mistake:** `UNION ALL` without a cycle/termination guard can recurse indefinitely; `UNION` duplicate removal is not a substitute for a path rule.
 - **Unexpected row count:** display keys before aggregates, count rows after
   each join/filter stage, and find the first stage whose grain differs from the
   contract. Do not hide fanout with `DISTINCT`.
@@ -296,14 +296,8 @@ Pitfalls
 - UNION vs UNION ALL: use UNION ALL to avoid global de-dup unless necessary; dedup can be expensive.
 - Large trees can be costly; index parent_id and id.
 
-Current practice map
-- The authoritative six prompts, progressive hints, and expected shapes
-  are maintained in **Exercises** above. They map
-  one-for-one to both solution companions; older short exercise lists
-  were removed to prevent prompt drift.
-
 Further reading
-- WITH RECURSIVE: https://www.postgresql.org/docs/current/queries-with.html#QUERIES-WITH-RECURSIVE
+- WITH RECURSIVE: https://www.postgresql.org/docs/17/queries-with.html#QUERIES-WITH-RECURSIVE
 - Tree traversal recipes: https://wiki.postgresql.org/wiki/Hierarchical_queries
 
 ## Ask an AI tutor about this lesson
@@ -313,7 +307,7 @@ enough to complete the lesson offline. If you want a patient tutor, copy this
 prompt after opening the repository in the AI tutor:
 
 ```text
-Tutor me through sql-24 — Recursive CTEs.
+Tutor me through sql-24: Recursive CTEs for Hierarchies and Graphs.
 
 I have completed the direct catalog prerequisite: `sql-23`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day24_recursive_ctes.md

@@ -1,5 +1,5 @@
 -- SQL-TYPES-01 executable solutions
--- SOLUTION READING MAP — sql-types-01: PostgreSQL-Native Types and Searchable Documents
+-- SOLUTION READING MAP for sql-types-01: Native PostgreSQL Types and Full-Text Search
 -- Explanation: sql/professional/solutions/sql_types_01_native_types_search_solutions.md
 -- Run from the repository root only against advanced_sql_training:
 --   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solutions/sql_types_01_native_types_search_solutions.sql

@@ -7,13 +7,8 @@
 Open this explanation only after making an honest attempt. The executable
 companion runs solely against the disposable `advanced_sql_training` database:
 
-```powershell
-# Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f "sql\postgres-60day\solutions\day60_solutions.sql"
-```
-
 ```bash
-# macOS/Linux, from the repository root
+# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day60_solutions.sql
 ```
@@ -26,7 +21,7 @@ ordering with the explanation before comparing syntax.
 ## Clause-by-clause reading map
 
 The lesson's main concepts are Acceptance criterion, Evidence bundle, Handoff. Its worked-model focus is:
-Take customer LTV through the final evidence loop: state one-customer grain and revenue scope, run the view query, reconcile summed LTV with SUM(orders.totalamount), capture the result and environment, and record any exception with owner and next action. Apply the same loop to each deliverable.
+Take customer LTV through the final evidence loop: state one-customer grain and revenue scope, run the view query, reconcile summed LTV with `SUM(orders.total_amount)`, capture the result and environment, and record any exception with owner and next action. Apply the same loop to each deliverable.
 
 - Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
   before adding aggregates; a one-to-many join is allowed to multiply rows only
@@ -343,13 +338,13 @@ have named owners/evidence. Query correctness alone is not production readiness.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-60 Exercise 6, read from the inline `VALUES` fixture. Build the answer toward `item`, `evidence`, and `owner`; keep `evidence` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-60 Exercise 6, expected output: one row per `evidence`. The final columns are `item`, `evidence`, and `owner`.
-- **Independent verification:** For sql-60 Exercise 6, reselect the returned keys directly from the source; require unique `evidence` where the expected grain is one row per key and confirm the projected `item`, `evidence`, and `owner` against the inline `VALUES` fixture. Add one source row with a new `evidence`; verify the result gains exactly one row carrying that `evidence` value.
-- **Intermediate relation check:** For sql-60 Exercise 6, select `evidence` from the inline `VALUES` fixture before adding derived columns.
-- **Clause check:** For sql-60 Exercise 6, the solution actually uses `FROM`, and `SELECT`. Read only those operations: begin at the inline `VALUES` fixture, preserve one row per `evidence`, and finish with `item`, `evidence`, and `owner`.
+- **Inputs/evidence:** For sql-60 Exercise 6, list the release checklist as an inline `VALUES` relation with one row per `item`, its current `evidence`, and its `owner`.
+- **Expected result/shape:** For sql-60 Exercise 6, expected output: 6 rows, one per checklist `item`: rollback plan, object ownership/privileges, refresh cadence, monitoring and alerts, data contracts, and known limits. The final columns are `item`, `evidence`, and `owner`.
+- **Independent verification:** For sql-60 Exercise 6, confirm 6 rows with no NULL `evidence` or `owner` and no repeated `item`; every row whose `evidence` reads `review required` still needs a named reviewer before release.
+- **Intermediate relation check:** For sql-60 Exercise 6, write the `VALUES` list with column aliases first and check that each `item` appears once.
+- **Clause check:** For sql-60 Exercise 6, the solution actually uses `FROM`, and `SELECT`. Read only those operations: begin at the inline `VALUES` fixture, preserve one row per checklist item, and finish with `item`, `evidence`, and `owner`.
 - **Alternative/trade-off:** For sql-60 Exercise 6, the chosen form is justified by this lesson-specific rationale: Rollback, ownership, privileges, refresh, monitoring, contracts, and limits all have named owners/evidence. Evaluate another form against the concrete expected result (one row per `evidence`) and the verification above.
-- **Edge case:** Add one source row with a new `evidence`; verify the result gains exactly one row carrying that `evidence` value.
+- **Edge case:** A `VALUES` checklist records claims, not proof; link each `evidence` entry to an executed check or to the review that produced it.
 
 ## Exercise 7: Publish lineage
 
@@ -389,13 +384,13 @@ constraints or quarantine rules must enforce.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-60 Exercise 9, read from `edge_fixture`. Build the answer toward `fixture_rows`, `null_email_rows`, `duplicate_key_rows`, and `nonnull_amount_rows`; keep `fixture_rows` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-60 Exercise 9, expected output: one row per `fixture_rows`. The final columns are `fixture_rows`, `null_email_rows`, `duplicate_key_rows`, and `nonnull_amount_rows`.
-- **Independent verification:** For sql-60 Exercise 9, reselect the returned keys directly from the source; require unique `fixture_rows` where the expected grain is one row per key and confirm the projected `fixture_rows`, `null_email_rows`, `duplicate_key_rows`, and `nonnull_amount_rows` against `edge_fixture`. Repeat with `NULL` in `fixture_rows`, and `null_email_rows` and state whether the row is kept, rejected, or classified.
-- **Intermediate relation check:** For sql-60 Exercise 9, inspect the source keys that survive `WHERE`.
-- **Clause check:** For sql-60 Exercise 9, the solution actually uses `WITH`, `FROM`, `WHERE`, aggregate `FILTER`, and `SELECT`. Read only those operations: begin at `edge_fixture`, preserve one row per `fixture_rows`, and finish with `fixture_rows`, `null_email_rows`, `duplicate_key_rows`, and `nonnull_amount_rows`.
+- **Inputs/evidence:** For sql-60 Exercise 9, build a three-row `VALUES` fixture `edge_fixture(id, email, amount)` with one row whose email and amount are NULL and two rows that share `id` 2 with emails that differ only in case, then count rows, NULL emails, duplicate keys, and non-null amounts.
+- **Expected result/shape:** For sql-60 Exercise 9, expected output: one row with `fixture_rows` 3, `null_email_rows` 1, `duplicate_key_rows` 1, and `nonnull_amount_rows` 2. The final columns are `fixture_rows`, `null_email_rows`, `duplicate_key_rows`, and `nonnull_amount_rows`.
+- **Independent verification:** For sql-60 Exercise 9, confirm that `duplicate_key_rows` equals `COUNT(*) - COUNT(DISTINCT id)` (3 - 2 = 1) and `nonnull_amount_rows` equals `COUNT(amount)` (2); `COUNT(DISTINCT lower(email))` is 1, so the two `id` 2 rows also collide after email normalization.
+- **Intermediate relation check:** For sql-60 Exercise 9, count each property in its own `SELECT` over the fixture first; `COUNT(column)` skips NULL, while `COUNT(*)` does not.
+- **Clause check:** For sql-60 Exercise 9, the solution actually uses `WITH`, `FROM`, `WHERE`, aggregate `FILTER`, and `SELECT`. Read only those operations: begin at `edge_fixture`, preserve exactly one summary row, and finish with `fixture_rows`, `null_email_rows`, `duplicate_key_rows`, and `nonnull_amount_rows`.
 - **Alternative/trade-off:** For sql-60 Exercise 9, the chosen form is justified by this lesson-specific rationale: The in-query fixture represents NULL, one-row-like, and duplicate-key cases without changing course data. Evaluate another form against the concrete expected result (one row per `fixture_rows`) and the verification above.
-- **Edge case:** Repeat with `NULL` in `fixture_rows`, and `null_email_rows` and state whether the row is kept, rejected, or classified.
+- **Edge case:** A report that only counts non-null amounts would silently drop the NULL row; keep `fixture_rows` beside every filtered count so missing values stay visible.
 
 ## Exercise 10: Distinguish FAIL from NOT_RUN
 
@@ -404,10 +399,10 @@ bootstrap remains `NOT_RUN`; prose or confidence must never upgrade it to PASS.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-60 Exercise 10, read from `v_dq_customers_solution`, `v_customer_ltv_solution`, and `orders`. Build the answer toward `criterion`, and `result`; keep `order_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-60 Exercise 10, expected output: one row per `order_id`. The final columns are `criterion`, and `result`. The final order is `criterion`.
-- **Independent verification:** For sql-60 Exercise 10, reselect the returned keys directly from the source; require unique `order_id` where the expected grain is one row per key and confirm the projected `criterion`, and `result` against `v_dq_customers_solution`, `v_customer_ltv_solution`, and `orders`. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
-- **Intermediate relation check:** For sql-60 Exercise 10, check `criterion` before applying the row cap.
-- **Clause check:** For sql-60 Exercise 10, the solution actually uses `FROM`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `v_dq_customers_solution`, `v_customer_ltv_solution`, and `orders`, preserve one row per `order_id`, and finish with `criterion`, and `result` ordered by `criterion`.
+- **Inputs/evidence:** For sql-60 Exercise 10, list the acceptance criteria as a `VALUES` relation with `criterion`, an `executed` flag, the `observed` value from the solution views, and the `expected` value, then label each criterion `PASS`, `FAIL`, or `NOT_RUN`.
+- **Expected result/shape:** For sql-60 Exercise 10, expected output: 3 rows ordered by `criterion`: `customer DQ` PASS, `LTV reconciliation` PASS, and `Windows CI bootstrap` NOT_RUN. The final columns are `criterion` and `result`. The final order is `criterion`.
+- **Independent verification:** For sql-60 Exercise 10, confirm that each PASS row's observed value matches its expected value when queried directly (`SELECT invalid_email FROM v_dq_customers_solution` returns 0) and that the unexecuted criterion reports `NOT_RUN`, never `PASS`.
+- **Intermediate relation check:** For sql-60 Exercise 10, write the `CASE` so that `executed` is tested before the comparison; an unexecuted check must never fall through to `PASS`.
+- **Clause check:** For sql-60 Exercise 10, the solution actually uses `FROM`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `v_dq_customers_solution`, `v_customer_ltv_solution`, and `orders`, preserve one row per criterion, and finish with `criterion`, and `result` ordered by `criterion`.
 - **Alternative/trade-off:** For sql-60 Exercise 10, the chosen form is justified by this lesson-specific rationale: Executed checks compare observed and expected values. Evaluate another form against the concrete expected result (one row per `order_id`) and the verification above.
-- **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+- **Edge case:** If `observed` is NULL, `observed = expected` is unknown and the `CASE` returns `FAIL`, which is the safe result for a check that produced no evidence.

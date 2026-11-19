@@ -28,14 +28,8 @@ Start at the repository root. The answer-free starter is deliberately safe to
 run: it prints orientation text and does not call unfinished functions or
 contact PostgreSQL.
 
-```powershell
-# Windows PowerShell
-.\.venv\Scripts\python.exe bridge\lessons\day02_protocols_context_decorators.py
-.\.venv\Scripts\python.exe -m pytest bridge\tests -q
-```
-
 ```bash
-# macOS/Linux
+# Linux, macOS, or Windows through WSL 2
 .venv/bin/python bridge/lessons/day02_protocols_context_decorators.py
 .venv/bin/python -m pytest bridge/tests -q
 ```
@@ -95,6 +89,26 @@ A resource context has four observable paths:
 
 The starter focuses on the first three. The fourth is a stretch exercise because
 multi-error reporting requires an explicit policy.
+
+### The same contract in the real driver
+
+Psycopg 3 already ships this behavior: a connection is a context manager that
+commits when the block succeeds, rolls back when the block raises, and closes
+the connection in both cases. psycopg2's `with conn:` ended the transaction but
+left the connection open, so do not carry that habit over. Your
+`managed_connection()` exercise reproduces the same order with a recording fake,
+which is how you test the policy without a server. Run this only in the optional
+live-database route described in the bridge Day 3 guide.
+
+```python
+import os
+
+import psycopg
+
+with psycopg.connect(os.environ["DS60_DATABASE_URL"]) as conn:
+    conn.execute("SELECT 1")
+assert conn.closed  # committed, then closed when the block ended
+```
 
 
 <!-- BEGIN BRIDGE ENRICHMENT: DEEP DIVE -->
@@ -255,7 +269,7 @@ prompt below deliberately names exact paths so a new AI tutoring session can ori
 itself without guessing.
 
 ```text
-Tutor me through stable lesson ID bridge-02: Protocols Context Decorators.
+Tutor me through stable lesson ID bridge-02: Protocols, Context Managers, and Decorators.
 Direct catalog prerequisites: bridge-01. Assume I completed exactly those
 prerequisites, then begin with one short Retrieval question that connects each
 prerequisite to this lesson.
@@ -268,12 +282,12 @@ Do not open, quote, summarize, or copy anything under solutions/ until I
 explicitly say I have finished my attempt and ask to compare.
 
 Use these coaching phases in order:
-1. Predict — ask what I expect before I run or change code.
-2. Attempt — let me implement or explain one numbered exercise at a time.
-3. Hint — give the smallest useful conceptual hint, never a finished answer.
-4. Evidence — ask for the exact return value, exception type, recorded calls,
+1. Predict: ask what I expect before I run or change code.
+2. Attempt: let me implement or explain one numbered exercise at a time.
+3. Hint: give the smallest useful conceptual hint, never a finished answer.
+4. Evidence: ask for the exact return value, exception type, recorded calls,
    query plus bound parameters, or written decision required by that exercise.
-5. Retrieval — close with two no-notes questions and one transfer problem.
+5. Retrieval: close with two no-notes questions and one transfer problem.
 
 Keep the default path offline and fake-first. If the lesson has an optional
 PostgreSQL step, require my explicit opt-in, DS60_DATABASE_URL, and the

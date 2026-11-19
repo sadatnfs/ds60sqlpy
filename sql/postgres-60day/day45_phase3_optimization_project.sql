@@ -101,10 +101,10 @@ ORDER BY
 --    Hint ladder, rung 1: For sql-45 Exercise 3, run `direct`, `items`, and `preaggregated` one at a time. Record each CTE's row count and `order_id` uniqueness before the next stage uses it.
 -- 4. Edge case: test a date window with zero matching orders and ensure every
 --    rewrite returns the same empty result rather than an invented zero row.
---    Inputs: For sql-45 Exercise 4, read from `orders`. Build the answer toward `impossible_window_rows`; keep `order_id` visible whenever the result has row-level grain.
---    Expected result/shape: For sql-45 Exercise 4, expected output: one row per `order_id`. The final columns are `impossible_window_rows`.
---    Verify: For sql-45 Exercise 4, run an anti-check that counts rows where NOT ((order_date >= timestamptz '1900-01-01 00:00:00+00' AND order_date < timestamptz '1900-01-02 00:00:00+00')); require unique `order_id` where the expected grain is one row per key and confirm the projected `impossible_window_rows` against `orders`. Insert rows immediately before, exactly at, and immediately after `order_date >= timestamptz '1900-01-01 00:00:00+00'`, and `order_date < timestamptz '1900-01-02 00:00:00+00'`; identify which rows pass each inclusive or exclusive comparison.
---    Hint ladder, rung 1: For sql-45 Exercise 4, inspect the source keys that survive `WHERE`.
+--    Inputs: For sql-45 Exercise 4, read from `orders` with a window that matches no rows, `order_date >= TIMESTAMPTZ '1900-01-01 00:00:00+00' AND order_date < TIMESTAMPTZ '1900-01-02 00:00:00+00'`, and count the matching orders.
+--    Expected result/shape: For sql-45 Exercise 4, expected output: one row with `impossible_window_rows` 0. The final columns are `impossible_window_rows`.
+--    Verify: For sql-45 Exercise 4, confirm the count is 0, then run a grouped form of the same filter, such as `SELECT c.country, COUNT(*) FROM orders o JOIN customers c USING (customer_id) WHERE <same window> GROUP BY c.country`, and confirm it returns no rows: an ungrouped aggregate always returns one row, while a grouped query over empty input returns none, so every rewrite of the report must keep the same shape.
+--    Hint ladder, rung 1: For sql-45 Exercise 4, run the window predicate with `SELECT COUNT(*)` and with a `GROUP BY` version, and compare the number of result rows.
 -- 5. Design: propose one composite or covering index, state the exact query it
 --    serves, and explain its write/storage tradeoff.
 --    Inputs: For sql-45 Exercise 5, read from `pg_indexes`. Build the answer toward `indexname`, and `indexdef`; keep `indexname` visible whenever the result has row-level grain.

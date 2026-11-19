@@ -215,9 +215,9 @@ def decide_recovery(evidence: RecoveryEvidence) -> RecoveryDecision:
 #    happen before injected retry delay.
 #    Hint: One attempt must acquire, lock, re-check, apply, verify, record, commit, close, then
 #    report.
-#    Verify: Record the nine delivery stages—open, bootstrap/lock, re-check, commands, verify,
-#    metadata, commit, close, report—and in failure assert rollback and close occur before the
-#    sleeper.
+#    Verify: Record the nine delivery stages (open, bootstrap/lock, re-check, commands, verify,
+#    metadata, commit, close, report) and, in failure, assert rollback and close occur before
+#    the sleeper.
 # 6. [Commit uncertainty] Simulate an uncertain commit whose retry sees a matching metadata row
 #    and prove commands are not applied twice.
 #    Hint: Re-check immutable metadata under lock before every attempt.

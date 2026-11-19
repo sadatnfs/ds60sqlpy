@@ -7,13 +7,8 @@
 Open this explanation only after making an honest attempt. The executable
 companion runs solely against the disposable `advanced_sql_training` database:
 
-```powershell
-# Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f "sql\postgres-60day\solutions\day54_solutions.sql"
-```
-
 ```bash
-# macOS/Linux, from the repository root
+# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day54_solutions.sql
 ```
@@ -53,8 +48,9 @@ same grain, `NULL` semantics, deterministic ordering, and safety. Prefer the
 form whose intermediate relations a reviewer can verify; optimize only after
 correctness is established with evidence.
 
-Run [`day52_solutions.sql`](day52_solutions.sql) first in the same database.
-Day 54 creates and tests aggregate objects inside a transaction, then rolls
+Run Day 52 first in the same database, either
+[`day52_solutions.sql`](day52_solutions.sql) or the Day 52 learner file; Day 54
+needs only the base warehouse. Day 54 creates and tests aggregate objects inside a transaction, then rolls
 everything back. The complete runnable answer is
 [`day54_solutions.sql`](day54_solutions.sql).
 
@@ -175,16 +171,18 @@ with `ROLLBACK`; the aggregate objects intentionally will not persist.
 - **Alternative/trade-off:** For sql-54 Exercise 2, the chosen form is justified by this lesson-specific rationale: The executable solution creates: Within one procedure call it: 1. Evaluate another form against the concrete expected result (one row per `year`, `month`, and `product_sk`) and the verification above.
 - **Edge case:** Run with 1 minus one and 1 plus one eligible rows; require the output cap of 1 while retaining `dd.year DESC, dd.month DESC`.
 
-## Required Days 52–54 sequence
+## Required Days 52 to 54 sequence
 
 ```text
-psql -X -v ON_ERROR_STOP=1 -d course -f day52_solutions.sql
-psql -X -v ON_ERROR_STOP=1 -d course -f day53_solutions.sql
-psql -X -v ON_ERROR_STOP=1 -d course -f day54_solutions.sql
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f day52_solutions.sql
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f day53_solutions.sql
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f day54_solutions.sql
 ```
 
 Day 52 persists course-owned warehouse state. Days 53 and 54 prove their
 solutions and roll back. Day 54 does not require Day 53 changes to persist.
+Either Day 52 file, learner or solution, is a valid starting point for these
+solutions.
 
 ## Reasoning, state, and pitfalls
 

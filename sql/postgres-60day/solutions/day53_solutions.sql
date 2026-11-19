@@ -1,5 +1,5 @@
 -- Day 53 solutions: SCD Type 2 and temporal fact lookup
--- SOLUTION READING MAP — sql-53: Project3 DWH Part2 SCD
+-- SOLUTION READING MAP for sql-53: Data Warehouse Project, Part 2: Slowly Changing Dimensions
 -- Explanation: sql/postgres-60day/solutions/day53_solutions.md
 -- Run from the repository root only against advanced_sql_training:
 --   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day53_solutions.sql
@@ -18,10 +18,51 @@ SET search_path TO dwh, training, public;
 DO $require_day52$
 BEGIN
   IF to_regclass('dwh.dim_customer') IS NULL THEN
-    RAISE EXCEPTION 'Run day52_solutions.sql before Day 53';
+    RAISE EXCEPTION 'Run Day 52 (the learner file or day52_solutions.sql) before Day 53';
   END IF;
 END
 $require_day52$;
+
+-- Day 52 Exercise 1 contract: every dim_customer version links to dim_country
+-- through a NOT NULL country_sk. After day52_solutions.sql these idempotent
+-- statements change nothing; after the Day 52 learner base alone they add the
+-- same link inside this rolled-back transaction.
+CREATE TABLE IF NOT EXISTS dim_country (
+  country_sk int GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  country_code text NOT NULL UNIQUE
+);
+
+INSERT INTO dim_country (country_code)
+SELECT DISTINCT
+  c.country
+FROM
+  training.customers c
+WHERE
+  NOT EXISTS (
+    SELECT
+      1
+    FROM
+      dim_country co
+    WHERE
+      co.country_code = c.country)
+ORDER BY
+  c.country;
+
+ALTER TABLE dim_customer
+  ADD COLUMN IF NOT EXISTS country_sk int REFERENCES dim_country (country_sk);
+
+UPDATE
+  dim_customer dc
+SET
+  country_sk = co.country_sk
+FROM
+  dim_country co
+WHERE
+  co.country_code = dc.country
+  AND dc.country_sk IS NULL;
+
+ALTER TABLE dim_customer
+  ALTER COLUMN country_sk SET NOT NULL;
 
 -- Exercise 2: audit metadata on both changing dimensions.
 ALTER TABLE dim_customer
@@ -63,21 +104,23 @@ WHERE
   dc.customer_id = s.customer_id
   AND dc.is_current;
 
+-- The scalar lookup yields NULL for an unknown country, which the NOT NULL
+-- rule rejects, instead of an inner join silently skipping the new version.
 INSERT INTO dim_customer (customer_id, full_name, country, segment, country_sk, valid_from, valid_to, is_current, updated_by, updated_at)
 SELECT
   s.customer_id,
   s.full_name,
   s.country,
   s.segment,
-  co.country_sk,
-  s.effective_date,
-  NULL,
-  TRUE,
-  'day53_solution',
-  CURRENT_TIMESTAMP
+  (
+    SELECT
+      co.country_sk
+    FROM
+      dim_country co
+    WHERE
+      co.country_code = s.country), s.effective_date, NULL, TRUE, 'day53_solution', CURRENT_TIMESTAMP
 FROM
-  staged_customer_change s
-  JOIN dim_country co ON co.country_code = s.country;
+  staged_customer_change s;
 
 -- Exercise 1: rebuild a fact-key mapping by choosing the dimension versions
 -- whose validity intervals contain each order date.
