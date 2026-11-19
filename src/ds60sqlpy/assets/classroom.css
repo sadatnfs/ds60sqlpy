@@ -2033,20 +2033,20 @@ details.notice::before {
 }
 .exercise-pager {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 6px;
   margin-bottom: 12px;
 }
+/* Problem numbers wrap rather than scroll, so every problem stays visible on phones. */
 .exercise-steps {
   display: flex;
   flex: 1 1 auto;
+  flex-wrap: wrap;
   gap: 4px;
   min-width: 0;
   margin: -4px 0;
   padding: 4px;
   list-style: none;
-  overflow-x: auto;
-  scrollbar-width: thin;
 }
 .exercise-step,
 .exercise-turn {

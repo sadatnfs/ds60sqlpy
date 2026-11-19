@@ -2414,6 +2414,59 @@ await test("a failed run shows its plain explanation and line action, and a rese
   assert.equal(box.children.length, 0);
 });
 
+await test("a fast run clears its in-progress note and an explained error skips the generic tip", async () => {
+  const e = environment();
+  legacyCurrent(e);
+  e.element("source").value = "total = 10\nprint(totl)\n";
+  const running = e.event("run");
+  await settle();
+  e.resolve(e.next("save-pad"), { ok: true });
+  for (let i = 0; i < 5; i++) {
+    await settle();
+    e.resolve(e.next("save"), {});
+  }
+  await settle();
+  assert.match(e.element("status").textContent, /while this bounded run finishes/);
+  e.resolve(e.next("run"), {
+    language: "python",
+    returncode: 1,
+    elapsed_seconds: 0.05,
+    output: "NameError: name 'totl' is not defined",
+    receipt_saved: true,
+    explanation: {
+      kind: "runtime",
+      title: "Python does not know the name `totl` on line 2.",
+      line: 2,
+      column: null,
+      hint: "Did you mean `total`? Fix the spelling, then run again.",
+      raw: "NameError: name 'totl' is not defined",
+    },
+  });
+  await settle();
+  e.resolve(e.next("pad-history"), { history: [] });
+  e.resolve(e.next("classroom-history"), { history: [] });
+  await running;
+  await settle();
+  assert.equal(e.element("status").textContent, "");
+  assert.equal(e.element("run-explanation").hidden, false);
+  assert.equal(e.element("checks").children.length, 0);
+});
+
+await test("a runtime that is not ready is named by the profile ID the launcher accepts", async () => {
+  const e = environment();
+  e.current("go-001", "go");
+  e.run(
+    'current.runtime_profile="go";current.capability={profile:"go",ready:false,detail:"Prepare this optional runtime with the module launcher first."};showCapability(current.capability);',
+  );
+  const parts = e.element("capability").children;
+  assert.equal(parts[1].tagName, "CODE");
+  assert.equal(parts[1].textContent, "go");
+  assert.equal(
+    parts.map((part) => (typeof part === "string" ? part : part.textContent)).join(""),
+    "The go runtime is not ready. Prepare this optional runtime with the module launcher first.",
+  );
+});
+
 await test("a finished run that printed nothing says how to show a value", async () => {
   const e = environment();
   e.current();

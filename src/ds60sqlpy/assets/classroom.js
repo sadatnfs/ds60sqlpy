@@ -543,6 +543,8 @@ function status(text, error = false) {
   $("status").textContent = text;
   $("status").className = "status" + (error ? " error" : "");
 }
+const LEGACY_RUN_NOTE =
+  "Your source and notes are saved. You may read another lesson while this bounded run finishes.";
 function pref(key, fallback = null) {
   try {
     return JSON.parse(localStorage.getItem("ds60.classroom." + key)) ?? fallback;
@@ -1326,6 +1328,7 @@ async function openLesson(id, save = true, requested = {}) {
   renderPrerequisites(data.prerequisites || found.record.prerequisites || []);
   $("llm-reading-route").hidden = !["llm-theory", "llm-applied"].includes(trackId);
   $("guide").innerHTML = data.guide_html;
+  hideRepeatedLevel();
   enhanceGuideCode();
   renderSections();
   $("source").value = data.source || "";
@@ -1543,16 +1546,21 @@ function showCapability(cap) {
     : legacyRunActive
       ? " A bounded Python or SQL run is active. Wait for its result before running again."
       : "";
-  $("capability").textContent =
-    (draft
-      ? cap.detail
-      : reading
-        ? "Read the guide and record your reasoning. This lesson needs no code runtime."
-        : cap.ready
-          ? "Ready to run in your local classroom. " +
-            (current.engine === "legacy" ? cap.detail || "" : "")
-          : (cap.profile || current.runtime_profile) + " is not ready. " + (cap.detail || "")) +
-    activity;
+  const runtimeId = cap.profile || current.runtime_profile;
+  if (!draft && !reading && !cap.ready)
+    // Name the runtime by the profile ID that the launcher's --profile option accepts.
+    $("capability").replaceChildren(
+      ...(runtimeId ? ["The ", node("code", runtimeId), " runtime"] : ["This lesson's runtime"]),
+      " is not ready. " + (cap.detail || "") + activity,
+    );
+  else
+    $("capability").textContent =
+      (draft
+        ? cap.detail
+        : reading
+          ? "Read the guide and record your reasoning. This lesson needs no code runtime."
+          : "Ready to run in your local classroom. " +
+            (current.engine === "legacy" ? cap.detail || "" : "")) + activity;
   $("capability").className = "notice" + (!cap.ready && !reading ? " warn" : "");
   $("runtime-setup").hidden =
     cap.ready || reading || draft || (!current.setup_commands?.length && !current.runtime_guidance);
@@ -1899,6 +1907,12 @@ function editorLanguage(...names) {
       if (key) return key;
     }
   return null;
+}
+// The level badge already names the level; a guide line that only repeats it is hidden.
+function hideRepeatedLevel() {
+  for (const paragraph of $("guide").querySelectorAll(":scope > p"))
+    if (/^Level:\s*(?:beginner|intermediate|advanced)\.?$/i.test(paragraph.textContent.trim()))
+      paragraph.hidden = true;
 }
 // Guide examples get Copy, and Try in editor when the example is in the pad's language.
 function enhanceGuideCode() {
@@ -3105,7 +3119,7 @@ function showLegacyResult(result, context, source) {
     : result.receipt_saved === true
       ? "Saved run" +
         (result.saved_at ? " from " + new Date(result.saved_at).toLocaleString() : "") +
-        ". This output belongs to its recorded source; viewing it does not change your current pad."
+        ". It keeps the code that produced it, so opening it later never changes your editor."
       : result.receipt_saved === false
         ? "This run finished, but its result could not be saved. Copy any output you need before leaving or reloading. " +
           (result.receipt_error || "") +
@@ -3172,14 +3186,16 @@ function showLegacyResult(result, context, source) {
   };
   updateErrorJump();
   showRunExplanation(result.explanation, displayedJob);
-  $("checks").append(
-    node(
-      "li",
-      result.returncode === 0
-        ? "Execution finished successfully. Explain the result; this does not automatically demonstrate mastery."
-        : "The program stopped with an error. Read the last lines of the output, change one thing, and run again.",
-    ),
-  );
+  // A failed run's explanation already names the next step; the generic tip would repeat it.
+  if (result.returncode === 0 || !result.explanation)
+    $("checks").append(
+      node(
+        "li",
+        result.returncode === 0
+          ? "Finished without errors. Next, explain in your notes why it printed what it did."
+          : "The program stopped with an error. Read the last lines of the output, change one thing, and run again.",
+      ),
+    );
 }
 function receiptScope(context) {
   return {
@@ -3419,9 +3435,7 @@ async function runCode() {
         "Running your code. It stops after " + intent.timeout + " seconds if it has not finished.",
       );
       startRunTimer();
-      status(
-        "Your source and notes are saved. You may read another lesson while this bounded run finishes.",
-      );
+      status(LEGACY_RUN_NOTE);
       try {
         const result = await lab(
           context.mode === "lesson" ? "run-lesson" : "run",
@@ -3457,6 +3471,8 @@ async function runCode() {
       } finally {
         legacyRunActive = false;
         stopRunTimer();
+        // A fast run must not leave "while this run finishes" on screen afterward.
+        if ($("status").textContent === LEGACY_RUN_NOTE) status("");
       }
     } else {
       startRunTimer();
