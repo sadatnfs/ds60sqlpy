@@ -1,6 +1,6 @@
 # Standalone context: this package directory only. No classroom image is required.
-ARG PYTHON_IMAGE=python:3.12.12-slim-bookworm
-ARG SPARK_IMAGE=spark:4.0.1-scala2.13-java17-python3-ubuntu
+ARG PYTHON_IMAGE=python:3.12.16-slim-bookworm@sha256:935c3c5b12357a7e10caa9c1e6ca5692344d97cf229832ef584be2cec9fc03df
+ARG SPARK_IMAGE=spark:4.0.1-scala2.13-java17-python3-ubuntu@sha256:a552a335e0aedb44fa28b20ed7e9dc52c2e856faf87fb0409fb57dbf37b45bf7
 FROM ${SPARK_IMAGE} AS spark-distribution
 
 FROM ${PYTHON_IMAGE} AS runtime-base

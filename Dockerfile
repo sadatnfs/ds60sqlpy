@@ -1,5 +1,5 @@
-ARG DS60_BASE_IMAGE=python:3.12-slim-bookworm
-ARG DS60_TEX_NODE_IMAGE=node:24.22.1-bookworm-slim@sha256:55fb5f5a527ea2c5c4a95f963e48ef90aa38c7b346054fdc8ee9957a2b55d205
+ARG DS60_BASE_IMAGE=python:3.12.16-slim-bookworm@sha256:935c3c5b12357a7e10caa9c1e6ca5692344d97cf229832ef584be2cec9fc03df
+ARG DS60_TEX_NODE_IMAGE=node:24.22.3-bookworm-slim@sha256:dc26ae92c9fb15cf6b1d63e20f0944b2efe0f115b20e00be48fb23fceb061c54
 FROM ${DS60_TEX_NODE_IMAGE} AS lesson-tex
 WORKDIR /compile
 COPY scripts/compile_lesson_tex.mjs scripts/compile_lesson_tex.mjs
@@ -10,7 +10,7 @@ RUN node scripts/compile_lesson_tex.mjs <tex-inputs.json >compiled-tex.json
 FROM ${DS60_BASE_IMAGE}
 
 LABEL org.opencontainers.image.title="DS60 Learning Lab" \
-    org.opencontainers.image.version="1.3.0" \
+    org.opencontainers.image.version="1.4.0" \
     org.opencontainers.image.description="Local classroom for programming, data science and machine learning" \
     org.opencontainers.image.source="https://github.com/sadatnfs/ds60sqlpy" \
     org.opencontainers.image.url="https://github.com/sadatnfs/ds60sqlpy" \
@@ -37,7 +37,11 @@ WORKDIR /opt/course
 ARG DS60_DOCKER_PROFILES=core
 ENV DS60_DOCKER_PROFILES=${DS60_DOCKER_PROFILES}
 ENV PATH="/opt/course/.venv/bin:$PATH"
-RUN python -m pip install --no-cache-dir uv==0.11.6
+COPY requirements/bootstrap-uv.lock /tmp/bootstrap-uv.lock
+# Optional anonymous mirror for restricted networks; every install below is hash-locked.
+ARG DS60_PYTHON_INDEX_URL=
+RUN python -m pip install ${DS60_PYTHON_INDEX_URL:+--index-url "$DS60_PYTHON_INDEX_URL"} --no-cache-dir \
+    --require-hashes -r /tmp/bootstrap-uv.lock && rm /tmp/bootstrap-uv.lock
 COPY pyproject.toml uv.lock README.md ./
 COPY src/ds60sqlpy/docker_profiles.py /tmp/ds60-docker-profiles.py
 ARG DS60_UV_CACHE_ID=ds60sqlpy-uv-v1

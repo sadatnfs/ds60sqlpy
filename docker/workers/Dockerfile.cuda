@@ -8,7 +8,9 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-ins
     && python3 -m venv /opt/gpu \
     && install -d -m 0700 /run/ds60
 COPY docker/workers/gpu/requirements-${DS60_GPU_PROFILE}.lock /tmp/gpu-requirements.txt
-RUN /opt/gpu/bin/python -m pip install --no-cache-dir --require-hashes --only-binary=:all: -r /tmp/gpu-requirements.txt
+# Optional anonymous mirror for restricted networks; locked hashes are still required.
+ARG DS60_PYTHON_INDEX_URL=
+RUN /opt/gpu/bin/python -m pip install ${DS60_PYTHON_INDEX_URL:+--index-url "$DS60_PYTHON_INDEX_URL"} --no-cache-dir --require-hashes --only-binary=:all: -r /tmp/gpu-requirements.txt
 ENV PATH=/opt/gpu/bin:${PATH} PYTHONPATH=/opt/worker/src PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 WORKDIR /opt/worker
 COPY src/ds60sqlpy/__init__.py src/ds60sqlpy/http_server.py src/ds60sqlpy/module_worker.py src/ds60sqlpy/worker_operations.py src/ds60sqlpy/plot_artifacts.py src/ds60sqlpy/plot_capture.py src/ds60sqlpy/worker_figures.py src/ds60sqlpy/gpu_runtime.py /opt/worker/src/ds60sqlpy/

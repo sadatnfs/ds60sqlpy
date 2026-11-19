@@ -25,6 +25,21 @@
 
 classroom text eol=lf
 
+# Shell wrappers, image definitions and build tables are read by bash, sh, make
+# or Docker inside Linux, where a CRLF checkout breaks them.
+*.command text eol=lf
+*.tsv text eol=lf
+*.mjs text eol=lf
+Dockerfile text eol=lf
+Dockerfile.* text eol=lf
+Makefile text eol=lf
+workshop text eol=lf
+scripts/format-repo text eol=lf
+scripts/lint-repo text eol=lf
+scripts/publish-images text eol=lf
+docker/formatting/prettier text eol=lf
+docker/formatting/swift-format text eol=lf
+
 # Signed public fixtures must retain their exact bytes on every checkout.
 courses/kubernetes/fixtures/provenance/publisher-public.txt text eol=lf
 courses/kubernetes/fixtures/provenance/*.sig binary

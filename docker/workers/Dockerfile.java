@@ -1,5 +1,5 @@
-ARG DS60_JAVA_IMAGE=eclipse-temurin:21-jdk-jammy@sha256:742daacb9316be4b6fc60258f6e4ac2a11882f6c597373c92290a57bfad0d2e0
-ARG DS60_PYTHON_IMAGE=python:3.12.12-slim-bookworm
+ARG DS60_JAVA_IMAGE=eclipse-temurin:21-jdk-jammy@sha256:432e54724c3e57d1846aeb886f4d339f3b0522931c4e64119c2797013b7cfc3c
+ARG DS60_PYTHON_IMAGE=python:3.12.16-slim-bookworm@sha256:935c3c5b12357a7e10caa9c1e6ca5692344d97cf229832ef584be2cec9fc03df
 FROM ${DS60_JAVA_IMAGE} AS java
 FROM ${DS60_PYTHON_IMAGE}
 COPY --from=java /opt/java/openjdk /opt/java/openjdk

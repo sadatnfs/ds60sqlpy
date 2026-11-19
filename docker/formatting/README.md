@@ -79,7 +79,7 @@ and retain the actual image identities with the resulting checks.
 | PHP | @prettier/plugin-php 0.26.0 |
 | TOML | prettier-plugin-toml 2.0.6 |
 | C, C++, CUDA C++ and C# | clang-format 21.1.8 |
-| Go | gofmt from Go 1.27.3 |
+| Go | gofmt from Go 1.27.4 |
 | Rust | rustfmt from Rust 1.99.1, edition 2024 |
 | Swift | swift-format from Swift 6.3.3 |
 | Scala | Scalafmt 3.11.5, Scala 2.13 dialect |

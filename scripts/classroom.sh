@@ -63,7 +63,7 @@ Examples:
   ./classroom
   ./classroom --starter
   ./classroom --profile cpp20 --profile java21
-  ./classroom --starter --from-hub USER --image-tag python-core=1.3.0
+  ./classroom --starter --from-hub USER --image-tag python-core=1.4.0
   ./classroom resume
   ./classroom --rebuild
   ./classroom stop
@@ -205,7 +205,7 @@ make_compose() {
 }
 selected_profiles=()
 make_compose
-settings="$("${compose[@]}" config --environment | awk '/^(COMPOSE_PROJECT_NAME|DS60_LAB_PORT|DS60_CLASSROOM_PORT|DS60_POSTGRES_PORT|DS60_POSTGRES_IMAGE)=/')" || fail 'Compose could not read the course configuration. Check .env syntax and the Compose version.'
+settings="$("${compose[@]}" config --environment | awk '/^(COMPOSE_PROJECT_NAME|DS60_LAB_PORT|DS60_CLASSROOM_PORT|DS60_POSTGRES_PORT|DS60_POSTGRES_IMAGE|DS60_PYTHON_INDEX_URL|DS60_NPM_REGISTRY)=/')" || fail 'Compose could not read the course configuration. Check .env syntax and the Compose version.'
 project_name=''
 internal_port=8765
 configured_port=''
@@ -221,6 +221,15 @@ while IFS='=' read -r key value; do
     DS60_CLASSROOM_PORT) requested_port="${requested_port:-$value}" ;;
     DS60_POSTGRES_PORT) configured_db_port="$value" ;;
     DS60_POSTGRES_IMAGE) db_image="${value:-postgres:17}" ;;
+    DS60_PYTHON_INDEX_URL | DS60_NPM_REGISTRY)
+      # Optional build-only mirrors must be anonymous HTTPS URLs; never print them.
+      case "$value" in
+        '') ;;
+        *[[:space:]]* | *@* | *'?'* | *'#'*) fail "$key must be an anonymous HTTPS URL without credentials, a query or a fragment." ;;
+        https://?*) ;;
+        *) fail "$key must use HTTPS." ;;
+      esac
+      ;;
   esac
 done <<<"$settings"
 [[ "$project_name" =~ ^[a-z0-9][a-z0-9_-]{0,48}$ ]] || fail 'Compose resolved an invalid project name.'
@@ -654,6 +663,13 @@ start_or_create() {
   fi
 }
 start_or_create postgres 180
+# Prepare the sql-sec-01 NOLOGIN lab roles in new and existing volumes alike.
+# The container's local administrator socket needs no password; the step is
+# idempotent and never blocks startup, because the lesson has a role-free path.
+if ! "${compose[@]}" exec -T postgres psql -X -q -v ON_ERROR_STOP=1 -U ds60_admin \
+  -d advanced_sql_training -f /docker-entrypoint-initdb.d/02-security-lab-roles.sql >/dev/null 2>&1; then
+  printf 'Note: the sql-sec-01 lab roles could not be prepared; that lesson will use its role-free path.\n'
+fi
 url="$(published_url)" || fail 'Docker did not report a loopback browser mapping for this project.'
 public_port="${url#http://127.0.0.1:}"
 public_port="${public_port%/classroom}"

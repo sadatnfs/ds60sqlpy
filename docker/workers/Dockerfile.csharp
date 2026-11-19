@@ -1,4 +1,4 @@
-ARG DS60_DOTNET_IMAGE=mcr.microsoft.com/dotnet/sdk:10.0@sha256:747cbade5bfd918a175ac32f8f1d931edec2c7d0d5397a3de72eaef1ac1f66d2
+ARG DS60_DOTNET_IMAGE=mcr.microsoft.com/dotnet/sdk:10.0@sha256:bef136a371963aaa46ec97882845ef6f54dec15728bb4b128b1c2a400ffbc9b4
 FROM ${DS60_DOTNET_IMAGE}
 RUN apt-get update && apt-get install -y --no-install-recommends python3 \
     && rm -rf /var/lib/apt/lists/* && install -d -m 0700 /run/ds60

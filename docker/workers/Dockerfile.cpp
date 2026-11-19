@@ -8,8 +8,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends python3-venv \
     && rm -rf /var/lib/apt/lists/*
 ARG TARGETARCH
 COPY docker/workers/requirements-cmake.${TARGETARCH}.lock /tmp/requirements-cmake.txt
+# Optional anonymous mirror for restricted networks; locked hashes are still required.
+ARG DS60_PYTHON_INDEX_URL=
 RUN python3 -m venv /opt/cmake \
-    && /opt/cmake/bin/python -m pip install --no-cache-dir --require-hashes --only-binary=:all: -r /tmp/requirements-cmake.txt
+    && /opt/cmake/bin/python -m pip install ${DS60_PYTHON_INDEX_URL:+--index-url "$DS60_PYTHON_INDEX_URL"} --no-cache-dir --require-hashes --only-binary=:all: -r /tmp/requirements-cmake.txt
 ENV PATH="/opt/cmake/bin:$PATH"
 RUN install -d -m 0700 /run/ds60
 WORKDIR /opt/worker

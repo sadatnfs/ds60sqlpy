@@ -5,6 +5,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import os
+import re
 import stat
 import subprocess
 import sys
@@ -432,6 +433,9 @@ def test_classroom_compose_has_named_only_state_and_private_workers() -> None:
     assert "volumes" not in worker
     assert worker["networks"] == ["module-private"] and "ports" not in worker
     assert worker["read_only"] is True and "KILL" in worker["cap_add"]
+    # A worker killed out of memory comes back; a deliberate stop stays stopped.
+    assert worker["restart"] == "on-failure"
+    assert all(service["restart"] == "on-failure" for service in modules["services"].values())
     all_text = (ROOT / "compose.classroom.yaml").read_text()
     assert "docker.sock" not in all_text and "DS60_MODULE_RUNTIME_DIR" not in all_text
 
@@ -463,3 +467,53 @@ def test_kubernetes_overlay_reuses_classroom_state_and_never_mounts_engine() -> 
     main_endpoints = json.loads(main["services"]["lab"]["environment"]["DS60_MODULE_ENDPOINTS"])
     assert endpoints == {**main_endpoints, "k8s-kind": "http://kubernetes-worker:8081"}
     assert set(endpoints) - set(main_endpoints) == {"k8s-kind"}
+
+
+def test_new_databases_require_passwords_on_loopback_but_keep_the_admin_socket() -> None:
+    yaml = pytest.importorskip("yaml", reason="Compose structural checks use optional PyYAML.")
+    compose = yaml.safe_load((ROOT / "compose.yaml").read_text())
+    arguments = compose["services"]["postgres"]["environment"]["POSTGRES_INITDB_ARGS"].split()
+    # The app shares PostgreSQL's network namespace, so loopback must not be trusted.
+    assert "--auth-host=scram-sha-256" in arguments
+    assert "--auth-local=trust" in arguments
+
+
+def test_security_lab_roles_stay_plain_nologin_set_only_memberships() -> None:
+    script = (ROOT / "docker/init/02-security-lab-roles.sql").read_text()
+    code = "\n".join(line for line in script.splitlines() if not line.lstrip().startswith("--"))
+    assert "format('CREATE ROLE %I NOLOGIN', lab_role)" in code
+    for attribute in ("SUPERUSER", "CREATEDB", "CREATEROLE", "REPLICATION", "BYPASSRLS"):
+        assert not re.search(rf"(?<!NO){attribute}", code), attribute
+    assert "PASSWORD NULL" in code and "WITH ADMIN" not in code.upper()
+    assert "rolname IN ('admin', 'ds60') AND rolcanlogin AND NOT rolsuper" in code
+    grants = re.findall(r"'GRANT [^']+'\s*(?:'[^']*')?", code)
+    assert len(grants) == 2 and all("SET TRUE" in grant for grant in grants)
+    assert "WITH INHERIT FALSE, SET TRUE" in grants[1]
+
+
+def test_every_python_base_is_one_maintained_pinned_image() -> None:
+    sources = [
+        ROOT / "Dockerfile",
+        *sorted(ROOT.glob("compose*.yaml")),
+        *sorted((ROOT / "docker").rglob("Dockerfile*")),
+        *sorted((ROOT / "packages").glob("*/Dockerfile")),
+        ROOT / "docker/registry-mirrors.env.txt",
+    ]
+    texts = {path.relative_to(ROOT).as_posix(): path.read_text() for path in sources}
+    references = {
+        match.group(1)
+        for text in texts.values()
+        for match in re.finditer(
+            r"(?<![\w.])(?:mirror\.gcr\.io/library/)?(python:3[^\s\"'}]*)", text
+        )
+    }
+    assert len(references) == 1, references
+    assert re.fullmatch(r"python:3\.\d+\.\d+-slim-[a-z]+@sha256:[0-9a-f]{64}", references.pop())
+    assert not [name for name, text in texts.items() if "astral-sh/uv:python" in text]
+    spark = {
+        match.group(1)
+        for text in texts.values()
+        for match in re.finditer(r"(?<![\w.])(?:mirror\.gcr\.io/library/)?(spark:[^\s\"'}]*)", text)
+    }
+    assert len(spark) == 1, spark
+    assert re.fullmatch(r"spark:[\w.-]+@sha256:[0-9a-f]{64}", spark.pop())

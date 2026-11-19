@@ -1,4 +1,4 @@
-ARG DS60_PHP_IMAGE=php:8.4.27-cli-bookworm@sha256:496b5e02fe9fe44fcfb715023b931048111dc4e0bc719789d83c906be9f04b05
+ARG DS60_PHP_IMAGE=php:8.4.27-cli-bookworm@sha256:b3e907a1108629c562c4bb313ce3449e34d49991f6bb2487913f6146f47200fe
 FROM ${DS60_PHP_IMAGE}
 RUN apt-get update && apt-get install -y --no-install-recommends python3 \
     && php -r "exit(extension_loaded('pdo_sqlite') ? 0 : 1);" \

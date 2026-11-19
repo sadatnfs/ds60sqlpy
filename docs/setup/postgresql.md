@@ -9,6 +9,18 @@ Docker learner login is `admin` with password `admin`. A separate bootstrap
 role performs container initialization. The classroom supplies the connection
 internally, so ordinary SQL source should contain no connection string.
 
+The `admin` login cannot create roles. For the security lesson `sql-sec-01`,
+`./classroom` prepares six plain NOLOGIN roles on every start (new and existing
+volumes alike) and lets `admin` adopt them only with `SET ROLE`. They have no
+password, login or administrative attribute, and the lesson rolls back every
+object it creates as them.
+
+A database volume created by this release also requires the course password for
+every TCP connection, including loopback inside the app container, so lesson code
+cannot sign in as the bootstrap administrator. Administrative maintenance uses
+the PostgreSQL container's local socket, for example
+`docker compose exec postgres psql -U ds60_admin -d advanced_sql_training`.
+
 ## Confirm the connection from the SQL pad
 
 Open **PostgreSQL**, choose the first on-ramp lesson and select SQL snippet
@@ -42,20 +54,28 @@ numbered sequence.
 
 ## Training data and permissions
 
-Some lessons need the course-owned `training` schema. The setup script
-`sql/postgres-60day/00_setup.sql` drops and recreates that schema. Use the
-classroom's explicit preparation action only after reading its acknowledgement.
-It is not required for `SELECT 1;` and is not a general repair for a failed query.
+Most lessons read the course-owned `training` schema. You never load it by
+hand. When you open a SQL lesson or a Python-to-PostgreSQL bridge lesson, its
+**Course database** panel checks the schema, and the first run loads it if it
+is missing, using the same `sql/postgres-60day/00_setup.sql` and
+`00_verify.sql` scripts as the course checks. Loading only creates what is
+absent; it never replaces existing data. You can also choose
+**Load course tables** before running anything.
+
+If your own changes leave the tables different from the original data, the
+panel says so and offers **Reset training data**. After you confirm, it drops
+and recreates only that schema; saved code, notes and run history are kept.
+Resetting is not a general repair for a failed query.
 
 Keep lesson work inside the local disposable course database. Ordinary
 learner credentials do not imply permission for server administration,
 extensions, replication or physical recovery. Advanced lessons identify
 separate capability requirements and useful reading/default exercises.
 
-Most exercises use transactions that roll back their changes. Some sequences
-deliberately retain state, such as the warehouse lessons spanning SQL Days
-52 through 54. Follow their ordering and fixture instructions rather than
-resetting between every file.
+Most exercises use transactions that roll back their changes. The warehouse
+lessons, SQL Days 52 through 54, deliberately keep a `dwh` schema that Day 52
+builds. Opening Day 53 or 54 first is fine: the panel offers to build that
+schema, and the first run builds it automatically.
 
 ## Ports and stopping
 

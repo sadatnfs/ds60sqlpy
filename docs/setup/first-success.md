@@ -76,10 +76,13 @@ Expect one row with `first_result = 1` and `total = 5`. This query needs no
 training-table reset. The Docker classroom supplies its local database
 connection; you do not need a host database or a password in the SQL pad.
 
-Continue through `sql-start-02` and `sql-start-03` before `sql-01`.
-When a later lesson needs the training schema, read its setup instructions.
-Resetting that schema replaces course data and is a deliberate action, not a
-routine startup step.
+Continue through `sql-start-02` and `sql-start-03` before `sql-01`. You may
+also open any later SQL lesson directly. Its **Course database** panel shows
+whether the course training tables are loaded. If they are not, choose
+**Load course tables**, or simply press Run: missing tables load before the
+first run and stay loaded for every later lesson. **Reset training data**
+restores the original rows when your own changes make results differ from the
+lesson; it keeps your saved code and notes and is not a fix for a failed query.
 
 ## Save, switch and inspect history
 

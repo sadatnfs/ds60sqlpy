@@ -15,8 +15,10 @@ env:
   PYTHONUTF8: "1"
 
 concurrency:
-  group: course-validation-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # The weekly schedule gets its own group, and runs on main always finish: the
+  # release gate requires a successful run for the exact published revision.
+  group: course-validation-${{ github.workflow }}-${{ github.event_name == 'schedule' && 'schedule' || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   source-quality:

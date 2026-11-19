@@ -13,7 +13,8 @@ env:
 
 concurrency:
   group: application-builds-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # Runs on main always finish; the release gate requires the exact revision.
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   select-images:

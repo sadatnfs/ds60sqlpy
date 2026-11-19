@@ -27,8 +27,9 @@ packages:
 docker build --tag spark-likelihood:0.2.0 .
 ```
 
-The defaults are `python:3.12.12-slim-bookworm` and
-`spark:4.0.1-scala2.13-java17-python3-ubuntu`. The Dockerfile copies the Spark
+The defaults are `python:3.12.16-slim-bookworm` and
+`spark:4.0.1-scala2.13-java17-python3-ubuntu`, each pinned by digest in the
+Dockerfile. The Dockerfile copies the Spark
 distribution into the neutral Python environment, installs Java/libgomp and the
 package-owned CPU/scientific locks, builds a wheel in a separate stage and
 installs it noneditably. It retains the wheel under `/opt/spark-likelihood-wheels`.

@@ -66,10 +66,10 @@ cd ds60sqlpy
 ./classroom
 ```
 
-This checkout targets release 1.3.0. To use prebuilt images, first verify a
+This checkout targets release 1.4.0. To use prebuilt images, first verify a
 completed full publisher and fresh-pull acceptance for that release, then use
 its matching source or starter with
-`./classroom --all --from-hub sadatnfs --tag 1.3.0`.
+`./classroom --all --from-hub sadatnfs --tag 1.4.0`.
 See [Docker Hub distribution](#optional-docker-hub-distribution) for historical
 evidence, current availability, selective installation and saved versions.
 
@@ -156,13 +156,28 @@ cluster preparation are explicit lesson workflows. For errors, profiles and
 recovery, read the [one-command guide](docs/one-command-classroom.md) and
 [offline-use guide](docs/setup/offline.md).
 
+### 4. Find your way around
+
+- **Search** from the box at the top, or press Ctrl+K (Cmd+K on a Mac) or `/`
+  anywhere, to jump to a subject or lesson by title, ID or topic.
+- A lesson opens as a two-page spread: the guide on the left, your code and
+  notes on the right. Drag the divider between them to resize, or choose
+  **Hide lesson list** for more room. On a phone, **Lesson**, **Code** and
+  **Result** jump between the three parts.
+- **Run code** (Ctrl+Enter or Cmd+Enter) saves your draft and shows the output
+  directly below the run controls. Ctrl+S or Cmd+S saves without running.
+- You may start any lesson directly, even mid-course. SQL and Python-to-PostgreSQL
+  lessons show a **Course database** panel: missing course tables load
+  automatically the first time you run code, or with **Load course tables**.
+  See [training data](docs/setup/postgresql.md#training-data-and-permissions).
+
 ## One home, every learning path
 
 The home page is the subject chooser. Every subject has its own color theme
 and a text label, so color is never the only way to identify a path. Opening a
 lesson keeps its guide, coding workspace or reading notes, and progress in the
-same classroom. Use **All learning paths** to change direction without opening a
-second application.
+same classroom. Use **All subjects** in the header, or search with Ctrl+K, to
+change direction without opening a second application.
 
 | Subject                         | Start here                                                                  | Main direction                                                                                                                       |
 | ------------------------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
@@ -244,152 +259,6 @@ isolated browser preview. See [plotting](docs/plotting.md) for limits
 and [textbook rendering](docs/textbook-rendering.md) for the authoring contract.
 
 ## Read, code and keep your work
-
-### Optional Docker Hub distribution
-
-The [historical 1.1.0 publisher](https://github.com/sadatnfs/ds60sqlpy/actions/runs/40961726148)
-completed from [source `59a0d116`](https://github.com/sadatnfs/ds60sqlpy/tree/59a0d116a1759d5d509718c52c4f3439e1986644),
-promoting App and all 25 ordinary workers as combined Linux AMD64/ARM64 images.
-Its native worker/scientific gates and App/Core fresh-pull/stop/resume checks
-passed. The later all-module audit accepted 19 native groups and retained 19
-failed groups. An authenticated metadata check on October 30 returned HTTP 404
-for the old App tag. Those records describe historical results, not current
-availability or acceptance of this later source.
-
-For a completed full 1.3.0 publication, use the matching source or starter:
-
-```sh
-./classroom --all --from-hub sadatnfs --tag 1.3.0
-```
-
-Ordinary startup uploads nothing. For a new Hub selection, omitting `--tag`
-resolves the app's `latest` alias to a concrete release, requires a matching
-checked-in app version, and saves that version. App tags are `:1.3.0` and
-`:latest`; distinct worker tags include `:1.3.0-worker-r-statistics` and
-`:1.3.0-worker-python-core`. Docker selects the native architecture. Tags starting
-`ci-` are publication staging candidates, not learner releases. Hub mode never
-falls back to local builds. The [complete subject/profile/image mapping](docs/dockerhub.md#subjects-runtime-profiles-and-canonical-images)
-explains which runtime serves each subject and how to select only needed workers.
-
-The independent [Spark/TMBad package](packages/spark-tmbad/README.md) was added
-after the historical 1.1.0 publisher's source. Use each independent package's
-own version, installation guide and qualification records; a classroom image
-version does not imply package acceptance. Saved learner selections retain
-their pin until an explicit update.
-
-For a partial publication, select only its available workers. For example, an
-app/Core plus JavaScript and TypeScript publication is installed with:
-
-```sh
-./classroom --profile javascript-node --profile typescript-node \
-  --from-hub YOUR_DOCKERHUB_USER --tag 1.0.0
-```
-
-`--all` requires every ordinary worker at the selected app release and fails
-if a partial publication omitted one. Use `--tag VERSION` to select a default
-release explicitly. Repeat `--image-tag PROFILE=VERSION` to choose a particular
-Hub image, including `app`; for example, `--image-tag app=1.0.0` and
-`--image-tag javascript-node=1.0.0`. `VERSION` may also be `latest` for an
-individual profile. The launcher resolves it to a concrete version and checks
-the published worker's profile, platforms and source revision before saving it.
-Selected workers must share the app's qualified source revision. Current CI
-binds one checked-in version to each revision, so its releases do not support
-mixing worker images from different versions. The launcher also requires any
-different patch versions to stay in the app's major.minor line. Missing or
-incompatible images stop startup with the project volumes retained.
-Use `--image-tag javascript-node=default --rebuild` to clear a saved worker
-pin and return that worker to the app's version.
-
-A same-namespace saved Hub project keeps its pinned release when you repeat
-`--from-hub USER` without `--tag`. Use `--tag latest --rebuild` to choose a newer
-completed release deliberately. Later bare `./classroom resume` never builds,
-pulls or follows a moving latest tag.
-
-For a completed full release, download without starting services with
-`./classroom pull --all --from-hub YOUR_DOCKERHUB_USER --tag 1.3.0`.
-For a partial release, use only its published profiles.
-For an existing project, switching image source/layout or applying an update
-requires the same command without `pull` and with `--rebuild`. In Hub mode
-that pulls and applies images without compiling. Keep the same custom
-`--project NAME` to retain its volumes. Images do not carry saved progress;
-moving machines needs a separate learning/database backup.
-
-#### Publish through GitHub Actions
-
-The full publication workflow builds and pushes only for a push to `main`
-whose HEAD commit message contains `[publish-docker]`. The targeted
-workflow accepts `[build-test-ALIAS]` on a branch for native qualification
-without uploading, and `[publish-ALIAS]` on `main` for a partial
-versioned release. Use exactly one Docker marker in the HEAD message.
-Configure the two repository Actions secrets `DOCKERHUB_USERNAME` and
-`DOCKERHUB_TOKEN` for publication. No extra enable variables or
-protected-environment setup is required.
-
-For a smaller native check, `[build-test-js]` builds and qualifies the
-JavaScript and TypeScript group without publishing. `[publish-js]` publishes
-App, Core and that group from a marked `main` commit after its gates pass.
-Profile names such as `javascript-node` are aliases for their complete
-qualification group. See [targeted image checks and partial publication](docs/targeted-images.md)
-for accepted markers, version rules and the selected-profile install command.
-
-After staging and validating the reviewed release changes on `main`:
-
-```sh
-git commit -m "Release the reviewed version [publish-docker]"
-git push origin main
-```
-
-Native AMD64 and ARM64 jobs build and qualify the app, Core and worker groups.
-Commit-specific staging uploads precede final promotion. Only the complete
-successful checks allow versioned worker tags, then the app version, followed
-by latest aliases with app `latest` last. Small receipts record the evidence;
-large Docker archives are not transferred through Actions artifacts.
-
-The version comes from checked-in source. An incompatible existing version is
-refused; changes after publication need a coherent new patch version such as `1.1.1`.
-The first upload can be large, and later runs reuse unchanged layers where
-available. Account pull limits, fair use and runner capacity still apply.
-A workflow configuration or staging upload does not prove final publication.
-For published full versions, the [read-only module audit](docs/dockerhub.md#audit-every-published-module-without-republishing)
-checks canonical pulls and selected setup using the exact original source,
-without rebuilding or publishing images.
-
-#### Publish an existing local image set manually
-
-The local publisher remains a separate, single-architecture route. If this
-machine needs authentication, the operator runs:
-
-```sh
-docker login
-```
-
-Preview already built and tested images without uploading:
-
-```sh
-./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag 1.3.0
-```
-
-After reviewing the mapping, explicitly upload:
-
-```sh
-./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag 1.3.0 --push
-```
-
-This requires the complete ordinary local set by default. It checks all
-selected images before tagging/pushing and does not build, log in, create
-another architecture or publish combined manifests. Prepare missing images
-with `./classroom build --all --local-build --tag 1.3.0`, then qualify them.
-
-Manual tags include architecture, such as `1.3.0-lab-arm64`. A matching-architecture
-learner selects that layout explicitly:
-
-```sh
-./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 1.3.0 --architecture-tags
-```
-
-An ARM64-only Mac publication does not supply AMD64 tags for a typical
-Windows/WSL machine. See [Docker Hub distribution](docs/dockerhub.md) for
-complete account, tag, lifecycle, compatibility and publication instructions.
 
 ### Reading and execution
 
@@ -499,6 +368,152 @@ provides source-derived search across lessons, package APIs, models, reference
 cases and study IDs. Its separate [running log](accomplishments/RUNNING.md)
 records dated evidence tiers. Neither is learner progress or a current release
 acceptance claim.
+
+## Optional Docker Hub distribution
+
+The [historical 1.1.0 publisher](https://github.com/sadatnfs/ds60sqlpy/actions/runs/40961726148)
+completed from [source `59a0d116`](https://github.com/sadatnfs/ds60sqlpy/tree/59a0d116a1759d5d509718c52c4f3439e1986644),
+promoting App and all 25 ordinary workers as combined Linux AMD64/ARM64 images.
+Its native worker/scientific gates and App/Core fresh-pull/stop/resume checks
+passed. The later all-module audit accepted 19 native groups and retained 19
+failed groups. An authenticated metadata check on October 30 returned HTTP 404
+for the old App tag. Those records describe historical results, not current
+availability or acceptance of this later source.
+
+For a completed full 1.4.0 publication, use the matching source or starter:
+
+```sh
+./classroom --all --from-hub sadatnfs --tag 1.4.0
+```
+
+Ordinary startup uploads nothing. For a new Hub selection, omitting `--tag`
+resolves the app's `latest` alias to a concrete release, requires a matching
+checked-in app version, and saves that version. App tags are `:1.4.0` and
+`:latest`; distinct worker tags include `:1.4.0-worker-r-statistics` and
+`:1.4.0-worker-python-core`. Docker selects the native architecture. Tags starting
+`ci-` are publication staging candidates, not learner releases. Hub mode never
+falls back to local builds. The [complete subject/profile/image mapping](docs/dockerhub.md#subjects-runtime-profiles-and-canonical-images)
+explains which runtime serves each subject and how to select only needed workers.
+
+The independent [Spark/TMBad package](packages/spark-tmbad/README.md) was added
+after the historical 1.1.0 publisher's source. Use each independent package's
+own version, installation guide and qualification records; a classroom image
+version does not imply package acceptance. Saved learner selections retain
+their pin until an explicit update.
+
+For a partial publication, select only its available workers. For example, an
+app/Core plus JavaScript and TypeScript publication is installed with:
+
+```sh
+./classroom --profile javascript-node --profile typescript-node \
+  --from-hub YOUR_DOCKERHUB_USER --tag 1.0.0
+```
+
+`--all` requires every ordinary worker at the selected app release and fails
+if a partial publication omitted one. Use `--tag VERSION` to select a default
+release explicitly. Repeat `--image-tag PROFILE=VERSION` to choose a particular
+Hub image, including `app`; for example, `--image-tag app=1.0.0` and
+`--image-tag javascript-node=1.0.0`. `VERSION` may also be `latest` for an
+individual profile. The launcher resolves it to a concrete version and checks
+the published worker's profile, platforms and source revision before saving it.
+Selected workers must share the app's qualified source revision. Current CI
+binds one checked-in version to each revision, so its releases do not support
+mixing worker images from different versions. The launcher also requires any
+different patch versions to stay in the app's major.minor line. Missing or
+incompatible images stop startup with the project volumes retained.
+Use `--image-tag javascript-node=default --rebuild` to clear a saved worker
+pin and return that worker to the app's version.
+
+A same-namespace saved Hub project keeps its pinned release when you repeat
+`--from-hub USER` without `--tag`. Use `--tag latest --rebuild` to choose a newer
+completed release deliberately. Later bare `./classroom resume` never builds,
+pulls or follows a moving latest tag.
+
+For a completed full release, download without starting services with
+`./classroom pull --all --from-hub YOUR_DOCKERHUB_USER --tag 1.4.0`.
+For a partial release, use only its published profiles.
+For an existing project, switching image source/layout or applying an update
+requires the same command without `pull` and with `--rebuild`. In Hub mode
+that pulls and applies images without compiling. Keep the same custom
+`--project NAME` to retain its volumes. Images do not carry saved progress;
+moving machines needs a separate learning/database backup.
+
+### Publish through GitHub Actions
+
+The full publication workflow builds and pushes only for a push to `main`
+whose HEAD commit message contains `[publish-docker]`. The targeted
+workflow accepts `[build-test-ALIAS]` on a branch for native qualification
+without uploading, and `[publish-ALIAS]` on `main` for a partial
+versioned release. Use exactly one Docker marker in the HEAD message.
+Configure the two repository Actions secrets `DOCKERHUB_USERNAME` and
+`DOCKERHUB_TOKEN` for publication. No extra enable variables or
+protected-environment setup is required.
+
+For a smaller native check, `[build-test-js]` builds and qualifies the
+JavaScript and TypeScript group without publishing. `[publish-js]` publishes
+App, Core and that group from a marked `main` commit after its gates pass.
+Profile names such as `javascript-node` are aliases for their complete
+qualification group. See [targeted image checks and partial publication](docs/targeted-images.md)
+for accepted markers, version rules and the selected-profile install command.
+
+After staging and validating the reviewed release changes on `main`:
+
+```sh
+git commit -m "Release the reviewed version [publish-docker]"
+git push origin main
+```
+
+Native AMD64 and ARM64 jobs build and qualify the app, Core and worker groups.
+Commit-specific staging uploads precede final promotion. Only the complete
+successful checks allow versioned worker tags, then the app version, followed
+by latest aliases with app `latest` last. Small receipts record the evidence;
+large Docker archives are not transferred through Actions artifacts.
+
+The version comes from checked-in source. An incompatible existing version is
+refused; changes after publication need a coherent new patch version such as `1.1.1`.
+The first upload can be large, and later runs reuse unchanged layers where
+available. Account pull limits, fair use and runner capacity still apply.
+A workflow configuration or staging upload does not prove final publication.
+For published full versions, the [read-only module audit](docs/dockerhub.md#audit-every-published-module-without-republishing)
+checks canonical pulls and selected setup using the exact original source,
+without rebuilding or publishing images.
+
+### Publish an existing local image set manually
+
+The local publisher remains a separate, single-architecture route. If this
+machine needs authentication, the operator runs:
+
+```sh
+docker login
+```
+
+Preview already built and tested images without uploading:
+
+```sh
+./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag 1.4.0
+```
+
+After reviewing the mapping, explicitly upload:
+
+```sh
+./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag 1.4.0 --push
+```
+
+This requires the complete ordinary local set by default. It checks all
+selected images before tagging/pushing and does not build, log in, create
+another architecture or publish combined manifests. Prepare missing images
+with `./classroom build --all --local-build --tag 1.4.0`, then qualify them.
+
+Manual tags include architecture, such as `1.4.0-lab-arm64`. A matching-architecture
+learner selects that layout explicitly:
+
+```sh
+./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 1.4.0 --architecture-tags
+```
+
+An ARM64-only Mac publication does not supply AMD64 tags for a typical
+Windows/WSL machine. See [Docker Hub distribution](docs/dockerhub.md) for
+complete account, tag, lifecycle, compatibility and publication instructions.
 
 ## Develop and contribute
 

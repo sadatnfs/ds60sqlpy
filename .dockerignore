@@ -39,6 +39,21 @@ id_dsa
 id_ecdsa
 id_ed25519
 id_rsa
+# Proxy and registry settings a developer may create locally. Root-only names
+# stay root-only: nested NuGet.Config files are legitimate course inputs.
+.netrc
+_netrc
+.git-credentials
+.docker
+.kube
+kubeconfig
+pip.conf
+pip.ini
+uv.toml
+NuGet.Config
+**/.netrc
+**/_netrc
+**/.git-credentials
 **/.env
 **/.env.*
 !**/.env.example

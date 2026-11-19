@@ -1,9 +1,9 @@
 # Build from docker/formatting, so learner files and the Git database never enter
 # the build context. Release digests match the classroom's reviewed toolchains.
 ARG BASE_IMAGE=ubuntu:24.04@sha256:68ee22004a9109b44973313b02ff7b1de250f1de0f5ecb628d73f579aaff33ac
-ARG GO_IMAGE=golang:1.27.3-bookworm@sha256:972b4110ba0f47539a975c31e52c64765e1ff19f2d74469ae4a595c6676e80a5
+ARG GO_IMAGE=golang:1.27.4-bookworm@sha256:4fa7c968ba93f1635670522dbb01a2c78150443e1385746924566079f36570ea
 ARG RUST_IMAGE=rust:1.99.1-bookworm@sha256:48b7f435b8fc6378ce43b44f15e3a47fd8919b2825f835c39bd4bd3da50af5b8
-ARG NODE_IMAGE=node:24.22.1-bookworm-slim@sha256:55fb5f5a527ea2c5c4a95f963e48ef90aa38c7b346054fdc8ee9957a2b55d205
+ARG NODE_IMAGE=node:24.22.3-bookworm-slim@sha256:dc26ae92c9fb15cf6b1d63e20f0944b2efe0f115b20e00be48fb23fceb061c54
 ARG SWIFT_IMAGE=swift:6.3.3-noble@sha256:c2f3ac2eb806ce43f68859c3d52bd3bb1cfc88672fb3a948b76e136d98e39278
 
 FROM ${GO_IMAGE} AS go-tools
@@ -35,8 +35,9 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /opt/formatters
 COPY requirements.lock ./
+ARG PYTHON_INDEX_URL=https://pypi.org/simple
 RUN python3 -m venv /opt/formatters/venv \
-    && /opt/formatters/venv/bin/pip install --index-url https://pypi.org/simple --no-cache-dir --require-hashes --only-binary=:all: -r requirements.lock
+    && /opt/formatters/venv/bin/pip install --index-url ${PYTHON_INDEX_URL} --no-cache-dir --require-hashes --only-binary=:all: -r requirements.lock
 COPY install-downloads.py ./
 RUN TARGETARCH=${TARGETARCH} python3 install-downloads.py
 COPY --from=go-tools /usr/local/go/bin/gofmt /usr/local/bin/gofmt
