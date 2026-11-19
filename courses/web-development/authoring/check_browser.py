@@ -14,7 +14,12 @@ from urllib.parse import urlsplit
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "src"))
-from scripts.check_classroom_browser import choose_lesson, save, show_code_and_notes  # noqa: E402
+from scripts.check_classroom_browser import (  # noqa: E402
+    SOURCE_EDITOR,
+    choose_lesson,
+    save,
+    show_code_and_notes,
+)
 
 NATIVE_CASES = [
     (
@@ -123,7 +128,7 @@ def main() -> None:
                 request.continue_()
 
         def run(source: str, markers: list[str], status: str = "succeeded") -> None:
-            page.locator("#source").fill(source)
+            page.locator(SOURCE_EDITOR).fill(source)
             page.locator("#run").click()
             page.locator("#browser-preview").scroll_into_view_if_needed()
             for marker in markers:
@@ -213,11 +218,11 @@ def main() -> None:
 
             choose_lesson(page, "web-development", "web-025", api.expect)
             newest = '<!doctype html><html lang="en"><head><title>Saved draft</title></head><body><main><h1>Newer retained draft</h1></main></body></html>'
-            page.locator("#source").fill(newest)
+            page.locator(SOURCE_EDITOR).fill(newest)
             save(page, api.expect)
             choose_lesson(page, "web-development", "web-031", api.expect)
             php = '<?php echo "Separate PHP source";\n'
-            page.locator("#source").fill(php)
+            page.locator(SOURCE_EDITOR).fill(php)
             save(page, api.expect)
             choose_lesson(page, "web-development", "web-025", api.expect)
             api.expect(page.locator("#source")).to_have_value(newest)
@@ -234,7 +239,7 @@ def main() -> None:
                 ["deliberate web failure"],
                 "failed",
             )
-            page.locator("#source").fill(newest)
+            page.locator(SOURCE_EDITOR).fill(newest)
             save(page, api.expect)
             record("Thrown inline-script failure is reported as failed")
             if failures or unexpected_requests:

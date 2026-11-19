@@ -19,10 +19,12 @@ from urllib.parse import quote
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from scripts.check_classroom_browser import (  # noqa: E402
+    SOURCE_EDITOR,
     Audit,
     choose_lesson,
     save,
     show_code_and_notes,
+    subject_card,
 )
 from scripts.check_classroom_profiles import ClassroomClient, classroom_origin  # noqa: E402
 from scripts.check_d3_browser import digest_json, validate_observation  # noqa: E402
@@ -126,7 +128,7 @@ def run_reference(page: Any, client: Any, row: dict[str, Any], expect: Any) -> d
         item["job_id"]
         for item in client.call("module-browser-history", lesson_id=row["id"])["history"]
     }
-    page.locator("#source").fill(row["source"])
+    page.locator(SOURCE_EDITOR).fill(row["source"])
     save(page, expect)
 
     def submitted(response: Any) -> bool:
@@ -182,7 +184,7 @@ def run_reference(page: Any, client: Any, row: dict[str, Any], expect: Any) -> d
 def restored_pad(
     page: Any, client: Any, identity: str, source: str, original: dict[str, Any], expect: Any
 ) -> dict[str, Any]:
-    page.locator("#source").fill(source)
+    page.locator(SOURCE_EDITOR).fill(source)
     save(page, expect)
     fields = {
         key: original.get(key, source if key == "source" else "")
@@ -210,12 +212,12 @@ def dax_flow(page: Any, client: Any, expect: Any, report: dict[str, Any]) -> Non
 
     page.on("request", watch)
     try:
-        page.locator("#source").fill(DAX_DRAFT)
+        page.locator(SOURCE_EDITOR).fill(DAX_DRAFT)
         save(page, expect)
         expect(page.locator("#run")).to_be_hidden()
         expect(page.locator("#runtime-results")).to_be_hidden()
         expect(page.locator("#offline-workspace")).to_be_visible()
-        page.locator("#source").press("Control+Enter")
+        page.locator(SOURCE_EDITOR).press("Control+Enter")
         page.wait_for_timeout(100)
         expect(page.locator("#source")).to_have_value(DAX_DRAFT)
         with page.expect_download() as download:
@@ -280,9 +282,7 @@ def qualify(
     try:
         page.goto(origin + "/classroom")
         title = json.loads((root / "courses/data-visualization/track.json").read_text())["title"]
-        page.locator("#subject-cards .subject-card").filter(
-            has=page.locator("h3").filter(has_text=re.compile("^" + re.escape(title) + "$"))
-        ).click()
+        subject_card(page, title).click()
         expect(page.locator("#workspace-view")).to_be_visible()
         for row in references(root):
             select_plotly(page, row, expect)

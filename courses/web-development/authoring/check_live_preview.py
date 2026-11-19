@@ -14,7 +14,11 @@ from urllib.parse import urlsplit
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "src"))
-from scripts.check_classroom_browser import choose_lesson, show_code_and_notes  # noqa: E402
+from scripts.check_classroom_browser import (  # noqa: E402
+    SOURCE_EDITOR,
+    choose_lesson,
+    show_code_and_notes,
+)
 
 
 def document(label: str) -> str:
@@ -88,7 +92,7 @@ def main() -> None:
             show_code_and_notes(page, api.expect)
             api.expect(page.locator("#browser-live-toggle")).not_to_be_checked()
             api.expect(page.locator("#browser-preview iframe")).to_have_count(0)
-            page.locator("#source").fill(document("LIVE_FIRST"))
+            page.locator(SOURCE_EDITOR).fill(document("LIVE_FIRST"))
             page.locator("#browser-live-toggle").check()
             frame = heading("LIVE_FIRST")
             api.expect(page.locator("#authored")).to_have_class("panes browser-focus")
@@ -96,12 +100,12 @@ def main() -> None:
             record("Live rendering requires explicit opt-in and does not create a saved run")
 
             previous = len(frame_loads)
-            page.locator("#source").fill(document("LIVE_OLD_A"))
+            page.locator(SOURCE_EDITOR).fill(document("LIVE_OLD_A"))
             page.wait_for_timeout(100)
-            page.locator("#source").fill(document("LIVE_OLD_B"))
+            page.locator(SOURCE_EDITOR).fill(document("LIVE_OLD_B"))
             page.wait_for_timeout(100)
             latest = document("LIVE_LATEST")
-            page.locator("#source").fill(latest)
+            page.locator(SOURCE_EDITOR).fill(latest)
             frame = heading("LIVE_LATEST")
             assert len(frame_loads) == previous + 1, "Rapid typing created redundant frames"
             assert not receipts
@@ -111,10 +115,10 @@ def main() -> None:
                 "</main>",
                 '<input id="page-focus"><script>document.querySelector("#page-focus").focus();</script></main>',
             )
-            page.locator("#source").fill(focus_source)
+            page.locator(SOURCE_EDITOR).fill(focus_source)
             heading("FOCUS_RETAINED")
-            api.expect(page.locator("#source")).to_be_focused()
-            page.locator("#source").fill(latest)
+            api.expect(page.locator(SOURCE_EDITOR)).to_be_focused()
+            page.locator(SOURCE_EDITOR).fill(latest)
             frame = heading("LIVE_LATEST")
             record("Initial page focus requests do not interrupt typing in the live editor")
 
@@ -140,7 +144,7 @@ def main() -> None:
             page.locator("#browser-live-pause").click()
             api.expect(page.locator("#browser-live-pause")).to_have_text("Resume updates")
             previous = len(frame_loads)
-            page.locator("#source").fill(document("LIVE_AFTER_PAUSE"))
+            page.locator(SOURCE_EDITOR).fill(document("LIVE_AFTER_PAUSE"))
             page.wait_for_timeout(900)
             api.expect(frame.locator("h1")).to_have_text("LIVE_LATEST")
             assert len(frame_loads) == previous
@@ -148,7 +152,7 @@ def main() -> None:
             frame = heading("LIVE_AFTER_PAUSE")
             record("Pause prevents automatic refresh and Resume renders the current draft")
 
-            page.locator("#source").fill(document("MUST_NOT_START"))
+            page.locator(SOURCE_EDITOR).fill(document("MUST_NOT_START"))
             previous = len(frame_loads)
             page.locator("#browser-live-stop").click()
             page.wait_for_timeout(900)
@@ -159,7 +163,7 @@ def main() -> None:
             record("Stop cancels pending refresh without a background restart or receipt")
 
             manual = document("MANUAL_EXACT_SOURCE")
-            page.locator("#source").fill(manual)
+            page.locator(SOURCE_EDITOR).fill(manual)
             page.locator("#browser-live-toggle").check()
             heading("MANUAL_EXACT_SOURCE")
             page.locator("#run").click()
@@ -170,7 +174,7 @@ def main() -> None:
             assert len(receipts) == 1 and receipts[0]["source"] == manual
             record("Manual Run exits live mode and records its exact submitted source once")
 
-            page.locator("#source").fill(document("UNSAVED_RUN_DRAFT"))
+            page.locator(SOURCE_EDITOR).fill(document("UNSAVED_RUN_DRAFT"))
             page.locator("#browser-live-toggle").check()
             heading("UNSAVED_RUN_DRAFT")
             api.expect(page.locator("#job-history")).to_be_visible()
@@ -186,7 +190,7 @@ def main() -> None:
             )
 
             explicit = document("EXPLICIT_OBSERVATION")
-            page.locator("#source").fill(explicit)
+            page.locator(SOURCE_EDITOR).fill(explicit)
             page.locator("#browser-live-toggle").check()
             heading("EXPLICIT_OBSERVATION")
             page.locator("#browser-observation-save").click()
@@ -199,7 +203,7 @@ def main() -> None:
 
             page.locator("#browser-live-pause").click()
             heading("EXPLICIT_OBSERVATION")
-            page.locator("#source").fill(document("NAVIGATION_MUST_CANCEL"))
+            page.locator(SOURCE_EDITOR).fill(document("NAVIGATION_MUST_CANCEL"))
             previous = len(frame_loads)
             choose_lesson(page, "web-development", "web-031", api.expect)
             page.wait_for_timeout(900)
@@ -213,19 +217,19 @@ def main() -> None:
 
             choose_lesson(page, "javascript-typescript", "js-043", api.expect)
             d3 = 'd3.select("#chart").append("svg").attr("viewBox","0 0 200 100").append("circle").attr("cx",80).attr("cy",50).attr("r",20); console.log("D3_LIVE_READY");'
-            page.locator("#source").fill(d3)
+            page.locator(SOURCE_EDITOR).fill(d3)
             page.locator("#browser-live-toggle").check()
             api.expect(page.locator("#output")).to_contain_text("D3_LIVE_READY")
             api.expect(
                 page.frame_locator("#browser-preview iframe").locator("svg circle")
             ).to_have_count(1)
-            page.locator("#source").fill(
+            page.locator(SOURCE_EDITOR).fill(
                 'console.log("D3_STALE_STARTED");'
                 "await new Promise(resolve => setTimeout(resolve, 1800));"
                 'console.log("D3_STALE_FINISHED");'
             )
             api.expect(page.locator("#output")).to_contain_text("D3_STALE_STARTED")
-            page.locator("#source").fill(d3)
+            page.locator(SOURCE_EDITOR).fill(d3)
             api.expect(page.locator("#output")).to_contain_text("D3_LIVE_READY")
             page.wait_for_timeout(1300)
             api.expect(page.locator("#output")).not_to_contain_text("D3_STALE_FINISHED")
@@ -233,10 +237,10 @@ def main() -> None:
                 page.frame_locator("#browser-preview iframe").locator("svg circle")
             ).to_have_count(1)
             record("Replacing an in-flight asynchronous preview ignores its stale completion")
-            page.locator("#source").fill('throw new Error("D3_LIVE_ERROR");')
+            page.locator(SOURCE_EDITOR).fill('throw new Error("D3_LIVE_ERROR");')
             api.expect(page.locator("#output")).to_contain_text("D3_LIVE_ERROR")
             api.expect(page.locator("#job-status")).to_contain_text("failed")
-            page.locator("#source").fill(d3)
+            page.locator(SOURCE_EDITOR).fill(d3)
             api.expect(page.locator("#output")).to_contain_text("D3_LIVE_READY")
             api.expect(page.locator("#job-status")).to_contain_text("succeeded")
             assert len(receipts) == 2

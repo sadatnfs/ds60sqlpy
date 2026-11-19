@@ -23,7 +23,13 @@ from urllib.parse import quote
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from scripts.check_classroom_browser import Audit, choose_lesson, save  # noqa: E402
+from scripts.check_classroom_browser import (  # noqa: E402
+    SOURCE_EDITOR,
+    Audit,
+    choose_lesson,
+    save,
+    subject_card,
+)
 from scripts.check_classroom_profiles import (  # noqa: E402
     TERMINAL,
     ClassroomClient,
@@ -68,6 +74,7 @@ READ_ACTIONS = {
     "module-lesson",
     "module-job",
     "classroom-index",
+    "classroom-exercises",
 }
 LITERAL = '<img src="https://example.invalid/scientist-probe" onerror="window.scientistProbe=true">'
 TABLE = {
@@ -438,7 +445,7 @@ class NetworkLog:
 def show_pad(page: Any, expect: Any) -> None:
     if page.locator("#reading-toggle").get_attribute("aria-pressed") == "true":
         page.locator("#reading-toggle").click()
-    expect(page.locator("#source")).to_be_visible()
+    expect(page.locator(SOURCE_EDITOR)).to_be_visible()
     expect(page.locator("#explanation")).to_be_visible()
 
 
@@ -477,7 +484,7 @@ def submit_once(
     old = {
         row["job_id"] for row in client.call("module-lesson", lesson_id=case.lesson_id)["history"]
     }
-    page.locator("#source").fill(case.source)
+    page.locator(SOURCE_EDITOR).fill(case.source)
     page.locator("#explanation").fill("Disposable acceptance probe; no learner mastery claim.")
     save(page, expect)
     page.locator("#timeout").select_option("120")
@@ -526,15 +533,17 @@ def submit_once(
     expect(page.locator("#job-status")).to_contain_text(case.status, timeout=20_000)
     expect(page.locator("#output")).to_have_text(job["output"] or "(No output yet.)")
     if case.diagnostic_line is not None:
-        expect(page.locator("#error-line")).to_have_text(
-            f"Inspect source line {case.diagnostic_line}"
+        # The run explanation offers the jump when it can place the line itself;
+        # otherwise the generic results button does. Exactly one must be visible.
+        jump = page.get_by_role(
+            "button", name=f"Show line {case.diagnostic_line} in the editor", exact=True
         )
-        page.locator("#error-line").click()
-        selected = page.locator("#source").evaluate(
-            "node => node.value.slice(node.selectionStart,node.selectionEnd)"
+        expect(jump).to_have_count(1)
+        jump.click()
+        expect(page.locator(SOURCE_EDITOR)).to_be_focused()
+        expect(page.locator("#source-editor .cm-activeLine")).to_have_text(
+            case.source.splitlines()[case.diagnostic_line - 1]
         )
-        if selected != case.source.splitlines()[case.diagnostic_line - 1]:
-            raise ValueError("Compiler diagnostic selected the wrong submitted source line")
     return job
 
 
@@ -637,13 +646,14 @@ def history_isolation(
 ) -> None:
     prefix = "//" if case.profile == "stan-cpu" else ("--" if case.profile == "dbt-duckdb" else "#")
     draft = case.source + f"\n{prefix} Unexecuted draft after {case.id}.\n"
-    page.locator("#source").fill(draft)
+    page.locator(SOURCE_EDITOR).fill(draft)
     save(page, expect)
     submissions = len(network.submissions)
     select_saved_job(page, job, expect)
     expect(page.locator("#source")).to_have_value(draft)
     if case.diagnostic_line is not None:
-        expect(page.locator("#error-line")).to_be_hidden()
+        jumps = page.get_by_role("button", name=re.compile(r"^Show line \d+ in the editor$"))
+        expect(jumps).to_have_count(0)
     if len(network.submissions) != submissions:
         raise ValueError("Reading saved output executed source")
     if client.call("module-lesson", lesson_id=case.lesson_id)["source"] != draft:
@@ -694,13 +704,9 @@ def qualify(
         page.goto(origin + "/classroom")
         expect(page.locator("#subject-cards .subject-card")).to_have_count(len(titles))
         for title in titles.values():
-            card = page.locator("#subject-cards .subject-card").filter(
-                has=page.locator("h3").filter(has_text=re.compile("^" + re.escape(title) + "$"))
-            )
+            card = subject_card(page, title)
             expect(card).to_have_count(1)
-        page.locator("#subject-cards .subject-card").filter(
-            has=page.locator("h3").filter(has_text=re.compile("^" + re.escape(titles["dbt"]) + "$"))
-        ).click()
+        subject_card(page, titles["dbt"]).click()
         expect(page.locator("#workspace-view")).to_be_visible()
         choices = set(
             page.locator("#subject-select option").evaluate_all("nodes => nodes.map(n => n.value)")
@@ -789,7 +795,8 @@ def persistence_browser(
         finally:
             context.close()
     if network.submissions or network.blocked:
-        raise ValueError("Read-only browser verification attempted a mutation")
+        blocked = ", ".join(sorted(set(network.blocked))) or "module-run"
+        raise ValueError("Read-only browser verification attempted a mutation: " + blocked)
     verify_persistence(client, report, root)
     audit.clean()
     report["persistence"] = {

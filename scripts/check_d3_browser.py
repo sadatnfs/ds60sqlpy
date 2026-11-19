@@ -21,10 +21,12 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from scripts.check_classroom_browser import (  # noqa: E402
+    SOURCE_EDITOR,
     Audit,
     choose_lesson,
     save,
     show_code_and_notes,
+    subject_card,
 )
 from scripts.check_classroom_profiles import ClassroomClient, classroom_origin  # noqa: E402
 
@@ -163,9 +165,7 @@ def history(client: ClassroomClient, identity: str) -> list[dict[str, Any]]:
 def open_javascript(page: Any, origin: str, expect: Any, root: Path = ROOT) -> None:
     title = json.loads((root / "courses/javascript-typescript/track.json").read_text())["title"]
     page.goto(origin + "/classroom")
-    card = page.locator("#subject-cards .subject-card").filter(
-        has=page.locator("h3").filter(has_text=re.compile(r"^" + re.escape(title) + r"$"))
-    )
+    card = subject_card(page, title)
     expect(card).to_have_count(1)
     card.click()
     expect(page.locator("#workspace-view")).to_be_visible()
@@ -183,7 +183,7 @@ def run_source(
     choose_lesson(page, "javascript-typescript", identity, expect)
     show_code_and_notes(page, expect)
     before = {record["job_id"] for record in history(client, identity)}
-    page.locator("#source").fill(source)
+    page.locator(SOURCE_EDITOR).fill(source)
     page.locator("#explanation").fill(NOTE + identity)
     save(page, expect)
 
@@ -319,7 +319,7 @@ def qualify(browser: Any, origin: str, audit: Audit, expect: Any, report: dict[s
         # A fresh browser profile must recover server-saved output without executing it.
         final = by_id["js-066"]
         draft = "// Saved independent draft after the qualified reference.\n" + final["source"]
-        page.locator("#source").fill(draft)
+        page.locator(SOURCE_EDITOR).fill(draft)
         save(page, expect)
         stored = history(client, "js-066")
         previous_ids = [row["job_id"] for row in stored]
@@ -428,7 +428,7 @@ console.log('D3 isolation checks complete');"""
             "console.log('D3 stale frame late');resolve();},700));"
         )
         choose_lesson(page, "javascript-typescript", "js-043", expect)
-        page.locator("#source").fill(stale)
+        page.locator(SOURCE_EDITOR).fill(stale)
         save(page, expect)
         page.locator("#run").click()
         expect(page.locator("#output")).to_contain_text("D3 stale frame started")

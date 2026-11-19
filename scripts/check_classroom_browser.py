@@ -166,6 +166,18 @@ def lesson_label_pattern(identity: str) -> re.Pattern[str]:
     return re.compile(r"^" + re.escape(identity) + r"(?=\s|$)")
 
 
+# Learners type into the bundled code editor. The hidden #source text area keeps
+# the value API that saving, running and restoring read, so checks still read it.
+SOURCE_EDITOR = "#source-editor .cm-content"
+
+
+def subject_card(page: Any, title: str) -> Any:
+    """Return the home directory entry whose visible subject title is exactly ``title``."""
+    return page.locator("#subject-cards .subject-card").filter(
+        has=page.locator(".toc-title").filter(has_text=re.compile("^" + re.escape(title) + "$"))
+    )
+
+
 def choose_lesson(page: Any, subject: str, identity: str, expect: Any) -> None:
     title = page.locator(f'#subject-select option[value="{subject}"]').text_content()
     assert title, "The requested subject has no visible label."
@@ -204,7 +216,7 @@ def show_code_and_notes(page: Any, expect: Any) -> None:
     if page.locator("#reading-toggle").get_attribute("aria-pressed") == "true":
         page.locator("#reading-toggle").click()
     expect(page.locator("#authored .practice-pane")).to_be_visible()
-    expect(page.locator("#source")).to_be_visible()
+    expect(page.locator(SOURCE_EDITOR)).to_be_visible()
     expect(page.locator("#explanation")).to_be_visible()
 
 
@@ -240,12 +252,12 @@ def classroom_checks(browser: Any, origin: str, audit: Audit, expect: Any) -> No
         audit.screenshot(page, "classroom-home-desktop")
         page.set_viewport_size({"width": 390, "height": 844})
         no_overflow(page)
-        expect(page.locator(".pace-card h2")).to_have_text("Session duration", use_inner_text=True)
+        expect(page.locator(".pace-card h2")).to_have_text(
+            "Three steps per lesson", use_inner_text=True
+        )
         audit.screenshot(page, "classroom-home-mobile")
         page.set_viewport_size({"width": 1440, "height": 1000})
-        page.locator("#subject-cards .subject-card").filter(
-            has=page.locator("h3").filter(has_text=re.compile(r"^Python and data science$"))
-        ).click()
+        subject_card(page, "Python and data science").click()
         expect(page.locator("#workspace-view")).to_be_visible()
         subjects = set(
             page.locator("#subject-select option").evaluate_all(
@@ -281,12 +293,12 @@ def classroom_checks(browser: Any, origin: str, audit: Audit, expect: Any) -> No
             "Contributor setup numbering restarted after a command block or paragraph."
         )
         audit.passed("Day 02 setup steps retain 1, 2, 3, 4 across commands and paragraphs")
-        page.locator("#source").fill(python_source)
+        page.locator(SOURCE_EDITOR).fill(python_source)
         page.locator("#phase-note").fill(NOTE)
         save(page, expect)
         page.locator("#run").click()
         expect(page.locator("#output")).to_have_text(python_marker, timeout=90_000)
-        expect(page.locator("#job-status")).to_contain_text("Exit 0")
+        expect(page.locator("#job-status")).to_contain_text("Finished \u00b7 exit 0")
         expect(page.locator("#run-storage-status")).to_contain_text("Saved run")
         for mode in ("light", "dark"):
             if page.locator("body").get_attribute("data-mode") != mode:
@@ -316,15 +328,15 @@ def classroom_checks(browser: Any, origin: str, audit: Audit, expect: Any) -> No
 
         choose_lesson(page, "sql", "sql-start-02", expect)
         choose_sql_snippet(page, expect)
-        page.locator("#source").fill(sql_source)
+        page.locator(SOURCE_EDITOR).fill(sql_source)
         save(page, expect)
         page.locator("#run").click()
         expect(page.locator("#sql-results")).to_contain_text(sql_marker, timeout=90_000)
-        expect(page.locator("#job-status")).to_contain_text("Exit 0")
+        expect(page.locator("#job-status")).to_contain_text("Finished \u00b7 exit 0")
         expect(page.locator("#sql-results")).to_contain_text("42")
         choose_lesson(page, "llm-theory", "llm-002", expect)
         show_code_and_notes(page, expect)
-        page.locator("#source").fill(module_source)
+        page.locator(SOURCE_EDITOR).fill(module_source)
         page.locator("#explanation").fill(NOTE)
         save(page, expect)
         page.locator("#run").click()
@@ -466,7 +478,7 @@ print({marker!r})
             lesson_id
         )
         show_code_and_notes(page, expect)
-        page.locator("#source").fill(source)
+        page.locator(SOURCE_EDITOR).fill(source)
         touched = True
         save(page, expect)
 
@@ -522,7 +534,7 @@ print({marker!r})
     finally:
         try:
             if touched:
-                page.locator("#source").fill(original_fields["source"])
+                page.locator(SOURCE_EDITOR).fill(original_fields["source"])
                 save(page, expect)
                 client.call("module-save", lesson_id=lesson_id, fields=original_fields)
                 restored = client.call("module-lesson", lesson_id=lesson_id)["session"]
