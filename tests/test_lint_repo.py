@@ -146,6 +146,27 @@ def test_c_linkage_header_projection_keeps_declarations_visible() -> None:
     assert linting.grammar_errors("api.h", broken, "c")
 
 
+def test_csharp_projection_accepts_null_conditional_assignment_and_keeps_lines() -> None:
+    source = (
+        b"class P { static void M(System.Text.StringBuilder? b, int[]? xs) {\n"
+        b"  b?.Capacity = 32;\n"
+        b"  b?.Capacity += 1;\n"
+        b"  xs?[0] = 1;\n"
+        b"  var same = b?.Length == 0;\n"
+        b'  var text = "b?.Capacity = 32";\n'
+        b"} }\n"
+    )
+    projected = linting.csharp_grammar_source(source)
+    assert b"  b.Capacity = 32;\n  b.Capacity += 1;\n  xs[0] = 1;\n" in projected
+    assert b"var same = b?.Length == 0;" in projected
+    assert b'"b?.Capacity = 32"' in projected
+    assert projected.count(b"\n") == source.count(b"\n")
+    pytest.importorskip("tree_sitter_language_pack")
+    assert linting.grammar_errors("Program.cs", source, "csharp") == []
+    broken = source.replace(b"b?.Capacity = 32;", b"b?.Capacity = ;")
+    assert linting.grammar_errors("Program.cs", broken, "csharp")
+
+
 def test_missing_parser_dependency_is_a_failure_not_a_skip(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

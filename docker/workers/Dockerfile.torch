@@ -9,7 +9,7 @@ COPY docker/workers/requirements-torch.${TARGETARCH}.lock /tmp/requirements.txt
 # CPU-only torch wheels come from the PyTorch index. With an optional anonymous
 # mirror, every other locked package comes from the mirror and only the torch
 # page is read from PyTorch; hashes are still required.
-ARG DS60_PYTHON_INDEX_URL=
+ARG DS60_PYTHON_INDEX_URL
 RUN if [ -n "$DS60_PYTHON_INDEX_URL" ]; then \
       set -- --index-url "$DS60_PYTHON_INDEX_URL" --find-links https://download.pytorch.org/whl/cpu/torch/; \
     else \

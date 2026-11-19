@@ -92,6 +92,8 @@ export default [
   },
   {
     files: ["courses/data-visualization/{lessons,references}/viz-*.js"],
+    // The prepared browser variant supplies Plotly as a page global.
+    languageOptions: { globals: { Plotly: "readonly" } },
     plugins: { classroom: browserPad },
     processor: "classroom/async",
   },

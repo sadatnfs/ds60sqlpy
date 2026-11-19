@@ -4,7 +4,7 @@ FROM ${DS60_NODE_IMAGE} AS node
 WORKDIR /opt/typescript
 COPY docker/workers/typescript/package*.json ./
 # Optional anonymous npm mirror; package-lock integrity hashes are still enforced.
-ARG DS60_NPM_REGISTRY=
+ARG DS60_NPM_REGISTRY
 RUN npm ci ${DS60_NPM_REGISTRY:+--registry "$DS60_NPM_REGISTRY" --replace-registry-host=always} \
     --ignore-scripts --no-audit --no-fund
 FROM ${DS60_PYTHON_IMAGE}

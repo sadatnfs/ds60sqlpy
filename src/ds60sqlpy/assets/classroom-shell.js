@@ -1,4 +1,6 @@
 "use strict";
+// classroom.js loads first and defines these shared script globals.
+/* global current, index, themes, locate, theme, openLesson, switchTrack, showHome, lab */
 // Workspace conveniences layered over classroom.js: the Ctrl/Cmd+K lesson index,
 // the resizable spread gutter, sidebar and mobile navigation, reading progress,
 // the status slug and result reveal. Everything degrades to the plain page.

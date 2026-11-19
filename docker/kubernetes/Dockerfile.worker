@@ -5,7 +5,7 @@ ENV TARGETARCH=${TARGETARCH}
 COPY docker/kubernetes/download_kubectl.py /tmp/download_kubectl.py
 COPY requirements/kubernetes-worker.lock /tmp/kubernetes-worker.lock
 # Optional anonymous mirror for restricted networks; the install is hash-locked.
-ARG DS60_PYTHON_INDEX_URL=
+ARG DS60_PYTHON_INDEX_URL
 RUN python /tmp/download_kubectl.py && rm /tmp/download_kubectl.py \
     && python -m pip install ${DS60_PYTHON_INDEX_URL:+--index-url "$DS60_PYTHON_INDEX_URL"} --no-cache-dir \
         --require-hashes -r /tmp/kubernetes-worker.lock && rm /tmp/kubernetes-worker.lock \

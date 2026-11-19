@@ -39,7 +39,7 @@ ENV DS60_DOCKER_PROFILES=${DS60_DOCKER_PROFILES}
 ENV PATH="/opt/course/.venv/bin:$PATH"
 COPY requirements/bootstrap-uv.lock /tmp/bootstrap-uv.lock
 # Optional anonymous mirror for restricted networks; every install below is hash-locked.
-ARG DS60_PYTHON_INDEX_URL=
+ARG DS60_PYTHON_INDEX_URL
 RUN python -m pip install ${DS60_PYTHON_INDEX_URL:+--index-url "$DS60_PYTHON_INDEX_URL"} --no-cache-dir \
     --require-hashes -r /tmp/bootstrap-uv.lock && rm /tmp/bootstrap-uv.lock
 COPY pyproject.toml uv.lock README.md ./

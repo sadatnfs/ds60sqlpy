@@ -232,8 +232,32 @@ def tmb_grammar_source(source: bytes) -> bytes:
     return bytes(projected)
 
 
+CSHARP_NULL_CONDITIONAL_ASSIGNMENT = re.compile(
+    rb"(?m)^([ \t]*)([A-Za-z_@][\w@.\[\]()]*\?[.\[][\w@.?\[\]()]*?)"
+    rb"([ \t]*(?:\?\?|<<|>>>?|[-+*/%&|^])?=(?![=>]))"
+)
+
+
+def csharp_grammar_source(source: bytes) -> bytes:
+    """Project C# 14 null-conditional assignment statements for parsing.
+
+    The bundled C# grammar predates C# 14, which accepts statements such as
+    `target?.Member = value;`. Dropping the `?` from the assignment target keeps
+    every other token and every line, so other syntax errors still report their
+    real lines. The .NET 10 compiler in the classroom worker checks the source.
+    """
+    return CSHARP_NULL_CONDITIONAL_ASSIGNMENT.sub(
+        lambda match: (
+            match.group(1)
+            + match.group(2).replace(b"?.", b".").replace(b"?[", b"[")
+            + match.group(3)
+        ),
+        source,
+    )
+
+
 def grammar_source(path: str, source: bytes, grammar: str) -> tuple[str, bytes]:
-    """Project standard linkage guards and declared TMB macro syntax for parsing.
+    """Project linkage guards, declared TMB macros and newer C# for parsing.
 
     Tree-sitter does not evaluate preprocessor branches and cannot join an
     opening extern-C brace to its separately guarded closing brace. Checking the
@@ -252,6 +276,8 @@ def grammar_source(path: str, source: bytes, grammar: str) -> tuple[str, bytes]:
             return "cpp", projected
     if grammar == "cpp":
         return grammar, tmb_grammar_source(source)
+    if grammar == "csharp":
+        return grammar, csharp_grammar_source(source)
     return grammar, source
 
 
@@ -543,8 +569,10 @@ def main(argv: list[str] | None = None) -> int:
     )
     print(
         "TMB macro projections retain both bodies but do not model AD semantics. "
-        "Grammar checks do not prove type checking, linking, runtime behavior or "
-        "lesson correctness. Markdown fences retain their authoring contracts."
+        "C# 14 null-conditional assignments parse without their `?`; the .NET 10 "
+        "worker compiles the original. Grammar checks do not prove type checking, "
+        "linking, runtime behavior or lesson correctness. Markdown fences retain "
+        "their authoring contracts."
     )
     print("Lint checks passed." if success else "Lint failed; see diagnostics above.")
     return 0 if success else 1

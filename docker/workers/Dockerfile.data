@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends libgomp1 \
 ARG TARGETARCH
 COPY docker/workers/requirements-data-engineering.${TARGETARCH}.lock /tmp/requirements.txt
 # Optional anonymous mirror for restricted networks; locked hashes are still required.
-ARG DS60_PYTHON_INDEX_URL=
+ARG DS60_PYTHON_INDEX_URL
 RUN python -m pip install ${DS60_PYTHON_INDEX_URL:+--index-url "$DS60_PYTHON_INDEX_URL"} --no-cache-dir --require-hashes --only-binary=:all: -r /tmp/requirements.txt
 WORKDIR /opt/worker
 COPY src/ds60sqlpy/__init__.py src/ds60sqlpy/http_server.py src/ds60sqlpy/module_worker.py src/ds60sqlpy/worker_operations.py src/ds60sqlpy/plot_artifacts.py src/ds60sqlpy/plot_capture.py src/ds60sqlpy/worker_figures.py src/ds60sqlpy/dbt_runner.py /opt/worker/src/ds60sqlpy/

@@ -17,7 +17,7 @@ FROM toolchain
 ARG TARGETARCH
 COPY docker/workers/requirements-stan.${TARGETARCH}.lock /tmp/stan-python.lock
 # Optional anonymous mirror for restricted networks; locked hashes are still required.
-ARG DS60_PYTHON_INDEX_URL=
+ARG DS60_PYTHON_INDEX_URL
 RUN python -m pip install ${DS60_PYTHON_INDEX_URL:+--index-url "$DS60_PYTHON_INDEX_URL"} --no-cache-dir --require-hashes --only-binary=:all: -r /tmp/stan-python.lock
 ENV CMDSTAN=/opt/cmdstan
 WORKDIR /opt/worker

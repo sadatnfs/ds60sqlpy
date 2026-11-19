@@ -1,4 +1,6 @@
 "use strict";
+// classroom.js loads first and defines the open lesson as a shared script global.
+/* global current */
 // Progressive enhancement: replace the visible source textarea with the bundled
 // offline code editor. The textarea stays in the DOM and keeps its value API, so
 // saving, running, history and recovery code continue to read and write it.
