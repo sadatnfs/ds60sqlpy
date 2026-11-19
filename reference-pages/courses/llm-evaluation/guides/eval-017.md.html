@@ -304,7 +304,7 @@ worked_b<span class="syntax-punctuation">(</span><span class="syntax-punctuation
 <h4 id="3-reverse-empirical-counts">3. Reverse empirical counts<a class="heading-anchor" href="#3-reverse-empirical-counts" aria-label="Link to this section">#</a></h4>
 <p>Use one win and three losses.</p>
 <p><strong>Expected:</strong> The fitted preference probability is 0.25.</p>
-<p><strong>Hint:</strong> The MLE difference is log(wins/losses).</p>
+<p><strong>Hint:</strong> The MLE difference is <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>log</mi><mo>⁡</mo><mo stretchy="false">(</mo><mrow><mi mathvariant="normal">w</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">s</mi></mrow><mi mathvariant="normal">/</mi><mrow><mi mathvariant="normal">l</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">s</mi><mi mathvariant="normal">s</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">s</mi></mrow><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(\mathrm{wins}/\mathrm{losses})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="mopen">(</span><span class="mord"><span class="mord mathrm">wins</span></span><span class="mord">/</span><span class="mord"><span class="mord mathrm">losses</span></span><span class="mclose">)</span></span></span></span>.</p>
 <h4 id="4-all-wins-and-no-losses">4. All wins and no losses<a class="heading-anchor" href="#4-all-wins-and-no-losses" aria-label="Link to this section">#</a></h4>
 <p>Fit an unregularized pair with four wins and zero losses.</p>
 <p><strong>Expected:</strong> No finite maximum-likelihood difference exists.</p>
@@ -312,7 +312,7 @@ worked_b<span class="syntax-punctuation">(</span><span class="syntax-punctuation
 <h4 id="5-test-numerical-stability">5. Test numerical stability<a class="heading-anchor" href="#5-test-numerical-stability" aria-label="Link to this section">#</a></h4>
 <p>Use scores-1000 and 1000 for the preferred/rejected pair.</p>
 <p><strong>Expected:</strong> Loss remains finite at 2000.</p>
-<p><strong>Hint:</strong> Avoid log(sigmoid(delta)) computed naively.</p>
+<p><strong>Hint:</strong> Avoid computing <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>log</mi><mo>⁡</mo><mi>σ</mi><mo stretchy="false">(</mo><mi>δ</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log\sigma(\delta)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">σ</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0379em;">δ</span><span class="mclose">)</span></span></span></span> naively.</p>
 <h4 id="6-interpret-a-preference-cycle">6. Interpret a preference cycle<a class="heading-anchor" href="#6-interpret-a-preference-cycle" aria-label="Link to this section">#</a></h4>
 <p>Observe A&gt;B, B&gt;C and C&gt;A across labels.</p>
 <p><strong>Expected:</strong> A deterministic scalar ordering cannot satisfy all three.</p>
@@ -322,8 +322,16 @@ worked_b<span class="syntax-punctuation">(</span><span class="syntax-punctuation
 <li><a href="https://arxiv.org/abs/1706.03741">Preference-based reward learning</a></li>
 <li><a href="https://arxiv.org/abs/2305.18290">Direct Preference Optimization model assumptions</a></li>
 </ul>
-<h3 id="study-companion">Study companion<a class="heading-anchor" href="#study-companion" aria-label="Link to this section">#</a></h3>
-<p>Use the repository learning-companion skill with this lesson ID and your own source/output. Ask for clarification of the estimand, probability distribution, data split or gradient before a hint. Keep claims about the authored fixture separate from claims requiring real population or model evidence.</p></article>
+<h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for eval-017, Preference data and Bradley-Terry reward models.
+Read courses/llm-evaluation/guides/eval-017.md and courses/llm-evaluation/lessons/eval-017.py. Direct prerequisites: eval-003, eval-011, llm-applied-020.
+Ask me to state the estimand, probability distribution, data split or gradient
+before giving a hint. Review my attempt at the six investigations one at a time,
+give one hint, and ask for the printed evidence.
+Keep courses/llm-evaluation/solutions/ closed until I attempt or explicitly request comparison.
+Keep claims about the authored fixture separate from claims that need real
+population or model evidence. Done when I can reproduce both worked programs,
+pass the six investigations and explain one failure case.</code></pre></article>
   </main>
 </body>
 </html>

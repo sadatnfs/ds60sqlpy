@@ -384,7 +384,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
         <div class="artifact-content"><h3 id="guide--service-hardening-and-observability">Service hardening and observability<a class="heading-anchor" href="#guide--service-hardening-and-observability" aria-label="Link to this section">#</a></h3>
 <p><strong>Stable ID:</strong> <code>python-svc-02</code></p>
 <p><strong>Level:</strong> advanced</p>
-<p><strong>Estimated time:</strong> 240–300 minutes</p>
+<p><strong>Estimated time:</strong> 240-300 minutes</p>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Catalog prerequisites:</strong> <code>python-55</code>, <code>bridge-08</code>, <code>python-svc-01</code>, and <code>python-ml-01</code></li>
@@ -438,7 +438,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 startup -&gt; SHA-256 verification -&gt; constrained JSON artifact</code></pre>
 <p>Its main function serves one local request, flips a dependency probe, and shows readiness fail while health stays available.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
-<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python and data science</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
 <p><strong>Optional contributor route:</strong> use the prepared environment in <a href="../reference-pages/CONTRIBUTING.md.html">CONTRIBUTING</a> on Linux, macOS or Windows through WSL 2. The commands below assume its packages are already installed. They are not prerequisites for opening this lesson in the Docker classroom. Local <code>.learning/</code> files and CLI progress belong to this checkout; they do not read or update the Docker classroom&#x27;s named learning volume.</p>
 <p>Work from the repository root. First run the answer-free learner module named in this guide&#x27;s original walkthrough. Read each TODO as a contract: record the input, returned value, raised exception, and side effect before implementing it. Then run the focused test command in <strong>Self-check</strong>. Keep exploratory changes in a copy or a new test; the checked-in solution remains a comparison artifact.</p>
 <p>Prepared POSIX/WSL contributor terminal:</p>
@@ -612,7 +612,7 @@ forbidden <span class="syntax-operator">=</span> <span class="syntax-builtin">se
 <p>Wrap these policies in a thin FastAPI adapter from Day 44, preserving injected tests. Combine with <code>python-svc-01</code> for outbound reliability and Bridge Day 8 for database readiness, transaction, and deployment behavior.</p>
 <h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into the AI tutor while the repository root is open:</p>
-<pre class="highlighted-code"><code class="language-text">Tutor me through `python-svc-02` — Service hardening and observability.
+<pre class="highlighted-code"><code class="language-text">Tutor me through `python-svc-02`: Service hardening and observability.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize readiness, bounded resources, auth policy, artifact trust, and low-cardinality telemetry. Use exactly these maintained learner materials:
@@ -1552,7 +1552,7 @@ outage <span class="syntax-operator">=</span> status<span class="syntax-punctuat
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through `python-svc-02` — Service hardening and observability.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through `python-svc-02`: Service hardening and observability.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize readiness, bounded resources, auth policy, artifact trust, and low-cardinality telemetry. Use exactly these maintained learner materials:

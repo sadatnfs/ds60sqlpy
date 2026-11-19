@@ -200,26 +200,26 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 1: Create nontrivial optimizer state</span></span>
-<span class="source-line"><span class="syntax-comment"># Take two Adam steps on(w-2)² fromw0 and inspect iterations.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: iteration count2 and positive weight.</span></span>
+<span class="source-line"><span class="syntax-comment"># Take two Adam steps on (w-2)² from w=0 and inspect iterations.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: iteration count 2 and positive weight.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 2: Save both state components</span></span>
-<span class="source-line"><span class="syntax-comment"># Save a checkpoint containingw and Adam into a TemporaryDirectory.</span></span>
+<span class="source-line"><span class="syntax-comment"># Save a checkpoint containing w and Adam into a TemporaryDirectory.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: checkpoint index exists; no course source file is written.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Calculate the uninterrupted control</span></span>
 <span class="source-line"><span class="syntax-comment"># Snapshot the saved weight and take one further step without restoring.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: iteration count3; weight changes.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: iteration count 3; weight changes.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Restore in a fresh process</span></span>
 <span class="source-line"><span class="syntax-comment"># Launch the existing interpreter with fresh variable/Adam objects, restore the saved</span></span>
 <span class="source-line"><span class="syntax-comment"># prefix and take one step.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: child weight matches control within1e-6; child iterations3.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: child weight matches control within 1e-6; child iterations 3.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Expose a weights-only restart</span></span>
 <span class="source-line"><span class="syntax-comment"># Set a fresh Adam variable to the saved weight without restoring optimizer moments, then</span></span>
 <span class="source-line"><span class="syntax-comment"># take one step.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: next weight differs from the full-state control by more than1e-6.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: next weight differs from the full-state control by more than 1e-6.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Verify cleanup</span></span>
 <span class="source-line"><span class="syntax-comment"># Remove the owned temporary checkpoint directory and verify it no longer exists.</span></span>

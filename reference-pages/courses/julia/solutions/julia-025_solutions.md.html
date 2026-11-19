@@ -197,10 +197,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The executable reference is <code>julia-025_reference.jl</code>. Its checks cover the stated authored inputs; they are not a claim of general scientific validity or mastery.</p>
 <h3 id="1-trace-the-accumulator">1. Trace the accumulator<a class="heading-anchor" href="#1-trace-the-accumulator" aria-label="Link to this section">#</a></h3>
 <p>The accumulator is Float64 throughout; the final value is 14.</p>
-<p><strong>Expected observation:</strong> The values are 1,5,14.</p>
+<p><strong>Expected observation:</strong> The values are 1, 5 and 14.</p>
 <h3 id="2-preserve-precision">2. Preserve precision<a class="heading-anchor" href="#2-preserve-precision" aria-label="Link to this section">#</a></h3>
-<p>zero(T) and floating multiplication preserve the specified small-case element arithmetic.</p>
-<p><strong>Expected observation:</strong> The result is Float32(5).</p>
+<p><code>zero(T)</code> and floating multiplication preserve the specified small-case element arithmetic.</p>
+<p><strong>Expected observation:</strong> The result is <code>Float32(5)</code>.</p>
 <h3 id="3-change-workload-size">3. Change workload size<a class="heading-anchor" href="#3-change-workload-size" aria-label="Link to this section">#</a></h3>
 <p>A larger workload changes the experiment. Multiple observations are needed to compare scaling.</p>
 <p><strong>Expected observation:</strong> Both return four times their length; observed time may vary.</p>

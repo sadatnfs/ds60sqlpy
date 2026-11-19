@@ -9,7 +9,7 @@
     content="default-src 'none'; style-src 'self' file: 'unsafe-inline'; font-src data:; img-src data:; form-action 'none'"
   >
   <link rel="stylesheet" href="../../../../src/ds60sqlpy/assets/vendor/textbook/fonts.css">
-  <title>spark-013: One row, one event · DS60 reference</title>
+  <title>spark-013: One row, one event: NULL-aware aggregates · DS60 reference</title>
   <style>
     :root {
       --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
@@ -190,10 +190,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <main class="shell">
     <header class="hero">
       <p class="eyebrow">Rendered course document</p>
-      <h1>spark-013: One row, one event</h1>
+      <h1>spark-013: One row, one event: NULL-aware aggregates</h1>
       <p class="source-path">Generated from <code>courses/scala-spark/guides/spark-013.md</code></p>
     </header>
-    <article class="document"><h2 id="spark-013-one-row-one-event">spark-013: One row, one event<a class="heading-anchor" href="#spark-013-one-row-one-event" aria-label="Link to this section">#</a></h2>
+    <article class="document"><h2 id="spark-013-one-row-one-event-null-aware-aggregates">spark-013: One row, one event: NULL-aware aggregates<a class="heading-anchor" href="#spark-013-one-row-one-event-null-aware-aggregates" aria-label="Link to this section">#</a></h2>
 <p>A NULL-aware aggregate lesson in Scala, PySpark and Spark SQL.</p>
 <p>Open this lesson from the Scala and Apache Spark path in the unified <code>/classroom</code>. Its Scala and PySpark variants use the separately prepared <code>spark-local-scala</code> and <code>spark-local-python</code> workers. The classroom capability notice reports actual runtime readiness. Reading a guide does not install a JVM or prove that a worker is ready. Keep the <a href="../solutions/spark-013_solutions.md.html">solutions</a> separate while you predict and attempt the work.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>

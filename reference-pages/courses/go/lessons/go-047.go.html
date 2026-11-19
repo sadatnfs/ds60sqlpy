@@ -198,11 +198,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-keyword">import</span> <span class="syntax-string">&quot;fmt&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">func</span> main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 1: Verify one successful API call: Run a fake client configured to return a value.</span></span>
-<span class="source-line">	<span class="syntax-comment">// Expected: The result is retained and exactly one call occurs.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 1: Verify one successful API call: change one input: Copy worked example 1 into a scratch pad and change `f := &amp;FakeReader{Value: 3}` to `f := &amp;FakeReader{Value: 4}`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Expected: The changed run panics with `success` because `err == nil &amp;&amp; v == 3 &amp;&amp; f.Calls == 1` no longer holds. Restoring the original line brings back the worked observation: the result is retained and exactly one call occurs.</span></span>
 <span class="source-line"></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 2: Preserve a forbidden error: Make the fake return ErrForbidden.</span></span>
-<span class="source-line">	<span class="syntax-comment">// Expected: The exact cause is visible and only one call occurs.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 2: Preserve a forbidden error: diagnose an edited check: A careless edit changed the check in worked example 2 so that it reads `check(errors.Is(err, ErrForbidden) &amp;&amp; f.Calls != 1, &quot;forbidden&quot;)`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Expected: Before the repair the program panics with `forbidden`; after it the line reads `check(errors.Is(err, ErrForbidden) &amp;&amp; f.Calls == 1, &quot;forbidden&quot;)` again and the exact cause is visible and only one call occurs.</span></span>
 <span class="source-line"></span>
 <span class="source-line">	<span class="syntax-comment">// Exercise 3: Stop before a canceled call: Cancel context before invoking the adapter.</span></span>
 <span class="source-line">	<span class="syntax-comment">// Expected: No API call is made.</span></span>
@@ -213,8 +213,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">	<span class="syntax-comment">// Exercise 5: Retain an unknown failure: Return an unexpected error cause.</span></span>
 <span class="source-line">	<span class="syntax-comment">// Expected: The cause remains inspectable.</span></span>
 <span class="source-line"></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 6: Transfer source-bound evidence: Bind a synthetic receipt to its lesson ID and source digest label.</span></span>
-<span class="source-line">	<span class="syntax-comment">// Expected: Both identifiers survive comparison.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 6: Transfer source-bound evidence: Bind a synthetic receipt to its lesson ID and the SHA-256 digest of the exact source text, then compare it with a source that has one extra byte.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Expected: The receipt matches the exact source and rejects the changed source.</span></span>
 <span class="source-line"></span>
 <span class="source-line">	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Implement the six investigations in your saved pad.&quot;</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-punctuation">}</span></span>

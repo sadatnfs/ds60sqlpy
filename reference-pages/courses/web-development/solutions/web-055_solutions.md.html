@@ -194,31 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-055_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-055-explanatory-solutions">web-055: explanatory solutions<a class="heading-anchor" href="#web-055-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.</p>
-<h3 id="why-the-mechanism-works">Why the mechanism works<a class="heading-anchor" href="#why-the-mechanism-works" aria-label="Link to this section">#</a></h3>
-<p>An endpoint should not assume its dataset will remain small. Bound the amount of work and the response size. Pagination returns a portion of a collection under a documented order. Offset pagination is simple but can shift as records are inserted or removed. Cursor pagination identifies a position in a stable ordering and needs a tie-breaker when the primary sort value is not unique.</p>
-<p>Caching reuses a previous result, but the cache key and invalidation policy are part of correctness. A key that omits user identity or authorization scope can expose another user&#x27;s data. A stale result may be acceptable for one display and harmful for another. Define freshness, ownership and failure behavior before using a cache to hide an expensive query.</p>
-<p>The reference demonstrates a bounded in-memory cursor over unique increasing ids. It validates the page size, selects ids greater than the cursor and takes only the requested count. This is an algorithm model, not a database query plan or distributed cache. A production query needs a matching index and engine-specific measurement.</p>
+<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-055.md</code>.</p>
 <h3 id="exercise-1-explain-why-pagination-needs-an-explicit-stable-order">Exercise 1: Explain why pagination needs an explicit stable order.<a class="heading-anchor" href="#exercise-1-explain-why-pagination-needs-an-explicit-stable-order" aria-label="Link to this section">#</a></h3>
-<p>Without it, page boundaries can duplicate or omit records unpredictably.</p>
-<p>Trace the smallest example before editing. Name which values are source and which are observations.</p>
+<p><strong>Expected answer:</strong> Without it, page boundaries can duplicate or omit records unpredictably.</p>
+<p><strong>Why:</strong> Without an explicit order the database may return rows in any order, so pages can overlap or skip rows.</p>
 <h3 id="exercise-2-add-a-maximum-page-size-rule">Exercise 2: Add a maximum page-size rule.<a class="heading-anchor" href="#exercise-2-add-a-maximum-page-size-rule" aria-label="Link to this section">#</a></h3>
-<p>A caller cannot request an unbounded result.</p>
-<p>Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.</p>
+<p><strong>Expected evidence:</strong> A caller cannot request an unbounded result.</p>
+<p><strong>Why:</strong> A maximum page size bounds memory, time and response size per request.</p>
 <h3 id="exercise-3-implement-a-cursor-based-slice-over-synthetic-records">Exercise 3: Implement a cursor-based slice over synthetic records.<a class="heading-anchor" href="#exercise-3-implement-a-cursor-based-slice-over-synthetic-records" aria-label="Link to this section">#</a></h3>
-<p>The second page continues after the last id and the final page can be shorter.</p>
-<p>Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.</p>
+<p><strong>Expected evidence:</strong> The second page continues after the last id and the final page can be shorter.</p>
+<p><strong>Why:</strong> A keyset cursor resumes exactly after the last seen row, and the final page may hold fewer rows than the limit.</p>
 <h3 id="exercise-4-diagnose-a-cache-key-shared-by-all-authenticated-users">Exercise 4: Diagnose a cache key shared by all authenticated users.<a class="heading-anchor" href="#exercise-4-diagnose-a-cache-key-shared-by-all-authenticated-users" aria-label="Link to this section">#</a></h3>
-<p>The key omits an authorization-dependent dimension and risks data leakage.</p>
-<p>Keep the failing input. Identify the first layer where the observed result differs from the intended contract.</p>
+<p><strong>Expected answer:</strong> The key omits an authorization-dependent dimension and risks data leakage.</p>
+<p><strong>Why:</strong> A cache key must include every authorization dimension, such as the user id, or one user may receive another&#x27;s data.</p>
 <h3 id="exercise-5-test-an-empty-page-and-an-invalid-page-size">Exercise 5: Test an empty page and an invalid page size.<a class="heading-anchor" href="#exercise-5-test-an-empty-page-and-an-invalid-page-size" aria-label="Link to this section">#</a></h3>
-<p>Empty results are represented normally while invalid budgets are rejected.</p>
-<p>Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.</p>
+<p><strong>Expected evidence:</strong> Empty results are represented normally while invalid budgets are rejected.</p>
+<p><strong>Why:</strong> An empty page is a normal result, while a page size outside the allowed range is an invalid request.</p>
 <h3 id="exercise-6-explain-what-must-be-measured-before-claiming-a-faster-database-endpoint">Exercise 6: Explain what must be measured before claiming a faster database endpoint.<a class="heading-anchor" href="#exercise-6-explain-what-must-be-measured-before-claiming-a-faster-database-endpoint" aria-label="Link to this section">#</a></h3>
-<p>Inspect the actual query plan, index, workload, latency distribution and correctness under the target engine.</p>
-<p>Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.</p>
-<h3 id="reference-comparison-and-limits">Reference comparison and limits<a class="heading-anchor" href="#reference-comparison-and-limits" aria-label="Link to this section">#</a></h3>
-<p>Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.</p></article>
+<p><strong>Expected answer:</strong> Inspect the actual query plan, index, workload, latency distribution and correctness under the target engine.</p>
+<p><strong>Why:</strong> Query plans, index use, workload mix, latency percentiles and correct results on the target engine show whether a change helps.</p>
+<h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
+<p>Open <code>courses/web-development/solutions/web-055_solution.php</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.</p></article>
   </main>
 </body>
 </html>

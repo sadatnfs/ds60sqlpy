@@ -194,37 +194,46 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/swift/solutions/swift-018_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="swift-018-explanation-and-comparison">swift-018: explanation and comparison<a class="heading-anchor" href="#swift-018-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="swift-018_solution.swift.html">swift-018_solution.swift</a>. Its assertions are always active under the prepared classroom compile settings.</p>
+<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="swift-018_solution.swift.html">swift-018_solution.swift</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Reuse an ordering mechanism:</strong> The Comparable requirement makes ordering available without dynamic casts. One implementation preserves Int and String results.</p>
 <p><strong>Preserve container element type:</strong> The relationship is encoded in the type rather than a runtime convention. Swapping retains the same concrete element type.</p>
-<h3 id="reason-through-the-six-tasks">Reason through the six tasks<a class="heading-anchor" href="#reason-through-the-six-tasks" aria-label="Link to this section">#</a></h3>
-<ol>
-<li><strong>Predict and explain.</strong> Identify inferred generic types at every call.</li>
-</ol>
-<ol start="2">
-<li><strong>Guided modification.</strong> Use larger with Double values and a tie.</li>
-</ol>
-<ol start="3">
-<li><strong>Independent construction.</strong> Create a generic immutable triple with a rotation operation.</li>
-</ol>
-<ol start="4">
-<li><strong>Diagnose a defect.</strong> Diagnose calling an unavailable method on an unconstrained T.</li>
-</ol>
-<ol start="5">
-<li><strong>Boundary evidence.</strong> State tie behavior and test equal inputs.</li>
-</ol>
-<ol start="6">
-<li><strong>Transfer and justify.</strong> Choose generic or existential abstraction for an API that must preserve concrete result type.</li>
-</ol>
-<p>For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.</p>
+<h3 id="task-answers">Task answers<a class="heading-anchor" href="#task-answers" aria-label="Link to this section">#</a></h3>
+<h4 id="task-1-predict-and-explain">Task 1: Predict and explain<a class="heading-anchor" href="#task-1-predict-and-explain" aria-label="Link to this section">#</a></h4>
+<p>Identify inferred generic types at every call.</p>
+<p>No separate reference answer has been written for this task. Example A is the evidence to compare with: The Comparable requirement makes ordering available without dynamic casts. One implementation preserves Int and String results.</p>
+<h4 id="task-2-guided-modification">Task 2: Guided modification<a class="heading-anchor" href="#task-2-guided-modification" aria-label="Link to this section">#</a></h4>
+<p>Use larger with Double values and a tie.</p>
+<p>No separate reference answer has been written for this task. Start from Example B: The relationship is encoded in the type rather than a runtime convention. Swapping retains the same concrete element type.</p>
+<h4 id="task-3-independent-construction">Task 3: Independent construction<a class="heading-anchor" href="#task-3-independent-construction" aria-label="Link to this section">#</a></h4>
+<p>Create a generic immutable triple with a rotation operation.</p>
+<p><strong>Reference answer.</strong> It runs as the <code>Task 3</code> block of the reference program.</p>
+<pre class="highlighted-code"><code class="language-swift"><span class="syntax-keyword">struct</span> <span class="syntax-class">Triple</span><span class="syntax-punctuation">&lt;</span>T<span class="syntax-punctuation">&gt;</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">let</span> first<span class="syntax-punctuation">:</span> T
+  <span class="syntax-keyword">let</span> second<span class="syntax-punctuation">:</span> T
+  <span class="syntax-keyword">let</span> third<span class="syntax-punctuation">:</span> T
+  <span class="syntax-keyword">func</span> <span class="syntax-function">rotated</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">-&gt;</span> Triple<span class="syntax-punctuation">&lt;</span>T<span class="syntax-punctuation">&gt;</span> <span class="syntax-punctuation">{</span> Triple<span class="syntax-punctuation">(</span><span class="syntax-builtin">first</span><span class="syntax-punctuation">:</span> second<span class="syntax-punctuation">,</span> second<span class="syntax-punctuation">:</span> third<span class="syntax-punctuation">,</span> third<span class="syntax-punctuation">:</span> <span class="syntax-builtin">first</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">let</span> rotated <span class="syntax-punctuation">=</span> Triple<span class="syntax-punctuation">(</span><span class="syntax-builtin">first</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> second<span class="syntax-punctuation">:</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> third<span class="syntax-punctuation">:</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>rotated<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>rotated<span class="syntax-punctuation">.</span><span class="syntax-builtin">first</span> <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-number">2</span> <span class="syntax-operator">&amp;&amp;</span> rotated<span class="syntax-punctuation">.</span>second <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-number">3</span> <span class="syntax-operator">&amp;&amp;</span> rotated<span class="syntax-punctuation">.</span>third <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Observe:</strong> Rotating (1, 2, 3) gives (2, 3, 1).</p>
+<p>The properties are let constants, so rotation returns a new triple instead of changing the original.</p>
+<h4 id="task-4-diagnose-a-defect">Task 4: Diagnose a defect<a class="heading-anchor" href="#task-4-diagnose-a-defect" aria-label="Link to this section">#</a></h4>
+<p>Diagnose calling an unavailable method on an unconstrained T.</p>
+<p>No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson&#x27;s pitfalls: Any discards useful type information. Excessively broad constraints make reuse harder. A generic algorithm still needs domain-specific failure and ordering policies.</p>
+<h4 id="task-5-boundary-evidence">Task 5: Boundary evidence<a class="heading-anchor" href="#task-5-boundary-evidence" aria-label="Link to this section">#</a></h4>
+<p>State tie behavior and test equal inputs.</p>
+<p>No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Reuse an ordering mechanism) and Example B (Preserve container element type).</p>
+<h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
+<p>Choose generic or existential abstraction for an API that must preserve concrete result type.</p>
+<p>No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry <strong>Generic parameter</strong>, and state one limitation of your choice.</p>
 <h3 id="mechanism-and-diagnostic-reasoning">Mechanism and diagnostic reasoning<a class="heading-anchor" href="#mechanism-and-diagnostic-reasoning" aria-label="Link to this section">#</a></h3>
 <p>Generics preserve type relationships across an algorithm or container. A generic pair stores two values of the same chosen type. The compiler rejects mixing unrelated types unless the API explicitly models that possibility. This is stronger and clearer than storing Any and casting later.</p>
 <p>Constraints expose the capabilities an algorithm needs. Comparable permits ordering, while Equatable permits equality. Use the narrowest useful constraint and state behavior for ties and empty inputs. Generic abstraction is valuable when it removes duplicated mechanisms without erasing domain meaning.</p>
 <p><code>func larger&lt;T: Comparable&gt;</code> introduces a constrained type parameter. The return type T preserves the input relationship. Generic structs use the same parameter syntax.</p>
 <p>Any discards useful type information. Excessively broad constraints make reuse harder. A generic algorithm still needs domain-specific failure and ordering policies.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.</p></article>
+<p>Run the reference and confirm that it prints <code>swift-018: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
   </main>
 </body>
 </html>

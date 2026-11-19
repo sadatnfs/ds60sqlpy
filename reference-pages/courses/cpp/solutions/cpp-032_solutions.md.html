@@ -202,7 +202,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="futures-launch-policy-and-bounded-work-ownership">Futures, launch policy and bounded work ownership<a class="heading-anchor" href="#futures-launch-policy-and-bounded-work-ownership" aria-label="Link to this section">#</a></h3>
 <p>A future represents a result that may become available later. It carries either a value or an exception from the asynchronous operation. Calling get waits as needed and retrieves that outcome. A valid future is normally consumed once by get; treating it as a reusable result object can produce a no-state error on a later call.</p>
 <p>The examples use std::launch::async explicitly so the operation is launched asynchronously rather than leaving a deferred policy choice to the implementation. That still does not define a production thread pool. Launching one async task per row in a very large input can create an unacceptable amount of concurrency or resource pressure. The lesson uses a fixed small number of tasks so the ownership and result flow are visible.</p>
-<p>The success program computes the square of 3 and observes9 through get. The failure program launches a task with -1, where checked_square throws invalid_argument. The exception is stored and rethrown when main calls get. A flag confirms that the specific error was observed. Ignoring the future or never retrieving its outcome can hide a failed task from the application report.</p>
+<p>The success program computes the square of 3 and observes 9 through get. The failure program launches a task with -1, where checked_square throws invalid_argument. The exception is stored and rethrown when main calls get. A flag confirms that the specific error was observed. Ignoring the future or never retrieving its outcome can hide a failed task from the application report.</p>
 <p>When combining multiple tasks, define whether one failure aborts the whole result or whether partial results have a valid meaning. A total assembled from successful tasks alone can look plausible while silently omitting failures. Keep accepted, completed, failed and cancelled work accounting explicit. Cancellation of pending work also needs a mechanism; future by itself is not a general cancel operation.</p>
 <p>A real executor has at least worker count, queue capacity, submission policy, result ownership and shutdown behavior. Those are separate choices. The fixed-two-task example illustrates result propagation but does not implement every executor feature. The final capstone returns to bounded admission and conservation of work so that a failed parallel computation cannot publish an unexplained partial total.</p>
 <h3 id="debugging-the-contract">Debugging the contract<a class="heading-anchor" href="#debugging-the-contract" aria-label="Link to this section">#</a></h3>
@@ -218,32 +218,32 @@ assert<span class="syntax-punctuation">(</span>f<span class="syntax-punctuation"
 <p>Define maximum workers 2 and queued tasks 4.</p>
 <p><strong>Expected:</strong> Both bounds documented independently.</p>
 <p><strong>Reasoning:</strong> Limiting workers alone can still allow an unbounded queue.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Check that your document gives two separate numbers, 2 running and 4 waiting, and says what happens to a fifth waiting task.</p>
 <h3 id="exercise-2-compare-serial-results">Exercise 2: Compare serial results<a class="heading-anchor" href="#exercise-2-compare-serial-results" aria-label="Link to this section">#</a></h3>
 <p>Square 3 and 4 serially and in two futures.</p>
 <p><strong>Expected:</strong> Exact total 25 in both paths.</p>
 <p><strong>Reasoning:</strong> Parallelism must preserve the correctness contract.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Assert <code>checked_square(3) + checked_square(4) == 25</code>, and that the sum of <code>get()</code> on two <code>std::async</code> futures is also 25.</p>
 <h3 id="exercise-3-propagate-a-failure">Exercise 3: Propagate a failure<a class="heading-anchor" href="#exercise-3-propagate-a-failure" aria-label="Link to this section">#</a></h3>
 <p>Include task -1 and call get.</p>
 <p><strong>Expected:</strong> invalid_argument reaches the owner.</p>
 <p><strong>Reasoning:</strong> A future carries exceptions as well as values.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Assert that <code>get()</code> on the future for -1 throws <code>std::invalid_argument</code> in the calling thread, as Worked example 2 does with its <code>rejected</code> flag.</p>
 <h3 id="exercise-4-repair-fire-and-forget">Exercise 4: Repair fire-and-forget<a class="heading-anchor" href="#exercise-4-repair-fire-and-forget" aria-label="Link to this section">#</a></h3>
 <p>Review discarded futures and missing result accounting.</p>
 <p><strong>Expected:</strong> Observe every result or exception and join owned work.</p>
 <p><strong>Reasoning:</strong> Unhandled failure cannot be labeled successful completion.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Confirm every <code>std::async</code> future is stored and <code>get()</code> is called on each, then check that results plus caught exceptions equal the number of submitted tasks.</p>
 <h3 id="exercise-5-test-empty-workload">Exercise 5: Test empty workload<a class="heading-anchor" href="#exercise-5-test-empty-workload" aria-label="Link to this section">#</a></h3>
 <p>Run no tasks through the serial/reference contract.</p>
 <p><strong>Expected:</strong> Empty results and total 0.</p>
 <p><strong>Reasoning:</strong> Do not create unnecessary workers for no input.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Run an empty task list and assert the results are empty and the total is 0 without starting any future.</p>
 <h3 id="exercise-6-transfer-backpressure">Exercise 6: Transfer backpressure<a class="heading-anchor" href="#exercise-6-transfer-backpressure" aria-label="Link to this section">#</a></h3>
 <p>Sketch a capacity-4 queue for ten tasks and two consumers.</p>
 <p><strong>Expected:</strong> At most 2 running plus 4 queued, remaining producer work blocked.</p>
 <p><strong>Reasoning:</strong> Admission and completion counts provide inspectable bounds.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p></article>
+<p><strong>Verify:</strong> Check that the sketch blocks the producer when the queue holds 4 tasks, so running plus queued tasks never exceed 6 of the 10.</p></article>
   </main>
 </body>
 </html>

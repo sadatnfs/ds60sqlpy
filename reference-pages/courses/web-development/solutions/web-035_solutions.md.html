@@ -194,31 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-035_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-035-explanatory-solutions">web-035: explanatory solutions<a class="heading-anchor" href="#web-035-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.</p>
-<h3 id="why-the-mechanism-works">Why the mechanism works<a class="heading-anchor" href="#why-the-mechanism-works" aria-label="Link to this section">#</a></h3>
-<p>PHP&#x27;s array is an ordered map: it associates keys with values and preserves an iteration order. It can represent a list or a keyed record, but these are different data contracts. A list of study rows should not accidentally become an object-shaped JSON value because filtered numeric keys were left nonconsecutive. Key coercion can also matter, so avoid treating arbitrary external strings as interchangeable with integer indices.</p>
-<p>Transformations are easier to reason about when they do not mutate the original data unexpectedly. Map computes a derived value for each record; filter keeps records satisfying a predicate. Validate expected fields before arithmetic. A missing key is different from a known null field and should be handled according to the record contract.</p>
-<p>Use explicit string keys for records, such as subject and minutes. <code>array_filter</code> preserves keys, so <code>array_values</code> is useful when the intended result is a fresh list. <code>array_map</code> applies a function to values. A foreach by reference can leave a lingering reference to the last item; avoid it unless mutation is necessary and understood.</p>
+<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-035.md</code>.</p>
 <h3 id="exercise-1-explain-how-a-list-differs-from-a-keyed-record">Exercise 1: Explain how a list differs from a keyed record.<a class="heading-anchor" href="#exercise-1-explain-how-a-list-differs-from-a-keyed-record" aria-label="Link to this section">#</a></h3>
-<p>A list models ordered values; a record&#x27;s named keys identify fields.</p>
-<p>Trace the smallest example before editing. Name which values are source and which are observations.</p>
+<p><strong>Expected answer:</strong> A list models ordered values; a record&#x27;s named keys identify fields.</p>
+<p><strong>Why:</strong> A list uses consecutive integer positions, while a record&#x27;s string keys name its fields.</p>
 <h3 id="exercise-2-add-a-second-validated-study-row">Exercise 2: Add a second validated study row.<a class="heading-anchor" href="#exercise-2-add-a-second-validated-study-row" aria-label="Link to this section">#</a></h3>
-<p>Every row has the declared subject and integer-minutes fields.</p>
-<p>Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.</p>
+<p><strong>Expected evidence:</strong> Every row has the declared subject and integer-minutes fields.</p>
+<p><strong>Why:</strong> Records with the same keys and types can be processed by one function without special cases.</p>
 <h3 id="exercise-3-filter-and-summarize-study-records-without-changing-the-originals">Exercise 3: Filter and summarize study records without changing the originals.<a class="heading-anchor" href="#exercise-3-filter-and-summarize-study-records-without-changing-the-originals" aria-label="Link to this section">#</a></h3>
-<p>The derived list contains only qualifying rows and retains consecutive indices.</p>
-<p>Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.</p>
+<p><strong>Expected evidence:</strong> The derived list contains only qualifying rows and retains consecutive indices.</p>
+<p><strong>Why:</strong> array_filter returns a new array, and array_values renumbers it into a list.</p>
 <h3 id="exercise-4-diagnose-json-output-changing-from-an-array-to-an-object-shape">Exercise 4: Diagnose JSON output changing from an array to an object shape.<a class="heading-anchor" href="#exercise-4-diagnose-json-output-changing-from-an-array-to-an-object-shape" aria-label="Link to this section">#</a></h3>
-<p>Inspect numeric key gaps after filtering and reindex when the contract is a list.</p>
-<p>Keep the failing input. Identify the first layer where the observed result differs from the intended contract.</p>
+<p><strong>Expected answer:</strong> Inspect numeric key gaps after filtering and reindex when the contract is a list.</p>
+<p><strong>Why:</strong> array_filter preserves keys, so gaps such as 0 and 2 make json_encode produce an object instead of a list.</p>
 <h3 id="exercise-5-test-an-empty-result-and-a-missing-required-field">Exercise 5: Test an empty result and a missing required field.<a class="heading-anchor" href="#exercise-5-test-an-empty-result-and-a-missing-required-field" aria-label="Link to this section">#</a></h3>
-<p>Empty lists are valid where declared; malformed records are rejected explicitly.</p>
-<p>Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.</p>
+<p><strong>Expected evidence:</strong> Empty lists are valid where declared; malformed records are rejected explicitly.</p>
+<p><strong>Why:</strong> An empty list is a valid result, while a malformed record must be rejected before it is used.</p>
 <h3 id="exercise-6-explain-the-risk-of-a-lingering-foreach-reference">Exercise 6: Explain the risk of a lingering foreach reference.<a class="heading-anchor" href="#exercise-6-explain-the-risk-of-a-lingering-foreach-reference" aria-label="Link to this section">#</a></h3>
-<p>A reference variable can still alias the last element and cause later assignments to mutate it.</p>
-<p>Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.</p>
-<h3 id="reference-comparison-and-limits">Reference comparison and limits<a class="heading-anchor" href="#reference-comparison-and-limits" aria-label="Link to this section">#</a></h3>
-<p>Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.</p></article>
+<p><strong>Expected answer:</strong> A reference variable can still alias the last element and cause later assignments to mutate it.</p>
+<p><strong>Why:</strong> After a by-reference loop, <code>$item</code> still points at the last element, so a later assignment overwrites it; <code>unset($item)</code> breaks the reference.</p>
+<h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
+<p>Open <code>courses/web-development/solutions/web-035_solution.php</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.</p></article>
   </main>
 </body>
 </html>

@@ -198,20 +198,20 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-keyword">import</span> <span class="syntax-string">&quot;fmt&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">func</span> main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 1: Inspect the current target: Read runtime target identifiers.</span></span>
-<span class="source-line">	<span class="syntax-comment">// Expected: Both identifiers are nonempty.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 1: Inspect the current target: predict an edited check: Copy worked example 1 into a scratch pad and change `check(runtime.GOOS != &quot;&quot; &amp;&amp; runtime.GOARCH != &quot;&quot;, &quot;target&quot;)` to `check(runtime.GOOS == &quot;&quot; &amp;&amp; runtime.GOARCH != &quot;&quot;, &quot;target&quot;)` inside its check. Before running, predict whether the check still passes and explain why; then restore it.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Expected: The changed run panics with `target` because the edited check no longer holds. Restoring the original line brings back the worked observation: both identifiers are nonempty.</span></span>
 <span class="source-line"></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 2: Validate a supported deployment tuple: Check linux/amd64 and linux/arm64 against an explicit target set.</span></span>
-<span class="source-line">	<span class="syntax-comment">// Expected: Both tuples are admitted.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 2: Validate the running deployment tuple: debug a regression: A regression changed one token in worked example 2, so one line now reads `allowed := map[string]bool{&quot;linux/amd64&quot;: true, &quot;linux/arm65&quot;: true}`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Expected: Before the repair the program panics with `running target`; after it the line reads `allowed := map[string]bool{&quot;linux/amd64&quot;: true, &quot;linux/arm64&quot;: true}` again and the running Linux tuple is admitted.</span></span>
 <span class="source-line"></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 3: Refuse an unsupported tuple: Check an unrelated target against the same set.</span></span>
-<span class="source-line">	<span class="syntax-comment">// Expected: The unsupported target is rejected.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 3: Refuse an unsupported tuple: Check plan9/386 and an incomplete linux tuple with the same lookup, keeping linux/arm64 as the control.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Expected: Both unsupported tuples are rejected while linux/arm64 is admitted.</span></span>
 <span class="source-line"></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 4: Model stop-accepting before drain: Transition a service state from accepting to draining to stopped.</span></span>
-<span class="source-line">	<span class="syntax-comment">// Expected: No new work is admitted once draining begins.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 4: Model stop-accepting before drain: Start with two active tasks, drain the service, try to admit a third task, then finish both tasks.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Expected: The third task is refused once draining begins, and the service stops only after both tasks finish.</span></span>
 <span class="source-line"></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 5: Retain unfinished work evidence: Apply a shutdown budget that ends before two tasks finish.</span></span>
-<span class="source-line">	<span class="syntax-comment">// Expected: The remaining task count stays visible.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 5: Retain unfinished work evidence: Admit one more task to a service already running one, drain it, and allow a shutdown budget of one completion.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Expected: One of the two tasks remains unfinished and visible.</span></span>
 <span class="source-line"></span>
 <span class="source-line">	<span class="syntax-comment">// Exercise 6: Transfer deterministic version metadata: Format a version and source revision into a build label.</span></span>
 <span class="source-line">	<span class="syntax-comment">// Expected: The result is lesson/1.0 revision=abc123.</span></span>

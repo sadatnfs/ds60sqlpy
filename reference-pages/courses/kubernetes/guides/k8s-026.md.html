@@ -207,7 +207,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A NoSchedule taint repels new Pods unless a matching toleration permits them. A toleration allows placement; it does not force the Pod onto that node. DaemonSet controllers add some standard tolerations for their operational role, but an arbitrary custom dedicated-node taint is not automatically an invitation to run there.</p>
 <p>Do not patch Nodes to make the example pass. That changes a shared cluster-level scheduling input. A dedicated host capability must own such changes and provide a restoration plan if the lesson explicitly requires them.</p>
 <h3 id="compare-expected-and-observed-daemonset-counts">Compare expected and observed DaemonSet counts<a class="heading-anchor" href="#compare-expected-and-observed-daemonset-counts" aria-label="Link to this section">#</a></h3>
-<p>Synthetic nodes:node-a has zone=a with no custom taint; node-b has zone=b; node-c has zone=a and a dedicated NoSchedule taint not tolerated by the fixture. Under this limited predicate, only node-a is eligible. Adding the matching toleration in a separately reviewed host variant makes node-c eligible as well.</p>
+<p>Synthetic nodes: node-a has zone=a with no custom taint; node-b has zone=b; node-c has zone=a and a dedicated NoSchedule taint not tolerated by the fixture. Under this limited predicate, only node-a is eligible. Adding the matching toleration in a separately reviewed host variant makes node-c eligible as well.</p>
 <p>Compare the host-provided eligible-node facts with desiredNumberScheduled, numberReady and actual Pod nodeName/UID observations. A count can lag during reconciliation, and a ready count smaller than desired needs conditions/events for diagnosis. Zero desired can be correct if no nodes satisfy the selector.</p>
 <p>A one-node kind cluster does not establish multinode placement or DaemonSet behavior across failures. Keep the actual topology in the qualification receipt and avoid a generic claim of one Pod per every possible node.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
@@ -215,19 +215,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <pre class="highlighted-code"><code class="language-yaml"><span class="syntax-tag">lesson.ds60sqlpy/zone</span><span class="syntax-punctuation">:</span> a</code></pre>
 <p><strong>Expected:</strong> Only nodes matching the declared zone are candidates before other placement constraints.</p>
 <h4 id="worked-example-2-count-the-explicit-synthetic-candidates">Worked example 2: Count the explicit synthetic candidates<a class="heading-anchor" href="#worked-example-2-count-the-explicit-synthetic-candidates" aria-label="Link to this section">#</a></h4>
-<p>node-a:zone a, no custom taint; node-b:zone b; node-c:zone a, dedicated NoSchedule without toleration.</p>
+<p>node-a: zone a, no custom taint; node-b: zone b; node-c: zone a, dedicated NoSchedule without toleration.</p>
 <p><strong>Expected:</strong> One eligible node under the limited fixture predicate; adding a matching toleration can make two.</p>
 <h3 id="inspect-the-specific-owned-object">Inspect the specific owned object<a class="heading-anchor" href="#inspect-the-specific-owned-object" aria-label="Link to this section">#</a></h3>
 <p>Only after the chapter&#x27;s host capability is provisioned and its resources remain present, use the explicit receipt fields described in <a href="../host-labs.md.html">host-labs.md</a>. A completed one-shot browser Run has already cleaned its objects. The following read does not provision the missing capability and does not justify changing credentials after a Forbidden result.</p>
-<p>POSIX:</p>
+<p>Bash on Linux, macOS or Ubuntu under WSL 2:</p>
 <pre class="highlighted-code"><code class="language-bash">: <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_KUBECONFIG<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt path</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 : <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_CONTEXT<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt context</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 : <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_NAMESPACE<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt namespace</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<span class="syntax-string">&quot;</span> --context <span class="syntax-string">&quot;</span>$LAB_CONTEXT<span class="syntax-string">&quot;</span> --namespace <span class="syntax-string">&quot;</span>$LAB_NAMESPACE<span class="syntax-string">&quot;</span> get daemonset node-fixture -o json</code></pre>
-<p>PowerShell:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">-not</span> $env:LAB_KUBECONFIG <span class="syntax-operator">-or</span> <span class="syntax-operator">-not</span> $env:LAB_CONTEXT <span class="syntax-operator">-or</span> <span class="syntax-operator">-not</span> $env:LAB_NAMESPACE<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;Owned receipt fields are required.&#x27;</span> <span class="syntax-punctuation">}</span>
-<span class="syntax-punctuation">&amp;</span> kubectl <span class="syntax-punctuation">-</span>-kubeconfig $env:LAB_KUBECONFIG <span class="syntax-punctuation">-</span>-context $env:LAB_CONTEXT <span class="syntax-punctuation">-</span>-namespace $env:LAB_NAMESPACE get daemonset node-fixture -o json
-<span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>$LASTEXITCODE <span class="syntax-operator">-ne</span> 0<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;The scoped observation failed.&#x27;</span> <span class="syntax-punctuation">}</span></code></pre>
+<p>Windows uses the same Bash commands inside WSL 2. The lab adapter refuses native Windows credential handling, so do not run kubectl against the receipt from PowerShell. From PowerShell, only open your WSL 2 distribution (the name reported by <code>wsl.exe --list --verbose</code>), change to your checkout with its Linux path, then run the Bash block above unchanged:</p>
+<pre class="highlighted-code"><code class="language-powershell">wsl<span class="syntax-punctuation">.</span>exe <span class="syntax-punctuation">-</span>-distribution Ubuntu</code></pre>
 <p>Retain only the fields needed by this chapter&#x27;s prediction. A NotFound result may be expected after one-shot cleanup; a Forbidden result may identify a deliberately absent advanced capability. Neither result authorizes an ambient-context fallback.</p>
 <h3 id="run-and-bounded-evidence">Run and bounded evidence<a class="heading-anchor" href="#run-and-bounded-evidence" aria-label="Link to this section">#</a></h3>
 <p>The app artifact is a reading worksheet, <code>courses/kubernetes/lessons/k8s-026.md</code>. The current browser adapter does not provide the full <strong>exclusive topology/DaemonSet host fixture with sanitized node facts</strong> operation. Use the synthetic fixture and offline check first. Live work follows <a href="../host-labs.md.html">the scoped host-lab guide</a> only when the named capability and owned target have been provisioned. A worksheet or static check is never a cluster execution receipt.</p>
@@ -236,32 +234,32 @@ kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<sp
 <h4 id="exercise-1-compare-controller-intent">Exercise 1: Compare controller intent<a class="heading-anchor" href="#exercise-1-compare-controller-intent" aria-label="Link to this section">#</a></h4>
 <p>Explain replicas 2 Deployment versus a DaemonSet over eligible nodes.</p>
 <p><strong>Expected result/shape:</strong> Fixed replica count versus topology-derived desired placement.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Fixed replica count versus topology-derived desired placement.</p>
+<p><strong>Verify:</strong> State the Pod count each controller would produce on a three-node cluster with two eligible nodes.</p>
 <p><strong>Progressive hints:</strong> The controllers answer different questions.</p>
 <h4 id="exercise-2-evaluate-node-labels">Exercise 2: Evaluate node labels<a class="heading-anchor" href="#exercise-2-evaluate-node-labels" aria-label="Link to this section">#</a></h4>
 <p>Apply the zone=a selector to the three supplied node facts.</p>
 <p><strong>Expected result/shape:</strong> node-a and node-c pass the label condition; node-b does not.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: node-a and node-c pass the label condition; node-b does not.</p>
+<p><strong>Verify:</strong> Apply the selector to each node&#x27;s labels one node at a time and record a yes or no for each.</p>
 <p><strong>Progressive hints:</strong> Separate label eligibility from taint/resource checks.</p>
 <h4 id="exercise-3-evaluate-the-custom-taint">Exercise 3: Evaluate the custom taint<a class="heading-anchor" href="#exercise-3-evaluate-the-custom-taint" aria-label="Link to this section">#</a></h4>
 <p>Add the untolerated dedicated NoSchedule condition.</p>
 <p><strong>Expected result/shape:</strong> Only node-a remains eligible in the simplified model.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Only node-a remains eligible in the simplified model.</p>
+<p><strong>Verify:</strong> For each node that passed the label check, compare its taints with the Pod&#x27;s tolerations; a node without a matching toleration drops out.</p>
 <p><strong>Progressive hints:</strong> A toleration permits but does not force placement.</p>
 <h4 id="exercise-4-observe-actual-placement">Exercise 4: Observe actual placement<a class="heading-anchor" href="#exercise-4-observe-actual-placement" aria-label="Link to this section">#</a></h4>
 <p>In the qualified host topology, compare desired/ready counts and Pod nodeName/UIDs.</p>
 <p><strong>Expected result/shape:</strong> Observed eligible-node and controller evidence agree or a specific condition explains the gap.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Observed eligible-node and controller evidence agree or a specific condition explains the gap.</p>
+<p><strong>Verify:</strong> Compare <code>status.desiredNumberScheduled</code>, <code>status.numberReady</code> and each Pod&#x27;s <code>spec.nodeName</code> with your predicted eligible nodes.</p>
 <p><strong>Progressive hints:</strong> Record the actual node count and labels from the host receipt.</p>
 <h4 id="exercise-5-reject-automatic-node-edits">Exercise 5: Reject automatic node edits<a class="heading-anchor" href="#exercise-5-reject-automatic-node-edits" aria-label="Link to this section">#</a></h4>
 <p>Review a proposal to remove a taint from a shared Node to make the lab pass.</p>
 <p><strong>Expected result/shape:</strong> No learner Node mutation; request the correct owned capability or report unavailable placement.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: No learner Node mutation; request the correct owned capability or report unavailable placement.</p>
+<p><strong>Verify:</strong> Check that the proposal changes no Node object and names the capability request or unavailable report that replaces the edit.</p>
 <p><strong>Progressive hints:</strong> Node labels and taints are cluster-level inputs.</p>
 <h4 id="exercise-6-clean-up-the-right-resources">Exercise 6: Clean up the right resources<a class="heading-anchor" href="#exercise-6-clean-up-the-right-resources" aria-label="Link to this section">#</a></h4>
 <p>Describe DaemonSet UID-aware cleanup and retained host configuration.</p>
 <p><strong>Expected result/shape:</strong> Only the owned DaemonSet/controller children are removed; unrelated agents and node settings preserved.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Only the owned DaemonSet/controller children are removed; unrelated agents and node settings preserved.</p>
+<p><strong>Verify:</strong> List the DaemonSet UID and its child Pod UIDs, and confirm that node labels and taints are identical before and after cleanup.</p>
 <p><strong>Progressive hints:</strong> Controller ownership differs from node ownership.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain the mechanism behind the first example, then distinguish it from this boundary case: One eligible node under the limited fixture predicate; adding a matching toleration can make two. State which observations are synthetic and which, if any, were read from your owned runtime.</p>
@@ -269,7 +267,7 @@ kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<sp
 <p>Pending can result from selector mismatch, untolerated taint or insufficient requested resources. A toleration does not grant host access, and a DaemonSet is not inherently privileged. The restricted fixture demonstrates the controller shape without exposing node files or network namespaces.</p>
 <p>The static predicate explains supplied facts only. Actual desired/ready counts and node placement must be read from the exclusive host lab. Cleanup targets the recorded DaemonSet UID and its controlled Pods, not node labels or unrelated node-local agents.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
-<p>Close the answer and reconstruct the reasoning for Exercise6, Clean up the right resources. Name the exact source and observed identity you would require before claiming the changed case succeeded.</p>
+<p>Close the answer and reconstruct the reasoning for Exercise 6 (Clean up the right resources). Name the exact source and observed identity you would require before claiming the changed case succeeded.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue to <code>k8s-027</code> after preserving the six evidence records.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>

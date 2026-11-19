@@ -194,33 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-011_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-011-explanatory-solutions">docker-011: explanatory solutions<a class="heading-anchor" href="#docker-011-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These are explanations of the supplied teaching fixtures, not fabricated engine results.</p>
-<h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
-<p>Compose describes a related set of services, networks and volumes in one application model. A service describes how to create containers with a common role. A project groups their owned resources so commands can target the application rather than every container on the engine.</p>
-<p>The YAML model is declarative input, but running Compose is still an operation against a particular engine. Two copies of the same file can create different projects. Conversely, reusing the same project name can act on existing resources from an earlier invocation. Explicit project identity makes a teaching lab safer and its cleanup understandable.</p>
-<p>A service name is also a useful DNS name on its Compose network. The default network enables peers to find each other without fixed IPs. Named volumes remain separate storage resources. An application can therefore be recreated while preserving its data, provided the same intended volume remains mounted.</p>
-<p>Use <code>docker compose -p ds60-docker-study ...</code> from the copied fixture directory. The explicit <code>-p</code> sets the project name consistently for build, up, logs and down. The fixture has <code>app</code> and an optional tools-profile <code>client</code>; the client uses the same local image but runs a short request command instead of the server.</p>
-<p><code>config --quiet</code> validates and renders the model without printing its values or starting services. <code>up -d --wait</code> creates or updates services and waits according to readiness behavior. <code>down</code> removes the project’s containers and ordinary networks while retaining named volumes unless explicit volume deletion is requested.</p>
+<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-011.md</code>.</p>
 <h3 id="exercise-1-identify-the-project-and-service-names">Exercise 1: Identify the project and service names.<a class="heading-anchor" href="#exercise-1-identify-the-project-and-service-names" aria-label="Link to this section">#</a></h3>
-<p>The project groups engine resources; the service describes an application role. A container ID is a third identity that can change after recreation.</p>
-<p><strong>Expected:</strong> Project ds60-docker-study and service app.</p>
+<p><strong>Expected answer:</strong> Project ds60-docker-study and service app.</p>
+<p><strong>Why:</strong> The project groups engine resources; the service describes an application role. A container ID is a third identity that can change after recreation.</p>
 <h3 id="exercise-2-predict-what-config-quiet-changes">Exercise 2: Predict what config --quiet changes.<a class="heading-anchor" href="#exercise-2-predict-what-config-quiet-changes" aria-label="Link to this section">#</a></h3>
-<p>Static model validation is valuable early evidence, but it cannot prove port availability, image execution, volume permissions or endpoint correctness.</p>
-<p><strong>Expected:</strong> It validates the model without creating runtime resources.</p>
+<p><strong>Expected answer:</strong> It validates the model without creating runtime resources.</p>
+<p><strong>Why:</strong> Static model validation is valuable early evidence, but it cannot prove port availability, image execution, volume permissions or endpoint correctness.</p>
 <h3 id="exercise-3-write-the-project-lifecycle-command-sequence">Exercise 3: Write the project lifecycle command sequence.<a class="heading-anchor" href="#exercise-3-write-the-project-lifecycle-command-sequence" aria-label="Link to this section">#</a></h3>
-<p>Each step adds evidence and has a defined effect. Keeping the project option on every command prevents a directory-name change from accidentally selecting a different project.</p>
-<p><strong>Expected:</strong> Validate, build, up with readiness, inspect, then down.</p>
+<p><strong>Expected evidence:</strong> Validate, build, up with readiness, inspect, then down.</p>
+<p><strong>Why:</strong> Each step adds evidence and has a defined effect. Keeping the project option on every command prevents a directory-name change from accidentally selecting a different project.</p>
 <h3 id="exercise-4-diagnose-an-unexpected-resource-collision">Exercise 4: Diagnose an unexpected resource collision.<a class="heading-anchor" href="#exercise-4-diagnose-an-unexpected-resource-collision" aria-label="Link to this section">#</a></h3>
-<p>A reused project name or host port can collide with another copy. Renaming or deleting blindly may affect work you did not create; establish ownership first.</p>
-<p><strong>Expected:</strong> Inspect project identity and existing owned resources before changes.</p>
+<p><strong>Expected answer:</strong> Inspect project identity and existing owned resources before changes.</p>
+<p><strong>Why:</strong> A reused project name or host port can collide with another copy. Renaming or deleting blindly may affect work you did not create; establish ownership first.</p>
 <h3 id="exercise-5-explain-why-down-preserves-user-data-by-default">Exercise 5: Explain why down preserves user data by default.<a class="heading-anchor" href="#exercise-5-explain-why-down-preserves-user-data-by-default" aria-label="Link to this section">#</a></h3>
-<p>Containers and networks are generally disposable application infrastructure. Persistent state deserves a deliberate retention policy, so destruction is not an incidental consequence of stopping a lab.</p>
-<p><strong>Expected:</strong> Named volume removal is a separate explicit operation.</p>
+<p><strong>Expected answer:</strong> Named volume removal is a separate explicit operation.</p>
+<p><strong>Why:</strong> Containers and networks are generally disposable application infrastructure. Persistent state deserves a deliberate retention policy, so destruction is not an incidental consequence of stopping a lab.</p>
 <h3 id="exercise-6-design-a-two-copy-experiment-without-interference">Exercise 6: Design a two-copy experiment without interference.<a class="heading-anchor" href="#exercise-6-design-a-two-copy-experiment-without-interference" aria-label="Link to this section">#</a></h3>
-<p>Both copies can use the same internal service names because each project has its own network. Host-published ports share a host namespace and must avoid conflicts.</p>
-<p><strong>Expected:</strong> Distinct project names and distinct published host ports.</p>
+<p><strong>Expected evidence:</strong> Distinct project names and distinct published host ports.</p>
+<p><strong>Why:</strong> Both copies can use the same internal service names because each project has its own network. Host-published ports share a host namespace and must avoid conflicts.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful solution identifies the exact object, the phase when a setting takes effect, the expected normal result and an observation that disproves it. Repeating a command until it succeeds hides the mechanism. Change one variable, keep a failure record, and test the intended behavior again. Source examples here are small enough to inspect; a production system additionally needs ownership, lifecycle, data recovery and operational review. The host exercises are optional and must stay within the learner-created project.</p></article>
+<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>
 </body>
 </html>

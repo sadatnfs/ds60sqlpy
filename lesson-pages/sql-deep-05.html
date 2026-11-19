@@ -9,7 +9,7 @@
     content="default-src 'none'; style-src 'self' file: 'unsafe-inline'; font-src data:; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
   >
   <link rel="stylesheet" href="../src/ds60sqlpy/assets/vendor/textbook/fonts.css">
-  <title>sql-deep-05 · Predicate Proof, Partial Indexes, and Conditional Mutation Contracts · DS60</title>
+  <title>sql-deep-05 · Predicate Implication, Partial Indexes, and Conditional Writes · DS60</title>
   <style>
     :root {
       --paper: #f6f2e8;
@@ -312,7 +312,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <div class="shell">
       <section class="hero">
         <p class="eyebrow">sql · lesson sql-deep-05</p>
-        <h1>Predicate Proof, Partial Indexes, and Conditional Mutation Contracts</h1>
+        <h1>Predicate Implication, Partial Indexes, and Conditional Writes</h1>
         <p class="hero-copy">SQL semantics, temporal metrics and correctness</p>
         <div class="meta">
           <span class="tag">advanced</span>
@@ -408,9 +408,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Start the Linux-container engine and run <code>./classroom</code> from the repository root. On Windows, use Ubuntu in WSL 2 or the thin <code>START_DOCKER_CLASSROOM.cmd</code> wrapper. Choose <strong>PostgreSQL</strong> on the shared <code>/classroom</code> home, then open <strong>sql-deep-05</strong>. The <a href="../reference-pages/docs/one-command-classroom.md.html">launcher guide</a> covers first preparation, strict resume and the saved project selection. No host Python or PostgreSQL installation is required for this browser route.</p>
 <ol>
-<li>Read the prerequisite and fixture notes before running the file. Use only the local disposable <code>advanced_sql_training</code> database. A simple snippet such as <code>SELECT 1;</code> needs no training-schema reset.</li>
+<li>Read the prerequisite and fixture notes before running the file. Use only the local disposable <code>advanced_sql_training</code> database.</li>
 <li>Choose <strong>Whole SQL lesson (psql)</strong> for the cataloged learner script. This preserves the lesson&#x27;s reviewed psql directives, relative includes and transaction behavior. <strong>SQL snippet</strong> is appropriate for ordinary SQL statements, but is not a replacement for an entire script&#x27;s setup.</li>
-<li>When the lesson requires the course training data, use the explicit preparation action and read its reset acknowledgement. It replaces the course-owned <code>training</code> schema. Do not reset unrelated data or prepare every lesson by habit; stateful sequences have their own ordering.</li>
+<li>The <strong>Course database</strong> panel above the code shows whether the course training tables are loaded. Missing tables load automatically before your first run (or choose <strong>Load course tables</strong>) and stay loaded for later lessons. <strong>Reset training data</strong> restores the original rows only when your own changes made results differ; it keeps your saved code and notes.</li>
 <li>Edit the learner copy in the classroom and save your prediction before running. Its whole-script workspace is <code>.learning/sql/sql-deep-05/lesson/workspace/sql/professional/lessons/sql_deep_05.sql</code>. For browser work this path is inside the Docker learning volume, not a newly created host folder beside your checkout. The checked-in source remains the answer-free starting artifact.</li>
 <li>Run the whole script and inspect the full transcript. The runner uses <code>psql -X -v ON_ERROR_STOP=1 -f</code>. SELECT output has columns, rows and a row count; DDL/DML has command tags; intentional checks may produce NOTICE messages. An unexpected ERROR or nonzero exit is a failure to diagnose, even when an earlier query printed plausible values.</li>
 <li>Verify the lesson&#x27;s expected grain, ordering, constraints and declared transaction or cleanup outcome. Keep required ROLLBACK statements. The warehouse sequence and other explicitly stateful exercises explain when state is committed. Read saved output without rerunning it when reviewing an earlier attempt.</li>
@@ -535,7 +535,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li><a href="https://www.postgresql.org/docs/17/sql-insert.html">PostgreSQL17 INSERT ON CONFLICT</a>.</li>
 </ul>
 <h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to coach me through sql-deep-05: Predicate Proof, Partial Indexes, and Conditional Mutation Contracts.
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to coach me through sql-deep-05: Predicate Implication, Partial Indexes, and Conditional Writes.
 Read sql/professional/companion-guides/sql_deep_05.md and sql/professional/lessons/sql_deep_05.sql. Direct prerequisites: sql-ops-01, sql-concurrency-01.
 Explain the row grain and SQL clauses, then ask me to predict a concrete result before my attempt. Give one hint at a time and review my exact result rows, identity, NULL behavior and boundary evidence. Ask retrieval questions in my own words. Do not read solutions/ until I request it or have made an honest attempt.
 Use only the prepared local disposable advanced_sql_training database and the complete rollback-safe script. Preserve my ignored working copy and do not start services or redirect to another database.
@@ -1312,7 +1312,7 @@ $conflict$<span class="syntax-punctuation">;</span>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Use $guide-ds60sqlpy-learning to coach me through sql-deep-05: Predicate Proof, Partial Indexes, and Conditional Mutation Contracts.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Use $guide-ds60sqlpy-learning to coach me through sql-deep-05: Predicate Implication, Partial Indexes, and Conditional Writes.
 Read sql/professional/companion-guides/sql_deep_05.md and sql/professional/lessons/sql_deep_05.sql. Direct prerequisites: sql-ops-01, sql-concurrency-01.
 Explain the row grain and SQL clauses, then ask me to predict a concrete result before my attempt. Give one hint at a time and review my exact result rows, identity, NULL behavior and boundary evidence. Ask retrieval questions in my own words. Do not read solutions/ until I request it or have made an honest attempt.
 Use only the prepared local disposable advanced_sql_training database and the complete rollback-safe script. Preserve my ignored working copy and do not start services or redirect to another database.

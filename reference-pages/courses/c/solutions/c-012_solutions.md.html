@@ -198,20 +198,22 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism-and-assumptions">Mechanism and assumptions<a class="heading-anchor" href="#mechanism-and-assumptions" aria-label="Link to this section">#</a></h3>
 <p>const describes permitted access through a type-qualified expression. A pointer to const int prevents modifying the target through that pointer, while a const pointer prevents changing which target the pointer designates. These are different guarantees. A mutable object can be observed through a const view and changed through another valid mutable path. An object originally defined const must not be modified by casting away qualification. Const-correct APIs communicate read-only intent and let callers pass immutable data safely, but they do not automatically provide deep immutability, ownership or synchronization.</p>
 <p>const int <em>p reads as a pointer to a const-qualified int. int </em>const p is a const pointer to a mutable int. const int *const p combines both restrictions. Function parameters can use const for borrowed read-only arrays. A struct containing a pointer can still reference mutable storage even if the outer struct is accessed through a const pointer; deep ownership requires a broader design.</p>
-<h3 id="exercise-1-read-through-a-const-view">Exercise 1: Read through a const view<a class="heading-anchor" href="#exercise-1-read-through-a-const-view" aria-label="Link to this section">#</a></h3>
-<p>Observe a mutable integer through const int pointer.</p>
+<h3 id="exercise-1-read-through-a-const-view-change-one-input">Exercise 1: Read through a const view: change one input<a class="heading-anchor" href="#exercise-1-read-through-a-const-view-change-one-input" aria-label="Link to this section">#</a></h3>
+<p>Copy worked example 1 into a scratch pad and change <code>int value = 4;</code> to <code>int value = 5;</code>. Before running, predict which CHECK fails and which value it now sees; then run it and restore the original line.</p>
+<p>The unchanged code is worked example 1:</p>
 <pre class="highlighted-code"><code class="language-c"><span class="syntax-keyword">int</span> value <span class="syntax-operator">=</span> <span class="syntax-number">4</span><span class="syntax-punctuation">;</span>
 <span class="syntax-keyword">const</span> <span class="syntax-keyword">int</span> <span class="syntax-operator">*</span>view <span class="syntax-operator">=</span> <span class="syntax-operator">&amp;</span>value<span class="syntax-punctuation">;</span>
 CHECK<span class="syntax-punctuation">(</span><span class="syntax-operator">*</span>view <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
-<p><strong>Expected:</strong> The read yields 4.</p>
+<p><strong>Expected:</strong> The changed run stops with <code>Check failed</code> at the CHECK on <code>*view == 4</code>. Restoring the original line brings back the worked observation: the read yields 4.</p>
 <p>The view is read-only, but the underlying object was not defined const.</p>
-<h3 id="exercise-2-observe-another-valid-mutation">Exercise 2: Observe another valid mutation<a class="heading-anchor" href="#exercise-2-observe-another-valid-mutation" aria-label="Link to this section">#</a></h3>
-<p>Change the mutable object through its original name.</p>
+<h3 id="exercise-2-observe-another-valid-mutation-debug-a-regression">Exercise 2: Observe another valid mutation: debug a regression<a class="heading-anchor" href="#exercise-2-observe-another-valid-mutation-debug-a-regression" aria-label="Link to this section">#</a></h3>
+<p>A regression changed one token in worked example 2, so one line now reads <code>value = 8;</code>. Run worked example 2 with that line, use the failing CHECK to locate the defect and repair it without changing the CHECK.</p>
+<p>The unchanged code is worked example 2:</p>
 <pre class="highlighted-code"><code class="language-c"><span class="syntax-keyword">int</span> value <span class="syntax-operator">=</span> <span class="syntax-number">4</span><span class="syntax-punctuation">;</span>
 <span class="syntax-keyword">const</span> <span class="syntax-keyword">int</span> <span class="syntax-operator">*</span>view <span class="syntax-operator">=</span> <span class="syntax-operator">&amp;</span>value<span class="syntax-punctuation">;</span>
 value <span class="syntax-operator">=</span> <span class="syntax-number">7</span><span class="syntax-punctuation">;</span>
 CHECK<span class="syntax-punctuation">(</span><span class="syntax-operator">*</span>view <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">7</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
-<p><strong>Expected:</strong> The const view now reads 7.</p>
+<p><strong>Expected:</strong> Before the repair the run stops with <code>Check failed</code> at the CHECK on <code>*view == 7</code>; after it the line reads <code>value = 7;</code> again and the const view now reads 7.</p>
 <p>Const access does not freeze a shared mutable object or create a snapshot.</p>
 <h3 id="exercise-3-use-a-fixed-pointer-target">Exercise 3: Use a fixed pointer target<a class="heading-anchor" href="#exercise-3-use-a-fixed-pointer-target" aria-label="Link to this section">#</a></h3>
 <p>Create an int pointer that cannot be reassigned, then update its target.</p>

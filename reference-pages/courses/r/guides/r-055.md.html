@@ -196,9 +196,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="r-055-scales-coordinates-and-facets-change-different-contracts">r-055: Scales, coordinates and facets change different contracts<a class="heading-anchor" href="#r-055-scales-coordinates-and-facets-change-different-contracts" aria-label="Link to this section">#</a></h2>
 <p><strong>Level:</strong> advanced. <strong>Direct prerequisites:</strong> <code>r-054</code></p>
 <h3 id="run-and-retain-your-work">Run and retain your work<a class="heading-anchor" href="#run-and-retain-your-work" aria-label="Link to this section">#</a></h3>
-<p>Use the classroom&#x27;s R language pad and prepared r-statistics profile. Each run evaluates one main.R script in a fresh offline R process. Define every required input in the script; earlier runs do not leave live variables behind. Save source and notes separately from run receipts. No package installation or data download is needed for these examples.</p>
-<p>Base plot calls are captured as PNG figures. Explicitly print ggplot2 and Plotly objects in scripts: print(chart). The classroom retains at most two figures per run; Plotly figures use the prepared interactive browser renderer. A temporary file created inside a run is not automatically a persistent download. Keep the supplied examples self-contained and use the saved source, notes and supported figure/result views for retained work.</p>
-<p>Open the <a href="../lessons/r-055.R.html">starter</a>. The <a href="../solutions/r-055_reference.R.html">complete reference</a> and <a href="../solutions/r-055_solutions.md.html">explained answers</a> are available for deliberate comparison.</p>
+<p>Open <code>r-055</code> in <code>/classroom</code> and use the prepared <code>r-statistics</code> profile. Each Run evaluates one <code>main.R</code> script in a fresh offline R process, so define every input in the script; an earlier Run leaves no variables behind. Work in the <a href="../lessons/r-055.R.html">starter</a>. The <a href="../solutions/r-055_reference.R.html">complete reference</a> ends by printing <code>r-055 reference checks passed</code>, and the <a href="../solutions/r-055_solutions.md.html">explained answers</a> are there for deliberate comparison after your own attempt. This chapter draws figures: base plots are captured as PNG, ggplot2 and Plotly objects must be printed explicitly, and the classroom keeps at most two figures per run. The <a href="../README.md.html">course overview</a> describes saved work, figure capture and the prepared package versions.</p>
 <h3 id="outcome-and-mechanism">Outcome and mechanism<a class="heading-anchor" href="#outcome-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Choose scale, coordinate and facet policies while explaining how each affects calculations and visual comparisons.</p>
 <p>A scale maps data values to visual properties and can transform or limit the data entering a layer. A coordinate system determines how those mapped positions are displayed. These stages are related but not interchangeable. In particular, setting a scale limit can remove observations before a statistic is calculated, while coordinate zoom can retain them in the calculation and change only the displayed window.</p>
@@ -259,7 +257,6 @@ free <span class="syntax-operator">&lt;-</span> ggplot2<span class="syntax-opera
 <p><strong>Expected observation:</strong> Two panels with two y-scale assignments under free_y.</p>
 <p>The free-scale plot can show both within-group patterns clearly, but equal vertical distances no longer encode equal changes across groups.</p>
 <h3 id="practice-with-evidence">Practice with evidence<a class="heading-anchor" href="#practice-with-evidence" aria-label="Link to this section">#</a></h3>
-<p>Retain the submitted source, the specific input or changed condition, and the observed result or expected failure. A successful exit checks only the properties the program actually asserts; it does not establish general correctness or mastery.</p>
 <h4 id="exercise-1-predict">Exercise 1: Predict<a class="heading-anchor" href="#exercise-1-predict" aria-label="Link to this section">#</a></h4>
 <p>Build the coordinate-zoom and scale-limited fitted-line comparison.</p>
 <h4 id="exercise-2-modify">Exercise 2: Modify<a class="heading-anchor" href="#exercise-2-modify" aria-label="Link to this section">#</a></h4>
@@ -284,22 +281,22 @@ free <span class="syntax-operator">&lt;-</span> ggplot2<span class="syntax-opera
 <h3 id="reference-review">Reference review<a class="heading-anchor" href="#reference-review" aria-label="Link to this section">#</a></h3>
 <p>The fitted-line comparison verifies a real change in the statistic&#x27;s input data, not only a cosmetic zoom. Its expected removal warning should be interpreted as part of that mechanism. Facet metadata and transformed coordinates supply separate checks for scale behavior.</p>
 <p>The reference prints only two plots. Correct layer metadata does not guarantee that the delivered visual comparison is clear, so captions, scales and missing-category policies remain part of the graphical review.</p>
-<p>Compare your implementation with the reference only after retaining your own attempt. Different readable implementations can satisfy the same behavioral contract. Inspect type, shape, missingness and boundary behavior alongside printed numbers.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://ggplot2.tidyverse.org/reference/coord_cartesian.html">Coordinate Cartesian zoom</a></li>
 <li><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html">Continuous position scales</a></li>
 <li><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html">Faceting</a></li>
 </ul>
-<p>The prepared environment uses R 4.6.1, R6 2.6.1, S7 0.2.2, ggplot2 4.0.3 and Plotly 4.12.1. These original examples use the checked-in dependency contract; external package changes require a fresh compatibility check.</p>
 <h3 id="continue">Continue<a class="heading-anchor" href="#continue" aria-label="Link to this section">#</a></h3>
-<p>Use the <a href="../README.md.html">course map</a> to choose the next chapter by its prerequisites. For broader model assumptions, study the statistics tutorial alongside the executable R examples.</p>
+<p>Chapters that list <code>r-055</code> as a direct prerequisite: <a href="r-056.md.html"><code>r-056</code></a>, <a href="r-057.md.html"><code>r-057</code></a>.</p>
 <h3 id="ask-an-ai-tutor">Ask an AI tutor<a class="heading-anchor" href="#ask-an-ai-tutor" aria-label="Link to this section">#</a></h3>
-<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for r-055. Read the guide and my saved attempt.
-Explain the relevant R mechanism, type and data-shape contract. Give one
-progressive hint before revealing the complete reference unless I request it.
-Distinguish my observed output from an expected result and from unrun code.
-Do not claim mastery from a successful process exit or a matching source string.</code></pre></article>
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for r-055 (Scales, coordinates and facets change different contracts).
+Read the guide and my saved attempt. Explain the relevant R mechanism,
+type and data-shape contract, focusing on: scale limit, coordinate zoom, transformation, facet, shared comparison.
+Give one progressive hint before revealing the complete reference unless
+I request it. Distinguish my observed output from an expected result and
+from unrun code. Do not claim mastery from a successful process exit or a
+matching source string.</code></pre></article>
   </main>
 </body>
 </html>

@@ -207,6 +207,21 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-keyword">from</span> sklearn.tree <span class="syntax-keyword">import</span> DecisionTreeRegressor</span>
 <span class="source-line"></span>
 <span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Function names are stable test identities. Standalone programs and printed</span></span>
+<span class="source-line"><span class="syntax-comment"># labels follow the guide order: learning_01.py runs case_07 (geometry), then</span></span>
+<span class="source-line"><span class="syntax-comment"># learning_02.py to learning_07.py run case_01 to case_06.</span></span>
+<span class="source-line">PROGRAM_ORDER <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">case_07</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">case_01</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">case_02</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">case_03</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">case_04</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">case_05</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">case_06</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;</span><span class="syntax-string">case_08</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">wilson_interval</span><span class="syntax-punctuation">(</span>successes<span class="syntax-punctuation">,</span> n<span class="syntax-punctuation">,</span> alpha<span class="syntax-operator">=</span><span class="syntax-number">0.05</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    p <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>successes<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> n</span>
 <span class="source-line">    z <span class="syntax-operator">=</span> stats<span class="syntax-operator">.</span>norm<span class="syntax-operator">.</span>ppf<span class="syntax-punctuation">(</span><span class="syntax-number">1</span> <span class="syntax-operator">-</span> alpha <span class="syntax-operator">/</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span></span>
@@ -242,7 +257,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">exact_wald_coverage_at_005</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> wald_coverage<span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">exact_wilson_coverage_at_005</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> wilson_coverage<span class="syntax-punctuation">,</span></span>
 <span class="source-line">    <span class="syntax-punctuation">}</span></span>
-<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">01 likelihood to coverage:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> result<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">02 likelihood to coverage:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> result<span class="syntax-punctuation">)</span></span>
 <span class="source-line">    <span class="syntax-keyword">return</span> result</span>
 <span class="source-line"></span>
 <span class="source-line"></span>
@@ -303,7 +318,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">conditional_or</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">marginal_or</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> marginal_or<span class="syntax-punctuation">,</span></span>
 <span class="source-line">    <span class="syntax-punctuation">}</span></span>
-<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">02 logistic model to decision:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> result<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">03 logistic model to decision:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> result<span class="syntax-punctuation">)</span></span>
 <span class="source-line">    <span class="syntax-keyword">return</span> result</span>
 <span class="source-line"></span>
 <span class="source-line"></span>
@@ -350,7 +365,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">tiny_bootstrap_indices</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> bootstrap<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">tiny_oob_indices</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> oob<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">    <span class="syntax-punctuation">}</span></span>
-<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">03 forest selection:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> result<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">04 forest selection:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> result<span class="syntax-punctuation">)</span></span>
 <span class="source-line">    <span class="syntax-keyword">return</span> result</span>
 <span class="source-line"></span>
 <span class="source-line"></span>
@@ -391,7 +406,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">validation_mse</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> validation<span class="syntax-punctuation">[</span>best <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">test_mse</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> mean_squared_error<span class="syntax-punctuation">(</span>target<span class="syntax-punctuation">[</span><span class="syntax-number">270</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> frozen<span class="syntax-operator">.</span>predict<span class="syntax-punctuation">(</span>features<span class="syntax-punctuation">[</span><span class="syntax-number">270</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">    <span class="syntax-punctuation">}</span></span>
-<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">04 boosting trajectory:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> result<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">05 boosting trajectory:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> result<span class="syntax-punctuation">)</span></span>
 <span class="source-line">    <span class="syntax-keyword">return</span> result</span>
 <span class="source-line"></span>
 <span class="source-line"></span>
@@ -420,7 +435,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">full_test_accuracy</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> full_model<span class="syntax-operator">.</span>score<span class="syntax-punctuation">(</span>test_x<span class="syntax-punctuation">,</span> test_y<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">scaled_variance_ratios</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> scaled<span class="syntax-operator">.</span>explained_variance_ratio_<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">    <span class="syntax-punctuation">}</span></span>
-<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">05 compression versus prediction:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> result<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">06 compression versus prediction:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> result<span class="syntax-punctuation">)</span></span>
 <span class="source-line">    <span class="syntax-keyword">return</span> result</span>
 <span class="source-line"></span>
 <span class="source-line"></span>
@@ -453,7 +468,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">new_group_accuracy</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> group_scores<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">nested_outer_mse</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> outer_scores<span class="syntax-punctuation">,</span></span>
 <span class="source-line">    <span class="syntax-punctuation">}</span></span>
-<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">06 evaluation of the full procedure:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> result<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">07 evaluation of the full procedure:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> result<span class="syntax-punctuation">)</span></span>
 <span class="source-line">    <span class="syntax-keyword">return</span> result</span>
 <span class="source-line"></span>
 <span class="source-line"></span>
@@ -487,7 +502,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">stable_error</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> stable<span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;</span><span class="syntax-string">oversized_step_error</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> unstable<span class="syntax-punctuation">,</span></span>
 <span class="source-line">    <span class="syntax-punctuation">}</span></span>
-<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">07 geometry and optimization:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> result<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">01 geometry and optimization:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> result<span class="syntax-punctuation">)</span></span>
 <span class="source-line">    <span class="syntax-keyword">return</span> result</span>
 <span class="source-line"></span>
 <span class="source-line"></span>
@@ -526,7 +541,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">    <span class="syntax-keyword">for</span> case <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span>case_01<span class="syntax-punctuation">,</span> case_02<span class="syntax-punctuation">,</span> case_03<span class="syntax-punctuation">,</span> case_04<span class="syntax-punctuation">,</span> case_05<span class="syntax-punctuation">,</span> case_06<span class="syntax-punctuation">,</span> case_07<span class="syntax-punctuation">,</span> case_08<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">for</span> case <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span>case_07<span class="syntax-punctuation">,</span> case_01<span class="syntax-punctuation">,</span> case_02<span class="syntax-punctuation">,</span> case_03<span class="syntax-punctuation">,</span> case_04<span class="syntax-punctuation">,</span> case_05<span class="syntax-punctuation">,</span> case_06<span class="syntax-punctuation">,</span> case_08<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">        <span class="syntax-keyword">case</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line"></span>
 <span class="source-line"></span>

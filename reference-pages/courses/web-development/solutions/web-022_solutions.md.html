@@ -194,31 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-022_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-022-explanatory-solutions">web-022: explanatory solutions<a class="heading-anchor" href="#web-022-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.</p>
-<h3 id="why-the-mechanism-works">Why the mechanism works<a class="heading-anchor" href="#why-the-mechanism-works" aria-label="Link to this section">#</a></h3>
-<p>A stylesheet is easier to change when responsibilities are visible. Base rules describe document defaults, component rules describe reusable structures, and narrowly named utilities make deliberate local adjustments. These categories are a design choice, not a browser feature by themselves. Cascade layers let authors establish an explicit ordering among groups of declarations without continually increasing selector specificity.</p>
-<p>For normal author declarations, later layers take priority over earlier layers, and unlayered normal declarations have priority over layered normal declarations. Important declarations reverse layer priority, which is one reason indiscriminate important usage makes reasoning harder. A good architecture keeps selectors understandable and limits the area a change can affect.</p>
-<p>Declare the layer order once with <code>@layer base, components, utilities</code>. Put actual rules inside those layers. Keep component names tied to a useful responsibility such as lesson-card, not a visual accident such as left-blue-box. Test a component in more than one surrounding context to expose accidental ancestor dependencies.</p>
+<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-022.md</code>.</p>
 <h3 id="exercise-1-predict-the-layer-winner-for-normal-declarations">Exercise 1: Predict the layer winner for normal declarations.<a class="heading-anchor" href="#exercise-1-predict-the-layer-winner-for-normal-declarations" aria-label="Link to this section">#</a></h3>
-<p>A later declared layer outranks an earlier one before specificity is compared.</p>
-<p>Trace the smallest example before editing. Name which values are source and which are observations.</p>
+<p><strong>Expected answer:</strong> A later declared layer outranks an earlier one before specificity is compared.</p>
+<p><strong>Why:</strong> For normal declarations, a later layer beats an earlier one regardless of selector specificity.</p>
 <h3 id="exercise-2-move-a-component-s-rules-into-one-named-layer">Exercise 2: Move a component&#x27;s rules into one named layer.<a class="heading-anchor" href="#exercise-2-move-a-component-s-rules-into-one-named-layer" aria-label="Link to this section">#</a></h3>
-<p>Its styling responsibility is grouped and discoverable.</p>
-<p>Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.</p>
+<p><strong>Expected evidence:</strong> Its styling responsibility is grouped and discoverable.</p>
+<p><strong>Why:</strong> Grouping the rules by responsibility makes their priority predictable and easy to find.</p>
 <h3 id="exercise-3-build-a-small-layered-stylesheet-with-base-component-and-utility-rules">Exercise 3: Build a small layered stylesheet with base, component and utility rules.<a class="heading-anchor" href="#exercise-3-build-a-small-layered-stylesheet-with-base-component-and-utility-rules" aria-label="Link to this section">#</a></h3>
-<p>The intended overrides work without escalating ids or important flags.</p>
-<p>Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.</p>
+<p><strong>Expected evidence:</strong> The intended overrides work without escalating ids or important flags.</p>
+<p><strong>Why:</strong> Layer order resolves conflicts, so you do not need ids or !important to make a utility win.</p>
 <h3 id="exercise-4-diagnose-an-unlayered-rule-unexpectedly-beating-layered-normal-rules">Exercise 4: Diagnose an unlayered rule unexpectedly beating layered normal rules.<a class="heading-anchor" href="#exercise-4-diagnose-an-unlayered-rule-unexpectedly-beating-layered-normal-rules" aria-label="Link to this section">#</a></h3>
-<p>Unlayered normal author declarations have higher layer priority.</p>
-<p>Keep the failing input. Identify the first layer where the observed result differs from the intended contract.</p>
+<p><strong>Expected answer:</strong> Unlayered normal author declarations have higher layer priority.</p>
+<p><strong>Why:</strong> Unlayered normal declarations beat all layered normal declarations, which surprises authors who expect source order to decide.</p>
 <h3 id="exercise-5-place-the-component-under-a-different-parent">Exercise 5: Place the component under a different parent.<a class="heading-anchor" href="#exercise-5-place-the-component-under-a-different-parent" aria-label="Link to this section">#</a></h3>
-<p>Its behavior does not rely on an accidental deep ancestor selector.</p>
-<p>Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.</p>
+<p><strong>Expected evidence:</strong> Its behavior does not rely on an accidental deep ancestor selector.</p>
+<p><strong>Why:</strong> A selector tied to a deep ancestor chain breaks when the component moves, while a component class keeps working.</p>
 <h3 id="exercise-6-explain-why-important-declarations-complicate-layer-reasoning">Exercise 6: Explain why important declarations complicate layer reasoning.<a class="heading-anchor" href="#exercise-6-explain-why-important-declarations-complicate-layer-reasoning" aria-label="Link to this section">#</a></h3>
-<p>Important layer ordering is reversed, so the normal ordering intuition no longer applies.</p>
-<p>Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.</p>
-<h3 id="reference-comparison-and-limits">Reference comparison and limits<a class="heading-anchor" href="#reference-comparison-and-limits" aria-label="Link to this section">#</a></h3>
-<p>Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.</p></article>
+<p><strong>Expected answer:</strong> Important layer ordering is reversed, so the normal ordering intuition no longer applies.</p>
+<p><strong>Why:</strong> For important declarations the layer order reverses, so an earlier layer wins, the opposite of normal declarations.</p>
+<h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
+<p>Open <code>courses/web-development/solutions/web-022_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
   </main>
 </body>
 </html>

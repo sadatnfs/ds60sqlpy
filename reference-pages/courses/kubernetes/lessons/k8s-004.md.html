@@ -197,32 +197,26 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Use the guide and synthetic case ledger. A prediction or copied fixture is not a live runtime observation.</p>
 <h3 id="exercise-1-identify-the-request-tuple">Exercise 1: Identify the request tuple<a class="heading-anchor" href="#exercise-1-identify-the-request-tuple" aria-label="Link to this section">#</a></h3>
 <p>Write the caller, namespace, API group, resource, name and verb for an owned hello Deployment read.</p>
-<p>Expected: A six-field request includes apps/deployments, hello, get and the explicit leased namespace.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-2-read-the-role-grant">Exercise 2: Read the Role grant<a class="heading-anchor" href="#exercise-2-read-the-role-grant" aria-label="Link to this section">#</a></h3>
 <p>Compare get hello with list deployments and create namespaces under the example Role.</p>
-<p>Expected: Only get hello is granted by this Role; list and namespace creation are absent.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-3-check-namespace-identity">Exercise 3: Check namespace identity<a class="heading-anchor" href="#exercise-3-check-namespace-identity" aria-label="Link to this section">#</a></h3>
 <p>Compare the ns-1 receipt with the ns-2 readback.</p>
-<p>Expected: Refuse despite the matching namespace name and owner label.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-4-observe-least-privilege">Exercise 4: Observe least privilege<a class="heading-anchor" href="#exercise-4-observe-least-privilege" aria-label="Link to this section">#</a></h3>
 <p>With an explicitly provisioned lease, record an own-namespace permitted action and a denied cluster/Secret action.</p>
-<p>Expected: Actual allow/deny results are recorded separately from source policy; no credentials enter the worksheet.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
-<h3 id="exercise-5-inspect-expiry-and-cleanup-reserve">Exercise 5: Inspect expiry and cleanup reserve<a class="heading-anchor" href="#exercise-5-inspect-expiry-and-cleanup-reserve" aria-label="Link to this section">#</a></h3>
-<p>Evaluate a synthetic lease expiring in30 seconds for60 seconds of work plus15 seconds cleanup and5 seconds margin.</p>
-<p>Expected: Refuse because30&lt;80.</p>
+<h3 id="exercise-5-bind-a-clusterrole-inside-one-namespace">Exercise 5: Bind a ClusterRole inside one namespace<a class="heading-anchor" href="#exercise-5-bind-a-clusterrole-inside-one-namespace" aria-label="Link to this section">#</a></h3>
+<p>A RoleBinding in namespace lesson-a references the built-in ClusterRole view. Predict whether the bound identity can list Pods in lesson-a, list Pods in lesson-b and list Secrets in lesson-a.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-6-explain-additive-authorization">Exercise 6: Explain additive authorization<a class="heading-anchor" href="#exercise-6-explain-additive-authorization" aria-label="Link to this section">#</a></h3>
 <p>Describe why one narrow Role file cannot prove that no other privilege exists.</p>
-<p>Expected: A written answer includes other RoleBindings/ClusterRoleBindings and actual effective authorization evidence.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p></article>
   </main>

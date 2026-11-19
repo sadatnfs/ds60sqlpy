@@ -196,13 +196,23 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-typescript"><code><span class="source-line"><span class="syntax-comment">// Answer-free learner source. Save your own copy before editing.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">export</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"><span class="syntax-comment">// Exercise 1: Await and narrow a result</span></span>
-<span class="source-line"><span class="syntax-comment">// Look up a known id and an absent id.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: known value 7; absent error not_found.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 1: Await and narrow a result: predict an edited check</span></span>
+<span class="source-line"><span class="syntax-comment">// Copy Example A into a scratch `main.mts` and change `assert.deepEqual(await</span></span>
+<span class="source-line"><span class="syntax-comment">// lookup(&#x27;missing&#x27;), { ok: false, error: &#x27;not_found&#x27; });` to `assert.deepEqual(await</span></span>
+<span class="source-line"><span class="syntax-comment">// lookup(&#x27;missing&#x27;), { ok: true, error: &#x27;not_found&#x27; });` inside its check. Before running</span></span>
+<span class="source-line"><span class="syntax-comment">// it, predict whether the check still passes and explain why; then restore it.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` at the check</span></span>
+<span class="source-line"><span class="syntax-comment">// `assert.deepEqual(await lookup(&#x27;missing&#x27;), { ok: false, error: &#x27;not_found&#x27; })`. Restoring</span></span>
+<span class="source-line"><span class="syntax-comment">// the original line brings back the worked observation: known value 7; absent error</span></span>
+<span class="source-line"><span class="syntax-comment">// not_found.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment">// Exercise 2: Show a failure result does not invoke catch</span></span>
-<span class="source-line"><span class="syntax-comment">// Attach catch to a lookup returning a not_found value.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: catch count 0; result still not_found.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 2: Show a failure result does not invoke catch: debug a regression</span></span>
+<span class="source-line"><span class="syntax-comment">// A regression changed one token in Example B, so one line now reads `let caught = 1;`. Run</span></span>
+<span class="source-line"><span class="syntax-comment">// Example B with that line, use the failing check to locate the defect and repair it without</span></span>
+<span class="source-line"><span class="syntax-comment">// changing the check.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at the check</span></span>
+<span class="source-line"><span class="syntax-comment">// `assert.equal(caught, 0)`; after it the line reads `let caught = 0;` again and catch count</span></span>
+<span class="source-line"><span class="syntax-comment">// 0; result still not_found.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 3: Translate recognized cancellation</span></span>
 <span class="source-line"><span class="syntax-comment">// Abort a real timer-backed operation.</span></span>

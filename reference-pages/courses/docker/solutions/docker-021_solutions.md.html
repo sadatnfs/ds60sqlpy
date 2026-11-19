@@ -194,33 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-021_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-021-explanatory-solutions">docker-021: explanatory solutions<a class="heading-anchor" href="#docker-021-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These are explanations of the supplied teaching fixtures, not fabricated engine results.</p>
-<h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
-<p>A backup is a retained copy intended for recovery. A restore is the process of reconstructing usable state from that copy. The existence of an archive file does not prove that recovery works. A useful backup procedure defines consistency, scope, identity, retention and an independent restore test.</p>
-<p>A filesystem copy of a live database may be inconsistent even when every file is readable. Applications have their own transactional state and backup protocols. The fixture’s small JSON counter can be exported while the app is stopped, making the consistency boundary easy to explain. That procedure must not be generalized to every database.</p>
-<p>Back up only the disposable study volume in this chapter. The main classroom’s learner progress is separate. Never use global volume pruning as part of a backup exercise, and never overwrite the only good copy while testing a restore.</p>
-<p>The fixture README includes an export using the app image’s Python standard library and a separate restore-target volume. Stop the app first, export a small JSON record to the learner copy, inspect its schema, then test restoration into a new owned volume. Record checksums and expected values without treating a checksum as proof of application semantics.</p>
-<p>A recovery point objective describes tolerable data loss measured in time. A recovery time objective describes the acceptable time to restore service. They guide backup frequency and practice, but a local teaching experiment only measures its own small workload.</p>
+<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-021.md</code>.</p>
 <h3 id="exercise-1-distinguish-backup-creation-and-restore-acceptance">Exercise 1: Distinguish backup creation and restore acceptance.<a class="heading-anchor" href="#exercise-1-distinguish-backup-creation-and-restore-acceptance" aria-label="Link to this section">#</a></h3>
-<p>The latter catches missing files, invalid formats and wrong ownership that a successful copy can hide.</p>
-<p><strong>Expected:</strong> An archive exists versus a new instance can use recovered data.</p>
+<p><strong>Expected answer:</strong> An archive exists versus a new instance can use recovered data.</p>
+<p><strong>Why:</strong> The latter catches missing files, invalid formats and wrong ownership that a successful copy can hide.</p>
 <h3 id="exercise-2-predict-the-risk-of-copying-a-live-transactional-database-directory">Exercise 2: Predict the risk of copying a live transactional database directory.<a class="heading-anchor" href="#exercise-2-predict-the-risk-of-copying-a-live-transactional-database-directory" aria-label="Link to this section">#</a></h3>
-<p>Databases can coordinate several files and buffered writes. Use their documented backup mechanism instead of assuming a file copy captures a valid snapshot.</p>
-<p><strong>Expected:</strong> The copy may not represent a consistent transaction boundary.</p>
+<p><strong>Expected answer:</strong> The copy may not represent a consistent transaction boundary.</p>
+<p><strong>Why:</strong> Databases can coordinate several files and buffered writes. Use their documented backup mechanism instead of assuming a file copy captures a valid snapshot.</p>
 <h3 id="exercise-3-design-a-separate-restore-target">Exercise 3: Design a separate restore target.<a class="heading-anchor" href="#exercise-3-design-a-separate-restore-target" aria-label="Link to this section">#</a></h3>
-<p>The test should not destroy the only working state. Keeping the source untouched also makes comparison and rollback possible.</p>
-<p><strong>Expected:</strong> A new owned volume with no overwrite of the source.</p>
+<p><strong>Expected evidence:</strong> A new owned volume with no overwrite of the source.</p>
+<p><strong>Why:</strong> The test should not destroy the only working state. Keeping the source untouched also makes comparison and rollback possible.</p>
 <h3 id="exercise-4-diagnose-a-valid-checksum-with-invalid-application-data">Exercise 4: Diagnose a valid checksum with invalid application data.<a class="heading-anchor" href="#exercise-4-diagnose-a-valid-checksum-with-invalid-application-data" aria-label="Link to this section">#</a></h3>
-<p>A checksum proves a relationship between byte sequences. The application must still parse and validate the data it will use.</p>
-<p><strong>Expected:</strong> Byte identity does not establish schema or semantic correctness.</p>
+<p><strong>Expected answer:</strong> Byte identity does not establish schema or semantic correctness.</p>
+<p><strong>Why:</strong> A checksum proves a relationship between byte sequences. The application must still parse and validate the data it will use.</p>
 <h3 id="exercise-5-explain-rpo-and-rto-using-the-counter-lab">Exercise 5: Explain RPO and RTO using the counter lab.<a class="heading-anchor" href="#exercise-5-explain-rpo-and-rto-using-the-counter-lab" aria-label="Link to this section">#</a></h3>
-<p>Name the workload and measurement period. A small local result cannot be advertised as a production recovery guarantee for larger or different data.</p>
-<p><strong>Expected:</strong> Allowed lost updates and time to a usable restored instance.</p>
+<p><strong>Expected answer:</strong> Allowed lost updates and time to a usable restored instance.</p>
+<p><strong>Why:</strong> Name the workload and measurement period. A small local result cannot be advertised as a production recovery guarantee for larger or different data.</p>
 <h3 id="exercise-6-produce-a-recovery-evidence-packet">Exercise 6: Produce a recovery evidence packet.<a class="heading-anchor" href="#exercise-6-produce-a-recovery-evidence-packet" aria-label="Link to this section">#</a></h3>
-<p>The packet ties the copy to a particular source and proves independent use. Cleanup should remove only the disposable restore resources after review.</p>
-<p><strong>Expected:</strong> Source identity, export hash, restore target, parsed value and cleanup record.</p>
+<p><strong>Expected evidence:</strong> Source identity, export hash, restore target, parsed value and cleanup record.</p>
+<p><strong>Why:</strong> The packet ties the copy to a particular source and proves independent use. Cleanup should remove only the disposable restore resources after review.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful solution identifies the exact object, the phase when a setting takes effect, the expected normal result and an observation that disproves it. Repeating a command until it succeeds hides the mechanism. Change one variable, keep a failure record, and test the intended behavior again. Source examples here are small enough to inspect; a production system additionally needs ownership, lifecycle, data recovery and operational review. The host exercises are optional and must stay within the learner-created project.</p></article>
+<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>
 </body>
 </html>

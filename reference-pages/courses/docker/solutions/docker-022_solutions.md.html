@@ -194,33 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-022_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-022-explanatory-solutions">docker-022: explanatory solutions<a class="heading-anchor" href="#docker-022-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These are explanations of the supplied teaching fixtures, not fabricated engine results.</p>
-<h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
-<p>CPU and memory are finite resources shared by containers and other host workloads. Resource controls constrain or weight access; they do not automatically reserve a dedicated physical machine. A process can be throttled, run slowly under contention or be killed after memory pressure, depending on its settings and the kernel.</p>
-<p>A CPU quota limits how much CPU time a cgroup can consume over a period. A memory limit constrains accounted memory, with behavior influenced by swap and engine configuration. Containers still share the underlying host or VM budget. Allocating a large limit in Compose does not create physical RAM.</p>
-<p>Performance experiments need controlled inputs and measurements. A single fast run can benefit from caches, idle neighbors or a different architecture. Record the workload, image, limits, host allocation and several runs. Avoid deliberately exhausting the host as a lesson demonstration.</p>
-<p>The fixture uses modest <code>mem_limit</code>, <code>cpus</code> and <code>pids_limit</code> settings. These are runtime constraints on the teaching process, not proof of a production capacity plan. <code>docker stats --no-stream</code> gives a point-in-time view. Observe trends with bounded sampling if you need a rate, and distinguish cumulative values from instantaneous ones.</p>
-<p>For a safe experiment, compare a short CPU computation at two modest limits in the disposable project. Keep data size fixed and avoid claiming that a single elapsed time isolates every scheduler effect. Memory fault experiments require deliberately small inputs and a controlled target.</p>
+<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-022.md</code>.</p>
 <h3 id="exercise-1-compare-a-cpu-limit-with-dedicated-hardware">Exercise 1: Compare a CPU limit with dedicated hardware.<a class="heading-anchor" href="#exercise-1-compare-a-cpu-limit-with-dedicated-hardware" aria-label="Link to this section">#</a></h3>
-<p>Shared scheduling and host contention remain. State the actual control rather than translating it into an unsupported performance guarantee.</p>
-<p><strong>Expected:</strong> A quota constrains time; it does not grant exclusive cores.</p>
+<p><strong>Expected answer:</strong> A quota constrains time; it does not grant exclusive cores.</p>
+<p><strong>Why:</strong> Shared scheduling and host contention remain. State the actual control rather than translating it into an unsupported performance guarantee.</p>
 <h3 id="exercise-2-predict-the-effect-of-insufficient-engine-vm-memory">Exercise 2: Predict the effect of insufficient engine VM memory.<a class="heading-anchor" href="#exercise-2-predict-the-effect-of-insufficient-engine-vm-memory" aria-label="Link to this section">#</a></h3>
-<p>The VM allocation bounds the resources the engine can manage. Inspect that layer when several individually modest containers compete.</p>
-<p><strong>Expected:</strong> Container limits cannot compensate for missing host capacity.</p>
+<p><strong>Expected answer:</strong> Container limits cannot compensate for missing host capacity.</p>
+<p><strong>Why:</strong> The VM allocation bounds the resources the engine can manage. Inspect that layer when several individually modest containers compete.</p>
 <h3 id="exercise-3-design-a-controlled-cpu-comparison">Exercise 3: Design a controlled CPU comparison.<a class="heading-anchor" href="#exercise-3-design-a-controlled-cpu-comparison" aria-label="Link to this section">#</a></h3>
-<p>Control enough variables to make the comparison interpretable. Keep architecture and cache state in the evidence record.</p>
-<p><strong>Expected:</strong> Same input and image, one changed limit, several bounded measurements.</p>
+<p><strong>Expected evidence:</strong> Same input and image, one changed limit, several bounded measurements.</p>
+<p><strong>Why:</strong> Control enough variables to make the comparison interpretable. Keep architecture and cache state in the evidence record.</p>
 <h3 id="exercise-4-diagnose-slowness-without-assuming-memory-failure">Exercise 4: Diagnose slowness without assuming memory failure.<a class="heading-anchor" href="#exercise-4-diagnose-slowness-without-assuming-memory-failure" aria-label="Link to this section">#</a></h3>
-<p>Multiple mechanisms produce slow responses. A memory increase is unjustified when the first failing observation is elsewhere.</p>
-<p><strong>Expected:</strong> Compare CPU throttling, I/O, requests and memory observations.</p>
+<p><strong>Expected answer:</strong> Compare CPU throttling, I/O, requests and memory observations.</p>
+<p><strong>Why:</strong> Multiple mechanisms produce slow responses. A memory increase is unjustified when the first failing observation is elsewhere.</p>
 <h3 id="exercise-5-explain-why-a-single-docker-stats-sample-is-limited">Exercise 5: Explain why a single docker stats sample is limited.<a class="heading-anchor" href="#exercise-5-explain-why-a-single-docker-stats-sample-is-limited" aria-label="Link to this section">#</a></h3>
-<p>Sampling frequency and timing influence what is visible. Use a bounded series and application timings when investigating an intermittent issue.</p>
-<p><strong>Expected:</strong> It does not capture the whole workload or historical peaks.</p>
+<p><strong>Expected answer:</strong> It does not capture the whole workload or historical peaks.</p>
+<p><strong>Why:</strong> Sampling frequency and timing influence what is visible. Use a bounded series and application timings when investigating an intermittent issue.</p>
 <h3 id="exercise-6-define-a-safe-resource-stress-boundary">Exercise 6: Define a safe resource stress boundary.<a class="heading-anchor" href="#exercise-6-define-a-safe-resource-stress-boundary" aria-label="Link to this section">#</a></h3>
-<p>The goal is to observe a mechanism, not to consume all host resources. Stop when the named failure or performance condition is established.</p>
-<p><strong>Expected:</strong> Small fixed workload, timeout and owned disposable target.</p>
+<p><strong>Expected evidence:</strong> Small fixed workload, timeout and owned disposable target.</p>
+<p><strong>Why:</strong> The goal is to observe a mechanism, not to consume all host resources. Stop when the named failure or performance condition is established.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful solution identifies the exact object, the phase when a setting takes effect, the expected normal result and an observation that disproves it. Repeating a command until it succeeds hides the mechanism. Change one variable, keep a failure record, and test the intended behavior again. Source examples here are small enough to inspect; a production system additionally needs ownership, lifecycle, data recovery and operational review. The host exercises are optional and must stay within the learner-created project.</p></article>
+<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>
 </body>
 </html>

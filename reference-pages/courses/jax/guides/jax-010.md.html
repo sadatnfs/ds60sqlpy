@@ -206,8 +206,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="derivation-and-shape-contract">Derivation and shape contract<a class="heading-anchor" href="#derivation-and-shape-contract" aria-label="Link to this section">#</a></h3>
 <p>For a fixed scalar configuration n, <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo separator="true">,</mo><mi>n</mi><mo stretchy="false">)</mo><mo>=</mo><msubsup><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></msubsup><mi>x</mi><mo>=</mo><mi>n</mi><mi>x</mi></mrow><annotation encoding="application/x-tex">f(x,n)=\sum_{i=1}^{n}x=nx</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.1076em;">f</span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">n</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1.104em;vertical-align:-0.2997em;"></span><span class="mop"><span class="mop op-symbol small-op" style="position:relative;top:0em;">∑</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8043em;"><span style="top:-2.4003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mrel mtight">=</span><span class="mord mtight">1</span></span></span></span><span style="top:-3.2029em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">n</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2997em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">x</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span><span class="mord mathnormal">x</span></span></span></span>. Python can unroll a small static n during tracing. For dynamic values, an array control-flow representation is a different implementation choice. A cache specialization is associated with more than the displayed numeric value of x: shape, dtype, static configuration and function identity can matter. The exact trace count below is a local diagnostic for a freshly created function in this pinned environment.</p>
 <h3 id="run-this-investigation">Run this investigation<a class="heading-anchor" href="#run-this-investigation" aria-label="Link to this section">#</a></h3>
-<p>Use the <strong>JAX</strong> subject in the shared <code>/classroom</code> interface and its prepared <code>jax-cpu</code> profile. A Run starts a fresh Python process; save source and notes before replacing an attempt. The examples below are each complete programs, including their setup. They use tiny offline fixtures and deliberately enable 64-bit arithmetic before constructing arrays. This is a course precision choice, not the usual JAX default. No packages, models or data are downloaded.</p>
-<p>Learner source: <code>courses/jax/lessons/jax-010.py</code>. Guide: <code>courses/jax/guides/jax-010.md</code>. Predict the value and failure behavior before running. A passing assertion supports that particular contract; it does not establish statistical validity, mastery or accelerator performance.</p>
+<p>Open <code>jax-010</code> under the <strong>JAX</strong> subject in <code>/classroom</code> with its prepared <code>jax-cpu</code> profile. Worked example 1, <em>A deliberate static loop</em>, and worked example 2, <em>Trace-time effects are not runtime counters</em>, are complete programs that include only the setup they use and each print <code>jax-010: 1 asserted case passed</code>. The learner file <code>courses/jax/lessons/jax-010.py</code> leaves the six exercises, from <em>Compare eager and compiled values</em> to <em>Inspect the staged operations</em>, for you to implement; the complete reference prints <code>jax-010: 8 asserted cases passed</code>. Every program enables 64-bit arithmetic before creating arrays, a course choice since JAX defaults to 32 bit, and every Run is a fresh Python process, so save source and notes before replacing an attempt. A passing assertion supports its stated contract only, not statistical validity, mastery or accelerator performance.</p>
 <h3 id="worked-investigations">Worked investigations<a class="heading-anchor" href="#worked-investigations" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-a-deliberate-static-loop">Worked example 1: A deliberate static loop<a class="heading-anchor" href="#worked-example-1-a-deliberate-static-loop" aria-label="Link to this section">#</a></h4>
 <p>Compile repeat_add with n static and compare n=3 and n=4 for x=2.</p>
@@ -217,10 +216,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 
 <span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
 
-<span class="syntax-keyword">import</span> math
 <span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 <span class="syntax-keyword">import</span> jax
-<span class="syntax-keyword">import</span> jax.numpy <span class="syntax-keyword">as</span> jnp
 
 
 <span class="syntax-comment"># Choose precision before creating arrays; the usual JAX default is 32 bit.</span>
@@ -246,7 +243,7 @@ compiled_repeat <span class="syntax-operator">=</span> jax<span class="syntax-op
     close<span class="syntax-punctuation">(</span>compiled_repeat<span class="syntax-punctuation">(</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> n<span class="syntax-operator">=</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6.0</span><span class="syntax-punctuation">)</span>
     close<span class="syntax-punctuation">(</span>compiled_repeat<span class="syntax-punctuation">(</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> n<span class="syntax-operator">=</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8.0</span><span class="syntax-punctuation">)</span>
 
-    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">jax-010</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&quot;</span><span class="syntax-string">: 1 asserted cases passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">jax-010: 1 asserted case passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
@@ -259,7 +256,6 @@ compiled_repeat <span class="syntax-operator">=</span> jax<span class="syntax-op
 
 <span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
 
-<span class="syntax-keyword">import</span> math
 <span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 <span class="syntax-keyword">import</span> jax
 <span class="syntax-keyword">import</span> jax.numpy <span class="syntax-keyword">as</span> jnp
@@ -271,16 +267,6 @@ jax<span class="syntax-operator">.</span>config<span class="syntax-operator">.</
 
 <span class="syntax-keyword">def</span> <span class="syntax-function">close</span><span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-10</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">1e-10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span>atol<span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span>rtol<span class="syntax-punctuation">)</span>
-
-
-<span class="syntax-keyword">def</span> <span class="syntax-function">repeat_add</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">,</span> n<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
-    result <span class="syntax-operator">=</span> <span class="syntax-number">0.0</span> <span class="syntax-operator">*</span> value
-    <span class="syntax-keyword">for</span> _ <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span>n<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
-        result <span class="syntax-operator">=</span> result <span class="syntax-operator">+</span> value
-    <span class="syntax-keyword">return</span> result
-
-
-compiled_repeat <span class="syntax-operator">=</span> jax<span class="syntax-operator">.</span>jit<span class="syntax-punctuation">(</span>repeat_add<span class="syntax-punctuation">,</span> static_argnames<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
@@ -296,7 +282,7 @@ compiled_repeat <span class="syntax-operator">=</span> jax<span class="syntax-op
     close<span class="syntax-punctuation">(</span>compiled<span class="syntax-punctuation">(</span>jnp<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">4.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">5.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
     <span class="syntax-keyword">assert</span> traces <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
 
-    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">jax-010</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&quot;</span><span class="syntax-string">: 1 asserted cases passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">jax-010: 1 asserted case passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
@@ -305,39 +291,39 @@ compiled_repeat <span class="syntax-operator">=</span> jax<span class="syntax-op
 <h4 id="exercise-1-compare-eager-and-compiled-values">Exercise 1: Compare eager and compiled values<a class="heading-anchor" href="#exercise-1-compare-eager-and-compiled-values" aria-label="Link to this section">#</a></h4>
 <p>Evaluate a smooth polynomial eagerly and under JIT on [1,2,3].</p>
 <p><strong>Expected:</strong> Both give [3,7,13].</p>
-<p><strong>Verify:</strong> Retain the relevant inputs, intermediate calculation and observation. Compilation should preserve the declared operation within its numerical contract.</p>
+<p><strong>Verify:</strong> Compilation should preserve the declared operation within its numerical contract.</p>
 <p><strong>Hint 1:</strong> Use a nonconstant input vector.</p>
-<p><strong>Hint 2:</strong> Revisit the worked case that changes the same assumption, then close the reference and reconstruct the result from the stated contract.</p>
+<p><strong>Hint 2:</strong> The reference solution calls <code>jax.jit</code> and then makes 2 assertions against the expected observation.</p>
 <h4 id="exercise-2-observe-a-shape-specialization">Exercise 2: Observe a shape specialization<a class="heading-anchor" href="#exercise-2-observe-a-shape-specialization" aria-label="Link to this section">#</a></h4>
 <p>Call one fresh traced function with length two and length three.</p>
 <p><strong>Expected:</strong> Two trace-list entries with the corresponding shapes.</p>
-<p><strong>Verify:</strong> Retain the relevant inputs, intermediate calculation and observation. Abstract shape information changes the specialization even when the elementwise formula is unchanged.</p>
+<p><strong>Verify:</strong> Abstract shape information changes the specialization even when the elementwise formula is unchanged.</p>
 <p><strong>Hint 1:</strong> A different shape can require a new compiled program.</p>
-<p><strong>Hint 2:</strong> Revisit the worked case that changes the same assumption, then close the reference and reconstruct the result from the stated contract.</p>
+<p><strong>Hint 2:</strong> The reference solution calls <code>.append</code>, <code>jax.jit</code>, <code>.block_until_ready</code> and <code>jnp.ones</code> and then makes 1 assertion against the expected observation.</p>
 <h4 id="exercise-3-expose-a-traced-boolean-error">Exercise 3: Expose a traced Boolean error<a class="heading-anchor" href="#exercise-3-expose-a-traced-boolean-error" aria-label="Link to this section">#</a></h4>
 <p>JIT a Python if that depends on the numerical value of an array scalar.</p>
 <p><strong>Expected:</strong> TracerBoolConversionError.</p>
-<p><strong>Verify:</strong> Retain the relevant inputs, intermediate calculation and observation. The Python branch asks for a concrete truth value during tracing. Dynamic numerical control needs an array control-flow primitive.</p>
+<p><strong>Verify:</strong> The Python branch asks for a concrete truth value during tracing. Dynamic numerical control needs an array control-flow primitive.</p>
 <p><strong>Hint 1:</strong> Distinguish an array value from shape metadata.</p>
-<p><strong>Hint 2:</strong> Revisit the worked case that changes the same assumption, then close the reference and reconstruct the result from the stated contract.</p>
+<p><strong>Hint 2:</strong> The reference solution calls <code>jax.jit</code> and <code>jnp.float64</code> and treats <code>jax.errors.TracerBoolConversionError</code> as the passing outcome, failing if the call returns.</p>
 <h4 id="exercise-4-keep-zero-iterations-defined">Exercise 4: Keep zero iterations defined<a class="heading-anchor" href="#exercise-4-keep-zero-iterations-defined" aria-label="Link to this section">#</a></h4>
 <p>Evaluate the static loop with n=0.</p>
 <p><strong>Expected:</strong> Zero with the input&#x27;s scalar shape.</p>
-<p><strong>Verify:</strong> Retain the relevant inputs, intermediate calculation and observation. The initial carry is the result when no iterations execute.</p>
+<p><strong>Verify:</strong> The initial carry is the result when no iterations execute.</p>
 <p><strong>Hint 1:</strong> State the loop&#x27;s identity value.</p>
-<p><strong>Hint 2:</strong> Revisit the worked case that changes the same assumption, then close the reference and reconstruct the result from the stated contract.</p>
+<p><strong>Hint 2:</strong> The reference solution calls <code>compiled_repeat</code> and then makes 1 assertion against the expected observation.</p>
 <h4 id="exercise-5-compose-differentiation-with-compilation">Exercise 5: Compose differentiation with compilation<a class="heading-anchor" href="#exercise-5-compose-differentiation-with-compilation" aria-label="Link to this section">#</a></h4>
 <p>Differentiate the compiled square-sum function at [1,2].</p>
 <p><strong>Expected:</strong> Gradient [2,4].</p>
-<p><strong>Verify:</strong> Retain the relevant inputs, intermediate calculation and observation. A supported transformation composition preserves the chain rule for the same scalar objective.</p>
+<p><strong>Verify:</strong> A supported transformation composition preserves the chain rule for the same scalar objective.</p>
 <p><strong>Hint 1:</strong> The output must still be a scalar for grad.</p>
-<p><strong>Hint 2:</strong> Revisit the worked case that changes the same assumption, then close the reference and reconstruct the result from the stated contract.</p>
+<p><strong>Hint 2:</strong> The reference solution calls <code>jax.jit</code>, <code>jnp.sum</code> and <code>jax.grad</code> and then makes 1 assertion against the expected observation.</p>
 <h4 id="exercise-6-inspect-the-staged-operations">Exercise 6: Inspect the staged operations<a class="heading-anchor" href="#exercise-6-inspect-the-staged-operations" aria-label="Link to this section">#</a></h4>
 <p>Create a jaxpr for x*x+1 and identify numerical equations.</p>
 <p><strong>Expected:</strong> A jaxpr with numerical equations and one output variable.</p>
-<p><strong>Verify:</strong> Retain the relevant inputs, intermediate calculation and observation. This is inspection of the staged computation, not proof of speed or a particular hardware instruction schedule.</p>
+<p><strong>Verify:</strong> This is inspection of the staged computation, not proof of speed or a particular hardware instruction schedule.</p>
 <p><strong>Hint 1:</strong> Avoid brittle tests of pretty-printed compiler text.</p>
-<p><strong>Hint 2:</strong> Revisit the worked case that changes the same assumption, then close the reference and reconstruct the result from the stated contract.</p>
+<p><strong>Hint 2:</strong> The reference solution calls <code>jax.make_jaxpr</code> and <code>jnp.float64</code> and then makes 2 assertions against the expected observation.</p>
 <h3 id="diagnosis-and-boundaries">Diagnosis and boundaries<a class="heading-anchor" href="#diagnosis-and-boundaries" aria-label="Link to this section">#</a></h3>
 <p>For repeated recompilation, inspect function identity, static values, shapes and dtypes. For a missing Python side effect, ask whether it happened only during tracing. Do not introduce mutable global state to communicate between compiled calls.</p>
 <h3 id="transfer-and-review">Transfer and review<a class="heading-anchor" href="#transfer-and-review" aria-label="Link to this section">#</a></h3>
@@ -347,7 +333,7 @@ compiled_repeat <span class="syntax-operator">=</span> jax<span class="syntax-op
 <li><a href="https://docs.jax.dev/en/latest/jit-compilation.html">JIT compilation</a></li>
 </ul>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Use the checked-in $guide-ds60sqlpy-learning skill for <code>jax-010</code>. Start with my own prediction and source. Ask me to explain one intermediate shape, derivative or state transition, then give a progressive hint for the first incorrect assumption. Distinguish authored examples, my actual receipt and any hardware or population claim requiring additional evidence.</p></article>
+<p>Use the checked-in $guide-ds60sqlpy-learning skill for <code>jax-010</code> (JIT tracing, static inputs and compilation reuse), focusing on tracer, static argument, specialization, compilation cache. Start with my own prediction and source for one exercise, such as <em>Expose a traced Boolean error</em>. Ask me to explain one intermediate shape, derivative or state transition, then give a progressive hint for the first incorrect assumption. Distinguish authored examples, my actual saved run output and any hardware or population claim requiring additional evidence.</p></article>
   </main>
 </body>
 </html>

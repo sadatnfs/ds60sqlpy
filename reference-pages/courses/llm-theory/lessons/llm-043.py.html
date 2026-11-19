@@ -200,22 +200,22 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 1: Compare bidirectional and causal mixtures</span></span>
-<span class="source-line"><span class="syntax-comment"># Use zero queries/keys and values[[2, 0], [0, 2], [6, 6]] under all-allowed and causal</span></span>
-<span class="source-line"><span class="syntax-comment"># masks.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: encoder rows all[8/3, 8/3]; decoder rows[2, 0], [1, 1], [8/3, 8/3].</span></span>
+<span class="source-line"><span class="syntax-comment"># Use zero queries and keys with values [[2, 0], [0, 2], [6, 6]] under all-allowed and</span></span>
+<span class="source-line"><span class="syntax-comment"># causal masks.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: encoder rows all [8/3, 8/3]; decoder rows [2, 0], [1, 1], [8/3, 8/3].</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 2: Trace rectangular cross-attention</span></span>
 <span class="source-line"><span class="syntax-comment"># Use two zero target queries, three zero source keys and the same source values.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: score/weight shape(2, 3); output shape(2, 2); both outputs[8/3, 8/3].</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: score and weight shape (2, 3); output shape (2, 2); both outputs [8/3, 8/3].</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Build shifted decoder targets</span></span>
-<span class="source-line"><span class="syntax-comment"># For target IDs[5, 7, 3], prepend BOS1 and form input/label pairs.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: inputs[1, 5, 7]; labels[5, 7, 3]; diagonal allowed without seeing the target itself.</span></span>
+<span class="source-line"><span class="syntax-comment"># For target IDs [5, 7, 3], prepend BOS 1 and form input/label pairs.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: inputs [1, 5, 7]; labels [5, 7, 3]; the diagonal is allowed without seeing the target itself.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Separate masked-token supervision</span></span>
-<span class="source-line"><span class="syntax-comment"># Corrupt source[2, 5, 7] at the middle position with MASK0 and supervise only that</span></span>
+<span class="source-line"><span class="syntax-comment"># Corrupt source [2, 5, 7] at the middle position with MASK 0 and supervise only that</span></span>
 <span class="source-line"><span class="syntax-comment"># original token.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: input[2, 0, 7]; one active label5; bidirectional context remains allowed.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: input [2, 0, 7]; one active label 5; bidirectional context remains allowed.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Perturb future target values</span></span>
 <span class="source-line"><span class="syntax-comment"># Change only the third value vector and compare the first two encoder/decoder outputs.</span></span>
@@ -223,7 +223,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Combine source padding with cross-attention</span></span>
 <span class="source-line"><span class="syntax-comment"># Mark the third source position as padding for both target queries.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: both cross outputs[1, 1]; padded source weight0.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: both cross outputs [1, 1]; padded source weight 0.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Read the guide and implement the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>

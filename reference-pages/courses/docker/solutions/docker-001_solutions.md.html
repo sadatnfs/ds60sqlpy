@@ -194,33 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-001_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-001-explanatory-solutions">docker-001: explanatory solutions<a class="heading-anchor" href="#docker-001-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These are explanations of the supplied teaching fixtures, not fabricated engine results.</p>
-<h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
-<p>A process is a running program together with its memory, open files and operating-system identity. An image is a packaged filesystem plus startup configuration. A container is a running or stopped instance created from an image, with its own writable layer and isolation settings. Docker is tooling that asks a container runtime to create and manage those instances. These words name different objects with different lifetimes.</p>
-<p>An image is not a miniature running computer. Starting two containers from one image starts two sets of processes. They initially see the same image files but acquire distinct writable changes. Stopping a container stops its processes; it does not erase the image or automatically remove named volumes. Removing an image is not a reliable or appropriate way to remove application data.</p>
-<p>Linux containers share the engine’s Linux kernel. On macOS and a Windows WSL 2 setup, the engine lives in a Linux environment managed by the desktop product or distribution. The application therefore follows Linux process and path rules even when your browser is on another operating system. A VM isolates a whole guest kernel; a container primarily isolates processes using the host kernel. Neither word alone tells you the strength of a deployment’s security boundary.</p>
-<p>Read <code>docker run --rm IMAGE COMMAND</code> from left to right. <code>run</code> creates a new container and starts its main process. <code>--rm</code> asks Docker to remove that container after it exits. <code>IMAGE</code> selects a filesystem and defaults; the remaining arguments replace the default command when the image permits. This is different from <code>docker start NAME</code>, which restarts an existing container. A printed line is process output, while the exit status tells you whether that invocation reported success.</p>
-<p>Use the maintained fixture image after its explicit build. The examples use <code>ds60-docker-study:local</code>, a local tag created by the fixture. They do not require an unknown image to be fetched. An image tag is a convenient name; later chapters explain why it is not an immutable identity.</p>
+<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-001.md</code>.</p>
 <h3 id="exercise-1-predict-what-remains-after-the-short-process-exits">Exercise 1: Predict what remains after the short process exits.<a class="heading-anchor" href="#exercise-1-predict-what-remains-after-the-short-process-exits" aria-label="Link to this section">#</a></h3>
-<p>The removal flag applies to the created container, not to every object derived from its image. An image can be reused by another run without retaining that earlier process or writable layer.</p>
-<p><strong>Expected:</strong> The local image remains; the --rm container is removed.</p>
+<p><strong>Expected answer:</strong> The local image remains; the --rm container is removed.</p>
+<p><strong>Why:</strong> The removal flag applies to the created container, not to every object derived from its image. An image can be reused by another run without retaining that earlier process or writable layer.</p>
 <h3 id="exercise-2-draw-two-containers-created-from-one-image">Exercise 2: Draw two containers created from one image.<a class="heading-anchor" href="#exercise-2-draw-two-containers-created-from-one-image" aria-label="Link to this section">#</a></h3>
-<p>Do not draw one process shared between the containers. Sharing read-only image layers saves storage; it does not merge memory, process IDs or mutable application state.</p>
-<p><strong>Expected:</strong> One shared image description, two process groups and two writable layers.</p>
+<p><strong>Expected answer:</strong> One shared image description, two process groups and two writable layers.</p>
+<p><strong>Why:</strong> Do not draw one process shared between the containers. Sharing read-only image layers saves storage; it does not merge memory, process IDs or mutable application state.</p>
 <h3 id="exercise-3-classify-source-code-image-tag-container-and-volume">Exercise 3: Classify source code, image tag, container and volume.<a class="heading-anchor" href="#exercise-3-classify-source-code-image-tag-container-and-volume" aria-label="Link to this section">#</a></h3>
-<p>Source is build input, a tag names an image, a container is an instance, and a volume is separately managed storage. Naming these objects correctly makes later cleanup commands predictable.</p>
-<p><strong>Expected:</strong> Four objects with separate creation and deletion events.</p>
+<p><strong>Expected answer:</strong> Four objects with separate creation and deletion events.</p>
+<p><strong>Why:</strong> Source is build input, a tag names an image, a container is an instance, and a volume is separately managed storage. Naming these objects correctly makes later cleanup commands predictable.</p>
 <h3 id="exercise-4-explain-why-an-exited-container-can-still-appear-in-docker-ps-a">Exercise 4: Explain why an exited container can still appear in docker ps -a.<a class="heading-anchor" href="#exercise-4-explain-why-an-exited-container-can-still-appear-in-docker-ps-a" aria-label="Link to this section">#</a></h3>
-<p>The main process ending changes container state. Unless automatic removal was requested or a later removal occurs, Docker retains its metadata and writable layer so you can inspect the outcome.</p>
-<p><strong>Expected:</strong> Stopped state is distinct from object removal.</p>
+<p><strong>Expected answer:</strong> Stopped state is distinct from object removal.</p>
+<p><strong>Why:</strong> The main process ending changes container state. Unless automatic removal was requested or a later removal occurs, Docker retains its metadata and writable layer so you can inspect the outcome.</p>
 <h3 id="exercise-5-compare-a-linux-container-on-macos-with-a-native-macos-process">Exercise 5: Compare a Linux container on macOS with a native macOS process.<a class="heading-anchor" href="#exercise-5-compare-a-linux-container-on-macos-with-a-native-macos-process" aria-label="Link to this section">#</a></h3>
-<p>CPU architecture and the kernel environment both matter. A Linux container does not gain macOS application frameworks merely because a macOS browser connects to its published port.</p>
-<p><strong>Expected:</strong> The container calls a Linux kernel in the engine environment.</p>
+<p><strong>Expected answer:</strong> The container calls a Linux kernel in the engine environment.</p>
+<p><strong>Why:</strong> CPU architecture and the kernel environment both matter. A Linux container does not gain macOS application frameworks merely because a macOS browser connects to its published port.</p>
 <h3 id="exercise-6-explain-what-evidence-proves-a-web-application-is-serving">Exercise 6: Explain what evidence proves a web application is serving.<a class="heading-anchor" href="#exercise-6-explain-what-evidence-proves-a-web-application-is-serving" aria-label="Link to this section">#</a></h3>
-<p>An image existing proves only packaging. Container state adds process evidence. The request adds the actual application behavior at a particular endpoint, which remains a separate claim.</p>
-<p><strong>Expected:</strong> A running process plus a bounded HTTP request and expected response.</p>
+<p><strong>Expected answer:</strong> A running process plus a bounded HTTP request and expected response.</p>
+<p><strong>Why:</strong> An image existing proves only packaging. Container state adds process evidence. The request adds the actual application behavior at a particular endpoint, which remains a separate claim.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful solution identifies the exact object, the phase when a setting takes effect, the expected normal result and an observation that disproves it. Repeating a command until it succeeds hides the mechanism. Change one variable, keep a failure record, and test the intended behavior again. Source examples here are small enough to inspect; a production system additionally needs ownership, lifecycle, data recovery and operational review. The host exercises are optional and must stay within the learner-created project.</p></article>
+<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>
 </body>
 </html>

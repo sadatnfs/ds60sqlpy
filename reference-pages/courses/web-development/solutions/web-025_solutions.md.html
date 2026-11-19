@@ -194,33 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-025_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-025-explanatory-solutions">web-025: explanatory solutions<a class="heading-anchor" href="#web-025-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.</p>
-<h3 id="why-the-mechanism-works">Why the mechanism works<a class="heading-anchor" href="#why-the-mechanism-works" aria-label="Link to this section">#</a></h3>
-<p>The document object model is the browser&#x27;s live tree of elements. JavaScript can select a node, observe an event and update content. HTML supplies the structure, CSS supplies presentation, and JavaScript handles behavior. Start with a native button so keyboard activation and focus work without reimplementation. The event listener is a function called when a matching event occurs; it is not the same as calling the function immediately while registering it.</p>
-<p>Keep state separate from the text that displays it. A numeric count in a variable is the source of truth; a render function translates it into a label. Reading the current label and repeatedly parsing it back into a number couples business state to presentation. Use textContent for plain user text because it creates text rather than parsing markup.</p>
-<p><code>document.querySelector(&#x27;#add&#x27;)</code> returns a matching element or null. <code>addEventListener(&#x27;click&#x27;, handler)</code> registers a function. Update the number, then render the new value to an output element. Query elements after they exist, for example with a script at the end of the body. For JavaScript syntax, revisit the JavaScript foundations and browser chapters rather than treating this lesson as a substitute for that route.</p>
-<p>A classic inline script runs when the parser reaches it. A script in the head cannot assume that later body elements already exist. Separate classic script tags share the document&#x27;s global lexical environment, while a module has its own scope and strict semantics. DOMContentLoaded fires after parsing and the relevant deferred script work; it does not mean every image has loaded. The load event describes the later document load boundary. Register a listener before its event occurs, or inspect readyState when code can be loaded at different times.</p>
-<p>An external classic script with defer preserves document order and waits for parsing. Async scripts do not provide that same ordering guarantee. Defer does not turn an inline classic script into a deferred one. Inline modules use real module semantics, including top-level this being undefined. The classroom supports inline modules but blocks external script files and imports. Study multi-file loading in a separately prepared local project rather than weakening the preview policy.</p>
+<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-025.md</code>.</p>
 <h3 id="exercise-1-predict-when-the-registered-callback-executes">Exercise 1: Predict when the registered callback executes.<a class="heading-anchor" href="#exercise-1-predict-when-the-registered-callback-executes" aria-label="Link to this section">#</a></h3>
-<p>It runs on a matching event, not merely because the listener was registered.</p>
-<p>Trace the smallest example before editing. Name which values are source and which are observations.</p>
+<p><strong>Expected answer:</strong> It runs on a matching event, not merely because the listener was registered.</p>
+<p><strong>Why:</strong> addEventListener stores the callback; the browser calls it later, once per matching event.</p>
 <h3 id="exercise-2-change-the-display-label-without-changing-numeric-state">Exercise 2: Change the display label without changing numeric state.<a class="heading-anchor" href="#exercise-2-change-the-display-label-without-changing-numeric-state" aria-label="Link to this section">#</a></h3>
-<p>The counter logic remains independent of presentation wording.</p>
-<p>Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.</p>
+<p><strong>Expected evidence:</strong> The counter logic remains independent of presentation wording.</p>
+<p><strong>Why:</strong> Keeping state separate from presentation lets the wording change without breaking the arithmetic.</p>
 <h3 id="exercise-3-build-a-native-button-counter-with-a-reset-action-and-output">Exercise 3: Build a native-button counter with a reset action and output.<a class="heading-anchor" href="#exercise-3-build-a-native-button-counter-with-a-reset-action-and-output" aria-label="Link to this section">#</a></h3>
-<p>Increment and reset work by keyboard and pointer, with a visible announced result.</p>
-<p>Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.</p>
+<p><strong>Expected evidence:</strong> Increment and reset work by keyboard and pointer, with a visible announced result.</p>
+<p><strong>Why:</strong> Native buttons are keyboard operable, and output can be announced as a status when its text changes.</p>
 <h3 id="exercise-4-diagnose-a-null-selection-caused-by-a-missing-id">Exercise 4: Diagnose a null selection caused by a missing id.<a class="heading-anchor" href="#exercise-4-diagnose-a-null-selection-caused-by-a-missing-id" aria-label="Link to this section">#</a></h3>
-<p>Inspect the document relationship before attaching the listener.</p>
-<p>Keep the failing input. Identify the first layer where the observed result differs from the intended contract.</p>
+<p><strong>Expected answer:</strong> Inspect the document relationship before attaching the listener.</p>
+<p><strong>Why:</strong> querySelector returns null when no element matches, and calling a method on null throws a TypeError.</p>
 <h3 id="exercise-5-insert-text-containing-angle-brackets-without-creating-markup">Exercise 5: Insert text containing angle brackets without creating markup.<a class="heading-anchor" href="#exercise-5-insert-text-containing-angle-brackets-without-creating-markup" aria-label="Link to this section">#</a></h3>
-<p>textContent preserves the literal data and creates no extra element.</p>
-<p>Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.</p>
+<p><strong>Expected evidence:</strong> textContent preserves the literal data and creates no extra element.</p>
+<p><strong>Why:</strong> textContent stores characters as text, so angle brackets never reach the HTML parser and cannot create elements.</p>
 <h3 id="exercise-6-explain-why-reading-state-back-from-formatted-text-is-fragile">Exercise 6: Explain why reading state back from formatted text is fragile.<a class="heading-anchor" href="#exercise-6-explain-why-reading-state-back-from-formatted-text-is-fragile" aria-label="Link to this section">#</a></h3>
-<p>Formatting, localization and extra words can break parsing while the underlying number is unchanged.</p>
-<p>Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.</p>
-<h3 id="reference-comparison-and-limits">Reference comparison and limits<a class="heading-anchor" href="#reference-comparison-and-limits" aria-label="Link to this section">#</a></h3>
-<p>Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.</p></article>
+<p><strong>Expected answer:</strong> Formatting, localization and extra words can break parsing while the underlying number is unchanged.</p>
+<p><strong>Why:</strong> Parsing formatted text couples logic to presentation, so a translation or extra word breaks the state.</p>
+<h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
+<p>Open <code>courses/web-development/solutions/web-025_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
   </main>
 </body>
 </html>

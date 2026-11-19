@@ -194,37 +194,52 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/swift/solutions/swift-011_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="swift-011-explanation-and-comparison">swift-011: explanation and comparison<a class="heading-anchor" href="#swift-011-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="swift-011_solution.swift.html">swift-011_solution.swift</a>. Its assertions are always active under the prepared classroom compile settings.</p>
+<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="swift-011_solution.swift.html">swift-011_solution.swift</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Return two related counts:</strong> The grouping is useful locally without requiring an entire class hierarchy. Named tuple fields expose the accounting relationship.</p>
 <p><strong>Model distinct outcomes:</strong> The switch extracts data after establishing the state case. Each outcome exposes only its own meaningful payload.</p>
-<h3 id="reason-through-the-six-tasks">Reason through the six tasks<a class="heading-anchor" href="#reason-through-the-six-tasks" aria-label="Link to this section">#</a></h3>
-<ol>
-<li><strong>Predict and explain.</strong> Name the meaning of each tuple field.</li>
-</ol>
-<ol start="2">
-<li><strong>Guided modification.</strong> Add a third accounting field only if its meaning is independent.</li>
-</ol>
-<ol start="3">
-<li><strong>Independent construction.</strong> Model loading, ready and failed states with an enum.</li>
-</ol>
-<ol start="4">
-<li><strong>Diagnose a defect.</strong> Diagnose several optional fields that permit contradictory state combinations.</li>
-</ol>
-<ol start="5">
-<li><strong>Boundary evidence.</strong> Add a new enum case and inspect the compiler-reported consumers requiring updates.</li>
-</ol>
-<ol start="6">
-<li><strong>Transfer and justify.</strong> Choose tuple or named enum/struct for a reusable public API and explain the tradeoff.</li>
-</ol>
-<p>For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.</p>
+<h3 id="task-answers">Task answers<a class="heading-anchor" href="#task-answers" aria-label="Link to this section">#</a></h3>
+<h4 id="task-1-predict-and-explain">Task 1: Predict and explain<a class="heading-anchor" href="#task-1-predict-and-explain" aria-label="Link to this section">#</a></h4>
+<p>Name the meaning of each tuple field.</p>
+<p>No separate reference answer has been written for this task. Example A is the evidence to compare with: The grouping is useful locally without requiring an entire class hierarchy. Named tuple fields expose the accounting relationship.</p>
+<h4 id="task-2-guided-modification">Task 2: Guided modification<a class="heading-anchor" href="#task-2-guided-modification" aria-label="Link to this section">#</a></h4>
+<p>Add a third accounting field only if its meaning is independent.</p>
+<p>No separate reference answer has been written for this task. Start from Example B: The switch extracts data after establishing the state case. Each outcome exposes only its own meaningful payload.</p>
+<h4 id="task-3-independent-construction">Task 3: Independent construction<a class="heading-anchor" href="#task-3-independent-construction" aria-label="Link to this section">#</a></h4>
+<p>Model loading, ready and failed states with an enum.</p>
+<p><strong>Reference answer.</strong> It runs as the <code>Task 3</code> block of the reference program.</p>
+<pre class="highlighted-code"><code class="language-swift"><span class="syntax-keyword">enum</span> <span class="syntax-class">Load</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">case</span> loading
+  <span class="syntax-keyword">case</span> ready<span class="syntax-punctuation">(</span><span class="syntax-builtin">Int</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-keyword">case</span> failed<span class="syntax-punctuation">(</span><span class="syntax-builtin">String</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">func</span> <span class="syntax-function">label</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">_</span> state<span class="syntax-punctuation">:</span> Load<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">-&gt;</span> <span class="syntax-builtin">String</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">switch</span> state <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">case</span> <span class="syntax-punctuation">.</span>loading<span class="syntax-punctuation">:</span> <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">loading</span><span class="syntax-string">&quot;</span>
+  <span class="syntax-keyword">case</span> <span class="syntax-punctuation">.</span>ready<span class="syntax-punctuation">(</span><span class="syntax-keyword">let</span> count<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">ready:</span><span class="syntax-string">\(</span><span class="syntax-builtin">count</span><span class="syntax-string">)</span><span class="syntax-string">&quot;</span>
+  <span class="syntax-keyword">case</span> <span class="syntax-punctuation">.</span>failed<span class="syntax-punctuation">(</span><span class="syntax-keyword">let</span> reason<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">failed:</span><span class="syntax-string">\(</span>reason<span class="syntax-string">)</span><span class="syntax-string">&quot;</span>
+  <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>label<span class="syntax-punctuation">(</span><span class="syntax-punctuation">.</span>loading<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">loading</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">&amp;&amp;</span> label<span class="syntax-punctuation">(</span><span class="syntax-punctuation">.</span>ready<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">ready:3</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>label<span class="syntax-punctuation">(</span><span class="syntax-punctuation">.</span>failed<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">offline</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">failed:offline</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Observe:</strong> The states render as loading, ready:3 and failed:offline.</p>
+<p>Each case carries only the data that exists in that state, and the switch must handle all three.</p>
+<h4 id="task-4-diagnose-a-defect">Task 4: Diagnose a defect<a class="heading-anchor" href="#task-4-diagnose-a-defect" aria-label="Link to this section">#</a></h4>
+<p>Diagnose several optional fields that permit contradictory state combinations.</p>
+<p>No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson&#x27;s pitfalls: An enum raw value and an associated value solve different problems. A catch-all default can conceal a newly added state. Avoid using tuples so large that their positional relationship becomes obscure.</p>
+<h4 id="task-5-boundary-evidence">Task 5: Boundary evidence<a class="heading-anchor" href="#task-5-boundary-evidence" aria-label="Link to this section">#</a></h4>
+<p>Add a new enum case and inspect the compiler-reported consumers requiring updates.</p>
+<p>No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Return two related counts) and Example B (Model distinct outcomes).</p>
+<h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
+<p>Choose tuple or named enum/struct for a reusable public API and explain the tradeoff.</p>
+<p>No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry <strong>Tuple</strong>, and state one limitation of your choice.</p>
 <h3 id="mechanism-and-diagnostic-reasoning">Mechanism and diagnostic reasoning<a class="heading-anchor" href="#mechanism-and-diagnostic-reasoning" aria-label="Link to this section">#</a></h3>
 <p>A tuple groups a fixed set of values without introducing a new nominal type. It is useful for local multi-value results, but a named type is clearer when the same concept crosses several APIs. An enum represents one case from a finite set. Associated values attach data relevant only to that case.</p>
 <p>Explicit cases prevent impossible combinations such as success=true with an error message and no result. A switch must handle the alternatives. This is a strong foundation for application state machines, parsing results and asynchronous loading state. Add a new case only when it represents a real domain distinction, then review every consumer.</p>
 <p><code>(count: Int, rejected: Int)</code> names tuple components. <code>enum Outcome { case value(Int); case invalid(String) }</code> binds case-specific payloads. <code>case .value(let count)</code> extracts only the matching payload.</p>
 <p>An enum raw value and an associated value solve different problems. A catch-all default can conceal a newly added state. Avoid using tuples so large that their positional relationship becomes obscure.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.</p></article>
+<p>Run the reference and confirm that it prints <code>swift-011: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
   </main>
 </body>
 </html>

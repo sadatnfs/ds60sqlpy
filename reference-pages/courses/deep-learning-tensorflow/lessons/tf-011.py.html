@@ -199,18 +199,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">Copy to .learning before editing. Six independent attempts belong below.</span></span>
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 1: Construct a scalar model</span></span>
-<span class="source-line"><span class="syntax-comment"># Create a zero-initialized single-unit model without bias and inspect its parameter</span></span>
-<span class="source-line"><span class="syntax-comment"># count.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: one parameter and all initial predictions0.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Fit one epoch with the standard loop</span></span>
+<span class="source-line"><span class="syntax-comment"># Build a fresh zero-initialized model, compile it with SGD(0.1) and loss=&#x27;mse&#x27;, then call</span></span>
+<span class="source-line"><span class="syntax-comment"># fit(x, y, epochs=1, batch_size=3, shuffle=False, verbose=0).</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: History loss 56/3 (the loss before the update); kernel 28/15, the same as train_on_batch.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 2: Audit the first update</span></span>
-<span class="source-line"><span class="syntax-comment"># Compile with mean squared error and SGD(.1), then call train_on_batch once.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: kernel28/15 and post-update loss56/675 within1e-6.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Predict a halved learning rate</span></span>
+<span class="source-line"><span class="syntax-comment"># Before running it, predict the kernel and post-update loss for a fresh model trained</span></span>
+<span class="source-line"><span class="syntax-comment"># once with SGD(0.05); then check the prediction.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: kernel 14/15; post-update loss 3584/675, about 5.31.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Inspect forward shape</span></span>
-<span class="source-line"><span class="syntax-comment"># Pass two observations [[4],[5]] through the trained model and inspect output axes.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: shape(2,1), predictions112/15 and28/3.</span></span>
+<span class="source-line"><span class="syntax-comment"># Pass two observations [[4], [5]] through the trained model and inspect output axes.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: shape (2, 1), predictions 112/15 and 28/3.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Evaluation leaves weights alone</span></span>
 <span class="source-line"><span class="syntax-comment"># Snapshot the kernel, run a forward evaluation with training=False, and compare.</span></span>
@@ -219,11 +220,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Show the extra intercept</span></span>
 <span class="source-line"><span class="syntax-comment"># Construct an otherwise equivalent Dense layer with bias enabled and count trainable</span></span>
 <span class="source-line"><span class="syntax-comment"># scalars.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: 2 parameters; bias starts0.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: 2 parameters; bias starts 0.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Compare the scalar oracle</span></span>
 <span class="source-line"><span class="syntax-comment"># Compute the first gradient directly from NumPy residuals and inputs, without Keras.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: gradient-56/3 and update28/15.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: gradient -56/3 and update 28/15.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Read the guide and implement the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>

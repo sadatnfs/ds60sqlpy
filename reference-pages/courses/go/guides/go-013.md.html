@@ -197,7 +197,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Beginner. Allow about 90 minutes, then revisit the transfer case later. Prerequisites: go-012</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
-<p>By the end, explain module, exported name, import path; implement the six investigations below; and defend the expected result of a changed input before running it. A passing reference is evidence about that program, not a certification of your independent understanding.</p>
+<p>Use standard-library packages through their exported API and read the module, go and toolchain directives in go.mod. Along the way, explain module, exported name, import path; implement the six investigations below; and defend the expected result of a changed input before running it.</p>
 <h3 id="why-this-mechanism-matters">Why this mechanism matters<a class="heading-anchor" href="#why-this-mechanism-matters" aria-label="Link to this section">#</a></h3>
 <p>A package is a compilation and visibility boundary; a module is a versioned collection of packages described by go.mod. An import path identifies a package, not an operating-system filename. Capitalized declarations are exported to other packages. The main package creates an executable, while reusable packages expose focused APIs. go.sum records module-content checksums but is not a substitute for reviewing dependency changes. An offline classroom pad cannot become a multi-file dependency project by containing a go.mod string. This lesson executes standard-library boundary examples and separately teaches the real project layout. Keep generated outputs, dependency selection and application source under distinct review.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
@@ -207,8 +207,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li><strong>Import path:</strong> The logical identity used to select a package.</li>
 </ul>
 <h3 id="syntax-anatomy-and-reasoning">Syntax anatomy and reasoning<a class="heading-anchor" href="#syntax-anatomy-and-reasoning" aria-label="Link to this section">#</a></h3>
-<p>The standard library already contains packages such as path, strings and strconv. An alias in an import declaration changes the local selector name, not the dependency&#x27;s identity. For a real project, run go mod init example.org/learning/report in a prepared directory, place reusable code under a package folder, and use go test ./... plus go build ./cmd/report. Pin reviewed dependency versions with go get and commit go.mod and go.sum. Dependency retrieval is explicit setup, never a side effect of opening a lesson.</p>
-<h3 id="classroom-execution-contract">Classroom execution contract<a class="heading-anchor" href="#classroom-execution-contract" aria-label="Link to this section">#</a></h3>
+<p>The standard library already contains packages such as path, strings and strconv. An alias in an import declaration changes the local selector name, not the dependency&#x27;s identity. For a real project, run go mod init example.org/learning/report in a prepared directory, place reusable code under a package folder, and use go test ./... plus go build ./cmd/report. Pin reviewed dependency versions with go get and commit go.mod and go.sum. Dependency retrieval is explicit setup, never a side effect of opening a lesson. A go.mod file starts with the module path, then a go line such as go 1.27 that states the minimum Go version the module needs, and optionally a toolchain line such as toolchain go1.27.3 that names a suggested newer toolchain. The GOTOOLCHAIN environment variable decides whether the go command may switch to another toolchain; local means it never does.</p>
+<h3 id="run-this-lesson">Run this lesson<a class="heading-anchor" href="#run-this-lesson" aria-label="Link to this section">#</a></h3>
 <p>Choose Go in the unified Docker classroom. Save your own pad before experimenting. The prepared worker stages it as <code>main.go</code>, compiles it, and executes the resulting program with bounded time and output. The pad is one source file. It does not supply interactive input, arbitrary command-line arguments, package installation, Kubernetes credentials or a host Docker socket. Every ordinary reference here uses the standard library, synthetic local data and explicit checks. A failed <code>check</code> panics and produces a nonzero process result; do not remove it to make the run appear successful.</p>
 <p>The explanatory solution snippets belong inside <code>func main()</code> unless they declare a helper. <code>check</code> is a tiny teaching helper that panics when a condition is false. The separate reference supplies required imports and helpers and implements all six cases. Use that complete source only after an attempt or an explicit reveal. For an independently prepared Go project, the equivalent local build is <code>go build -o lesson main.go</code>, followed by <code>./lesson</code>; use Linux or WSL 2 for that optional workflow. Compiling proves syntax and type consistency, while the executed checks establish the stated example contracts.</p>
 <h4 id="prepared-external-project">Prepared external project<a class="heading-anchor" href="#prepared-external-project" aria-label="Link to this section">#</a></h4>
@@ -274,75 +274,75 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>
 <p>For each example, write the input values, the state that can change, and the expected observation. Explain which result would disprove your current interpretation. For concurrency, predict a guaranteed relationship rather than an arbitrary scheduling order. For an error case, identify whether it is rejected at compilation or returned during execution.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
-<h4 id="exercise-1-use-a-package-boundary">Exercise 1: Use a package boundary<a class="heading-anchor" href="#exercise-1-use-a-package-boundary" aria-label="Link to this section">#</a></h4>
-<p>Join logical slash-separated path segments with path.Join.</p>
-<p><strong>Expected:</strong> The result is reports/daily.json.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
-<h4 id="exercise-2-compose-standard-library-apis">Exercise 2: Compose standard-library APIs<a class="heading-anchor" href="#exercise-2-compose-standard-library-apis" aria-label="Link to this section">#</a></h4>
-<p>Trim and parse the text containing spaces around 12.</p>
-<p><strong>Expected:</strong> The parsed value is 12.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<h4 id="exercise-1-use-a-package-boundary-predict-an-edited-check">Exercise 1: Use a package boundary: predict an edited check<a class="heading-anchor" href="#exercise-1-use-a-package-boundary-predict-an-edited-check" aria-label="Link to this section">#</a></h4>
+<p>Copy worked example 1 into a scratch pad and change <code>check(path.Join(&quot;reports&quot;, &quot;daily.json&quot;) == &quot;reports/daily.json&quot;, &quot;path package&quot;)</code> to <code>check(path.Join(&quot;reports!&quot;, &quot;daily.json&quot;) == &quot;reports/daily.json&quot;, &quot;path package&quot;)</code> inside its check. Before running, predict whether the check still passes and explain why; then restore it.</p>
+<p><strong>Expected:</strong> The changed run panics with <code>path package</code> because the edited check no longer holds. Restoring the original line brings back the worked observation: the result is reports/daily.json.</p>
+<p><strong>Verify:</strong> Compare your written prediction with the panic message <code>path package</code> and name the value that made <code>path.Join(&quot;reports&quot;, &quot;daily.json&quot;) == &quot;reports/daily.json&quot;</code> false. After restoring the input, the program must print its success line again.</p>
+<h4 id="exercise-2-compose-standard-library-apis-debug-a-regression">Exercise 2: Compose standard-library APIs: debug a regression<a class="heading-anchor" href="#exercise-2-compose-standard-library-apis-debug-a-regression" aria-label="Link to this section">#</a></h4>
+<p>A regression changed one token in worked example 2, so one line now reads <code>v, err := strconv.Atoi(strings.TrimSpace(&quot; 13 &quot;))</code>. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.</p>
+<p><strong>Expected:</strong> Before the repair the program panics with <code>package composition</code>; after it the line reads <code>v, err := strconv.Atoi(strings.TrimSpace(&quot; 12 &quot;))</code> again and the parsed value is 12.</p>
+<p><strong>Verify:</strong> Keep the failing and the repaired runs. Explain why the changed token alters the value tested by <code>err == nil &amp;&amp; v == 12</code> for this input.</p>
 <h4 id="exercise-3-inspect-exported-spelling">Exercise 3: Inspect exported spelling<a class="heading-anchor" href="#exercise-3-inspect-exported-spelling" aria-label="Link to this section">#</a></h4>
-<p>Compare a public API spelling with its lower-case variant as identifiers in a naming check.</p>
-<p><strong>Expected:</strong> The public spelling begins with an uppercase rune.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
-<h4 id="exercise-4-keep-logical-imports-separate">Exercise 4: Keep logical imports separate<a class="heading-anchor" href="#exercise-4-keep-logical-imports-separate" aria-label="Link to this section">#</a></h4>
-<p>Clean a logical path containing a parent component.</p>
-<p><strong>Expected:</strong> reports/tmp/../daily becomes reports/daily.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p>Classify ParseInt, parseInt and an empty name with one rule: a name is exported when its first rune is an uppercase letter.</p>
+<p><strong>Expected:</strong> Only ParseInt is exported.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>exported(&quot;ParseInt&quot;) &amp;&amp; !exported(&quot;parseInt&quot;) &amp;&amp; !exported(&quot;&quot;)</code>. As a control, change <code>exported := func(name string) bool { return name != &quot;&quot; &amp;&amp; unicode.IsUpper([]rune(name)[0]) }</code> to <code>exported := func(name string) bool { return name == &quot;&quot; &amp;&amp; unicode.IsUpper([]rune(name)[0]) }</code>: the run must panic with <code>export convention</code>. Restore the line before continuing.</p>
+<h4 id="exercise-4-read-the-go-and-toolchain-directives">Exercise 4: Read the go and toolchain directives<a class="heading-anchor" href="#exercise-4-read-the-go-and-toolchain-directives" aria-label="Link to this section">#</a></h4>
+<p>Extract the module, go and toolchain lines from a small go.mod text.</p>
+<p><strong>Expected:</strong> The module requires Go 1.27 and suggests toolchain go1.27.3.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>directives[&quot;module&quot;] == &quot;example.org/learning/report&quot; &amp;&amp; directives[&quot;go&quot;] == &quot;1.27&quot; &amp;&amp; directives[&quot;toolchain&quot;] == &quot;go1.27.3&quot;</code>. As a control, change <code>if len(fields) == 2 {</code> to <code>if len(fields) == 3 {</code>: the run must panic with <code>directives</code>. Restore the line before continuing.</p>
 <h4 id="exercise-5-reject-malformed-input-at-an-api-boundary">Exercise 5: Reject malformed input at an API boundary<a class="heading-anchor" href="#exercise-5-reject-malformed-input-at-an-api-boundary" aria-label="Link to this section">#</a></h4>
 <p>Parse a nonnumeric public input after trimming.</p>
 <p><strong>Expected:</strong> The numeric error remains non-nil.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>err != nil</code>. As a control, change <code>check(err != nil, &quot;boundary error&quot;)</code> to <code>check(err == nil, &quot;boundary error&quot;)</code> inside that check: it must panic with <code>boundary error</code>, which shows the check can fail. Restore it.</p>
 <h4 id="exercise-6-transfer-an-api-contract">Exercise 6: Transfer an API contract<a class="heading-anchor" href="#exercise-6-transfer-an-api-contract" aria-label="Link to this section">#</a></h4>
 <p>Build a deterministic report name from a validated positive integer.</p>
 <p><strong>Expected:</strong> The resulting logical name is reports/day-3.json.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>name == &quot;reports/day-3.json&quot;</code>. As a control, change <code>day, err := strconv.Atoi(&quot;3&quot;)</code> to <code>day, err := strconv.Atoi(&quot;4&quot;)</code>: the run must panic with <code>report name</code>. Restore the line before continuing.</p>
 <p>Implement these in the answer-free learner source. Keep one independent check per claim. A task can require tracing, construction, a changed input or a deliberate safe failure. Do not run a data race, corrupt memory or contact a shared cluster merely to demonstrate why it would be wrong.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Read a compiler error from the first location in your source, then fix one cause at a time. Unused imports and variables are errors in Go; add an import when its use exists, rather than copying a large unused import list. A panic from <code>check</code> identifies a violated example contract. Compare the actual value with the expected value and inspect the state transition that produced it. A returned <code>error</code> is a value that the caller must handle; an ignored error can make later output look plausible while the original operation failed.</p>
 <p>The lesson-specific explanations in the two examples identify the important counterexamples. Extend that reasoning to every investigation: explain why a plausible alternative would fail, and preserve a tiny input that distinguishes it. Treat empty data, missing values and cancellation as domain cases with explicit policies. In concurrent work, replace sleeps used as synchronization with channels, mutexes or an explicit ownership protocol.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<h4 id="hint-for-investigation-1-use-a-package-boundary">Hint for investigation 1: Use a package boundary<a class="heading-anchor" href="#hint-for-investigation-1-use-a-package-boundary" aria-label="Link to this section">#</a></h4>
+<h4 id="hint-for-investigation-1-use-a-package-boundary-predict-an-edited-check">Hint for investigation 1: Use a package boundary: predict an edited check<a class="heading-anchor" href="#hint-for-investigation-1-use-a-package-boundary-predict-an-edited-check" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The result is reports/daily.json.</li>
-<li>Identify the input and the state boundary relevant to use a package boundary. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>path.Join(&quot;reports&quot;, &quot;daily.json&quot;) == &quot;reports/daily.json&quot;</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Compute the checked value with <code>check(path.Join(&quot;reports!&quot;, &quot;daily.json&quot;) == &quot;reports/daily.json&quot;, &quot;path package&quot;)</code> in place before running, then compare it with the value <code>path.Join(&quot;reports&quot;, &quot;daily.json&quot;) == &quot;reports/daily.json&quot;</code> expects.</li>
 </ol>
-<h4 id="hint-for-investigation-2-compose-standard-library-apis">Hint for investigation 2: Compose standard-library APIs<a class="heading-anchor" href="#hint-for-investigation-2-compose-standard-library-apis" aria-label="Link to this section">#</a></h4>
+<h4 id="hint-for-investigation-2-compose-standard-library-apis-debug-a-regression">Hint for investigation 2: Compose standard-library APIs: debug a regression<a class="heading-anchor" href="#hint-for-investigation-2-compose-standard-library-apis-debug-a-regression" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The parsed value is 12.</li>
-<li>Identify the input and the state boundary relevant to compose standard-library apis. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>err == nil &amp;&amp; v == 12</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Compare <code>v, err := strconv.Atoi(strings.TrimSpace(&quot; 13 &quot;))</code> with the same line in worked example 2 and state the claim each version makes.</li>
 </ol>
 <h4 id="hint-for-investigation-3-inspect-exported-spelling">Hint for investigation 3: Inspect exported spelling<a class="heading-anchor" href="#hint-for-investigation-3-inspect-exported-spelling" aria-label="Link to this section">#</a></h4>
 <ol>
-<li>Restate the expected observation: The public spelling begins with an uppercase rune.</li>
-<li>Identify the input and the state boundary relevant to inspect exported spelling. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>Restate the expected observation: Only ParseInt is exported.</li>
+<li>The check <code>exported(&quot;ParseInt&quot;) &amp;&amp; !exported(&quot;parseInt&quot;) &amp;&amp; !exported(&quot;&quot;)</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Predict the effect of changing <code>exported := func(name string) bool { return name != &quot;&quot; &amp;&amp; unicode.IsUpper([]rune(name)[0]) }</code> to <code>exported := func(name string) bool { return name == &quot;&quot; &amp;&amp; unicode.IsUpper([]rune(name)[0]) }</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
 </ol>
-<h4 id="hint-for-investigation-4-keep-logical-imports-separate">Hint for investigation 4: Keep logical imports separate<a class="heading-anchor" href="#hint-for-investigation-4-keep-logical-imports-separate" aria-label="Link to this section">#</a></h4>
+<h4 id="hint-for-investigation-4-read-the-go-and-toolchain-directives">Hint for investigation 4: Read the go and toolchain directives<a class="heading-anchor" href="#hint-for-investigation-4-read-the-go-and-toolchain-directives" aria-label="Link to this section">#</a></h4>
 <ol>
-<li>Restate the expected observation: reports/tmp/../daily becomes reports/daily.</li>
-<li>Identify the input and the state boundary relevant to keep logical imports separate. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>Restate the expected observation: The module requires Go 1.27 and suggests toolchain go1.27.3.</li>
+<li>The check <code>directives[&quot;module&quot;] == &quot;example.org/learning/report&quot; &amp;&amp; directives[&quot;go&quot;] == &quot;1.27&quot; &amp;&amp; directives[&quot;toolchain&quot;] == &quot;go1.27.3&quot;</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Predict the effect of changing <code>if len(fields) == 2 {</code> to <code>if len(fields) == 3 {</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
 </ol>
 <h4 id="hint-for-investigation-5-reject-malformed-input-at-an-api-boundary">Hint for investigation 5: Reject malformed input at an API boundary<a class="heading-anchor" href="#hint-for-investigation-5-reject-malformed-input-at-an-api-boundary" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The numeric error remains non-nil.</li>
-<li>Identify the input and the state boundary relevant to reject malformed input at an api boundary. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>err != nil</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Name one input that would make <code>err != nil</code> false. A check that no input can falsify is not evidence.</li>
 </ol>
 <h4 id="hint-for-investigation-6-transfer-an-api-contract">Hint for investigation 6: Transfer an API contract<a class="heading-anchor" href="#hint-for-investigation-6-transfer-an-api-contract" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The resulting logical name is reports/day-3.json.</li>
-<li>Identify the input and the state boundary relevant to transfer an api contract. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>name == &quot;reports/day-3.json&quot;</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Predict the effect of changing <code>day, err := strconv.Atoi(&quot;3&quot;)</code> to <code>day, err := strconv.Atoi(&quot;4&quot;)</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
 </ol>
 <h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
 <p>Close the reference. Rebuild one normal case and one boundary case from a blank pad. Explain the role of module without using its name in the definition. Then change the domain while keeping the same invariant. Record the new input, your prediction and the observed output. If your program passes only because its input is hard-coded, explain which part would need a reusable function in a larger project.</p>
 <h3 id="next-step-and-sources">Next step and sources<a class="heading-anchor" href="#next-step-and-sources" aria-label="Link to this section">#</a></h3>
-<p><a href="https://go.dev/doc/modules/managing-dependencies">Primary language or library documentation</a>, reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. This source supports the API contract; it does not verify the classroom worker. Runtime receipts are recorded separately by the repository validation tools. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.</p>
+<p><a href="https://go.dev/doc/modules/managing-dependencies">Primary language or library documentation</a>, reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for go-013: Packages, modules and reproducible project boundaries.
 Read courses/go/guides/go-013.md and my saved attempt based on courses/go/lessons/go-013.go.

@@ -196,13 +196,21 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-typescript"><code><span class="source-line"><span class="syntax-comment">// Answer-free learner source. Save your own copy before editing.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">export</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"><span class="syntax-comment">// Exercise 1: Preserve identity type and object identity</span></span>
-<span class="source-line"><span class="syntax-comment">// Pass a number and an object through identity.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: number remains 7; object is the same reference.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 1: Preserve identity type and object identity: change one input</span></span>
+<span class="source-line"><span class="syntax-comment">// Copy Example A into a scratch `main.mts` and change `const value: number = identity(7);`</span></span>
+<span class="source-line"><span class="syntax-comment">// to `const value: number = identity(8);`. Before running it, predict which check fails and</span></span>
+<span class="source-line"><span class="syntax-comment">// which value it now sees; then run it and restore the original line.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` at the check `assert.equal(value,</span></span>
+<span class="source-line"><span class="syntax-comment">// 7)`. Restoring the original line brings back the worked observation: number remains 7;</span></span>
+<span class="source-line"><span class="syntax-comment">// object is the same reference.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment">// Exercise 2: Connect a key to its exact result type</span></span>
-<span class="source-line"><span class="syntax-comment">// Read id and count from one record with getProperty.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: id is string A; count is number 2.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 2: Connect a key to its exact result type: debug a regression</span></span>
+<span class="source-line"><span class="syntax-comment">// A regression changed one token in Example B, so one line now reads `const row = { id: &#x27;A&#x27;,</span></span>
+<span class="source-line"><span class="syntax-comment">// count: 3 };`. Run Example B with that line, use the failing check to locate the defect and</span></span>
+<span class="source-line"><span class="syntax-comment">// repair it without changing the check.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at the check</span></span>
+<span class="source-line"><span class="syntax-comment">// `assert.equal(count, 2)`; after it the line reads `const row = { id: &#x27;A&#x27;, count: 2 };`</span></span>
+<span class="source-line"><span class="syntax-comment">// again and id is string A; count is number 2.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 3: Expose absence in a generic first function</span></span>
 <span class="source-line"><span class="syntax-comment">// Read the first item from a nonempty and an empty readonly array.</span></span>

@@ -212,7 +212,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-comment"># Expected: module features equal manual features; the asymmetric probe distinguishes the two orientations.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Inspect activation gradients</span></span>
-<span class="source-line"><span class="syntax-comment"># Differentiate ReLU at-2 and 2.</span></span>
+<span class="source-line"><span class="syntax-comment"># Differentiate ReLU at -2 and 2.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: gradients 0 and 1.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Expose identical-unit symmetry</span></span>
@@ -220,8 +220,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-comment"># Expected: two unit outputs match on every row.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Transfer to continuous inputs</span></span>
-<span class="source-line"><span class="syntax-comment"># Evaluate the fixed construction at(.2, .8) and(.8, .2).</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: both.6; the function is absolute difference.</span></span>
+<span class="source-line"><span class="syntax-comment"># Evaluate the fixed construction at (0.2, 0.8) and (0.8, 0.2).</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: both 0.6; the function is absolute difference.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Read the guide and implement the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>

@@ -206,9 +206,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Worker lifecycle:</strong> Startup, messaging, errors, completion and termination ownership.</p>
 <h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
 <p>new Worker creates the thread. workerData supplies a cloned or transferred initial payload. parentPort sends the result to the parent. A transferList names the exact ArrayBuffer ownership to move. Parent code listens for result, error and premature exit, then cleans up listeners and terminates the worker. Use process and thread identifiers only as observations of the actual run, not as fixed expected numbers.</p>
-<h3 id="exercise-1-perform-bounded-cpu-work-in-a-real-worker">Exercise 1: Perform bounded CPU work in a real worker<a class="heading-anchor" href="#exercise-1-perform-bounded-cpu-work-in-a-real-worker" aria-label="Link to this section">#</a></h3>
-<p>Task: Sum integers 1 through 10000 in a worker and inspect its thread id.</p>
+<h3 id="exercise-1-perform-bounded-cpu-work-in-a-real-worker-change-one-input">Exercise 1: Perform bounded CPU work in a real worker: change one input<a class="heading-anchor" href="#exercise-1-perform-bounded-cpu-work-in-a-real-worker-change-one-input" aria-label="Link to this section">#</a></h3>
+<p>Task: Copy Example A into a scratch <code>main.mjs</code> and change <code>10000,</code> to <code>10001,</code>. Before running it, predict which check fails and which value it now sees; then run it and restore the original line.</p>
 <p>The result came through an actual worker message. The tiny workload illustrates mechanics and may be slower than a direct loop because startup costs dominate.</p>
+<p>The unchanged code is the exercise block of Example A:</p>
 <pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">const</span> result <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> runWorker<span class="syntax-punctuation">(</span>
   <span class="syntax-string">`</span><span class="syntax-string">const { parentPort, workerData, threadId } = require(&#x27;node:worker_threads&#x27;);</span>
 <span class="syntax-string">let sum = 0; for (let value = 1; value &lt;= workerData; value += 1) sum += value;</span>
@@ -217,11 +218,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>sum<span class="syntax-punctuation">,</span> <span class="syntax-number">50005000</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 assert<span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">.</span>threadId <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
-<p><strong>Expected:</strong> sum 50005000; worker thread id positive.</p>
-<p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
-<h3 id="exercise-2-transfer-a-buffer-and-observe-detachment">Exercise 2: Transfer a buffer and observe detachment<a class="heading-anchor" href="#exercise-2-transfer-a-buffer-and-observe-detachment" aria-label="Link to this section">#</a></h3>
-<p>Task: Send an ArrayBuffer by transfer list, modify its first byte in the worker and return the bytes.</p>
+<p><strong>Expected:</strong> The changed run fails with an <code>AssertionError</code> at the check <code>assert.equal(result.sum, 50005000)</code>. Restoring the original line brings back the worked observation: sum 50005000; worker thread id positive.</p>
+<p><strong>Verify:</strong> Compare your written prediction with the reported <code>AssertionError</code>, including its actual and expected values, and name the value that made <code>assert.equal(result.sum, 50005000)</code> fail. After restoring the line, the program prints its <code>{&quot;checks&quot;:1,&quot;status&quot;:&quot;passed&quot;}</code> receipt again.</p>
+<h3 id="exercise-2-transfer-a-buffer-and-observe-detachment-debug-a-regression">Exercise 2: Transfer a buffer and observe detachment: debug a regression<a class="heading-anchor" href="#exercise-2-transfer-a-buffer-and-observe-detachment-debug-a-regression" aria-label="Link to this section">#</a></h3>
+<p>Task: A regression changed one token in Example B, so one line now reads <code>const buffer = Uint8Array.from([1, 3, 3]).buffer;</code>. Run Example B with that line, use the failing check to locate the defect and repair it without changing the check.</p>
 <p>The sender loses access because ownership moved. Treating a detached buffer as still usable would create an invalid lifetime assumption.</p>
+<p>The unchanged code is the exercise block of Example B:</p>
 <pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">const</span> buffer <span class="syntax-operator">=</span> <span class="syntax-builtin">Uint8Array</span><span class="syntax-punctuation">.</span><span class="syntax-keyword">from</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>buffer<span class="syntax-punctuation">;</span>
 <span class="syntax-keyword">const</span> result <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> runWorker<span class="syntax-punctuation">(</span>
   <span class="syntax-string">`</span><span class="syntax-string">const { parentPort, workerData } = require(&#x27;node:worker_threads&#x27;);</span>
@@ -231,8 +233,8 @@ assert<span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation
 <span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>buffer<span class="syntax-punctuation">.</span>byteLength<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">9</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
-<p><strong>Expected:</strong> parent byteLength 0; returned bytes 9,2,3.</p>
-<p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
+<p><strong>Expected:</strong> Before the repair the run fails with an <code>AssertionError</code> at the check <code>assert.deepEqual(result, [9, 2, 3])</code>; after it the line reads <code>const buffer = Uint8Array.from([1, 2, 3]).buffer;</code> again and parent byteLength 0; returned bytes 9,2,3.</p>
+<p><strong>Verify:</strong> Keep the failing and the repaired runs. Explain why the changed token alters the value tested by <code>assert.deepEqual(result, [9, 2, 3])</code> for this input.</p>
 <h3 id="exercise-3-distinguish-cloning-from-shared-mutation">Exercise 3: Distinguish cloning from shared mutation<a class="heading-anchor" href="#exercise-3-distinguish-cloning-from-shared-mutation" aria-label="Link to this section">#</a></h3>
 <p>Task: Send an object, mutate the worker copy and compare the original.</p>
 <p>Ordinary message data is cloned. This prevents accidental aliasing but can add copying cost for large payloads.</p>
@@ -245,7 +247,7 @@ assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punc
 assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>original<span class="syntax-punctuation">.</span>value<span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> worker returns 9; parent remains 1.</p>
-<p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>assert.equal(original.value, 1)</code>. As a control, change <code>const original = { value: 1 };</code> to <code>const original = { value: 2 };</code>: the run must fail with an <code>AssertionError</code> at that check. Restore the line before continuing.</p>
 <h3 id="exercise-4-propagate-an-actual-worker-exception">Exercise 4: Propagate an actual worker exception<a class="heading-anchor" href="#exercise-4-propagate-an-actual-worker-exception" aria-label="Link to this section">#</a></h3>
 <p>Task: Run an authored worker that throws a fixture error.</p>
 <p>Worker exceptions arrive through the error event. A parent that listens only for messages could wait forever for a result that cannot arrive.</p>
@@ -254,7 +256,7 @@ assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuat
   <span class="syntax-string">/worker fixture failed/u</span><span class="syntax-punctuation">,</span>
 <span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> parent Promise rejects with worker fixture failed.</p>
-<p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>assert.rejects(runWorker(`throw new Error(&#x27;worker fixture failed&#x27;);`, null), /worker fixture failed/u)</code> and confirm that the reference still passes. Then name an input that would make it fail and explain which value changes.</p>
 <h3 id="exercise-5-terminate-an-owned-worker-that-remains-alive">Exercise 5: Terminate an owned worker that remains alive<a class="heading-anchor" href="#exercise-5-terminate-an-owned-worker-that-remains-alive" aria-label="Link to this section">#</a></h3>
 <p>Task: Start a worker that reports ready and keeps an interval open, then terminate it.</p>
 <p>A ready message does not close active handles. Explicit termination releases the owned worker and its interval; the test does not leave background work running.</p>
@@ -275,7 +277,7 @@ assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuat
   assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-operator">typeof</span> code<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;number&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected:</strong> ready observed; terminate resolves with an exit code.</p>
-<p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>assert.equal(typeof code, &#x27;number&#x27;)</code>. As a control, change <code>worker.once(&#x27;error&#x27;, reject); }), &#x27;ready&#x27;</code> to <code>worker.once(&#x27;error&#x27;, reject); }), &#x27;ready!&#x27;</code> inside it: the run must fail with an <code>AssertionError</code>, which shows the check can fail. Restore it.</p>
 <h3 id="exercise-6-reject-data-that-cannot-be-cloned">Exercise 6: Reject data that cannot be cloned<a class="heading-anchor" href="#exercise-6-reject-data-that-cannot-be-cloned" aria-label="Link to this section">#</a></h3>
 <p>Task: Try to pass a function through workerData.</p>
 <p>Functions carry executable behavior and closure state, not supported cloneable message data. Define a data protocol and keep worker implementation separate.</p>
@@ -287,7 +289,7 @@ assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuat
   <span class="syntax-punctuation">(</span>error<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> error<span class="syntax-punctuation">.</span>name <span class="syntax-operator">===</span> <span class="syntax-string">&#x27;DataCloneError&#x27;</span><span class="syntax-punctuation">,</span>
 <span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> DataCloneError before useful worker execution.</p>
-<p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>assert.rejects(runWorker(`const { parentPort } = require(&#x27;node:worker_threads&#x27;); parentPort.postMessage(&#x27;unused&#x27;);`, { callback: () =&gt; 1 }), (error) =&gt; error.name === &#x27;DataCloneError&#x27;)</code>. As a control, change <code>error =&gt; error.name === &#x27;DataCloneError&#x27;</code> to <code>error =&gt; error.name !== &#x27;DataCloneError&#x27;</code> inside it: the run must fail with an <code>AssertionError</code>, which shows the check can fail. Restore it.</p>
 <h3 id="after-comparison">After comparison<a class="heading-anchor" href="#after-comparison" aria-label="Link to this section">#</a></h3>
 <p>Return to your saved implementation and repeat a case with different values. Keep compiler diagnostics, process output and browser observations separate. Do not suppress a failing assertion or use a type assertion to declare an unvalidated value safe. Resource-owning examples must finish cleanup even when work fails. Describe each result with its actual host and fixture scope rather than as production acceptance.</p></article>
   </main>

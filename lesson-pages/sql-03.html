@@ -9,7 +9,7 @@
     content="default-src 'none'; style-src 'self' file: 'unsafe-inline'; font-src data:; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
   >
   <link rel="stylesheet" href="../src/ds60sqlpy/assets/vendor/textbook/fonts.css">
-  <title>sql-03 · Inner Joins · DS60</title>
+  <title>sql-03 · Inner Joins and Predicate Placement · DS60</title>
   <style>
     :root {
       --paper: #f6f2e8;
@@ -312,7 +312,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <div class="shell">
       <section class="hero">
         <p class="eyebrow">sql · lesson sql-03</p>
-        <h1>Inner Joins</h1>
+        <h1>Inner Joins and Predicate Placement</h1>
         <p class="hero-copy">SQL foundations and query building</p>
         <div class="meta">
           <span class="tag">foundation</span>
@@ -407,9 +407,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Start the Linux-container engine and run <code>./classroom</code> from the repository root. On Windows, use Ubuntu in WSL 2 or the thin <code>START_DOCKER_CLASSROOM.cmd</code> wrapper. Choose <strong>PostgreSQL</strong> on the shared <code>/classroom</code> home, then open <strong>sql-03</strong>. The <a href="../reference-pages/docs/one-command-classroom.md.html">launcher guide</a> covers first preparation, strict resume and the saved project selection. No host Python or PostgreSQL installation is required for this browser route.</p>
 <ol>
-<li>Read the prerequisite and fixture notes before running the file. Use only the local disposable <code>advanced_sql_training</code> database. A simple snippet such as <code>SELECT 1;</code> needs no training-schema reset.</li>
+<li>Read the prerequisite and fixture notes before running the file. Use only the local disposable <code>advanced_sql_training</code> database.</li>
 <li>Choose <strong>Whole SQL lesson (psql)</strong> for the cataloged learner script. This preserves the lesson&#x27;s reviewed psql directives, relative includes and transaction behavior. <strong>SQL snippet</strong> is appropriate for ordinary SQL statements, but is not a replacement for an entire script&#x27;s setup.</li>
-<li>When the lesson requires the course training data, use the explicit preparation action and read its reset acknowledgement. It replaces the course-owned <code>training</code> schema. Do not reset unrelated data or prepare every lesson by habit; stateful sequences have their own ordering.</li>
+<li>The <strong>Course database</strong> panel above the code shows whether the course training tables are loaded. Missing tables load automatically before your first run (or choose <strong>Load course tables</strong>) and stay loaded for later lessons. <strong>Reset training data</strong> restores the original rows only when your own changes made results differ; it keeps your saved code and notes.</li>
 <li>Edit the learner copy in the classroom and save your prediction before running. Its whole-script workspace is <code>.learning/sql/sql-03/lesson/workspace/sql/postgres-60day/day03_inner_joins.sql</code>. For browser work this path is inside the Docker learning volume, not a newly created host folder beside your checkout. The checked-in source remains the answer-free starting artifact.</li>
 <li>Run the whole script and inspect the full transcript. The runner uses <code>psql -X -v ON_ERROR_STOP=1 -f</code>. SELECT output has columns, rows and a row count; DDL/DML has command tags; intentional checks may produce NOTICE messages. An unexpected ERROR or nonzero exit is a failure to diagnose, even when an earlier query printed plausible values.</li>
 <li>Verify the lesson&#x27;s expected grain, ordering, constraints and declared transaction or cleanup outcome. Keep required ROLLBACK statements. The warehouse sequence and other explicitly stateful exercises explain when state is committed. Read saved output without rerunning it when reviewing an earlier attempt.</li>
@@ -502,7 +502,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ol>
 <h4 id="guide--common-mistakes-and-how-to-recover">Common mistakes and how to recover<a class="heading-anchor" href="#guide--common-mistakes-and-how-to-recover" aria-label="Link to this section">#</a></h4>
 <ul>
-<li><strong>Lesson-specific semantic mistake:</strong> A missing or incomplete ON condition creates row multiplication; joining two detail tables before aggregation can multiply measures.</li>
+<li><strong>Lesson-specific semantic mistake:</strong> A missing or incomplete <code>ON</code> condition creates row multiplication; joining two detail tables before aggregation can multiply measures.</li>
 <li><strong>Unexpected row count:</strong> display keys before aggregates, count rows after each join/filter stage, and find the first stage whose grain differs from the contract. Do not hide fanout with <code>DISTINCT</code>.</li>
 <li><strong>Unexpected <code>NULL</code> or missing row:</strong> decide whether the fact is unknown, inapplicable, zero, or absent before using <code>COALESCE</code>; inspect outer-join predicate placement and empty-input aggregate behavior.</li>
 <li><strong>Unstable top/first/last output:</strong> add <code>ORDER BY</code> with a unique final tie-breaker before <code>LIMIT</code> or order-sensitive windows/aggregates.</li>
@@ -550,17 +550,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Using LIKE to join keys; always use exact key equality unless justified.</li>
 <li>Ambiguity in column names after join; qualify columns to avoid surprises.</li>
 </ul>
-<p>Current practice map</p>
-<ul>
-<li>The authoritative six prompts, progressive hints, and expected shapes are maintained in <strong>Exercises</strong> above. They map one-for-one to both solution companions; older short exercise lists were removed to prevent prompt drift.</li>
-</ul>
 <p>Further reading</p>
 <ul>
-<li>Joins: https://www.postgresql.org/docs/current/queries-table-expressions.html#QUERIES-JOINS</li>
+<li>Joins: https://www.postgresql.org/docs/17/queries-table-expressions.html#QUERIES-JOINS</li>
 </ul>
 <h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in the AI tutor:</p>
-<pre class="highlighted-code"><code class="language-text">Tutor me through sql-03 — Inner Joins.
+<pre class="highlighted-code"><code class="language-text">Tutor me through sql-03: Inner Joins and Predicate Placement.
 
 I have completed the direct catalog prerequisite: `sql-02`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day03_inner_joins.md
@@ -570,7 +566,7 @@ Key terms to teach in context: Join key, Cardinality, Fanout. First define those
 language and explain table, row, column, result set, row grain, SQL NULL, and
 deterministic ordering where they apply. Then explain the important clauses in
 logical order and state the expected row grain/shape before asking me to run
-anything. The guide&#x27;s lesson-specific worked-model focus is: Follow one orders row through the orderitems join. It becomes one row per line item, so summing orders.totalamount at that point repeats the order total. The learner query instead calculates value from each line and aggregates at the requested customer or category grain.
+anything. The guide&#x27;s lesson-specific worked-model focus is: Follow one `orders` row through the `order_items` join. It becomes one row per line item, so summing `orders.total_amount` at that point repeats the order total. The learner query instead calculates value from each line and aggregates at the requested customer or category grain.
 
 Use only the local disposable advanced_sql_training database. Prefer the
 Docker classroom&#x27;s Whole SQL lesson (psql) workspace and its ignored
@@ -742,14 +738,12 @@ transfer task that I answer without looking back. Done when I can explain the ro
         <div class="artifact-content"><h3 id="solution-1--day-03-solutions-inner-joins-relational-linking-and-predicate-placement">Day 03 solutions: INNER JOINs: Relational Linking and Predicate Placement<a class="heading-anchor" href="#solution-1--day-03-solutions-inner-joins-relational-linking-and-predicate-placement" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
 <p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
-psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql\postgres-60day\solutions\day03_solutions.sql</span><span class="syntax-string">&quot;</span></code></pre>
-<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># Linux, macOS, or Windows through WSL 2, from the repository root</span>
 psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/postgres-60day/solutions/day03_solutions.sql</code></pre>
 <p><code>psql</code> prints each result/command tag in the terminal. Stop at the first unexpected <code>ERROR</code>; later output cannot repair an earlier failed invariant. Compare your own SQL, row grain, column names, row counts, <code>NULL</code> policy, and ordering with the explanation before comparing syntax.</p>
 <h4 id="solution-1--clause-by-clause-reading-map">Clause-by-clause reading map<a class="heading-anchor" href="#solution-1--clause-by-clause-reading-map" aria-label="Link to this section">#</a></h4>
-<p>The lesson&#x27;s main concepts are Join key, Cardinality, Fanout. Its worked-model focus is: Follow one orders row through the orderitems join. It becomes one row per line item, so summing orders.totalamount at that point repeats the order total. The learner query instead calculates value from each line and aggregates at the requested customer or category grain.</p>
+<p>The lesson&#x27;s main concepts are Join key, Cardinality, Fanout. Its worked-model focus is: Follow one <code>orders</code> row through the <code>order_items</code> join. It becomes one row per line item, so summing <code>orders.total_amount</code> at that point repeats the order total. The learner query instead calculates value from each line and aggregates at the requested customer or category grain.</p>
 <ul>
 <li>Start at <code>FROM</code>/<code>JOIN</code> and state the intermediate row grain. Inspect join keys before adding aggregates; a one-to-many join is allowed to multiply rows only when the later contract accounts for it.</li>
 <li>Apply <code>WHERE</code> to input rows, <code>GROUP BY</code> to form buckets, and <code>HAVING</code> to completed groups. Window functions run over the surviving relation and normally preserve its row count.</li>
@@ -1024,7 +1018,7 @@ payment_totals <span class="syntax-keyword">AS</span> <span class="syntax-punctu
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- Day 03 executable solutions</span></span>
-<span class="source-line"><span class="syntax-comment">-- SOLUTION READING MAP — sql-03: Inner Joins</span></span>
+<span class="source-line"><span class="syntax-comment">-- SOLUTION READING MAP for sql-03: Inner Joins and Predicate Placement</span></span>
 <span class="source-line"><span class="syntax-comment">-- Explanation: sql/postgres-60day/solutions/day03_solutions.md</span></span>
 <span class="source-line"><span class="syntax-comment">-- Run from the repository root only against advanced_sql_training:</span></span>
 <span class="source-line"><span class="syntax-comment">--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day03_solutions.sql</span></span>
@@ -1232,7 +1226,7 @@ payment_totals <span class="syntax-keyword">AS</span> <span class="syntax-punctu
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through sql-03 — Inner Joins.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through sql-03: Inner Joins and Predicate Placement.
 
 I have completed the direct catalog prerequisite: `sql-02`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day03_inner_joins.md
@@ -1242,7 +1236,7 @@ Key terms to teach in context: Join key, Cardinality, Fanout. First define those
 language and explain table, row, column, result set, row grain, SQL NULL, and
 deterministic ordering where they apply. Then explain the important clauses in
 logical order and state the expected row grain/shape before asking me to run
-anything. The guide&#x27;s lesson-specific worked-model focus is: Follow one orders row through the orderitems join. It becomes one row per line item, so summing orders.totalamount at that point repeats the order total. The learner query instead calculates value from each line and aggregates at the requested customer or category grain.
+anything. The guide&#x27;s lesson-specific worked-model focus is: Follow one `orders` row through the `order_items` join. It becomes one row per line item, so summing `orders.total_amount` at that point repeats the order total. The learner query instead calculates value from each line and aggregates at the requested customer or category grain.
 
 Use only the local disposable advanced_sql_training database. Prefer the
 Docker classroom&#x27;s Whole SQL lesson (psql) workspace and its ignored
@@ -1265,8 +1259,8 @@ transfer task that I answer without looking back. Done when I can explain the ro
       </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
-        <a class="nav-card" href="sql-02.html"><small>Previous lesson</small><strong>sql-02</strong><span>Aggregates, GROUP BY and HAVING</span></a>
-        <a class="nav-card next" href="sql-04.html"><small>Next lesson</small><strong>sql-04</strong><span>Outer Joins</span></a>
+        <a class="nav-card" href="sql-02.html"><small>Previous lesson</small><strong>sql-02</strong><span>Aggregates, GROUP BY, and HAVING</span></a>
+        <a class="nav-card next" href="sql-04.html"><small>Next lesson</small><strong>sql-04</strong><span>Outer Joins and Unmatched Rows</span></a>
       </nav>
     </div>
   </main>

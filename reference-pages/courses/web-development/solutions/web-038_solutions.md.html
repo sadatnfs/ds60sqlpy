@@ -194,31 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-038_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-038-explanatory-solutions">web-038: explanatory solutions<a class="heading-anchor" href="#web-038-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.</p>
-<h3 id="why-the-mechanism-works">Why the mechanism works<a class="heading-anchor" href="#why-the-mechanism-works" aria-label="Link to this section">#</a></h3>
-<p>JSON is a data format, not a PHP object model or a validation system. Decoding can produce syntactically valid data with the wrong fields, wrong types or an unexpectedly deep structure. Treat parsing and contract validation as separate steps. The examples use tiny inline JSON and a temporary stream so no host path or persistent file is required.</p>
-<p>A stream represents a readable or writable sequence of bytes. File operations can fail, return partial results or expose sensitive data if paths are chosen carelessly. In an application, accept an identifier and map it to an owned location instead of accepting an arbitrary user-supplied filesystem path. Bound size before reading untrusted content into memory, and close resources when finished.</p>
-<p>Use JSON_THROW_ON_ERROR so invalid JSON becomes an exception instead of an ambiguous null result. Pass true when an associative-array representation is intended, then validate each required field. <code>php://temp</code> provides a temporary stream suitable for this local demonstration. Check resource creation and write results, rewind before reading, and close in a finally block.</p>
+<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-038.md</code>.</p>
 <h3 id="exercise-1-explain-why-valid-json-can-still-be-invalid-application-input">Exercise 1: Explain why valid JSON can still be invalid application input.<a class="heading-anchor" href="#exercise-1-explain-why-valid-json-can-still-be-invalid-application-input" aria-label="Link to this section">#</a></h3>
-<p>It may contain the wrong structure, types, ranges or required fields.</p>
-<p>Trace the smallest example before editing. Name which values are source and which are observations.</p>
+<p><strong>Expected answer:</strong> It may contain the wrong structure, types, ranges or required fields.</p>
+<p><strong>Why:</strong> json_decode only checks syntax, so types, ranges and required fields still need validation.</p>
 <h3 id="exercise-2-add-a-bounded-decoding-depth-and-explicit-parse-errors">Exercise 2: Add a bounded decoding depth and explicit parse errors.<a class="heading-anchor" href="#exercise-2-add-a-bounded-decoding-depth-and-explicit-parse-errors" aria-label="Link to this section">#</a></h3>
-<p>Malformed or too-deep input produces an intentional failure.</p>
-<p>Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.</p>
+<p><strong>Expected evidence:</strong> Malformed or too-deep input produces an intentional failure.</p>
+<p><strong>Why:</strong> The depth limit bounds nesting, and the flag turns malformed input into a JsonException.</p>
 <h3 id="exercise-3-parse-a-small-study-record-and-round-trip-it-through-a-temporary-stream">Exercise 3: Parse a small study record and round-trip it through a temporary stream.<a class="heading-anchor" href="#exercise-3-parse-a-small-study-record-and-round-trip-it-through-a-temporary-stream" aria-label="Link to this section">#</a></h3>
-<p>The field contract passes and the returned bytes match the encoded value.</p>
-<p>Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.</p>
+<p><strong>Expected evidence:</strong> The field contract passes and the returned bytes match the encoded value.</p>
+<p><strong>Why:</strong> A temporary stream behaves like a file in memory, so the round trip shows that the written bytes equal the encoded value.</p>
 <h3 id="exercise-4-diagnose-an-empty-read-caused-by-the-stream-cursor-position">Exercise 4: Diagnose an empty read caused by the stream cursor position.<a class="heading-anchor" href="#exercise-4-diagnose-an-empty-read-caused-by-the-stream-cursor-position" aria-label="Link to this section">#</a></h3>
-<p>Rewind before reading from the beginning.</p>
-<p>Keep the failing input. Identify the first layer where the observed result differs from the intended contract.</p>
+<p><strong>Expected answer:</strong> Rewind before reading from the beginning.</p>
+<p><strong>Why:</strong> After writing, the cursor sits at the end of the stream, so a read returns nothing until rewind moves it back.</p>
 <h3 id="exercise-5-reject-an-unexpected-field-type-and-an-oversized-input-string">Exercise 5: Reject an unexpected field type and an oversized input string.<a class="heading-anchor" href="#exercise-5-reject-an-unexpected-field-type-and-an-oversized-input-string" aria-label="Link to this section">#</a></h3>
-<p>The program checks both byte budget and data contract before use.</p>
-<p>Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.</p>
+<p><strong>Expected evidence:</strong> The program checks both byte budget and data contract before use.</p>
+<p><strong>Why:</strong> A byte budget limits work before parsing, and the field check rejects data that parses but breaks the contract.</p>
 <h3 id="exercise-6-explain-why-user-controlled-paths-need-an-ownership-policy">Exercise 6: Explain why user-controlled paths need an ownership policy.<a class="heading-anchor" href="#exercise-6-explain-why-user-controlled-paths-need-an-ownership-policy" aria-label="Link to this section">#</a></h3>
-<p>A path can escape the intended data area or expose unrelated files; identifiers should map through a reviewed boundary.</p>
-<p>Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.</p>
-<h3 id="reference-comparison-and-limits">Reference comparison and limits<a class="heading-anchor" href="#reference-comparison-and-limits" aria-label="Link to this section">#</a></h3>
-<p>Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.</p></article>
+<p><strong>Expected answer:</strong> A path can escape the intended data area or expose unrelated files; identifiers should map through a reviewed boundary.</p>
+<p><strong>Why:</strong> Paths from users can traverse outside the data area, so the program should map identifiers to files it owns.</p>
+<h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
+<p>Open <code>courses/web-development/solutions/web-038_solution.php</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.</p></article>
   </main>
 </body>
 </html>

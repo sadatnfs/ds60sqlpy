@@ -197,28 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-keyword">public</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Main</span> <span class="syntax-punctuation">{</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span></span>
-<span class="source-line">    <span class="syntax-comment">// Exercise 1: Retain sequence multiplicity</span></span>
-<span class="source-line">    <span class="syntax-comment">// Create a mutable list red,blue,red and append green.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: size 4; red appears twice.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Exercise 1: Retain sequence multiplicity: change one input</span></span>
+<span class="source-line">    <span class="syntax-comment">// Copy Example A into a scratch `Main.java` and change `List&lt;String&gt; colors = new</span></span>
+<span class="source-line">    <span class="syntax-comment">// ArrayList&lt;&gt;(List.of(&quot;red&quot;, &quot;blue&quot;, &quot;red&quot;));` to `List&lt;String&gt; colors = new</span></span>
+<span class="source-line">    <span class="syntax-comment">// ArrayList&lt;&gt;(List.of(&quot;red!&quot;, &quot;blue&quot;, &quot;red&quot;));`. Before running it with `java -ea Main`,</span></span>
+<span class="source-line">    <span class="syntax-comment">// predict which assertion fails and which value it now sees; then run it and restore the</span></span>
+<span class="source-line">    <span class="syntax-comment">// original line.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` from the assertion on</span></span>
+<span class="source-line">    <span class="syntax-comment">// `colors.size() == 4 &amp;&amp; Collections.frequency(colors, &quot;red&quot;) == 2`. Restoring the original</span></span>
+<span class="source-line">    <span class="syntax-comment">// line brings back the worked observation: size 4; red appears twice.</span></span>
 <span class="source-line"></span>
-<span class="source-line">    <span class="syntax-comment">// Exercise 2: Count with a map</span></span>
-<span class="source-line">    <span class="syntax-comment">// Count each color withMap.merge.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: red2,blue1,green1.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Exercise 2: Count with a map: debug a regression</span></span>
+<span class="source-line">    <span class="syntax-comment">// A regression changed one token in the code that Example B adds after Example A, so one</span></span>
+<span class="source-line">    <span class="syntax-comment">// line now reads `for (String color : colors) counts.merge(color, 2, Integer::sum);`. Run</span></span>
+<span class="source-line">    <span class="syntax-comment">// Example B with that line, use the failing assertion to locate the defect and repair it</span></span>
+<span class="source-line">    <span class="syntax-comment">// without changing the assertion.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` from the assertion on</span></span>
+<span class="source-line">    <span class="syntax-comment">// `counts.equals(Map.of(&quot;red&quot;, 2, &quot;blue&quot;, 1, &quot;green&quot;, 1))`; after it the line reads `for</span></span>
+<span class="source-line">    <span class="syntax-comment">// (String color : colors) counts.merge(color, 1, Integer::sum);` again and red 2, blue 1,</span></span>
+<span class="source-line">    <span class="syntax-comment">// green 1.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 3: Inspect set insertion</span></span>
-<span class="source-line">    <span class="syntax-comment">// Insertred twice into a HashSet and inspect return values.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: first true,second false,size1.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Insert red twice into a HashSet and inspect return values.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: first true, second false, size 1.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 4: Create deterministic output order</span></span>
 <span class="source-line">    <span class="syntax-comment">// Sort the count-map keys before presenting them.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: blue,green,red.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: blue, green, red.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 5: Distinguish lookup from insertion</span></span>
-<span class="source-line">    <span class="syntax-comment">// Readmissing withgetOrDefault0 and compare map size.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: value0;map stillsize3.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Read missing with getOrDefault 0 and compare map size.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: value 0; map still size 3.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 6: Respect unmodifiable fixtures</span></span>
-<span class="source-line">    <span class="syntax-comment">// Try adding toList.of(1,2) and catch the specific exception.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Try adding to List.of(1, 2) and catch the specific exception.</span></span>
 <span class="source-line">    <span class="syntax-comment">// Expected: UnsupportedOperationException.</span></span>
 <span class="source-line">    System<span class="syntax-punctuation">.</span><span class="syntax-attribute">out</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">println</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement and check the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line">  <span class="syntax-punctuation">}</span></span>

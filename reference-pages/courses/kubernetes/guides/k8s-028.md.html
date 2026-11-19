@@ -200,7 +200,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Release and recover an owned stateful fixture with explicit access and data boundaries.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p>The intermediate capstone combines a stateless application response, a synthetic persistent marker store, reviewed configuration rendering and measured traffic policy. It is a host-lab integration exercise because the normal browser adapter does not provide the storage, CNI and stateful-update capabilities needed for the whole scenario.</p>
-<p>The supplied manifests keep the components explicit:configured hello Deployment/Service, one StatefulSet claim template and two ingress policies. The persistent marker is a file-based synthetic datastore, not a real database service. Its writer and reader operations must be separately bounded and reviewed by the host. A correct frontend response is not evidence that the marker survived, and an unchanged marker is not evidence that network isolation works.</p>
+<p>The supplied manifests keep the components explicit: configured hello Deployment/Service, one StatefulSet claim template and two ingress policies. The persistent marker is a file-based synthetic datastore, not a real database service. Its writer and reader operations must be separately bounded and reviewed by the host. A correct frontend response is not evidence that the marker survived, and an unchanged marker is not evidence that network isolation works.</p>
 <p>The capstone&#x27;s acceptance packet connects those independent observations and includes a failed-change recovery. Cleanup respects the declared synthetic-data retention choice and exact resource identities. Releasing the disposable cluster is a separate lifecycle boundary that can remove node-local retained data.</p>
 <h3 id="plan-component-and-capability-dependencies">Plan component and capability dependencies<a class="heading-anchor" href="#plan-component-and-capability-dependencies" aria-label="Link to this section">#</a></h3>
 <p>Before starting, verify the owned namespace UID, qualified StorageClass, policy-capable CNI, approved images and prepared renderer if used. Record which host operation owns cluster-scoped prerequisites and which namespaced resources the learner scenario owns. The current ordinary worker lease does not silently acquire these extra rights.</p>
@@ -212,22 +212,20 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Keep the failure timeline and cleanup outcome. The host may retain the synthetic PVC for a subsequent recovery lesson only when that retention is explicitly recorded; otherwise final cleanup follows exact object receipts and the chosen reclaim policy.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-read-a-complete-evidence-packet">Worked example 1: Read a complete evidence packet<a class="heading-anchor" href="#worked-example-1-read-a-complete-evidence-packet" aria-label="Link to this section">#</a></h4>
-<p>Synthetic packet:application marker reviewer, data hash h1, allowed client success, denied client failure, limited authorization confirmed, cleanup/retention recorded. Every field has its own source and timestamp.</p>
+<p>Synthetic packet: application marker reviewer, data hash h1, allowed client success, denied client failure, limited authorization confirmed, cleanup/retention recorded. Every field has its own source and timestamp.</p>
 <p><strong>Expected:</strong> All component gates must pass; one cannot substitute for another.</p>
 <h4 id="worked-example-2-reject-recovery-by-reinitialization">Worked example 2: Reject recovery by reinitialization<a class="heading-anchor" href="#worked-example-2-reject-recovery-by-reinitialization" aria-label="Link to this section">#</a></h4>
 <p>After a failed rollout, the operator reruns the marker writer before checking storage. The marker now matches h1, but the prior bytes were never read.</p>
 <p><strong>Expected:</strong> Persistence recovery is unproved because the verification step overwrote the evidence.</p>
 <h3 id="inspect-the-specific-owned-object">Inspect the specific owned object<a class="heading-anchor" href="#inspect-the-specific-owned-object" aria-label="Link to this section">#</a></h3>
 <p>Only after the chapter&#x27;s host capability is provisioned and its resources remain present, use the explicit receipt fields described in <a href="../host-labs.md.html">host-labs.md</a>. A completed one-shot browser Run has already cleaned its objects. The following read does not provision the missing capability and does not justify changing credentials after a Forbidden result.</p>
-<p>POSIX:</p>
+<p>Bash on Linux, macOS or Ubuntu under WSL 2:</p>
 <pre class="highlighted-code"><code class="language-bash">: <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_KUBECONFIG<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt path</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 : <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_CONTEXT<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt context</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 : <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_NAMESPACE<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt namespace</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<span class="syntax-string">&quot;</span> --context <span class="syntax-string">&quot;</span>$LAB_CONTEXT<span class="syntax-string">&quot;</span> --namespace <span class="syntax-string">&quot;</span>$LAB_NAMESPACE<span class="syntax-string">&quot;</span> get statefulset store -o json</code></pre>
-<p>PowerShell:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">-not</span> $env:LAB_KUBECONFIG <span class="syntax-operator">-or</span> <span class="syntax-operator">-not</span> $env:LAB_CONTEXT <span class="syntax-operator">-or</span> <span class="syntax-operator">-not</span> $env:LAB_NAMESPACE<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;Owned receipt fields are required.&#x27;</span> <span class="syntax-punctuation">}</span>
-<span class="syntax-punctuation">&amp;</span> kubectl <span class="syntax-punctuation">-</span>-kubeconfig $env:LAB_KUBECONFIG <span class="syntax-punctuation">-</span>-context $env:LAB_CONTEXT <span class="syntax-punctuation">-</span>-namespace $env:LAB_NAMESPACE get statefulset store -o json
-<span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>$LASTEXITCODE <span class="syntax-operator">-ne</span> 0<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;The scoped observation failed.&#x27;</span> <span class="syntax-punctuation">}</span></code></pre>
+<p>Windows uses the same Bash commands inside WSL 2. The lab adapter refuses native Windows credential handling, so do not run kubectl against the receipt from PowerShell. From PowerShell, only open your WSL 2 distribution (the name reported by <code>wsl.exe --list --verbose</code>), change to your checkout with its Linux path, then run the Bash block above unchanged:</p>
+<pre class="highlighted-code"><code class="language-powershell">wsl<span class="syntax-punctuation">.</span>exe <span class="syntax-punctuation">-</span>-distribution Ubuntu</code></pre>
 <p>Retain only the fields needed by this chapter&#x27;s prediction. A NotFound result may be expected after one-shot cleanup; a Forbidden result may identify a deliberately absent advanced capability. Neither result authorizes an ambient-context fallback.</p>
 <h3 id="concrete-finite-marker-operations">Concrete finite marker operations<a class="heading-anchor" href="#concrete-finite-marker-operations" aria-label="Link to this section">#</a></h3>
 <p>The separate <a href="../fixtures/k8s-022-marker-writer.json.html">exclusive-create writer</a> and <a href="../fixtures/k8s-022-marker-reader.json.html">read-only verifier</a> are host-only Job manifests. The writer opens <code>/data/marker</code> with mode <code>xb</code>, so an existing file causes failure instead of silently overwriting evidence. The reader requires the exact <code>persistent-demo</code> bytes followed by a newline and reports their SHA256. It never initializes data.</p>
@@ -240,32 +238,32 @@ kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<sp
 <h4 id="exercise-1-inventory-capabilities">Exercise 1: Inventory capabilities<a class="heading-anchor" href="#exercise-1-inventory-capabilities" aria-label="Link to this section">#</a></h4>
 <p>List storage, CNI, renderer, image and owned-target requirements.</p>
 <p><strong>Expected result/shape:</strong> Each capability has a qualified host receipt or is marked unavailable.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Each capability has a qualified host receipt or is marked unavailable.</p>
+<p><strong>Verify:</strong> Each capability row must point to a host receipt or say unavailable; no row may be inferred from a manifest.</p>
 <p><strong>Progressive hints:</strong> The ordinary worker does not implement the entire capstone.</p>
 <h4 id="exercise-2-establish-independent-baselines">Exercise 2: Establish independent baselines<a class="heading-anchor" href="#exercise-2-establish-independent-baselines" aria-label="Link to this section">#</a></h4>
 <p>Record application response, marker hash and both client paths before change.</p>
 <p><strong>Expected result/shape:</strong> A source-identified baseline exists for every acceptance gate.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: A source-identified baseline exists for every acceptance gate.</p>
+<p><strong>Verify:</strong> Confirm that each baseline was captured before the change and names its source: a request, a hash or a client path.</p>
 <p><strong>Progressive hints:</strong> Keep writer completion separate from read verification.</p>
 <h4 id="exercise-3-review-rendered-intent">Exercise 3: Review rendered intent<a class="heading-anchor" href="#exercise-3-review-rendered-intent" aria-label="Link to this section">#</a></h4>
 <p>Compare the full chart/overlay output with the approved object set.</p>
 <p><strong>Expected result/shape:</strong> No unexpected kind, namespace, image, hook or security change.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: No unexpected kind, namespace, image, hook or security change.</p>
+<p><strong>Verify:</strong> Diff the rendered output against the approved object list and inspect kinds, namespaces, images, hooks and security fields.</p>
 <p><strong>Progressive hints:</strong> Rendering is data preparation, not deployment authority.</p>
 <h4 id="exercise-4-inject-and-diagnose-one-change-failure">Exercise 4: Inject and diagnose one change failure<a class="heading-anchor" href="#exercise-4-inject-and-diagnose-one-change-failure" aria-label="Link to this section">#</a></h4>
 <p>Use the approved wrong-probe or equivalent bounded candidate fault.</p>
 <p><strong>Expected result/shape:</strong> The intended gate fails with a discriminating condition/client result and no unrelated mutation.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: The intended gate fails with a discriminating condition/client result and no unrelated mutation.</p>
+<p><strong>Verify:</strong> Write the predicted failing boundary before applying the fault and compare it with the first gate that actually failed.</p>
 <p><strong>Progressive hints:</strong> Predict the first failing boundary before applying.</p>
 <h4 id="exercise-5-recover-without-rewriting-data">Exercise 5: Recover without rewriting data<a class="heading-anchor" href="#exercise-5-recover-without-rewriting-data" aria-label="Link to this section">#</a></h4>
 <p>Restore reviewed intent, then read the marker and retest policy/client behavior.</p>
 <p><strong>Expected result/shape:</strong> Application recovers, hash remains h1, and allowed/denied paths retain their intended outcomes.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Application recovers, hash remains h1, and allowed/denied paths retain their intended outcomes.</p>
+<p><strong>Verify:</strong> Re-read the marker with the read-only reader and repeat both client paths, then compare with the baselines from Exercise 2.</p>
 <p><strong>Progressive hints:</strong> A reader must not double as an initializer.</p>
 <h4 id="exercise-6-hand-off-retention-and-cleanup">Exercise 6: Hand off retention and cleanup<a class="heading-anchor" href="#exercise-6-hand-off-retention-and-cleanup" aria-label="Link to this section">#</a></h4>
 <p>Record whether the synthetic PVC remains and which exact resources were removed.</p>
 <p><strong>Expected result/shape:</strong> UID-aware cleanup and explicit data-retention/reclaim boundaries are reviewable.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: UID-aware cleanup and explicit data-retention/reclaim boundaries are reviewable.</p>
+<p><strong>Verify:</strong> Confirm that the packet lists removed UIDs and the PVC retention decision separately from cluster release.</p>
 <p><strong>Progressive hints:</strong> Cluster release is separate from Pod/claim retention.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain the mechanism behind the first example, then distinguish it from this boundary case: Persistence recovery is unproved because the verification step overwrote the evidence. State which observations are synthetic and which, if any, were read from your owned runtime.</p>
@@ -273,7 +271,7 @@ kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<sp
 <p>Application response, stored data, authorization, network enforcement and cleanup have different evidence. A single green summary cannot replace the underlying identities, checksums and client results. The fixture is bounded and synthetic, so it does not establish production database durability, HA or a universal isolation guarantee.</p>
 <p>The offline reference checks the packet logic only. The full host capstone remains unavailable on the basic one-shot profile even though several of its individual manifests resemble supported browser sources.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
-<p>Close the answer and reconstruct the reasoning for Exercise6, Hand off retention and cleanup. Name the exact source and observed identity you would require before claiming the changed case succeeded.</p>
+<p>Close the answer and reconstruct the reasoning for Exercise 6 (Hand off retention and cleanup). Name the exact source and observed identity you would require before claiming the changed case succeeded.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue to <code>k8s-029</code> after preserving the six evidence records.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>

@@ -194,33 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-034_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-034-explanatory-solutions">docker-034: explanatory solutions<a class="heading-anchor" href="#docker-034-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These are explanations of the supplied teaching fixtures, not fabricated engine results.</p>
-<h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
-<p>A migration changes stored data or schema from one version to another. Replacing an application image can require such a change, but image rollback does not automatically reverse data migration. Code version and data version are related state machines with different reversibility.</p>
-<p>A safe migration procedure identifies the starting schema, validates preconditions, creates a consistent backup, performs a bounded transition and verifies the new invariant. Concurrent old and new application instances complicate this because both may read or write the same data during replacement.</p>
-<p>The fixture counter includes a schema_version field so learners can discuss this boundary without a full database. The course does not run destructive migrations on the main classroom’s progress store. Work on copied synthetic records and a separate disposable restore target.</p>
-<p>An expand-and-contract approach first adds a compatible representation, allows both versions to work, migrates data and only later removes the old representation. It costs temporary complexity but can reduce deployment downtime. A tiny offline app may instead choose a documented maintenance window and an exclusive migration.</p>
-<p>Atomic file replacement can prevent a partially written JSON file from appearing, but it is not a general distributed transaction. Define locking and single-writer assumptions explicitly. Backups and rollback commands must match the data protocol, not just the image tag.</p>
+<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-034.md</code>.</p>
 <h3 id="exercise-1-predict-whether-image-rollback-reverses-a-schema-change">Exercise 1: Predict whether image rollback reverses a schema change.<a class="heading-anchor" href="#exercise-1-predict-whether-image-rollback-reverses-a-schema-change" aria-label="Link to this section">#</a></h3>
-<p>The image and volume have different lifetimes. A rollback that ignores the data format can replace one failure with another.</p>
-<p><strong>Expected:</strong> It does not automatically restore previous data.</p>
+<p><strong>Expected answer:</strong> It does not automatically restore previous data.</p>
+<p><strong>Why:</strong> The image and volume have different lifetimes. A rollback that ignores the data format can replace one failure with another.</p>
 <h3 id="exercise-2-identify-migration-preconditions">Exercise 2: Identify migration preconditions.<a class="heading-anchor" href="#exercise-2-identify-migration-preconditions" aria-label="Link to this section">#</a></h3>
-<p>These conditions make the transition reviewable. Guessing the starting format can corrupt records that belong to a different version.</p>
-<p><strong>Expected:</strong> Known schema version, exclusive or compatible writers and a verified backup.</p>
+<p><strong>Expected answer:</strong> Known schema version, exclusive or compatible writers and a verified backup.</p>
+<p><strong>Why:</strong> These conditions make the transition reviewable. Guessing the starting format can corrupt records that belong to a different version.</p>
 <h3 id="exercise-3-design-a-v1-to-v2-synthetic-record-conversion">Exercise 3: Design a v1-to-v2 synthetic record conversion.<a class="heading-anchor" href="#exercise-3-design-a-v1-to-v2-synthetic-record-conversion" aria-label="Link to this section">#</a></h3>
-<p>Use a pure transformation on copied input first. Reject malformed records instead of silently guessing missing values.</p>
-<p><strong>Expected:</strong> Preserve counter value and set a validated new schema version.</p>
+<p><strong>Expected evidence:</strong> Preserve counter value and set a validated new schema version.</p>
+<p><strong>Why:</strong> Use a pure transformation on copied input first. Reject malformed records instead of silently guessing missing values.</p>
 <h3 id="exercise-4-diagnose-an-old-reader-failing-after-deployment-rollback">Exercise 4: Diagnose an old reader failing after deployment rollback.<a class="heading-anchor" href="#exercise-4-diagnose-an-old-reader-failing-after-deployment-rollback" aria-label="Link to this section">#</a></h3>
-<p>Inspect the stored version before restarting repeatedly. Restore or use a compatible reader according to the planned recovery procedure.</p>
-<p><strong>Expected:</strong> The data format may have advanced beyond its compatibility.</p>
+<p><strong>Expected answer:</strong> The data format may have advanced beyond its compatibility.</p>
+<p><strong>Why:</strong> Inspect the stored version before restarting repeatedly. Restore or use a compatible reader according to the planned recovery procedure.</p>
 <h3 id="exercise-5-explain-atomic-file-replacement-limits">Exercise 5: Explain atomic file replacement limits.<a class="heading-anchor" href="#exercise-5-explain-atomic-file-replacement-limits" aria-label="Link to this section">#</a></h3>
-<p>Multiple writers can still overwrite each other’s valid updates without coordination. Name the lock and single-host assumptions.</p>
-<p><strong>Expected:</strong> It avoids partial file visibility under stated local assumptions, not all concurrent-write races.</p>
+<p><strong>Expected answer:</strong> It avoids partial file visibility under stated local assumptions, not all concurrent-write races.</p>
+<p><strong>Why:</strong> Multiple writers can still overwrite each other’s valid updates without coordination. Name the lock and single-host assumptions.</p>
 <h3 id="exercise-6-write-a-migration-release-plan">Exercise 6: Write a migration release plan.<a class="heading-anchor" href="#exercise-6-write-a-migration-release-plan" aria-label="Link to this section">#</a></h3>
-<p>The plan should be concrete enough to rehearse on a copy. A code tag change alone is not a data recovery strategy.</p>
-<p><strong>Expected:</strong> Preconditions, backup, transition, validation, compatible rollback and cleanup.</p>
+<p><strong>Expected evidence:</strong> Preconditions, backup, transition, validation, compatible rollback and cleanup.</p>
+<p><strong>Why:</strong> The plan should be concrete enough to rehearse on a copy. A code tag change alone is not a data recovery strategy.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful solution identifies the exact object, the phase when a setting takes effect, the expected normal result and an observation that disproves it. Repeating a command until it succeeds hides the mechanism. Change one variable, keep a failure record, and test the intended behavior again. Source examples here are small enough to inspect; a production system additionally needs ownership, lifecycle, data recovery and operational review. The host exercises are optional and must stay within the learner-created project.</p></article>
+<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>
 </body>
 </html>

@@ -198,7 +198,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.</p>
 <h3 id="1-replace-the-udf">1. Replace the UDF<a class="heading-anchor" href="#1-replace-the-udf" aria-label="Link to this section">#</a></h3>
 <p>The native expression keeps semantics visible to the engine. Removing Python callbacks is useful when the native operation actually expresses the same logic.</p>
-<p><strong>Expected:</strong> The values remain [1,4,9].</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> polars <span class="syntax-keyword">as</span> pl
+
+frame <span class="syntax-operator">=</span> pl<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
+native <span class="syntax-operator">=</span> frame<span class="syntax-operator">.</span>select<span class="syntax-punctuation">(</span>pl<span class="syntax-operator">.</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>pow<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>alias<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">square</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> native<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">square</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>to_list<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">]</span></code></pre>
+<p><strong>Expected:</strong> The values remain [1, 4, 9].</p>
 <h3 id="2-state-a-return-type">2. State a return type<a class="heading-anchor" href="#2-state-a-return-type" aria-label="Link to this section">#</a></h3>
 <p>Choose a dtype that can represent the permitted range, and test overflow or missing output under the intended policy.</p>
 <p><strong>Expected:</strong> It declares the intended integer dtype.</p>
@@ -254,7 +259,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
     main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="interpretation">Interpretation<a class="heading-anchor" href="#interpretation" aria-label="Link to this section">#</a></h3>
-<p>Use a Python UDF only with an explicit value, type and batching contract. Demonstrate equivalence to a trusted result on contrasting fixtures and identify which optimization claims are justified. Preserve a native implementation whenever it is clearer and semantically equivalent.</p></article>
+<p>Demonstrate equivalence to a trusted result on contrasting fixtures and identify which optimization claims are justified. Preserve a native implementation whenever it is clearer and semantically equivalent.</p></article>
   </main>
 </body>
 </html>

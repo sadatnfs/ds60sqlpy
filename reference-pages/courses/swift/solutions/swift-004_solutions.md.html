@@ -194,37 +194,43 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/swift/solutions/swift-004_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="swift-004-explanation-and-comparison">swift-004: explanation and comparison<a class="heading-anchor" href="#swift-004-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="swift-004_solution.swift.html">swift-004_solution.swift</a>. Its assertions are always active under the prepared classroom compile settings.</p>
+<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="swift-004_solution.swift.html">swift-004_solution.swift</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Count the right unit:</strong> Character count follows grapheme boundaries instead of byte storage. Both spellings contain one Character but differ in UTF-8 bytes.</p>
 <p><strong>Slice with a valid index:</strong> A valid index belongs to the source string and respects its representation boundaries. The split preserves the emoji as a complete Character.</p>
-<h3 id="reason-through-the-six-tasks">Reason through the six tasks<a class="heading-anchor" href="#reason-through-the-six-tasks" aria-label="Link to this section">#</a></h3>
-<ol>
-<li><strong>Predict and explain.</strong> Predict Character and byte counts for both accent spellings.</li>
-</ol>
-<ol start="2">
-<li><strong>Guided modification.</strong> Add an emoji and compare counts again.</li>
-</ol>
-<ol start="3">
-<li><strong>Independent construction.</strong> Write a function returning the first Character as an optional value.</li>
-</ol>
-<ol start="4">
-<li><strong>Diagnose a defect.</strong> Diagnose treating a byte offset as a String.Index.</li>
-</ol>
-<ol start="5">
-<li><strong>Boundary evidence.</strong> Test empty text and a multi-scalar grapheme.</li>
-</ol>
-<ol start="6">
-<li><strong>Transfer and justify.</strong> Design a text-field limit and document whether it counts bytes or visible characters.</li>
-</ol>
-<p>For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.</p>
+<h3 id="task-answers">Task answers<a class="heading-anchor" href="#task-answers" aria-label="Link to this section">#</a></h3>
+<h4 id="task-1-predict-and-explain">Task 1: Predict and explain<a class="heading-anchor" href="#task-1-predict-and-explain" aria-label="Link to this section">#</a></h4>
+<p>Predict Character and byte counts for both accent spellings.</p>
+<p>No separate reference answer has been written for this task. Example A is the evidence to compare with: Character count follows grapheme boundaries instead of byte storage. Both spellings contain one Character but differ in UTF-8 bytes.</p>
+<h4 id="task-2-guided-modification">Task 2: Guided modification<a class="heading-anchor" href="#task-2-guided-modification" aria-label="Link to this section">#</a></h4>
+<p>Add an emoji and compare counts again.</p>
+<p>No separate reference answer has been written for this task. Start from Example B: A valid index belongs to the source string and respects its representation boundaries. The split preserves the emoji as a complete Character.</p>
+<h4 id="task-3-independent-construction">Task 3: Independent construction<a class="heading-anchor" href="#task-3-independent-construction" aria-label="Link to this section">#</a></h4>
+<p>Write a function returning the first Character as an optional value.</p>
+<p><strong>Reference answer.</strong> It runs as the <code>Task 3</code> block of the reference program.</p>
+<pre class="highlighted-code"><code class="language-swift"><span class="syntax-keyword">func</span> <span class="syntax-function">firstCharacter</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">_</span> text<span class="syntax-punctuation">:</span> <span class="syntax-builtin">String</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">-&gt;</span> <span class="syntax-builtin">Character</span><span class="syntax-punctuation">?</span> <span class="syntax-punctuation">{</span>
+  text<span class="syntax-punctuation">.</span><span class="syntax-builtin">first</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>firstCharacter<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">😀B</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">😀</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>firstCharacter<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-keyword">nil</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Observe:</strong> The first Character of 😀B is 😀, and empty text gives nil.</p>
+<p>A Character is a full grapheme cluster, so the emoji is one element, and the optional result keeps empty text distinct from any character.</p>
+<h4 id="task-4-diagnose-a-defect">Task 4: Diagnose a defect<a class="heading-anchor" href="#task-4-diagnose-a-defect" aria-label="Link to this section">#</a></h4>
+<p>Diagnose treating a byte offset as a String.Index.</p>
+<p>No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson&#x27;s pitfalls: Indices from one string are not arbitrary positions in another. Keeping a small Substring can retain a large source buffer. Case conversion and identity comparison require deliberate language or machine-key policies.</p>
+<h4 id="task-5-boundary-evidence">Task 5: Boundary evidence<a class="heading-anchor" href="#task-5-boundary-evidence" aria-label="Link to this section">#</a></h4>
+<p>Test empty text and a multi-scalar grapheme.</p>
+<p>No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Count the right unit) and Example B (Slice with a valid index).</p>
+<h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
+<p>Design a text-field limit and document whether it counts bytes or visible characters.</p>
+<p>No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry <strong>Grapheme cluster</strong>, and state one limitation of your choice.</p>
 <h3 id="mechanism-and-diagnostic-reasoning">Mechanism and diagnostic reasoning<a class="heading-anchor" href="#mechanism-and-diagnostic-reasoning" aria-label="Link to this section">#</a></h3>
 <p>Swift String models extended grapheme clusters as Characters. A visible character may contain several Unicode scalars or code units. This makes String.count different from UTF-8 byte count. It also explains why arbitrary integer indexing is not the general String interface: moving through variable-width text requires valid String.Index positions.</p>
 <p>Text processing must choose its unit. A network payload limit is often measured in bytes, while a user-facing length may mean characters. Unicode normalization and case rules complicate identity. Use the explicit representation needed by the operation and keep machine identifiers separate from human-language display text.</p>
 <p><code>text.count</code> counts Characters. <code>text.utf8.count</code> counts bytes. <code>index(after:)</code> advances a valid String.Index. Slices produce Substring values that may retain the original storage until converted to String.</p>
 <p>Indices from one string are not arbitrary positions in another. Keeping a small Substring can retain a large source buffer. Case conversion and identity comparison require deliberate language or machine-key policies.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.</p></article>
+<p>Run the reference and confirm that it prints <code>swift-004: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
   </main>
 </body>
 </html>

@@ -208,13 +208,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="build-configuration-and-always-active-checks">Build configuration and always-active checks<a class="heading-anchor" href="#build-configuration-and-always-active-checks" aria-label="Link to this section">#</a></h3>
 <p>A build configuration selects compiler options and dependency relationships. CMake describes targets and their requirements; it does not replace the compiler or infer a correct source contract. A clean configure/build sequence should identify the source directory, build directory, selected generator, compiler and target. Keeping generated build files outside the source tree makes it easier to distinguish authored inputs from tool output.</p>
 <p>Debug and Release commonly differ in optimization and assertion configuration, but those names alone are not a universal specification. Inspect the actual flags. The standard assert macro can be removed when NDEBUG is defined. Any expression inside assert can then disappear, including side effects. A validation step that must happen in every build should use an ordinary condition and explicit failure result rather than relying on assert.</p>
-<p>The first complete example uses if to return failure when twice(3) is wrong. It remains active under NDEBUG. The second deliberately increments a counter inside assert to expose the macro behavior: without NDEBUG the counter reaches1; with NDEBUG it stays0. This is a teaching negative pattern, not a recommendation. It explains why tests should not initialize data or perform required work solely inside assert.</p>
+<p>The first complete example uses if to return failure when twice(3) is wrong. It remains active under NDEBUG. The second deliberately increments a counter inside assert to expose the macro behavior: without NDEBUG the counter reaches 1; with NDEBUG it stays 0. This is a teaching negative pattern, not a recommendation. It explains why tests should not initialize data or perform required work solely inside assert.</p>
 <p>CMake target properties express requirements for one executable or library. A language standard requirement belongs to the target, and include/link dependencies should be scoped according to whether consumers need them. Global flags copied into every directory can accidentally couple unrelated targets and hide missing public dependencies. The real multifile fixture is the appropriate place to inspect this behavior.</p>
 <p>A successful configuration only generates a build system. A successful build produces an artifact. Running the artifact and checking its output is another step. If the generator supports multiple configurations, the build/run path must select the intended configuration explicitly. The course host instructions distinguish those operations; the browser profile invokes its own fixed compiler pipeline and does not run arbitrary CMake projects.</p>
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the C++ module, save this lesson&#x27;s learner pad, then use Run. The worker stages the pad as <code>main.cpp</code> and compiles one translation unit. Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for exact local commands, flags, exit statuses, paths and Docker guidance. Tests involving multiple files, CMake, tool flags or shared libraries are explicitly host-project exercises.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
-<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs:each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
+<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs: each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p><a href="../examples/cpp-013-example-1.cpp.html">Complete program 1</a></p>
 <pre class="highlighted-code"><code class="language-cpp"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;iostream&gt;</span>
@@ -227,7 +227,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpp-013 example 1 checks passed</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
   <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
-<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<p><strong>Expected:</strong> With assertions enabled, the program exits with status 0 and prints:</p>
 <pre class="highlighted-code"><code class="language-text">always-active check passed
 cpp-013 example 1 checks passed</code></pre>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
@@ -251,39 +251,39 @@ cpp-013 example 1 checks passed</code></pre>
   std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpp-013 example 2 checks passed</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
   <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
-<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<p><strong>Expected:</strong> With assertions enabled, the program exits with status 0 and prints:</p>
 <pre class="highlighted-code"><code class="language-text">assert active: evaluations=1
 cpp-013 example 2 checks passed</code></pre>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-read-flags">Exercise 1: Read flags<a class="heading-anchor" href="#exercise-1-read-flags" aria-label="Link to this section">#</a></h4>
 <p>Explain -std=c++20, -Wall, -Wextra and -Wpedantic.</p>
 <p><strong>Expected result/shape:</strong> Language selection and three diagnostic groups distinguished.</p>
-<p><strong>Verify:</strong> Language selection and three diagnostic groups distinguished.</p>
+<p><strong>Verify:</strong> Check that your explanation assigns <code>-std=c++20</code> to choosing the language standard and gives <code>-Wall</code>, <code>-Wextra</code> and <code>-Wpedantic</code> three different roles; <code>-Wall</code> does not enable every warning.</p>
 <p><strong>Progressive hints:</strong> Warnings are feedback rather than successful tests.</p>
 <h4 id="exercise-2-run-named-tests">Exercise 2: Run named tests<a class="heading-anchor" href="#exercise-2-run-named-tests" aria-label="Link to this section">#</a></h4>
 <p>Use the supplied CMake project and ctest --output-on-failure.</p>
 <p><strong>Expected result/shape:</strong> One or more registered tests actually execute; record count and status.</p>
-<p><strong>Verify:</strong> One or more registered tests actually execute; record count and status.</p>
+<p><strong>Verify:</strong> Read the ctest summary line and record the number of tests run and passed; a summary of zero tests means nothing was registered, not that the code is correct.</p>
 <p><strong>Progressive hints:</strong> Configure/build/test are three phases.</p>
 <h4 id="exercise-3-create-a-failing-check">Exercise 3: Create a failing check<a class="heading-anchor" href="#exercise-3-create-a-failing-check" aria-label="Link to this section">#</a></h4>
 <p>Change the expected twice(3) result to 7 in a scratch copy.</p>
 <p><strong>Expected result/shape:</strong> Executable exit 1 and failing test.</p>
-<p><strong>Verify:</strong> Executable exit 1 and failing test.</p>
+<p><strong>Verify:</strong> Build the scratch copy, run it, and confirm <code>echo $?</code> prints 1 and the <code>always-active check passed</code> line is missing; ctest must also mark the test as failed.</p>
 <p><strong>Progressive hints:</strong> A failed assertion needs to be observable outside the process.</p>
 <h4 id="exercise-4-repair-a-disabled-test">Exercise 4: Repair a disabled test<a class="heading-anchor" href="#exercise-4-repair-a-disabled-test" aria-label="Link to this section">#</a></h4>
 <p>Build a scratch assert-only test with -DNDEBUG.</p>
 <p><strong>Expected result/shape:</strong> The wrong assert disappears; an if-based test still fails.</p>
-<p><strong>Verify:</strong> The wrong assert disappears; an if-based test still fails.</p>
+<p><strong>Verify:</strong> Build the scratch file with <code>-DNDEBUG</code> and confirm the wrong <code>assert</code> no longer stops the program while the <code>if</code>-based check still returns 1; without <code>-DNDEBUG</code> the <code>assert</code> aborts first.</p>
 <p><strong>Progressive hints:</strong> Do not use disabled assertions as the only release oracle.</p>
 <h4 id="exercise-5-test-zero">Exercise 5: Test zero<a class="heading-anchor" href="#exercise-5-test-zero" aria-label="Link to this section">#</a></h4>
 <p>Keep the always-active twice(0)==0 check.</p>
 <p><strong>Expected result/shape:</strong> Exit 0 for the correct function.</p>
-<p><strong>Verify:</strong> Exit 0 for the correct function.</p>
+<p><strong>Verify:</strong> Add <code>if (twice(0) != 0) return 1;</code> next to the existing check, build with <code>-DNDEBUG</code>, and confirm the exit status is still 0.</p>
 <p><strong>Progressive hints:</strong> Boundary behavior is a separate test input.</p>
 <h4 id="exercise-6-transfer-a-regression">Exercise 6: Transfer a regression<a class="heading-anchor" href="#exercise-6-transfer-a-regression" aria-label="Link to this section">#</a></h4>
 <p>Break twice to x+x+1, run both tests, then restore.</p>
 <p><strong>Expected result/shape:</strong> Both normal and zero contracts reject the broken function.</p>
-<p><strong>Verify:</strong> Both normal and zero contracts reject the broken function.</p>
+<p><strong>Verify:</strong> With <code>x + x + 1</code>, confirm <code>twice(3)</code> gives 7 and <code>twice(0)</code> gives 1 so both checks return 1; after restoring <code>x * 2</code>, both must pass again.</p>
 <p><strong>Progressive hints:</strong> A test suite earns confidence by detecting a plausible defect.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain why this observation follows from the mechanism: The process returns nonzero if the result is wrong, including Release builds. Then explain the changed condition in example 2 without opening the answer.</p>
@@ -294,7 +294,7 @@ cpp-013 example 2 checks passed</code></pre>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue with <a href="cpp-014.md.html">cpp-014</a> after saving the six observations.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
-<p><a href="https://cmake.org/cmake/help/v3.28/guide/tutorial/index.html">CMake3.28 tutorial</a></p>
+<p><a href="https://cmake.org/cmake/help/v3.28/guide/tutorial/index.html">CMake 3.28 tutorial</a></p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to coach cpp-013.
 Read courses/cpp/guides/cpp-013.md and courses/cpp/lessons/cpp-013.cpp.

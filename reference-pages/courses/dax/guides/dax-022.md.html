@@ -201,7 +201,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="the-question-and-the-mechanism">The question and the mechanism<a class="heading-anchor" href="#the-question-and-the-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Locate a variable&#x27;s binding context and avoid repeating one total for every member.</p>
 <p>A variable outside an iterator can hold one scalar for the entire iterator. A variable declared in the iterator&#x27;s expression can be bound separately for each row. The difference is easy to miss when both variables are named Revenue. Use names that expose whether the value is a global total, an incoming-context total or a current-member result.</p>
-<p>With no filters, a variable bound to [NetRevenue] is 187. Summing that value once per Product row yields 748 because Product has four rows. Defining the variable inside SUMX(Product,...) instead invokes the measure for each row, giving 67,24,96 and BLANK, which sum to 187.</p>
+<p>With no filters, a variable bound to [NetRevenue] is 187. Summing that value once per Product row yields 748 because Product has four rows. Defining the variable inside SUMX(Product,...) instead invokes the measure for each row, giving 67, 24, 96 and BLANK, which sum to 187.</p>
 <p>Outer filters still matter before either binding. In Paper there are two Product rows and the incoming total is 91. A shared scalar is repeated twice to give 182, while per-product binding sums 67 and 24 to 91. A variable can improve readability without preserving the intended meaning if moved across an evaluation boundary.</p>
 <h3 id="vocabulary-and-expression-anatomy">Vocabulary and expression anatomy<a class="heading-anchor" href="#vocabulary-and-expression-anatomy" aria-label="Link to this section">#</a></h3>
 <p>The first named variable is outside SUMX; the second is declared after the iterator&#x27;s table argument, inside its scalar expression. RETURN ends that inner variable block. This is a scope distinction, not a mutable assignment updated by each loop iteration.</p>
@@ -264,7 +264,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Context is not simply filtered versus unfiltered. The exact point at which a scalar is bound determines which filtered total gets repeated.</p>
 <p>Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table.</p>
 <h3 id="practice-prediction-construction-and-diagnosis">Practice: prediction, construction and diagnosis<a class="heading-anchor" href="#practice-prediction-construction-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>Retain your formula or written reasoning, the stated context, contributing rows or values, and a conclusion with its unit. This is a manual learning record, not an execution receipt.</p>
+<p>Retain your formula or written reasoning, the stated context, contributing rows or values, and a conclusion with its unit. These notes are your own study record; they do not show that a formula ran.</p>
 <h4 id="exercise-1-predict">Exercise 1: Predict<a class="heading-anchor" href="#exercise-1-predict" aria-label="Link to this section">#</a></h4>
 <p>Predict the shared-scalar sum under Home.</p>
 <h4 id="exercise-2-change-one-condition">Exercise 2: Change one condition<a class="heading-anchor" href="#exercise-2-change-one-condition" aria-label="Link to this section">#</a></h4>
@@ -291,8 +291,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Continue to <a href="dax-023.md.html">dax-023</a> when its prerequisites make sense, or revisit this stage from the <a href="../README.md.html">course map</a>.</p>
 <h3 id="official-references-and-evidence-limits">Official references and evidence limits<a class="heading-anchor" href="#official-references-and-evidence-limits" aria-label="Link to this section">#</a></h3>
 <ul>
-<li><a href="https://learn.microsoft.com/en-us/dax/var-dax">Official documentation 1</a></li>
-<li><a href="https://learn.microsoft.com/en-us/dax/sumx-function-dax">Official documentation 2</a></li>
+<li><a href="https://learn.microsoft.com/en-us/dax/var-dax">DAX keyword: VAR</a></li>
+<li><a href="https://learn.microsoft.com/en-us/dax/sumx-function-dax">DAX function: SUMX</a></li>
 </ul>
 <p>Documentation was reviewed for this original course on 2026-10-25. Version-sensitive features have explicit notes. Source/model checks and independent fixture arithmetic are not a DAX parser, compiler, semantic engine, real RLS test or performance measurement.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>

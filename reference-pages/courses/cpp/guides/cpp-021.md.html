@@ -207,14 +207,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The wrapper&#x27;s job is to stop accidental unit mixing before runtime. A count and an amount may both use long long storage, but only the domain-approved operations should exist. Equality and addition laws give clients predictable behavior. Those laws apply only within the declared numeric domain: overflowing signed arithmetic is not an exotic counterexample to the law, it is an operation outside the program contract. A checked addition API should preserve that distinction.</p>
 <h3 id="strong-domain-types-and-operator-meaning">Strong domain types and operator meaning<a class="heading-anchor" href="#strong-domain-types-and-operator-meaning" aria-label="Link to this section">#</a></h3>
 <p>Two integers can have incompatible meanings even when their machine representation is identical. A Cents type makes a monetary unit visible at function boundaries. It can prevent a caller from accidentally passing a raw row count where a price is expected, provided its constructors and conversions preserve that separation. This is a domain-model benefit rather than a different arithmetic engine.</p>
-<p>An overloaded operator should preserve a familiar, documented meaning. Adding two Cents values produces a Cents result; comparing two values compares their amounts. The complete examples check125=25+100 and the zero identity. They do not establish currency conversion, rounding policy or overflow handling. Those requirements would need distinct types or explicit functions and tests.</p>
+<p>An overloaded operator should preserve a familiar, documented meaning. Adding two Cents values produces a Cents result; comparing two values compares their amounts. The complete examples check 125 = 25 + 100 and the zero identity. They do not establish currency conversion, rounding policy or overflow handling. Those requirements would need distinct types or explicit functions and tests.</p>
 <p>The zero value is useful because it supplies an identity for accumulation. If price+zero changes price, either the operator or the type invariant is wrong. Equality should compare the semantic value represented by the type, not an incidental address. In a richer money type, currency would also matter: equal numeric amounts in different currencies should not be casually added.</p>
 <p>Operator syntax can hide cost and failure. A small Cents addition is simple, while an overloaded plus that performs network I/O or mutates unrelated state would violate ordinary reader expectations. Prefer explicit named operations when behavior is surprising or requires a policy argument. The goal is clearer code, not making every business action look like arithmetic.</p>
 <p>Construction is the boundary where invalid states should be considered. If negative cents are forbidden in one domain but valid for a signed balance in another, one universal wrapper may be misleading. State the type&#x27;s invariant and choose names accordingly. The lesson uses a tiny representation so the learner can separate unit correctness from the later checked-arithmetic policy.</p>
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the C++ module, save this lesson&#x27;s learner pad, then use Run. The worker stages the pad as <code>main.cpp</code> and compiles one translation unit. Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for exact local commands, flags, exit statuses, paths and Docker guidance. Tests involving multiple files, CMake, tool flags or shared libraries are explicitly host-project exercises.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
-<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs:each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
+<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs: each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p><a href="../examples/cpp-021-example-1.cpp.html">Complete program 1</a></p>
 <pre class="highlighted-code"><code class="language-cpp"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;cassert&gt;</span>
@@ -233,7 +233,7 @@ Cents <span class="syntax-keyword">operator</span><span class="syntax-operator">
   std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpp-021 example 1 checks passed</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
   <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
-<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<p><strong>Expected:</strong> With assertions enabled, the program exits with status 0 and prints:</p>
 <pre class="highlighted-code"><code class="language-text">cpp-021 example 1 checks passed</code></pre>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p><a href="../examples/cpp-021-example-2.cpp.html">Complete program 2</a></p>
@@ -251,38 +251,38 @@ Cents <span class="syntax-keyword">operator</span><span class="syntax-operator">
   std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpp-021 example 2 checks passed</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
   <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
-<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<p><strong>Expected:</strong> With assertions enabled, the program exits with status 0 and prints:</p>
 <pre class="highlighted-code"><code class="language-text">cpp-021 example 2 checks passed</code></pre>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-name-the-units">Exercise 1: Name the units<a class="heading-anchor" href="#exercise-1-name-the-units" aria-label="Link to this section">#</a></h4>
 <p>Compare Cents{125} with item count 125.</p>
 <p><strong>Expected result/shape:</strong> Equal representation, different domain meaning.</p>
-<p><strong>Verify:</strong> Equal representation, different domain meaning.</p>
+<p><strong>Verify:</strong> Confirm <code>Cents{125}.value == 125</code> compiles while <code>Cents{125} == 125</code> does not; equal numbers do not make the two domains comparable.</p>
 <p><strong>Progressive hints:</strong> Names prevent treating every integer as interchangeable.</p>
 <h4 id="exercise-2-test-identity">Exercise 2: Test identity<a class="heading-anchor" href="#exercise-2-test-identity" aria-label="Link to this section">#</a></h4>
 <p>Add zero to Cents{125}.</p>
 <p><strong>Expected result/shape:</strong> Cents{125}.</p>
-<p><strong>Verify:</strong> Cents{125}.</p>
+<p><strong>Verify:</strong> Assert <code>(Cents{125} + Cents{0}) == Cents{125}</code>, as Worked example 2 does, with the zero written as <code>Cents{0}</code> rather than a raw integer.</p>
 <p><strong>Progressive hints:</strong> The operation should preserve the value at the identity.</p>
 <h4 id="exercise-3-construct-a-separate-type">Exercise 3: Construct a separate type<a class="heading-anchor" href="#exercise-3-construct-a-separate-type" aria-label="Link to this section">#</a></h4>
 <p>Add struct ItemCount and avoid mixed addition.</p>
 <p><strong>Expected result/shape:</strong> Cents+ItemCount has no valid overload.</p>
-<p><strong>Verify:</strong> Cents+ItemCount has no valid overload.</p>
+<p><strong>Verify:</strong> Write <code>Cents{1} + ItemCount{1}</code> in a scratch file and confirm the compiler finds no matching <code>operator+</code>, while <code>Cents + Cents</code> still compiles.</p>
 <p><strong>Progressive hints:</strong> Omitting meaningless operations is an interface feature.</p>
 <h4 id="exercise-4-repair-implicit-conversion">Exercise 4: Repair implicit conversion<a class="heading-anchor" href="#exercise-4-repair-implicit-conversion" aria-label="Link to this section">#</a></h4>
 <p>Review a non-explicit raw integer constructor.</p>
 <p><strong>Expected result/shape:</strong> Use explicit construction at the domain boundary.</p>
-<p><strong>Verify:</strong> Use explicit construction at the domain boundary.</p>
+<p><strong>Verify:</strong> In a scratch copy, add a non-explicit <code>Cents(long long)</code> constructor and show that <code>Cents total = 125;</code> compiles; marking it <code>explicit</code> must make that line fail.</p>
 <p><strong>Progressive hints:</strong> Implicit conversion can silently cross units.</p>
 <h4 id="exercise-5-check-equality-laws">Exercise 5: Check equality laws<a class="heading-anchor" href="#exercise-5-check-equality-laws" aria-label="Link to this section">#</a></h4>
 <p>Compare a=125, b=125, c=125.</p>
 <p><strong>Expected result/shape:</strong> Reflexive, symmetric and transitive equality for these values.</p>
-<p><strong>Verify:</strong> Reflexive, symmetric and transitive equality for these values.</p>
+<p><strong>Verify:</strong> Assert <code>a == a</code>, <code>a == b</code>, <code>b == a</code>, <code>b == c</code> and <code>a == c</code> for the three <code>Cents{125}</code> values, all through the defaulted <code>operator==</code>.</p>
 <p><strong>Progressive hints:</strong> Default member equality implements the value contract.</p>
 <h4 id="exercise-6-transfer-safety">Exercise 6: Transfer safety<a class="heading-anchor" href="#exercise-6-transfer-safety" aria-label="Link to this section">#</a></h4>
 <p>Specify checked addition when values approach LLONG_MAX.</p>
 <p><strong>Expected result/shape:</strong> Reject overflow before calculating a+b.</p>
-<p><strong>Verify:</strong> Reject overflow before calculating a+b.</p>
+<p><strong>Verify:</strong> Test your guard with <code>LLONG_MAX</code> plus 1 and confirm it rejects before computing the sum, while <code>LLONG_MAX - 1</code> plus 1 is accepted.</p>
 <p><strong>Progressive hints:</strong> Strong naming does not prevent representation overflow.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain why this observation follows from the mechanism: The API retains cents units and produces 125 cents. Then explain the changed condition in example 2 without opening the answer.</p>

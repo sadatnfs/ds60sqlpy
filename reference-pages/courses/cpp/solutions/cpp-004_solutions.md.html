@@ -200,7 +200,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="detailed-reasoning">Detailed reasoning<a class="heading-anchor" href="#detailed-reasoning" aria-label="Link to this section">#</a></h3>
 <p>Trace [4, -2, 0, 6] as four transitions. Starting total 0 becomes 4 after the first item, stays 4 for the rejected -2, stays 4 for the accepted zero and becomes 10 for 6. The zero step explains why comparing totals alone cannot detect &gt;0 versus &gt;=0: acceptance counts expose the difference. An index loop should state a half-open interval such as [0, size), so an empty input naturally executes zero iterations.</p>
 <h3 id="state-boundaries-and-loop-progress">State, boundaries and loop progress<a class="heading-anchor" href="#state-boundaries-and-loop-progress" aria-label="Link to this section">#</a></h3>
-<p>A loop has three questions: what state is carried, which element is visited next, and why does the process terminate? In nonnegative_sum, the carried state is total. Immediately before each iteration, total equals the sum of the nonnegative values in the already visited prefix. Initially that prefix is empty, so zero is the correct state. After processing4 the prefix sum is 4; after -2 it stays4; after 0 it stays4; after 6 it becomes10. This is an invariant, not merely a description of one lucky output.</p>
+<p>A loop has three questions: what state is carried, which element is visited next, and why does the process terminate? In nonnegative_sum, the carried state is total. Immediately before each iteration, total equals the sum of the nonnegative values in the already visited prefix. Initially that prefix is empty, so zero is the correct state. After processing 4 the prefix sum is 4; after -2 it stays 4; after 0 it stays 4; after 6 it becomes 10. This is an invariant, not merely a description of one lucky output.</p>
 <p>The range-for declaration <code>int x : xs</code> copies the current integer into x. Changing x would not change the vector element. The body executes once per element and never for an empty vector. No special empty-case index is needed because the traversal contract already handles zero elements. An index loop requires more care: for a vector of size n, valid indices are 0 through n-1, while n is the past-the-end position. Using &lt;=size instead of &lt;size creates an invalid access on the final iteration.</p>
 <p>A boundary bug can be hidden by an aggregate. Replacing &gt;=0 with &gt;0 changes whether zero is retained, but adding zero does not change the total. Therefore a total-only test cannot distinguish those predicates. Track both accepted count and sum when the policy cares about membership. The empty, all-negative and mixed fixtures exercise different paths; none substitutes for the exact zero boundary.</p>
 <p>Loop initialization belongs outside the repeated body when it represents accumulated history. If total is reset to zero at each iteration, the program forgets every prior contribution and may return only the last accepted value. A trace table exposes that defect immediately. The same principle applies to counters, maximum-so-far values and parser state: choose an initial identity and explain the transition before writing the loop.</p>
@@ -217,32 +217,32 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Trace [4, -2, 0, 6] with a row for each input.</p>
 <p><strong>Expected:</strong> Totals [4, 4, 4, 10], four visits.</p>
 <p><strong>Reasoning:</strong> Only the negative value is excluded.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Add a temporary print of <code>x</code> and <code>total</code> inside the loop of Worked example 1: it must print exactly four lines, and the last total must equal the asserted 10.</p>
 <h3 id="exercise-2-change-the-threshold">Exercise 2: Change the threshold<a class="heading-anchor" href="#exercise-2-change-the-threshold" aria-label="Link to this section">#</a></h3>
 <p>Count retained values for &gt;=0 and &gt;0 on [4, -2, 0, 6].</p>
 <p><strong>Expected:</strong> Counts 3 and 2; both sums 10.</p>
 <p><strong>Reasoning:</strong> A sum can hide a zero-boundary error.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Assert both counts (3 and 2) and both sums (10) in one program; only the element 0 changes classification between the two predicates.</p>
 <h3 id="exercise-3-construct-a-bounded-loop">Exercise 3: Construct a bounded loop<a class="heading-anchor" href="#exercise-3-construct-a-bounded-loop" aria-label="Link to this section">#</a></h3>
 <p>Sum integers 1 through 4 with an index loop.</p>
 <p><strong>Expected:</strong> 10 from exactly four iterations.</p>
 <p><strong>Reasoning:</strong> Use i&lt;=4 or an equivalent half-open range.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Keep a separate iteration counter and assert <code>counter == 4 &amp;&amp; sum == 10</code>, then confirm the condition is <code>i &lt;= 4</code> when <code>i</code> starts at 1.</p>
 <h3 id="exercise-4-repair-a-reset">Exercise 4: Repair a reset<a class="heading-anchor" href="#exercise-4-repair-a-reset" aria-label="Link to this section">#</a></h3>
 <p>Move total=0 into the loop, predict, then repair the scratch copy.</p>
 <p><strong>Expected:</strong> Broken final total 6; repaired total 10.</p>
 <p><strong>Reasoning:</strong> Initialization inside the loop forgets earlier state.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Run the broken scratch copy and confirm it returns 6, the last element alone; after moving <code>total = 0</code> back above the loop, assert the result is 10 again.</p>
 <h3 id="exercise-5-test-the-empty-boundary">Exercise 5: Test the empty boundary<a class="heading-anchor" href="#exercise-5-test-the-empty-boundary" aria-label="Link to this section">#</a></h3>
 <p>Run empty and all-negative vectors.</p>
 <p><strong>Expected:</strong> Both totals 0; no element access.</p>
 <p><strong>Reasoning:</strong> The invariant starts valid before any iteration.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Assert <code>nonnegative_sum({}) == 0</code> and <code>nonnegative_sum({-1, -5}) == 0</code> in one program; the empty case must not index the vector.</p>
 <h3 id="exercise-6-transfer-the-predicate">Exercise 6: Transfer the predicate<a class="heading-anchor" href="#exercise-6-transfer-the-predicate" aria-label="Link to this section">#</a></h3>
 <p>Keep readings in [0, 5] from [-1, 0, 4, 5, 6].</p>
 <p><strong>Expected:</strong> Values [0, 4, 5], total 9.</p>
 <p><strong>Reasoning:</strong> Use conjunction with both inclusive boundaries.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p></article>
+<p><strong>Verify:</strong> Assert the kept values equal <code>std::vector&lt;int&gt;{0, 4, 5}</code> and their total is 9; both boundary values 0 and 5 stay while -1 and 6 are dropped.</p></article>
   </main>
 </body>
 </html>

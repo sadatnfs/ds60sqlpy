@@ -200,28 +200,28 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 1: Derive a scalar gradient</span></span>
-<span class="source-line"><span class="syntax-comment"># Differentiate(w-2)² atw0 in float64.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: gradient-4 and loss4.</span></span>
+<span class="source-line"><span class="syntax-comment"># Differentiate(w-2)² at w=0 in float64.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: gradient -4 and loss 4.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 2: Compare finite differences</span></span>
-<span class="source-line"><span class="syntax-comment"># Use central differenceh=.001 for the same scalar function.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: finite difference approximately-4 within1e-10.</span></span>
+<span class="source-line"><span class="syntax-comment"># Use central difference h=0.001 for the same scalar function.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: finite difference approximately -4 within 1e-10.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Observe accumulation</span></span>
 <span class="source-line"><span class="syntax-comment"># Call backward on a new loss without clearing the prior gradient.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: stored gradient becomes-8.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: stored gradient becomes -8.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Clear gradient state</span></span>
-<span class="source-line"><span class="syntax-comment"># Set the gradient toNone, recompute and backpropagate once.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: gradient returns to-4.</span></span>
+<span class="source-line"><span class="syntax-comment"># Set the gradient to None, recompute and backpropagate once.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: gradient returns to -4.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Inspect detachment</span></span>
-<span class="source-line"><span class="syntax-comment"># Detachw and compare its value and gradient-tracking status.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: same value0; requires_gradFalse.</span></span>
+<span class="source-line"><span class="syntax-comment"># Detach w and compare its value and gradient-tracking status.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: same value 0; requires_gradFalse.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Check an embedding table</span></span>
-<span class="source-line"><span class="syntax-comment"># Lookup IDs2,0,2 in a fixed4x2 table and compare repeated rows.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: shape(3,2); rows0 and2 both[2,2].</span></span>
+<span class="source-line"><span class="syntax-comment"># Lookup IDs 2, 0, 2 in a fixed 4x2 table and compare repeated rows.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: shape (3, 2); rows 0 and 2 both [2, 2].</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Read the guide and implement the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>

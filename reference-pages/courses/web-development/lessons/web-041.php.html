@@ -197,11 +197,33 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">declare</span><span class="syntax-punctuation">(</span>strict_types<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">);</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment">// web-041: Build a summary service with an injected repository.</span></span>
-<span class="source-line"><span class="syntax-comment">// Implement the task with local synthetic values. Do not use real credentials.</span></span>
-<span class="source-line"><span class="syntax-comment">// Keep separate checks for the normal case and the boundary in Exercise 5.</span></span>
+<span class="source-line"><span class="syntax-comment">// web-041: Interfaces, composition and replaceable dependencies</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercises. Hints are in the guide; answers are in the solutions folder.</span></span>
+<span class="source-line"><span class="syntax-comment">// 1. Identify the dependency hidden by the interface.</span></span>
+<span class="source-line"><span class="syntax-comment">// 2. Supply an in-memory store with a known count.</span></span>
+<span class="source-line"><span class="syntax-comment">// 3. Build a summary service with an injected repository.</span></span>
+<span class="source-line"><span class="syntax-comment">// 4. Diagnose a test double that returns impossible domain values.</span></span>
+<span class="source-line"><span class="syntax-comment">// 5. Test zero completed lessons.</span></span>
+<span class="source-line"><span class="syntax-comment">// 6. Explain what remains untested by an in-memory repository.</span></span>
+<span class="source-line"><span class="syntax-comment">//</span></span>
+<span class="source-line"><span class="syntax-comment">// Worked example 1: A narrow dependency</span></span>
+<span class="source-line"><span class="syntax-comment">// interface ProgressStore { public function completedCount(): int; }</span></span>
+<span class="source-line"><span class="syntax-comment">//</span></span>
+<span class="source-line"><span class="syntax-comment">// Worked example 2: Composition</span></span>
+<span class="source-line"><span class="syntax-comment">// final class Summary { public function __construct(private ProgressStore $store) {}</span></span>
+<span class="source-line"><span class="syntax-comment">//   public function label(): string { return $this-&gt;store-&gt;completedCount() . &#x27; complete&#x27;; }</span></span>
+<span class="source-line"><span class="syntax-comment">// }</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-keyword">echo</span> <span class="syntax-string">&quot;</span><span class="syntax-string">My implementation goes here.</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">function</span> <span class="syntax-function">check</span><span class="syntax-punctuation">(</span>bool $condition<span class="syntax-punctuation">,</span> string $message<span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> void</span>
+<span class="source-line"><span class="syntax-punctuation">{</span></span>
+<span class="source-line">  <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>$condition<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> RuntimeException<span class="syntax-punctuation">(</span>$message<span class="syntax-punctuation">);</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">// Write your implementation here and add one check() call for each case you test.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">echo</span> <span class="syntax-string">&quot;</span><span class="syntax-string">web-041 attempt finished without a failed check</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span></code></pre></article>
   </main>
 </body>

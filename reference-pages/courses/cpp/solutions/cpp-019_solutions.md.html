@@ -217,32 +217,32 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Filter &gt;=0 then double [-1, 0, 3].</p>
 <p><strong>Expected:</strong> [0, 6].</p>
 <p><strong>Reasoning:</strong> The predicate runs before transformation.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Collect the filtered and doubled view into a vector and assert it equals <code>std::vector&lt;int&gt;{0, 6}</code>.</p>
 <h3 id="exercise-2-change-composition">Exercise 2: Change composition<a class="heading-anchor" href="#exercise-2-change-composition" aria-label="Link to this section">#</a></h3>
 <p>Double first, then filter &gt;0.</p>
 <p><strong>Expected:</strong> [6]; zero is excluded by the new predicate.</p>
 <p><strong>Reasoning:</strong> Changing order or boundary changes the contract.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Swap the two adaptors, change the predicate to <code>x &gt; 0</code>, and assert the collected vector is <code>std::vector&lt;int&gt;{6}</code>; -1 doubles to -2 and 0 stays 0, so both drop out.</p>
 <h3 id="exercise-3-materialize-ownership">Exercise 3: Materialize ownership<a class="heading-anchor" href="#exercise-3-materialize-ownership" aria-label="Link to this section">#</a></h3>
 <p>Collect the view into vector&lt;int&gt;.</p>
 <p><strong>Expected:</strong> Stored [0, 6] remains independent of later source changes.</p>
 <p><strong>Reasoning:</strong> Materialization gives the result ownership.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> After collecting, set <code>xs[2] = 100</code> and assert the stored vector is still <code>std::vector&lt;int&gt;{0, 6}</code>, while iterating the view again yields 0 and 200.</p>
 <h3 id="exercise-4-repair-dangling-view">Exercise 4: Repair dangling view<a class="heading-anchor" href="#exercise-4-repair-dangling-view" aria-label="Link to this section">#</a></h3>
 <p>Review a view returned over a local vector.</p>
 <p><strong>Expected:</strong> Reject; keep the owner outside or return a vector.</p>
 <p><strong>Reasoning:</strong> A lazy pipeline still borrows the original storage.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Trace where the local vector is destroyed and confirm the reviewed function returns a view over it; the repair returns <code>std::vector&lt;int&gt;</code> or takes the owner by reference from the caller.</p>
 <h3 id="exercise-5-sort-records">Exercise 5: Sort records<a class="heading-anchor" href="#exercise-5-sort-records" aria-label="Link to this section">#</a></h3>
 <p>Sort scores (id1, 9), (id2, 4) by points.</p>
 <p><strong>Expected:</strong> ID order [2, 1].</p>
 <p><strong>Reasoning:</strong> Projection selects the comparison key, not the output type.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Assert <code>scores[0].id == 2 &amp;&amp; scores[1].id == 1</code> after <code>std::ranges::sort(scores, {}, &amp;Score::points)</code>, as Worked example 2 does.</p>
 <h3 id="exercise-6-transfer-stable-ties">Exercise 6: Transfer stable ties<a class="heading-anchor" href="#exercise-6-transfer-stable-ties" aria-label="Link to this section">#</a></h3>
 <p>Add (id3, 4) and define deterministic ordering by points then ID.</p>
 <p><strong>Expected:</strong> ID order [2, 3, 1].</p>
 <p><strong>Reasoning:</strong> A tie-breaker makes equal-key order explicit.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p></article>
+<p><strong>Verify:</strong> Sort with a comparator on <code>std::tie(a.points, a.id) &lt; std::tie(b.points, b.id)</code> and assert the ids are 2, 3, 1; the tie at 4 points is broken by the smaller id.</p></article>
   </main>
 </body>
 </html>

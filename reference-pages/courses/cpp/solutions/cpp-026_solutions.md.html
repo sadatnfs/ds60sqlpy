@@ -202,7 +202,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="debugging-a-wrong-value-before-timing-it">Debugging a wrong value before timing it<a class="heading-anchor" href="#debugging-a-wrong-value-before-timing-it" aria-label="Link to this section">#</a></h3>
 <p>Debugging begins with a reproducible mismatch between expected and observed behavior. A debugger lets you stop at a relevant point, inspect variables and follow the call stack. It is most useful when guided by a hypothesis, such as the accumulator being reset or a caller passing the wrong range. Stepping through every line without a question can produce activity without narrowing the cause.</p>
 <p>The total function provides a small deterministic target. For [2, 4, 6], the expected sum is 12. A breakpoint before the return can inspect the input size and accumulated value. The call stack distinguishes a defect inside total from a caller supplying a different vector. Preserve the smallest failing fixture and the first point where actual state diverges from the predicted trace.</p>
-<p>Timing asks a separate question. Repeating the computation1000 times yields a checksum of 12000, which prevents the benchmark from being judged only by an elapsed number. A benchmark must still consider optimization, allocation, setup work, warm caches and whether the work resembles the real workload. The compiler may simplify work whose result is predictable, so an apparently tiny duration can reflect optimization rather than useful throughput.</p>
+<p>Timing asks a separate question. Repeating the computation 1000 times yields a checksum of 12000, which prevents the benchmark from being judged only by an elapsed number. A benchmark must still consider optimization, allocation, setup work, warm caches and whether the work resembles the real workload. The compiler may simplify work whose result is predictable, so an apparently tiny duration can reflect optimization rather than useful throughput.</p>
 <p>Use a monotonic clock such as steady_clock for elapsed time. Wall-clock adjustments should not create negative benchmark durations. A single measurement is noisy because scheduling and other activity vary. Compare repeated samples and keep the correctness gate fixed. Never assert one exact nanosecond value as a portable expected result.</p>
 <p>Debug builds improve some forms of observability, but their performance may differ substantially from optimized builds. A debug-time result should not be advertised as production speed. Record compiler, flags, architecture, input size and included setup costs. If an optimization changes the answer or skips a required validation step, the faster timing is not a valid improvement.</p>
 <h3 id="debugging-the-contract">Debugging the contract<a class="heading-anchor" href="#debugging-the-contract" aria-label="Link to this section">#</a></h3>
@@ -218,32 +218,32 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Write the expected sum of [2, 4, 6].</p>
 <p><strong>Expected:</strong> 12 from three values.</p>
 <p><strong>Reasoning:</strong> A debugger needs a precise discrepancy.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Write 12 down before running anything, then compare it with Worked example 1&#x27;s assertion <code>total({2, 4, 6}) == 12</code>.</p>
 <h3 id="exercise-2-inspect-a-stack">Exercise 2: Inspect a stack<a class="heading-anchor" href="#exercise-2-inspect-a-stack" aria-label="Link to this section">#</a></h3>
 <p>Use an already available debugger on a -g host build and break in total.</p>
 <p><strong>Expected:</strong> Call stack includes main and total; xs has three values.</p>
 <p><strong>Reasoning:</strong> The browser does not provide an interactive debugger.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> At the breakpoint, print the backtrace and confirm <code>total</code> appears above <code>main</code>, then print <code>xs.size()</code> and check that it is 3.</p>
 <h3 id="exercise-3-measure-a-bounded-workload">Exercise 3: Measure a bounded workload<a class="heading-anchor" href="#exercise-3-measure-a-bounded-workload" aria-label="Link to this section">#</a></h3>
 <p>Run 1000 totals and record steady_clock duration.</p>
 <p><strong>Expected:</strong> Checksum 12000 and nonnegative measured duration with units.</p>
 <p><strong>Reasoning:</strong> Output correctness prevents meaningless timing claims.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Assert <code>checksum == 12000</code>, as Worked example 2 does, and print the duration through <code>std::chrono::duration_cast&lt;std::chrono::microseconds&gt;</code> so the unit appears with the number.</p>
 <h3 id="exercise-4-reject-a-false-benchmark">Exercise 4: Reject a false benchmark<a class="heading-anchor" href="#exercise-4-reject-a-false-benchmark" aria-label="Link to this section">#</a></h3>
 <p>Explain why one observed faster run proves little.</p>
 <p><strong>Expected:</strong> Build mode, workload, repetitions and variability listed.</p>
 <p><strong>Reasoning:</strong> Scheduler noise and optimizer behavior affect tiny measurements.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Check that your explanation names the build flags (<code>-O0</code> versus <code>-O2</code>), the fixed workload of 1000 totals, the number of repeated runs and the spread between them.</p>
 <h3 id="exercise-5-test-an-empty-case">Exercise 5: Test an empty case<a class="heading-anchor" href="#exercise-5-test-an-empty-case" aria-label="Link to this section">#</a></h3>
 <p>Inspect total({}) with debugger or assertions.</p>
 <p><strong>Expected:</strong> 0 and no element access.</p>
 <p><strong>Reasoning:</strong> The accumulation identity handles emptiness.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Assert <code>total({}) == 0</code>, or step through it in the debugger and confirm <code>std::accumulate</code> returns its initial 0 without reading an element.</p>
 <h3 id="exercise-6-transfer-a-hypothesis">Exercise 6: Transfer a hypothesis<a class="heading-anchor" href="#exercise-6-transfer-a-hypothesis" aria-label="Link to this section">#</a></h3>
 <p>Replace a linear scan with a map lookup and state a measurable hypothesis.</p>
 <p><strong>Expected:</strong> Same exact results, operation counts and bounded measurements compared.</p>
 <p><strong>Reasoning:</strong> Choose the evidence before declaring a winner.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p></article>
+<p><strong>Verify:</strong> First assert that both versions return the same answer for every query, then compare operation counts and repeated timings at the same input size and build flags.</p></article>
   </main>
 </body>
 </html>

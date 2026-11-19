@@ -386,23 +386,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Level:</strong> Advanced <strong>Stable lesson ID:</strong> <code>bridge-ai-01</code> <strong>Catalog prerequisites:</strong> <code>bridge-08</code> and <code>python-test-01</code> <strong>Prerequisites:</strong> <a href="bridge-08.html#guide">Bridge Day 8</a> and the <a href="python-test-01.html#guide">professional testing module</a>. Python Day 15 and Bridge Day 5 are earlier background within those paths.</p>
 <p>This module teaches the engineering boundaries around a retrieval-augmented assistant without requiring or contacting a hosted model. Both “embedding” and “generation” are deterministic local doubles. There is no model SDK, account, network call, API key, downloaded weight, or hidden usage charge.</p>
 <p>Run the learner file:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell</span>
-<span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe bridge<span class="syntax-punctuation">\</span>professional<span class="syntax-punctuation">\</span>lessons<span class="syntax-punctuation">\</span>bridge_ai_01_application_engineering<span class="syntax-punctuation">.</span>py</code></pre>
-<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux</span>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># Linux, macOS, or Windows through WSL 2</span>
 .venv/bin/python bridge/professional/lessons/bridge_ai_01_application_engineering.py</code></pre>
 <p>The reference implementation and its evaluation also run offline:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell</span>
-<span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe bridge<span class="syntax-punctuation">\</span>professional<span class="syntax-punctuation">\</span>solutions<span class="syntax-punctuation">\</span>bridge_ai_01_application_engineering_solution<span class="syntax-punctuation">.</span>py</code></pre>
-<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux</span>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># Linux, macOS, or Windows through WSL 2</span>
 .venv/bin/python bridge/professional/solutions/bridge_ai_01_application_engineering_solution.py</code></pre>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python + PostgreSQL engineering</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
 <p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>Start at the repository root. The answer-free starter is deliberately safe to run: it prints orientation text and does not call unfinished functions or contact PostgreSQL.</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell</span>
-<span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe bridge<span class="syntax-punctuation">\</span>professional<span class="syntax-punctuation">\</span>lessons<span class="syntax-punctuation">\</span>bridge_ai_01_application_engineering<span class="syntax-punctuation">.</span>py
-<span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m pytest bridge<span class="syntax-punctuation">\</span>professional<span class="syntax-punctuation">\</span>tests -q</code></pre>
-<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux</span>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># Linux, macOS, or Windows through WSL 2</span>
 .venv/bin/python bridge/professional/lessons/bridge_ai_01_application_engineering.py
 .venv/bin/python -m pytest bridge/professional/tests -q</code></pre>
 <p>Read this guide first, implement one boundary at a time in <code>bridge/professional/lessons/bridge_ai_01_application_engineering.py</code>, and use small fakes or recording doubles for the default evidence path. This lesson is fully offline: use the checked-in model doubles. It needs no PostgreSQL server, hosted model, SDK account, API key, network call, or downloaded model weights.</p>
@@ -786,12 +779,12 @@ Do not open, quote, summarize, or copy anything under solutions/ until I
 explicitly say I have finished my attempt and ask to compare.
 
 Use these coaching phases in order:
-1. Predict — ask what I expect before I run or change code.
-2. Attempt — let me implement or explain one numbered exercise at a time.
-3. Hint — give the smallest useful conceptual hint, never a finished answer.
-4. Evidence — ask for the exact return value, exception type, recorded calls,
+1. Predict: ask what I expect before I run or change code.
+2. Attempt: let me implement or explain one numbered exercise at a time.
+3. Hint: give the smallest useful conceptual hint, never a finished answer.
+4. Evidence: ask for the exact return value, exception type, recorded calls,
    query plus bound parameters, or written decision required by that exercise.
-5. Retrieval — close with two no-notes questions and one transfer problem.
+5. Retrieval: close with two no-notes questions and one transfer problem.
 
 Keep the default path offline and fake-first. If the lesson has an optional
 PostgreSQL step, require my explicit opt-in, DS60_DATABASE_URL, and the
@@ -1913,12 +1906,12 @@ Do not open, quote, summarize, or copy anything under solutions/ until I
 explicitly say I have finished my attempt and ask to compare.
 
 Use these coaching phases in order:
-1. Predict — ask what I expect before I run or change code.
-2. Attempt — let me implement or explain one numbered exercise at a time.
-3. Hint — give the smallest useful conceptual hint, never a finished answer.
-4. Evidence — ask for the exact return value, exception type, recorded calls,
+1. Predict: ask what I expect before I run or change code.
+2. Attempt: let me implement or explain one numbered exercise at a time.
+3. Hint: give the smallest useful conceptual hint, never a finished answer.
+4. Evidence: ask for the exact return value, exception type, recorded calls,
    query plus bound parameters, or written decision required by that exercise.
-5. Retrieval — close with two no-notes questions and one transfer problem.
+5. Retrieval: close with two no-notes questions and one transfer problem.
 
 Keep the default path offline and fake-first. If the lesson has an optional
 PostgreSQL step, require my explicit opt-in, DS60_DATABASE_URL, and the

@@ -206,8 +206,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="derivation-and-shape-contract">Derivation and shape contract<a class="heading-anchor" href="#derivation-and-shape-contract" aria-label="Link to this section">#</a></h3>
 <p>For measured repeats <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>t</mi><mn>1</mn></msub><mo separator="true">,</mo><mo>…</mo><mo separator="true">,</mo><msub><mi>t</mi><mi>r</mi></msub></mrow><annotation encoding="application/x-tex">t_1,\ldots,t_r</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8095em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="minner">…</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0278em;">r</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>, retain the count, units and work boundary with any summary. A speed ratio <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>t</mi><mi>A</mi></msub><mi mathvariant="normal">/</mi><msub><mi>t</mi><mi>B</mi></msub></mrow><annotation encoding="application/x-tex">t_A/t_B</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">A</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord">/</span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0502em;">B</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> is interpretable only when the two measurements include equivalent work and correct results. Timing uncertainty and background activity can dominate tiny computations. The assertions here require finite nonnegative times and correct outputs, not a predetermined ordering between cold and warm measurements.</p>
 <h3 id="run-this-investigation">Run this investigation<a class="heading-anchor" href="#run-this-investigation" aria-label="Link to this section">#</a></h3>
-<p>Use the <strong>JAX</strong> subject in the shared <code>/classroom</code> interface and its prepared <code>jax-cpu</code> profile. A Run starts a fresh Python process; save source and notes before replacing an attempt. The examples below are each complete programs, including their setup. They use tiny offline fixtures and deliberately enable 64-bit arithmetic before constructing arrays. This is a course precision choice, not the usual JAX default. No packages, models or data are downloaded.</p>
-<p>Learner source: <code>courses/jax/lessons/jax-025.py</code>. Guide: <code>courses/jax/guides/jax-025.md</code>. Predict the value and failure behavior before running. A passing assertion supports that particular contract; it does not establish statistical validity, mastery or accelerator performance.</p>
+<p>Open <code>jax-025</code> under the <strong>JAX</strong> subject in <code>/classroom</code> with its prepared <code>jax-cpu</code> profile. Worked example 1, <em>Measure first and warm calls separately</em>, and worked example 2, <em>Keep placement outside a compute-only boundary</em>, are complete programs that include only the setup they use and each print <code>jax-025: 1 asserted case passed</code>. The learner file <code>courses/jax/lessons/jax-025.py</code> leaves the six exercises, from <em>Reject an empty timing sample</em> to <em>Identify the executed backend</em>, for you to implement; the complete reference prints <code>jax-025: 8 asserted cases passed</code>. Every program enables 64-bit arithmetic before creating arrays, a course choice since JAX defaults to 32 bit, and every Run is a fresh Python process, so save source and notes before replacing an attempt. A passing assertion supports its stated contract only, not statistical validity, mastery or accelerator performance.</p>
 <h3 id="worked-investigations">Worked investigations<a class="heading-anchor" href="#worked-investigations" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-measure-first-and-warm-calls-separately">Worked example 1: Measure first and warm calls separately<a class="heading-anchor" href="#worked-example-1-measure-first-and-warm-calls-separately" aria-label="Link to this section">#</a></h4>
 <p>Time one first invocation and three later invocations of the same fresh jitted product.</p>
@@ -217,7 +216,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 
 <span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
 
-<span class="syntax-keyword">import</span> math
 <span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 <span class="syntax-keyword">import</span> jax
 <span class="syntax-keyword">import</span> jax.numpy <span class="syntax-keyword">as</span> jnp
@@ -264,7 +262,7 @@ values <span class="syntax-operator">=</span> jnp<span class="syntax-operator">.
     <span class="syntax-keyword">assert</span> <span class="syntax-punctuation">(</span>cold <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> <span class="syntax-punctuation">(</span>warm <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
     <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">first_seconds</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> cold<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">warm_seconds</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> warm<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
 
-    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">jax-025</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&quot;</span><span class="syntax-string">: 1 asserted cases passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">jax-025: 1 asserted case passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
@@ -277,7 +275,6 @@ values <span class="syntax-operator">=</span> jnp<span class="syntax-operator">.
 
 <span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
 
-<span class="syntax-keyword">import</span> math
 <span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 <span class="syntax-keyword">import</span> jax
 <span class="syntax-keyword">import</span> jax.numpy <span class="syntax-keyword">as</span> jnp
@@ -321,7 +318,7 @@ values <span class="syntax-operator">=</span> jnp<span class="syntax-operator">.
     close<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">,</span> host <span class="syntax-operator">@</span> host<span class="syntax-operator">.</span>T<span class="syntax-punctuation">)</span>
     <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>times<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 
-    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">jax-025</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&quot;</span><span class="syntax-string">: 1 asserted cases passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">jax-025: 1 asserted case passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
@@ -330,39 +327,39 @@ values <span class="syntax-operator">=</span> jnp<span class="syntax-operator">.
 <h4 id="exercise-1-reject-an-empty-timing-sample">Exercise 1: Reject an empty timing sample<a class="heading-anchor" href="#exercise-1-reject-an-empty-timing-sample" aria-label="Link to this section">#</a></h4>
 <p>Request zero repetitions.</p>
 <p><strong>Expected:</strong> ValueError.</p>
-<p><strong>Verify:</strong> Retain the relevant inputs, intermediate calculation and observation. An empty list does not support a meaningful elapsed-time summary.</p>
+<p><strong>Verify:</strong> An empty list does not support a meaningful elapsed-time summary.</p>
 <p><strong>Hint 1:</strong> Validate the measurement plan before running work.</p>
-<p><strong>Hint 2:</strong> Revisit the worked case that changes the same assumption, then close the reference and reconstruct the result from the stated contract.</p>
+<p><strong>Hint 2:</strong> The reference solution calls <code>completed_times</code> and treats <code>ValueError</code> as the passing outcome, failing if the call returns.</p>
 <h4 id="exercise-2-retain-the-shape-contract">Exercise 2: Retain the shape contract<a class="heading-anchor" href="#exercise-2-retain-the-shape-contract" aria-label="Link to this section">#</a></h4>
 <p>Inspect the result shape of a completed product.</p>
 <p><strong>Expected:</strong> (16,16).</p>
-<p><strong>Verify:</strong> Retain the relevant inputs, intermediate calculation and observation. A fast result with the wrong output contract is not a performance success.</p>
+<p><strong>Verify:</strong> A fast result with the wrong output contract is not a performance success.</p>
 <p><strong>Hint 1:</strong> Correctness precedes timing interpretation.</p>
-<p><strong>Hint 2:</strong> Revisit the worked case that changes the same assumption, then close the reference and reconstruct the result from the stated contract.</p>
+<p><strong>Hint 2:</strong> The reference solution calls <code>completed_times</code> and <code>jax.jit</code> and then makes 1 assertion against the expected observation.</p>
 <h4 id="exercise-3-compare-eager-and-compiled-outputs">Exercise 3: Compare eager and compiled outputs<a class="heading-anchor" href="#exercise-3-compare-eager-and-compiled-outputs" aria-label="Link to this section">#</a></h4>
 <p>Compute the same product through eager and jitted functions.</p>
 <p><strong>Expected:</strong> Matching numerical results.</p>
-<p><strong>Verify:</strong> Retain the relevant inputs, intermediate calculation and observation. This comparison fixes values and dtype before considering any timing difference.</p>
+<p><strong>Verify:</strong> This comparison fixes values and dtype before considering any timing difference.</p>
 <p><strong>Hint 1:</strong> Do not change input construction between paths.</p>
-<p><strong>Hint 2:</strong> Revisit the worked case that changes the same assumption, then close the reference and reconstruct the result from the stated contract.</p>
+<p><strong>Hint 2:</strong> The reference solution calls <code>product</code> and <code>jax.jit</code> and then makes 1 assertion against the expected observation.</p>
 <h4 id="exercise-4-report-a-declared-summary">Exercise 4: Report a declared summary<a class="heading-anchor" href="#exercise-4-report-a-declared-summary" aria-label="Link to this section">#</a></h4>
 <p>Collect three completed times and calculate the median.</p>
 <p><strong>Expected:</strong> Finite median within the observed minimum and maximum.</p>
-<p><strong>Verify:</strong> Retain the relevant inputs, intermediate calculation and observation. The summary is descriptive of these measurements, not a confidence interval or a hardware guarantee.</p>
+<p><strong>Verify:</strong> The summary is descriptive of these measurements, not a confidence interval or a hardware guarantee.</p>
 <p><strong>Hint 1:</strong> Retain the original measurements alongside the summary.</p>
-<p><strong>Hint 2:</strong> Revisit the worked case that changes the same assumption, then close the reference and reconstruct the result from the stated contract.</p>
+<p><strong>Hint 2:</strong> The reference solution calls <code>completed_times</code>, <code>jax.jit</code>, <code>np.median</code>, <code>.min</code> and <code>.max</code> and then makes 1 assertion against the expected observation.</p>
 <h4 id="exercise-5-change-workload-size-explicitly">Exercise 5: Change workload size explicitly<a class="heading-anchor" href="#exercise-5-change-workload-size-explicitly" aria-label="Link to this section">#</a></h4>
 <p>Evaluate the product for an 8-by-8 array and check it against NumPy.</p>
 <p><strong>Expected:</strong> Correct 8-by-8 result; a different workload identity.</p>
-<p><strong>Verify:</strong> Retain the relevant inputs, intermediate calculation and observation. Changing shape can change both operation count and compilation specialization, so label it as another case.</p>
+<p><strong>Verify:</strong> Changing shape can change both operation count and compilation specialization, so label it as another case.</p>
 <p><strong>Hint 1:</strong> Do not combine different workload sizes into one unlabeled sample.</p>
-<p><strong>Hint 2:</strong> Revisit the worked case that changes the same assumption, then close the reference and reconstruct the result from the stated contract.</p>
+<p><strong>Hint 2:</strong> The reference solution calls <code>.reshape</code>, <code>jnp.arange</code>, <code>completed_times</code> and <code>jax.jit</code> and then makes 1 assertion against the expected observation.</p>
 <h4 id="exercise-6-identify-the-executed-backend">Exercise 6: Identify the executed backend<a class="heading-anchor" href="#exercise-6-identify-the-executed-backend" aria-label="Link to this section">#</a></h4>
 <p>Record the backend and result-device platform for this CPU lesson.</p>
 <p><strong>Expected:</strong> CPU backend and CPU-resident result.</p>
-<p><strong>Verify:</strong> Retain the relevant inputs, intermediate calculation and observation. This establishes the local execution identity, not accelerator performance.</p>
+<p><strong>Verify:</strong> This establishes the local execution identity, not accelerator performance.</p>
 <p><strong>Hint 1:</strong> A library supporting GPUs does not prove this call used one.</p>
-<p><strong>Hint 2:</strong> Revisit the worked case that changes the same assumption, then close the reference and reconstruct the result from the stated contract.</p>
+<p><strong>Hint 2:</strong> The reference solution calls <code>product</code>, <code>.block_until_ready</code>, <code>jax.default_backend</code> and <code>.devices</code> and then makes 2 assertions against the expected observation.</p>
 <h3 id="diagnosis-and-boundaries">Diagnosis and boundaries<a class="heading-anchor" href="#diagnosis-and-boundaries" aria-label="Link to this section">#</a></h3>
 <p>If timings look implausibly small, inspect synchronization. If the first call is slow, separate compilation from warm work. If a claimed speedup changes after moving data construction, the measurement boundary changed. Never assert a universal speed ratio in a small correctness test.</p>
 <h3 id="transfer-and-review">Transfer and review<a class="heading-anchor" href="#transfer-and-review" aria-label="Link to this section">#</a></h3>
@@ -374,7 +371,7 @@ values <span class="syntax-operator">=</span> jnp<span class="syntax-operator">.
 <li><a href="https://docs.jax.dev/en/latest/profiling.html">Profiling</a></li>
 </ul>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Use the checked-in $guide-ds60sqlpy-learning skill for <code>jax-025</code>. Start with my own prediction and source. Ask me to explain one intermediate shape, derivative or state transition, then give a progressive hint for the first incorrect assumption. Distinguish authored examples, my actual receipt and any hardware or population claim requiring additional evidence.</p></article>
+<p>Use the checked-in $guide-ds60sqlpy-learning skill for <code>jax-025</code> (Benchmark completed work and separate its costs), focusing on asynchronous dispatch, synchronization, cold call, warm call. Start with my own prediction and source for one exercise, such as <em>Compare eager and compiled outputs</em>. Ask me to explain one intermediate shape, derivative or state transition, then give a progressive hint for the first incorrect assumption. Distinguish authored examples, my actual saved run output and any hardware or population claim requiring additional evidence.</p></article>
   </main>
 </body>
 </html>

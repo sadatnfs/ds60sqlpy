@@ -198,8 +198,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
 <p>A channel connects producers and consumers with typed communication. An unbuffered send completes when a receiver participates; a buffered channel retains values up to its capacity. Buffering changes backpressure, not ownership of referenced objects sent through the channel. Closing means no more values will be sent. Receivers drain buffered values before observing closure. The producer that knows all sending is finished should own close. A receiver normally must not close the channel merely because it is done reading. Sending after close panics; an operation on a nil channel blocks unless a select chooses another ready case.</p>
 <p>make(chan int, 2) creates a two-element buffer. value, ok := &lt;-ch distinguishes a delivered value from the zero value after closure. range ch receives until closed and drained. chan&lt;- int restricts a parameter to sending; &lt;-chan int restricts it to receiving. len(ch) is a transient observation rather than a synchronization protocol.</p>
-<h3 id="1-drain-before-iteration-ends">1. Drain before iteration ends<a class="heading-anchor" href="#1-drain-before-iteration-ends" aria-label="Link to this section">#</a></h3>
-<p>Buffer 2 and 3, close and sum the channel.</p>
+<h3 id="1-drain-before-iteration-ends-change-one-input">1. Drain before iteration ends: change one input<a class="heading-anchor" href="#1-drain-before-iteration-ends-change-one-input" aria-label="Link to this section">#</a></h3>
+<p>Copy worked example 1 into a scratch pad and change <code>ch &lt;- 2</code> to <code>ch &lt;- 3</code>. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</p>
+<p>The unchanged code is worked example 1:</p>
 <pre class="highlighted-code"><code class="language-go">ch <span class="syntax-operator">:=</span> <span class="syntax-builtin">make</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">chan</span> <span class="syntax-keyword">int</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
 ch <span class="syntax-operator">&lt;-</span> <span class="syntax-number">2</span>
 ch <span class="syntax-operator">&lt;-</span> <span class="syntax-number">3</span>
@@ -209,17 +210,18 @@ sum <span class="syntax-operator">:=</span> <span class="syntax-number">0</span>
 	sum <span class="syntax-operator">+=</span> v
 <span class="syntax-punctuation">}</span>
 check<span class="syntax-punctuation">(</span>sum <span class="syntax-operator">==</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;drain&quot;</span><span class="syntax-punctuation">)</span></code></pre>
-<p><strong>Expected:</strong> Both values arrive and the sum is 5.</p>
+<p><strong>Expected:</strong> The changed run panics with <code>drain</code> because <code>sum == 5</code> no longer holds. Restoring the original line brings back the worked observation: both values arrive and the sum is 5.</p>
 <p>Close does not erase buffered values. Iteration ends after those values have been received.</p>
-<h3 id="2-distinguish-zero-from-closed">2. Distinguish zero from closed<a class="heading-anchor" href="#2-distinguish-zero-from-closed" aria-label="Link to this section">#</a></h3>
-<p>Send zero, close, then receive twice with comma-ok.</p>
+<h3 id="2-distinguish-zero-from-closed-debug-a-regression">2. Distinguish zero from closed: debug a regression<a class="heading-anchor" href="#2-distinguish-zero-from-closed-debug-a-regression" aria-label="Link to this section">#</a></h3>
+<p>A regression changed one token in worked example 2, so one line now reads <code>ch &lt;- 1</code>. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.</p>
+<p>The unchanged code is worked example 2:</p>
 <pre class="highlighted-code"><code class="language-go">ch <span class="syntax-operator">:=</span> <span class="syntax-builtin">make</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">chan</span> <span class="syntax-keyword">int</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
 ch <span class="syntax-operator">&lt;-</span> <span class="syntax-number">0</span>
 <span class="syntax-builtin">close</span><span class="syntax-punctuation">(</span>ch<span class="syntax-punctuation">)</span>
 a<span class="syntax-punctuation">,</span> okA <span class="syntax-operator">:=</span> <span class="syntax-operator">&lt;-</span>ch
 b<span class="syntax-punctuation">,</span> okB <span class="syntax-operator">:=</span> <span class="syntax-operator">&lt;-</span>ch
 check<span class="syntax-punctuation">(</span>a <span class="syntax-operator">==</span> <span class="syntax-number">0</span> <span class="syntax-operator">&amp;&amp;</span> b <span class="syntax-operator">==</span> <span class="syntax-number">0</span> <span class="syntax-operator">&amp;&amp;</span> okA <span class="syntax-operator">&amp;&amp;</span> <span class="syntax-punctuation">!</span>okB<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;closed presence&quot;</span><span class="syntax-punctuation">)</span></code></pre>
-<p><strong>Expected:</strong> The first zero has ok true; the second has ok false.</p>
+<p><strong>Expected:</strong> Before the repair the program panics with <code>closed presence</code>; after it the line reads <code>ch &lt;- 0</code> again and the first zero has ok true; the second has ok false.</p>
 <p>Value equality cannot distinguish a delivered zero from the post-closure zero. The boolean carries completion information.</p>
 <h3 id="3-use-sender-ownership">3. Use sender ownership<a class="heading-anchor" href="#3-use-sender-ownership" aria-label="Link to this section">#</a></h3>
 <p>Run a producer sending 1 and 2 before closing output.</p>

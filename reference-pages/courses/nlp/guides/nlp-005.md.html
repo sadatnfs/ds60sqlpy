@@ -235,32 +235,32 @@ edges <span class="syntax-operator">=</span> <span class="syntax-punctuation">[<
 <h4 id="exercise-1-retain-grammatical-context">Exercise 1: Retain grammatical context<a class="heading-anchor" href="#exercise-1-retain-grammatical-context" aria-label="Link to this section">#</a></h4>
 <p>Implement the four explicit lemma mappings and preserve raw/POS/lemma records.</p>
 <p><strong>Expected:</strong> saw/VERB -&gt; see; saw/NOUN -&gt; saw; studies/NOUN -&gt; study; better/ADJ -&gt; good.</p>
-<p><strong>Verify:</strong> saw/VERB -&gt; see; saw/NOUN -&gt; saw; studies/NOUN -&gt; study; better/ADJ -&gt; good. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Verify:</strong> Assert each (form, POS) key returns its lemma, so saw/VERB and saw/NOUN give different results, and that the raw form is still stored beside the lemma.</p>
 <p><strong>Hints:</strong> Key the table by both surface and POS.</p>
 <h4 id="exercise-2-trace-the-context-rule">Exercise 2: Trace the context rule<a class="heading-anchor" href="#exercise-2-trace-the-context-rule" aria-label="Link to this section">#</a></h4>
 <p>Implement the one-token determiner rule for saw in the first two sentences.</p>
 <p><strong>Expected:</strong> I saw her gives VERB; the saw broke gives NOUN.</p>
-<p><strong>Verify:</strong> I saw her gives VERB; the saw broke gives NOUN. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Verify:</strong> Print the label the rule assigns to saw in both sentences; the determiner the must be the only cue that switches VERB to NOUN.</p>
 <p><strong>Hints:</strong> Inspect the token immediately before saw and handle position zero.</p>
 <h4 id="exercise-3-preserve-a-known-error">Exercise 3: Preserve a known error<a class="heading-anchor" href="#exercise-3-preserve-a-known-error" aria-label="Link to this section">#</a></h4>
 <p>Run the old saw and compare with an independently stated NOUN label.</p>
 <p><strong>Expected:</strong> The rule returns VERB, and the error is recorded rather than relabeled as correct.</p>
-<p><strong>Verify:</strong> The rule returns VERB, and the error is recorded rather than relabeled as correct. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Verify:</strong> Check that the result record keeps the rule&#x27;s VERB output next to the independent NOUN label and marks it as an error instead of overwriting either value.</p>
 <p><strong>Hints:</strong> An intervening adjective defeats immediate-predecessor logic.</p>
 <h4 id="exercise-4-validate-head-indices">Exercise 4: Validate head indices<a class="heading-anchor" href="#exercise-4-validate-head-indices" aria-label="Link to this section">#</a></h4>
 <p>Check one-root, range and cycle rules on the supplied arrays.</p>
 <p><strong>Expected:</strong> Accept [1,-1,1]; reject [1,0,-1],[-1,-1],[2,-1] and empty input.</p>
-<p><strong>Verify:</strong> Accept [1,-1,1]; reject [1,0,-1],[-1,-1],[2,-1] and empty input. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Verify:</strong> Assert that exactly one of the five head arrays passes and that each rejected array fails a named rule: two roots, an out-of-range head, a cycle or no tokens.</p>
 <p><strong>Hints:</strong> Follow each head chain with a set of visited positions.</p>
 <h4 id="exercise-5-separate-structure-from-meaning">Exercise 5: Separate structure from meaning<a class="heading-anchor" href="#exercise-5-separate-structure-from-meaning" aria-label="Link to this section">#</a></h4>
 <p>Compare [1,-1,1] and [1,-1,0] for I saw her.</p>
 <p><strong>Expected:</strong> Both structurally valid; only the first matches the intended head assignment.</p>
-<p><strong>Verify:</strong> Both structurally valid; only the first matches the intended head assignment. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Verify:</strong> Check that both arrays pass the structural validator and that only [1, -1, 1] attaches her to saw, so validity and meaning are reported separately.</p>
 <p><strong>Hints:</strong> Draw the edges and describe the changed attachment.</p>
 <h4 id="exercise-6-choose-task-specific-normalization">Exercise 6: Choose task-specific normalization<a class="heading-anchor" href="#exercise-6-choose-task-specific-normalization" aria-label="Link to this section">#</a></h4>
 <p>Explain whether tense and number should be collapsed for search versus event extraction.</p>
 <p><strong>Expected:</strong> A concrete policy preserves raw text and names at least one lost distinction for each transformation.</p>
-<p><strong>Verify:</strong> A concrete policy preserves raw text and names at least one lost distinction for each transformation. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Verify:</strong> Check that the written policy keeps the raw token, names a distinction lost for search and one for event extraction, and states when each collapse is acceptable.</p>
 <p><strong>Hints:</strong> Ask what downstream decision depends on the distinction.</p>
 <h3 id="interview-reasoning">Interview reasoning<a class="heading-anchor" href="#interview-reasoning" aria-label="Link to this section">#</a></h3>
 <p><strong>Interview: Is stemming a cheaper version of correct lemmatization?</strong> It solves a different normalization problem and may produce nonwords. Its usefulness depends on the task, while lemmatization attempts a lexical interpretation often requiring grammar.</p>

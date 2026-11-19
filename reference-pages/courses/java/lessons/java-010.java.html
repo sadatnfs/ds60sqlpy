@@ -197,29 +197,38 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-keyword">public</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Main</span> <span class="syntax-punctuation">{</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span></span>
-<span class="source-line">    <span class="syntax-comment">// Exercise 1: Call through an interface</span></span>
-<span class="source-line">    <span class="syntax-comment">// Use Pricing references to identity and half-price implementations on 100 cents.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: 100 and 50.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Exercise 1: Call through an interface: change one input</span></span>
+<span class="source-line">    <span class="syntax-comment">// Copy Example A into a scratch `Main.java` and change `return amount / 2;` to `return</span></span>
+<span class="source-line">    <span class="syntax-comment">// amount / 3;`. Before running it with `java -ea Main`, predict which assertion fails and</span></span>
+<span class="source-line">    <span class="syntax-comment">// which value it now sees; then run it and restore the original line.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` from the assertion on</span></span>
+<span class="source-line">    <span class="syntax-comment">// `regular.price(100) == 100 &amp;&amp; half.price(100) == 50`. Restoring the original line brings</span></span>
+<span class="source-line">    <span class="syntax-comment">// back the worked observation: 100 and 50.</span></span>
 <span class="source-line"></span>
-<span class="source-line">    <span class="syntax-comment">// Exercise 2: Compose a fee policy</span></span>
-<span class="source-line">    <span class="syntax-comment">// Wrap the half-price policy with a10-cent fee.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: price100 becomes60.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Exercise 2: Compose a fee policy: debug a regression</span></span>
+<span class="source-line">    <span class="syntax-comment">// A regression changed one token in the code that Example B adds after Example A, so one</span></span>
+<span class="source-line">    <span class="syntax-comment">// line now reads `Pricing withFee = new Fee(half, 11);`. Run Example B with that line, use</span></span>
+<span class="source-line">    <span class="syntax-comment">// the failing assertion to locate the defect and repair it without changing the assertion.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` from the assertion on</span></span>
+<span class="source-line">    <span class="syntax-comment">// `withFee.price(100) == 60`; after it the line reads `Pricing withFee = new Fee(half, 10);`</span></span>
+<span class="source-line">    <span class="syntax-comment">// again and price 100 becomes 60.</span></span>
 <span class="source-line"></span>
-<span class="source-line">    <span class="syntax-comment">// Exercise 3: Inspect rounding semantics</span></span>
-<span class="source-line">    <span class="syntax-comment">// Apply integer half-price to101 cents under truncation-toward-zero.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: 50 cents before fee.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Exercise 3: Switch exhaustively over a sealed type</span></span>
+<span class="source-line">    <span class="syntax-comment">// Price 200 cents with NoDiscount, Percent(25) and Fixed(250) through one pattern-matching</span></span>
+<span class="source-line">    <span class="syntax-comment">// switch over the sealed Discount interface.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: 200, 150 and 0.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 4: Validate every implementation</span></span>
-<span class="source-line">    <span class="syntax-comment">// Call regular,half and fee policy with-1.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: all throwIllegalArgumentException.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Call regular, half and fee policy with -1.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: all throw IllegalArgumentException.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 5: Change a collaborator without changing caller code</span></span>
-<span class="source-line">    <span class="syntax-comment">// Iterate over the three policies and collect prices for100.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: results100,50,60.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Iterate over the three policies and collect prices for 100.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: results 100, 50, 60.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 6: Reject an invalid wrapper</span></span>
 <span class="source-line">    <span class="syntax-comment">// Construct a fee wrapper with a negative fee or null delegate.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: negative fee IllegalArgumentException;null delegate NullPointerException.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: negative fee IllegalArgumentException; null delegate NullPointerException.</span></span>
 <span class="source-line">    System<span class="syntax-punctuation">.</span><span class="syntax-attribute">out</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">println</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement and check the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line">  <span class="syntax-punctuation">}</span></span>
 <span class="source-line"><span class="syntax-punctuation">}</span></span>

@@ -199,28 +199,28 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">Copy to .learning before editing. Six independent attempts belong below.</span></span>
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 1: Expose naive overflow</span></span>
-<span class="source-line"><span class="syntax-comment"># Exponentiate float32 logits1000, 999 directly.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: both exponentials infinite.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Find the float64 overflow boundary</span></span>
+<span class="source-line"><span class="syntax-comment"># Exponentiate float64 values 709 and 710.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: \(e^{709}\) is finite (about 8.2e307); \(e^{710}\) overflows to inf.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 2: Compute a stable class loss</span></span>
-<span class="source-line"><span class="syntax-comment"># Use target 0 with the same logits.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: loss log(1+exp(-1)) within 1e-6.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Compute a stable loss for target 1</span></span>
+<span class="source-line"><span class="syntax-comment"># Use float32 logits [1000, 998] with target class 1.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: loss \(\log(1+e^{2})\), about 2.1269, within 1e-5.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 3: Check shift invariance</span></span>
-<span class="source-line"><span class="syntax-comment"># Compare softmax 1000, 999 with softmax 0, -1.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: probabilities match within 1e-6.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: Check a new shift</span></span>
+<span class="source-line"><span class="syntax-comment"># Compare the softmax of [1000, 998] with the softmax of [5, 3].</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: both are about [0.8808, 0.1192] and match within 1e-6.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Inspect stable gradients</span></span>
 <span class="source-line"><span class="syntax-comment"># Differentiate the target 0 loss with respect to both logits.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: finite gradients summing approximately 0.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Compare dtype ranges explicitly</span></span>
-<span class="source-line"><span class="syntax-comment"># Inspect float16 and bfloat 16 maximum values and float32 epsilon.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: bfloat 16 range exceeds float16; float32 epsilon positive.</span></span>
+<span class="source-line"><span class="syntax-comment"># Inspect float16 and bfloat16 maximum values and float32 epsilon.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: bfloat16 range exceeds float16; float32 epsilon positive.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Reject a nonfinite input contract</span></span>
-<span class="source-line"><span class="syntax-comment"># Pass aN aN logit through an explicit finite-input validator.</span></span>
+<span class="source-line"><span class="syntax-comment"># Pass a NaN logit through an explicit finite-input validator.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: ValueError before loss evaluation.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>

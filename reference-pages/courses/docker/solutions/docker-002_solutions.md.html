@@ -194,33 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-002_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-002-explanatory-solutions">docker-002: explanatory solutions<a class="heading-anchor" href="#docker-002-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These are explanations of the supplied teaching fixtures, not fabricated engine results.</p>
-<h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
-<p>The Docker client is the command you type. The daemon or engine receives its requests and manages containers. A context selects the endpoint to which the client connects. A local-looking terminal can be configured to operate a remote engine, so confirming the endpoint is part of ownership rather than a cosmetic setup step.</p>
-<p>WSL 2 provides a Linux environment on Windows. The course uses its Ubuntu shell and an engine configured for Linux containers. It does not teach Windows containers or require each language compiler on Windows. On macOS, a desktop engine generally provides a Linux VM. On Linux, the engine can run on the host. These host arrangements differ, while the application’s container filesystem and runtime stay Linux-based.</p>
-<p>The fixture needs a local engine and Compose. Compose is the client-side tool that reads a multi-service application definition. A successful client version print does not prove that the engine is running. Conversely, permission to access an engine grants substantial control over its host environment. Resolve setup through the engine’s documented user configuration rather than making a socket world-writable.</p>
-<p><code>docker context show</code> prints the selected context name. <code>docker context inspect NAME</code> shows its endpoint configuration. <code>docker info</code> actually contacts the engine and exposes its server operating-system type and resource configuration. <code>docker compose version</code> checks the Compose plugin. Treat errors separately: an absent command, an unreachable daemon, an authorization problem and a Windows-container engine are different conditions.</p>
-<p>Run these in the same Bash terminal you will use for the fixture. Do not change global contexts as an unexplained repair. If a context is remote, stop and select the intended local setup deliberately outside the lesson. Keep private endpoint paths and machine identifiers out of screenshots shared publicly.</p>
+<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-002.md</code>.</p>
 <h3 id="exercise-1-predict-whether-docker-version-proves-readiness">Exercise 1: Predict whether docker --version proves readiness.<a class="heading-anchor" href="#exercise-1-predict-whether-docker-version-proves-readiness" aria-label="Link to this section">#</a></h3>
-<p>The version command can use local client information. It does not need to create a server connection and therefore cannot establish permission, engine mode or available resources.</p>
-<p><strong>Expected:</strong> No; it only proves the client can run.</p>
+<p><strong>Expected answer:</strong> No; it only proves the client can run.</p>
+<p><strong>Why:</strong> The version command can use local client information. It does not need to create a server connection and therefore cannot establish permission, engine mode or available resources.</p>
 <h3 id="exercise-2-identify-the-selected-context-and-endpoint">Exercise 2: Identify the selected context and endpoint.<a class="heading-anchor" href="#exercise-2-identify-the-selected-context-and-endpoint" aria-label="Link to this section">#</a></h3>
-<p>Names are user-defined and cannot by themselves prove locality. Inspect the endpoint and understand which engine owns it before any state-changing operation.</p>
-<p><strong>Expected:</strong> A locally recorded context name and an intentionally local endpoint.</p>
+<p><strong>Expected answer:</strong> A locally recorded context name and an intentionally local endpoint.</p>
+<p><strong>Why:</strong> Names are user-defined and cannot by themselves prove locality. Inspect the endpoint and understand which engine owns it before any state-changing operation.</p>
 <h3 id="exercise-3-produce-a-minimal-setup-checklist">Exercise 3: Produce a minimal setup checklist.<a class="heading-anchor" href="#exercise-3-produce-a-minimal-setup-checklist" aria-label="Link to this section">#</a></h3>
-<p>The language compilers come from classroom images. The host prerequisite is the engine environment; adding unrelated native toolchains makes first setup harder without solving a daemon connection problem.</p>
-<p><strong>Expected:</strong> Bash, local Linux engine, Compose and sufficient allocated resources.</p>
+<p><strong>Expected evidence:</strong> Bash, local Linux engine, Compose and sufficient allocated resources.</p>
+<p><strong>Why:</strong> The language compilers come from classroom images. The host prerequisite is the engine environment; adding unrelated native toolchains makes first setup harder without solving a daemon connection problem.</p>
 <h3 id="exercise-4-diagnose-client-success-with-daemon-connection-failure">Exercise 4: Diagnose client success with daemon connection failure.<a class="heading-anchor" href="#exercise-4-diagnose-client-success-with-daemon-connection-failure" aria-label="Link to this section">#</a></h3>
-<p>Do not interpret an unavailable server as a broken application Dockerfile. No build has occurred yet, so change the setup layer that actually failed.</p>
-<p><strong>Expected:</strong> Investigate engine startup, endpoint and permission separately.</p>
+<p><strong>Expected answer:</strong> Investigate engine startup, endpoint and permission separately.</p>
+<p><strong>Why:</strong> Do not interpret an unavailable server as a broken application Dockerfile. No build has occurred yet, so change the setup layer that actually failed.</p>
 <h3 id="exercise-5-explain-where-commands-run-on-windows">Exercise 5: Explain where commands run on Windows.<a class="heading-anchor" href="#exercise-5-explain-where-commands-run-on-windows" aria-label="Link to this section">#</a></h3>
-<p>Linux paths and Bash quoting are part of the examples. PowerShell has different expansion and continuation syntax, so relabeling commands without changing syntax would mislead beginners.</p>
-<p><strong>Expected:</strong> Inside the integrated WSL 2 Ubuntu terminal.</p>
+<p><strong>Expected answer:</strong> Inside the integrated WSL 2 Ubuntu terminal.</p>
+<p><strong>Why:</strong> Linux paths and Bash quoting are part of the examples. PowerShell has different expansion and continuation syntax, so relabeling commands without changing syntax would mislead beginners.</p>
 <h3 id="exercise-6-explain-a-safe-response-to-discovering-a-remote-context">Exercise 6: Explain a safe response to discovering a remote context.<a class="heading-anchor" href="#exercise-6-explain-a-safe-response-to-discovering-a-remote-context" aria-label="Link to this section">#</a></h3>
-<p>The lesson’s authorization concerns a disposable local lab. An ambient context does not extend that ownership to a shared engine or authorize cleanup of its resources.</p>
-<p><strong>Expected:</strong> Stop before mutations and deliberately configure the owned local engine.</p>
+<p><strong>Expected answer:</strong> Stop before mutations and deliberately configure the owned local engine.</p>
+<p><strong>Why:</strong> The lesson’s authorization concerns a disposable local lab. An ambient context does not extend that ownership to a shared engine or authorize cleanup of its resources.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful solution identifies the exact object, the phase when a setting takes effect, the expected normal result and an observation that disproves it. Repeating a command until it succeeds hides the mechanism. Change one variable, keep a failure record, and test the intended behavior again. Source examples here are small enough to inspect; a production system additionally needs ownership, lifecycle, data recovery and operational review. The host exercises are optional and must stay within the learner-created project.</p></article>
+<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>
 </body>
 </html>

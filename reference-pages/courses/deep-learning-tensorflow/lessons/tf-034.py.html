@@ -199,30 +199,31 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">Copy to .learning before editing. Six independent attempts belong below.</span></span>
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 1: Count errors by group</span></span>
-<span class="source-line"><span class="syntax-comment"># Use groupsA,A,B with predictions1,0,0 and truth1,1,0.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: A1/2 errors; B0/1.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Count errors for three groups</span></span>
+<span class="source-line"><span class="syntax-comment"># Use rows (ID, group, truth, prediction): a A 1 1, b A 0 1, c B 1 1, d B 0 0, e C 1 0, f</span></span>
+<span class="source-line"><span class="syntax-comment"># C 0 1, g C 1 1.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: group A 1/2, group B 0/2, group C 2/3 errors.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 2: Expose duplicate confidence</span></span>
-<span class="source-line"><span class="syntax-comment"># Repeat the groupB row five times and compare row count with unique IDs.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: 8 rows but only3 unique IDs.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Deduplicate before reporting</span></span>
+<span class="source-line"><span class="syntax-comment"># Append three more copies of row g, then compare group C counts by row and by unique ID.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: C has 6 rows but 3 unique IDs; the row-level error rate 2/6 understates the 2/3 rate by ID.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Evaluate fixed perturbations</span></span>
-<span class="source-line"><span class="syntax-comment"># Use f(x)=x&gt;=0 with base1 and perturbations-.1,-.9,-1.1.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: first two retain class1; final perturbation changes to0.</span></span>
+<span class="source-line"><span class="syntax-comment"># Use f(x)=x&gt;=0 with base 1 and perturbations -0.1, -0.9, -1.1.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: first two retain class 1; final perturbation changes to 0.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Keep severities separate</span></span>
 <span class="source-line"><span class="syntax-comment"># Record one severe failure and nine minor passes; count severe failures independently of</span></span>
 <span class="source-line"><span class="syntax-comment"># total pass rate.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: 90percent passes and1 severe failure.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: 90 percent passes and 1 severe failure.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Write bounded claims</span></span>
 <span class="source-line"><span class="syntax-comment"># Create a model card naming the three unique units and untested conditions.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: card includes count3 and an untested future-population condition.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: card includes count 3 and an untested future-population condition.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Reject an empty group rate</span></span>
 <span class="source-line"><span class="syntax-comment"># Compute a rate only when its group has observations.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: empty group producesNone, not0.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: empty group produces None, not 0.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Read the guide and implement the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>

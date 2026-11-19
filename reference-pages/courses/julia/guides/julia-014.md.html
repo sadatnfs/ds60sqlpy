@@ -198,7 +198,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Intermediate; approximately 150 minutes. Direct prerequisites: <code>julia-004</code>, <code>julia-012</code>.</p>
 <p>Keep missingness and numerical failure distinct and report the denominator used by each aggregation policy.</p>
 <h3 id="classroom-execution">Classroom execution<a class="heading-anchor" href="#classroom-execution" aria-label="Link to this section">#</a></h3>
-<p>Choose <strong>Julia language and scientific computing</strong> in <code>/classroom</code>, open this unit, and select its prepared <code>julia</code> runtime. The worker starts a fresh <code>main.jl</code> process with two Julia threads, a fixed package environment, no startup file and offline package settings. Both worked examples are complete under that environment. Save your current pad before replacing it. No package, model or dataset is fetched by a lesson.</p>
+<p>Open <code>julia-014</code> in <code>/classroom</code> with its prepared <code>julia</code> runtime. Worked case A (deletion and replacement change a mean) and worked case B (skipmissing does not remove NaN) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing <code>julia-014: all reference checks passed</code>. The <a href="../README.md.html">course overview</a> describes the shared runtime: a fresh offline <code>main.jl</code> process with two threads and a fixed package environment.</p>
 <h3 id="three-states-with-different-meanings">Three states with different meanings<a class="heading-anchor" href="#three-states-with-different-meanings" aria-label="Link to this section">#</a></h3>
 <p><code>missing</code> represents unknown or unavailable data. <code>nothing</code> commonly represents the absence of a returned value. NaN is a floating-point value that often indicates an undefined numerical result. These states are not interchangeable, and a function should not collapse them into zero without a declared policy.</p>
 <p>Operations involving <code>missing</code> can propagate uncertainty. The eager Boolean operators <code>&amp;</code> and <code>|</code> support three-valued behavior when one part is unknown. An <code>if</code> condition and the controlling operand of <code>&amp;&amp;</code> or <code>||</code> still require a Boolean. <code>ismissing</code> produces a definite test. <code>skipmissing</code> iterates over observed values, while <code>coalesce</code> substitutes a stated replacement for missing data.</p>
@@ -259,7 +259,7 @@ worked_b<span class="syntax-punctuation">(</span><span class="syntax-punctuation
 <p>The examples establish the behavior of small authored arrays and one aggregation policy. They do not justify complete-case analysis, zero imputation or any other statistical strategy for an external dataset. Later table, time and modeling units retain these counts and assumptions through larger workflows.</p>
 <h3 id="six-investigations">Six investigations<a class="heading-anchor" href="#six-investigations" aria-label="Link to this section">#</a></h3>
 <h4 id="1-retain-the-denominator">1. Retain the denominator<a class="heading-anchor" href="#1-retain-the-denominator" aria-label="Link to this section">#</a></h4>
-<p>Summarize 1,missing,3 using observed values.</p>
+<p>Summarize <code>[1, missing, 3]</code> using observed values.</p>
 <p><strong>Expected:</strong> Total 3, observed 2 and mean 2.</p>
 <p><strong>Hint:</strong> Keep counts alongside the statistic.</p>
 <h4 id="2-replace-explicitly">2. Replace explicitly<a class="heading-anchor" href="#2-replace-explicitly" aria-label="Link to this section">#</a></h4>
@@ -275,8 +275,8 @@ worked_b<span class="syntax-punctuation">(</span><span class="syntax-punctuation
 <p><strong>Expected:</strong> The observed count is 0 and estimate is missing.</p>
 <p><strong>Hint:</strong> Do not fabricate a mean from an empty observed set.</p>
 <h4 id="5-distinguish-absence">5. Distinguish absence<a class="heading-anchor" href="#5-distinguish-absence" aria-label="Link to this section">#</a></h4>
-<p>Compare something(nothing,7) with coalesce(nothing,7).</p>
-<p><strong>Expected:</strong> The former returns 7; the latter retains nothing.</p>
+<p>Compare <code>something(nothing, 7)</code> with <code>coalesce(nothing, 7)</code>.</p>
+<p><strong>Expected:</strong> The former returns 7; the latter retains <code>nothing</code>.</p>
 <p><strong>Hint:</strong> The helpers target different sentinel meanings.</p>
 <h4 id="6-assess-a-real-policy">6. Assess a real policy<a class="heading-anchor" href="#6-assess-a-real-policy" aria-label="Link to this section">#</a></h4>
 <p>Choose deletion or imputation for a scientific dataset.</p>
@@ -288,7 +288,7 @@ worked_b<span class="syntax-punctuation">(</span><span class="syntax-punctuation
 <li><a href="https://docs.julialang.org/en/v1/stdlib/Statistics/">Statistics standard library</a></li>
 </ul>
 <h3 id="study-companion">Study companion<a class="heading-anchor" href="#study-companion" aria-label="Link to this section">#</a></h3>
-<p>Use the repository learning-companion skill with this lesson ID, your prediction and your actual source/output. Ask for a diagnosis of the first incorrect type, shape, state transition or assumption. Keep observed execution distinct from a timing claim, inferred mathematical result or external deployment.</p></article>
+<p>A repository-aware assistant with the learning-companion skill can review <code>julia-014</code> with you. Give it your prediction for one investigation, your source and the actual output, and ask it to find the first incorrect assumption about missing, nothing, NaN, Union or coverage.</p></article>
   </main>
 </body>
 </html>

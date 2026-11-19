@@ -197,29 +197,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-keyword">public</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Main</span> <span class="syntax-punctuation">{</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span></span>
-<span class="source-line">    <span class="syntax-comment">// Exercise 1: Verify the compiler target</span></span>
-<span class="source-line">    <span class="syntax-comment">// Compile the fixture with --release 21 and inspect its class header.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: magic CAFEBABE; major version 65.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Exercise 1: Verify the compiler target: predict an edited check</span></span>
+<span class="source-line">    <span class="syntax-comment">// Copy Example A into a scratch `Main.java` and change `assert magic == 0xCAFEBABE &amp;&amp; major</span></span>
+<span class="source-line">    <span class="syntax-comment">// == 65;` to `assert magic == 0xCAFEBABE &amp;&amp; major == 66;` inside its assertion. Before</span></span>
+<span class="source-line">    <span class="syntax-comment">// running it with `java -ea Main`, predict whether the assertion still holds and explain</span></span>
+<span class="source-line">    <span class="syntax-comment">// why; then restore it.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` from the assertion on `magic ==</span></span>
+<span class="source-line">    <span class="syntax-comment">// 0xCAFEBABE &amp;&amp; major == 65`. Restoring the original line brings back the worked</span></span>
+<span class="source-line">    <span class="syntax-comment">// observation: magic CAFEBABE; major version 65.</span></span>
 <span class="source-line"></span>
-<span class="source-line">    <span class="syntax-comment">// Exercise 2: Inspect packaged launch metadata</span></span>
-<span class="source-line">    <span class="syntax-comment">// Open thebuiltJAR andcheckMain-Class andApp.class.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: Main-ClassApp;class entry present.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Exercise 2: Inspect packaged launch metadata: diagnose an edited check</span></span>
+<span class="source-line">    <span class="syntax-comment">// A careless edit changed the assertion that Example B adds after Example A so that it reads</span></span>
+<span class="source-line">    <span class="syntax-comment">// `assert jar.getManifest().getMainAttributes().getValue(&quot;Main-Class&quot;).equals(&quot;App!&quot;) &amp;&amp;`.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Run Example B with that line, explain why the edited assertion now fails for the same</span></span>
+<span class="source-line">    <span class="syntax-comment">// program state, and restore it.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` from the assertion on</span></span>
+<span class="source-line">    <span class="syntax-comment">// `jar.getManifest().getMainAttributes().getValue(&quot;Main-Class&quot;).equals(&quot;App&quot;) &amp;&amp;</span></span>
+<span class="source-line">    <span class="syntax-comment">// jar.getJarEntry(&quot;App.class&quot;) != null`; after it the line reads `assert</span></span>
+<span class="source-line">    <span class="syntax-comment">// jar.getManifest().getMainAttributes().getValue(&quot;Main-Class&quot;).equals(&quot;App&quot;) &amp;&amp;` again and</span></span>
+<span class="source-line">    <span class="syntax-comment">// main-Class App; class entry present.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 3: Run a fresh-process self-test</span></span>
-<span class="source-line">    <span class="syntax-comment">// Launch the JAR with--self-test through a bounded childJVM.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: exit 0 andoutputrelease-ok.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Launch the JAR with --self-test through a bounded child JVM.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: exit 0 and output release-ok.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 4: Verify an invalid launch fails clearly</span></span>
-<span class="source-line">    <span class="syntax-comment">// Run thesameJAR with an unsupported argument.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: exit2 and unknown argument diagnostic.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Run the same JAR with an unsupported argument.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: exit 2 and unknown argument diagnostic.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 5: Reject artifact tampering before execution</span></span>
-<span class="source-line">    <span class="syntax-comment">// Hash the JAR,fliponebyte,and call the integrity gate.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: SecurityException;original bytes restored for cleanup.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Hash the JAR, flip one byte, and call the integrity gate.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: SecurityException; original bytes restored for cleanup.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 6: Record runtime-image scope and rollback identity</span></span>
-<span class="source-line">    <span class="syntax-comment">// Inspect whether jlink exists,and write a record distinguishing local JAR acceptance</span></span>
-<span class="source-line">    <span class="syntax-comment">// fromanunbuiltcustomruntime.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Inspect whether jlink exists, and write a record distinguishing local JAR acceptance from</span></span>
+<span class="source-line">    <span class="syntax-comment">// an unbuilt custom runtime.</span></span>
 <span class="source-line">    <span class="syntax-comment">// Expected: previous artifact v1 retained; custom_runtime_built False.</span></span>
 <span class="source-line">    System<span class="syntax-punctuation">.</span><span class="syntax-attribute">out</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">println</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement and check the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line">  <span class="syntax-punctuation">}</span></span>

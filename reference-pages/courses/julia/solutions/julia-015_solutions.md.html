@@ -197,7 +197,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The executable reference is <code>julia-015_reference.jl</code>. Its checks cover the stated authored inputs; they are not a claim of general scientific validity or mastery.</p>
 <h3 id="1-name-the-derived-field">1. Name the derived field<a class="heading-anchor" href="#1-name-the-derived-field" aria-label="Link to this section">#</a></h3>
 <p>Names and shape are part of the resulting schema.</p>
-<p><strong>Expected observation:</strong> The output column contains 1,2,3 under the explicit name scaled.</p>
+<p><strong>Expected observation:</strong> The output column contains 1, 2 and 3 under the explicit name <code>scaled</code>.</p>
 <h3 id="2-observe-a-shared-column">2. Observe a shared column<a class="heading-anchor" href="#2-observe-a-shared-column" aria-label="Link to this section">#</a></h3>
 <p>A caller must request a copy when independent storage is required.</p>
 <p><strong>Expected observation:</strong> The source DataFrame changes.</p>
@@ -206,7 +206,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Expected observation:</strong> The copied values remain unchanged.</p>
 <h3 id="4-report-group-coverage">4. Report group coverage<a class="heading-anchor" href="#4-report-group-coverage" aria-label="Link to this section">#</a></h3>
 <p>Row accounting remains necessary after grouping.</p>
-<p><strong>Expected observation:</strong> It reports 2 rows,1 observed score and mean 1.</p>
+<p><strong>Expected observation:</strong> It reports 2 rows, 1 observed score and mean 1.</p>
 <h3 id="5-handle-an-all-missing-group">5. Handle an all-missing group<a class="heading-anchor" href="#5-handle-an-all-missing-group" aria-label="Link to this section">#</a></h3>
 <p>A fabricated zero could change later model or business decisions.</p>
 <p><strong>Expected observation:</strong> The result is missing.</p>

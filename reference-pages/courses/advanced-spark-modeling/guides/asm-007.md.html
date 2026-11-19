@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/advanced-spark-modeling/guides/asm-007.md</code></p>
     </header>
     <article class="document"><h2 id="asm-007-a-driver-optimizer-over-distributed-passes">asm-007: A driver optimizer over distributed passes<a class="heading-anchor" href="#asm-007-a-driver-optimizer-over-distributed-passes" aria-label="Link to this section">#</a></h2>
-<p>Tutorial mode. Stage: intermediate. Direct prerequisites: <code>asm-006</code>, <code>clp-015</code>.</p>
+<p>Tutorial mode. Stage: advanced. Direct prerequisites: <code>asm-006</code>, <code>clp-015</code>.</p>
 <h3 id="starting-point-and-result">Starting point and result<a class="heading-anchor" href="#starting-point-and-result" aria-label="Link to this section">#</a></h3>
 <p>A global fit has one parameter vector shared by every row. The driver can own that small vector while Spark computes loss and derivatives over distributed data. We use an intercept-only Bernoulli model so an exact solution is available. This isolates orchestration errors from the complexity of a numerical library.</p>
 <h3 id="mechanism-evaluation-and-update-are-separate-phases">Mechanism: evaluation and update are separate phases<a class="heading-anchor" href="#mechanism-evaluation-and-update-are-separate-phases" aria-label="Link to this section">#</a></h3>

@@ -407,9 +407,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Start the Linux-container engine and run <code>./classroom</code> from the repository root. On Windows, use Ubuntu in WSL 2 or the thin <code>START_DOCKER_CLASSROOM.cmd</code> wrapper. Choose <strong>PostgreSQL</strong> on the shared <code>/classroom</code> home, then open <strong>sql-concurrency-01</strong>. The <a href="../reference-pages/docs/one-command-classroom.md.html">launcher guide</a> covers first preparation, strict resume and the saved project selection. No host Python or PostgreSQL installation is required for this browser route.</p>
 <ol>
-<li>Read the prerequisite and fixture notes before running the file. Use only the local disposable <code>advanced_sql_training</code> database. A simple snippet such as <code>SELECT 1;</code> needs no training-schema reset.</li>
+<li>Read the prerequisite and fixture notes before running the file. Use only the local disposable <code>advanced_sql_training</code> database.</li>
 <li>Choose <strong>Whole SQL lesson (psql)</strong> for the cataloged learner script. This preserves the lesson&#x27;s reviewed psql directives, relative includes and transaction behavior. <strong>SQL snippet</strong> is appropriate for ordinary SQL statements, but is not a replacement for an entire script&#x27;s setup.</li>
-<li>When the lesson requires the course training data, use the explicit preparation action and read its reset acknowledgement. It replaces the course-owned <code>training</code> schema. Do not reset unrelated data or prepare every lesson by habit; stateful sequences have their own ordering.</li>
+<li>The <strong>Course database</strong> panel above the code shows whether the course training tables are loaded. Missing tables load automatically before your first run (or choose <strong>Load course tables</strong>) and stay loaded for later lessons. <strong>Reset training data</strong> restores the original rows only when your own changes made results differ; it keeps your saved code and notes.</li>
 <li>Edit the learner copy in the classroom and save your prediction before running. Its whole-script workspace is <code>.learning/sql/sql-concurrency-01/lesson/workspace/sql/professional/lessons/sql_concurrency_01_isolation_and_versions.sql</code>. For browser work this path is inside the Docker learning volume, not a newly created host folder beside your checkout. The checked-in source remains the answer-free starting artifact.</li>
 <li>Run the whole script and inspect the full transcript. The runner uses <code>psql -X -v ON_ERROR_STOP=1 -f</code>. SELECT output has columns, rows and a row count; DDL/DML has command tags; intentional checks may produce NOTICE messages. An unexpected ERROR or nonzero exit is a failure to diagnose, even when an earlier query printed plausible values.</li>
 <li>Verify the lesson&#x27;s expected grain, ordering, constraints and declared transaction or cleanup outcome. Keep required ROLLBACK statements. The warehouse sequence and other explicitly stateful exercises explain when state is committed. Read saved output without rerunning it when reviewing an earlier attempt.</li>
@@ -552,7 +552,7 @@ RETURNING
 <p><strong>Progressive hint:</strong> Every mutation path must advance the same version contract, including replenishment.</p>
 <h4 id="guide--optional-observed-two-session-lab">Optional observed two-session lab<a class="heading-anchor" href="#guide--optional-observed-two-session-lab" aria-label="Link to this section">#</a></h4>
 <p>The default file above is a model. To observe visibility, this optional lab commits exactly one table in the course-owned <code>sql_concurrency_live</code> schema. It uses two terminals connected to the same local disposable database, needs no extension or superuser role, and must finish with the explicit cleanup. The preparation refuses to replace an existing schema. Stop if another learner is already using that schema; do not erase their work.</p>
-<p>Run from the repository root, in PowerShell or a macOS/Linux terminal:</p>
+<p>Run from the repository root on Linux, macOS, or Windows through WSL 2:</p>
 <pre class="highlighted-code"><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/fixtures/concurrency/prepare.sql</code></pre>
 <p>Open <strong>Terminal A</strong> and <strong>Terminal B</strong>, each with:</p>
 <pre class="highlighted-code"><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training</code></pre>
@@ -625,7 +625,7 @@ RETURNING
 <h4 id="guide--reference">Reference<a class="heading-anchor" href="#guide--reference" aria-label="Link to this section">#</a></h4>
 <p>The course works offline after setup. These optional official references describe the PostgreSQL semantics used here:</p>
 <ul>
-<li><a href="https://www.postgresql.org/docs/16/transaction-iso.html">PostgreSQL 16 documentation</a></li>
+<li><a href="https://www.postgresql.org/docs/17/transaction-iso.html">PostgreSQL 16 documentation</a></li>
 </ul>
 <h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>The lesson and expected observations are sufficient offline. For optional coaching, copy:</p>

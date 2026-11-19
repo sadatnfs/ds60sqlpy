@@ -194,31 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-052_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-052-explanatory-solutions">web-052: explanatory solutions<a class="heading-anchor" href="#web-052-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.</p>
-<h3 id="why-the-mechanism-works">Why the mechanism works<a class="heading-anchor" href="#why-the-mechanism-works" aria-label="Link to this section">#</a></h3>
-<p>A transaction groups operations into a unit that can commit or roll back. Atomicity means the unit is not partially applied when the transaction aborts under the database&#x27;s contract. Constraints enforce invariants close to the stored data, where every writer must encounter them. Application checks alone can race when two requests read the same state and then both attempt an update.</p>
-<p>Concurrency requires more than wrapping code in begin and commit. Isolation levels, locking and the chosen database determine what other transactions can observe. An optimistic update includes an expected version in its WHERE clause and checks the affected-row count. A zero-row update can mean the record changed or was not accessible; the application must decide how to report and retry safely.</p>
-<p>Begin a transaction, perform related writes, commit only after all succeed, and roll back on failure if still in a transaction. Use a database CHECK or UNIQUE constraint where it expresses a durable invariant. The SQLite example demonstrates rollback and a version predicate in one connection; it does not simulate real parallel requests or qualify PostgreSQL isolation.</p>
+<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-052.md</code>.</p>
 <h3 id="exercise-1-explain-atomicity-without-claiming-every-transaction-is-serializable">Exercise 1: Explain atomicity without claiming every transaction is serializable.<a class="heading-anchor" href="#exercise-1-explain-atomicity-without-claiming-every-transaction-is-serializable" aria-label="Link to this section">#</a></h3>
-<p>Atomicity concerns all-or-nothing application; isolation is a separate property.</p>
-<p>Trace the smallest example before editing. Name which values are source and which are observations.</p>
+<p><strong>Expected answer:</strong> Atomicity concerns all-or-nothing application; isolation is a separate property.</p>
+<p><strong>Why:</strong> Atomicity means all writes commit or none do; isolation, a separate property, governs interference between concurrent transactions.</p>
 <h3 id="exercise-2-add-a-database-constraint-for-nonnegative-minutes">Exercise 2: Add a database constraint for nonnegative minutes.<a class="heading-anchor" href="#exercise-2-add-a-database-constraint-for-nonnegative-minutes" aria-label="Link to this section">#</a></h3>
-<p>The database rejects invalid writes even if an application check is missed.</p>
-<p>Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.</p>
+<p><strong>Expected evidence:</strong> The database rejects invalid writes even if an application check is missed.</p>
+<p><strong>Why:</strong> A database constraint rejects invalid rows even when a code path forgets the application check.</p>
 <h3 id="exercise-3-implement-a-version-checked-update-in-a-disposable-database">Exercise 3: Implement a version-checked update in a disposable database.<a class="heading-anchor" href="#exercise-3-implement-a-version-checked-update-in-a-disposable-database" aria-label="Link to this section">#</a></h3>
-<p>The first expected version succeeds and the repeated stale version affects zero rows.</p>
-<p>Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.</p>
+<p><strong>Expected evidence:</strong> The first expected version succeeds and the repeated stale version affects zero rows.</p>
+<p><strong>Why:</strong> The first update matches the version and increments it, so the second, stale update matches zero rows.</p>
 <h3 id="exercise-4-diagnose-accepting-a-zero-row-update-as-success">Exercise 4: Diagnose accepting a zero-row update as success.<a class="heading-anchor" href="#exercise-4-diagnose-accepting-a-zero-row-update-as-success" aria-label="Link to this section">#</a></h3>
-<p>Inspect affected-row evidence and handle the conflict explicitly.</p>
-<p>Keep the failing input. Identify the first layer where the observed result differs from the intended contract.</p>
+<p><strong>Expected answer:</strong> Inspect affected-row evidence and handle the conflict explicitly.</p>
+<p><strong>Why:</strong> Zero affected rows means the expected version no longer exists, which is a conflict to report, not a success.</p>
 <h3 id="exercise-5-force-a-failure-after-a-write-and-verify-rollback">Exercise 5: Force a failure after a write and verify rollback.<a class="heading-anchor" href="#exercise-5-force-a-failure-after-a-write-and-verify-rollback" aria-label="Link to this section">#</a></h3>
-<p>The stored value remains the pre-transaction value.</p>
-<p>Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.</p>
+<p><strong>Expected evidence:</strong> The stored value remains the pre-transaction value.</p>
+<p><strong>Why:</strong> rollBack discards uncommitted writes, so the stored value is the one from before the transaction.</p>
 <h3 id="exercise-6-explain-the-limits-of-the-single-connection-concurrency-demonstration">Exercise 6: Explain the limits of the single-connection concurrency demonstration.<a class="heading-anchor" href="#exercise-6-explain-the-limits-of-the-single-connection-concurrency-demonstration" aria-label="Link to this section">#</a></h3>
-<p>It tests predicates and rollback, while real races require controlled concurrent integration tests on the target engine.</p>
-<p>Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.</p>
-<h3 id="reference-comparison-and-limits">Reference comparison and limits<a class="heading-anchor" href="#reference-comparison-and-limits" aria-label="Link to this section">#</a></h3>
-<p>Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.</p></article>
+<p><strong>Expected answer:</strong> It tests predicates and rollback, while real races require controlled concurrent integration tests on the target engine.</p>
+<p><strong>Why:</strong> Sequential statements test predicates and rollback, but real races need concurrent connections on the target database.</p>
+<h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
+<p>Open <code>courses/web-development/solutions/web-052_solution.php</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.</p></article>
   </main>
 </body>
 </html>

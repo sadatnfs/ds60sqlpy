@@ -201,22 +201,22 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">  <span class="syntax-tag">&quot;cases&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;exercise&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;task&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;List metadata,values,schema,template and expected output.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;expected&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;One local template,no dependencies/plugins/hooks/CRDs.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;task&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;List metadata, values, schema, template and expected output.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;expected&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;One local template, no dependencies/plugins/hooks/CRDs.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;exercise&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;task&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use already prepared pinned Helm and compare output with expected-default.json.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;expected&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;One Deployment with replicas1 and approved image;record actual renderer receipt or unavailable status.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;expected&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;One Deployment with replicas 1 and approved image; record actual renderer receipt or unavailable status.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;exercise&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;task&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Render replicas2 and diff the full object.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;task&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Render replicas 2 and diff the full object.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;expected&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Only spec.replicas changes.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;exercise&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;task&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Try replicas3,an unapproved image or an extra unknown key in a scratch values file.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;task&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Try replicas 3, an unapproved image or an extra unknown key in a scratch values file.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;expected&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Schema/review rejection before any cluster operation.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
@@ -226,7 +226,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;exercise&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">6</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;task&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Record chart/values hashes,renderer version,full diff and separate apply/application acceptance.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;task&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Record chart/values hashes, renderer version, full diff and separate apply/application acceptance.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;expected&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;A reviewer can reproduce the local render and identify the exact owned runtime boundary.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">}</span></span>
 <span class="source-line">  <span class="syntax-punctuation">]</span></span>

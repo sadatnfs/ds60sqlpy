@@ -197,7 +197,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These answers explain the stated synthetic and scoped runtime contracts. Static checks do not prove cluster acceptance.</p>
 <h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
 <p>A container security context describes requested process and filesystem restrictions. Running as a nonroot UID, dropping capabilities, disallowing privilege escalation and using a read-only root filesystem reduce different risks. Pod Security admission is a separate policy that can reject workloads not meeting a chosen standard. Neither a namespace name nor one security field creates complete isolation by itself.</p>
-<p>The allowed browser workload uses runAsUser65532, runAsNonRoot true, RuntimeDefault seccomp, allowPrivilegeEscalation false, readOnlyRootFilesystem true and capabilities.drop ALL. Service-account token mounting is disabled. The parser rejects attempts to replace these values or add host namespaces, privileged mode and unapproved mounts.</p>
+<p>The allowed browser workload uses runAsUser 65532, runAsNonRoot true, RuntimeDefault seccomp, allowPrivilegeEscalation false, readOnlyRootFilesystem true and capabilities.drop ALL. Service-account token mounting is disabled. The parser rejects attempts to replace these values or add host namespaces, privileged mode and unapproved mounts.</p>
 <p>This lesson distinguishes source checks, admission decisions and actual runtime identity. The configured UID is desired process identity; an observed runtime UID requires a qualified fixture or host observation. The current app&#x27;s admitted baseline and ownership checks do not automatically prove every host/kernel security property.</p>
 <h3 id="exercise-1-map-each-control">Exercise 1: Map each control<a class="heading-anchor" href="#exercise-1-map-each-control" aria-label="Link to this section">#</a></h3>
 <p>The controls reduce different attack or error surfaces. Understanding their roles helps diagnose a legitimate application permission issue without removing every restriction.</p>
@@ -207,10 +207,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Expected:</strong> Accepted source, observed workload readiness and owned cleanup are recorded.</p>
 <h3 id="exercise-3-reject-a-privileged-mutation">Exercise 3: Reject a privileged mutation<a class="heading-anchor" href="#exercise-3-reject-a-privileged-mutation" aria-label="Link to this section">#</a></h3>
 <p>The course protects the operation at source admission. This is a valid negative result even though no privileged process ran. Preserve the phase rather than inventing a server rejection event.</p>
-<p><strong>Expected:</strong> Parser refusal before cluster mutation.</p>
+<p><strong>Expected:</strong> The course parser refuses the source before any cluster request. Under Pod Security Admission, privileged: true violates the Baseline level and allowPrivilegeEscalation: true violates the Restricted level.</p>
 <h3 id="exercise-4-reject-host-access">Exercise 4: Reject host access<a class="heading-anchor" href="#exercise-4-reject-host-access" aria-label="Link to this section">#</a></h3>
 <p>A secure-looking container context does not neutralize a host namespace or mount. The parser rejects those requests rather than trusting a learner to choose a harmless path.</p>
-<p><strong>Expected:</strong> All are outside the admitted browser contract.</p>
+<p><strong>Expected:</strong> hostPath volumes, hostNetwork and hostPID violate the Baseline standard, so a namespace enforcing baseline or restricted rejects them at admission; the classroom parser rejects them even earlier.</p>
 <h3 id="exercise-5-observe-a-host-policy-separately">Exercise 5: Observe a host policy separately<a class="heading-anchor" href="#exercise-5-observe-a-host-policy-separately" aria-label="Link to this section">#</a></h3>
 <p>The host capability must establish the admission configuration. A successful or denied API request then provides evidence about that policy under the current target. The worker receives no permission to relabel the namespace or install policy.</p>
 <p><strong>Expected:</strong> Policy version, namespace UID and actual admission reason accompany the result.</p>

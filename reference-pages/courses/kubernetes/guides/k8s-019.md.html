@@ -225,7 +225,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-tag">lesson-message</span><span class="syntax-punctuation">:</span> RFVNTVlfTEVTU09OX09OTFk=</code></pre>
 <p><strong>Expected:</strong> Decoding lesson-message yields exactly DUMMY_LESSON_ONLY; the bytes are intentionally synthetic.</p>
 <h4 id="worked-example-2-trace-a-projected-update">Worked example 2: Trace a projected update<a class="heading-anchor" href="#worked-example-2-trace-a-projected-update" aria-label="Link to this section">#</a></h4>
-<p>Synthetic sequence:source value A changes to B; existing environment remains A; projected file is later observed as B; application still returns A until its reload path is invoked.</p>
+<p>Synthetic sequence: source value A changes to B; existing environment remains A; projected file is later observed as B; application still returns A until its reload path is invoked.</p>
 <p><strong>Expected:</strong> Projection and application consumption are separate stages, and no exact refresh second is implied.</p>
 <h4 id="worked-example-3-read-the-actual-three-channel-response">Worked example 3: Read the actual three-channel response<a class="heading-anchor" href="#worked-example-3-read-the-actual-three-channel-response" aria-label="Link to this section">#</a></h4>
 <p>The observer response has five fields: pod_uid, boot_id, environment, projected_file and application_cache. Suppose the first response is Pod P1, boot B1 and initial/initial/initial. After the Secret patch, the teacher polls the file label rather than assuming a fixed delay. A later response P1/B1 with initial/rotated/initial proves that this process has observed the new projection while retaining both its original environment and cached value. POST /reload returns P1/B1 with initial/rotated/rotated. Finally a replacement P2/B2 reports rotated/rotated/rotated. The exact JSON comes from the real fixture, while these P1/B1 names are explanatory placeholders.</p>
@@ -233,15 +233,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Expected:</strong> The same-process stages retain both identities; replacement changes both. Label changes and cleanup are independently checked.</p>
 <h3 id="inspect-the-specific-owned-object">Inspect the specific owned object<a class="heading-anchor" href="#inspect-the-specific-owned-object" aria-label="Link to this section">#</a></h3>
 <p>Only after the chapter&#x27;s host capability is provisioned and its resources remain present, use the explicit receipt fields described in <a href="../host-labs.md.html">host-labs.md</a>. A completed one-shot browser Run has already cleaned its objects. The following read does not provision the missing capability and does not justify changing credentials after a Forbidden result.</p>
-<p>POSIX:</p>
+<p>Bash on Linux, macOS or Ubuntu under WSL 2:</p>
 <pre class="highlighted-code"><code class="language-bash">: <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_KUBECONFIG<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt path</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 : <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_CONTEXT<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt context</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 : <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_NAMESPACE<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt namespace</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<span class="syntax-string">&quot;</span> --context <span class="syntax-string">&quot;</span>$LAB_CONTEXT<span class="syntax-string">&quot;</span> --namespace <span class="syntax-string">&quot;</span>$LAB_NAMESPACE<span class="syntax-string">&quot;</span> get secret synthetic-message -o jsonpath<span class="syntax-operator">=</span><span class="syntax-string">&#x27;{.metadata.uid}&#x27;</span></code></pre>
-<p>PowerShell:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">-not</span> $env:LAB_KUBECONFIG <span class="syntax-operator">-or</span> <span class="syntax-operator">-not</span> $env:LAB_CONTEXT <span class="syntax-operator">-or</span> <span class="syntax-operator">-not</span> $env:LAB_NAMESPACE<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;Owned receipt fields are required.&#x27;</span> <span class="syntax-punctuation">}</span>
-<span class="syntax-punctuation">&amp;</span> kubectl <span class="syntax-punctuation">-</span>-kubeconfig $env:LAB_KUBECONFIG <span class="syntax-punctuation">-</span>-context $env:LAB_CONTEXT <span class="syntax-punctuation">-</span>-namespace $env:LAB_NAMESPACE get secret synthetic-message -o jsonpath<span class="syntax-punctuation">=</span><span class="syntax-string">&#x27;{.metadata.uid}&#x27;</span>
-<span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>$LASTEXITCODE <span class="syntax-operator">-ne</span> 0<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;The scoped observation failed.&#x27;</span> <span class="syntax-punctuation">}</span></code></pre>
+<p>Windows uses the same Bash commands inside WSL 2. The lab adapter refuses native Windows credential handling, so do not run kubectl against the receipt from PowerShell. From PowerShell, only open your WSL 2 distribution (the name reported by <code>wsl.exe --list --verbose</code>), change to your checkout with its Linux path, then run the Bash block above unchanged:</p>
+<pre class="highlighted-code"><code class="language-powershell">wsl<span class="syntax-punctuation">.</span>exe <span class="syntax-punctuation">-</span>-distribution Ubuntu</code></pre>
 <p>Retain only the fields needed by this chapter&#x27;s prediction. A NotFound result may be expected after one-shot cleanup; a Forbidden result may identify a deliberately absent advanced capability. Neither result authorizes an ambient-context fallback.</p>
 <h3 id="run-and-bounded-evidence">Run and bounded evidence<a class="heading-anchor" href="#run-and-bounded-evidence" aria-label="Link to this section">#</a></h3>
 <p>The app artifact is a reading worksheet, <code>courses/kubernetes/lessons/k8s-019.md</code>. The current browser adapter does not provide the full <strong>teacher-owned synthetic Secret mount observation, unavailable to normal worker</strong> operation. Use the synthetic fixture and offline check first. Live work follows <a href="../host-labs.md.html">the scoped host-lab guide</a> only when the named capability and owned target have been provisioned. A worksheet or static check is never a cluster execution receipt.</p>
@@ -250,32 +248,32 @@ kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<sp
 <h4 id="exercise-1-decode-the-authored-marker">Exercise 1: Decode the authored marker<a class="heading-anchor" href="#exercise-1-decode-the-authored-marker" aria-label="Link to this section">#</a></h4>
 <p>Base64-decode only the supplied lesson-message value.</p>
 <p><strong>Expected result/shape:</strong> Exact DUMMY_LESSON_ONLY round trip.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Exact DUMMY_LESSON_ONLY round trip.</p>
+<p><strong>Verify:</strong> Encode your decoded text again and compare it byte for byte with the supplied value.</p>
 <p><strong>Progressive hints:</strong> Use the encoded fixture, not a real Secret API read.</p>
 <h4 id="exercise-2-name-the-security-controls">Exercise 2: Name the security controls<a class="heading-anchor" href="#exercise-2-name-the-security-controls" aria-label="Link to this section">#</a></h4>
 <p>Separate encoding, RBAC, encryption at rest, transport and application handling.</p>
 <p><strong>Expected result/shape:</strong> Five distinct mechanisms and their evidence are described.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Five distinct mechanisms and their evidence are described.</p>
+<p><strong>Verify:</strong> For each control, name the threat it addresses; base64 encoding must appear with the answer none.</p>
 <p><strong>Progressive hints:</strong> Ask what threat each control addresses.</p>
 <h4 id="exercise-3-verify-the-normal-worker-denial">Exercise 3: Verify the normal-worker denial<a class="heading-anchor" href="#exercise-3-verify-the-normal-worker-denial" aria-label="Link to this section">#</a></h4>
 <p>Review direct Secret access and arbitrary Secret mount attempts against the current worker contract.</p>
 <p><strong>Expected result/shape:</strong> Both are outside the normal operation; no privilege broadening or real-value collection occurs.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Both are outside the normal operation; no privilege broadening or real-value collection occurs.</p>
+<p><strong>Verify:</strong> Check both attempts against the worker contract in <code>host-labs.md</code> and confirm that your answer requests no added permission.</p>
 <p><strong>Progressive hints:</strong> Creation of a consuming Pod can be an indirect access path in general Kubernetes.</p>
 <h4 id="exercise-4-compare-environment-and-projected-file">Exercise 4: Compare environment and projected file<a class="heading-anchor" href="#exercise-4-compare-environment-and-projected-file" aria-label="Link to this section">#</a></h4>
 <p>Predict the update trace for an existing process.</p>
 <p><strong>Expected result/shape:</strong> Environment A persists; file may become B after observed projection; application use depends on reload.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Environment A persists; file may become B after observed projection; application use depends on reload.</p>
+<p><strong>Verify:</strong> Assign each of the three values, environment, file and application output, to its own observation; none may be inferred from another.</p>
 <p><strong>Progressive hints:</strong> Do not collapse source update and process observation.</p>
 <h4 id="exercise-5-design-nonsecret-evidence">Exercise 5: Design nonsecret evidence<a class="heading-anchor" href="#exercise-5-design-nonsecret-evidence" aria-label="Link to this section">#</a></h4>
 <p>Specify what to retain from a synthetic mount test without copying real credentials.</p>
 <p><strong>Expected result/shape:</strong> Source/Pod identity, access outcome, reload behavior and synthetic equality evidence.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Source/Pod identity, access outcome, reload behavior and synthetic equality evidence.</p>
+<p><strong>Verify:</strong> Confirm that every retained field is an identity, an outcome or a synthetic value; any real credential value fails the check.</p>
 <p><strong>Progressive hints:</strong> A real secret value is not required to prove the mechanism.</p>
 <h4 id="exercise-6-clean-up-the-synthetic-fixture">Exercise 6: Clean up the synthetic fixture<a class="heading-anchor" href="#exercise-6-clean-up-the-synthetic-fixture" aria-label="Link to this section">#</a></h4>
 <p>Describe exact owned Secret/workload cleanup under the host capability.</p>
 <p><strong>Expected result/shape:</strong> Only recorded synthetic object UIDs are removed; normal worker permissions remain unchanged.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Only recorded synthetic object UIDs are removed; normal worker permissions remain unchanged.</p>
+<p><strong>Verify:</strong> List the UIDs to delete and confirm that each one appears in the host capability&#x27;s creation record.</p>
 <p><strong>Progressive hints:</strong> Names can be reused and host capability is separate.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain the mechanism behind the first example, then distinguish it from this boundary case: Projection and application consumption are separate stages, and no exact refresh second is implied. State which observations are synthetic and which, if any, were read from your owned runtime.</p>
@@ -283,7 +281,7 @@ kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<sp
 <p>Base64 decoding is intentionally easy. A successful round trip proves representation fidelity, not confidentiality. A mounted file&#x27;s restrictive mode does not establish server-side encryption, and an encrypted data store does not repair excessive API permissions.</p>
 <p>The offline check makes no Secret API request. The normal browser refusal must not be bypassed through another namespace, exec command or ambient administrator context. Keep the synthetic host-lab capability and its observations explicit.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
-<p>Close the answer and reconstruct the reasoning for Exercise6, Clean up the synthetic fixture. Name the exact source and observed identity you would require before claiming the changed case succeeded.</p>
+<p>Close the answer and reconstruct the reasoning for Exercise 6 (Clean up the synthetic fixture). Name the exact source and observed identity you would require before claiming the changed case succeeded.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue to <code>k8s-020</code> after preserving the six evidence records.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>

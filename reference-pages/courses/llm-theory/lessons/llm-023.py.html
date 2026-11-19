@@ -200,28 +200,28 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 1: Retain the crossing token</span></span>
-<span class="source-line"><span class="syntax-comment"># Apply top-p.6 to probabilities[.5,.3,.2].</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: retained IDs0,1 with original mass.8.</span></span>
+<span class="source-line"><span class="syntax-comment"># Apply top-p 0.6 to probabilities [0.5, 0.3, 0.2].</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: retained IDs 0, 1 with original mass 0.8.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 2: Renormalize retained mass</span></span>
 <span class="source-line"><span class="syntax-comment"># Normalize the selected two probabilities before drawing.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: probabilities.625,.375.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: probabilities 0.625, 0.375.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Reproduce local sampling</span></span>
-<span class="source-line"><span class="syntax-comment"># Draw8 tokens with two independently seeded CPU generators.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: draw sequences match and contain only0,1.</span></span>
+<span class="source-line"><span class="syntax-comment"># Draw 8 tokens with two independently seeded CPU generators.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: draw sequences match and contain only 0, 1.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Stop on EOS</span></span>
-<span class="source-line"><span class="syntax-comment"># Consume proposed tokens2,3,9,4 with EOS9 and cap5.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: generated2,3,9;4 is never consumed.</span></span>
+<span class="source-line"><span class="syntax-comment"># Consume proposed tokens 2, 3, 9, 4 with EOS ID 9 and cap 5.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: generated 2, 3, 9; 4 is never consumed.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Enforce a cap without EOS</span></span>
-<span class="source-line"><span class="syntax-comment"># Consume an endless repeated token2 under cap3.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: exactly3 generated tokens.</span></span>
+<span class="source-line"><span class="syntax-comment"># Consume an endless repeated token 2 under cap 3.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: exactly 3 generated tokens.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Separate greedy mode</span></span>
-<span class="source-line"><span class="syntax-comment"># Handle temperature0 with argmax rather than division.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: token0 and finite untouched logits.</span></span>
+<span class="source-line"><span class="syntax-comment"># Handle temperature 0 with argmax rather than division.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: token 0 and finite untouched logits.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Read the guide and implement the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>

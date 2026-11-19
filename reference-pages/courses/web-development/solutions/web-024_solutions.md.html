@@ -194,31 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-024_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-024-explanatory-solutions">web-024: explanatory solutions<a class="heading-anchor" href="#web-024-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.</p>
-<h3 id="why-the-mechanism-works">Why the mechanism works<a class="heading-anchor" href="#why-the-mechanism-works" aria-label="Link to this section">#</a></h3>
-<p>A portal combines structure, navigation and repeated components around a user goal. Begin with the tasks: finding a topic, understanding prerequisites, choosing an action and reading progress. The information architecture groups content so those tasks are discoverable. A beautiful collection of cards is not enough if every label is vague or the reading order hides the main choice.</p>
-<p>This milestone integrates the earlier mechanisms without requiring a framework. Semantic headings establish the outline, native links provide navigation, Grid or Flexbox distributes cards, and tokens maintain consistent spacing and color. Progress labels remain textual. The project uses synthetic data and does not claim persistent accounts or a working backend.</p>
-<p>Write acceptance criteria before styling: one main region, descriptive page title, reachable navigation, distinct card headings, no color-only status, a narrow-width layout and a usable zoomed view. Implement the smallest coherent page, then audit the settled state at multiple widths. Keep appearance checks separate from structural checks because each can pass while the other fails.</p>
+<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-024.md</code>.</p>
 <h3 id="exercise-1-write-three-learner-tasks-before-drawing-the-interface">Exercise 1: Write three learner tasks before drawing the interface.<a class="heading-anchor" href="#exercise-1-write-three-learner-tasks-before-drawing-the-interface" aria-label="Link to this section">#</a></h3>
-<p>Find a topic, assess its prerequisites and choose a clear next action.</p>
-<p>Trace the smallest example before editing. Name which values are source and which are observations.</p>
+<p><strong>Expected evidence:</strong> Find a topic, assess its prerequisites and choose a clear next action.</p>
+<p><strong>Why:</strong> Starting from tasks keeps the interface focused on finding a topic, checking prerequisites and taking the next step.</p>
 <h3 id="exercise-2-define-a-small-token-set-for-the-page">Exercise 2: Define a small token set for the page.<a class="heading-anchor" href="#exercise-2-define-a-small-token-set-for-the-page" aria-label="Link to this section">#</a></h3>
-<p>Spacing, text and surface choices are consistent and named by role.</p>
-<p>Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.</p>
+<p><strong>Expected evidence:</strong> Spacing, text and surface choices are consistent and named by role.</p>
+<p><strong>Why:</strong> A small role-based token set keeps the page consistent and makes later palette changes safe.</p>
 <h3 id="exercise-3-build-a-complete-offline-portal-with-three-paths-and-local-destinations">Exercise 3: Build a complete offline portal with three paths and local destinations.<a class="heading-anchor" href="#exercise-3-build-a-complete-offline-portal-with-three-paths-and-local-destinations" aria-label="Link to this section">#</a></h3>
-<p>All cards, navigation and headings are meaningful, keyboard reachable and responsive.</p>
-<p>Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.</p>
+<p><strong>Expected evidence:</strong> All cards, navigation and headings are meaningful, keyboard reachable and responsive.</p>
+<p><strong>Why:</strong> A meaningful structure keeps the portal usable without styles, and the CSS then adapts it to different widths.</p>
 <h3 id="exercise-4-audit-one-deliberately-vague-link-and-one-broken-fragment">Exercise 4: Audit one deliberately vague link and one broken fragment.<a class="heading-anchor" href="#exercise-4-audit-one-deliberately-vague-link-and-one-broken-fragment" aria-label="Link to this section">#</a></h3>
-<p>Replace the vague label and repair the target relationship.</p>
-<p>Keep the failing input. Identify the first layer where the observed result differs from the intended contract.</p>
+<p><strong>Expected evidence:</strong> Replace the vague label and repair the target relationship.</p>
+<p><strong>Why:</strong> Link text must describe its destination, and every fragment must match an existing id.</p>
 <h3 id="exercise-5-review-narrow-width-zoom-keyboard-and-print-behavior">Exercise 5: Review narrow width, zoom, keyboard and print behavior.<a class="heading-anchor" href="#exercise-5-review-narrow-width-zoom-keyboard-and-print-behavior" aria-label="Link to this section">#</a></h3>
-<p>Retain observations for each surface instead of claiming a universal pass from one screenshot.</p>
-<p>Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.</p>
+<p><strong>Expected evidence:</strong> Retain observations for each surface instead of claiming a universal pass from one screenshot.</p>
+<p><strong>Why:</strong> Narrow width, zoom, keyboard and print each exercise different behavior, so each needs its own evidence.</p>
 <h3 id="exercise-6-explain-the-portal-s-remaining-backend-requirements">Exercise 6: Explain the portal&#x27;s remaining backend requirements.<a class="heading-anchor" href="#exercise-6-explain-the-portal-s-remaining-backend-requirements" aria-label="Link to this section">#</a></h3>
-<p>Persistent identity, saved progress and authorization need a server and storage contract beyond this static page.</p>
-<p>Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.</p>
-<h3 id="reference-comparison-and-limits">Reference comparison and limits<a class="heading-anchor" href="#reference-comparison-and-limits" aria-label="Link to this section">#</a></h3>
-<p>Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.</p></article>
+<p><strong>Expected answer:</strong> Persistent identity, saved progress and authorization need a server and storage contract beyond this static page.</p>
+<p><strong>Why:</strong> Saved progress, identity and permissions require a server and storage; a static page can only describe them.</p>
+<h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
+<p>Open <code>courses/web-development/solutions/web-024_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
   </main>
 </body>
 </html>

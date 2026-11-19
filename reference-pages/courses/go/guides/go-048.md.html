@@ -195,9 +195,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="go-048-capstone-a-reliable-resumable-controller-design">go-048: Capstone: a reliable, resumable controller design<a class="heading-anchor" href="#go-048-capstone-a-reliable-resumable-controller-design" aria-label="Link to this section">#</a></h2>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
-<p>Advanced. Allow about 120 minutes, then revisit the transfer case later. Prerequisites: go-047</p>
+<p>Advanced. Allow about 180 minutes, then revisit the transfer case later. Prerequisites: go-047</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
-<p>By the end, explain control-loop invariant, resumability, operational contract; implement the six investigations below; and defend the expected result of a changed input before running it. A passing reference is evidence about that program, not a certification of your independent understanding.</p>
+<p>Design a resumable controller that converges from any starting state, refuses replacement objects and survives restarts. Along the way, explain control-loop invariant, resumability, operational contract; implement the six investigations below; and defend the expected result of a changed input before running it.</p>
 <h3 id="why-this-mechanism-matters">Why this mechanism matters<a class="heading-anchor" href="#why-this-mechanism-matters" aria-label="Link to this section">#</a></h3>
 <p>The capstone combines desired-state validation, exact identity, idempotent planning, cancellation and durable observations. A controller is successful when repeated observations converge without duplicating effects or damaging resources it does not own. Begin with an explicit state diagram and classify each operation as pure, read-only, idempotent mutation or potentially uncertain external side effect. Record what an operation observed and what it requested, not an invented certainty that the whole system is ready. Production readiness also includes minimal RBAC, bounded queues, useful status, metrics, graceful shutdown and a recovery runbook. This offline capstone proves a small orchestration model; the prepared client-go project and owned Kubernetes module supply the separate real-system learning routes.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
@@ -208,7 +208,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ul>
 <h3 id="syntax-anatomy-and-reasoning">Syntax anatomy and reasoning<a class="heading-anchor" href="#syntax-anatomy-and-reasoning" aria-label="Link to this section">#</a></h3>
 <p>The model stores UID, desired count, current count and a write counter. reconcileCap first checks cancellation, then ownership, then input validity, and finally changes state only when needed. The ordering prevents invalid or unauthorized work from reaching mutation. A real adapter adds optimistic concurrency, API errors, status subresources and cleanup. Preserve these boundaries when replacing the in-memory store rather than moving all logic into one untestable function.</p>
-<h3 id="classroom-execution-contract">Classroom execution contract<a class="heading-anchor" href="#classroom-execution-contract" aria-label="Link to this section">#</a></h3>
+<h3 id="run-this-lesson">Run this lesson<a class="heading-anchor" href="#run-this-lesson" aria-label="Link to this section">#</a></h3>
 <p>Choose Go in the unified Docker classroom. Save your own pad before experimenting. The prepared worker stages it as <code>main.go</code>, compiles it, and executes the resulting program with bounded time and output. The pad is one source file. It does not supply interactive input, arbitrary command-line arguments, package installation, Kubernetes credentials or a host Docker socket. Every ordinary reference here uses the standard library, synthetic local data and explicit checks. A failed <code>check</code> panics and produces a nonzero process result; do not remove it to make the run appear successful.</p>
 <p>The explanatory solution snippets belong inside <code>func main()</code> unless they declare a helper. <code>check</code> is a tiny teaching helper that panics when a condition is false. The separate reference supplies required imports and helpers and implements all six cases. Use that complete source only after an attempt or an explicit reveal. For an independently prepared Go project, the equivalent local build is <code>go build -o lesson main.go</code>, followed by <code>./lesson</code>; use Linux or WSL 2 for that optional workflow. Compiling proves syntax and type consistency, while the executed checks establish the stated example contracts.</p>
 <p>For the full project, write a design note containing the desired-state schema, owned child identity, RBAC rules, reconciliation state diagram, status conditions, retry/cancellation policy, finalizer behavior, observability fields and failure-test matrix. Implement the actual API adapter only against an explicitly owned disposable target. The ordinary pad is intentionally the deterministic decision layer, not an autonomous cluster operator.</p>
@@ -322,75 +322,75 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>
 <p>For each example, write the input values, the state that can change, and the expected observation. Explain which result would disprove your current interpretation. For concurrency, predict a guaranteed relationship rather than an arbitrary scheduling order. For an error case, identify whether it is rejected at compilation or returned during execution.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
-<h4 id="exercise-1-converge-from-a-different-state">Exercise 1: Converge from a different state<a class="heading-anchor" href="#exercise-1-converge-from-a-different-state" aria-label="Link to this section">#</a></h4>
-<p>Reconcile owned UID u1 from count 1 to desired 3.</p>
-<p><strong>Expected:</strong> The count becomes 3 with one write.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
-<h4 id="exercise-2-repeat-without-duplicate-writes">Exercise 2: Repeat without duplicate writes<a class="heading-anchor" href="#exercise-2-repeat-without-duplicate-writes" aria-label="Link to this section">#</a></h4>
-<p>Run the same desired state twice.</p>
-<p><strong>Expected:</strong> Only the first call writes.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<h4 id="exercise-1-converge-from-a-different-state-change-one-input">Exercise 1: Converge from a different state: change one input<a class="heading-anchor" href="#exercise-1-converge-from-a-different-state-change-one-input" aria-label="Link to this section">#</a></h4>
+<p>Copy worked example 1 into a scratch pad and change <code>err := reconcileCap(context.Background(), &amp;s, &quot;u1&quot;, 3)</code> to <code>err := reconcileCap(context.Background(), &amp;s, &quot;u1&quot;, 4)</code>. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</p>
+<p><strong>Expected:</strong> The changed run panics with <code>converge</code> because <code>err == nil &amp;&amp; s.Current == 3 &amp;&amp; s.Writes == 1</code> no longer holds. Restoring the original line brings back the worked observation: the count becomes 3 with one write.</p>
+<p><strong>Verify:</strong> Compare your written prediction with the panic message <code>converge</code> and name the value that made <code>err == nil &amp;&amp; s.Current == 3 &amp;&amp; s.Writes == 1</code> false. After restoring the input, the program must print its success line again.</p>
+<h4 id="exercise-2-repeat-without-duplicate-writes-diagnose-an-edited-check">Exercise 2: Repeat without duplicate writes: diagnose an edited check<a class="heading-anchor" href="#exercise-2-repeat-without-duplicate-writes-diagnose-an-edited-check" aria-label="Link to this section">#</a></h4>
+<p>A careless edit changed the check in worked example 2 so that it reads <code>check(reconcileCap(context.Background(), &amp;s, &quot;u1&quot;, 4) == nil, &quot;first&quot;)</code>. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.</p>
+<p><strong>Expected:</strong> Before the repair the program panics with <code>idempotent</code>; after it the line reads <code>check(reconcileCap(context.Background(), &amp;s, &quot;u1&quot;, 3) == nil, &quot;first&quot;)</code> again and only the first call writes.</p>
+<p><strong>Verify:</strong> Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that <code>reconcileCap(context.Background(), &amp;s, &quot;u1&quot;, 3) == nil &amp;&amp; s.Writes == 1</code> accepts.</p>
 <h4 id="exercise-3-refuse-a-replacement-object">Exercise 3: Refuse a replacement object<a class="heading-anchor" href="#exercise-3-refuse-a-replacement-object" aria-label="Link to this section">#</a></h4>
 <p>Supply expected UID old while observed UID is new.</p>
 <p><strong>Expected:</strong> No write occurs and an ownership error is returned.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>err != nil &amp;&amp; s.Current == 1 &amp;&amp; s.Writes == 0</code>. As a control, change <code>s := CapState{UID: &quot;new&quot;, Current: 1}</code> to <code>s := CapState{UID: &quot;new&quot;, Current: 2}</code>: the run must panic with <code>ownership</code>. Restore the line before continuing.</p>
 <h4 id="exercise-4-preserve-state-on-invalid-intent">Exercise 4: Preserve state on invalid intent<a class="heading-anchor" href="#exercise-4-preserve-state-on-invalid-intent" aria-label="Link to this section">#</a></h4>
 <p>Request a negative count.</p>
 <p><strong>Expected:</strong> The operation fails without mutation.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>err != nil &amp;&amp; s.Current == 1 &amp;&amp; s.Writes == 0</code>. As a control, change <code>s := CapState{UID: &quot;u1&quot;, Current: 1}</code> to <code>s := CapState{UID: &quot;u1&quot;, Current: 2}</code>: the run must panic with <code>invalid</code>. Restore the line before continuing.</p>
 <h4 id="exercise-5-cancel-before-new-work">Exercise 5: Cancel before new work<a class="heading-anchor" href="#exercise-5-cancel-before-new-work" aria-label="Link to this section">#</a></h4>
 <p>Pass an already-canceled context.</p>
 <p><strong>Expected:</strong> No write occurs and cancellation is retained.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>errors.Is(err, context.Canceled) &amp;&amp; s.Writes == 0</code>. As a control, change <code>check(errors.Is(err, context.Canceled) &amp;&amp; s.Writes == 0, &quot;cancel&quot;)</code> to <code>check(errors.Is(err, context.Canceled) &amp;&amp; s.Writes != 0, &quot;cancel&quot;)</code> inside that check: it must panic with <code>cancel</code>, which shows the check can fail. Restore it.</p>
 <h4 id="exercise-6-transfer-restart-reasoning">Exercise 6: Transfer restart reasoning<a class="heading-anchor" href="#exercise-6-transfer-restart-reasoning" aria-label="Link to this section">#</a></h4>
 <p>Copy the converged durable state into a new controller invocation.</p>
 <p><strong>Expected:</strong> The restarted invocation makes no additional write.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>reconcileCap(context.Background(), &amp;restored, &quot;u1&quot;, 3) == nil &amp;&amp; restored.Writes == 1</code>. As a control, change <code>s := CapState{UID: &quot;u1&quot;, Current: 3, Writes: 1}</code> to <code>s := CapState{UID: &quot;u1&quot;, Current: 4, Writes: 1}</code>: the run must panic with <code>restart</code>. Restore the line before continuing.</p>
 <p>Implement these in the answer-free learner source. Keep one independent check per claim. A task can require tracing, construction, a changed input or a deliberate safe failure. Do not run a data race, corrupt memory or contact a shared cluster merely to demonstrate why it would be wrong.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Read a compiler error from the first location in your source, then fix one cause at a time. Unused imports and variables are errors in Go; add an import when its use exists, rather than copying a large unused import list. A panic from <code>check</code> identifies a violated example contract. Compare the actual value with the expected value and inspect the state transition that produced it. A returned <code>error</code> is a value that the caller must handle; an ignored error can make later output look plausible while the original operation failed.</p>
 <p>The lesson-specific explanations in the two examples identify the important counterexamples. Extend that reasoning to every investigation: explain why a plausible alternative would fail, and preserve a tiny input that distinguishes it. Treat empty data, missing values and cancellation as domain cases with explicit policies. In concurrent work, replace sleeps used as synchronization with channels, mutexes or an explicit ownership protocol.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<h4 id="hint-for-investigation-1-converge-from-a-different-state">Hint for investigation 1: Converge from a different state<a class="heading-anchor" href="#hint-for-investigation-1-converge-from-a-different-state" aria-label="Link to this section">#</a></h4>
+<h4 id="hint-for-investigation-1-converge-from-a-different-state-change-one-input">Hint for investigation 1: Converge from a different state: change one input<a class="heading-anchor" href="#hint-for-investigation-1-converge-from-a-different-state-change-one-input" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The count becomes 3 with one write.</li>
-<li>Identify the input and the state boundary relevant to converge from a different state. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>err == nil &amp;&amp; s.Current == 3 &amp;&amp; s.Writes == 1</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Compute the checked value with <code>err := reconcileCap(context.Background(), &amp;s, &quot;u1&quot;, 4)</code> in place before running, then compare it with the value <code>err == nil &amp;&amp; s.Current == 3 &amp;&amp; s.Writes == 1</code> expects.</li>
 </ol>
-<h4 id="hint-for-investigation-2-repeat-without-duplicate-writes">Hint for investigation 2: Repeat without duplicate writes<a class="heading-anchor" href="#hint-for-investigation-2-repeat-without-duplicate-writes" aria-label="Link to this section">#</a></h4>
+<h4 id="hint-for-investigation-2-repeat-without-duplicate-writes-diagnose-an-edited-check">Hint for investigation 2: Repeat without duplicate writes: diagnose an edited check<a class="heading-anchor" href="#hint-for-investigation-2-repeat-without-duplicate-writes-diagnose-an-edited-check" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Only the first call writes.</li>
-<li>Identify the input and the state boundary relevant to repeat without duplicate writes. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>reconcileCap(context.Background(), &amp;s, &quot;u1&quot;, 3) == nil &amp;&amp; s.Writes == 1</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Compare <code>check(reconcileCap(context.Background(), &amp;s, &quot;u1&quot;, 4) == nil, &quot;first&quot;)</code> with the same line in worked example 2 and state the claim each version makes.</li>
 </ol>
 <h4 id="hint-for-investigation-3-refuse-a-replacement-object">Hint for investigation 3: Refuse a replacement object<a class="heading-anchor" href="#hint-for-investigation-3-refuse-a-replacement-object" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: No write occurs and an ownership error is returned.</li>
-<li>Identify the input and the state boundary relevant to refuse a replacement object. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>err != nil &amp;&amp; s.Current == 1 &amp;&amp; s.Writes == 0</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Predict the effect of changing <code>s := CapState{UID: &quot;new&quot;, Current: 1}</code> to <code>s := CapState{UID: &quot;new&quot;, Current: 2}</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
 </ol>
 <h4 id="hint-for-investigation-4-preserve-state-on-invalid-intent">Hint for investigation 4: Preserve state on invalid intent<a class="heading-anchor" href="#hint-for-investigation-4-preserve-state-on-invalid-intent" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The operation fails without mutation.</li>
-<li>Identify the input and the state boundary relevant to preserve state on invalid intent. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>err != nil &amp;&amp; s.Current == 1 &amp;&amp; s.Writes == 0</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Predict the effect of changing <code>s := CapState{UID: &quot;u1&quot;, Current: 1}</code> to <code>s := CapState{UID: &quot;u1&quot;, Current: 2}</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
 </ol>
 <h4 id="hint-for-investigation-5-cancel-before-new-work">Hint for investigation 5: Cancel before new work<a class="heading-anchor" href="#hint-for-investigation-5-cancel-before-new-work" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: No write occurs and cancellation is retained.</li>
-<li>Identify the input and the state boundary relevant to cancel before new work. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>errors.Is(err, context.Canceled) &amp;&amp; s.Writes == 0</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Name one input that would make <code>errors.Is(err, context.Canceled) &amp;&amp; s.Writes == 0</code> false. A check that no input can falsify is not evidence.</li>
 </ol>
 <h4 id="hint-for-investigation-6-transfer-restart-reasoning">Hint for investigation 6: Transfer restart reasoning<a class="heading-anchor" href="#hint-for-investigation-6-transfer-restart-reasoning" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The restarted invocation makes no additional write.</li>
-<li>Identify the input and the state boundary relevant to transfer restart reasoning. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>reconcileCap(context.Background(), &amp;restored, &quot;u1&quot;, 3) == nil &amp;&amp; restored.Writes == 1</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Predict the effect of changing <code>s := CapState{UID: &quot;u1&quot;, Current: 3, Writes: 1}</code> to <code>s := CapState{UID: &quot;u1&quot;, Current: 4, Writes: 1}</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
 </ol>
 <h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
 <p>Close the reference. Rebuild one normal case and one boundary case from a blank pad. Explain the role of control-loop invariant without using its name in the definition. Then change the domain while keeping the same invariant. Record the new input, your prediction and the observed output. If your program passes only because its input is hard-coded, explain which part would need a reusable function in a larger project.</p>
 <h3 id="next-step-and-sources">Next step and sources<a class="heading-anchor" href="#next-step-and-sources" aria-label="Link to this section">#</a></h3>
-<p><a href="https://kubernetes.io/docs/concepts/architecture/controller/">Primary language or library documentation</a>, reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. This source supports the API contract; it does not verify the classroom worker. Runtime receipts are recorded separately by the repository validation tools. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.</p>
+<p><a href="https://kubernetes.io/docs/concepts/architecture/controller/">Primary language or library documentation</a>, reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for go-048: Capstone: a reliable, resumable controller design.
 Read courses/go/guides/go-048.md and my saved attempt based on courses/go/lessons/go-048.go.

@@ -197,7 +197,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Intermediate. Allow about 120 minutes, then revisit the transfer case later. Prerequisites: go-027</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
-<p>By the end, explain concurrency bound, task identity, fan-in; implement the six investigations below; and defend the expected result of a changed input before running it. A passing reference is evidence about that program, not a certification of your independent understanding.</p>
+<p>Build a bounded worker pool that returns results in input order and leaves no goroutine running. Along the way, explain concurrency bound, task identity, fan-in; implement the six investigations below; and defend the expected result of a changed input before running it.</p>
 <h3 id="why-this-mechanism-matters">Why this mechanism matters<a class="heading-anchor" href="#why-this-mechanism-matters" aria-label="Link to this section">#</a></h3>
 <p>A worker pool limits active execution but does not create infinite capacity. Queues, in-flight tasks and result buffers all consume resources. Give each task an identity so completion order can differ from presentation order. A collector can place results by index to produce a deterministic final sequence. The producer owns input closure, workers process tasks, and a joiner closes results after all senders exit. Cancellation and partial failure need an explicit policy rather than silently losing tasks. This example performs bounded integer work and joins every goroutine. It illustrates coordination without claiming that more workers always make a program faster.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
@@ -208,7 +208,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ul>
 <h3 id="syntax-anatomy-and-reasoning">Syntax anatomy and reasoning<a class="heading-anchor" href="#syntax-anatomy-and-reasoning" aria-label="Link to this section">#</a></h3>
 <p>A jobs channel carries indexed tasks. Start a bounded number of workers, feed jobs and close input. A WaitGroup tracks workers; close results only after Wait completes. Assign each result to its input index. Reject zero workers before starting the pipeline, otherwise a producer may block forever with no consumer.</p>
-<h3 id="classroom-execution-contract">Classroom execution contract<a class="heading-anchor" href="#classroom-execution-contract" aria-label="Link to this section">#</a></h3>
+<h3 id="run-this-lesson">Run this lesson<a class="heading-anchor" href="#run-this-lesson" aria-label="Link to this section">#</a></h3>
 <p>Choose Go in the unified Docker classroom. Save your own pad before experimenting. The prepared worker stages it as <code>main.go</code>, compiles it, and executes the resulting program with bounded time and output. The pad is one source file. It does not supply interactive input, arbitrary command-line arguments, package installation, Kubernetes credentials or a host Docker socket. Every ordinary reference here uses the standard library, synthetic local data and explicit checks. A failed <code>check</code> panics and produces a nonzero process result; do not remove it to make the run appear successful.</p>
 <p>The explanatory solution snippets belong inside <code>func main()</code> unless they declare a helper. <code>check</code> is a tiny teaching helper that panics when a condition is false. The separate reference supplies required imports and helpers and implements all six cases. Use that complete source only after an attempt or an explicit reveal. For an independently prepared Go project, the equivalent local build is <code>go build -o lesson main.go</code>, followed by <code>./lesson</code>; use Linux or WSL 2 for that optional workflow. Compiling proves syntax and type consistency, while the executed checks establish the stated example contracts.</p>
 <p>Each worked example below is a complete Go file. Copy one whole block into your saved pad and run it. Example 2 includes the first case as well as the second, so its setup is complete. Its supporting declarations may be reused in later investigations. The separate reference implements all six cases.</p>
@@ -340,75 +340,75 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>
 <p>For each example, write the input values, the state that can change, and the expected observation. Explain which result would disprove your current interpretation. For concurrency, predict a guaranteed relationship rather than an arbitrary scheduling order. For an error case, identify whether it is rejected at compilation or returned during execution.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
-<h4 id="exercise-1-preserve-input-order">Exercise 1: Preserve input order<a class="heading-anchor" href="#exercise-1-preserve-input-order" aria-label="Link to this section">#</a></h4>
-<p>Square 3, 1 and 2 with two workers.</p>
-<p><strong>Expected:</strong> The result is 9, 1, 4.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
-<h4 id="exercise-2-handle-empty-input">Exercise 2: Handle empty input<a class="heading-anchor" href="#exercise-2-handle-empty-input" aria-label="Link to this section">#</a></h4>
-<p>Run the pool on an empty slice.</p>
-<p><strong>Expected:</strong> It returns an empty result and terminates.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<h4 id="exercise-1-preserve-input-order-change-one-input">Exercise 1: Preserve input order: change one input<a class="heading-anchor" href="#exercise-1-preserve-input-order-change-one-input" aria-label="Link to this section">#</a></h4>
+<p>Copy worked example 1 into a scratch pad and change <code>v, err := parallelSquares([]int{3, 1, 2}, 2)</code> to <code>v, err := parallelSquares([]int{4, 1, 2}, 2)</code>. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</p>
+<p><strong>Expected:</strong> The changed run panics with <code>order</code> because <code>err == nil &amp;&amp; len(v) == 3 &amp;&amp; v[0] == 9 &amp;&amp; v[1] == 1 &amp;&amp; v[2] == 4</code> no longer holds. Restoring the original line brings back the worked observation: the result is 9, 1, 4.</p>
+<p><strong>Verify:</strong> Compare your written prediction with the panic message <code>order</code> and name the value that made <code>err == nil &amp;&amp; len(v) == 3 &amp;&amp; v[0] == 9 &amp;&amp; v[1] == 1 &amp;&amp; v[2] == 4</code> false. After restoring the input, the program must print its success line again.</p>
+<h4 id="exercise-2-handle-empty-input-diagnose-an-edited-check">Exercise 2: Handle empty input: diagnose an edited check<a class="heading-anchor" href="#exercise-2-handle-empty-input-diagnose-an-edited-check" aria-label="Link to this section">#</a></h4>
+<p>A careless edit changed the check in worked example 2 so that it reads <code>check(err != nil &amp;&amp; len(v) == 0, &quot;empty&quot;)</code>. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.</p>
+<p><strong>Expected:</strong> Before the repair the program panics with <code>empty</code>; after it the line reads <code>check(err == nil &amp;&amp; len(v) == 0, &quot;empty&quot;)</code> again and it returns an empty result and terminates.</p>
+<p><strong>Verify:</strong> Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that <code>err == nil &amp;&amp; len(v) == 0</code> accepts.</p>
 <h4 id="exercise-3-reject-absent-capacity">Exercise 3: Reject absent capacity<a class="heading-anchor" href="#exercise-3-reject-absent-capacity" aria-label="Link to this section">#</a></h4>
 <p>Request zero workers.</p>
 <p><strong>Expected:</strong> The call returns an error immediately.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>err != nil</code>. As a control, change <code>_, err := parallelSquares([]int{1}, 0)</code> to <code>_, err := parallelSquares([]int{1}, 1)</code>: the run must panic with <code>zero workers</code>. Restore the line before continuing.</p>
 <h4 id="exercise-4-compare-serial-semantics">Exercise 4: Compare serial semantics<a class="heading-anchor" href="#exercise-4-compare-serial-semantics" aria-label="Link to this section">#</a></h4>
 <p>Use one and three workers for the same three inputs.</p>
 <p><strong>Expected:</strong> Both produce the same sequence.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>e1 == nil &amp;&amp; e2 == nil &amp;&amp; slices.Equal(a, b)</code>. As a control, change <code>a, e1 := parallelSquares([]int{1, 2, 3}, 1)</code> to <code>a, e1 := parallelSquares([]int{2, 2, 3}, 1)</code>: the run must panic with <code>same semantics</code>. Restore the line before continuing.</p>
 <h4 id="exercise-5-retain-duplicate-tasks">Exercise 5: Retain duplicate tasks<a class="heading-anchor" href="#exercise-5-retain-duplicate-tasks" aria-label="Link to this section">#</a></h4>
 <p>Process 2, 2 and 2.</p>
 <p><strong>Expected:</strong> All three results are retained.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>err == nil &amp;&amp; len(v) == 3 &amp;&amp; v[2] == 4</code>. As a control, change <code>v, err := parallelSquares([]int{2, 2, 2}, 2)</code> to <code>v, err := parallelSquares([]int{2, 2, 3}, 2)</code>: the run must panic with <code>duplicates</code>. Restore the line before continuing.</p>
 <h4 id="exercise-6-transfer-idle-worker-cleanup">Exercise 6: Transfer idle-worker cleanup<a class="heading-anchor" href="#exercise-6-transfer-idle-worker-cleanup" aria-label="Link to this section">#</a></h4>
 <p>Use four workers for one input of 5.</p>
 <p><strong>Expected:</strong> One result equals 25 and all workers exit.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>err == nil &amp;&amp; len(v) == 1 &amp;&amp; v[0] == 25</code>. As a control, change <code>v, err := parallelSquares([]int{5}, 4)</code> to <code>v, err := parallelSquares([]int{6}, 4)</code>: the run must panic with <code>idle workers</code>. Restore the line before continuing.</p>
 <p>Implement these in the answer-free learner source. Keep one independent check per claim. A task can require tracing, construction, a changed input or a deliberate safe failure. Do not run a data race, corrupt memory or contact a shared cluster merely to demonstrate why it would be wrong.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Read a compiler error from the first location in your source, then fix one cause at a time. Unused imports and variables are errors in Go; add an import when its use exists, rather than copying a large unused import list. A panic from <code>check</code> identifies a violated example contract. Compare the actual value with the expected value and inspect the state transition that produced it. A returned <code>error</code> is a value that the caller must handle; an ignored error can make later output look plausible while the original operation failed.</p>
 <p>The lesson-specific explanations in the two examples identify the important counterexamples. Extend that reasoning to every investigation: explain why a plausible alternative would fail, and preserve a tiny input that distinguishes it. Treat empty data, missing values and cancellation as domain cases with explicit policies. In concurrent work, replace sleeps used as synchronization with channels, mutexes or an explicit ownership protocol.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<h4 id="hint-for-investigation-1-preserve-input-order">Hint for investigation 1: Preserve input order<a class="heading-anchor" href="#hint-for-investigation-1-preserve-input-order" aria-label="Link to this section">#</a></h4>
+<h4 id="hint-for-investigation-1-preserve-input-order-change-one-input">Hint for investigation 1: Preserve input order: change one input<a class="heading-anchor" href="#hint-for-investigation-1-preserve-input-order-change-one-input" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The result is 9, 1, 4.</li>
-<li>Identify the input and the state boundary relevant to preserve input order. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>err == nil &amp;&amp; len(v) == 3 &amp;&amp; v[0] == 9 &amp;&amp; v[1] == 1 &amp;&amp; v[2] == 4</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Compute the checked value with <code>v, err := parallelSquares([]int{4, 1, 2}, 2)</code> in place before running, then compare it with the value <code>err == nil &amp;&amp; len(v) == 3 &amp;&amp; v[0] == 9 &amp;&amp; v[1] == 1 &amp;&amp; v[2] == 4</code> expects.</li>
 </ol>
-<h4 id="hint-for-investigation-2-handle-empty-input">Hint for investigation 2: Handle empty input<a class="heading-anchor" href="#hint-for-investigation-2-handle-empty-input" aria-label="Link to this section">#</a></h4>
+<h4 id="hint-for-investigation-2-handle-empty-input-diagnose-an-edited-check">Hint for investigation 2: Handle empty input: diagnose an edited check<a class="heading-anchor" href="#hint-for-investigation-2-handle-empty-input-diagnose-an-edited-check" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: It returns an empty result and terminates.</li>
-<li>Identify the input and the state boundary relevant to handle empty input. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>err == nil &amp;&amp; len(v) == 0</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Compare <code>check(err != nil &amp;&amp; len(v) == 0, &quot;empty&quot;)</code> with the same line in worked example 2 and state the claim each version makes.</li>
 </ol>
 <h4 id="hint-for-investigation-3-reject-absent-capacity">Hint for investigation 3: Reject absent capacity<a class="heading-anchor" href="#hint-for-investigation-3-reject-absent-capacity" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The call returns an error immediately.</li>
-<li>Identify the input and the state boundary relevant to reject absent capacity. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>err != nil</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Predict the effect of changing <code>_, err := parallelSquares([]int{1}, 0)</code> to <code>_, err := parallelSquares([]int{1}, 1)</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
 </ol>
 <h4 id="hint-for-investigation-4-compare-serial-semantics">Hint for investigation 4: Compare serial semantics<a class="heading-anchor" href="#hint-for-investigation-4-compare-serial-semantics" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Both produce the same sequence.</li>
-<li>Identify the input and the state boundary relevant to compare serial semantics. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>e1 == nil &amp;&amp; e2 == nil &amp;&amp; slices.Equal(a, b)</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Predict the effect of changing <code>a, e1 := parallelSquares([]int{1, 2, 3}, 1)</code> to <code>a, e1 := parallelSquares([]int{2, 2, 3}, 1)</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
 </ol>
 <h4 id="hint-for-investigation-5-retain-duplicate-tasks">Hint for investigation 5: Retain duplicate tasks<a class="heading-anchor" href="#hint-for-investigation-5-retain-duplicate-tasks" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: All three results are retained.</li>
-<li>Identify the input and the state boundary relevant to retain duplicate tasks. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>err == nil &amp;&amp; len(v) == 3 &amp;&amp; v[2] == 4</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Predict the effect of changing <code>v, err := parallelSquares([]int{2, 2, 2}, 2)</code> to <code>v, err := parallelSquares([]int{2, 2, 3}, 2)</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
 </ol>
 <h4 id="hint-for-investigation-6-transfer-idle-worker-cleanup">Hint for investigation 6: Transfer idle-worker cleanup<a class="heading-anchor" href="#hint-for-investigation-6-transfer-idle-worker-cleanup" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: One result equals 25 and all workers exit.</li>
-<li>Identify the input and the state boundary relevant to transfer idle-worker cleanup. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>err == nil &amp;&amp; len(v) == 1 &amp;&amp; v[0] == 25</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Predict the effect of changing <code>v, err := parallelSquares([]int{5}, 4)</code> to <code>v, err := parallelSquares([]int{6}, 4)</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
 </ol>
 <h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
 <p>Close the reference. Rebuild one normal case and one boundary case from a blank pad. Explain the role of concurrency bound without using its name in the definition. Then change the domain while keeping the same invariant. Record the new input, your prediction and the observed output. If your program passes only because its input is hard-coded, explain which part would need a reusable function in a larger project.</p>
 <h3 id="next-step-and-sources">Next step and sources<a class="heading-anchor" href="#next-step-and-sources" aria-label="Link to this section">#</a></h3>
-<p><a href="https://go.dev/ref/spec">Primary language or library documentation</a>, reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. This source supports the API contract; it does not verify the classroom worker. Runtime receipts are recorded separately by the repository validation tools. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.</p>
+<p><a href="https://go.dev/ref/spec">Primary language or library documentation</a>, reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for go-028: Bounded worker pools and result ordering.
 Read courses/go/guides/go-028.md and my saved attempt based on courses/go/lessons/go-028.go.

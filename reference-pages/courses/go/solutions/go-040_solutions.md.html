@@ -198,15 +198,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
 <p>A controller queue decouples event ingestion from reconciliation. Repeated events for one key can be coalesced because reconciliation reads the latest state. A failing key should not spin in a tight loop or prevent unrelated keys from progressing. Rate-limited retry combines an increasing delay with a cap and often jitter; cancellation and a maximum work policy prevent unlimited resource use. Permanent invalid input differs from a transient API failure. Success should clear retry history so an old failure does not penalize a repaired object forever. This lesson models scheduling decisions without sleeping or claiming a full implementation of client-go workqueue semantics.</p>
 <p>A queue key usually names a namespace and object name, not a pointer to a stale object. The worker gets a key, defers Done, reconciles and either Forget on success or schedules a rate-limited retry. The fixture uses integer delay units to test a capped exponential policy deterministically. Production jitter should be tested with an injected source rather than a fixed assumption about wall-clock timing.</p>
-<h3 id="1-calculate-increasing-delay">1. Calculate increasing delay<a class="heading-anchor" href="#1-calculate-increasing-delay" aria-label="Link to this section">#</a></h3>
-<p>Inspect attempts 0, 1 and 2.</p>
+<h3 id="1-calculate-increasing-delay-predict-an-edited-check">1. Calculate increasing delay: predict an edited check<a class="heading-anchor" href="#1-calculate-increasing-delay-predict-an-edited-check" aria-label="Link to this section">#</a></h3>
+<p>Copy worked example 1 into a scratch pad and change <code>check(delay(0) == 1 &amp;&amp; delay(1) == 2 &amp;&amp; delay(2) == 4, &quot;growth&quot;)</code> to <code>check(delay(1) == 1 &amp;&amp; delay(1) == 2 &amp;&amp; delay(2) == 4, &quot;growth&quot;)</code> inside its check. Before running, predict whether the check still passes and explain why; then restore it.</p>
+<p>The unchanged code is worked example 1:</p>
 <pre class="highlighted-code"><code class="language-go">check<span class="syntax-punctuation">(</span>delay<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span> <span class="syntax-operator">&amp;&amp;</span> delay<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">2</span> <span class="syntax-operator">&amp;&amp;</span> delay<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;growth&quot;</span><span class="syntax-punctuation">)</span></code></pre>
-<p><strong>Expected:</strong> The delays are 1, 2 and 4 units.</p>
+<p><strong>Expected:</strong> The changed run panics with <code>growth</code> because the edited check no longer holds. Restoring the original line brings back the worked observation: the delays are 1, 2 and 4 units.</p>
 <p>The first attempt and retry numbering must be documented. Ambiguous numbering creates off-by-one operational behavior.</p>
-<h3 id="2-cap-the-delay">2. Cap the delay<a class="heading-anchor" href="#2-cap-the-delay" aria-label="Link to this section">#</a></h3>
-<p>Inspect attempts beyond the configured cap.</p>
+<h3 id="2-cap-the-delay-diagnose-an-edited-check">2. Cap the delay: diagnose an edited check<a class="heading-anchor" href="#2-cap-the-delay-diagnose-an-edited-check" aria-label="Link to this section">#</a></h3>
+<p>A careless edit changed the check in worked example 2 so that it reads <code>check(delay(3) != 8 &amp;&amp; delay(10) == 8, &quot;cap&quot;)</code>. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.</p>
+<p>The unchanged code is worked example 2:</p>
 <pre class="highlighted-code"><code class="language-go">check<span class="syntax-punctuation">(</span>delay<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">8</span> <span class="syntax-operator">&amp;&amp;</span> delay<span class="syntax-punctuation">(</span><span class="syntax-number">10</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">8</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;cap&quot;</span><span class="syntax-punctuation">)</span></code></pre>
-<p><strong>Expected:</strong> The delay never exceeds 8 units.</p>
+<p><strong>Expected:</strong> Before the repair the program panics with <code>cap</code>; after it the line reads <code>check(delay(3) == 8 &amp;&amp; delay(10) == 8, &quot;cap&quot;)</code> again and the delay never exceeds 8 units.</p>
 <p>A cap prevents exponential growth from becoming impractical or overflowing. It does not replace a total retry budget.</p>
 <h3 id="3-coalesce-duplicate-keys">3. Coalesce duplicate keys<a class="heading-anchor" href="#3-coalesce-duplicate-keys" aria-label="Link to this section">#</a></h3>
 <p>Enqueue alpha twice and beta once in a set model.</p>
@@ -230,16 +232,19 @@ check<span class="syntax-punctuation">(</span>delay<span class="syntax-punctuati
 <p><strong>Expected:</strong> Its next failure starts at the first delay.</p>
 <p>Success ends the current failure sequence. Retaining stale backoff can make a later unrelated event appear inexplicably slow.</p>
 <h3 id="6-transfer-a-total-budget">6. Transfer a total budget<a class="heading-anchor" href="#6-transfer-a-total-budget" aria-label="Link to this section">#</a></h3>
-<p>Allow at most three attempts and count admitted retries.</p>
-<pre class="highlighted-code"><code class="language-go">admitted <span class="syntax-operator">:=</span> <span class="syntax-number">0</span>
-<span class="syntax-keyword">for</span> attempt <span class="syntax-operator">:=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span> attempt <span class="syntax-punctuation">&lt;</span> <span class="syntax-number">5</span><span class="syntax-punctuation">;</span> attempt<span class="syntax-operator">++</span> <span class="syntax-punctuation">{</span>
-	<span class="syntax-keyword">if</span> attempt <span class="syntax-punctuation">&lt;</span> <span class="syntax-number">3</span> <span class="syntax-punctuation">{</span>
-		admitted<span class="syntax-operator">++</span>
+<p>Spend a total waiting budget of 10 units on retries whose delays come from delay(attempt).</p>
+<pre class="highlighted-code"><code class="language-go">spent<span class="syntax-punctuation">,</span> attempts <span class="syntax-operator">:=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span>
+<span class="syntax-keyword">for</span> attempt <span class="syntax-operator">:=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">;</span> attempt<span class="syntax-operator">++</span> <span class="syntax-punctuation">{</span>
+	d <span class="syntax-operator">:=</span> delay<span class="syntax-punctuation">(</span>attempt<span class="syntax-punctuation">)</span>
+	<span class="syntax-keyword">if</span> spent<span class="syntax-operator">+</span>d <span class="syntax-punctuation">&gt;</span> <span class="syntax-number">10</span> <span class="syntax-punctuation">{</span>
+		<span class="syntax-keyword">break</span>
 	<span class="syntax-punctuation">}</span>
+	spent <span class="syntax-operator">+=</span> d
+	attempts<span class="syntax-operator">++</span>
 <span class="syntax-punctuation">}</span>
-check<span class="syntax-punctuation">(</span>admitted <span class="syntax-operator">==</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;budget&quot;</span><span class="syntax-punctuation">)</span></code></pre>
-<p><strong>Expected:</strong> Exactly three attempts are admitted.</p>
-<p>A delay cap bounds waiting per retry, while an attempt or elapsed-time budget bounds total work. Both are separate policies.</p>
+check<span class="syntax-punctuation">(</span>attempts <span class="syntax-operator">==</span> <span class="syntax-number">3</span> <span class="syntax-operator">&amp;&amp;</span> spent <span class="syntax-operator">==</span> <span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;budget&quot;</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> Three retries fit (1+2+4=7 units); the fourth delay of 8 would exceed the budget.</p>
+<p>A delay cap bounds waiting per retry, while an attempt or elapsed-time budget bounds total work. Both are separate policies, and the total budget is checked before a delay is spent.</p>
 <h3 id="transfer-after-comparison">Transfer after comparison<a class="heading-anchor" href="#transfer-after-comparison" aria-label="Link to this section">#</a></h3>
 <p>Return to your own pad and reproduce one check with a new input. Explain why the check rejects a plausible wrong implementation. Keep the distinction between a pure model, an in-process fake, and a real external system visible in your notes.</p></article>
   </main>

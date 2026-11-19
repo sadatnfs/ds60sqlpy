@@ -211,9 +211,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Entrypoint&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Precondition&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Model a three-level capacity calculation and explain every intermediate value.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Compile and run a Swift program with an explicit @main entry point and check a computed value with precondition.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Compute the capacity of three shelves holding eight books each.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Hello, Swift appears before the lesson marker. The computed seat count is 24.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Three shelves of eight books hold 24 books.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;swift-002&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -229,9 +229,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Type inference&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Conversion&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Choose units and types for a small measurement model.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use let and var deliberately and convert between numeric types explicitly.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Compute a mean from an integer total and count using a deliberate conversion.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The accumulator becomes 8 while the fixed amount remains 4. Integer division yields 3; floating division yields 3.5.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The mean is 3.5, while integer division of the same values would give 3.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;swift-003&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -247,9 +247,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Tolerance&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Wrapping arithmetic&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Choose a numeric representation and rounding policy for a price calculation.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Detect integer overflow with reporting arithmetic and use Decimal where exact decimal values matter.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Write checked quantity addition that returns an explicit rejected outcome.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;255 plus one reports overflow and a wrapped partial result of zero. The floating result meets the stated tolerance and the decimal fixture retains decimal intent.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;200 + 50 is accepted as 250; 200 + 56 is rejected instead of wrapping to 0.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;swift-004&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -265,9 +265,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;String.Index&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Substring&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Design a text-field limit and document whether it counts bytes or visible characters.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Count and slice strings by Character and index, not by assumed byte or code unit positions.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Write a function returning the first Character as an optional value.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Both spellings contain one Character but differ in UTF-8 bytes. The split preserves the emoji as a complete Character.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The first Character of 😀B is 😀, and empty text gives nil.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;swift-005&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -283,9 +283,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Unwrapping&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Nil&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Model an optional measurement whose absence must survive serialization and reporting.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Represent absence with optionals and unwrap them safely without inventing sentinel values.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Write a parser accepting only present nonnegative integers.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;A present zero remains distinct from nil. Parsing produces an optional and malformed text is absent.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;12 and 0 are accepted; nil, -3 and x are rejected.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;swift-006&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -301,9 +301,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Closed range&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Half-open range&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Replace a broad default in an enum switch with explicit cases and explain the maintenance benefit.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Write exhaustive switch statements and guards that cover every case, including boundaries.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Write a three-way classifier for negative, zero and positive quantities.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;59 retries, 60 passes and 101 is invalid. The early exit excludes missing and empty values before the valid path.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;-2, 0 and 7 are classified as negative, zero and positive.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;swift-007&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -319,9 +319,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Accumulator&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Termination argument&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Design a bounded retry loop and explain both its invariant and its stop condition.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Write loops with safe traversal and report not-found with an optional result.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Implement a first-match search with an optional result.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The total is 12 and the empty total is zero. The first 8 appears at offset 1 and 9 is absent.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The first 7 is at offset 1; a missing target and an empty array give nil.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;swift-008&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -337,9 +337,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Parameter&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Inout&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Choose return values or inout for an API and justify who owns state changes.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Write functions with clear argument labels and choose between value parameters and inout.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Write a pure function normalizing a quantity without mutating its caller.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Labels show which dimension each argument supplies. The caller explicitly grants mutation and observes 5.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;15 is normalized to 10 and -4 to 0, while the caller&#x27;s value stays 15.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;swift-009&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -355,9 +355,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Copy-on-write&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Capacity&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Explain what changes when array elements are mutable class instances.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Predict copy-on-write behavior of arrays and transform them without changing the source.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Build a filtered array without changing the source.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Appending to the copy leaves the original unchanged. Reserving twenty slots creates no logical elements.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The filtered array is [2, 4] and the source is unchanged.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;swift-010&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -373,9 +373,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Key&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Set membership&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Design a custom Hashable key using only stable identity fields.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use dictionaries and sets for lookup and deduplication and sort them for stable output.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Build a unique sorted list of accepted inventory names.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Pear is present with zero and apple is absent. Duplicate red is not inserted and sorted output is deterministic.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The accepted names are apple, fig and pear, each once and sorted.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;swift-011&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -391,9 +391,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Enum&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Associated value&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Choose tuple or named enum/struct for a reusable public API and explain the tradeoff.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Model alternatives with enums and associated values handled by exhaustive switches.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Model loading, ready and failed states with an enum.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Named tuple fields expose the accounting relationship. Each outcome exposes only its own meaningful payload.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The states render as loading, ready:3 and failed:offline.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;swift-012&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -409,9 +409,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Mutating method&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Encapsulation&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Choose a value model for an editable form and explain how cancel can restore an earlier snapshot.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Encapsulate state in structs with private(set) and mutating methods that keep invariants.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Build a bounded counter with private mutation.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Reserving from the copied inventory does not change the original. Rejected requests retain the previous valid stock.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Two increments succeed, the third is refused, and the value stays at 2.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;swift-013&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -427,9 +427,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Final class&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Composition&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Explain whether a shared class needs synchronization before use from concurrent tasks.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Choose classes for shared identity and structs for values, and predict sharing and copying.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Choose class or struct for a shared connection coordinator and a coordinate value.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Both names observe the same increment. Two fresh counters have equal state but distinct identities.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Both coordinator references see 1 open connection, while moving the copied coordinate leaves the original at x = 1.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;swift-014&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -445,9 +445,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Computed property&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Observer&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Choose an explicit method instead of a setter for a state change with validation and failure.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Derive computed properties from one stored source of truth and use observers deliberately.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Build a value model with one stored unit and a documented converted view.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Area changes with width without a separately updated area field. The getter and setter translate between temperature scales.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;3.048 meters reads as 10 feet.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;swift-015&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -463,9 +463,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Capture list&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Higher-order function&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Choose a named function or closure for a reusable domain transformation and explain readability and capture policy.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Write closures, control what they capture and compose transformation pipelines.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Write a function accepting a transformation closure.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Map creates transformed values while retaining the original array. The explicit capture list retains factor 2 for the closure.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Applying the closure gives 10, 20 and 30.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;swift-016&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -481,9 +481,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Aggregation&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Rejection evidence&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Design a reusable result that retains safe line-specific reasons without storing raw sensitive input.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Build an honest inventory importer that reports sorted totals and rejected lines.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Produce a sorted text report with accepted totals and rejected count.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Pear totals 6 and apple totals 3. The valid zero remains present while three records are rejected.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The report lists apple: 3, pear: 3 and rejected: 1.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;swift-017&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -499,9 +499,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Conformance&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Existential&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Choose a dependency worth abstracting in the importer and explain why a protocol helps.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Program against protocols so implementations can be substituted without changing callers.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Define a protocol for a deterministic label formatter.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The consumer calls the pricing capability without needing its storage details. Two conforming policies produce different valid prices.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The formatter produces 1 item and 3 items, identically on every call.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;swift-018&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -517,9 +517,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Constraint&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Type relationship&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Choose generic or existential abstraction for an API that must preserve concrete result type.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Write generic types and functions with the constraints their operations need.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Create a generic immutable triple with a rotation operation.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;One implementation preserves Int and String results. Swapping retains the same concrete element type.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Rotating (1, 2, 3) gives (2, 3, 1).&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;swift-019&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -535,9 +535,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Opaque type&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Type erasure&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Choose opaque output or existential storage for an API and document the preserved relationships.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use associated types, opaque results and existentials and explain what each hides.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Write a generic transformation preserving the producer item type.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The generic consumer knows the produced value is an Int. The caller uses sequence behavior without naming the concrete array type.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Transforming the produced 7 gives 8, still an Int.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;swift-020&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -553,9 +553,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Collection&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Materialization&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Choose lazy or materialized processing for a large input and explain repeatability and memory costs.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Work with collection protocols, slices and lazy sequences and reason about their cost.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Write a generic sum over Sequence where the element type is suitable.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The slice starts at index 1 while traversal still produces two elements. The lazy recipe produces 20 and 30 when consumed.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The sum works for Ints (6) and Doubles (4.0) and returns 0 for an empty sequence.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;swift-021&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -571,9 +571,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Throwing function&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Result&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Choose Optional, throws or Result for three APIs and explain each semantic distinction.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Throw and handle typed errors and convert between throwing calls and Result values.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Write a throwing validator for an inventory record.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Three is accepted and a negative quantity is rejected. The stored outcome retains a QuantityError.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;A valid record passes; an empty name throws RecordError.emptyName.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;swift-022&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -589,9 +589,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Weak reference&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Retain cycle&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Choose weak or unowned for a relationship and justify the lifetime guarantee required.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Prevent retain cycles with weak and unowned references and verify that objects are released.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Design a weak delegate relationship.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The weak observer becomes nil after the last strong reference is removed. The child survives independently without retaining its parent.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The listener receives finished; after it is released the weak delegate becomes nil and finish() does nothing.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;swift-023&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -607,9 +607,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Coding key&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Schema evolution&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Plan migration of a renamed field without discarding existing saved records.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Encode and decode with Codable and validate decoded values before trusting them.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Write a decoder that validates before returning a trusted item.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The modeled fields round-trip through JSON. Valid JSON can still describe an invalid item.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The valid item is returned; quantity -1 decodes but is rejected before it is trusted.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;swift-024&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -625,9 +625,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Defer&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Persistence scope&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Design a durable app save with atomic replacement and a recoverable previous version.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Persist data in owned temporary files with Foundation URLs and remove them on every path.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Persist a Codable value in a temporary file and validate after reading.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The UTF-8 bytes round-trip in a uniquely owned location. The two URLs carry different location schemes.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The value read back equals the saved one and passes the quantity check; the folder is removed at the end of the block.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;swift-025&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -643,9 +643,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Calendar&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Monotonic clock&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Design storage, display and duration-measurement policies for an appointment app.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Handle dates, calendars and elapsed time with fixed fixtures independent of the time zone.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Build a report from fixed timestamp fixtures.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The elapsed interval is 5,400 seconds. Both strings represent the same instant.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The report reads 165 minutes from 2025-03-01T22:30:00Z.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;swift-026&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -661,8 +661,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Target&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Module&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Add a new target only when it creates a useful dependency boundary and document that direction.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Run swift test and the journey-demo executable.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Build and run a Swift package and explain its module and target boundaries.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Reproduce Example A (Keep a pure core function) and Example B (Separate presentation from calculation) and explain each check.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The pure kernel is suitable for a reusable library. Presentation is independently testable.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
@@ -679,8 +679,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Regression&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Property&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Create a verification plan distinguishing unit, package, UI and device evidence.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Add a real JourneyCore test for rejected negative quantity.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Write behavior tests for the prepared package with XCTest and know where Swift Testing fits.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Reproduce Example A (Check independently derived cases) and Example B (Catch a plausible wrong boundary) and explain each check.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Normal and boundary values satisfy the clamp contract. The zero case catches the wrong default and clamping is idempotent.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
@@ -697,9 +697,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Task&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Structured concurrency&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Identify suspension points in an app load operation and explain what state may change around them.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Write async functions and explain where suspension points occur.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Write an async adapter that returns a validated domain value.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The awaited result is 8. The async boundary preserves both the valid result and the domain error.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The adapter awaits the raw text and returns Quantity(value: 12).&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;swift-029&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -715,9 +715,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Completion order&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Admission limit&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Choose a concurrency bound for an I/O workload and explain its resource basis.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Run bounded parallel work with task groups that own their child tasks.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Implement bounded admission for a small list with at most two outstanding children.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Sorted results are deterministic despite unspecified completion order. No admitted children produces the identity result zero.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;All five inputs are processed, and at most two child tasks were ever outstanding.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;swift-030&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -733,9 +733,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;CancellationError&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Operation outcome&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Design a receipt distinguishing success, confirmed cancellation and unknown outcome.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Cancel asynchronous work cooperatively and clean up on every exit path.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Write a bounded processing loop with cleanup on cancellation.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The task acknowledges cancellation and its completion is awaited. This task still returns 9 because its body does not check cancellation.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;When cancellation is observed before the fourth item, items 1 to 3 are done and cleanup still runs; an uncancelled task finishes both items.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;swift-031&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -751,9 +751,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Reentrancy&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Sendable&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Design a reservation state machine for an operation requiring external I/O before commitment.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Protect mutable state with actors so access is serialized by construction.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Implement a bounded actor-owned queue with explicit admission.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;All twenty increments are retained. The second reservation is rejected without making stock negative.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Two offers are admitted, the third is refused, and the first item taken is 1.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;swift-032&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -769,9 +769,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Receipt&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Conflict&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Design a durable adapter and document what actor isolation alone cannot guarantee.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Build an actor-owned import ledger with idempotent operations and conflict detection.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Add a read-only receipt lookup that never re-executes work.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;A repeated operation returns its receipt without applying again. A changed payload is rejected and prior state remains intact.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The lookup finds receipt 3 for one, reports nil for two, and the work ran only once.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;swift-033&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -787,9 +787,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Isolation domain&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Snapshot&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Design data exchange between a UI model and a background actor using immutable snapshots.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Pass only Sendable values across concurrency boundaries under Swift 6 strict checking.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Replace a shared mutable result class with a sendable value result.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The task receives immutable value data and returns 6. The parent owns result aggregation and sorts it deterministically.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The task returns Summary(count: 3, total: 9).&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;swift-034&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -805,9 +805,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Buffer policy&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Termination&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Choose lossless backpressure or deliberate dropping for a real event source and explain cleanup on cancellation.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Produce and consume AsyncStreams with explicit completion and bounded buffering.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Build a finite event stream with explicit completion ownership.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The finite stream totals 5 and terminates. The newest-one policy retains 2 and drops the older buffered value.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The consumer receives start, progress and done, and its loop ends.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;swift-035&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -823,9 +823,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Borrowed access&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Undefined behavior&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Write an interoperability checklist covering ownership, alignment, initialization and error reporting.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Keep unsafe buffer access scoped and hidden behind a safe function contract.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Wrap a scoped read-only buffer operation behind a safe function contract.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The result escapes as an integer while the borrowed pointer does not. An empty buffer is valid to inspect by count.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The safe wrapper returns 9 for [2, 3, 4] and 0 for an empty array.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;swift-036&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -841,9 +841,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Allocation&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Benchmark equivalence&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Write a measurement plan covering workload, correctness, optimization mode and allocation evidence.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Compare algorithm costs and copy behavior with evidence rather than assumptions.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Compare repeated array scans with one built Set under the same identity policy.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The last-element search performs four comparisons. The index preserves four identities and answers membership.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Both approaches find 2 of the 3 queries.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;swift-037&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -859,9 +859,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Wrapped value&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Projection&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Choose a wrapper or explicit validation method based on whether assignment can fail meaningfully.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Write property wrappers that apply one reusable access or normalization policy.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Create a wrapper with an explicit normalization policy for a local display field.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Assignments are clamped into zero through ten. A valid interior value is unchanged and the projection exposes the range.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Both assignment and initialization store the trimmed text Report and x.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;swift-038&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -877,9 +877,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Declarative composition&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Intermediate result&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Explain why a domain-specific builder may be clearer or less clear than an ordinary array literal.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Compose declarative structures with result builders, including optional parts.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Build a small report declaration using the existing builder.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Two expressions become an ordered array of sections. The conditional contributes its section when true.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The report contains Summary and Totals; the Warnings section is omitted.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;swift-039&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -895,8 +895,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Reducer&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Presentation state&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Draw the dependency direction among core, persistence adapter, view model and SwiftUI views.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Build and test JourneyCore before opening the Apple app.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Separate a portable domain core from the Apple app and test it on its own.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Reproduce Example A (Apply a domain action) and Example B (Keep identity stable during edits) and explain each check.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The transformed item changes completion while retaining the original value. Completion changes do not manufacture a new identity.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
@@ -913,8 +913,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Binding&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;View identity&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Decide whether a piece of state belongs to the view, model or domain core and justify its lifetime.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Run JourneyApp and edit a title through its real binding.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Manage SwiftUI state and bindings with a single source of truth.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Reproduce Example A (Derive presentation from one state) and Example B (A state change updates its derived view) and explain each check.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The label follows the stored completion state. Changing completion changes the derived label while retaining the title.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
@@ -931,8 +931,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Deep link&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Navigation path&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Design a restoration format for navigation without storing view instances or private payloads.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Run JourneyApp and navigate by stable item identity.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Navigate by stable identity and validate deep links before acting on them.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Reproduce Example A (Parse an admitted route) and Example B (Reject unrelated or incomplete links) and explain each check.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The admitted scheme and host resolve to item one. Unrelated schemes, missing identity and unlisted actions are rejected.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
@@ -949,8 +949,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Migration&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Recovery policy&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Design a version-one to version-two migration with backup, rollback and verification steps.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Inspect JourneyApp save and load errors with an owned test file.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Save, load and migrate app data with recoverable errors.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Reproduce Example A (Read the supported version) and Example B (Refuse an unknown future schema) and explain each check.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The supported envelope round-trips with two titles. The unsupported document is rejected without modifying its payload.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
@@ -967,8 +967,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Stale result&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Transport adapter&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Design a URLSession boundary with explicit FoundationNetworking import on Linux, request timeout, size bound and schema validation.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Implement a deterministic fake transport returning success and failure values.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Model loading states and discard stale network results with a deterministic fake transport.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Reproduce Example A (Accept the current request result) and Example B (Ignore a superseded result) and explain each check.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The matching generation updates current state. The stale response cannot overwrite the newer value.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
@@ -985,9 +985,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Dynamic Type&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Localization&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Create a manual accessibility acceptance checklist with concrete observations and retained defects.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Run JourneyApp using keyboard navigation and VoiceOver on macOS.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The label communicates completion without relying on color. Display text changes while identity remains stable.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Make an app accessible and localizable with meaningful labels and stable identity.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Reproduce Example A (Describe state with words) and Example B (Keep identity separate from translation) and explain each check.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The label communicates completion without relying on color. Switching language changes the title from Read to Lire while the completion saved under lesson-one still shows complete.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;swift-045&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -1003,8 +1003,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Coordinator&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Feedback loop&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Document coordinator ownership, delegate cleanup and platform-specific API availability.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Inspect and build SelectableText.swift in the Apple project.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Wrap UIKit and AppKit views at clear integration boundaries.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Reproduce Example A (Avoid redundant imperative updates) and Example B (Retain user changes as actions) and explain each check.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The same value is not assigned twice. The portable kernel exposes a deliberate state transition.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
@@ -1021,8 +1021,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Simulator&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Signing&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Prepare a release note listing platform, SDK, destination, test results and remaining device/signing limitations.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Generate JourneyApp, list destinations and run its provided test scheme on an available simulator or macOS destination.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Run app tests on simulators or macOS destinations and explain signing requirements.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Reproduce Example A (Separate acceptance categories) and Example B (Require every declared release gate) and explain each check.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Domain and package evidence do not imply UI or device qualification. Save/reload remains an explicit incomplete gate.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
@@ -1039,15 +1039,15 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Conditional compilation&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Platform adapter&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Create a platform support matrix listing compiled, executed and manually inspected surfaces separately.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Build JourneyCore on a prepared Linux Swift environment and separately build JourneyApp on macOS.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Separate portable and platform-specific code and state each platform&#x27;s deployment contract.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Reproduce Example A (Keep portable policy independent) and Example B (Declare a capability rather than guess) and explain each check.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The same domain summary works without a UI framework. The Linux capability set does not invent SwiftUI support.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;swift-048&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Capstone: an offline-first study planner&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;advanced&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">180</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;swift-047&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
@@ -1057,8 +1057,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Acceptance evidence&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Extension boundary&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Deliver a project README with architecture, actual platform evidence, accessibility observations, recovery policy and one independently implemented extension.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Build and test JourneyCore, then run the complete JourneyApp on a prepared Apple destination.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Build and test a complete offline-first study planner across the portable core and the Apple app.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Reproduce Example A (Produce a stable completion summary) and Example B (Preserve identity across a value update) and explain each check.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;One of two uniquely identified items is complete. The update retains identity and the prior snapshot.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">}</span></span>
 <span class="source-line">  <span class="syntax-punctuation">]</span></span>

@@ -386,29 +386,20 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Level:</strong> Advanced <strong>Stable lesson ID:</strong> <code>bridge-analytics-01</code> <strong>Catalog prerequisites:</strong> <code>python-data-01</code>, <code>sql-analytics-01</code>, and <code>bridge-05</code> <strong>Prerequisites:</strong> the <a href="python-data-01.html#guide">professional columnar-data module</a>, <a href="sql-analytics-01.html#guide">advanced analytical SQL lab</a>, and <a href="bridge-05.html#guide">Bridge Day 5</a>. Those paths include the Python Day 23 and SQL Day 30 foundations.</p>
 <p>This module builds a small dbt-style analytics project entirely in an in-memory DuckDB database. “dbt-style” means models form a declared directed acyclic graph (DAG), transformations are select statements materialized in dependency order, grain and contracts are explicit, and data tests plus reconciliation gate the mart. It does not require the dbt package, a hosted warehouse, an account, credentials, a network connection, or local database files.</p>
 <p>Install the professional and quality profiles once while connected if the normal setup has not already installed them:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell</span>
-<span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m pip install -e <span class="syntax-string">&quot;</span><span class="syntax-string">.[professional,quality]</span><span class="syntax-string">&quot;</span></code></pre>
-<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux</span>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># Linux, macOS, or Windows through WSL 2</span>
 .venv/bin/python -m pip install -e <span class="syntax-string">&quot;.[professional,quality]&quot;</span></code></pre>
 <p>Run the answer-free starter:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell</span>
-<span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe bridge<span class="syntax-punctuation">\</span>professional<span class="syntax-punctuation">\</span>lessons<span class="syntax-punctuation">\</span>bridge_analytics_01_local_project<span class="syntax-punctuation">.</span>py</code></pre>
-<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux</span>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># Linux, macOS, or Windows through WSL 2</span>
 .venv/bin/python bridge/professional/lessons/bridge_analytics_01_local_project.py</code></pre>
 <p>Run the completed local project:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell</span>
-<span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe bridge<span class="syntax-punctuation">\</span>professional<span class="syntax-punctuation">\</span>solutions<span class="syntax-punctuation">\</span>bridge_analytics_01_local_project_solution<span class="syntax-punctuation">.</span>py</code></pre>
-<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux</span>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># Linux, macOS, or Windows through WSL 2</span>
 .venv/bin/python bridge/professional/solutions/bridge_analytics_01_local_project_solution.py</code></pre>
 <p>The solution builds twice in the same in-memory connection and asserts that the ordered snapshot is identical. Closing the process removes all tables.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python + PostgreSQL engineering</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
 <p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>Start at the repository root. The answer-free starter is deliberately safe to run: it prints orientation text and does not call unfinished functions or contact PostgreSQL.</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell</span>
-<span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe bridge<span class="syntax-punctuation">\</span>professional<span class="syntax-punctuation">\</span>lessons<span class="syntax-punctuation">\</span>bridge_analytics_01_local_project<span class="syntax-punctuation">.</span>py
-<span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m pytest bridge<span class="syntax-punctuation">\</span>professional<span class="syntax-punctuation">\</span>tests -q</code></pre>
-<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux</span>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># Linux, macOS, or Windows through WSL 2</span>
 .venv/bin/python bridge/professional/lessons/bridge_analytics_01_local_project.py
 .venv/bin/python -m pytest bridge/professional/tests -q</code></pre>
 <p>Read this guide first, implement one boundary at a time in <code>bridge/professional/lessons/bridge_analytics_01_local_project.py</code>, and use small fakes or recording doubles for the default evidence path. This lesson uses only an in-memory DuckDB database created by the process. Closing the process removes it; do not create or commit a local database file.</p>
@@ -832,12 +823,12 @@ Do not open, quote, summarize, or copy anything under solutions/ until I
 explicitly say I have finished my attempt and ask to compare.
 
 Use these coaching phases in order:
-1. Predict — ask what I expect before I run or change code.
-2. Attempt — let me implement or explain one numbered exercise at a time.
-3. Hint — give the smallest useful conceptual hint, never a finished answer.
-4. Evidence — ask for the exact return value, exception type, recorded calls,
+1. Predict: ask what I expect before I run or change code.
+2. Attempt: let me implement or explain one numbered exercise at a time.
+3. Hint: give the smallest useful conceptual hint, never a finished answer.
+4. Evidence: ask for the exact return value, exception type, recorded calls,
    query plus bound parameters, or written decision required by that exercise.
-5. Retrieval — close with two no-notes questions and one transfer problem.
+5. Retrieval: close with two no-notes questions and one transfer problem.
 
 Keep the default path offline and fake-first. If the lesson has an optional
 PostgreSQL step, require my explicit opt-in, DS60_DATABASE_URL, and the
@@ -2088,12 +2079,12 @@ Do not open, quote, summarize, or copy anything under solutions/ until I
 explicitly say I have finished my attempt and ask to compare.
 
 Use these coaching phases in order:
-1. Predict — ask what I expect before I run or change code.
-2. Attempt — let me implement or explain one numbered exercise at a time.
-3. Hint — give the smallest useful conceptual hint, never a finished answer.
-4. Evidence — ask for the exact return value, exception type, recorded calls,
+1. Predict: ask what I expect before I run or change code.
+2. Attempt: let me implement or explain one numbered exercise at a time.
+3. Hint: give the smallest useful conceptual hint, never a finished answer.
+4. Evidence: ask for the exact return value, exception type, recorded calls,
    query plus bound parameters, or written decision required by that exercise.
-5. Retrieval — close with two no-notes questions and one transfer problem.
+5. Retrieval: close with two no-notes questions and one transfer problem.
 
 Keep the default path offline and fake-first. If the lesson has an optional
 PostgreSQL step, require my explicit opt-in, DS60_DATABASE_URL, and the

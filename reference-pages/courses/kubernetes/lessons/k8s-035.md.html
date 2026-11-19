@@ -197,32 +197,26 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Use the guide and synthetic case ledger. A prediction or copied fixture is not a live runtime observation.</p>
 <h3 id="exercise-1-separate-name-uid-and-version">Exercise 1: Separate name, UID and version<a class="heading-anchor" href="#exercise-1-separate-name-uid-and-version" aria-label="Link to this section">#</a></h3>
 <p>Explain the role of hello-config, u1 and rv-A.</p>
-<p>Expected: Name addresses an object; UID its lifetime; resourceVersion is an opaque API token.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-2-predict-the-conflict">Exercise 2: Predict the conflict<a class="heading-anchor" href="#exercise-2-predict-the-conflict" aria-label="Link to this section">#</a></h3>
 <p>Apply an rv-A update to stored rv-B with the same UID.</p>
-<p>Expected: 409-style conflict with current data unchanged.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-3-recompute-after-reread">Exercise 3: Recompute after reread<a class="heading-anchor" href="#exercise-3-recompute-after-reread" aria-label="Link to this section">#</a></h3>
 <p>Read rv-B and preserve unrelated fields while reconsidering the intended message edit.</p>
-<p>Expected: A new conditional request uses current state and a bounded retry count.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-4-stop-on-replacement-identity">Exercise 4: Stop on replacement identity<a class="heading-anchor" href="#exercise-4-stop-on-replacement-identity" aria-label="Link to this section">#</a></h3>
 <p>Reread the same name with UID u2 when the lease expected u1.</p>
-<p>Expected: Refuse the mutation across object replacement.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-5-recover-from-watch-expiration">Exercise 5: Recover from watch expiration<a class="heading-anchor" href="#exercise-5-recover-from-watch-expiration" aria-label="Link to this section">#</a></h3>
 <p>Replace a stale cache with a supplied fresh list after 410.</p>
-<p>Expected: Current u2 snapshot retained; watcher restarts from the new list token.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-6-handle-bookmarks-and-duplicates">Exercise 6: Handle bookmarks and duplicates<a class="heading-anchor" href="#exercise-6-handle-bookmarks-and-duplicates" aria-label="Link to this section">#</a></h3>
 <p>Classify a bookmark and a repeated modified event.</p>
-<p>Expected: Bookmark advances progress; duplicate state does not repeat external effects.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p></article>
   </main>

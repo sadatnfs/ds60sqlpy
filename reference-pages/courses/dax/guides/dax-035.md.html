@@ -200,8 +200,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Open the <a href="../lessons/dax-035.dax.html">starter</a>. Compare the <a href="../solutions/dax-035_reference.dax.html">named reference</a> and <a href="../solutions/dax-035_solutions.md.html">reasoning</a> when ready. The <a href="../models/retail/model.json.html">model specification</a> identifies every fixture table, column type, key and relationship. The <a href="../models/README.md.html">fixture handbook</a> displays the original data and explains each table grain.</p>
 <h3 id="the-question-and-the-mechanism">The question and the mechanism<a class="heading-anchor" href="#the-question-and-the-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Define a fiscal year explicitly and distinguish fiscal-to-date from a completed fiscal year.</p>
-<p>A fiscal-year label is a convention over dates, not an intrinsic property of an integer called Year. Our ordinary FiscalYear ends in June: July 1,2024 begins FY 2025, while June 30,2024 ends FY 2024. Labeling a fiscal year by its ending year is a deliberate rule that should be written in the date dictionary.</p>
-<p>A fiscal-year-to-date question also needs an as-of date. FY 2025 spans July 2024 through June 2025, but this fixture&#x27;s sales observation ends February 28,2025. Summing available FY 2025 facts gives 123; calling that a completed-year total would overstate the temporal coverage. A complete calendar table can represent future fiscal dates without supplying their outcomes.</p>
+<p>A fiscal-year label is a convention over dates, not an intrinsic property of an integer called Year. Our ordinary FiscalYear ends in June: July 1, 2024 begins FY 2025, while June 30, 2024 ends FY 2024. Labeling a fiscal year by its ending year is a deliberate rule that should be written in the date dictionary.</p>
+<p>A fiscal-year-to-date question also needs an as-of date. FY 2025 spans July 2024 through June 2025, but this fixture&#x27;s sales observation ends February 28, 2025. Summing available FY 2025 facts gives 123; calling that a completed-year total would overstate the temporal coverage. A complete calendar table can represent future fiscal dates without supplying their outcomes.</p>
 <p>Classic time-intelligence functions can support shifted Gregorian year boundaries with their documented year-end arguments. The reference here instead shows the explicit fiscal column and as-of date filter so the included population is easy to inspect. More irregular calendars need additional metadata and, potentially, the version-sensitive calendar-based features introduced next.</p>
 <h3 id="vocabulary-and-expression-anatomy">Vocabulary and expression anatomy<a class="heading-anchor" href="#vocabulary-and-expression-anatomy" aria-label="Link to this section">#</a></h3>
 <p>Case A inspects two neighboring boundary dates and their stored FiscalYear labels. Case B applies an explicit fiscal-year filter and a maximum available date. The code does not infer a financial reporting standard from the word fiscal; the fixture&#x27;s convention is the authority.</p>
@@ -250,8 +250,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <pre class="highlighted-code"><code class="language-dax"><span class="syntax-keyword">EVALUATE</span> <span class="syntax-function">CALCULATETABLE</span> <span class="syntax-punctuation">(</span> <span class="syntax-function">ROW</span> <span class="syntax-punctuation">(</span> <span class="syntax-string">&quot;FiscalYTDRevenue&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-attribute">[NetRevenue]</span> <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-class">&#x27;Date&#x27;</span><span class="syntax-attribute">[FiscalYear]</span> <span class="syntax-operator">=</span> <span class="syntax-number">2025</span><span class="syntax-punctuation">,</span> <span class="syntax-class">&#x27;Date&#x27;</span><span class="syntax-attribute">[Date]</span> <span class="syntax-operator">&lt;=</span> <span class="syntax-function">DATE</span> <span class="syntax-punctuation">(</span> <span class="syntax-number">2025</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">28</span> <span class="syntax-punctuation">)</span> <span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Context trace:</strong></p>
 <ol>
-<li>The fiscal interval starts July 1,2024.</li>
-<li>The as-of boundary stops at February 28,2025, not June 30.</li>
+<li>The fiscal interval starts July 1, 2024.</li>
+<li>The as-of boundary stops at February 28, 2025, not June 30.</li>
 <li>The available matching sales are S4..S8, totaling 123.</li>
 </ol>
 <p><strong>Hand-derived worked-reference result:</strong></p>
@@ -265,7 +265,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>There happen to be no second-half 2024 sales in this fixture. That does not make Gregorian and fiscal-year measures generally equivalent.</p>
 <p>Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table.</p>
 <h3 id="practice-prediction-construction-and-diagnosis">Practice: prediction, construction and diagnosis<a class="heading-anchor" href="#practice-prediction-construction-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>Retain your formula or written reasoning, the stated context, contributing rows or values, and a conclusion with its unit. This is a manual learning record, not an execution receipt.</p>
+<p>Retain your formula or written reasoning, the stated context, contributing rows or values, and a conclusion with its unit. These notes are your own study record; they do not show that a formula ran.</p>
 <h4 id="exercise-1-predict">Exercise 1: Predict<a class="heading-anchor" href="#exercise-1-predict" aria-label="Link to this section">#</a></h4>
 <p>Predict FiscalYear for January 3, 2025.</p>
 <h4 id="exercise-2-change-one-condition">Exercise 2: Change one condition<a class="heading-anchor" href="#exercise-2-change-one-condition" aria-label="Link to this section">#</a></h4>
@@ -292,8 +292,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Continue to <a href="dax-036.md.html">dax-036</a> when its prerequisites make sense, or revisit this stage from the <a href="../README.md.html">course map</a>.</p>
 <h3 id="official-references-and-evidence-limits">Official references and evidence limits<a class="heading-anchor" href="#official-references-and-evidence-limits" aria-label="Link to this section">#</a></h3>
 <ul>
-<li><a href="https://learn.microsoft.com/en-us/dax/datesytd-function-dax">Official documentation 1</a></li>
-<li><a href="https://learn.microsoft.com/en-us/power-bi/guidance/model-date-tables">Official documentation 2</a></li>
+<li><a href="https://learn.microsoft.com/en-us/dax/datesytd-function-dax">DAX function: DATESYTD</a></li>
+<li><a href="https://learn.microsoft.com/en-us/power-bi/guidance/model-date-tables">Power BI guidance: date tables</a></li>
 </ul>
 <p>Documentation was reviewed for this original course on 2026-10-25. Version-sensitive features have explicit notes. Source/model checks and independent fixture arithmetic are not a DAX parser, compiler, semantic engine, real RLS test or performance measurement.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>

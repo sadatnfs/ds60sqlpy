@@ -202,29 +202,23 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict the storage type of c(1L, 2.5).</p>
 <p>Both entries are stored as doubles.</p>
-<p><strong>Expected evidence:</strong> Both entries are stored as doubles.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Replace numeric 17 with the identifier &quot;0017&quot;.</p>
 <p>Keep the identifier character to preserve leading zeros.</p>
-<p><strong>Expected evidence:</strong> Keep the identifier character to preserve leading zeros.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Check that 19 items form three groups of five with four left.</p>
 <p>19 %/% 5 is 3 and 19 %% 5 is 4.</p>
-<p><strong>Expected evidence:</strong> 19 %/% 5 is 3 and 19 %% 5 is 4.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose identical(2L, 2) being false.</p>
 <p>The storage types differ even though numeric equality holds.</p>
-<p><strong>Expected evidence:</strong> The storage types differ even though numeric equality holds.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Check a decimal calculation near 0.3.</p>
 <p>isTRUE(all.equal(...)) supplies one logical result.</p>
-<p><strong>Expected evidence:</strong> isTRUE(all.equal(...)) supplies one logical result.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>State why a large tolerance can hide a defect.</p>
 <p>A tolerance should permit representation error, not an arbitrary change in the intended amount.</p>
-<p><strong>Expected evidence:</strong> A tolerance should permit representation error, not an arbitrary change in the intended amount.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference contains explicit behavioral assertions for its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The reference makes 6 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>
 </body>
 </html>

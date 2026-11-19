@@ -194,31 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-053_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-053-explanatory-solutions">web-053: explanatory solutions<a class="heading-anchor" href="#web-053-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.</p>
-<h3 id="why-the-mechanism-works">Why the mechanism works<a class="heading-anchor" href="#why-the-mechanism-works" aria-label="Link to this section">#</a></h3>
-<p>Authentication answers who the application believes is making a request. Authorization answers whether that identity may perform this action on this object. A record id in a URL is a locator, not proof of permission. A hidden owner field, disabled button or filtered interface cannot enforce access because the client can alter all of them.</p>
-<p>Apply authorization on every relevant server operation, including reads, updates, deletion and exports. Scope queries by trusted identity or enforce an explicit policy before returning data. Deny by default when a required identity or permission is missing. Error behavior should avoid disclosing another user&#x27;s sensitive record while still providing useful recovery for legitimate users.</p>
-<p>The reference receives a trusted synthetic actor id as a separate parameter from the requested record id. A query includes both record id and owner id as bound values. The fake actor is a test fixture, not a login implementation. A real adapter must obtain it from a verified session or credential and must not copy it from a form field.</p>
+<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-053.md</code>.</p>
 <h3 id="exercise-1-explain-why-knowing-a-record-id-is-not-sufficient-permission">Exercise 1: Explain why knowing a record id is not sufficient permission.<a class="heading-anchor" href="#exercise-1-explain-why-knowing-a-record-id-is-not-sufficient-permission" aria-label="Link to this section">#</a></h3>
-<p>Ids identify objects; a policy must authorize access for the current actor.</p>
-<p>Trace the smallest example before editing. Name which values are source and which are observations.</p>
+<p><strong>Expected answer:</strong> Ids identify objects; a policy must authorize access for the current actor.</p>
+<p><strong>Why:</strong> Ids are guessable or discoverable, so each access needs a policy check against the current actor.</p>
 <h3 id="exercise-2-add-owner-scoping-to-a-prepared-read-query">Exercise 2: Add owner scoping to a prepared read query.<a class="heading-anchor" href="#exercise-2-add-owner-scoping-to-a-prepared-read-query" aria-label="Link to this section">#</a></h3>
-<p>The query can return only the requested actor&#x27;s matching record.</p>
-<p>Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.</p>
+<p><strong>Expected evidence:</strong> The query can return only the requested actor&#x27;s matching record.</p>
+<p><strong>Why:</strong> Scoping the query by owner means another actor&#x27;s record can never be returned, even by mistake.</p>
 <h3 id="exercise-3-build-an-object-access-function-with-separate-trusted-actor-and-requested-id-inputs">Exercise 3: Build an object-access function with separate trusted actor and requested id inputs.<a class="heading-anchor" href="#exercise-3-build-an-object-access-function-with-separate-trusted-actor-and-requested-id-inputs" aria-label="Link to this section">#</a></h3>
-<p>The owner can read the record and a different actor receives no record.</p>
-<p>Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.</p>
+<p><strong>Expected evidence:</strong> The owner can read the record and a different actor receives no record.</p>
+<p><strong>Why:</strong> Keeping trusted and untrusted inputs separate makes it obvious which value decides permission.</p>
 <h3 id="exercise-4-diagnose-trusting-ownerid-from-a-submitted-form">Exercise 4: Diagnose trusting owner_id from a submitted form.<a class="heading-anchor" href="#exercise-4-diagnose-trusting-ownerid-from-a-submitted-form" aria-label="Link to this section">#</a></h3>
-<p>A caller can forge it; derive ownership from the verified server-side identity.</p>
-<p>Keep the failing input. Identify the first layer where the observed result differs from the intended contract.</p>
+<p><strong>Expected answer:</strong> A caller can forge it; derive ownership from the verified server-side identity.</p>
+<p><strong>Why:</strong> The browser can send any value, so ownership must come from the verified session identity.</p>
 <h3 id="exercise-5-test-own-other-and-missing-records">Exercise 5: Test own, other and missing records.<a class="heading-anchor" href="#exercise-5-test-own-other-and-missing-records" aria-label="Link to this section">#</a></h3>
-<p>Each follows a deliberate policy without leaking another actor&#x27;s title.</p>
-<p>Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.</p>
+<p><strong>Expected evidence:</strong> Each follows a deliberate policy without leaking another actor&#x27;s title.</p>
+<p><strong>Why:</strong> Returning the same no-record result for other and missing ids avoids revealing which ids exist.</p>
 <h3 id="exercise-6-explain-why-hiding-an-edit-button-is-only-a-user-interface-convenience">Exercise 6: Explain why hiding an edit button is only a user-interface convenience.<a class="heading-anchor" href="#exercise-6-explain-why-hiding-an-edit-button-is-only-a-user-interface-convenience" aria-label="Link to this section">#</a></h3>
-<p>The server endpoint must enforce the same permission even when called directly.</p>
-<p>Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.</p>
-<h3 id="reference-comparison-and-limits">Reference comparison and limits<a class="heading-anchor" href="#reference-comparison-and-limits" aria-label="Link to this section">#</a></h3>
-<p>Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.</p></article>
+<p><strong>Expected answer:</strong> The server endpoint must enforce the same permission even when called directly.</p>
+<p><strong>Why:</strong> Hiding a control changes only the page; the endpoint must check permission on every request.</p>
+<h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
+<p>Open <code>courses/web-development/solutions/web-053_solution.php</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.</p></article>
   </main>
 </body>
 </html>

@@ -196,9 +196,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="r-045-structured-validation-and-training-only-preprocessing">r-045: Structured validation and training-only preprocessing<a class="heading-anchor" href="#r-045-structured-validation-and-training-only-preprocessing" aria-label="Link to this section">#</a></h2>
 <p><strong>Level:</strong> intermediate. <strong>Direct prerequisites:</strong> <code>r-044</code></p>
 <h3 id="run-and-retain-your-work">Run and retain your work<a class="heading-anchor" href="#run-and-retain-your-work" aria-label="Link to this section">#</a></h3>
-<p>Use the classroom&#x27;s R language pad and prepared r-statistics profile. Each run evaluates one main.R script in a fresh offline R process. Define every required input in the script; earlier runs do not leave live variables behind. Save source and notes separately from run receipts. No package installation or data download is needed for these examples.</p>
-<p>Base plot calls are captured as PNG figures. Explicitly print ggplot2 and Plotly objects in scripts: print(chart). The classroom retains at most two figures per run; Plotly figures use the prepared interactive browser renderer. A temporary file created inside a run is not automatically a persistent download. Keep the supplied examples self-contained and use the saved source, notes and supported figure/result views for retained work.</p>
-<p>Open the <a href="../lessons/r-045.R.html">starter</a>. The <a href="../solutions/r-045_reference.R.html">complete reference</a> and <a href="../solutions/r-045_solutions.md.html">explained answers</a> are available for deliberate comparison.</p>
+<p>Open <code>r-045</code> in <code>/classroom</code> and use the prepared <code>r-statistics</code> profile. Each Run evaluates one <code>main.R</code> script in a fresh offline R process, so define every input in the script; an earlier Run leaves no variables behind. Work in the <a href="../lessons/r-045.R.html">starter</a>. The <a href="../solutions/r-045_reference.R.html">complete reference</a> ends by printing <code>r-045 reference checks passed</code>, and the <a href="../solutions/r-045_solutions.md.html">explained answers</a> are there for deliberate comparison after your own attempt. This chapter prints values only; when a chapter draws figures, the classroom keeps at most two figures per run. The <a href="../README.md.html">course overview</a> describes saved work, figure capture and the prepared package versions.</p>
 <h3 id="outcome-and-mechanism">Outcome and mechanism<a class="heading-anchor" href="#outcome-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Construct validation procedures whose partitions and preprocessing match the intended transfer claim.</p>
 <p>A validation split defines what kind of new information the assessment represents. Randomly splitting rows can be appropriate for some independent-observation questions, but it can leak information when several rows belong to the same person, document family, device or time-linked episode. A new row from a known family is not the same transfer question as a new family.</p>
@@ -254,7 +252,6 @@ leaked_center <span class="syntax-operator">&lt;-</span> <span class="syntax-fun
 <p><strong>Expected observation:</strong> Training center1; global center51; valid held-out transformed values 99/101.</p>
 <p>The transformation parameters are part of the fitted procedure. Including held-out values changes the centering rule even without using labels.</p>
 <h3 id="practice-with-evidence">Practice with evidence<a class="heading-anchor" href="#practice-with-evidence" aria-label="Link to this section">#</a></h3>
-<p>Retain the submitted source, the specific input or changed condition, and the observed result or expected failure. A successful exit checks only the properties the program actually asserts; it does not establish general correctness or mastery.</p>
 <h4 id="exercise-1-predict">Exercise 1: Predict<a class="heading-anchor" href="#exercise-1-predict" aria-label="Link to this section">#</a></h4>
 <p>Construct a group-disjoint split for four two-row families.</p>
 <h4 id="exercise-2-modify">Exercise 2: Modify<a class="heading-anchor" href="#exercise-2-modify" aria-label="Link to this section">#</a></h4>
@@ -279,21 +276,21 @@ leaked_center <span class="syntax-operator">&lt;-</span> <span class="syntax-fun
 <h3 id="reference-review">Reference review<a class="heading-anchor" href="#reference-review" aria-label="Link to this section">#</a></h3>
 <p>The reference checks disjointness at the family level and refits inside each fold. Its perfect synthetic affine predictions test implementation mechanics, not the credibility of real-world validation. The training-only centering example isolates a preprocessing leak without mixing it with model error.</p>
 <p>The final aggregation preserves both sums and counts, allowing the observation-weighted result to be reconstructed. Temporal ordering is checked independently. A complete applied study must also reserve model-selection decisions for development data and retain a final assessment that was not reused for tuning.</p>
-<p>Compare your implementation with the reference only after retaining your own attempt. Different readable implementations can satisfy the same behavioral contract. Inspect type, shape, missingness and boundary behavior alongside printed numbers.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/lm.html">R lm</a></li>
 <li><a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/model.frame.html">R model frames</a></li>
 </ul>
-<p>The prepared environment uses R 4.6.1, R6 2.6.1, S7 0.2.2, ggplot2 4.0.3 and Plotly 4.12.1. These original examples use the checked-in dependency contract; external package changes require a fresh compatibility check.</p>
 <h3 id="continue">Continue<a class="heading-anchor" href="#continue" aria-label="Link to this section">#</a></h3>
-<p>Use the <a href="../README.md.html">course map</a> to choose the next chapter by its prerequisites. For broader model assumptions, study the statistics tutorial alongside the executable R examples.</p>
+<p>Chapters that list <code>r-045</code> as a direct prerequisite: <a href="r-046.md.html"><code>r-046</code></a>, <a href="r-047.md.html"><code>r-047</code></a>, <a href="r-049.md.html"><code>r-049</code></a>, <a href="r-050.md.html"><code>r-050</code></a>. For the modeling assumptions behind these examples, read the <a href="../../statistics-ml/README.md.html">statistics tutorial</a> alongside the R code.</p>
 <h3 id="ask-an-ai-tutor">Ask an AI tutor<a class="heading-anchor" href="#ask-an-ai-tutor" aria-label="Link to this section">#</a></h3>
-<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for r-045. Read the guide and my saved attempt.
-Explain the relevant R mechanism, type and data-shape contract. Give one
-progressive hint before revealing the complete reference unless I request it.
-Distinguish my observed output from an expected result and from unrun code.
-Do not claim mastery from a successful process exit or a matching source string.</code></pre></article>
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for r-045 (Structured validation and training-only preprocessing).
+Read the guide and my saved attempt. Explain the relevant R mechanism,
+type and data-shape contract, focusing on: group split, temporal split, leakage, cross-validation, training-only preprocessing.
+Give one progressive hint before revealing the complete reference unless
+I request it. Distinguish my observed output from an expected result and
+from unrun code. Do not claim mastery from a successful process exit or a
+matching source string.</code></pre></article>
   </main>
 </body>
 </html>

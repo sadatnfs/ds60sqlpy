@@ -200,15 +200,57 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">    <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">meta</span> <span class="syntax-attribute">name</span><span class="syntax-operator">=</span><span class="syntax-string">&quot;viewport&quot;</span> <span class="syntax-attribute">content</span><span class="syntax-operator">=</span><span class="syntax-string">&quot;width=device-width, initial-scale=1&quot;</span> <span class="syntax-punctuation">/</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">title</span><span class="syntax-punctuation">&gt;</span>Grid: tracks, gaps and two-dimensional alignment: my attempt<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">title</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">style</span><span class="syntax-punctuation">&gt;</span></span>
-<span class="source-line">      <span class="syntax-comment">/* Implement the lesson-specific CSS. Keep keyboard focus visible. */</span></span>
+<span class="source-line">      <span class="syntax-comment">/*</span></span>
+<span class="source-line"><span class="syntax-comment">        Worked example 1: Two equal tracks</span></span>
+<span class="source-line"><span class="syntax-comment">        .grid {</span></span>
+<span class="source-line"><span class="syntax-comment">          display: grid;</span></span>
+<span class="source-line"><span class="syntax-comment">          grid-template-columns: repeat(2, minmax(0, 1fr));</span></span>
+<span class="source-line"><span class="syntax-comment">          gap: 1rem;</span></span>
+<span class="source-line"><span class="syntax-comment">        }</span></span>
+<span class="source-line"><span class="syntax-comment">      */</span></span>
+<span class="source-line"></span>
+<span class="source-line">      <span class="syntax-comment">/*</span></span>
+<span class="source-line"><span class="syntax-comment">        Worked example 2: Adaptive cards</span></span>
+<span class="source-line"><span class="syntax-comment">        .cards {</span></span>
+<span class="source-line"><span class="syntax-comment">          display: grid;</span></span>
+<span class="source-line"><span class="syntax-comment">          grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));</span></span>
+<span class="source-line"><span class="syntax-comment">          gap: 1rem;</span></span>
+<span class="source-line"><span class="syntax-comment">        }</span></span>
+<span class="source-line"><span class="syntax-comment">      */</span></span>
+<span class="source-line"></span>
+<span class="source-line">      <span class="syntax-comment">/* Write the CSS for the exercises here. Keep keyboard focus visible. */</span></span>
 <span class="source-line">    <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">style</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line">  <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">head</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line">  <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">body</span><span class="syntax-punctuation">&gt;</span></span>
-<span class="source-line">    <span class="syntax-comment">&lt;!-- web-016: Build an adaptive topic grid that survives a narrow container. --&gt;</span></span>
-<span class="source-line">    <span class="syntax-comment">&lt;!-- Save your prediction, then implement the six exercises from the guide. --&gt;</span></span>
+<span class="source-line">    <span class="syntax-comment">&lt;!--</span></span>
+<span class="source-line"><span class="syntax-comment">      web-016 exercises. Hints are in the guide; answers are in the solutions folder.</span></span>
+<span class="source-line"><span class="syntax-comment">      1. Explain why two 1fr tracks plus a gap are not two 50% widths plus a gap.</span></span>
+<span class="source-line"><span class="syntax-comment">      2. Add a fourth card without new positional rules.</span></span>
+<span class="source-line"><span class="syntax-comment">      3. Build an adaptive topic grid that survives a narrow container.</span></span>
+<span class="source-line"><span class="syntax-comment">      4. Diagnose a long value widening a track.</span></span>
+<span class="source-line"><span class="syntax-comment">      5. Test empty, one-card and seven-card collections.</span></span>
+<span class="source-line"><span class="syntax-comment">      6. Explain auto-fit versus auto-fill at a high level.</span></span>
+<span class="source-line"><span class="syntax-comment">    --&gt;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">main</span><span class="syntax-punctuation">&gt;</span></span>
-<span class="source-line">      <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">h1</span><span class="syntax-punctuation">&gt;</span>Grid: tracks, gaps and two-dimensional alignment<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">h1</span><span class="syntax-punctuation">&gt;</span></span>
-<span class="source-line">      <span class="syntax-comment">&lt;!-- Build your own document here. The reference is separate. --&gt;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">h1</span><span class="syntax-punctuation">&gt;</span>Topic grid<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">h1</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">div</span> <span class="syntax-attribute">class</span><span class="syntax-operator">=</span><span class="syntax-string">&quot;cards&quot;</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">article</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">          <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">h2</span><span class="syntax-punctuation">&gt;</span>HTML<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">h2</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">          <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">p</span><span class="syntax-punctuation">&gt;</span>Structure and meaning.<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">p</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">article</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">article</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">          <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">h2</span><span class="syntax-punctuation">&gt;</span>CSS<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">h2</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">          <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">p</span><span class="syntax-punctuation">&gt;</span>Layout and readability.<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">p</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">article</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">article</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">          <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">h2</span><span class="syntax-punctuation">&gt;</span>PHP<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">h2</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">          <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">p</span><span class="syntax-punctuation">&gt;</span>Data and requests.<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">p</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">article</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">article</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">          <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">h2</span><span class="syntax-punctuation">&gt;</span>JavaScript<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">h2</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">          <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">p</span><span class="syntax-punctuation">&gt;</span>Browser interaction.<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">p</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">article</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">div</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">main</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line">  <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">body</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line"><span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">html</span><span class="syntax-punctuation">&gt;</span></span>

@@ -194,33 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-005_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-005-explanatory-solutions">docker-005: explanatory solutions<a class="heading-anchor" href="#docker-005-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These are explanations of the supplied teaching fixtures, not fabricated engine results.</p>
-<h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
-<p>A Dockerfile is a build recipe. Its instructions define a sequence of filesystem and configuration transformations. <code>FROM</code> selects the base image. <code>WORKDIR</code> selects a directory for later operations. <code>COPY</code> copies files from the build context. <code>RUN</code> executes during the build. <code>CMD</code> supplies a default command for a future container. Build-time work and runtime work are different phases.</p>
-<p>A successful build means the build instructions completed under the builder’s inputs. It does not prove that the server starts, can write its intended volume or responds correctly. Packaging tests and runtime tests belong together. A beginner should be able to identify every file copied into the image and why it is necessary.</p>
-<p>The maintained fixture uses only Python’s standard library, so it can teach build mechanics without a package repository. Its base image is still an external dependency during the first build. Later chapters pin immutable identities and export prepared images for disconnected use. The local tag is intentionally never pushed by a course command.</p>
-<p>The final dot in <code>docker build -t NAME .</code> is the context directory, not punctuation to omit. Docker reads the Dockerfile relative to the command’s options and copies only eligible files from that context. The tag names the result locally. <code>--progress=plain</code> makes build steps and cache decisions visible in terminal logs.</p>
-<p>Order instructions by dependency: runtime base, application directory, source copy, identity and command. Declare an unprivileged user after arranging readable files and writable data paths. <code>EXPOSE</code> documents an intended container port but does not publish it to your host.</p>
+<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-005.md</code>.</p>
 <h3 id="exercise-1-sort-run-and-cmd-into-lifecycle-phases">Exercise 1: Sort RUN and CMD into lifecycle phases.<a class="heading-anchor" href="#exercise-1-sort-run-and-cmd-into-lifecycle-phases" aria-label="Link to this section">#</a></h3>
-<p>Putting a long-running server in RUN can hang a build and does not preserve a running process inside the finished image. An image contains files and configuration, not a saved live server.</p>
-<p><strong>Expected:</strong> RUN executes at build time; CMD describes later startup.</p>
+<p><strong>Expected evidence:</strong> RUN executes at build time; CMD describes later startup.</p>
+<p><strong>Why:</strong> Putting a long-running server in RUN can hang a build and does not preserve a running process inside the finished image. An image contains files and configuration, not a saved live server.</p>
 <h3 id="exercise-2-explain-the-final-context-dot">Exercise 2: Explain the final context dot.<a class="heading-anchor" href="#exercise-2-explain-the-final-context-dot" aria-label="Link to this section">#</a></h3>
-<p>COPY paths are evaluated against the context. Running the same command from a different directory can change available files, so record both the Dockerfile and context location.</p>
-<p><strong>Expected:</strong> It selects the current directory as build input.</p>
+<p><strong>Expected answer:</strong> It selects the current directory as build input.</p>
+<p><strong>Why:</strong> COPY paths are evaluated against the context. Running the same command from a different directory can change available files, so record both the Dockerfile and context location.</p>
 <h3 id="exercise-3-write-a-minimal-dockerfile-for-a-single-file-app">Exercise 3: Write a minimal Dockerfile for a single file app.<a class="heading-anchor" href="#exercise-3-write-a-minimal-dockerfile-for-a-single-file-app" aria-label="Link to this section">#</a></h3>
-<p>The minimal file should have no unrelated tools or hidden host dependencies. Each instruction should have a clear effect you can verify in the resulting image.</p>
-<p><strong>Expected:</strong> Base, workdir, explicit source copy and foreground command.</p>
+<p><strong>Expected evidence:</strong> Base, workdir, explicit source copy and foreground command.</p>
+<p><strong>Why:</strong> The minimal file should have no unrelated tools or hidden host dependencies. Each instruction should have a clear effect you can verify in the resulting image.</p>
 <h3 id="exercise-4-diagnose-copy-failure-when-a-file-is-outside-context">Exercise 4: Diagnose COPY failure when a file is outside context.<a class="heading-anchor" href="#exercise-4-diagnose-copy-failure-when-a-file-is-outside-context" aria-label="Link to this section">#</a></h3>
-<p>Docker cannot copy arbitrary parent files through a relative escape. Expanding the context carelessly can send private material to the builder, so narrow the project layout instead.</p>
-<p><strong>Expected:</strong> Change the owned project layout or explicit context intentionally.</p>
+<p><strong>Expected answer:</strong> Change the owned project layout or explicit context intentionally.</p>
+<p><strong>Why:</strong> Docker cannot copy arbitrary parent files through a relative escape. Expanding the context carelessly can send private material to the builder, so narrow the project layout instead.</p>
 <h3 id="exercise-5-explain-why-expose-does-not-make-localhost-8080-work">Exercise 5: Explain why EXPOSE does not make localhost:8080 work.<a class="heading-anchor" href="#exercise-5-explain-why-expose-does-not-make-localhost-8080-work" aria-label="Link to this section">#</a></h3>
-<p>The container process must listen on the correct interface and a host mapping must exist. An EXPOSE instruction alone establishes neither of those operational facts.</p>
-<p><strong>Expected:</strong> It is metadata; port publishing is a runtime configuration.</p>
+<p><strong>Expected answer:</strong> It is metadata; port publishing is a runtime configuration.</p>
+<p><strong>Why:</strong> The container process must listen on the correct interface and a host mapping must exist. An EXPOSE instruction alone establishes neither of those operational facts.</p>
 <h3 id="exercise-6-define-build-and-runtime-acceptance-separately">Exercise 6: Define build and runtime acceptance separately.<a class="heading-anchor" href="#exercise-6-define-build-and-runtime-acceptance-separately" aria-label="Link to this section">#</a></h3>
-<p>Image creation is one stage. Running the exact image with intended user, mounts and network verifies the conditions a learner or operator will actually use.</p>
-<p><strong>Expected:</strong> Build succeeds, then endpoint and writable data behavior pass.</p>
+<p><strong>Expected evidence:</strong> Build succeeds, then endpoint and writable data behavior pass.</p>
+<p><strong>Why:</strong> Image creation is one stage. Running the exact image with intended user, mounts and network verifies the conditions a learner or operator will actually use.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful solution identifies the exact object, the phase when a setting takes effect, the expected normal result and an observation that disproves it. Repeating a command until it succeeds hides the mechanism. Change one variable, keep a failure record, and test the intended behavior again. Source examples here are small enough to inspect; a production system additionally needs ownership, lifecycle, data recovery and operational review. The host exercises are optional and must stay within the learner-created project.</p></article>
+<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>
 </body>
 </html>

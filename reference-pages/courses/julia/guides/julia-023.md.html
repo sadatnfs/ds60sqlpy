@@ -198,13 +198,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Advanced; approximately 150 minutes. Direct prerequisites: <code>julia-021</code>, <code>julia-022</code>.</p>
 <p>Use a prepared optimization library while checking the objective, feasible set and independent convergence evidence.</p>
 <h3 id="classroom-execution">Classroom execution<a class="heading-anchor" href="#classroom-execution" aria-label="Link to this section">#</a></h3>
-<p>Choose <strong>Julia language and scientific computing</strong> in <code>/classroom</code>, open this unit, and select its prepared <code>julia</code> runtime. The worker starts a fresh <code>main.jl</code> process with two Julia threads, a fixed package environment, no startup file and offline package settings. Both worked examples are complete under that environment. Save your current pad before replacing it. No package, model or dataset is fetched by a lesson.</p>
+<p>Open <code>julia-023</code> in <code>/classroom</code> with its prepared <code>julia</code> runtime. Worked case A (minimize a convex quadratic) and worked case B (a feasible boundary changes the answer) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing <code>julia-023: all reference checks passed</code>. The <a href="../README.md.html">course overview</a> describes the shared runtime: a fresh offline <code>main.jl</code> process with two threads and a fixed package environment.</p>
 <h3 id="specify-the-optimization-problem-first">Specify the optimization problem first<a class="heading-anchor" href="#specify-the-optimization-problem-first" aria-label="Link to this section">#</a></h3>
 <p>An optimizer searches for a point that improves a stated objective under a stated feasible set. The algorithm name does not determine whether the objective represents the scientific question. A mistaken sign, reduction or parameterization can be optimized successfully while solving the wrong problem.</p>
 <p>The prepared Optim package supports several methods. This unit uses a gradient-based method for a small smooth vector problem and a bounded method for a scalar problem. ForwardDiff supplies an explicit gradient callback. The code records the final point and objective, then checks them against known mathematical solutions.</p>
 <p>A convergence flag is a diagnostic under an algorithm&#x27;s stopping criteria. It is not a universal proof of a global optimum, especially for nonconvex objectives. Inspect residual gradients, objective values, feasibility and sensitivity to starting points where those checks are relevant.</p>
 <h3 id="worked-case-a-minimize-a-convex-quadratic">Worked case A: minimize a convex quadratic<a class="heading-anchor" href="#worked-case-a-minimize-a-convex-quadratic" aria-label="Link to this section">#</a></h3>
-<p>The first objective has a unique known minimum at[1,-2]. Its gradient is supplied through ForwardDiff using an in-place callback. The program checks the returned point, objective value and gradient norm independently of the optimizer&#x27;s status flag. The small convex construction makes a global conclusion possible because of its mathematical structure, not because the method is named BFGS.</p>
+<p>The first objective has a unique known minimum at <code>[1, -2]</code>. Its gradient is supplied through ForwardDiff using an in-place callback. The program checks the returned point, objective value and gradient norm independently of the optimizer&#x27;s status flag. The small convex construction makes a global conclusion possible because of its mathematical structure, not because the method is named BFGS.</p>
 <pre class="highlighted-code"><code class="language-julia"><span class="syntax-keyword">using</span> Test
 <span class="syntax-keyword">using</span> LinearAlgebra
 <span class="syntax-keyword">using</span> ForwardDiff
@@ -269,11 +269,11 @@ worked_b<span class="syntax-punctuation">(</span><span class="syntax-punctuation
 <p><strong>Expected:</strong> The mathematical problem changes.</p>
 <p><strong>Hint:</strong> State whether the goal is minimization or maximization.</p>
 <h4 id="2-verify-the-known-optimum">2. Verify the known optimum<a class="heading-anchor" href="#2-verify-the-known-optimum" aria-label="Link to this section">#</a></h4>
-<p>Evaluate the quadratic at[1,-2].</p>
+<p>Evaluate the quadratic at <code>[1, -2]</code>.</p>
 <p><strong>Expected:</strong> Objective and gradient are zero.</p>
 <p><strong>Hint:</strong> Use the analytic structure independently.</p>
 <h4 id="3-inspect-the-feasible-set">3. Inspect the feasible set<a class="heading-anchor" href="#3-inspect-the-feasible-set" aria-label="Link to this section">#</a></h4>
-<p>Minimize the scalar case only on[0,2].</p>
+<p>Minimize the scalar case only on the interval from 0 to 2.</p>
 <p><strong>Expected:</strong> The best feasible point is near 2.</p>
 <p><strong>Hint:</strong> The unconstrained minimizer 3 is unavailable.</p>
 <h4 id="4-read-convergence-evidence">4. Read convergence evidence<a class="heading-anchor" href="#4-read-convergence-evidence" aria-label="Link to this section">#</a></h4>
@@ -294,7 +294,7 @@ worked_b<span class="syntax-punctuation">(</span><span class="syntax-punctuation
 <li><a href="https://julianlsolvers.github.io/Optim.jl/stable/user/config/">Optim convergence options</a></li>
 </ul>
 <h3 id="study-companion">Study companion<a class="heading-anchor" href="#study-companion" aria-label="Link to this section">#</a></h3>
-<p>Use the repository learning-companion skill with this lesson ID, your prediction and your actual source/output. Ask for a diagnosis of the first incorrect type, shape, state transition or assumption. Keep observed execution distinct from a timing claim, inferred mathematical result or external deployment.</p></article>
+<p>A repository-aware assistant with the learning-companion skill can review <code>julia-023</code> with you. Give it your prediction for one investigation, your source and the actual output, and ask it to find the first incorrect assumption about Optim, BFGS, gradient, bounded optimization or convergence.</p></article>
   </main>
 </body>
 </html>

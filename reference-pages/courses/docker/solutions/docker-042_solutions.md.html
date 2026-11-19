@@ -194,33 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-042_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-042-explanatory-solutions">docker-042: explanatory solutions<a class="heading-anchor" href="#docker-042-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These are explanations of the supplied teaching fixtures, not fabricated engine results.</p>
-<h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
-<p>The final project is a compact release system rather than a larger application. Starting from the maintained fixture, produce a source-controlled build, an identified image, runtime acceptance, persistence and restore evidence, and a readable operator handoff. The aim is independent reasoning across the complete lifecycle.</p>
-<p>An expert explanation separates facts from assumptions. It names the tested engine and platform, the image identity, the source inputs and the behavior actually observed. It can explain why a failure occurs at one layer and which next observation would disprove that explanation. It also knows when a simple local project does not meet public-service or multi-host requirements.</p>
-<p>No capstone can certify expertise by itself. Use it to identify gaps: if you cannot explain a mount, signal, cache, network hop or recovery boundary, return to the relevant chapter. Repetition with a changed input is more valuable than copying a completed recipe.</p>
-<p>Create a fresh learner copy, keep public synthetic configuration, build visibly, qualify host and peer requests, test one controlled failure, recreate the app, export and independently restore data, and stop owned resources. Preserve an optional image archive for offline transfer without pushing it anywhere.</p>
-<p>Your handoff should contain a diagram, command sequence, expected outputs, failure decision tree and explicit retention policy. Include a coverage table with source checks, image build, actual runtime, browser observation, persistence and restore as separate rows. Mark untested engines or architectures honestly.</p>
+<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-042.md</code>.</p>
 <h3 id="exercise-1-predict-all-outcomes-before-running-the-final-project">Exercise 1: Predict all outcomes before running the final project.<a class="heading-anchor" href="#exercise-1-predict-all-outcomes-before-running-the-final-project" aria-label="Link to this section">#</a></h3>
-<p>Predictions make the experiment falsifiable. Without them it is easy to reinterpret any output as success.</p>
-<p><strong>Expected:</strong> A written normal, failure, replacement and recovery expectation.</p>
+<p><strong>Expected answer:</strong> A written normal, failure, replacement and recovery expectation.</p>
+<p><strong>Why:</strong> Predictions make the experiment falsifiable. Without them it is easy to reinterpret any output as success.</p>
 <h3 id="exercise-2-change-one-noncritical-configuration-and-rebuild-or-recreate-appropriately">Exercise 2: Change one noncritical configuration and rebuild or recreate appropriately.<a class="heading-anchor" href="#exercise-2-change-one-noncritical-configuration-and-rebuild-or-recreate-appropriately" aria-label="Link to this section">#</a></h3>
-<p>Source changes need a new image; runtime environment changes need application of new container configuration. Explain why your selected action is sufficient.</p>
-<p><strong>Expected:</strong> The chosen lifecycle action matches the kind of change.</p>
+<p><strong>Expected evidence:</strong> The chosen lifecycle action matches the kind of change.</p>
+<p><strong>Why:</strong> Source changes need a new image; runtime environment changes need application of new container configuration. Explain why your selected action is sufficient.</p>
 <h3 id="exercise-3-assemble-a-source-bound-release-packet">Exercise 3: Assemble a source-bound release packet.<a class="heading-anchor" href="#exercise-3-assemble-a-source-bound-release-packet" aria-label="Link to this section">#</a></h3>
-<p>The packet should let another learner connect each result to the artifact actually tested. Avoid stale screenshots or reports from an earlier image.</p>
-<p><strong>Expected:</strong> Exact source, image, platform, commands and observations.</p>
+<p><strong>Expected evidence:</strong> Exact source, image, platform, commands and observations.</p>
+<p><strong>Why:</strong> The packet should let another learner connect each result to the artifact actually tested. Avoid stale screenshots or reports from an earlier image.</p>
 <h3 id="exercise-4-diagnose-a-deliberate-single-layer-failure">Exercise 4: Diagnose a deliberate single-layer failure.<a class="heading-anchor" href="#exercise-4-diagnose-a-deliberate-single-layer-failure" aria-label="Link to this section">#</a></h3>
-<p>Do not weaken the acceptance check. Keep the failing observation as a regression case for the repaired configuration.</p>
-<p><strong>Expected:</strong> Minimal evidence locates the fault and a targeted repair restores the invariant.</p>
+<p><strong>Expected answer:</strong> Minimal evidence locates the fault and a targeted repair restores the invariant.</p>
+<p><strong>Why:</strong> Do not weaken the acceptance check. Keep the failing observation as a regression case for the repaired configuration.</p>
 <h3 id="exercise-5-prove-independent-data-recovery">Exercise 5: Prove independent data recovery.<a class="heading-anchor" href="#exercise-5-prove-independent-data-recovery" aria-label="Link to this section">#</a></h3>
-<p>This is stronger than backup existence. Keep the original data intact until the restore has passed its application-level check.</p>
-<p><strong>Expected:</strong> A new owned target serves the preserved expected state.</p>
+<p><strong>Expected evidence:</strong> A new owned target serves the preserved expected state.</p>
+<p><strong>Why:</strong> This is stronger than backup existence. Keep the original data intact until the restore has passed its application-level check.</p>
 <h3 id="exercise-6-teach-the-full-system-and-defend-its-limits">Exercise 6: Teach the full system and defend its limits.<a class="heading-anchor" href="#exercise-6-teach-the-full-system-and-defend-its-limits" aria-label="Link to this section">#</a></h3>
-<p>Good engineering communication states both achieved behavior and the boundaries of evidence. Local Docker success is a foundation for further systems learning, not a blanket production certification.</p>
-<p><strong>Expected:</strong> A beginner can follow the handoff and identify what it does not guarantee.</p>
+<p><strong>Expected evidence:</strong> A beginner can follow the handoff and identify what it does not guarantee.</p>
+<p><strong>Why:</strong> Good engineering communication states both achieved behavior and the boundaries of evidence. Local Docker success is a foundation for further systems learning, not a blanket production certification.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful solution identifies the exact object, the phase when a setting takes effect, the expected normal result and an observation that disproves it. Repeating a command until it succeeds hides the mechanism. Change one variable, keep a failure record, and test the intended behavior again. Source examples here are small enough to inspect; a production system additionally needs ownership, lifecycle, data recovery and operational review. The host exercises are optional and must stay within the learner-created project.</p></article>
+<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>
 </body>
 </html>

@@ -197,32 +197,26 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Use the guide and synthetic case ledger. A prediction or copied fixture is not a live runtime observation.</p>
 <h3 id="exercise-1-build-the-state-table">Exercise 1: Build the state table<a class="heading-anchor" href="#exercise-1-build-the-state-table" aria-label="Link to this section">#</a></h3>
 <p>Classify absent, owned-equal, owned-different and foreign child states.</p>
-<p>Expected: create, no-op, update and refuse respectively.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-2-replay-repeated-reconciliation">Exercise 2: Replay repeated reconciliation<a class="heading-anchor" href="#exercise-2-replay-repeated-reconciliation" aria-label="Link to this section">#</a></h3>
 <p>Apply the same desired state three times in the synthetic model.</p>
-<p>Expected: One create followed by two no-ops, with one child.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-3-change-desired-replicas">Exercise 3: Change desired replicas<a class="heading-anchor" href="#exercise-3-change-desired-replicas" aria-label="Link to this section">#</a></h3>
-<p>Move the owned desired count from 1 to2 and inspect the next two decisions.</p>
-<p>Expected: update then no-op after observed state matches.</p>
+<p>Move the owned desired count from 1 to 2 and inspect the next two decisions.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-4-test-replacement-identity">Exercise 4: Test replacement identity<a class="heading-anchor" href="#exercise-4-test-replacement-identity" aria-label="Link to this section">#</a></h3>
 <p>Replace the parent name with a new UID while the old child remains.</p>
-<p>Expected: The old child is foreign to the new parent under this contract.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-5-review-retry-and-status">Exercise 5: Review retry and status<a class="heading-anchor" href="#exercise-5-review-retry-and-status" aria-label="Link to this section">#</a></h3>
 <p>Classify temporary API unavailability versus an invalid desired value and stale generation status.</p>
-<p>Expected: Bounded backoff for transient failure; corrected intent for invalid input; stale readiness does not pass.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-6-complete-a-finalizer-obligation">Exercise 6: Complete a finalizer obligation<a class="heading-anchor" href="#exercise-6-complete-a-finalizer-obligation" aria-label="Link to this section">#</a></h3>
 <p>Remove only lesson.cleanup after synthetic external cleanup succeeds.</p>
-<p>Expected: other.cleanup remains; failed cleanup retains lesson.cleanup.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p></article>
   </main>

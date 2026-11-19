@@ -198,11 +198,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-keyword">import</span> <span class="syntax-string">&quot;fmt&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">func</span> main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 1: Commit a valid change: Transfer 3 between balances 5 and 5 in a staged transaction.</span></span>
-<span class="source-line">	<span class="syntax-comment">// Expected: The committed balances are 2 and 8.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 1: Commit a valid change: change one input: Copy worked example 1 into a scratch pad and change `s := Balances{A: 5, B: 5}` to `s := Balances{A: 6, B: 5}`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Expected: The changed run panics with `commit` because `err == nil &amp;&amp; s.A == 2 &amp;&amp; s.B == 8` no longer holds. Restoring the original line brings back the worked observation: the committed balances are 2 and 8.</span></span>
 <span class="source-line"></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 2: Rollback an explicit failure: Change staged state and return an error.</span></span>
-<span class="source-line">	<span class="syntax-comment">// Expected: The outer balances remain unchanged.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 2: Rollback an explicit failure: debug a regression: A regression changed one token in worked example 2, so one line now reads `s := Balances{A: 6, B: 5}`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Expected: Before the repair the program panics with `rollback`; after it the line reads `s := Balances{A: 5, B: 5}` again and the outer balances remain unchanged.</span></span>
 <span class="source-line"></span>
 <span class="source-line">	<span class="syntax-comment">// Exercise 3: Reject invalid funds: Attempt a transfer larger than available balance.</span></span>
 <span class="source-line">	<span class="syntax-comment">// Expected: The state remains 5 and 5.</span></span>

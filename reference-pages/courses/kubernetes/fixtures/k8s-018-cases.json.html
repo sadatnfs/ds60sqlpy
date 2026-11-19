@@ -207,27 +207,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;exercise&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;task&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Explain the subject namespace versus the RoleBinding namespace.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;expected&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Subject identifies the ServiceAccount;binding scope determines the namespaced grant.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;expected&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Subject identifies the ServiceAccount; binding scope determines the namespaced grant.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;exercise&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;task&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Fill the five-action authorization matrix.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;expected&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Only the intended own-namespace Pod reads are allowed;Secrets and privilege changes denied.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;expected&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Only the intended own-namespace Pod reads are allowed; Secrets and privilege changes denied.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;exercise&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;task&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Inspect automountServiceAccountToken:false in the application source.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;task&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Inspect automountServiceAccountToken: false in the application source.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;expected&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The synthetic workload does not receive an automatic API token mount.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;exercise&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;task&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Explain the sequence when a prepared fifteen-minute lease expires before Run.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;expected&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Guard refuses;exact owned session is released and a fresh session is prepared immediately before use.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;expected&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Guard refuses; exact owned session is released and a fresh session is prepared immediately before use.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;exercise&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">6</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;task&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;With the named host capability,retain positive/negative self-authorization outcomes without credentials.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;expected&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Identity,target,verb/resource,result and time are recorded;token/kubeconfig contents are excluded.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;task&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;With the named host capability, retain positive/negative self-authorization outcomes without credentials.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;expected&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Identity, target, verb/resource, result and time are recorded; token/kubeconfig contents are excluded.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">}</span></span>
 <span class="source-line">  <span class="syntax-punctuation">]</span></span>
 <span class="source-line"><span class="syntax-punctuation">}</span></span>

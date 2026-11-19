@@ -9,7 +9,7 @@
     content="default-src 'none'; style-src 'self' file: 'unsafe-inline'; font-src data:; img-src data:; form-action 'none'"
   >
   <link rel="stylesheet" href="../../../../src/ds60sqlpy/assets/vendor/textbook/fonts.css">
-  <title>viz-003: Draw uncertainty without changing its meaning · DS60 reference</title>
+  <title>viz-003: Uncertainty and effect displays · DS60 reference</title>
   <style>
     :root {
       --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
@@ -190,10 +190,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <main class="shell">
     <header class="hero">
       <p class="eyebrow">Rendered course document</p>
-      <h1>viz-003: Draw uncertainty without changing its meaning</h1>
+      <h1>viz-003: Uncertainty and effect displays</h1>
       <p class="source-path">Generated from <code>courses/data-visualization/guides/viz-003.md</code></p>
     </header>
-    <article class="document"><h2 id="viz-003-draw-uncertainty-without-changing-its-meaning">viz-003: Draw uncertainty without changing its meaning<a class="heading-anchor" href="#viz-003-draw-uncertainty-without-changing-its-meaning" aria-label="Link to this section">#</a></h2>
+    <article class="document"><h2 id="viz-003-uncertainty-and-effect-displays">viz-003: Uncertainty and effect displays<a class="heading-anchor" href="#viz-003-uncertainty-and-effect-displays" aria-label="Link to this section">#</a></h2>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Beginner. Direct prerequisites: <code>viz-002</code>, <code>statistics-008</code>. Use the prepared Python figure capture or the JavaScript browser variant.</p>
 <h3 id="what-an-error-bar-represents">What an error bar represents<a class="heading-anchor" href="#what-an-error-bar-represents" aria-label="Link to this section">#</a></h3>
@@ -205,6 +205,65 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="contrasting-case-a-practical-threshold">Contrasting case: a practical threshold<a class="heading-anchor" href="#contrasting-case-a-practical-threshold" aria-label="Link to this section">#</a></h3>
 <p>Suppose improvement must exceed .5 points. South&#x27;s lower bound .408 does not establish that stronger claim, despite excluding zero. Add a clearly labeled practical reference if it supports the decision. Do not replace uncertainty with green/red labels that conceal margins or interval width.</p>
 <p>A treatment comparison across subgroups also needs multiplicity and interaction reasoning. One significant subgroup and one nonsignificant subgroup do not prove their effects differ. A direct contrast with appropriate covariance addresses that question; the chart cannot infer it from two p-value labels.</p>
+<h3 id="expression-anatomy">Expression anatomy<a class="heading-anchor" href="#expression-anatomy" aria-label="Link to this section">#</a></h3>
+<p><code>error_x</code> attaches horizontal error bars to a scatter trace. With <code>&quot;type&quot;: &quot;data&quot;</code>, <code>array</code> is the distance from each estimate to its upper endpoint and <code>arrayminus</code> the distance to its lower endpoint; <code>symmetric</code> set to False tells Plotly to use both lists. Passing the endpoints themselves would draw bars of the wrong length, which is the mistake the worked case guards against. <code>customdata</code> carries the computed endpoints for the hover text, and <code>fig.add_vline(x=0, line_dash=&quot;dash&quot;)</code> adds the no-effect reference line. In JavaScript the same keys appear in a nested <code>error_x</code> object, and the reference line is a layout shape.</p>
+<p>Python, from <code>case_03</code> in the subject&#x27;s durable Plotly source:</p>
+<pre class="highlighted-code"><code class="language-python">fig <span class="syntax-operator">=</span> go<span class="syntax-operator">.</span>Figure<span class="syntax-punctuation">(</span>
+    go<span class="syntax-operator">.</span>Scatter<span class="syntax-punctuation">(</span>
+        x<span class="syntax-operator">=</span>effect<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        y<span class="syntax-operator">=</span>labels<span class="syntax-punctuation">,</span>
+        mode<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">markers</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        marker<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">size</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">11</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">symbol</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">diamond</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+        error_x<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span>
+            <span class="syntax-string">&quot;</span><span class="syntax-string">type</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">data</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+            <span class="syntax-string">&quot;</span><span class="syntax-string">array</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">(</span>upper <span class="syntax-operator">-</span> effect<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+            <span class="syntax-string">&quot;</span><span class="syntax-string">arrayminus</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">(</span>effect <span class="syntax-operator">-</span> lower<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+            <span class="syntax-string">&quot;</span><span class="syntax-string">symmetric</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+        customdata<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>column_stack<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>lower<span class="syntax-punctuation">,</span> upper<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        hovertemplate<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>
+            <span class="syntax-string">&quot;</span><span class="syntax-string">%</span><span class="syntax-string">{y}</span><span class="syntax-string">: </span><span class="syntax-string">%</span><span class="syntax-string">{x:.3f}</span><span class="syntax-string"> points; 95</span><span class="syntax-string">%</span><span class="syntax-string"> CI [</span><span class="syntax-string">%</span><span class="syntax-string">{customdata[0]:.3f}</span><span class="syntax-string">, </span><span class="syntax-string">&quot;</span>
+            <span class="syntax-string">&quot;</span><span class="syntax-string">%</span><span class="syntax-string">{customdata[1]:.3f}</span><span class="syntax-string">]&lt;extra&gt;&lt;/extra&gt;</span><span class="syntax-string">&quot;</span>
+        <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span>
+fig<span class="syntax-operator">.</span>add_vline<span class="syntax-punctuation">(</span>x<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> line_dash<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">dash</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> line_color<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">#555</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+fig<span class="syntax-operator">.</span>update_xaxes<span class="syntax-punctuation">(</span>title<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">Mean difference (points)</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">range</span><span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">0.8</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+fig<span class="syntax-operator">.</span>update_yaxes<span class="syntax-punctuation">(</span>title<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">Prespecified region</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
+<p>JavaScript, from browser specification 3, which <code>renderCase</code> passes to <code>Plotly.newPlot</code> with the shared caption and table:</p>
+<pre class="highlighted-code"><code class="language-javascript">data<span class="syntax-operator">:</span> <span class="syntax-punctuation">[</span>
+  <span class="syntax-punctuation">{</span>
+    type<span class="syntax-operator">:</span> <span class="syntax-string">&quot;scatter&quot;</span><span class="syntax-punctuation">,</span>
+    x<span class="syntax-operator">:</span> effect<span class="syntax-punctuation">,</span>
+    y<span class="syntax-operator">:</span> labels<span class="syntax-punctuation">,</span>
+    mode<span class="syntax-operator">:</span> <span class="syntax-string">&quot;markers&quot;</span><span class="syntax-punctuation">,</span>
+    marker<span class="syntax-operator">:</span> <span class="syntax-punctuation">{</span> symbol<span class="syntax-operator">:</span> <span class="syntax-string">&quot;diamond&quot;</span><span class="syntax-punctuation">,</span> size<span class="syntax-operator">:</span> <span class="syntax-number">11</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+    error_x<span class="syntax-operator">:</span> <span class="syntax-punctuation">{</span>
+      type<span class="syntax-operator">:</span> <span class="syntax-string">&quot;data&quot;</span><span class="syntax-punctuation">,</span>
+      array<span class="syntax-operator">:</span> se<span class="syntax-punctuation">.</span>map<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>v<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> <span class="syntax-number">1.96</span> <span class="syntax-operator">*</span> v<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+      arrayminus<span class="syntax-operator">:</span> se<span class="syntax-punctuation">.</span>map<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>v<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> <span class="syntax-number">1.96</span> <span class="syntax-operator">*</span> v<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+      symmetric<span class="syntax-operator">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+    customdata<span class="syntax-operator">:</span> labels<span class="syntax-punctuation">.</span>map<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>_<span class="syntax-punctuation">,</span> i<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">[</span>lower<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> upper<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    hovertemplate<span class="syntax-operator">:</span>
+      <span class="syntax-string">&quot;%{y}: %{x:.3f}; CI [%{customdata[0]:.3f}, %{customdata[1]:.3f}]&lt;extra&gt;&lt;/extra&gt;&quot;</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+layout<span class="syntax-operator">:</span> <span class="syntax-punctuation">{</span>
+  xaxis<span class="syntax-operator">:</span> <span class="syntax-punctuation">{</span> title<span class="syntax-operator">:</span> <span class="syntax-punctuation">{</span> text<span class="syntax-operator">:</span> <span class="syntax-string">&quot;Mean difference (points)&quot;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> range<span class="syntax-operator">:</span> <span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">0.8</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.4</span><span class="syntax-punctuation">]</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+  yaxis<span class="syntax-operator">:</span> <span class="syntax-punctuation">{</span> title<span class="syntax-operator">:</span> <span class="syntax-punctuation">{</span> text<span class="syntax-operator">:</span> <span class="syntax-string">&quot;Prespecified region&quot;</span> <span class="syntax-punctuation">}</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+  shapes<span class="syntax-operator">:</span> <span class="syntax-punctuation">[</span>
+    <span class="syntax-punctuation">{</span>
+      type<span class="syntax-operator">:</span> <span class="syntax-string">&quot;line&quot;</span><span class="syntax-punctuation">,</span>
+      x0<span class="syntax-operator">:</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span>
+      x1<span class="syntax-operator">:</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span>
+      y0<span class="syntax-operator">:</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span>
+      y1<span class="syntax-operator">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span>
+      yref<span class="syntax-operator">:</span> <span class="syntax-string">&quot;paper&quot;</span><span class="syntax-punctuation">,</span>
+      line<span class="syntax-operator">:</span> <span class="syntax-punctuation">{</span> dash<span class="syntax-operator">:</span> <span class="syntax-string">&quot;dash&quot;</span><span class="syntax-punctuation">,</span> color<span class="syntax-operator">:</span> <span class="syntax-string">&quot;#555&quot;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span></code></pre>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Calculate bounds.</strong> Derive all three intervals by hand. Expected evidence: endpoint table matching the fixture. Hint: multiply SE by 1.96 before adding or subtracting.</li>

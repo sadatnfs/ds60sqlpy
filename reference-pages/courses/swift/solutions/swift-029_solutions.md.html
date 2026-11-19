@@ -194,37 +194,67 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/swift/solutions/swift-029_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="swift-029-explanation-and-comparison">swift-029: explanation and comparison<a class="heading-anchor" href="#swift-029-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="swift-029_solution.swift.html">swift-029_solution.swift</a>. Its assertions are always active under the prepared classroom compile settings.</p>
+<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="swift-029_solution.swift.html">swift-029_solution.swift</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Collect results without assuming order:</strong> Independent values cross the boundary, and the parent alone mutates the result array. Sorted results are deterministic despite unspecified completion order.</p>
 <p><strong>Handle an empty group:</strong> The empty path needs no special background work or timer. No admitted children produces the identity result zero.</p>
-<h3 id="reason-through-the-six-tasks">Reason through the six tasks<a class="heading-anchor" href="#reason-through-the-six-tasks" aria-label="Link to this section">#</a></h3>
-<ol>
-<li><strong>Predict and explain.</strong> Identify who owns each task and the result array.</li>
-</ol>
-<ol start="2">
-<li><strong>Guided modification.</strong> Attach input indices and reconstruct submission ordering.</li>
-</ol>
-<ol start="3">
-<li><strong>Independent construction.</strong> Implement bounded admission for a small list with at most two outstanding children.</li>
-</ol>
-<ol start="4">
-<li><strong>Diagnose a defect.</strong> Diagnose concurrent mutation of a shared result array inside child tasks.</li>
-</ol>
-<ol start="5">
-<li><strong>Boundary evidence.</strong> Test empty input and a failing child using a throwing group.</li>
-</ol>
-<ol start="6">
-<li><strong>Transfer and justify.</strong> Choose a concurrency bound for an I/O workload and explain its resource basis.</li>
-</ol>
-<p>For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.</p>
+<h3 id="task-answers">Task answers<a class="heading-anchor" href="#task-answers" aria-label="Link to this section">#</a></h3>
+<h4 id="task-1-predict-and-explain">Task 1: Predict and explain<a class="heading-anchor" href="#task-1-predict-and-explain" aria-label="Link to this section">#</a></h4>
+<p>Identify who owns each task and the result array.</p>
+<p>No separate reference answer has been written for this task. Example A is the evidence to compare with: Independent values cross the boundary, and the parent alone mutates the result array. Sorted results are deterministic despite unspecified completion order.</p>
+<h4 id="task-2-guided-modification">Task 2: Guided modification<a class="heading-anchor" href="#task-2-guided-modification" aria-label="Link to this section">#</a></h4>
+<p>Attach input indices and reconstruct submission ordering.</p>
+<p>No separate reference answer has been written for this task. Start from Example B: The empty path needs no special background work or timer. No admitted children produces the identity result zero.</p>
+<h4 id="task-3-independent-construction">Task 3: Independent construction<a class="heading-anchor" href="#task-3-independent-construction" aria-label="Link to this section">#</a></h4>
+<p>Implement bounded admission for a small list with at most two outstanding children.</p>
+<p><strong>Reference answer.</strong> It runs as the <code>Task 3</code> block of the reference program.</p>
+<pre class="highlighted-code"><code class="language-swift"><span class="syntax-keyword">let</span> inputs <span class="syntax-punctuation">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">let</span> <span class="syntax-punctuation">(</span>results<span class="syntax-punctuation">,</span> peak<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=</span> <span class="syntax-keyword">await</span> withTaskGroup<span class="syntax-punctuation">(</span>
+  of<span class="syntax-punctuation">:</span> <span class="syntax-builtin">Int</span><span class="syntax-punctuation">.</span><span class="syntax-keyword">self</span><span class="syntax-punctuation">,</span> returning<span class="syntax-punctuation">:</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">Int</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">Int</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span><span class="syntax-keyword">self</span>
+<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> group <span class="syntax-keyword">in</span>
+  <span class="syntax-keyword">var</span> next <span class="syntax-punctuation">=</span> <span class="syntax-number">0</span>
+  <span class="syntax-keyword">var</span> outstanding <span class="syntax-punctuation">=</span> <span class="syntax-number">0</span>
+  <span class="syntax-keyword">var</span> peak <span class="syntax-punctuation">=</span> <span class="syntax-number">0</span>
+  <span class="syntax-keyword">var</span> collected<span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-builtin">Int</span><span class="syntax-punctuation">]</span> <span class="syntax-punctuation">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+  <span class="syntax-keyword">while</span> next <span class="syntax-operator">&lt;</span> inputs<span class="syntax-punctuation">.</span><span class="syntax-builtin">count</span> <span class="syntax-operator">&amp;&amp;</span> outstanding <span class="syntax-operator">&lt;</span> <span class="syntax-number">2</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">let</span> value <span class="syntax-punctuation">=</span> inputs<span class="syntax-punctuation">[</span>next<span class="syntax-punctuation">]</span>
+    group<span class="syntax-punctuation">.</span>addTask <span class="syntax-punctuation">{</span> value <span class="syntax-operator">*</span> <span class="syntax-number">10</span> <span class="syntax-punctuation">}</span>
+    next <span class="syntax-operator">+=</span> <span class="syntax-number">1</span>
+    outstanding <span class="syntax-operator">+=</span> <span class="syntax-number">1</span>
+    peak <span class="syntax-punctuation">=</span> <span class="syntax-builtin">max</span><span class="syntax-punctuation">(</span>peak<span class="syntax-punctuation">,</span> outstanding<span class="syntax-punctuation">)</span>
+  <span class="syntax-punctuation">}</span>
+  <span class="syntax-keyword">while</span> <span class="syntax-keyword">let</span> finished <span class="syntax-punctuation">=</span> <span class="syntax-keyword">await</span> group<span class="syntax-punctuation">.</span>next<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    collected<span class="syntax-punctuation">.</span>append<span class="syntax-punctuation">(</span>finished<span class="syntax-punctuation">)</span>
+    outstanding <span class="syntax-operator">-=</span> <span class="syntax-number">1</span>
+    <span class="syntax-keyword">if</span> next <span class="syntax-operator">&lt;</span> inputs<span class="syntax-punctuation">.</span><span class="syntax-builtin">count</span> <span class="syntax-punctuation">{</span>
+      <span class="syntax-keyword">let</span> value <span class="syntax-punctuation">=</span> inputs<span class="syntax-punctuation">[</span>next<span class="syntax-punctuation">]</span>
+      group<span class="syntax-punctuation">.</span>addTask <span class="syntax-punctuation">{</span> value <span class="syntax-operator">*</span> <span class="syntax-number">10</span> <span class="syntax-punctuation">}</span>
+      next <span class="syntax-operator">+=</span> <span class="syntax-number">1</span>
+      outstanding <span class="syntax-operator">+=</span> <span class="syntax-number">1</span>
+      peak <span class="syntax-punctuation">=</span> <span class="syntax-builtin">max</span><span class="syntax-punctuation">(</span>peak<span class="syntax-punctuation">,</span> outstanding<span class="syntax-punctuation">)</span>
+    <span class="syntax-punctuation">}</span>
+  <span class="syntax-punctuation">}</span>
+  <span class="syntax-keyword">return</span> <span class="syntax-punctuation">(</span>collected<span class="syntax-punctuation">.</span><span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> peak<span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>results <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20</span><span class="syntax-punctuation">,</span> <span class="syntax-number">30</span><span class="syntax-punctuation">,</span> <span class="syntax-number">40</span><span class="syntax-punctuation">,</span> <span class="syntax-number">50</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">&amp;&amp;</span> peak <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Observe:</strong> All five inputs are processed, and at most two child tasks were ever outstanding.</p>
+<p>A new child is added only after group.next() returns a finished one, so admission is bounded by construction, not by timing.</p>
+<h4 id="task-4-diagnose-a-defect">Task 4: Diagnose a defect<a class="heading-anchor" href="#task-4-diagnose-a-defect" aria-label="Link to this section">#</a></h4>
+<p>Diagnose concurrent mutation of a shared result array inside child tasks.</p>
+<p>No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson&#x27;s pitfalls: Group completion order is unspecified. Cancellation is cooperative and does not instantly kill children. Avoid unbounded child creation for large inputs.</p>
+<h4 id="task-5-boundary-evidence">Task 5: Boundary evidence<a class="heading-anchor" href="#task-5-boundary-evidence" aria-label="Link to this section">#</a></h4>
+<p>Test empty input and a failing child using a throwing group.</p>
+<p>No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Collect results without assuming order) and Example B (Handle an empty group).</p>
+<h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
+<p>Choose a concurrency bound for an I/O workload and explain its resource basis.</p>
+<p>No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry <strong>Child task</strong>, and state one limitation of your choice.</p>
 <h3 id="mechanism-and-diagnostic-reasoning">Mechanism and diagnostic reasoning<a class="heading-anchor" href="#mechanism-and-diagnostic-reasoning" aria-label="Link to this section">#</a></h3>
 <p>A task group creates child tasks whose lifetimes remain inside the group scope. Children may finish in any order, so result collection should not accidentally depend on scheduling. If output ordering matters, include an identity or sort after collection. Structured ownership makes it possible to await all admitted work before returning.</p>
 <p>A group is not automatically a concurrency limit. Adding a child for every element of a huge input can overwhelm memory or downstream systems. Bound admission by adding only a limited number and replacing completed work. The fixture uses three tiny tasks and explicitly avoids claiming a timing speedup.</p>
 <p>withTaskGroup creates a scoped group. addTask admits a child. for await consumes completed child results. A child captures only sendable data crossing the concurrency boundary.</p>
 <p>Group completion order is unspecified. Cancellation is cooperative and does not instantly kill children. Avoid unbounded child creation for large inputs.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.</p></article>
+<p>Run the reference and confirm that it prints <code>swift-029: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
   </main>
 </body>
 </html>

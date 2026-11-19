@@ -198,11 +198,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-keyword">import</span> <span class="syntax-string">&quot;fmt&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">func</span> main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 1: Observe shared storage: Take the first two elements of 1, 2, 3 and change the first through the slice.</span></span>
-<span class="source-line">	<span class="syntax-comment">// Expected: The original first element becomes 9.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 1: Observe shared storage: change one input: Copy worked example 1 into a scratch pad and change `view[0] = 9` to `view[1] = 9`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Expected: The changed run panics with `alias` because `values[0] == 9` no longer holds. Restoring the original line brings back the worked observation: the original first element becomes 9.</span></span>
 <span class="source-line"></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 2: Make an independent copy: Copy 1, 2, 3 into a new slice and mutate that copy.</span></span>
-<span class="source-line">	<span class="syntax-comment">// Expected: The original stays 1 while the copy starts 9.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 2: Make an independent copy: debug a regression: A regression changed one token in worked example 2, so one line now reads `values := []int{2, 2, 3}`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Expected: Before the repair the program panics with `copy`; after it the line reads `values := []int{1, 2, 3}` again and the original stays 1 while the copy starts 9.</span></span>
 <span class="source-line"></span>
 <span class="source-line">	<span class="syntax-comment">// Exercise 3: Restrict append capacity: Take values[:1:1] and append 8.</span></span>
 <span class="source-line">	<span class="syntax-comment">// Expected: The original second element remains 2.</span></span>

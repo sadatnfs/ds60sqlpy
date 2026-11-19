@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/advanced-spark-modeling/guides/asm-004.md</code></p>
     </header>
     <article class="document"><h2 id="asm-004-whole-group-memory-shuffle-and-skew">asm-004: Whole-group memory, shuffle and skew<a class="heading-anchor" href="#asm-004-whole-group-memory-shuffle-and-skew" aria-label="Link to this section">#</a></h2>
-<p>Tutorial mode. Stage: beginner. Direct prerequisites: <code>asm-003</code>, <code>spark-022</code>.</p>
+<p>Tutorial mode. Stage: intermediate. Direct prerequisites: <code>asm-003</code>, <code>spark-022</code>.</p>
 <h3 id="starting-point-and-result">Starting point and result<a class="heading-anchor" href="#starting-point-and-result" aria-label="Link to this section">#</a></h3>
 <p>Parallel independent fitting can fail for a reason unrelated to the optimizer: one group does not fit in a worker&#x27;s memory. This chapter separates group size, partition count, Arrow batch size and numerical parameter count. It uses ordinary Spark aggregations to inspect a deliberately skewed tiny table, then estimates the memory that an analogous wide real group would require.</p>
 <p>The memory figures are a lower-bound planning calculation, not a measured peak or an attempt to crash a container. The worked program has only twenty-two rows. It demonstrates that repartitioning does not alter the largest scientific group and that sufficient statistics can produce a mean without ever materializing the entire group in Python.</p>

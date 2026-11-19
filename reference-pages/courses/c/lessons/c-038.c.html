@@ -196,13 +196,23 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-c"><code><span class="source-line"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;stdio.h&gt;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">void</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
-<span class="source-line">  <span class="syntax-comment">/* Exercise 1: Inspect fetch-add semantics</span></span>
-<span class="source-line"><span class="syntax-comment">     Add 3 to an atomic integer initially 2.</span></span>
-<span class="source-line"><span class="syntax-comment">     Expected: The returned old value is 2 and current value is 5. */</span></span>
+<span class="source-line">  <span class="syntax-comment">/* Exercise 1: Inspect fetch-add semantics: change one input</span></span>
+<span class="source-line"><span class="syntax-comment">     Copy worked example 1 into a scratch pad and change `atomic_init(&amp;value,</span></span>
+<span class="source-line"><span class="syntax-comment">     2);` to `atomic_init(&amp;value, 3);`. Before running, predict which CHECK</span></span>
+<span class="source-line"><span class="syntax-comment">     fails and which value it now sees; then run it and restore the original</span></span>
+<span class="source-line"><span class="syntax-comment">     line. Expected: The changed run stops with `Check failed` at the CHECK on</span></span>
+<span class="source-line"><span class="syntax-comment">     `old == 2 &amp;&amp; atomic_load(&amp;value) == 5`. Restoring the original line brings</span></span>
+<span class="source-line"><span class="syntax-comment">     back the worked observation: the returned old value is 2 and current value</span></span>
+<span class="source-line"><span class="syntax-comment">     is 5. */</span></span>
 <span class="source-line"></span>
-<span class="source-line">  <span class="syntax-comment">/* Exercise 2: Compare and exchange successfully</span></span>
-<span class="source-line"><span class="syntax-comment">     Replace expected value 2 with 7.</span></span>
-<span class="source-line"><span class="syntax-comment">     Expected: The operation succeeds and stores 7. */</span></span>
+<span class="source-line">  <span class="syntax-comment">/* Exercise 2: Compare and exchange successfully: diagnose an edited check</span></span>
+<span class="source-line"><span class="syntax-comment">     A careless edit changed the CHECK in worked example 2 so that it reads</span></span>
+<span class="source-line"><span class="syntax-comment">     `CHECK(atomic_compare_exchange_strong(&amp;value, &amp;expected, 8));`. Run worked</span></span>
+<span class="source-line"><span class="syntax-comment">     example 2 with that line, explain why the edited CHECK now fails for the</span></span>
+<span class="source-line"><span class="syntax-comment">     same program state, and restore it. Expected: Before the repair the run</span></span>
+<span class="source-line"><span class="syntax-comment">     stops with `Check failed` at the CHECK on `atomic_load(&amp;value) == 7`; after</span></span>
+<span class="source-line"><span class="syntax-comment">     it the line reads `CHECK(atomic_compare_exchange_strong(&amp;value, &amp;expected,</span></span>
+<span class="source-line"><span class="syntax-comment">     7));` again and the operation succeeds and stores 7. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 3: Inspect failed compare-exchange</span></span>
 <span class="source-line"><span class="syntax-comment">     Attempt replacement with stale expected value 2 when current is 3.</span></span>

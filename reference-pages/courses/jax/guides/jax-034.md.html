@@ -222,39 +222,33 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1-justify-the-extension">Exercise 1: Justify the extension<a class="heading-anchor" href="#exercise-1-justify-the-extension" aria-label="Link to this section">#</a></h4>
 <p>List evidence needed before replacing a correct high-level operation with a custom kernel.</p>
 <p><strong>Expected:</strong> A measured limitation, equivalent work definition, supported target and independent numerical oracle.</p>
-<p><strong>Verify:</strong> Retain the relevant inputs, intermediate calculation and observation. Complexity is justified by a concrete benefit and an acceptance plan, not by the API&#x27;s lower level.</p>
-<p><strong>Hint 1:</strong> Measure before choosing the optimization.</p>
-<p><strong>Hint 2:</strong> Revisit the worked case that changes the same assumption, then close the reference and reconstruct the result from the stated contract.</p>
+<p><strong>Verify:</strong> Complexity is justified by a concrete benefit and an acceptance plan, not by the API&#x27;s lower level.</p>
+<p><strong>Hint:</strong> Measure before choosing the optimization.</p>
 <h4 id="exercise-2-define-input-layout">Exercise 2: Define input layout<a class="heading-anchor" href="#exercise-2-define-input-layout" aria-label="Link to this section">#</a></h4>
 <p>Specify how an operator handles transposed or strided inputs.</p>
 <p><strong>Expected:</strong> Either correct support or an explicit validated refusal/copy policy.</p>
-<p><strong>Verify:</strong> Retain the relevant inputs, intermediate calculation and observation. A shape alone does not describe memory layout. Silently assuming contiguity can return wrong values or access invalid memory.</p>
-<p><strong>Hint 1:</strong> Translate both dimensions and strides.</p>
-<p><strong>Hint 2:</strong> Revisit the worked case that changes the same assumption, then close the reference and reconstruct the result from the stated contract.</p>
+<p><strong>Verify:</strong> A shape alone does not describe memory layout. Silently assuming contiguity can return wrong values or access invalid memory.</p>
+<p><strong>Hint:</strong> Translate both dimensions and strides.</p>
 <h4 id="exercise-3-qualify-transformation-composition">Exercise 3: Qualify transformation composition<a class="heading-anchor" href="#exercise-3-qualify-transformation-composition" aria-label="Link to this section">#</a></h4>
 <p>A custom operation has a VJP. Decide whether JVP, vmap and higher derivatives are automatically accepted.</p>
 <p><strong>Expected:</strong> No; each required transformation needs its own supported rule and evidence.</p>
-<p><strong>Verify:</strong> Retain the relevant inputs, intermediate calculation and observation. A valid reverse rule does not imply every other transformation mode is implemented.</p>
-<p><strong>Hint 1:</strong> Use the custom_jvp/custom_vjp distinction from jax-022.</p>
-<p><strong>Hint 2:</strong> Revisit the worked case that changes the same assumption, then close the reference and reconstruct the result from the stated contract.</p>
+<p><strong>Verify:</strong> A valid reverse rule does not imply every other transformation mode is implemented.</p>
+<p><strong>Hint:</strong> Use the custom_jvp/custom_vjp distinction from jax-022.</p>
 <h4 id="exercise-4-design-a-fair-kernel-benchmark">Exercise 4: Design a fair kernel benchmark<a class="heading-anchor" href="#exercise-4-design-a-fair-kernel-benchmark" aria-label="Link to this section">#</a></h4>
 <p>Compare a fused operator with a sequence of high-level operations.</p>
 <p><strong>Expected:</strong> Matched inputs/outputs, synchronization, warmup, transfers, allocation policy and actual hardware identity.</p>
-<p><strong>Verify:</strong> Retain the relevant inputs, intermediate calculation and observation. A faster dispatch-only measurement or omitted transfer is not a valid completed-work speedup.</p>
-<p><strong>Hint 1:</strong> Ensure fusion has not changed the requested result or precision.</p>
-<p><strong>Hint 2:</strong> Revisit the worked case that changes the same assumption, then close the reference and reconstruct the result from the stated contract.</p>
+<p><strong>Verify:</strong> A faster dispatch-only measurement or omitted transfer is not a valid completed-work speedup.</p>
+<p><strong>Hint:</strong> Ensure fusion has not changed the requested result or precision.</p>
 <h4 id="exercise-5-preserve-a-cpu-oracle">Exercise 5: Preserve a CPU oracle<a class="heading-anchor" href="#exercise-5-preserve-a-cpu-oracle" aria-label="Link to this section">#</a></h4>
 <p>A GPU backend is unavailable. Define what useful work can still be completed.</p>
 <p><strong>Expected:</strong> Mathematical derivation, small CPU reference, interface review and planned failure cases, with GPU acceptance pending.</p>
-<p><strong>Verify:</strong> Retain the relevant inputs, intermediate calculation and observation. Unavailable hardware limits execution evidence but does not prevent rigorous source and numerical preparation.</p>
-<p><strong>Hint 1:</strong> Keep missing evidence explicit without discarding completed analysis.</p>
-<p><strong>Hint 2:</strong> Revisit the worked case that changes the same assumption, then close the reference and reconstruct the result from the stated contract.</p>
+<p><strong>Verify:</strong> Unavailable hardware limits execution evidence but does not prevent rigorous source and numerical preparation.</p>
+<p><strong>Hint:</strong> Keep missing evidence explicit without discarding completed analysis.</p>
 <h4 id="exercise-6-defend-the-final-result">Exercise 6: Defend the final result<a class="heading-anchor" href="#exercise-6-defend-the-final-result" aria-label="Link to this section">#</a></h4>
 <p>Prepare a concise review of an independently built JAX component using the course&#x27;s evidence layers.</p>
 <p><strong>Expected:</strong> A reproducible artifact and argument covering purpose, assumptions, source, tests, runtime observations, limits and unresolved risks.</p>
-<p><strong>Verify:</strong> Retain the relevant inputs, intermediate calculation and observation. The reviewer should be able to challenge a concrete claim and identify the observation supporting it. A lesson-completion count is not the evidence.</p>
-<p><strong>Hint 1:</strong> Demonstrate transfer and judgment rather than repeating the reference.</p>
-<p><strong>Hint 2:</strong> Revisit the worked case that changes the same assumption, then close the reference and reconstruct the result from the stated contract.</p>
+<p><strong>Verify:</strong> The reviewer should be able to challenge a concrete claim and identify the observation supporting it. A lesson-completion count is not the evidence.</p>
+<p><strong>Hint:</strong> Demonstrate transfer and judgment rather than repeating the reference.</p>
 <h3 id="diagnosis-and-boundaries">Diagnosis and boundaries<a class="heading-anchor" href="#diagnosis-and-boundaries" aria-label="Link to this section">#</a></h3>
 <p>Do not advertise unsupported dtype/layout/transform combinations. A successful source build is not device correctness, and a correct value is not a valid backward rule. Preserve resource ownership and the high-level oracle throughout optimization.</p>
 <h3 id="transfer-and-review">Transfer and review<a class="heading-anchor" href="#transfer-and-review" aria-label="Link to this section">#</a></h3>
@@ -266,7 +260,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li><a href="https://docs.jax.dev/en/latest/301/custom-jvp-vjp.html">Custom derivative rules</a></li>
 </ul>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Use the checked-in $guide-ds60sqlpy-learning skill for <code>jax-034</code>. Start with my own prediction and source. Ask me to explain one intermediate shape, derivative or state transition, then give a progressive hint for the first incorrect assumption. Distinguish authored examples, my actual receipt and any hardware or population claim requiring additional evidence.</p></article>
+<p>Use the checked-in $guide-ds60sqlpy-learning skill for <code>jax-034</code> (Optional kernels, FFI and an independent engineering review), focusing on custom kernel, FFI, layout, derivative rule, evidence review. Start with my own prediction and source for one exercise, such as <em>Qualify transformation composition</em>. Ask me to explain one intermediate shape, derivative or state transition, then give a progressive hint for the first incorrect assumption. Distinguish authored examples, my actual saved run output and any hardware or population claim requiring additional evidence.</p></article>
   </main>
 </body>
 </html>

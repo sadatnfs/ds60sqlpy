@@ -196,13 +196,23 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-c"><code><span class="source-line"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;stdio.h&gt;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">void</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
-<span class="source-line">  <span class="syntax-comment">/* Exercise 1: Push into an empty vector</span></span>
-<span class="source-line"><span class="syntax-comment">     Push 3 and 5 into a zero-initialized vector.</span></span>
-<span class="source-line"><span class="syntax-comment">     Expected: Length is 2 and values are retained. */</span></span>
+<span class="source-line">  <span class="syntax-comment">/* Exercise 1: Push into an empty vector: predict an edited check</span></span>
+<span class="source-line"><span class="syntax-comment">     Copy worked example 1 into a scratch pad and change `CHECK(vector_push(&amp;v,</span></span>
+<span class="source-line"><span class="syntax-comment">     3) &amp;&amp; vector_push(&amp;v, 5));` to `CHECK(vector_push(&amp;v, 4) &amp;&amp; vector_push(&amp;v,</span></span>
+<span class="source-line"><span class="syntax-comment">     5));` inside its CHECK. Before running, predict whether the CHECK still</span></span>
+<span class="source-line"><span class="syntax-comment">     holds and explain why; then restore it. Expected: The changed run stops</span></span>
+<span class="source-line"><span class="syntax-comment">     with `Check failed` at the CHECK on `v.len == 2 &amp;&amp; v.data[0] == 3 &amp;&amp;</span></span>
+<span class="source-line"><span class="syntax-comment">     v.data[1] == 5`. Restoring the original line brings back the worked</span></span>
+<span class="source-line"><span class="syntax-comment">     observation: length is 2 and values are retained. */</span></span>
 <span class="source-line"></span>
-<span class="source-line">  <span class="syntax-comment">/* Exercise 2: Reserve without adding elements</span></span>
-<span class="source-line"><span class="syntax-comment">     Reserve capacity eight.</span></span>
-<span class="source-line"><span class="syntax-comment">     Expected: Capacity is at least eight while length stays zero. */</span></span>
+<span class="source-line">  <span class="syntax-comment">/* Exercise 2: Reserve without adding elements: diagnose an edited check</span></span>
+<span class="source-line"><span class="syntax-comment">     A careless edit changed the CHECK in worked example 2 so that it reads</span></span>
+<span class="source-line"><span class="syntax-comment">     `CHECK(v.cap &gt; 8 &amp;&amp; v.len == 0);`. Run worked example 2 with that line,</span></span>
+<span class="source-line"><span class="syntax-comment">     explain why the edited CHECK now fails for the same program state, and</span></span>
+<span class="source-line"><span class="syntax-comment">     restore it. Expected: Before the repair the run stops with `Check failed`</span></span>
+<span class="source-line"><span class="syntax-comment">     at the CHECK on `v.cap &gt;= 8 &amp;&amp; v.len == 0`; after it the line reads</span></span>
+<span class="source-line"><span class="syntax-comment">     `CHECK(v.cap &gt;= 8 &amp;&amp; v.len == 0);` again and capacity is at least eight</span></span>
+<span class="source-line"><span class="syntax-comment">     while length stays zero. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 3: Grow while preserving contents</span></span>
 <span class="source-line"><span class="syntax-comment">     Push twenty sequential values.</span></span>

@@ -219,15 +219,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Expected:</strong> A, B, C are three separate controls. None should be relabeled as proof that every other layer was exercised.</p>
 <h3 id="inspect-the-specific-owned-object">Inspect the specific owned object<a class="heading-anchor" href="#inspect-the-specific-owned-object" aria-label="Link to this section">#</a></h3>
 <p>Only after the chapter&#x27;s host capability is provisioned and its resources remain present, use the explicit receipt fields described in <a href="../host-labs.md.html">host-labs.md</a>. A completed one-shot browser Run has already cleaned its objects. The following read does not provision the missing capability and does not justify changing credentials after a Forbidden result.</p>
-<p>POSIX:</p>
+<p>Bash on Linux, macOS or Ubuntu under WSL 2:</p>
 <pre class="highlighted-code"><code class="language-bash">: <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_KUBECONFIG<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt path</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 : <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_CONTEXT<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt context</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 : <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_NAMESPACE<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt namespace</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<span class="syntax-string">&quot;</span> --context <span class="syntax-string">&quot;</span>$LAB_CONTEXT<span class="syntax-string">&quot;</span> --namespace <span class="syntax-string">&quot;</span>$LAB_NAMESPACE<span class="syntax-string">&quot;</span> get pods -l app<span class="syntax-operator">=</span>hello -o json</code></pre>
-<p>PowerShell:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">-not</span> $env:LAB_KUBECONFIG <span class="syntax-operator">-or</span> <span class="syntax-operator">-not</span> $env:LAB_CONTEXT <span class="syntax-operator">-or</span> <span class="syntax-operator">-not</span> $env:LAB_NAMESPACE<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;Owned receipt fields are required.&#x27;</span> <span class="syntax-punctuation">}</span>
-<span class="syntax-punctuation">&amp;</span> kubectl <span class="syntax-punctuation">-</span>-kubeconfig $env:LAB_KUBECONFIG <span class="syntax-punctuation">-</span>-context $env:LAB_CONTEXT <span class="syntax-punctuation">-</span>-namespace $env:LAB_NAMESPACE get pods -l app<span class="syntax-punctuation">=</span>hello -o json
-<span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>$LASTEXITCODE <span class="syntax-operator">-ne</span> 0<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;The scoped observation failed.&#x27;</span> <span class="syntax-punctuation">}</span></code></pre>
+<p>Windows uses the same Bash commands inside WSL 2. The lab adapter refuses native Windows credential handling, so do not run kubectl against the receipt from PowerShell. From PowerShell, only open your WSL 2 distribution (the name reported by <code>wsl.exe --list --verbose</code>), change to your checkout with its Linux path, then run the Bash block above unchanged:</p>
+<pre class="highlighted-code"><code class="language-powershell">wsl<span class="syntax-punctuation">.</span>exe <span class="syntax-punctuation">-</span>-distribution Ubuntu</code></pre>
 <p>Retain only the fields needed by this chapter&#x27;s prediction. A NotFound result may be expected after one-shot cleanup; a Forbidden result may identify a deliberately absent advanced capability. Neither result authorizes an ambient-context fallback.</p>
 <h3 id="run-and-bounded-evidence">Run and bounded evidence<a class="heading-anchor" href="#run-and-bounded-evidence" aria-label="Link to this section">#</a></h3>
 <p>The app artifact is a reading worksheet, <code>courses/kubernetes/lessons/k8s-039.md</code>. The current browser adapter does not provide the full <strong>exclusive synthetic threat fixtures with separate parser, RBAC, admission and CNI evidence</strong> operation. Use the synthetic fixture and offline check first. Live work follows <a href="../host-labs.md.html">the scoped host-lab guide</a> only when the named capability and owned target have been provisioned. A worksheet or static check is never a cluster execution receipt.</p>
@@ -236,32 +234,32 @@ kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<sp
 <h4 id="exercise-1-write-a-threat-model">Exercise 1: Write a threat model<a class="heading-anchor" href="#exercise-1-write-a-threat-model" aria-label="Link to this section">#</a></h4>
 <p>Name learner, host operator and unrelated tenant, with their trusted capabilities.</p>
 <p><strong>Expected result/shape:</strong> Actors and assets are explicit rather than a blanket secure claim.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Actors and assets are explicit rather than a blanket secure claim.</p>
+<p><strong>Verify:</strong> Check that each actor has listed capabilities and that each asset has an owner.</p>
 <p><strong>Progressive hints:</strong> Start with who can submit what.</p>
 <h4 id="exercise-2-classify-six-adversarial-fields">Exercise 2: Classify six adversarial fields<a class="heading-anchor" href="#exercise-2-classify-six-adversarial-fields" aria-label="Link to this section">#</a></h4>
 <p>Map foreign namespace, privileged, hostPath, unapproved image, foreign service account and shell command to rejections.</p>
 <p><strong>Expected result/shape:</strong> Every field has a named closed-schema or ownership rule.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Every field has a named closed-schema or ownership rule.</p>
+<p><strong>Verify:</strong> For each field, cite the parser or ownership rule that rejects it.</p>
 <p><strong>Progressive hints:</strong> Inspect fields rather than executing the payload.</p>
 <h4 id="exercise-3-review-credential-exposure">Exercise 3: Review credential exposure<a class="heading-anchor" href="#exercise-3-review-credential-exposure" aria-label="Link to this section">#</a></h4>
 <p>Explain why tokens, engine sockets and ambient kubeconfig stay outside learner artifacts.</p>
 <p><strong>Expected result/shape:</strong> No alternate path around the bounded operation API.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: No alternate path around the bounded operation API.</p>
+<p><strong>Verify:</strong> Confirm that no credential, engine socket or kubeconfig path appears in any learner-visible file.</p>
 <p><strong>Progressive hints:</strong> A hidden broad credential can defeat a narrow UI.</p>
 <h4 id="exercise-4-separate-resource-and-network-controls">Exercise 4: Separate resource and network controls<a class="heading-anchor" href="#exercise-4-separate-resource-and-network-controls" aria-label="Link to this section">#</a></h4>
 <p>Compare CPU limits, quota, deadlines and NetworkPolicy.</p>
 <p><strong>Expected result/shape:</strong> Each constrains a different resource or traffic dimension.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Each constrains a different resource or traffic dimension.</p>
+<p><strong>Verify:</strong> Name the dimension each control constrains: compute, object count, time or traffic.</p>
 <p><strong>Progressive hints:</strong> Do not substitute one control for another.</p>
 <h4 id="exercise-5-inspect-cleanup-identity-defenses">Exercise 5: Inspect cleanup identity defenses<a class="heading-anchor" href="#exercise-5-inspect-cleanup-identity-defenses" aria-label="Link to this section">#</a></h4>
 <p>Compare a same-name object with a different UID/nonce to the operation receipt.</p>
 <p><strong>Expected result/shape:</strong> Foreign object preserved and cleanup reports the mismatch.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Foreign object preserved and cleanup reports the mismatch.</p>
+<p><strong>Verify:</strong> Compare UID and nonce with the receipt before cleanup; a mismatched object must be preserved and reported.</p>
 <p><strong>Progressive hints:</strong> Names can be reused by another operation.</p>
 <h4 id="exercise-6-state-residual-assumptions">Exercise 6: State residual assumptions<a class="heading-anchor" href="#exercise-6-state-residual-assumptions" aria-label="Link to this section">#</a></h4>
 <p>Write the final classroom isolation statement and untested threats.</p>
 <p><strong>Expected result/shape:</strong> No arbitrary-code or VM-equivalent isolation claim; host trust and qualified controls are named.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: No arbitrary-code or VM-equivalent isolation claim; host trust and qualified controls are named.</p>
+<p><strong>Verify:</strong> Confirm that the statement lists untested threats and makes no virtual-machine-equivalent isolation claim.</p>
 <p><strong>Progressive hints:</strong> A bounded allowed workload is a smaller claim.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain the mechanism behind the first example, then distinguish it from this boundary case: A, B, C are three separate controls. None should be relabeled as proof that every other layer was exercised. State which observations are synthetic and which, if any, were read from your owned runtime.</p>
@@ -269,7 +267,7 @@ kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<sp
 <p>Report the allowed operations, forbidden surfaces, observed negative cases and remaining assumptions. A clear boundary statement can support safe classroom use without claiming general hostile multitenant hosting.</p>
 <p>Do not widen permissions to demonstrate a forbidden action live. Do not collect another lease&#x27;s tokens as evidence. An authorization denial can be observed using the scoped test identity and a known synthetic target without exposing credentials or unrelated data.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
-<p>Close the answer and reconstruct the reasoning for Exercise6, State residual assumptions. Name the exact source and observed identity you would require before claiming the changed case succeeded.</p>
+<p>Close the answer and reconstruct the reasoning for Exercise 6 (State residual assumptions). Name the exact source and observed identity you would require before claiming the changed case succeeded.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue to <code>k8s-040</code> after preserving the six evidence records.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>

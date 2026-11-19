@@ -193,7 +193,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <h1>K8S 017</h1>
       <p class="source-path">Generated from <code>courses/kubernetes/lessons/k8s-017.yaml</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-yaml"><code><span class="source-line"><span class="syntax-tag">apiVersion</span><span class="syntax-punctuation">:</span> apps/v1</span>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-yaml"><code><span class="source-line"><span class="syntax-comment"># k8s-017 starter. The learner starter is the admitted restricted baseline because the adapter fixes every security field; Exercises 3 and 4 ask you to try refused mutations in a scratch copy. Compare with the separate reference in courses/kubernetes/solutions/ only after your attempt.</span></span>
+<span class="source-line"><span class="syntax-tag">apiVersion</span><span class="syntax-punctuation">:</span> apps/v1</span>
 <span class="source-line"><span class="syntax-tag">kind</span><span class="syntax-punctuation">:</span> Deployment</span>
 <span class="source-line"><span class="syntax-tag">metadata</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">  <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> hello</span>
@@ -245,12 +246,18 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">            <span class="syntax-tag">capabilities</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">              <span class="syntax-tag">drop</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">                <span class="syntax-punctuation">-</span> ALL</span>
-<span class="source-line"><span class="syntax-comment"># Exercise 1: Map each control. Explain UID,capabilities,privilege escalation,seccomp and root filesystem fields. Expected: Each field is connected to its specific mechanism rather than one generic secure label.</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 2: Run the allowed baseline. Use the fixed nonroot source in a qualified operation. Expected: Accepted source,observed workload readiness and owned cleanup are recorded.</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 3: Reject a privileged mutation. Change allowPrivilegeEscalation or add privileged:true in a scratch source. Expected: Parser refusal before cluster mutation.</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 4: Reject host access. Review hostPath,hostNetwork and hostPID variants. Expected: All are outside the admitted browser contract.</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 5: Observe a host policy separately. With a policy-qualified host fixture,compare allowed and denied API requests. Expected: Policy version,namespace UID and actual admission reason accompany the result.</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 6: Write a bounded threat statement. Describe what the fixed controls address and one remaining boundary requiring another control. Expected: For example,RBAC controls API access while network policy or application auth addresses different paths.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Map each control. Explain UID, capabilities, privilege escalation, seccomp and root filesystem fields.</span></span>
+<span class="source-line"><span class="syntax-comment"># My prediction and evidence:</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Run the allowed baseline. Use the fixed nonroot source in a qualified operation.</span></span>
+<span class="source-line"><span class="syntax-comment"># My prediction and evidence:</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: Reject a privileged mutation. In a scratch copy of the starter, change allowPrivilegeEscalation to true or add privileged: true.</span></span>
+<span class="source-line"><span class="syntax-comment"># My prediction and evidence:</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4: Reject host access. Review hostPath, hostNetwork and hostPID variants.</span></span>
+<span class="source-line"><span class="syntax-comment"># My prediction and evidence:</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5: Observe a host policy separately. With a policy-qualified host fixture, compare allowed and denied API requests.</span></span>
+<span class="source-line"><span class="syntax-comment"># My prediction and evidence:</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6: Write a bounded threat statement. Describe what the fixed controls address and one remaining boundary requiring another control.</span></span>
+<span class="source-line"><span class="syntax-comment"># My prediction and evidence:</span></span>
 <span class="source-line"></span></code></pre></article>
   </main>
 </body>

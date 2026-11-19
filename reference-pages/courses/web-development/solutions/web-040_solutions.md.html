@@ -194,31 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-040_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-040-explanatory-solutions">web-040: explanatory solutions<a class="heading-anchor" href="#web-040-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.</p>
-<h3 id="why-the-mechanism-works">Why the mechanism works<a class="heading-anchor" href="#why-the-mechanism-works" aria-label="Link to this section">#</a></h3>
-<p>A class defines a kind of object, and an object combines state with behavior. Use an object when it makes a domain boundary clearer, not merely because the program has grown. A constructor establishes the initial state. An invariant is a condition that should remain true throughout the object&#x27;s useful lifetime, such as a nonempty topic and nonnegative duration.</p>
-<p>Publicly mutable properties can let callers bypass a carefully checked constructor. A small immutable value object can preserve its contract by validating once and exposing readonly data. Readonly does not make every nested object deeply immutable, and it does not replace validation. Understand the specific language guarantee rather than treating the keyword as a complete architecture.</p>
-<p>Constructor property promotion can declare and initialize properties directly in the parameter list. Use explicit types and meaningful names. A method can derive a display label from the stored values without changing them. Prefer composition of small responsibilities over a deep inheritance hierarchy built before requirements are known.</p>
+<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-040.md</code>.</p>
 <h3 id="exercise-1-name-the-invariant-enforced-by-the-constructor">Exercise 1: Name the invariant enforced by the constructor.<a class="heading-anchor" href="#exercise-1-name-the-invariant-enforced-by-the-constructor" aria-label="Link to this section">#</a></h3>
-<p>A successfully constructed duration cannot begin with negative minutes.</p>
-<p>Trace the smallest example before editing. Name which values are source and which are observations.</p>
+<p><strong>Expected answer:</strong> A successfully constructed duration cannot begin with negative minutes.</p>
+<p><strong>Why:</strong> Because the constructor throws for negative minutes and the property is readonly, every Duration object has nonnegative minutes for its whole life.</p>
 <h3 id="exercise-2-add-a-method-that-formats-the-duration">Exercise 2: Add a method that formats the duration.<a class="heading-anchor" href="#exercise-2-add-a-method-that-formats-the-duration" aria-label="Link to this section">#</a></h3>
-<p>Formatting derives from state without changing it.</p>
-<p>Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.</p>
+<p><strong>Expected evidence:</strong> Formatting derives from state without changing it.</p>
+<p><strong>Why:</strong> A method that only reads state keeps the object immutable and the formatting reusable.</p>
 <h3 id="exercise-3-build-a-validated-study-session-value-object">Exercise 3: Build a validated study-session value object.<a class="heading-anchor" href="#exercise-3-build-a-validated-study-session-value-object" aria-label="Link to this section">#</a></h3>
-<p>Its topic and duration satisfy explicit constructor checks and remain readonly.</p>
-<p>Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.</p>
+<p><strong>Expected evidence:</strong> Its topic and duration satisfy explicit constructor checks and remain readonly.</p>
+<p><strong>Why:</strong> Constructor validation plus readonly properties mean invalid sessions cannot be created or changed later.</p>
 <h3 id="exercise-4-diagnose-a-setter-that-allows-invalid-state-after-construction">Exercise 4: Diagnose a setter that allows invalid state after construction.<a class="heading-anchor" href="#exercise-4-diagnose-a-setter-that-allows-invalid-state-after-construction" aria-label="Link to this section">#</a></h3>
-<p>Every mutation boundary must preserve the invariant, or mutation should be removed.</p>
-<p>Keep the failing input. Identify the first layer where the observed result differs from the intended contract.</p>
+<p><strong>Expected answer:</strong> Every mutation boundary must preserve the invariant, or mutation should be removed.</p>
+<p><strong>Why:</strong> A setter without the constructor&#x27;s checks lets invalid state in later, so it must validate the same rule or be removed.</p>
 <h3 id="exercise-5-test-an-empty-topic-and-zero-duration">Exercise 5: Test an empty topic and zero duration.<a class="heading-anchor" href="#exercise-5-test-an-empty-topic-and-zero-duration" aria-label="Link to this section">#</a></h3>
-<p>The topic is rejected while zero follows the declared nonnegative policy.</p>
-<p>Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.</p>
+<p><strong>Expected evidence:</strong> The topic is rejected while zero follows the declared nonnegative policy.</p>
+<p><strong>Why:</strong> The empty topic violates the rule and throws, while zero minutes satisfies the nonnegative rule.</p>
 <h3 id="exercise-6-explain-shallow-readonly-versus-deep-immutability">Exercise 6: Explain shallow readonly versus deep immutability.<a class="heading-anchor" href="#exercise-6-explain-shallow-readonly-versus-deep-immutability" aria-label="Link to this section">#</a></h3>
-<p>A readonly property cannot be reassigned, but referenced mutable objects can have their own changing state.</p>
-<p>Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.</p>
-<h3 id="reference-comparison-and-limits">Reference comparison and limits<a class="heading-anchor" href="#reference-comparison-and-limits" aria-label="Link to this section">#</a></h3>
-<p>Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.</p></article>
+<p><strong>Expected answer:</strong> A readonly property cannot be reassigned, but referenced mutable objects can have their own changing state.</p>
+<p><strong>Why:</strong> readonly prevents reassigning the property but not mutating the object it refers to, so deep immutability needs immutable members too.</p>
+<h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
+<p>Open <code>courses/web-development/solutions/web-040_solution.php</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.</p></article>
   </main>
 </body>
 </html>

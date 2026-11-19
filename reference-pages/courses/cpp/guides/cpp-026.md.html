@@ -208,13 +208,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="debugging-a-wrong-value-before-timing-it">Debugging a wrong value before timing it<a class="heading-anchor" href="#debugging-a-wrong-value-before-timing-it" aria-label="Link to this section">#</a></h3>
 <p>Debugging begins with a reproducible mismatch between expected and observed behavior. A debugger lets you stop at a relevant point, inspect variables and follow the call stack. It is most useful when guided by a hypothesis, such as the accumulator being reset or a caller passing the wrong range. Stepping through every line without a question can produce activity without narrowing the cause.</p>
 <p>The total function provides a small deterministic target. For [2, 4, 6], the expected sum is 12. A breakpoint before the return can inspect the input size and accumulated value. The call stack distinguishes a defect inside total from a caller supplying a different vector. Preserve the smallest failing fixture and the first point where actual state diverges from the predicted trace.</p>
-<p>Timing asks a separate question. Repeating the computation1000 times yields a checksum of 12000, which prevents the benchmark from being judged only by an elapsed number. A benchmark must still consider optimization, allocation, setup work, warm caches and whether the work resembles the real workload. The compiler may simplify work whose result is predictable, so an apparently tiny duration can reflect optimization rather than useful throughput.</p>
+<p>Timing asks a separate question. Repeating the computation 1000 times yields a checksum of 12000, which prevents the benchmark from being judged only by an elapsed number. A benchmark must still consider optimization, allocation, setup work, warm caches and whether the work resembles the real workload. The compiler may simplify work whose result is predictable, so an apparently tiny duration can reflect optimization rather than useful throughput.</p>
 <p>Use a monotonic clock such as steady_clock for elapsed time. Wall-clock adjustments should not create negative benchmark durations. A single measurement is noisy because scheduling and other activity vary. Compare repeated samples and keep the correctness gate fixed. Never assert one exact nanosecond value as a portable expected result.</p>
 <p>Debug builds improve some forms of observability, but their performance may differ substantially from optimized builds. A debug-time result should not be advertised as production speed. Record compiler, flags, architecture, input size and included setup costs. If an optimization changes the answer or skips a required validation step, the faster timing is not a valid improvement.</p>
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the C++ module, save this lesson&#x27;s learner pad, then use Run. The worker stages the pad as <code>main.cpp</code> and compiles one translation unit. Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for exact local commands, flags, exit statuses, paths and Docker guidance. Tests involving multiple files, CMake, tool flags or shared libraries are explicitly host-project exercises.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
-<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs:each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
+<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs: each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p><a href="../examples/cpp-026-example-1.cpp.html">Complete program 1</a></p>
 <pre class="highlighted-code"><code class="language-cpp"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;cassert&gt;</span>
@@ -230,7 +230,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpp-026 example 1 checks passed</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
   <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
-<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<p><strong>Expected:</strong> With assertions enabled, the program exits with status 0 and prints:</p>
 <pre class="highlighted-code"><code class="language-text">cpp-026 example 1 checks passed</code></pre>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p><a href="../examples/cpp-026-example-2.cpp.html">Complete program 2</a></p>
@@ -251,39 +251,39 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpp-026 example 2 checks passed</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
   <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
-<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<p><strong>Expected:</strong> With assertions enabled, the program exits with status 0 and prints:</p>
 <pre class="highlighted-code"><code class="language-text">checksum=12000
 cpp-026 example 2 checks passed</code></pre>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-reproduce-first">Exercise 1: Reproduce first<a class="heading-anchor" href="#exercise-1-reproduce-first" aria-label="Link to this section">#</a></h4>
 <p>Write the expected sum of [2, 4, 6].</p>
 <p><strong>Expected result/shape:</strong> 12 from three values.</p>
-<p><strong>Verify:</strong> 12 from three values.</p>
+<p><strong>Verify:</strong> Write 12 down before running anything, then compare it with Worked example 1&#x27;s assertion <code>total({2, 4, 6}) == 12</code>.</p>
 <p><strong>Progressive hints:</strong> A debugger needs a precise discrepancy.</p>
 <h4 id="exercise-2-inspect-a-stack">Exercise 2: Inspect a stack<a class="heading-anchor" href="#exercise-2-inspect-a-stack" aria-label="Link to this section">#</a></h4>
 <p>Use an already available debugger on a -g host build and break in total.</p>
 <p><strong>Expected result/shape:</strong> Call stack includes main and total; xs has three values.</p>
-<p><strong>Verify:</strong> Call stack includes main and total; xs has three values.</p>
+<p><strong>Verify:</strong> At the breakpoint, print the backtrace and confirm <code>total</code> appears above <code>main</code>, then print <code>xs.size()</code> and check that it is 3.</p>
 <p><strong>Progressive hints:</strong> The browser does not provide an interactive debugger.</p>
 <h4 id="exercise-3-measure-a-bounded-workload">Exercise 3: Measure a bounded workload<a class="heading-anchor" href="#exercise-3-measure-a-bounded-workload" aria-label="Link to this section">#</a></h4>
 <p>Run 1000 totals and record steady_clock duration.</p>
 <p><strong>Expected result/shape:</strong> Checksum 12000 and nonnegative measured duration with units.</p>
-<p><strong>Verify:</strong> Checksum 12000 and nonnegative measured duration with units.</p>
+<p><strong>Verify:</strong> Assert <code>checksum == 12000</code>, as Worked example 2 does, and print the duration through <code>std::chrono::duration_cast&lt;std::chrono::microseconds&gt;</code> so the unit appears with the number.</p>
 <p><strong>Progressive hints:</strong> Output correctness prevents meaningless timing claims.</p>
 <h4 id="exercise-4-reject-a-false-benchmark">Exercise 4: Reject a false benchmark<a class="heading-anchor" href="#exercise-4-reject-a-false-benchmark" aria-label="Link to this section">#</a></h4>
 <p>Explain why one observed faster run proves little.</p>
 <p><strong>Expected result/shape:</strong> Build mode, workload, repetitions and variability listed.</p>
-<p><strong>Verify:</strong> Build mode, workload, repetitions and variability listed.</p>
+<p><strong>Verify:</strong> Check that your explanation names the build flags (<code>-O0</code> versus <code>-O2</code>), the fixed workload of 1000 totals, the number of repeated runs and the spread between them.</p>
 <p><strong>Progressive hints:</strong> Scheduler noise and optimizer behavior affect tiny measurements.</p>
 <h4 id="exercise-5-test-an-empty-case">Exercise 5: Test an empty case<a class="heading-anchor" href="#exercise-5-test-an-empty-case" aria-label="Link to this section">#</a></h4>
 <p>Inspect total({}) with debugger or assertions.</p>
 <p><strong>Expected result/shape:</strong> 0 and no element access.</p>
-<p><strong>Verify:</strong> 0 and no element access.</p>
+<p><strong>Verify:</strong> Assert <code>total({}) == 0</code>, or step through it in the debugger and confirm <code>std::accumulate</code> returns its initial 0 without reading an element.</p>
 <p><strong>Progressive hints:</strong> The accumulation identity handles emptiness.</p>
 <h4 id="exercise-6-transfer-a-hypothesis">Exercise 6: Transfer a hypothesis<a class="heading-anchor" href="#exercise-6-transfer-a-hypothesis" aria-label="Link to this section">#</a></h4>
 <p>Replace a linear scan with a map lookup and state a measurable hypothesis.</p>
 <p><strong>Expected result/shape:</strong> Same exact results, operation counts and bounded measurements compared.</p>
-<p><strong>Verify:</strong> Same exact results, operation counts and bounded measurements compared.</p>
+<p><strong>Verify:</strong> First assert that both versions return the same answer for every query, then compare operation counts and repeated timings at the same input size and build flags.</p>
 <p><strong>Progressive hints:</strong> Choose the evidence before declaring a winner.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain why this observation follows from the mechanism: Known input gives 12 before any measurement. Then explain the changed condition in example 2 without opening the answer.</p>

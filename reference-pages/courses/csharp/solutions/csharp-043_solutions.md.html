@@ -194,37 +194,36 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/csharp/solutions/csharp-043_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="csharp-043-explanation-and-comparison">csharp-043: explanation and comparison<a class="heading-anchor" href="#csharp-043-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="csharp-043_solution.cs.html">csharp-043_solution.cs</a>. Its assertions are always active under the prepared classroom compile settings.</p>
+<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="csharp-043_solution.cs.html">csharp-043_solution.cs</a>. It runs both worked examples, and its assertions are always active under the prepared classroom compile settings.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Expose environment facts without overclaiming:</strong> Runtime facts are useful diagnostics but do not replace a source and project review. The running framework generation is compatible with the declared classroom target.</p>
-<p><strong>Keep configuration explicit:</strong> A real project fixture, rather than this metadata demonstration, is required to qualify multi-file build behavior. The example preserves the intended target and nullable policy.</p>
-<h3 id="reason-through-the-six-tasks">Reason through the six tasks<a class="heading-anchor" href="#reason-through-the-six-tasks" aria-label="Link to this section">#</a></h3>
-<ol>
-<li><strong>Predict and explain.</strong> Explain the distinct purpose of restore, build, run and publish.</li>
-</ol>
-<ol start="2">
-<li><strong>Guided modification.</strong> Build the checked-in DomainLab without adding a package.</li>
-</ol>
-<ol start="3">
-<li><strong>Independent construction.</strong> Move a pure domain type into the supplied class-library project and run its executable checks.</li>
-</ol>
-<ol start="4">
-<li><strong>Diagnose a defect.</strong> Diagnose an API unavailable under a different target framework.</li>
-</ol>
-<ol start="5">
-<li><strong>Boundary evidence.</strong> Delete only the lab-owned output directories and verify a clean rebuild.</li>
-</ol>
-<ol start="6">
-<li><strong>Transfer and justify.</strong> Design a dependency update review including lock changes, license checks and runtime evidence.</li>
-</ol>
-<p>For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.</p>
+<p><strong>Read the compiled target framework:</strong> Both values come from the build and the runtime rather than from a hand-written table, so the checks fail if the project targets another framework. A real multi-project fixture is still required to qualify restore and publish behavior. The compiled program reports .NETCoreApp,Version=v10.0, the framework its project targeted, and runs on a .NET 10 runtime.</p>
+<h3 id="task-answers">Task answers<a class="heading-anchor" href="#task-answers" aria-label="Link to this section">#</a></h3>
+<h4 id="task-1-predict-and-explain">Task 1: Predict and explain<a class="heading-anchor" href="#task-1-predict-and-explain" aria-label="Link to this section">#</a></h4>
+<p>Explain the distinct purpose of restore, build, run and publish.</p>
+<p>No separate reference answer has been written for this task. Example A is the evidence to compare with: Runtime facts are useful diagnostics but do not replace a source and project review. The running framework generation is compatible with the declared classroom target.</p>
+<h4 id="task-2-guided-modification">Task 2: Guided modification<a class="heading-anchor" href="#task-2-guided-modification" aria-label="Link to this section">#</a></h4>
+<p>Build the checked-in DomainLab without adding a package.</p>
+<p>No separate reference answer has been written for this task. Start from Example B: Both values come from the build and the runtime rather than from a hand-written table, so the checks fail if the project targets another framework. A real multi-project fixture is still required to qualify restore and publish behavior. The compiled program reports .NETCoreApp,Version=v10.0, the framework its project targeted, and runs on a .NET 10 runtime.</p>
+<h4 id="task-3-independent-construction">Task 3: Independent construction<a class="heading-anchor" href="#task-3-independent-construction" aria-label="Link to this section">#</a></h4>
+<p>Move a pure domain type into the supplied class-library project and run its executable checks.</p>
+<p>No reference answer has been written for this task yet. It needs a project or platform outside the single-file pad, so record your own build and run evidence and judge it against the vocabulary entry <strong>Target framework</strong> and the lesson notes.</p>
+<h4 id="task-4-diagnose-a-defect">Task 4: Diagnose a defect<a class="heading-anchor" href="#task-4-diagnose-a-defect" aria-label="Link to this section">#</a></h4>
+<p>Diagnose an API unavailable under a different target framework.</p>
+<p>No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson&#x27;s pitfalls: An SDK version and target framework are related but different. A successful restore is not a successful build. Do not present self-contained deployment as architecture-independent.</p>
+<h4 id="task-5-boundary-evidence">Task 5: Boundary evidence<a class="heading-anchor" href="#task-5-boundary-evidence" aria-label="Link to this section">#</a></h4>
+<p>Delete only the lab-owned output directories and verify a clean rebuild.</p>
+<p>No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Expose environment facts without overclaiming) and Example B (Read the compiled target framework).</p>
+<h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
+<p>Design a dependency update review including lock changes, license checks and runtime evidence.</p>
+<p>No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry <strong>Target framework</strong>, and state one limitation of your choice.</p>
 <h3 id="mechanism-and-diagnostic-reasoning">Mechanism and diagnostic reasoning<a class="heading-anchor" href="#mechanism-and-diagnostic-reasoning" aria-label="Link to this section">#</a></h3>
 <p>A project file records the compilation target and build policy. Source that compiles against one framework can fail against another if it uses unavailable APIs. Pin a supported SDK policy and target framework deliberately. Package references add another versioned dependency surface, including transitive dependencies and restore behavior.</p>
 <p>The classroom builds a fixed net10.0 project without arbitrary packages. External multi-file labs teach the project workflow explicitly: restore during preparation, build without changing dependencies, run tests, then publish a selected artifact. A portable build does not prove every architecture or operating system works. Keep actual build and runtime evidence separate.</p>
 <p><code>TargetFramework</code> selects net10.0. Nullable and ImplicitUsings are compile policies. <code>dotnet restore</code>, <code>dotnet build --no-restore</code>, <code>dotnet run --no-build</code> and <code>dotnet publish</code> have distinct responsibilities.</p>
 <p>An SDK version and target framework are related but different. A successful restore is not a successful build. Do not present self-contained deployment as architecture-independent.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.</p></article>
+<p>Run the reference and confirm that it prints <code>csharp-043: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
   </main>
 </body>
 </html>

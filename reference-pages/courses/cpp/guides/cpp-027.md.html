@@ -214,7 +214,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the C++ module, save this lesson&#x27;s learner pad, then use Run. The worker stages the pad as <code>main.cpp</code> and compiles one translation unit. Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for exact local commands, flags, exit statuses, paths and Docker guidance. Tests involving multiple files, CMake, tool flags or shared libraries are explicitly host-project exercises.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
-<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs:each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
+<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs: each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p><a href="../examples/cpp-027-example-1.cpp.html">Complete program 1</a></p>
 <pre class="highlighted-code"><code class="language-cpp"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;cassert&gt;</span>
@@ -223,13 +223,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-keyword">namespace</span> vendored <span class="syntax-punctuation">{</span>
 <span class="syntax-keyword">constexpr</span> <span class="syntax-keyword">int</span> api_version <span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span>
 <span class="syntax-keyword">constexpr</span> <span class="syntax-keyword">int</span> <span class="syntax-function">add</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span> a<span class="syntax-punctuation">,</span> <span class="syntax-keyword">int</span> b<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">return</span> a <span class="syntax-operator">+</span> b<span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
-<span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span> <span class="syntax-comment">// namespace vendored</span>
 <span class="syntax-keyword">int</span> main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
   <span class="syntax-keyword">static_assert</span><span class="syntax-punctuation">(</span>vendored<span class="syntax-operator">:</span><span class="syntax-operator">:</span>api_version <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
   std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpp-027 example 1 checks passed</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
   <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
-<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<p><strong>Expected:</strong> With assertions enabled, the program exits with status 0 and prints:</p>
 <pre class="highlighted-code"><code class="language-text">cpp-027 example 1 checks passed</code></pre>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p><a href="../examples/cpp-027-example-2.cpp.html">Complete program 2</a></p>
@@ -239,44 +239,44 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-keyword">namespace</span> vendored <span class="syntax-punctuation">{</span>
 <span class="syntax-keyword">constexpr</span> <span class="syntax-keyword">int</span> api_version <span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span>
 <span class="syntax-keyword">constexpr</span> <span class="syntax-keyword">int</span> <span class="syntax-function">add</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span> a<span class="syntax-punctuation">,</span> <span class="syntax-keyword">int</span> b<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">return</span> a <span class="syntax-operator">+</span> b<span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
-<span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span> <span class="syntax-comment">// namespace vendored</span>
 <span class="syntax-keyword">int</span> main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
   assert<span class="syntax-punctuation">(</span>vendored<span class="syntax-operator">:</span><span class="syntax-operator">:</span>add<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
   std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpp-027 example 2 checks passed</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
   <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
-<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<p><strong>Expected:</strong> With assertions enabled, the program exits with status 0 and prints:</p>
 <pre class="highlighted-code"><code class="language-text">cpp-027 example 2 checks passed</code></pre>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-inventory-inputs">Exercise 1: Inventory inputs<a class="heading-anchor" href="#exercise-1-inventory-inputs" aria-label="Link to this section">#</a></h4>
 <p>List compiler, C++ level, dependency source and build generator.</p>
 <p><strong>Expected result/shape:</strong> Four concrete identities, including dependency content hash.</p>
-<p><strong>Verify:</strong> Four concrete identities, including dependency content hash.</p>
+<p><strong>Verify:</strong> Check that each of the four entries is a value you can re-read later, such as the <code>g++ --version</code> output, <code>-std=c++20</code>, a <code>sha256sum</code> of the dependency archive and Ninja.</p>
 <p><strong>Progressive hints:</strong> A package name without a version is not a reproducible input.</p>
 <h4 id="exercise-2-build-offline">Exercise 2: Build offline<a class="heading-anchor" href="#exercise-2-build-offline" aria-label="Link to this section">#</a></h4>
 <p>Build the supplied local target in a fresh owned directory without network.</p>
 <p><strong>Expected result/shape:</strong> Configure/build/test complete without downloads.</p>
-<p><strong>Verify:</strong> Configure/build/test complete without downloads.</p>
+<p><strong>Verify:</strong> Run configure, build and ctest with networking disabled, for example inside <code>docker run --network none</code>, and confirm all three steps succeed.</p>
 <p><strong>Progressive hints:</strong> Every required dependency must already be present.</p>
 <h4 id="exercise-3-expose-target-requirements">Exercise 3: Expose target requirements<a class="heading-anchor" href="#exercise-3-expose-target-requirements" aria-label="Link to this section">#</a></h4>
 <p>Create a CMake interface target with cxx_std_20.</p>
 <p><strong>Expected result/shape:</strong> Consumer inherits the required language feature.</p>
-<p><strong>Verify:</strong> Consumer inherits the required language feature.</p>
+<p><strong>Verify:</strong> Link a consumer target to the interface target without setting its own standard, then confirm its compile command, shown by <code>ninja -v</code>, contains <code>-std=c++20</code> or <code>-std=gnu++20</code>.</p>
 <p><strong>Progressive hints:</strong> Target properties propagate intentional usage requirements.</p>
 <h4 id="exercise-4-repair-hidden-fetch">Exercise 4: Repair hidden fetch<a class="heading-anchor" href="#exercise-4-repair-hidden-fetch" aria-label="Link to this section">#</a></h4>
 <p>Review a configure script that downloads latest.zip.</p>
 <p><strong>Expected result/shape:</strong> Replace with checked local source and pinned reviewed identity.</p>
-<p><strong>Verify:</strong> Replace with checked local source and pinned reviewed identity.</p>
+<p><strong>Verify:</strong> Confirm the repaired script uses a local archive or directory and checks a recorded hash, and that configure still succeeds with networking disabled.</p>
 <p><strong>Progressive hints:</strong> Latest changes over time and violates offline default.</p>
 <h4 id="exercise-5-check-licensing">Exercise 5: Check licensing<a class="heading-anchor" href="#exercise-5-check-licensing" aria-label="Link to this section">#</a></h4>
 <p>Package the dependency license with the source inventory.</p>
 <p><strong>Expected result/shape:</strong> License path present in the delivery tree.</p>
-<p><strong>Verify:</strong> License path present in the delivery tree.</p>
+<p><strong>Verify:</strong> List the delivery tree and confirm the license file exists at exactly the path your inventory names.</p>
 <p><strong>Progressive hints:</strong> Technical reproducibility does not erase distribution obligations.</p>
 <h4 id="exercise-6-transfer-another-platform">Exercise 6: Transfer another platform<a class="heading-anchor" href="#exercise-6-transfer-another-platform" aria-label="Link to this section">#</a></h4>
 <p>Record an untested architecture as unqualified.</p>
 <p><strong>Expected result/shape:</strong> Separate built platform from planned platforms.</p>
-<p><strong>Verify:</strong> Separate built platform from planned platforms.</p>
+<p><strong>Verify:</strong> Check that your record lists the architecture you actually built and ran, from <code>uname -m</code>, separately from planned ones marked unqualified until executed.</p>
 <p><strong>Progressive hints:</strong> Configuration files are not execution evidence.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain why this observation follows from the mechanism: The expected source API version is pinned at compilation. Then explain the changed condition in example 2 without opening the answer.</p>

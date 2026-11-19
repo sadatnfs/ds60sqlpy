@@ -198,7 +198,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Intermediate; approximately 150 minutes. Direct prerequisites: <code>julia-009</code>.</p>
 <p>Use owned types to represent data contracts and distinguish immutable bindings from recursively immutable state.</p>
 <h3 id="classroom-execution">Classroom execution<a class="heading-anchor" href="#classroom-execution" aria-label="Link to this section">#</a></h3>
-<p>Choose <strong>Julia language and scientific computing</strong> in <code>/classroom</code>, open this unit, and select its prepared <code>julia</code> runtime. The worker starts a fresh <code>main.jl</code> process with two Julia threads, a fixed package environment, no startup file and offline package settings. Both worked examples are complete under that environment. Save your current pad before replacing it. No package, model or dataset is fetched by a lesson.</p>
+<p>Open <code>julia-010</code> in <code>/classroom</code> with its prepared <code>julia</code> runtime. Worked case A (a measurement constructor) and worked case B (mutable fields inside an immutable object) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing <code>julia-010: all reference checks passed</code>. The <a href="../README.md.html">course overview</a> describes the shared runtime: a fresh offline <code>main.jl</code> process with two threads and a fixed package environment.</p>
 <h3 id="a-type-can-carry-a-data-contract">A type can carry a data contract<a class="heading-anchor" href="#a-type-can-carry-a-data-contract" aria-label="Link to this section">#</a></h3>
 <p>A composite type groups named fields. A constructor creates an instance and can enforce invariants before an invalid object enters the rest of a program. The field types describe representations; they do not, by themselves, establish units, ranges or scientific meaning.</p>
 <p>An immutable <code>struct</code> prevents reassignment of its fields after construction. A <code>mutable struct</code> allows field updates. Neither choice automatically validates every future state. A mutable object may need methods that preserve its invariants, while an immutable object can still contain a mutable array that another reference can change.</p>
@@ -310,7 +310,7 @@ worked_b<span class="syntax-punctuation">(</span><span class="syntax-punctuation
 <li><a href="https://docs.julialang.org/en/v1/manual/constructors/">Julia constructors</a></li>
 </ul>
 <h3 id="study-companion">Study companion<a class="heading-anchor" href="#study-companion" aria-label="Link to this section">#</a></h3>
-<p>Use the repository learning-companion skill with this lesson ID, your prediction and your actual source/output. Ask for a diagnosis of the first incorrect type, shape, state transition or assumption. Keep observed execution distinct from a timing claim, inferred mathematical result or external deployment.</p></article>
+<p>A repository-aware assistant with the learning-companion skill can review <code>julia-010</code> with you. Give it your prediction for one investigation, your source and the actual output, and ask it to find the first incorrect assumption about struct, constructor, mutable struct, invariant or nested state.</p></article>
   </main>
 </body>
 </html>

@@ -208,13 +208,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="condition-variables-coordinate-a-state-machine">Condition variables coordinate a state machine<a class="heading-anchor" href="#condition-variables-coordinate-a-state-machine" aria-label="Link to this section">#</a></h3>
 <p>A condition variable is a waiting mechanism, not the shared condition itself. The real condition is expressed in protected state. This queue has a sequence of pending integers and a closed flag. Empty/open means there is currently no work but more may arrive. Nonempty means the consumer can take an item. Empty/closed means no more work can arrive and the consumer should finish.</p>
 <p>The mutex protects both the queue and the closed flag. The consumer holds a unique_lock and calls the predicate overload of wait. Waiting releases the mutex so a producer can change the state, then reacquires it before the predicate is evaluated again. A wakeup alone does not guarantee an item exists: spurious wakeups and other consumers can change the situation. The predicate is the source of truth.</p>
-<p>The first program enqueues2 and 3, then closes the queue while holding the mutex. The consumer drains the existing items even though closed is true, because nonempty still means work exists. Only empty and closed together terminate the loop. Exiting immediately on closed would discard accepted work. Waiting only for nonempty would hang after the last item because closure would not satisfy the condition.</p>
+<p>The first program enqueues 2 and 3, then closes the queue while holding the mutex. The consumer drains the existing items even though closed is true, because nonempty still means work exists. Only empty and closed together terminate the loop. Exiting immediately on closed would discard accepted work. Waiting only for nonempty would hang after the last item because closure would not satisfy the condition.</p>
 <p>The second program starts with an already empty, closed queue. The predicate is immediately true, so no notification is needed to make progress. This demonstrates why notifications should not be treated as stored messages. State persists; a notification may occur before another thread begins waiting. Rechecking the state under the same mutex avoids depending on an exact notification schedule.</p>
 <p>A bounded queue adds a capacity predicate for producers. When full, the interface must choose whether to wait, reject or cancel a submission. That policy belongs to the product contract and should be tested separately from consumer wakeup. The small reference has a fixed two-item input; it demonstrates correct draining and closure, not a production executor with backpressure and arbitrary task scheduling.</p>
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the C++ module, save this lesson&#x27;s learner pad, then use Run. The worker stages the pad as <code>main.cpp</code> and compiles one translation unit. Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for exact local commands, flags, exit statuses, paths and Docker guidance. Tests involving multiple files, CMake, tool flags or shared libraries are explicitly host-project exercises.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
-<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs:each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
+<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs: each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p><a href="../examples/cpp-030-example-1.cpp.html">Complete program 1</a></p>
 <pre class="highlighted-code"><code class="language-cpp"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;cassert&gt;</span>
@@ -252,7 +252,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpp-030 example 1 checks passed</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
   <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
-<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<p><strong>Expected:</strong> With assertions enabled, the program exits with status 0 and prints:</p>
 <pre class="highlighted-code"><code class="language-text">cpp-030 example 1 checks passed</code></pre>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p><a href="../examples/cpp-030-example-2.cpp.html">Complete program 2</a></p>
@@ -273,38 +273,38 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpp-030 example 2 checks passed</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
   <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
-<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<p><strong>Expected:</strong> With assertions enabled, the program exits with status 0 and prints:</p>
 <pre class="highlighted-code"><code class="language-text">cpp-030 example 2 checks passed</code></pre>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-state-the-invariant">Exercise 1: State the invariant<a class="heading-anchor" href="#exercise-1-state-the-invariant" aria-label="Link to this section">#</a></h4>
 <p>List queue state protected by m.</p>
 <p><strong>Expected result/shape:</strong> Queue contents and closed flag share one mutex.</p>
-<p><strong>Verify:</strong> Queue contents and closed flag share one mutex.</p>
+<p><strong>Verify:</strong> Check that every read or write of <code>q</code> and <code>closed</code> in Worked example 1 happens while a lock on <code>m</code> is held, including inside the wait predicate.</p>
 <p><strong>Progressive hints:</strong> Protecting related fields separately can violate their relationship.</p>
 <h4 id="exercise-2-drain-before-exit">Exercise 2: Drain before exit<a class="heading-anchor" href="#exercise-2-drain-before-exit" aria-label="Link to this section">#</a></h4>
 <p>Produce 2 and 3 then close.</p>
 <p><strong>Expected result/shape:</strong> Total 5 with both items consumed.</p>
-<p><strong>Verify:</strong> Total 5 with both items consumed.</p>
+<p><strong>Verify:</strong> Assert <code>total == 5</code> after <code>consumer.join()</code> and that <code>q.empty()</code> is true, so both items were consumed before the loop ended.</p>
 <p><strong>Progressive hints:</strong> Close means no future work, not erase pending work.</p>
 <h4 id="exercise-3-bound-the-queue">Exercise 3: Bound the queue<a class="heading-anchor" href="#exercise-3-bound-the-queue" aria-label="Link to this section">#</a></h4>
 <p>Add capacity 2 and a producer wait predicate.</p>
 <p><strong>Expected result/shape:</strong> Observed size never exceeds 2.</p>
-<p><strong>Verify:</strong> Observed size never exceeds 2.</p>
+<p><strong>Verify:</strong> Record <code>q.size()</code> right after every push while holding the lock, and assert it is never greater than 2.</p>
 <p><strong>Progressive hints:</strong> Producers wait for room while consumers notify after pop.</p>
 <h4 id="exercise-4-repair-naked-wait">Exercise 4: Repair naked wait<a class="heading-anchor" href="#exercise-4-repair-naked-wait" aria-label="Link to this section">#</a></h4>
 <p>Replace cv.wait(lock) with predicate waiting.</p>
 <p><strong>Expected result/shape:</strong> Spurious notifications cannot trigger front on empty queue.</p>
-<p><strong>Verify:</strong> Spurious notifications cannot trigger front on empty queue.</p>
+<p><strong>Verify:</strong> Confirm the repaired call passes the predicate <code>!q.empty() || closed</code> to <code>cv.wait</code>, so <code>front()</code> is reached only after the queue was seen to be non-empty.</p>
 <p><strong>Progressive hints:</strong> A wake does not prove the condition is true.</p>
 <h4 id="exercise-5-test-empty-close">Exercise 5: Test empty close<a class="heading-anchor" href="#exercise-5-test-empty-close" aria-label="Link to this section">#</a></h4>
 <p>Close before enqueueing any items.</p>
 <p><strong>Expected result/shape:</strong> Consumer exits with total 0.</p>
-<p><strong>Verify:</strong> Consumer exits with total 0.</p>
+<p><strong>Verify:</strong> Set <code>closed = true</code> under the lock before any push, notify, and assert <code>total == 0</code> after <code>consumer.join()</code>; Worked example 2 shows the wait returning at once.</p>
 <p><strong>Progressive hints:</strong> The predicate includes closed to allow termination.</p>
 <h4 id="exercise-6-transfer-cancellation">Exercise 6: Transfer cancellation<a class="heading-anchor" href="#exercise-6-transfer-cancellation" aria-label="Link to this section">#</a></h4>
 <p>Define whether cancellation drains or discards pending work.</p>
 <p><strong>Expected result/shape:</strong> Chosen policy accounts for every accepted item and joins all workers.</p>
-<p><strong>Verify:</strong> Chosen policy accounts for every accepted item and joins all workers.</p>
+<p><strong>Verify:</strong> Count accepted, processed and discarded items and assert <code>accepted == processed + discarded</code> after every worker has been joined.</p>
 <p><strong>Progressive hints:</strong> Shutdown semantics belong in the queue contract.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain why this observation follows from the mechanism: The consumer proceeds only when work exists or shutdown has been published. Then explain the changed condition in example 2 without opening the answer.</p>

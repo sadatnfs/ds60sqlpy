@@ -202,7 +202,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Produce a reviewable commercial metric specification with explicit populations and adjustment policies.</p>
 <p>An integrated commercial model needs more than a large final revenue formula. Define the grain, currency, date role and adjustment policy for each input. Our core Sales are USD amounts after line discounts. Returns records monetary refunds linked to SaleID; this fixture attributes those refunds to the original sale&#x27;s date, not an unprovided return-event date. ForeignSales is a separate population requiring explicit conversion.</p>
 <p>Core sales total 187 and refunds total 13, giving adjusted core revenue 174. The foreign transaction fixture converts to 270 USD under its transaction-date rate policy. These are distinct named populations. Do not combine them with a budget unless the budget&#x27;s scope includes both and source identities establish that no transaction is duplicated.</p>
-<p>The supplied Budget covers the core Paper/Home categories in January and February 2025. Core actuals in that scope are 123 before refunds and 114 after the nine-dollar refund attributed to S4. The compatible budget is 165, giving an adjusted-revenue variance of-51. This does not establish accounting profit, inventory restatement or tax treatment, which require additional data and policy.</p>
+<p>The supplied Budget covers the core Paper/Home categories in January and February 2025. Core actuals in that scope are 123 before refunds and 114 after the nine-dollar refund attributed to S4. The compatible budget is 165, giving an adjusted-revenue variance of -51. This does not establish accounting profit, inventory restatement or tax treatment, which require additional data and policy.</p>
 <h3 id="vocabulary-and-expression-anatomy">Vocabulary and expression anatomy<a class="heading-anchor" href="#vocabulary-and-expression-anatomy" aria-label="Link to this section">#</a></h3>
 <p>The reference composes named measures for refund attribution, adjusted core revenue and converted foreign amounts. The relationship Sales-&gt;Returns propagates the original sale&#x27;s dimension/date context. Budget remains disconnected and is matched explicitly by month and category. The two cases expose component totals before reporting a variance.</p>
 <p>Concepts to explain in your own words: <strong>commercial model</strong>, <strong>refund attribution</strong>, <strong>currency conversion</strong>, <strong>budget grain</strong>, <strong>reconciliation</strong>.</p>
@@ -214,6 +214,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
                     Date (one)
                        | inactive ShipDate
                        +------&gt; Sales</code></pre>
+<p>This lesson also uses the <code>analytics</code> model&#x27;s <code>Budget</code> table. <code>Budget</code> has no relationship, so a filter on another table reaches it only if the expression transfers the filter explicitly.</p>
 <p>All amounts in ordinary Sales are USD after the line discount, before tax and returns. The Date fixture is complete for 2024 and 2025; a short result table is a selected slice, not the whole calendar. JSON <code>null</code> in the worked-results sidecar means DAX BLANK, not the text &quot;null&quot;.</p>
 <h3 id="worked-cases">Worked cases<a class="heading-anchor" href="#worked-cases" aria-label="Link to this section">#</a></h3>
 <p>The following query-local declarations are shared by these cases. They do not create persisted measures in this classroom.</p>
@@ -235,7 +236,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol>
 <li>Core line discounts are already included in NetAmount, whose total is 187.</li>
 <li>Refunds 4 and 9 total 13; adjusted core revenue is 174.</li>
-<li>Foreign amounts convert to 100 +110 +60 =270 USD under their separate policy.</li>
+<li>Foreign amounts convert to 100 + 110 + 60 = 270 USD under their separate policy.</li>
 </ol>
 <p><strong>Hand-derived worked-reference result:</strong></p>
 <div class="table-wrap"><table><thead><tr>
@@ -259,8 +260,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Context trace:</strong></p>
 <ol>
 <li>Core 2025 sales in these months total 123.</li>
-<li>Only the refund linked to S 4 belongs to that sale-date population, subtracting 9.</li>
-<li>The four compatible budget rows total 165;114 -165 =-51.</li>
+<li>Only the refund linked to S4 belongs to that sale-date population, subtracting 9.</li>
+<li>The four compatible budget rows total 165; 114 - 165 = -51.</li>
 </ol>
 <p><strong>Hand-derived worked-reference result:</strong></p>
 <div class="table-wrap"><table><thead><tr>
@@ -281,7 +282,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A return-date report could differ, but this fixture does not contain ReturnDate. The correct conclusion is to state the limitation, not invent another temporal attribution.</p>
 <p>Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table.</p>
 <h3 id="practice-prediction-construction-and-diagnosis">Practice: prediction, construction and diagnosis<a class="heading-anchor" href="#practice-prediction-construction-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>Retain your formula or written reasoning, the stated context, contributing rows or values, and a conclusion with its unit. This is a manual learning record, not an execution receipt.</p>
+<p>Retain your formula or written reasoning, the stated context, contributing rows or values, and a conclusion with its unit. These notes are your own study record; they do not show that a formula ran.</p>
 <h4 id="exercise-1-predict">Exercise 1: Predict<a class="heading-anchor" href="#exercise-1-predict" aria-label="Link to this section">#</a></h4>
 <p>Reconcile adjusted core revenue by year.</p>
 <h4 id="exercise-2-change-one-condition">Exercise 2: Change one condition<a class="heading-anchor" href="#exercise-2-change-one-condition" aria-label="Link to this section">#</a></h4>
@@ -308,9 +309,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Continue to <a href="dax-059.md.html">dax-059</a> when its prerequisites make sense, or revisit this stage from the <a href="../README.md.html">course map</a>.</p>
 <h3 id="official-references-and-evidence-limits">Official references and evidence limits<a class="heading-anchor" href="#official-references-and-evidence-limits" aria-label="Link to this section">#</a></h3>
 <ul>
-<li><a href="https://learn.microsoft.com/en-us/power-bi/guidance/star-schema">Official documentation 1</a></li>
-<li><a href="https://learn.microsoft.com/en-us/dax/treatas-function-dax">Official documentation 2</a></li>
-<li><a href="https://learn.microsoft.com/en-us/dax/lookupvalue-function-dax">Official documentation 3</a></li>
+<li><a href="https://learn.microsoft.com/en-us/power-bi/guidance/star-schema">Power BI guidance: star schema</a></li>
+<li><a href="https://learn.microsoft.com/en-us/dax/treatas-function-dax">DAX function: TREATAS</a></li>
+<li><a href="https://learn.microsoft.com/en-us/dax/lookupvalue-function-dax">DAX function: LOOKUPVALUE</a></li>
 </ul>
 <p>Documentation was reviewed for this original course on 2026-10-25. Version-sensitive features have explicit notes. Source/model checks and independent fixture arithmetic are not a DAX parser, compiler, semantic engine, real RLS test or performance measurement.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>

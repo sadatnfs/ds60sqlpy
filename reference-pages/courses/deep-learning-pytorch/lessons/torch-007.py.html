@@ -199,18 +199,18 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">Copy to .learning before editing. Six independent attempts belong below.</span></span>
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 1: Inspect leaf and nonleaf state</span></span>
-<span class="source-line"><span class="syntax-comment"># Create a leaf tensor \(w=0\) and intermediate tensor \(u=2w\), retain the intermediate</span></span>
-<span class="source-line"><span class="syntax-comment"># gradient and backpropagate its sum.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: `w.is_leaf` is `True`; `u.is_leaf` is `False`; the gradients with respect to \(w\) and \(u\) are 2 and 1.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Predict a nonleaf gradient</span></span>
+<span class="source-line"><span class="syntax-comment"># Create leaf v=1.0 and intermediate u=3v, retain u&#x27;s gradient and backpropagate u*u.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: u.grad is 6 and v.grad is 18; u is not a leaf.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 2: Observe accumulation across fresh graphs</span></span>
-<span class="source-line"><span class="syntax-comment"># Compute (w-2)**2 twice at w=0 without clearing grad.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: after resetting first, grad -4 then -8.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Accumulate three backward calls</span></span>
+<span class="source-line"><span class="syntax-comment"># At w=1, backpropagate (w-2)**2 three times without clearing the gradient.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: each call contributes -2, so the stored gradient is -6.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 3: Clear before an independent step</span></span>
-<span class="source-line"><span class="syntax-comment"># Set grad None and backpropagate once more.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: grad returns to-4.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: Clear with zero_ and with None</span></span>
+<span class="source-line"><span class="syntax-comment"># Clear the accumulated gradient with p.grad.zero_() and backpropagate once, then set it</span></span>
+<span class="source-line"><span class="syntax-comment"># to None and backpropagate once more.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: both routes end at -2; after the None assignment the gradient is absent until the next backward.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Separate detach from ownership</span></span>
 <span class="source-line"><span class="syntax-comment"># Detach a tensor, mutate the detached view, and compare with a detached clone.</span></span>

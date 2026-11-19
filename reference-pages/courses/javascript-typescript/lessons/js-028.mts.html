@@ -196,13 +196,22 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-typescript"><code><span class="source-line"><span class="syntax-comment">// Answer-free learner source. Save your own copy before editing.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">export</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"><span class="syntax-comment">// Exercise 1: Find a shortest unweighted path</span></span>
-<span class="source-line"><span class="syntax-comment">// Search a graph with two equal-length routes from A to D.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: A,B,D under the stated neighbor order.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 1: Find a shortest unweighted path: change one input</span></span>
+<span class="source-line"><span class="syntax-comment">// Close Example A and rebuild it in a fresh `main.mts`, keeping the check</span></span>
+<span class="source-line"><span class="syntax-comment">// `assert.deepEqual(shortestPath(graph, &#x27;A&#x27;, &#x27;D&#x27;), [&#x27;A&#x27;, &#x27;B&#x27;, &#x27;D&#x27;])`. Then propose one input</span></span>
+<span class="source-line"><span class="syntax-comment">// change that would make that check fail and explain why before trying it.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: Your rebuild reproduces the worked observation (A,B,D under the stated neighbor</span></span>
+<span class="source-line"><span class="syntax-comment">// order), and your proposed change makes the check `assert.deepEqual(shortestPath(graph,</span></span>
+<span class="source-line"><span class="syntax-comment">// &#x27;A&#x27;, &#x27;D&#x27;), [&#x27;A&#x27;, &#x27;B&#x27;, &#x27;D&#x27;])` fail.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment">// Exercise 2: Beat greedy coin selection</span></span>
-<span class="source-line"><span class="syntax-comment">// Use denominations 1,3,4 to make amount 6.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: two coins; amount zero needs zero coins.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 2: Beat greedy coin selection: diagnose an edited check</span></span>
+<span class="source-line"><span class="syntax-comment">// A careless edit changed a check in Example B so that it reads `assert.equal(minCoins([1,</span></span>
+<span class="source-line"><span class="syntax-comment">// 3, 4], 1), 0);`. Run Example B with that line, explain why the edited check now fails for</span></span>
+<span class="source-line"><span class="syntax-comment">// the same program state, and restore it.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at the check</span></span>
+<span class="source-line"><span class="syntax-comment">// `assert.equal(minCoins([1, 3, 4], 0), 0)`; after it the line reads</span></span>
+<span class="source-line"><span class="syntax-comment">// `assert.equal(minCoins([1, 3, 4], 0), 0);` again and two coins; amount zero needs zero</span></span>
+<span class="source-line"><span class="syntax-comment">// coins.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 3: Terminate on a cyclic graph</span></span>
 <span class="source-line"><span class="syntax-comment">// Search A to C through A-B-A cycles and check source-to-source.</span></span>

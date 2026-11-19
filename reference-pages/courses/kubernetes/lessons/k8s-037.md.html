@@ -197,32 +197,26 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Use the guide and synthetic case ledger. A prediction or copied fixture is not a live runtime observation.</p>
 <h3 id="exercise-1-list-exact-version-inputs">Exercise 1: List exact version inputs<a class="heading-anchor" href="#exercise-1-list-exact-version-inputs" aria-label="Link to this section">#</a></h3>
 <p>Name server, node image, client, controller and storage/network versions needed in a receipt.</p>
-<p>Expected: A concrete pinned stack rather than a generic latest label.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-2-audit-api-usage">Exercise 2: Audit API usage<a class="heading-anchor" href="#exercise-2-audit-api-usage" aria-label="Link to this section">#</a></h3>
 <p>Extract apiVersion and kind from the reviewed manifests and identify destination checks.</p>
-<p>Expected: Every used API/feature has a server acceptance row.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-3-evaluate-the-incomplete-matrix">Exercise 3: Evaluate the incomplete matrix<a class="heading-anchor" href="#exercise-3-evaluate-the-incomplete-matrix" aria-label="Link to this section">#</a></h3>
 <p>Read B with API pass but controller unavailable.</p>
-<p>Expected: Destination not accepted; controller capability remains missing.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-4-compare-synthetic-data">Exercise 4: Compare synthetic data<a class="heading-anchor" href="#exercise-4-compare-synthetic-data" aria-label="Link to this section">#</a></h3>
 <p>Check destination marker against the independently captured source hash.</p>
-<p>Expected: Mismatch blocks promotion even when /version succeeds.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-5-design-a-rollback-boundary">Exercise 5: Design a rollback boundary<a class="heading-anchor" href="#exercise-5-design-a-rollback-boundary" aria-label="Link to this section">#</a></h3>
 <p>Explain when source can be released and what new destination writes would change.</p>
-<p>Expected: Source retained through the stated window; mutable-data rollback is outside this immutable fixture.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-6-write-the-qualification-conclusion">Exercise 6: Write the qualification conclusion<a class="heading-anchor" href="#exercise-6-write-the-qualification-conclusion" aria-label="Link to this section">#</a></h3>
 <p>Distinguish replacement rehearsal from in-place upgrade and production HA.</p>
-<p>Expected: Only the exact tested stack and synthetic workload gates are claimed.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p></article>
   </main>

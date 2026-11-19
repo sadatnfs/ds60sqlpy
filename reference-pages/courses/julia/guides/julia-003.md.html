@@ -198,12 +198,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Beginner; approximately 90 minutes. Direct prerequisites: <code>julia-001</code>.</p>
 <p>Process text without confusing byte positions, Unicode characters and visible grapheme clusters.</p>
 <h3 id="classroom-execution">Classroom execution<a class="heading-anchor" href="#classroom-execution" aria-label="Link to this section">#</a></h3>
-<p>Choose <strong>Julia language and scientific computing</strong> in <code>/classroom</code>, open this unit, and select its prepared <code>julia</code> runtime. The worker starts a fresh <code>main.jl</code> process with two Julia threads, a fixed package environment, no startup file and offline package settings. Both worked examples are complete under that environment. Save your current pad before replacing it. No package, model or dataset is fetched by a lesson.</p>
+<p>Open <code>julia-003</code> in <code>/classroom</code> with its prepared <code>julia</code> runtime. Worked case A (UTF-8 character starts) and worked case B (canonical normalization) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing <code>julia-003: all reference checks passed</code>. The <a href="../README.md.html">course overview</a> describes the shared runtime: a fresh offline <code>main.jl</code> process with two threads and a fixed package environment.</p>
 <h3 id="text-has-several-useful-lengths">Text has several useful lengths<a class="heading-anchor" href="#text-has-several-useful-lengths" aria-label="Link to this section">#</a></h3>
-<p>Julia strings use UTF -8. A byte is a storage unit, a Unicode scalar value is represented by a <code>Char</code>, and a visible grapheme may contain several scalar values. These notions coincide for simple ASCII text but diverge for accented characters and many other writing systems.</p>
+<p>Julia strings use UTF-8. A byte is a storage unit, a Unicode scalar value is represented by a <code>Char</code>, and a visible grapheme may contain several scalar values. These notions coincide for simple ASCII text but diverge for accented characters and many other writing systems.</p>
 <p>String indices identify valid character-start positions in the underlying code-unit sequence. They are not necessarily consecutive character counts. A generic loop should use <code>eachindex</code>, <code>nextind</code> or character iteration rather than incrementing a byte index and assuming that every position begins a valid character. <code>length</code> counts characters, while <code>ncodeunits</code> exposes the underlying code-unit count.</p>
 <p>A <code>Char</code> uses single quotes and a <code>String</code> uses double quotes. Interpolation inserts a value into a string, while concatenation combines string contents. Converting bytes or normalizing text requires an explicit policy. A program should not replace invalid or meaningful distinctions simply to make two strings compare equal.</p>
-<h3 id="worked-case-a-utf-8-character-starts">Worked case A: UTF -8 character starts<a class="heading-anchor" href="#worked-case-a-utf-8-character-starts" aria-label="Link to this section">#</a></h3>
+<h3 id="worked-case-a-utf-8-character-starts">Worked case A: UTF-8 character starts<a class="heading-anchor" href="#worked-case-a-utf-8-character-starts" aria-label="Link to this section">#</a></h3>
 <p>The two-character string containing an accented Latin character and a Greek character occupies four bytes. Its valid start indices are 1 and 3. Index 2 is inside the first character and raises <code>StringIndexError</code>. Iterating over valid indices or characters produces the expected two characters without assuming a one-byte representation.</p>
 <pre class="highlighted-code"><code class="language-julia"><span class="syntax-keyword">using</span> Test
 <span class="syntax-keyword">using</span> Unicode
@@ -244,7 +244,7 @@ worked_b<span class="syntax-punctuation">(</span><span class="syntax-punctuation
 <p>The examples operate on authored literal strings and standard Unicode functions. They do not prove that a normalization policy is suitable for every language, identifier system or security boundary. They establish inspectable byte/character/grapheme distinctions needed before building reliable parsers, annotations and scientific text workflows.</p>
 <h3 id="six-investigations">Six investigations<a class="heading-anchor" href="#six-investigations" aria-label="Link to this section">#</a></h3>
 <h4 id="1-advance-safely">1. Advance safely<a class="heading-anchor" href="#1-advance-safely" aria-label="Link to this section">#</a></h4>
-<p>Move from the first to the second character in the UTF -8 fixture.</p>
+<p>Move from the first to the second character in the UTF-8 fixture.</p>
 <p><strong>Expected:</strong> nextind returns 3.</p>
 <p><strong>Hint:</strong> Use a string-aware index operation.</p>
 <h4 id="2-count-visible-units">2. Count visible units<a class="heading-anchor" href="#2-count-visible-units" aria-label="Link to this section">#</a></h4>
@@ -273,7 +273,7 @@ worked_b<span class="syntax-punctuation">(</span><span class="syntax-punctuation
 <li><a href="https://docs.julialang.org/en/v1/stdlib/Unicode/">Unicode standard library</a></li>
 </ul>
 <h3 id="study-companion">Study companion<a class="heading-anchor" href="#study-companion" aria-label="Link to this section">#</a></h3>
-<p>Use the repository learning-companion skill with this lesson ID, your prediction and your actual source/output. Ask for a diagnosis of the first incorrect type, shape, state transition or assumption. Keep observed execution distinct from a timing claim, inferred mathematical result or external deployment.</p></article>
+<p>A repository-aware assistant with the learning-companion skill can review <code>julia-003</code> with you. Give it your prediction for one investigation, your source and the actual output, and ask it to find the first incorrect assumption about UTF-8, code unit, code point, grapheme or normalization.</p></article>
   </main>
 </body>
 </html>

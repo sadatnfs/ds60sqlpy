@@ -197,28 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-keyword">public</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Main</span> <span class="syntax-punctuation">{</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span></span>
-<span class="source-line">    <span class="syntax-comment">// Exercise 1: Read an admitted owned file</span></span>
-<span class="source-line">    <span class="syntax-comment">// Create `input.txt` inside an owned root and read at most 10 bytes.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: content hello.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Exercise 1: Read an admitted owned file: change one input</span></span>
+<span class="source-line">    <span class="syntax-comment">// Copy Example A into a scratch `Main.java` and change</span></span>
+<span class="source-line">    <span class="syntax-comment">// `java.nio.file.Files.writeString(root.resolve(&quot;input.txt&quot;), &quot;hello&quot;);` to</span></span>
+<span class="source-line">    <span class="syntax-comment">// `java.nio.file.Files.writeString(root.resolve(&quot;input.txt&quot;), &quot;hello!&quot;);`. Before running it</span></span>
+<span class="source-line">    <span class="syntax-comment">// with `java -ea Main`, predict which assertion fails and which value it now sees; then run</span></span>
+<span class="source-line">    <span class="syntax-comment">// it and restore the original line.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` from the assertion on `new</span></span>
+<span class="source-line">    <span class="syntax-comment">// String(readBounded(root, &quot;input.txt&quot;, 10),</span></span>
+<span class="source-line">    <span class="syntax-comment">// java.nio.charset.StandardCharsets.UTF_8).equals(&quot;hello&quot;)`. Restoring the original line</span></span>
+<span class="source-line">    <span class="syntax-comment">// brings back the worked observation: content hello.</span></span>
 <span class="source-line"></span>
-<span class="source-line">    <span class="syntax-comment">// Exercise 2: Reject lexical traversal and absolute paths</span></span>
-<span class="source-line">    <span class="syntax-comment">// Attempt../outside.txt andanabsolutechildpath.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: SecurityException for both.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Exercise 2: Reject lexical traversal and absolute paths: debug a regression</span></span>
+<span class="source-line">    <span class="syntax-comment">// A regression changed `rejected = true;` to `rejected = false;` in the code that Example B</span></span>
+<span class="source-line">    <span class="syntax-comment">// adds after Example A. Run Example B with that change, use the failing assertion to explain</span></span>
+<span class="source-line">    <span class="syntax-comment">// the defect and repair it without changing the assertion.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` from the assertion on</span></span>
+<span class="source-line">    <span class="syntax-comment">// `rejected`; after it the line reads `rejected = true;` again and securityException for</span></span>
+<span class="source-line">    <span class="syntax-comment">// both.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 3: Enforce the byte limit after reading a bounded amount</span></span>
-<span class="source-line">    <span class="syntax-comment">// Writefivebytes and request a four-byte maximum.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Write five bytes and request a four-byte maximum.</span></span>
 <span class="source-line">    <span class="syntax-comment">// Expected: IOException for oversized content.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 4: Reject symbolic-link access under the declared policy</span></span>
-<span class="source-line">    <span class="syntax-comment">// Create a link inside the owned root to another owned file and attempt to read throughit.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: link rejected when platform supports creation;unsupported capability recorded explicitly.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Create a link inside the owned root to another owned file and attempt to read through it.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: link rejected when platform supports creation; unsupported capability recorded</span></span>
+<span class="source-line">    <span class="syntax-comment">// explicitly.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 5: Keep operation names out of code execution</span></span>
-<span class="source-line">    <span class="syntax-comment">// Admitonlyread_fixture andrejectrun_shell.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: unknownoperationIllegalArgumentException.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Admit only read_fixture and reject run_shell.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: unknown operation IllegalArgumentException.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 6: Build a restricted diagnostic record</span></span>
-<span class="source-line">    <span class="syntax-comment">// Copy onlyrequest_id,operation and status from a map containing token andsource_text.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Copy only request_id, operation and status from a map containing token and source_text.</span></span>
 <span class="source-line">    <span class="syntax-comment">// Expected: diagnostic excludes both sensitive fields.</span></span>
 <span class="source-line">    System<span class="syntax-punctuation">.</span><span class="syntax-attribute">out</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">println</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement and check the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line">  <span class="syntax-punctuation">}</span></span>

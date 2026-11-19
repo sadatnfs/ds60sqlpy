@@ -207,7 +207,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Expected:</strong> Three specific evidence checks rather than a generic restart.</p>
 <h3 id="exercise-3-interpret-the-supplied-timeline">Exercise 3: Interpret the supplied timeline<a class="heading-anchor" href="#exercise-3-interpret-the-supplied-timeline" aria-label="Link to this section">#</a></h3>
 <p>The controlled one-fault trace supports a narrow causal explanation. In a real incident, the same correlation would require checking concurrent changes and alternative causes rather than assuming the teacher-supplied synthetic control conditions.</p>
-<p><strong>Expected:</strong> Selector changes at 10; zero endpoints observed at 15 while readiness remains1.</p>
+<p><strong>Expected:</strong> Selector changes at 10; zero endpoints observed at 15 while readiness remains 1.</p>
 <h3 id="exercise-4-apply-the-minimal-bounded-repair">Exercise 4: Apply the minimal bounded repair<a class="heading-anchor" href="#exercise-4-apply-the-minimal-bounded-repair" aria-label="Link to this section">#</a></h3>
 <p>The repair should preserve unrelated fields and respect optimistic concurrency. A stale whole-object replacement risks undoing another legitimate change, while a name-only update risks modifying an unrelated replacement.</p>
 <p><strong>Expected:</strong> Owned svc-1 repaired; replacement UID causes refusal.</p>

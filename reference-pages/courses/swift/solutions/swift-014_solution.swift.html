@@ -224,6 +224,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">      temperature<span class="syntax-punctuation">.</span>fahrenheit <span class="syntax-punctuation">=</span> <span class="syntax-number">212</span></span>
 <span class="source-line">      <span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span>temperature<span class="syntax-punctuation">.</span>celsius <span class="syntax-operator">-</span> <span class="syntax-number">100</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> <span class="syntax-number">1e-9</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">do</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-comment">//</span><span class="syntax-comment"> Task 3: Independent construction</span></span>
+<span class="source-line">      <span class="syntax-comment">//</span><span class="syntax-comment">/ Stores meters only; feet is a derived view and is never stored.</span></span>
+<span class="source-line">      <span class="syntax-keyword">struct</span> <span class="syntax-class">Length</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-keyword">var</span> meters<span class="syntax-punctuation">:</span> <span class="syntax-builtin">Double</span></span>
+<span class="source-line">        <span class="syntax-keyword">var</span> feet<span class="syntax-punctuation">:</span> <span class="syntax-builtin">Double</span> <span class="syntax-punctuation">{</span> meters <span class="syntax-operator">/</span> <span class="syntax-number">0.3048</span> <span class="syntax-punctuation">}</span></span>
+<span class="source-line">      <span class="syntax-punctuation">}</span></span>
+<span class="source-line">      <span class="syntax-keyword">let</span> length <span class="syntax-punctuation">=</span> Length<span class="syntax-punctuation">(</span>meters<span class="syntax-punctuation">:</span> <span class="syntax-number">3.048</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span>length<span class="syntax-punctuation">.</span>feet <span class="syntax-operator">-</span> <span class="syntax-number">10</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> <span class="syntax-number">1e-9</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
 <span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">swift-014: passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line">  <span class="syntax-punctuation">}</span></span>
 <span class="source-line"><span class="syntax-punctuation">}</span></span>

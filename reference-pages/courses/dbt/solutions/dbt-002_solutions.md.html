@@ -198,6 +198,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.</p>
 <h3 id="1-add-a-valid-row">1. Add a valid row<a class="heading-anchor" href="#1-add-a-valid-row" aria-label="Link to this section">#</a></h3>
 <p>The source and staged counts should both increase by one. Keep the identifier unique and verify the new row separately.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-comment"># Uses the tempfile import and the project(), invoke() and rows() helpers in main.py.</span>
+<span class="syntax-keyword">with</span> tempfile<span class="syntax-operator">.</span>TemporaryDirectory<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> d<span class="syntax-punctuation">:</span>
+    p <span class="syntax-operator">=</span> project<span class="syntax-punctuation">(</span>
+        d<span class="syntax-punctuation">,</span>
+        models<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span>
+            <span class="syntax-string">&quot;</span><span class="syntax-string">orders</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">(</span>
+                <span class="syntax-string">&quot;</span><span class="syntax-string">select id::integer as id, amount::integer as amount from </span><span class="syntax-string">{{</span><span class="syntax-string"> ref(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">raw_orders</span><span class="syntax-string">&#x27;</span><span class="syntax-string">) }}</span><span class="syntax-string">&quot;</span>
+            <span class="syntax-punctuation">)</span>
+        <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+        seeds<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">raw_orders</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">id,amount</span><span class="syntax-string">\n</span><span class="syntax-string">1,5</span><span class="syntax-string">\n</span><span class="syntax-string">2,7</span><span class="syntax-string">\n</span><span class="syntax-string">3,9</span><span class="syntax-string">\n</span><span class="syntax-string">4,3</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">)</span>
+    invoke<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">build</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> rows<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">select count(*), sum(amount) from orders</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">24</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span></code></pre>
 <p><strong>Expected:</strong> Accepted total becomes 24.</p>
 <h3 id="2-add-missing-text">2. Add missing text<a class="heading-anchor" href="#2-add-missing-text" aria-label="Link to this section">#</a></h3>
 <p>Keep a raw-is-null or blank indicator and a rejection reason. Treating all failed conversions alike can hide different operational problems.</p>
@@ -212,8 +225,23 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Use seeds for small controlled fixtures or mappings. Production ingestion needs a separate reproducible source contract and operational process.</p>
 <p><strong>Expected:</strong> The answer distinguishes small reference data from ingestion.</p>
 <h3 id="6-fail-mandatory-parsing">6. Fail mandatory parsing<a class="heading-anchor" href="#6-fail-mandatory-parsing" aria-label="Link to this section">#</a></h3>
-<p>Use strict failure when invalid input must block the product. Keep the failed evidence and do not mistake a stopped run for data that never arrived.</p>
-<p><strong>Expected:</strong> The malformed fixture fails.</p>
+<p>Use strict failure when invalid input must block the product. A view builds without reading any rows, so the conversion error would appear only when someone queries it; materialize a table, or add a test that reads the rows, so the build itself fails. Keep the failed evidence and do not mistake a stopped run for data that never arrived.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-comment"># Uses the tempfile import and the project(), invoke() and rows() helpers in main.py.</span>
+<span class="syntax-keyword">with</span> tempfile<span class="syntax-operator">.</span>TemporaryDirectory<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> d<span class="syntax-punctuation">:</span>
+    p <span class="syntax-operator">=</span> project<span class="syntax-punctuation">(</span>
+        d<span class="syntax-punctuation">,</span>
+        models<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span>
+            <span class="syntax-string">&quot;</span><span class="syntax-string">clean</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">(</span>
+                <span class="syntax-string">&quot;</span><span class="syntax-string">{{</span><span class="syntax-string"> config(materialized=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">table</span><span class="syntax-string">&#x27;</span><span class="syntax-string">) }} </span><span class="syntax-string">&quot;</span>
+                <span class="syntax-string">&quot;</span><span class="syntax-string">select id::integer as id, cast(amount as integer) as amount </span><span class="syntax-string">&quot;</span>
+                <span class="syntax-string">&quot;</span><span class="syntax-string">from </span><span class="syntax-string">{{</span><span class="syntax-string"> ref(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">raw_orders</span><span class="syntax-string">&#x27;</span><span class="syntax-string">) }}</span><span class="syntax-string">&quot;</span>
+            <span class="syntax-punctuation">)</span>
+        <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+        seeds<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">raw_orders</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">id,amount</span><span class="syntax-string">\n</span><span class="syntax-string">1,5</span><span class="syntax-string">\n</span><span class="syntax-string">2,bad</span><span class="syntax-string">\n</span><span class="syntax-string">3,9</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">)</span>
+    <span class="syntax-comment"># A view would build without reading rows; a table must convert every row.</span>
+    invoke<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">build</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> succeeds<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> Materialized as a table, the malformed fixture fails the build.</p>
 <h3 id="complete-reference">Complete reference<a class="heading-anchor" href="#complete-reference" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-string">&quot;&quot;&quot;dbt-002: actual local dbt and DuckDB reference.&quot;&quot;&quot;</span>
 
@@ -327,9 +355,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
             d<span class="syntax-punctuation">,</span>
             models<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span>
                 <span class="syntax-string">&quot;</span><span class="syntax-string">clean</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">(</span>
-                    <span class="syntax-string">&quot;</span><span class="syntax-string">select id::integer as id, try_cast(amount as integer) as </span><span class="syntax-string">&quot;</span>
-                    <span class="syntax-string">&quot;</span><span class="syntax-string">amount from </span><span class="syntax-string">{{</span><span class="syntax-string"> ref(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">raw_orders</span><span class="syntax-string">&#x27;</span><span class="syntax-string">) }} where try_cast(amount </span><span class="syntax-string">&quot;</span>
-                    <span class="syntax-string">&quot;</span><span class="syntax-string">as integer) is not null</span><span class="syntax-string">&quot;</span>
+                    <span class="syntax-string">&quot;</span><span class="syntax-string">select id::integer as id, try_cast(amount as integer) as amount</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span>
+                    <span class="syntax-string">&quot;</span><span class="syntax-string">from </span><span class="syntax-string">{{</span><span class="syntax-string"> ref(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">raw_orders</span><span class="syntax-string">&#x27;</span><span class="syntax-string">) }}</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span>
+                    <span class="syntax-string">&quot;</span><span class="syntax-string">where try_cast(amount as integer) is not null</span><span class="syntax-string">&quot;</span>
                 <span class="syntax-punctuation">)</span>
             <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
             seeds<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">raw_orders</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">id,amount</span><span class="syntax-string">\n</span><span class="syntax-string">1,5</span><span class="syntax-string">\n</span><span class="syntax-string">2,bad</span><span class="syntax-string">\n</span><span class="syntax-string">3,9</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
@@ -352,7 +380,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
     main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="interpretation">Interpretation<a class="heading-anchor" href="#interpretation" aria-label="Link to this section">#</a></h3>
-<p>Create a staging boundary with complete record accounting. State which invalid inputs block publication and which are quarantined, then test both paths using identified records. The same contract will later protect model features from silent data changes.</p></article>
+<p>State which invalid inputs block publication and which are quarantined, then test both paths using identified records. The same contract will later protect model features from silent data changes.</p></article>
   </main>
 </body>
 </html>

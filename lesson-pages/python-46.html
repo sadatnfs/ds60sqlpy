@@ -474,11 +474,8 @@ history<span class="syntax-punctuation">:</span> <span class="syntax-builtin">li
 <li>Keep experiments in new scratch cells. Do not edit the official solution while attempting the numbered practice.</li>
 <li>Restart the kernel and run from the first cell before calling the lesson complete. A clean run catches hidden state and stale variables.</li>
 </ol>
-<p>Windows PowerShell:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m jupyter lab</code></pre>
-<p>macOS/Linux:</p>
+<p>Linux, macOS, or Ubuntu in Windows WSL 2:</p>
 <pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
-<p>If the Windows environment uses the documented conda-prefix fallback, use <code>.\.venv\python.exe</code> in place of <code>.\.venv\Scripts\python.exe</code>.</p>
 <h4 id="guide--concept-deep-dive-tensors-computation-graphs-gradients-and-the-optimizer-cycle">Concept deep dive: tensors, computation graphs, gradients, and the optimizer cycle<a class="heading-anchor" href="#guide--concept-deep-dive-tensors-computation-graphs-gradients-and-the-optimizer-cycle" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
 <p>A neural network is a parameterized function composed from tensor operations. The <strong>forward pass</strong> produces predictions and a loss. Autograd records the computation graph and <code>backward()</code> applies the chain rule to accumulate gradients in parameter <code>.grad</code> fields. <code>optimizer.step()</code> then updates parameters according to those gradients.</p>
@@ -489,7 +486,6 @@ history<span class="syntax-punctuation">:</span> <span class="syntax-builtin">li
 <li><strong><code>loss.backward()</code>:</strong> computes derivatives through the recorded graph and adds them to existing <code>.grad</code> values.</li>
 <li><strong><code>optimizer.zero_grad(); ...; optimizer.step()</code>:</strong> clears old gradients, computes a new step, and updates registered parameters.</li>
 </ul>
-<p>Read an API call from the inside out: identify the data entering the operation, the state learned (if any), the value returned, and the evidence that would make the result trustworthy. A method returning without an exception proves only that the syntax and immediate runtime path worked.</p>
 <h5 id="guide--focused-example-a-differentiate-a-scalar-function-by-autograd">Focused example A: differentiate a scalar function by autograd<a class="heading-anchor" href="#guide--focused-example-a-differentiate-a-scalar-function-by-autograd" aria-label="Link to this section">#</a></h5>
 <p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> torch
@@ -502,7 +498,6 @@ y<span class="syntax-operator">.</span>backward<span class="syntax-punctuation">
 <p><strong>Expected observation:</strong> Autograd returns derivative 8.0, matching the hand-derived chain rule.</p>
 <p><strong>Assumption to name:</strong> <code>x</code> is a scalar leaf and only one backward pass has contributed to its gradient.</p>
 <h5 id="guide--focused-example-b-see-gradient-accumulation-explicitly">Focused example B: see gradient accumulation explicitly<a class="heading-anchor" href="#guide--focused-example-b-see-gradient-accumulation-explicitly" aria-label="Link to this section">#</a></h5>
-<p>This second example changes one important condition. Compare it with Example A instead of reading it as unrelated syntax.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> torch
 
 weight <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> requires_grad<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
@@ -556,15 +551,15 @@ cleared <span class="syntax-operator">=</span> weight<span class="syntax-operato
 <ol>
 <li>Plot the loss over epochs.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 1; tensors, computation graphs, gradients, and the optimizer cycle; save a labeled epoch-versus-loss curve and print the raw loss sequence; assert every plotted point is the sample-weighted epoch loss and report whether the final value improved over epoch 1.</p>
+<p><strong>Verify:</strong> Save a labeled epoch-versus-loss curve and print the raw loss sequence; assert every plotted point is the sample-weighted epoch loss and report whether the final value improved over epoch 1.</p>
 <ol start="2">
 <li>Replace SGD with Adam and compare convergence.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 2; tensors, computation graphs, gradients, and the optimizer cycle; from identical initial weights, batches, epochs, and seed, print SGD and Adam loss per epoch plus final validation loss; report convergence behavior without declaring a winner from unequal settings.</p>
+<p><strong>Verify:</strong> From identical initial weights, batches, epochs, and seed, print SGD and Adam loss per epoch plus final validation loss; report convergence behavior without declaring a winner from unequal settings.</p>
 <ol start="3">
 <li>Add one hidden layer and a ReLU activation.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 3; tensors, computation graphs, gradients, and the optimizer cycle; assert the network&#x27;s layer dimensions and output shape on a fixed batch, then compare parameter count and validation loss with the original model under the same seed/optimizer budget.</p>
+<p><strong>Verify:</strong> Assert the network&#x27;s layer dimensions and output shape on a fixed batch, then compare parameter count and validation loss with the original model under the same seed/optimizer budget.</p>
 <h5 id="guide--progressive-hints">Progressive hints<a class="heading-anchor" href="#guide--progressive-hints" aria-label="Link to this section">#</a></h5>
 <ol>
 <li>Append <code>loss.item()</code> once per epoch; use a logarithmic y-axis if early values obscure later improvement.</li>
@@ -637,7 +632,7 @@ cleared <span class="syntax-operator">=</span> weight<span class="syntax-operato
 </ul>
 <h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into the AI tutor while the repository root is open:</p>
-<pre class="highlighted-code"><code class="language-text">Tutor me through `python-46` : Day 46 : Deep Learning Overview.
+<pre class="highlighted-code"><code class="language-text">Tutor me through `python-46` (Day 46: Deep Learning Overview).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize tensors, computation graphs, gradients, and the optimizer cycle. Use exactly these maintained learner materials:
@@ -690,7 +685,7 @@ merely ran is not evidence of mastery.</code></pre></div>
         </header>
 
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-46-deep-learning-overview-pytorch-tensorflow">Day 46 : Deep Learning overview (PyTorch/TensorFlow)<a class="heading-anchor" href="#learner--cell-1--day-46-deep-learning-overview-pytorch-tensorflow" aria-label="Link to this section">#</a></h3>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-46-deep-learning-overview">Day 46: Deep Learning Overview<a class="heading-anchor" href="#learner--cell-1--day-46-deep-learning-overview" aria-label="Link to this section">#</a></h3>
 <p>Objectives:</p>
 <ul>
 <li>Understand tensors, computation graphs, autograd.</li>
@@ -705,7 +700,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <span class="source-line"></span>
 <span class="source-line">torch<span class="syntax-operator">.</span>manual_seed<span class="syntax-punctuation">(</span><span class="syntax-number">46</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line">torch<span class="syntax-operator">.</span>set_num_threads<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">torch<span class="syntax-operator">.</span>__version__</span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">torch</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> torch<span class="syntax-operator">.</span>__version__<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-comment"># Simple linear regression y = wx + b</span></span>
 <span class="source-line">X <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>linspace<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">200</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>unsqueeze<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line">true_w<span class="syntax-punctuation">,</span> true_b <span class="syntax-operator">=</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">0.5</span></span>
@@ -723,7 +718,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-3--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-3--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
 <p>Select the <code>Python (ds60sqlpy)</code> kernel, start at the first cell, and write each prediction before execution. Keep attempts in the provided scratch cell or new cells. Restart the kernel and run from the top before calling the work reproducible.</p>
-<h4 id="learner--cell-3--concept-lab-tensors-computation-graphs-gradients-and-the-optimizer-cycle">Concept lab : tensors, computation graphs, gradients, and the optimizer cycle<a class="heading-anchor" href="#learner--cell-3--concept-lab-tensors-computation-graphs-gradients-and-the-optimizer-cycle" aria-label="Link to this section">#</a></h4>
+<h4 id="learner--cell-3--concept-lab-tensors-computation-graphs-gradients-and-the-optimizer-cycle">Concept lab: tensors, computation graphs, gradients, and the optimizer cycle<a class="heading-anchor" href="#learner--cell-3--concept-lab-tensors-computation-graphs-gradients-and-the-optimizer-cycle" aria-label="Link to this section">#</a></h4>
 <h5 id="learner--cell-3--mental-model">Mental model<a class="heading-anchor" href="#learner--cell-3--mental-model" aria-label="Link to this section">#</a></h5>
 <p>A neural network is a parameterized function composed from tensor operations. The <strong>forward pass</strong> produces predictions and a loss. Autograd records the computation graph and <code>backward()</code> applies the chain rule to accumulate gradients in parameter <code>.grad</code> fields. <code>optimizer.step()</code> then updates parameters according to those gradients.</p>
 <p>Gradients accumulate by default, so a training step normally follows <code>zero_grad → forward → loss → backward → step</code>. Evaluation additionally switches training-specific module behavior off and disables gradient tracking. A falling training loss is evidence of optimization, not of generalization.</p>
@@ -734,7 +729,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <li><strong><code>optimizer.zero_grad(); ...; optimizer.step()</code>:</strong> clears old gradients, computes a new step, and updates registered parameters.</li>
 </ul>
 <p>For every call, identify input data, learned state, returned value, and a check that can fail. That habit prevents a successful cell from being mistaken for a correct analysis.</p></article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h5 id="learner--cell-4--focused-example-a-differentiate-a-scalar-function-by-autograd">Focused example A : differentiate a scalar function by autograd<a class="heading-anchor" href="#learner--cell-4--focused-example-a-differentiate-a-scalar-function-by-autograd" aria-label="Link to this section">#</a></h5>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h5 id="learner--cell-4--focused-example-a-differentiate-a-scalar-function-by-autograd">Focused example A: differentiate a scalar function by autograd<a class="heading-anchor" href="#learner--cell-4--focused-example-a-differentiate-a-scalar-function-by-autograd" aria-label="Link to this section">#</a></h5>
 <p><strong>Predict first:</strong> write down the expected shape, type, ordering, or direction of the result. Then run the next cell.</p>
 <p><strong>Assumption:</strong> <code>x</code> is a scalar leaf and only one backward pass has contributed to its gradient.</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> torch</span>
@@ -747,7 +742,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><p><strong>Expected observation:</strong> Autograd returns derivative 8.0, matching the hand-derived chain rule.</p>
 <p>Do not force exact equality for estimates based on samples. Record the seed, sample size, tolerance, and metric where they matter.</p></article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><h5 id="learner--cell-7--focused-example-b-see-gradient-accumulation-explicitly">Focused example B : see gradient accumulation explicitly<a class="heading-anchor" href="#learner--cell-7--focused-example-b-see-gradient-accumulation-explicitly" aria-label="Link to this section">#</a></h5>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><h5 id="learner--cell-7--focused-example-b-see-gradient-accumulation-explicitly">Focused example B: see gradient accumulation explicitly<a class="heading-anchor" href="#learner--cell-7--focused-example-b-see-gradient-accumulation-explicitly" aria-label="Link to this section">#</a></h5>
 <p>This example changes one important condition. Predict how and why the result should differ from Example A.</p>
 <p><strong>Assumption:</strong> Gradient accumulation is not intentionally being used to combine microbatches.</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> torch</span>
@@ -803,15 +798,15 @@ merely ran is not evidence of mastery.</code></pre></div>
 <ol>
 <li>Plot the loss over epochs.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 1 : tensors, computation graphs, gradients, and the optimizer cycle : save a labeled epoch-versus-loss curve and print the raw loss sequence; assert every plotted point is the sample-weighted epoch loss and report whether the final value improved over epoch 1.</p>
+<p><strong>Verify:</strong> Save a labeled epoch-versus-loss curve and print the raw loss sequence; assert every plotted point is the sample-weighted epoch loss and report whether the final value improved over epoch 1.</p>
 <ol start="2">
 <li>Replace SGD with Adam and compare convergence.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 2 : tensors, computation graphs, gradients, and the optimizer cycle : from identical initial weights, batches, epochs, and seed, print SGD and Adam loss per epoch plus final validation loss; report convergence behavior without declaring a winner from unequal settings.</p>
+<p><strong>Verify:</strong> From identical initial weights, batches, epochs, and seed, print SGD and Adam loss per epoch plus final validation loss; report convergence behavior without declaring a winner from unequal settings.</p>
 <ol start="3">
 <li>Add one hidden layer and a ReLU activation.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 3 : tensors, computation graphs, gradients, and the optimizer cycle : assert the network&#x27;s layer dimensions and output shape on a fixed batch, then compare parameter count and validation loss with the original model under the same seed/optimizer budget.</p>
+<p><strong>Verify:</strong> Assert the network&#x27;s layer dimensions and output shape on a fixed batch, then compare parameter count and validation loss with the original model under the same seed/optimizer budget.</p>
 <h5 id="learner--cell-10--progressive-hints">Progressive hints<a class="heading-anchor" href="#learner--cell-10--progressive-hints" aria-label="Link to this section">#</a></h5>
 <ol>
 <li>Append <code>loss.item()</code> once per epoch; use a logarithmic y-axis if early values obscure later improvement.</li>
@@ -825,15 +820,15 @@ merely ran is not evidence of mastery.</code></pre></div>
 <ol start="4">
 <li><strong>Autograd tracing:</strong> For one scalar regression batch, annotate every line from <code>zero_grad()</code> through <code>step()</code>: which tensors receive gradients, when are they accumulated, and when do parameters change? <strong>Progressive hint:</strong> Gradients accumulate in parameter <code>.grad</code> fields during backward; the optimizer reads them during step. zero_grad clears the previous batch.</li>
 </ol>
-<p><strong>Verify:</strong> Autograd tracing : print parameter value, gradient before/after zero_grad, gradient after backward, and parameter after step for one fixed batch; assert accumulation occurs across backward calls until zeroed and only step changes parameters.</p>
+<p><strong>Verify:</strong> Autograd tracing: print parameter value, gradient before/after zero_grad, gradient after backward, and parameter after step for one fixed batch; assert accumulation occurs across backward calls until zeroed and only step changes parameters.</p>
 <ol start="5">
 <li><strong>Mode debugging:</strong> Build a model with Dropout and BatchNorm, then compare repeated predictions in <code>train()</code> and <code>eval()</code> modes. Explain why <code>torch.no_grad()</code> is related but not interchangeable. <strong>Progressive hint:</strong> Mode changes module behavior; no_grad disables graph recording. Validation usually needs both <code>model.eval()</code> and <code>with torch.no_grad()</code>.</li>
 </ol>
-<p><strong>Verify:</strong> Mode debugging : for one fixed input, print repeated train-mode and eval-mode outputs plus BatchNorm running statistics; assert eval outputs are repeatable, no_grad removes graph tracking, and the caller restores the intended mode.</p>
+<p><strong>Verify:</strong> Mode debugging: for one fixed input, print repeated train-mode and eval-mode outputs plus BatchNorm running statistics; assert eval outputs are repeatable, no_grad removes graph tracking, and the caller restores the intended mode.</p>
 <ol start="6">
 <li><strong>Loss-aggregation edge case:</strong> Compare averaging per-batch losses with a sample-weighted epoch loss when the final batch is smaller. Implement the correct aggregation. <strong>Progressive hint:</strong> Multiply each mean batch loss by batch size, sum, then divide by the number of examples.</li>
 </ol>
-<p><strong>Verify:</strong> Loss-aggregation edge case : with unequal final-batch size, print each batch loss/count, naive mean, weighted epoch loss, and direct full-dataset loss; assert weighted and direct losses agree within 1e-7 while the naive mean differs.</p>
+<p><strong>Verify:</strong> Loss-aggregation edge case: with unequal final-batch size, print each batch loss/count, naive mean, weighted epoch loss, and direct full-dataset loss; assert weighted and direct losses agree within 1e-7 while the naive mean differs.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Expanded mastery lab scratch space</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
@@ -874,7 +869,7 @@ merely ran is not evidence of mastery.</code></pre></div>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-46-solutions-deep-learning-overview">Day 46: Solutions: Deep Learning Overview<a class="heading-anchor" href="#solution-1--day-46-solutions-deep-learning-overview" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-46-solutions-deep-learning-overview">Day 46 Solutions: Deep Learning Overview<a class="heading-anchor" href="#solution-1--day-46-solutions-deep-learning-overview" aria-label="Link to this section">#</a></h3>
 <p>In these solutions we implement a tiny MLP, compare optimizers, and deeply explain vanishing/exploding gradients and mitigations. Each code block is followed by a line‑by‑line walkthrough.</p>
 <p>Contents</p>
 <ul>
@@ -919,7 +914,7 @@ va_dl <span class="syntax-operator">=</span> DataLoader<span class="syntax-punct
 <li>Dataloaders: mini-batches for stochastic gradient descent</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 1; Tiny MLP and capacity exploration</p>
+<p>Worked reference for Exercise 1: Tiny MLP and capacity exploration</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">class</span> <span class="syntax-class">MLP</span><span class="syntax-punctuation">(</span>nn<span class="syntax-operator">.</span>Module<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">def</span> <span class="syntax-function">__init__</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> width<span class="syntax-operator">=</span><span class="syntax-number">32</span><span class="syntax-punctuation">,</span> depth<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
         <span class="syntax-builtin">super</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span><span class="syntax-function">__init__</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
@@ -992,7 +987,7 @@ plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(<
 <li>Plot: use log y-scale to see separation; takeaway is bias/variance tradeoff</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 2; SGD vs Adam convergence</p>
+<p>Worked reference for Exercise 2: SGD vs Adam convergence</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">fit_with_opt</span><span class="syntax-punctuation">(</span>model<span class="syntax-punctuation">,</span> opt_ctor<span class="syntax-punctuation">,</span> lr<span class="syntax-operator">=</span><span class="syntax-number">1e-2</span><span class="syntax-punctuation">,</span> epochs<span class="syntax-operator">=</span><span class="syntax-number">400</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     model <span class="syntax-operator">=</span> model<span class="syntax-operator">.</span>to<span class="syntax-punctuation">(</span>device<span class="syntax-punctuation">)</span>
     opt <span class="syntax-operator">=</span> opt_ctor<span class="syntax-punctuation">(</span>model<span class="syntax-operator">.</span>parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> lr<span class="syntax-operator">=</span>lr<span class="syntax-punctuation">)</span>
@@ -1032,7 +1027,7 @@ plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(<
 <li>Expectation: Adam’s curve typically descends more smoothly early on</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 3; Vanishing/exploding gradients and mitigation</p>
+<p>Worked reference for Exercise 3: Vanishing/exploding gradients and mitigation</p>
 <p>Concepts</p>
 <ul>
 <li>Vanishing: gradients shrink through depth (e.g., sigmoids/tanh saturate); early layers update slowly</li>
@@ -1107,17 +1102,17 @@ loss_fn <span class="syntax-operator">=</span> nn<span class="syntax-operator">.
 <p><strong>Prompt:</strong> Plot the loss over epochs.</p>
 <p><strong>How to reason about it:</strong> Store one scalar loss per epoch after aggregating by example, not an arbitrary last batch. Compare train and validation curves and label the optimizer, learning rate, seed, and capacity.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 1; tensors, computation graphs, gradients, and the optimizer cycle; save a labeled epoch-versus-loss curve and print the raw loss sequence; assert every plotted point is the sample-weighted epoch loss and report whether the final value improved over epoch 1.</p>
+<p><strong>Verify:</strong> Save a labeled epoch-versus-loss curve and print the raw loss sequence; assert every plotted point is the sample-weighted epoch loss and report whether the final value improved over epoch 1.</p>
 <h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Replace SGD with Adam and compare convergence.</p>
 <p><strong>How to reason about it:</strong> Recreate identically initialized models for optimizer comparisons. Adam and SGD often need different learning rates, so compare documented tuning budgets rather than forcing one shared setting.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 2; tensors, computation graphs, gradients, and the optimizer cycle; from identical initial weights, batches, epochs, and seed, print SGD and Adam loss per epoch plus final validation loss; report convergence behavior without declaring a winner from unequal settings.</p>
+<p><strong>Verify:</strong> From identical initial weights, batches, epochs, and seed, print SGD and Adam loss per epoch plus final validation loss; report convergence behavior without declaring a winner from unequal settings.</p>
 <h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Add one hidden layer and a ReLU activation.</p>
 <p><strong>How to reason about it:</strong> A hidden layer adds capacity only when dimensions and activation order are correct. Track <code>(batch, features)</code> through Linear-ReLU-Linear and compare validation evidence, not merely lower training loss.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 3; tensors, computation graphs, gradients, and the optimizer cycle; assert the network&#x27;s layer dimensions and output shape on a fixed batch, then compare parameter count and validation loss with the original model under the same seed/optimizer budget.</p>
+<p><strong>Verify:</strong> Assert the network&#x27;s layer dimensions and output shape on a fixed batch, then compare parameter count and validation loss with the original model under the same seed/optimizer budget.</p>
 <h5 id="solution-1--exercise-4-autograd-tracing">Exercise 4: Autograd tracing<a class="heading-anchor" href="#solution-1--exercise-4-autograd-tracing" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> For one scalar regression batch, annotate every line from <code>zero_grad()</code> through <code>step()</code>: which tensors receive gradients, when are they accumulated, and when do parameters change?</p>
 <p><strong>Reasoning before implementation:</strong> Gradients accumulate in parameter <code>.grad</code> fields during backward; the optimizer reads them during step. zero_grad clears the previous batch.</p>
@@ -1190,7 +1185,7 @@ epoch_loss <span class="syntax-operator">=</span> loss_sum <span class="syntax-o
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="solution-2--cell-1--day-46-solutions-deep-learning-overview">Day 46: Solutions: Deep Learning Overview<a class="heading-anchor" href="#solution-2--cell-1--day-46-solutions-deep-learning-overview" aria-label="Link to this section">#</a></h3>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="solution-2--cell-1--day-46-solutions-deep-learning-overview">Day 46 Solutions: Deep Learning Overview<a class="heading-anchor" href="#solution-2--cell-1--day-46-solutions-deep-learning-overview" aria-label="Link to this section">#</a></h3>
 <p>In these solutions we implement a tiny MLP, compare optimizers, and deeply explain vanishing/exploding gradients and mitigations. Each code block is followed by a line‑by‑line walkthrough.</p>
 <p>Contents</p>
 <ul>
@@ -1237,7 +1232,7 @@ epoch_loss <span class="syntax-operator">=</span> loss_sum <span class="syntax-o
 <li>Dataloaders: mini-batches for stochastic gradient descent</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 1; Tiny MLP and capacity exploration</p></article>
+<p>Worked reference for Exercise 1: Tiny MLP and capacity exploration</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">MLP</span><span class="syntax-punctuation">(</span>nn<span class="syntax-operator">.</span>Module<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">__init__</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> width<span class="syntax-operator">=</span><span class="syntax-number">32</span><span class="syntax-punctuation">,</span> depth<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">        <span class="syntax-builtin">super</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span><span class="syntax-function">__init__</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
@@ -1311,7 +1306,7 @@ epoch_loss <span class="syntax-operator">=</span> loss_sum <span class="syntax-o
 <li>Plot: use log y-scale to see separation; takeaway is bias/variance tradeoff</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 2; SGD vs Adam convergence</p></article>
+<p>Worked reference for Exercise 2: SGD vs Adam convergence</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">fit_with_opt</span><span class="syntax-punctuation">(</span>model<span class="syntax-punctuation">,</span> opt_ctor<span class="syntax-punctuation">,</span> lr<span class="syntax-operator">=</span><span class="syntax-number">1e-2</span><span class="syntax-punctuation">,</span> epochs<span class="syntax-operator">=</span><span class="syntax-number">400</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    model <span class="syntax-operator">=</span> model<span class="syntax-operator">.</span>to<span class="syntax-punctuation">(</span>device<span class="syntax-punctuation">)</span></span>
 <span class="source-line">    opt <span class="syntax-operator">=</span> opt_ctor<span class="syntax-punctuation">(</span>model<span class="syntax-operator">.</span>parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> lr<span class="syntax-operator">=</span>lr<span class="syntax-punctuation">)</span></span>
@@ -1352,7 +1347,7 @@ epoch_loss <span class="syntax-operator">=</span> loss_sum <span class="syntax-o
 <li>Expectation: Adam’s curve typically descends more smoothly early on</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 3; Vanishing/exploding gradients and mitigation</p>
+<p>Worked reference for Exercise 3: Vanishing/exploding gradients and mitigation</p>
 <p>Concepts</p>
 <ul>
 <li>Vanishing: gradients shrink through depth (e.g., sigmoids/tanh saturate); early layers update slowly</li>
@@ -1428,17 +1423,17 @@ epoch_loss <span class="syntax-operator">=</span> loss_sum <span class="syntax-o
 <p><strong>Prompt:</strong> Plot the loss over epochs.</p>
 <p><strong>How to reason about it:</strong> Store one scalar loss per epoch after aggregating by example, not an arbitrary last batch. Compare train and validation curves and label the optimizer, learning rate, seed, and capacity.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 1; tensors, computation graphs, gradients, and the optimizer cycle; save a labeled epoch-versus-loss curve and print the raw loss sequence; assert every plotted point is the sample-weighted epoch loss and report whether the final value improved over epoch 1.</p>
+<p><strong>Verify:</strong> Save a labeled epoch-versus-loss curve and print the raw loss sequence; assert every plotted point is the sample-weighted epoch loss and report whether the final value improved over epoch 1.</p>
 <h5 id="solution-2--cell-9--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-2--cell-9--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Replace SGD with Adam and compare convergence.</p>
 <p><strong>How to reason about it:</strong> Recreate identically initialized models for optimizer comparisons. Adam and SGD often need different learning rates, so compare documented tuning budgets rather than forcing one shared setting.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 2; tensors, computation graphs, gradients, and the optimizer cycle; from identical initial weights, batches, epochs, and seed, print SGD and Adam loss per epoch plus final validation loss; report convergence behavior without declaring a winner from unequal settings.</p>
+<p><strong>Verify:</strong> From identical initial weights, batches, epochs, and seed, print SGD and Adam loss per epoch plus final validation loss; report convergence behavior without declaring a winner from unequal settings.</p>
 <h5 id="solution-2--cell-9--exercise-3-original-lesson-practice">Exercise 3: Original lesson practice<a class="heading-anchor" href="#solution-2--cell-9--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Add one hidden layer and a ReLU activation.</p>
 <p><strong>How to reason about it:</strong> A hidden layer adds capacity only when dimensions and activation order are correct. Track <code>(batch, features)</code> through Linear-ReLU-Linear and compare validation evidence, not merely lower training loss.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 3; tensors, computation graphs, gradients, and the optimizer cycle; assert the network&#x27;s layer dimensions and output shape on a fixed batch, then compare parameter count and validation loss with the original model under the same seed/optimizer budget.</p>
+<p><strong>Verify:</strong> Assert the network&#x27;s layer dimensions and output shape on a fixed batch, then compare parameter count and validation loss with the original model under the same seed/optimizer budget.</p>
 <h5 id="solution-2--cell-9--exercise-4-autograd-tracing">Exercise 4: Autograd tracing<a class="heading-anchor" href="#solution-2--cell-9--exercise-4-autograd-tracing" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> For one scalar regression batch, annotate every line from <code>zero_grad()</code> through <code>step()</code>: which tensors receive gradients, when are they accumulated, and when do parameters change?</p>
 <p><strong>Reasoning before implementation:</strong> Gradients accumulate in parameter <code>.grad</code> fields during backward; the optimizer reads them during step. zero_grad clears the previous batch.</p>
@@ -1500,7 +1495,7 @@ epoch_loss <span class="syntax-operator">=</span> loss_sum <span class="syntax-o
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through `python-46` : Day 46 : Deep Learning Overview.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through `python-46` (Day 46: Deep Learning Overview).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize tensors, computation graphs, gradients, and the optimizer cycle. Use exactly these maintained learner materials:
@@ -1534,8 +1529,8 @@ merely ran is not evidence of mastery.</textarea>
       </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
-        <a class="nav-card" href="python-45.html"><small>Previous lesson</small><strong>python-45</strong><span>End to End Modeling Project</span></a>
-        <a class="nav-card next" href="python-47.html"><small>Next lesson</small><strong>python-47</strong><span>PyTorch Basics NN Training Loop</span></a>
+        <a class="nav-card" href="python-45.html"><small>Previous lesson</small><strong>python-45</strong><span>Project: End-to-End Modeling</span></a>
+        <a class="nav-card next" href="python-47.html"><small>Next lesson</small><strong>python-47</strong><span>PyTorch Tensors, Modules, and Training Loops</span></a>
       </nav>
     </div>
   </main>

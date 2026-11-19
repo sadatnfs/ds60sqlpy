@@ -200,30 +200,30 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 1: Freeze geometry and groups</span></span>
-<span class="source-line"><span class="syntax-comment"># Use training points[-2,-1,1,2], labels[0,0,1,1]; hold out[-3,3].</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: 4 train and2 test records with no shared IDs.</span></span>
+<span class="source-line"><span class="syntax-comment"># Use training points [-2, -1, 1, 2], labels [0, 0, 1, 1]; hold out [-3, 3].</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: 4 train and 2 test records with no shared IDs.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 2: Fit training preprocessing</span></span>
 <span class="source-line"><span class="syntax-comment"># Calculate training mean and standard deviation, then apply them to both sets.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: mean0; scale sqrt2.5; test transformed symmetrically.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: mean 0; scale \(\sqrt{2.5}\); test transformed symmetrically.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Train within a fixed budget</span></span>
-<span class="source-line"><span class="syntax-comment"># Initialize one weight0 and run40 full-batch SGD steps at rate.1 using binary logits</span></span>
+<span class="source-line"><span class="syntax-comment"># Initialize one weight 0 and run 40 full-batch SGD steps at rate 0.1 using binary logits</span></span>
 <span class="source-line"><span class="syntax-comment"># loss.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: 40 finite updates and positive final weight.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Account for every test row</span></span>
-<span class="source-line"><span class="syntax-comment"># Threshold final test logits at0 and compute all four confusion counts.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: TP1,TN1,FP0,FN0; total2.</span></span>
+<span class="source-line"><span class="syntax-comment"># Threshold final test logits at 0 and compute all four confusion counts.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: TP1, TN1, FP0, FN0; total 2.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Compare a baseline</span></span>
-<span class="source-line"><span class="syntax-comment"># Predict class0 for every held-out row and report its error count beside the model.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: baseline1 error; model0 on2 records.</span></span>
+<span class="source-line"><span class="syntax-comment"># Predict class 0 for every held-out row and report its error count beside the model.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: baseline 1 error; model 0 on 2 records.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Expose a subgroup failure</span></span>
 <span class="source-line"><span class="syntax-comment"># Assign test groups negative and positive; flip only the positive prediction and report</span></span>
 <span class="source-line"><span class="syntax-comment"># group errors.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: negative0/1; positive1/1.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: negative 0/1; positive 1/1.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Read the guide and implement the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>

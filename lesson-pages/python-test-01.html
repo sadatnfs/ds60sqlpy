@@ -384,11 +384,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
         <div class="artifact-content"><h3 id="guide--test-architecture-doubles-and-generative-testing">Test architecture, doubles, and generative testing<a class="heading-anchor" href="#guide--test-architecture-doubles-and-generative-testing" aria-label="Link to this section">#</a></h3>
 <p><strong>Stable ID:</strong> <code>python-test-01</code></p>
 <p><strong>Level:</strong> intermediate</p>
-<p><strong>Estimated time:</strong> 180–240 minutes</p>
+<p><strong>Estimated time:</strong> 180-240 minutes</p>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Catalog prerequisite:</strong> <code>python-10</code></li>
-<li>Python Days 1–10, especially functions, exceptions, files, and pytest</li>
+<li>Python Days 1-10, especially functions, exceptions, files, and pytest</li>
 <li>Bridge Day 5 is a useful database-specific follow-on, not a prerequisite</li>
 <li>The <code>professional</code> dependency group for Hypothesis</li>
 </ul>
@@ -429,7 +429,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 SessionService -&gt; AuditSink Protocol  -&gt; one narrow mock in the test</code></pre>
 <p>Both stores receive the same create/read/update/delete contract. Temporary-file tests prove JSON and replacement behavior that the fake cannot prove.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
-<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python and data science</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
 <p><strong>Optional contributor route:</strong> use the prepared environment in <a href="../reference-pages/CONTRIBUTING.md.html">CONTRIBUTING</a> on Linux, macOS or Windows through WSL 2. The commands below assume its packages are already installed. They are not prerequisites for opening this lesson in the Docker classroom. Local <code>.learning/</code> files and CLI progress belong to this checkout; they do not read or update the Docker classroom&#x27;s named learning volume.</p>
 <p>Work from the repository root. First run the answer-free learner module named in this guide&#x27;s original walkthrough. Read each TODO as a contract: record the input, returned value, raised exception, and side effect before implementing it. Then run the focused test command in <strong>Self-check</strong>. Keep exploratory changes in a copy or a new test; the checked-in solution remains a comparison artifact.</p>
 <p>Prepared POSIX/WSL contributor terminal:</p>
@@ -562,7 +562,7 @@ twice <span class="syntax-operator">=</span> normalize_tags<span class="syntax-p
 <p>Apply the same contract/fake pattern to Bridge Day 5. Continue to <code>python-lang-01</code> to make test seams precise with generics, Protocols, overloads, and runtime validation.</p>
 <h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into the AI tutor while the repository root is open:</p>
-<pre class="highlighted-code"><code class="language-text">Tutor me through `python-test-01` — Test architecture, doubles, and generative testing.
+<pre class="highlighted-code"><code class="language-text">Tutor me through `python-test-01`: Test architecture, doubles, and generative testing.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize test seams, fakes versus mocks, shared contracts, and generative properties. Use exactly these maintained learner materials:
@@ -1255,7 +1255,7 @@ clock<span class="syntax-operator">.</span>value <span class="syntax-operator">=
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through `python-test-01` — Test architecture, doubles, and generative testing.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through `python-test-01`: Test architecture, doubles, and generative testing.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize test seams, fakes versus mocks, shared contracts, and generative properties. Use exactly these maintained learner materials:
@@ -1289,7 +1289,7 @@ merely ran is not evidence of mastery.</textarea>
       </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
-        <a class="nav-card" href="python-data-01.html"><small>Previous lesson</small><strong>python-data-01</strong><span>Columnar Data, Arrow, and Embedded Analytical SQL</span></a>
+        <a class="nav-card" href="python-data-01.html"><small>Previous lesson</small><strong>python-data-01</strong><span>Columnar Data with Arrow, Parquet, and DuckDB</span></a>
         <a class="nav-card next" href="python-lang-01.html"><small>Next lesson</small><strong>python-lang-01</strong><span>Advanced Typing and the Python Data Model</span></a>
       </nav>
     </div>

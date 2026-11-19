@@ -197,32 +197,26 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Use the guide and synthetic case ledger. A prediction or copied fixture is not a live runtime observation.</p>
 <h3 id="exercise-1-identify-trust-inputs">Exercise 1: Identify trust inputs<a class="heading-anchor" href="#exercise-1-identify-trust-inputs" aria-label="Link to this section">#</a></h3>
 <p>List payload, signature, public key and expected content digest.</p>
-<p>Expected: Four distinct roles with an independently chosen trust key.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-2-check-content-integrity">Exercise 2: Check content integrity<a class="heading-anchor" href="#exercise-2-check-content-integrity" aria-label="Link to this section">#</a></h3>
 <p>Compare the original synthetic content hash with a changed byte sequence.</p>
-<p>Expected: Different content produces a different expected comparison result.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-3-verify-the-positive-signature">Exercise 3: Verify the positive signature<a class="heading-anchor" href="#exercise-3-verify-the-positive-signature" aria-label="Link to this section">#</a></h3>
 <p>Run the qualified CLI over attestation.json with the fixed key/signature.</p>
-<p>Expected: Exit0 plus successful verification output, with tool identity recorded.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-4-verify-the-tamper-negative">Exercise 4: Verify the tamper negative<a class="heading-anchor" href="#exercise-4-verify-the-tamper-negative" aria-label="Link to this section">#</a></h3>
 <p>Repeat against attestation-tampered.json without changing key or signature.</p>
-<p>Expected: Nonzero exit and verification failure.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-5-join-signature-subject-to-artifact">Exercise 5: Join signature subject to artifact<a class="heading-anchor" href="#exercise-5-join-signature-subject-to-artifact" aria-label="Link to this section">#</a></h3>
 <p>Explain why a valid signed statement about artifactA does not approve artifactB.</p>
-<p>Expected: The signed subject digest must match the actual artifact under the correct format contract.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-6-state-enforcement-and-offline-limits">Exercise 6: State enforcement and offline limits<a class="heading-anchor" href="#exercise-6-state-enforcement-and-offline-limits" aria-label="Link to this section">#</a></h3>
 <p>Compare this local signature check with OCI/Sigstore provenance and admission enforcement.</p>
-<p>Expected: Synthetic RSA fixture only; real image and cluster policy qualification remain separate.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p></article>
   </main>

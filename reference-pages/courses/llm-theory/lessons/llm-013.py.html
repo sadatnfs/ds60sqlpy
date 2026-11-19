@@ -199,31 +199,32 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">Copy to .learning before editing. Six independent attempts belong below.</span></span>
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 1: Construct next-token pairs</span></span>
-<span class="source-line"><span class="syntax-comment"># Shift IDs[2,5,7,3] into input and label arrays.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: inputs[2,5,7],labels[5,7,3].</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Shift a batch of two sequences</span></span>
+<span class="source-line"><span class="syntax-comment"># Shift IDs [[4, 1, 6, 2, 9], [3, 3, 8, 0, 5]] along the time axis into inputs and labels.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: inputs and labels both shape (2, 4); labels [[1, 6, 2, 9], [3, 8, 0, 5]].</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 2: Expose identity labels</span></span>
-<span class="source-line"><span class="syntax-comment"># Compare copied-input labels with the proper shifted targets.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: all three copied labels differ from the target fixture.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Predict a partly hidden label bug</span></span>
+<span class="source-line"><span class="syntax-comment"># For the second sequence, compare copied-input labels with the shifted targets and</span></span>
+<span class="source-line"><span class="syntax-comment"># predict how many positions agree.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: copied labels agree once (the repeated 3) and differ at the other 3 positions.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Detect exact duplicates</span></span>
 <span class="source-line"><span class="syntax-comment"># Hash texts alpha beta and an identical copy placed in another split.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: same SHA256 despite different filenames.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Detect family leakage</span></span>
-<span class="source-line"><span class="syntax-comment"># Assign documentsa andb to familyF across train and validation.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: family intersection containsF.</span></span>
+<span class="source-line"><span class="syntax-comment"># Assign documents a and b to family F across train and validation.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: family intersection contains F.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Freeze a vocabulary</span></span>
-<span class="source-line"><span class="syntax-comment"># Fit a vocabulary from training words alpha,beta and encode validation-only gamma without</span></span>
-<span class="source-line"><span class="syntax-comment"># adding it.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: vocabulary remains alpha,beta; gamma is unknown.</span></span>
+<span class="source-line"><span class="syntax-comment"># Fit a vocabulary from training words alpha, beta and encode validation-only gamma</span></span>
+<span class="source-line"><span class="syntax-comment"># without adding it.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: vocabulary remains alpha, beta; gamma is unknown.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Count active targets</span></span>
-<span class="source-line"><span class="syntax-comment"># Count targets across documents of lengths4 and2 without creating a transition between</span></span>
+<span class="source-line"><span class="syntax-comment"># Count targets across documents of lengths 4 and 2 without creating a transition between</span></span>
 <span class="source-line"><span class="syntax-comment"># documents.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: 3+1=4 targets, not5.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: 3+1=4 targets, not 5.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Read the guide and implement the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>

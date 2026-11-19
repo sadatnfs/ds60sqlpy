@@ -199,29 +199,32 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">Copy to .learning before editing. Six independent attempts belong below.</span></span>
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 1: Compute the full-precision reference</span></span>
-<span class="source-line"><span class="syntax-comment"># Multiply W[[.1,-.9],[1.7,-.2]] byx[1,-2].</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: output[1.9,2.1].</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Quantize a second matrix</span></span>
+<span class="source-line"><span class="syntax-comment"># Quantize W[[0.5, -1.2], [0.25, 2.0]] with one shared scale, the maximum absolute value</span></span>
+<span class="source-line"><span class="syntax-comment"># divided by 127, and nearest-even rounding.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: scale 2/127; integer array [[32, -76], [16, 127]].</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 2: Quantize one shared scale</span></span>
-<span class="source-line"><span class="syntax-comment"># Use maxabs1.7 divided by127,nearest-even rounding and signed int8.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: scale1.7/127;integer array[[7,-67],[127,-15]].</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Predict the reconstruction error</span></span>
+<span class="source-line"><span class="syntax-comment"># Dequantize the new integers and predict the largest absolute weight error and the bound</span></span>
+<span class="source-line"><span class="syntax-comment"># it must respect.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: largest error 0.5/127, about 0.0039, within the half-step bound 1/127.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Measure output error</span></span>
 <span class="source-line"><span class="syntax-comment"># Dequantize the shared-scale matrix and compare its output with the reference.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: finite maximum absolute output error below.02.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: finite maximum absolute output error below 0.02.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Use per-row scales</span></span>
 <span class="source-line"><span class="syntax-comment"># Quantize each row using its own maximum absolute value.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: row scales.9/127 and1.7/127;row0 integers[14,-127].</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: row scales 0.9/127 and 1.7/127; row 0 integers [14, -127].</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Account for storage metadata</span></span>
-<span class="source-line"><span class="syntax-comment"># Count4 int8 weights plusone float32 scale versus two float32 row scales.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: 8 bytes per-tensor;12 bytes per-row;excluding overhead.</span></span>
+<span class="source-line"><span class="syntax-comment"># Count 4 int8 weights plus one float32 scale versus two float32 row scales.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: 8 bytes per-tensor; 12 bytes per-row; excluding overhead.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Expose clipping and tie policy</span></span>
-<span class="source-line"><span class="syntax-comment"># Quantize values exceeding a scale1 range and inspect nearest-even rounding of.5,1.5,2.5.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: one saturation for128;ties round0,2,2.</span></span>
+<span class="source-line"><span class="syntax-comment"># Quantize values exceeding a scale 1 range and inspect nearest-even rounding of 0.5, 1.5,</span></span>
+<span class="source-line"><span class="syntax-comment"># 2.5.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: one saturation for 128; ties round 0, 2, 2.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Read the guide and implement the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>

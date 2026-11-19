@@ -196,7 +196,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="spark-004-immutable-collections-and-transformations">spark-004: Immutable collections and transformations<a class="heading-anchor" href="#spark-004-immutable-collections-and-transformations" aria-label="Link to this section">#</a></h2>
 <p>Authored tutorial and practice content. The prepared Scala/JVM worker executes a bounded program; process success and understanding remain distinct. No source file installs a tool or downloads a dependency.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
-<p>Beginner; approximately 105 minutes. Direct design prerequisites: <code>spark-003</code>. The lesson uses Scala 2.13 syntax and the prepared JDK 17 worker. The older design document proposed a different Spark/JDK tuple; use the current <a href="../execution-baseline.md.html">execution baseline</a> for this authored material.</p>
+<p>Beginner; approximately 75 minutes. Direct prerequisites: <code>spark-003</code>. The lesson uses Scala 2.13 syntax and the prepared JDK 17 worker. The <a href="../execution-baseline.md.html">execution baseline</a> lists the exact Scala, JDK and Spark versions.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
 <p>Open <code>spark-004</code> in the classroom, select the Scala source, prepare the <code>scala-jvm</code> profile and run the saved pad. The worker stages the single source as <code>Main.scala</code> and invokes <code>object Main</code>. Read the terminal output and exact assertions. The <a href="../lessons/spark-004.scala.html">learner source</a> runs two complete demonstrations; its six task functions remain explicit stubs until you implement them. Preserve your saved attempt. The <a href="../solutions/spark-004_solution.scala.html">reference program</a> and <a href="../solutions/spark-004_solutions.md.html">explained solutions</a> are separate and should be opened after an attempt or an explicit worked-comparison request. If the profile is unavailable, reading and saving remain available; opening this guide does not prepare a runtime.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
@@ -244,8 +244,8 @@ println<span class="syntax-punctuation">(</span><span class="syntax-string">s&qu
 <p>The first argument list supplies the starting accumulator; the second supplies the update function. Checked addition exposes overflow instead of allowing silent wraparound. The empty sequence still has a defined result because the initial value is part of the reduction contract.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-retain-observed-zero-and-repeated-values">Exercise 1: Retain observed zero and repeated values<a class="heading-anchor" href="#exercise-1-retain-observed-zero-and-repeated-values" aria-label="Link to this section">#</a></h4>
-<p>Implement a nonnegative filter for Seq(100L,-5L,0L,100L,25L). Preserve input order and duplicate values. An empty input should remain empty.</p>
-<p><strong>Expected result/shape:</strong> The result is Seq(100L,0L,100L,25L), with four occurrences. Both 100-cent entries and the zero remain.</p>
+<p>Implement a nonnegative filter for Seq(100L, -5L, 0L, 100L, 25L). Preserve input order and duplicate values. An empty input should remain empty.</p>
+<p><strong>Expected result/shape:</strong> The result is Seq(100L, 0L, 100L, 25L), with four occurrences. Both 100-cent entries and the zero remain.</p>
 <p><strong>Verify:</strong> Assert the exact sequence and confirm the original five-element sequence is unchanged; also assert accepted(Seq.empty) is empty.</p>
 <p><strong>Progressive hint:</strong> Compare the policy nonnegative with strictly positive before choosing the comparison operator.</p>
 <h4 id="exercise-2-keep-a-rejected-ledger">Exercise 2: Keep a rejected ledger<a class="heading-anchor" href="#exercise-2-keep-a-rejected-ledger" aria-label="Link to this section">#</a></h4>
@@ -255,17 +255,17 @@ println<span class="syntax-punctuation">(</span><span class="syntax-string">s&qu
 <p><strong>Progressive hint:</strong> partition computes complementary outputs from one predicate.</p>
 <h4 id="exercise-3-map-a-bounded-numeric-policy">Exercise 3: Map a bounded numeric policy<a class="heading-anchor" href="#exercise-3-map-a-bounded-numeric-policy" aria-label="Link to this section">#</a></h4>
 <p>For nonnegative Long amounts, return integer-cent five-percent fees rounded down. Reject a negative amount with IllegalArgumentException. Avoid multiplying by five before division, which could overflow on a very large Long.</p>
-<p><strong>Expected result/shape:</strong> Seq(100L,0L,100L,25L) maps to Seq(5L,0L,5L,1L). Long.MaxValue maps safely to Long.MaxValue/20L.</p>
+<p><strong>Expected result/shape:</strong> Seq(100L, 0L, 100L, 25L) maps to Seq(5L, 0L, 5L, 1L). Long.MaxValue maps safely to Long.MaxValue/20L.</p>
 <p><strong>Verify:</strong> Assert the exact four fees, the maximum-Long case and rejection of Seq(-1L).</p>
 <p><strong>Progressive hint:</strong> For nonnegative integer amounts, floor(amount*5/100) equals amount/20 without the intermediate multiplication.</p>
 <h4 id="exercise-4-fold-count-and-total-together">Exercise 4: Fold count and total together<a class="heading-anchor" href="#exercise-4-fold-count-and-total-together" aria-label="Link to this section">#</a></h4>
-<p>Return occurrence count and checked Long total for a supplied sequence. Use an explicit tuple accumulator and Math.addExact for the total. Empty input returns (0L,0L); an overflowing total raises ArithmeticException.</p>
-<p><strong>Expected result/shape:</strong> The accepted fixture returns (4L,225L), while Seq(Long.MaxValue,1L) is rejected by checked addition.</p>
+<p>Return occurrence count and checked Long total for a supplied sequence. Use an explicit tuple accumulator and Math.addExact for the total. Empty input returns (0L, 0L); an overflowing total raises ArithmeticException.</p>
+<p><strong>Expected result/shape:</strong> The accepted fixture returns (4L, 225L), while Seq(Long.MaxValue,1L) is rejected by checked addition.</p>
 <p><strong>Verify:</strong> Assert the two-component result, the empty identity and the overflow exception independently.</p>
 <p><strong>Progressive hint:</strong> A fold accumulator can be a tuple matched as(count, total) in each update.</p>
 <h4 id="exercise-5-represent-multiplicity-in-a-map">Exercise 5: Represent multiplicity in a Map<a class="heading-anchor" href="#exercise-5-represent-multiplicity-in-a-map" aria-label="Link to this section">#</a></h4>
 <p>Return a map from amount to occurrence count without discarding repeated values. Compare maps by keys and counts rather than assuming iteration order. Empty input returns an empty map.</p>
-<p><strong>Expected result/shape:</strong> The accepted fixture yields Map(100L-&gt;2L,0L-&gt;1L,25L-&gt;1L); the sum of counts is four.</p>
+<p><strong>Expected result/shape:</strong> The accepted fixture yields Map(100L-&gt;2L, 0L-&gt;1L, 25L-&gt;1L); the sum of counts is four.</p>
 <p><strong>Verify:</strong> Assert exact map equality and reconcile all map counts to the accepted sequence size.</p>
 <p><strong>Progressive hint:</strong> Fold an immutable Map and update one key with its previous count plus one.</p>
 <h4 id="exercise-6-transfer-the-bag-contract-to-grouped-reporting">Exercise 6: Transfer the bag contract to grouped reporting<a class="heading-anchor" href="#exercise-6-transfer-the-bag-contract-to-grouped-reporting" aria-label="Link to this section">#</a></h4>

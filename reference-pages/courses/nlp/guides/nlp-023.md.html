@@ -246,32 +246,32 @@ distance <span class="syntax-operator">=</span> <span class="syntax-number">0.5<
 <h4 id="exercise-1-filter-permission-and-freshness">Exercise 1: Filter permission and freshness<a class="heading-anchor" href="#exercise-1-filter-permission-and-freshness" aria-label="Link to this section">#</a></h4>
 <p>Apply the role/time rule to the three source records at time10.</p>
 <p><strong>Expected:</strong> Only policy version 2 for ops; unknown role and expired time30 yield no records.</p>
-<p><strong>Verify:</strong> Only policy version 2 for ops; unknown role and expired time30 yield no records. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Verify:</strong> Assert ops at time 10 receives only policy version 2, while an unknown role or time 30 receives no records.</p>
 <p><strong>Hints:</strong> Evaluate authorization and validity before constructing context.</p>
 <h4 id="exercise-2-fingerprint-content-reproducibly">Exercise 2: Fingerprint content reproducibly<a class="heading-anchor" href="#exercise-2-fingerprint-content-reproducibly" aria-label="Link to this section">#</a></h4>
 <p>Hash canonical records, reverse their input order and change one text field.</p>
 <p><strong>Expected:</strong> Reordering leaves hash unchanged; text change produces a different hash.</p>
-<p><strong>Verify:</strong> Reordering leaves hash unchanged; text change produces a different hash. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Verify:</strong> Assert reversing the record order leaves the hash unchanged and editing one text field changes it.</p>
 <p><strong>Hints:</strong> Sort records and keys before serialization.</p>
 <h4 id="exercise-3-measure-a-defined-drift">Exercise 3: Measure a defined drift<a class="heading-anchor" href="#exercise-3-measure-a-defined-drift" aria-label="Link to this section">#</a></h4>
 <p>Compute total variation for [50,50] and [80,20].</p>
 <p><strong>Expected:</strong> Distance.3; negative,nonfinite or zero-total count vectors are rejected.</p>
-<p><strong>Verify:</strong> Distance.3; negative,nonfinite or zero-total count vectors are rejected. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Verify:</strong> Assert the total variation distance is 0.3 and that negative, nonfinite and zero-total count vectors are rejected.</p>
 <p><strong>Hints:</strong> Normalize counts and take half the L1 difference.</p>
 <h4 id="exercise-4-respect-label-maturity">Exercise 4: Respect label maturity<a class="heading-anchor" href="#exercise-4-respect-label-maturity" aria-label="Link to this section">#</a></h4>
 <p>Evaluate predictions[1,1,0] with labels[1,None,0], then an all-unknown case.</p>
 <p><strong>Expected:</strong> Two mature cases with accuracy1; all-unknown returns count0 and no accuracy.</p>
-<p><strong>Verify:</strong> Two mature cases with accuracy1; all-unknown returns count0 and no accuracy. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Verify:</strong> Assert two mature cases with accuracy 1, and that the all-unknown batch reports count 0 and no accuracy.</p>
 <p><strong>Hints:</strong> Exclude unknown outcomes explicitly and report their count.</p>
 <h4 id="exercise-5-treat-external-text-as-data">Exercise 5: Treat external text as data<a class="heading-anchor" href="#exercise-5-treat-external-text-as-data" aria-label="Link to this section">#</a></h4>
 <p>Store the adversarial fixture in an evidence packet and apply the synthetic email redaction.</p>
 <p><strong>Expected:</strong> Text remains inert; only the declared email pattern is replaced; no broad anonymization claim.</p>
-<p><strong>Verify:</strong> Text remains inert; only the declared email pattern is replaced; no broad anonymization claim. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Verify:</strong> Assert the stored text is unchanged and inert, and that only the declared synthetic email pattern is replaced.</p>
 <p><strong>Hints:</strong> Do not evaluate source strings or turn them into tool instructions.</p>
 <h4 id="exercise-6-write-a-recovery-and-monitoring-contract">Exercise 6: Write a recovery and monitoring contract<a class="heading-anchor" href="#exercise-6-write-a-recovery-and-monitoring-contract" aria-label="Link to this section">#</a></h4>
 <p>Specify a stale-document incident with versions,diagnostics,rollback/reindex choice and acceptance evidence.</p>
 <p><strong>Expected:</strong> A concrete record distinguishes observed failure,hypothesis,authorized action and verified recovery.</p>
-<p><strong>Verify:</strong> A concrete record distinguishes observed failure,hypothesis,authorized action and verified recovery. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Verify:</strong> Check that the incident record separates the observed failure, hypothesis, authorized action and verified recovery, with versions and acceptance evidence.</p>
 <p><strong>Hints:</strong> Choose the repair for the failed component rather than automatically retraining.</p>
 <h3 id="interview-reasoning">Interview reasoning<a class="heading-anchor" href="#interview-reasoning" aria-label="Link to this section">#</a></h3>
 <p><strong>Interview: Does a changed input distribution imply model degradation?</strong> No. It is a signal to investigate. Performance requires outcomes or other task evidence, and label delays can make that evidence incomplete.</p>

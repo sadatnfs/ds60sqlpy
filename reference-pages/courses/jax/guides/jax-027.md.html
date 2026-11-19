@@ -206,8 +206,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="derivation-and-shape-contract">Derivation and shape contract<a class="heading-anchor" href="#derivation-and-shape-contract" aria-label="Link to this section">#</a></h3>
 <p>For an observation matrix <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>X</mi><mo>∈</mo><msup><mi mathvariant="double-struck">R</mi><mrow><mi>N</mi><mo>×</mo><mi>D</mi></mrow></msup></mrow><annotation encoding="application/x-tex">X\in\mathbb R^{N\times D}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7224em;vertical-align:-0.0391em;"></span><span class="mord mathnormal" style="margin-right:0.0785em;">X</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.8413em;"></span><span class="mord"><span class="mord mathbb">R</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8413em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.109em;">N</span><span class="mbin mtight">×</span><span class="mord mathnormal mtight" style="margin-right:0.0278em;">D</span></span></span></span></span></span></span></span></span></span></span></span>, a row-partition specification maps the N axis to the mesh&#x27;s data axis and leaves D unpartitioned. With one physical device, its only shard contains all N rows. A Gram calculation <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>X</mi><mi mathvariant="sans-serif">T</mi></msup><mi>X</mi></mrow><annotation encoding="application/x-tex">X^{\mathsf T}X</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8491em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0785em;">X</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8491em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathsf mtight">T</span></span></span></span></span></span></span></span></span><span class="mord mathnormal" style="margin-right:0.0785em;">X</span></span></span></span> returns a D-by-D matrix; a replicated output contract describes its placement, not a change to the matrix equation.</p>
 <h3 id="run-this-investigation">Run this investigation<a class="heading-anchor" href="#run-this-investigation" aria-label="Link to this section">#</a></h3>
-<p>Use the <strong>JAX</strong> subject in the shared <code>/classroom</code> interface and its prepared <code>jax-cpu</code> profile. A Run starts a fresh Python process; save source and notes before replacing an attempt. The examples below are each complete programs, including their setup. They use tiny offline fixtures and deliberately enable 64-bit arithmetic before constructing arrays. This is a course precision choice, not the usual JAX default. No packages, models or data are downloaded.</p>
-<p>Learner source: <code>courses/jax/lessons/jax-027.py</code>. Guide: <code>courses/jax/guides/jax-027.md</code>. Predict the value and failure behavior before running. A passing assertion supports that particular contract; it does not establish statistical validity, mastery or accelerator performance.</p>
+<p>Open <code>jax-027</code> under the <strong>JAX</strong> subject in <code>/classroom</code> with its prepared <code>jax-cpu</code> profile. Worked example 1, <em>Place and inspect a real array</em>, and worked example 2, <em>Specify output placement</em>, are complete programs that include only the setup they use and each print <code>jax-027: 1 asserted case passed</code>. The learner file <code>courses/jax/lessons/jax-027.py</code> leaves the six exercises, from <em>Inspect mesh identity</em> to <em>State the evidence limit</em>, for you to implement; the complete reference prints <code>jax-027: 8 asserted cases passed</code>. Every program enables 64-bit arithmetic before creating arrays, a course choice since JAX defaults to 32 bit, and every Run is a fresh Python process, so save source and notes before replacing an attempt. A passing assertion supports its stated contract only, not statistical validity, mastery or accelerator performance.</p>
 <h3 id="worked-investigations">Worked investigations<a class="heading-anchor" href="#worked-investigations" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-place-and-inspect-a-real-array">Worked example 1: Place and inspect a real array<a class="heading-anchor" href="#worked-example-1-place-and-inspect-a-real-array" aria-label="Link to this section">#</a></h4>
 <p>Put the host table into the declared row layout and inspect its addressable shard.</p>
@@ -217,10 +216,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 
 <span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
 
-<span class="syntax-keyword">import</span> math
 <span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 <span class="syntax-keyword">import</span> jax
-<span class="syntax-keyword">import</span> jax.numpy <span class="syntax-keyword">as</span> jnp
 
 <span class="syntax-keyword">from</span> jax.sharding <span class="syntax-keyword">import</span> Mesh<span class="syntax-punctuation">,</span> NamedSharding<span class="syntax-punctuation">,</span> PartitionSpec
 
@@ -234,7 +231,8 @@ jax<span class="syntax-operator">.</span>config<span class="syntax-operator">.</
 
 mesh <span class="syntax-operator">=</span> Mesh<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>jax<span class="syntax-operator">.</span>devices<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">cpu</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">data</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
 row_layout <span class="syntax-operator">=</span> NamedSharding<span class="syntax-punctuation">(</span>mesh<span class="syntax-punctuation">,</span> PartitionSpec<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">data</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
-replicated <span class="syntax-operator">=</span> NamedSharding<span class="syntax-punctuation">(</span>mesh<span class="syntax-punctuation">,</span> PartitionSpec<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+
+
 host <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">6.0</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
 
 
@@ -246,7 +244,7 @@ host <span class="syntax-operator">=</span> np<span class="syntax-operator">.</s
     <span class="syntax-keyword">assert</span> placed<span class="syntax-operator">.</span>addressable_shards<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>device<span class="syntax-operator">.</span>platform <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpu</span><span class="syntax-string">&quot;</span>
     close<span class="syntax-punctuation">(</span>placed<span class="syntax-operator">.</span>addressable_shards<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>data<span class="syntax-punctuation">,</span> host<span class="syntax-punctuation">)</span>
 
-    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">jax-027</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&quot;</span><span class="syntax-string">: 1 asserted cases passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">jax-027: 1 asserted case passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
@@ -259,10 +257,8 @@ host <span class="syntax-operator">=</span> np<span class="syntax-operator">.</s
 
 <span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
 
-<span class="syntax-keyword">import</span> math
 <span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 <span class="syntax-keyword">import</span> jax
-<span class="syntax-keyword">import</span> jax.numpy <span class="syntax-keyword">as</span> jnp
 
 <span class="syntax-keyword">from</span> jax.sharding <span class="syntax-keyword">import</span> Mesh<span class="syntax-punctuation">,</span> NamedSharding<span class="syntax-punctuation">,</span> PartitionSpec
 
@@ -288,7 +284,7 @@ host <span class="syntax-operator">=</span> np<span class="syntax-operator">.</s
     close<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">,</span> host<span class="syntax-operator">.</span>T <span class="syntax-operator">@</span> host<span class="syntax-punctuation">)</span>
     <span class="syntax-keyword">assert</span> result<span class="syntax-operator">.</span>sharding<span class="syntax-operator">.</span>is_equivalent_to<span class="syntax-punctuation">(</span>replicated<span class="syntax-punctuation">,</span> result<span class="syntax-operator">.</span>ndim<span class="syntax-punctuation">)</span>
 
-    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">jax-027</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&quot;</span><span class="syntax-string">: 1 asserted cases passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">jax-027: 1 asserted case passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
@@ -297,39 +293,39 @@ host <span class="syntax-operator">=</span> np<span class="syntax-operator">.</s
 <h4 id="exercise-1-inspect-mesh-identity">Exercise 1: Inspect mesh identity<a class="heading-anchor" href="#exercise-1-inspect-mesh-identity" aria-label="Link to this section">#</a></h4>
 <p>Check the named mesh size and its actual devices.</p>
 <p><strong>Expected:</strong> One data-axis device, CPU platform.</p>
-<p><strong>Verify:</strong> Retain the relevant inputs, intermediate calculation and observation. A mesh name does not imply more than the explicitly supplied device inventory.</p>
+<p><strong>Verify:</strong> A mesh name does not imply more than the explicitly supplied device inventory.</p>
 <p><strong>Hint 1:</strong> Read the concrete device count.</p>
-<p><strong>Hint 2:</strong> Revisit the worked case that changes the same assumption, then close the reference and reconstruct the result from the stated contract.</p>
+<p><strong>Hint 2:</strong> The reference solution needs no new function: it combines arrays from the setup with arithmetic, indexing or broadcasting and then makes 2 assertions against the expected observation.</p>
 <h4 id="exercise-2-round-trip-values">Exercise 2: Round-trip values<a class="heading-anchor" href="#exercise-2-round-trip-values" aria-label="Link to this section">#</a></h4>
 <p>Place the table and convert it back to a host array.</p>
 <p><strong>Expected:</strong> Equal host values for this fully addressable fixture.</p>
-<p><strong>Verify:</strong> Retain the relevant inputs, intermediate calculation and observation. This operation is valid because the one-device array is addressable in the current process.</p>
+<p><strong>Verify:</strong> This operation is valid because the one-device array is addressable in the current process.</p>
 <p><strong>Hint 1:</strong> Do not generalize full addressability to every multi-host array.</p>
-<p><strong>Hint 2:</strong> Revisit the worked case that changes the same assumption, then close the reference and reconstruct the result from the stated contract.</p>
+<p><strong>Hint 2:</strong> The reference solution calls <code>jax.device_put</code> and then makes 2 assertions against the expected observation.</p>
 <h4 id="exercise-3-inspect-the-specification">Exercise 3: Inspect the specification<a class="heading-anchor" href="#exercise-3-inspect-the-specification" aria-label="Link to this section">#</a></h4>
 <p>Compare the row-layout specification with an empty replicated specification.</p>
 <p><strong>Expected:</strong> The row spec names data on axis zero; replicated spec has no partition axes.</p>
-<p><strong>Verify:</strong> Retain the relevant inputs, intermediate calculation and observation. Their intended layout meanings differ even though one device makes their concrete storage coincide.</p>
+<p><strong>Verify:</strong> Their intended layout meanings differ even though one device makes their concrete storage coincide.</p>
 <p><strong>Hint 1:</strong> Metadata describes a distribution contract, not just today&#x27;s values.</p>
-<p><strong>Hint 2:</strong> Revisit the worked case that changes the same assumption, then close the reference and reconstruct the result from the stated contract.</p>
+<p><strong>Hint 2:</strong> The reference solution calls <code>PartitionSpec</code> and then makes 2 assertions against the expected observation.</p>
 <h4 id="exercise-4-differentiate-a-placed-calculation">Exercise 4: Differentiate a placed calculation<a class="heading-anchor" href="#exercise-4-differentiate-a-placed-calculation" aria-label="Link to this section">#</a></h4>
 <p>Differentiate the sum of squares for the placed input.</p>
 <p><strong>Expected:</strong> Twice the original table.</p>
-<p><strong>Verify:</strong> Retain the relevant inputs, intermediate calculation and observation. A supported one-device placement must preserve the ordinary derivative contract.</p>
+<p><strong>Verify:</strong> A supported one-device placement must preserve the ordinary derivative contract.</p>
 <p><strong>Hint 1:</strong> Keep the independent derivative oracle.</p>
-<p><strong>Hint 2:</strong> Revisit the worked case that changes the same assumption, then close the reference and reconstruct the result from the stated contract.</p>
+<p><strong>Hint 2:</strong> The reference solution calls <code>jax.device_put</code>, <code>jax.grad</code> and <code>jnp.sum</code> and then makes 1 assertion against the expected observation.</p>
 <h4 id="exercise-5-change-the-row-count">Exercise 5: Change the row count<a class="heading-anchor" href="#exercise-5-change-the-row-count" aria-label="Link to this section">#</a></h4>
 <p>Place a 5-by-2 table under the same named row layout.</p>
 <p><strong>Expected:</strong> Global shape (5,2), one local shard with all rows.</p>
-<p><strong>Verify:</strong> Retain the relevant inputs, intermediate calculation and observation. The specification describes axis meaning rather than hard-coding the original number of observations.</p>
+<p><strong>Verify:</strong> The specification describes axis meaning rather than hard-coding the original number of observations.</p>
 <p><strong>Hint 1:</strong> The single-device partition contains every row.</p>
-<p><strong>Hint 2:</strong> Revisit the worked case that changes the same assumption, then close the reference and reconstruct the result from the stated contract.</p>
+<p><strong>Hint 2:</strong> The reference solution calls <code>.reshape</code>, <code>np.arange</code> and <code>jax.device_put</code> and then makes 2 assertions against the expected observation.</p>
 <h4 id="exercise-6-state-the-evidence-limit">Exercise 6: State the evidence limit<a class="heading-anchor" href="#exercise-6-state-the-evidence-limit" aria-label="Link to this section">#</a></h4>
 <p>Inspect how many physical devices actually hold the result.</p>
 <p><strong>Expected:</strong> Exactly one; no multi-device scaling claim.</p>
-<p><strong>Verify:</strong> Retain the relevant inputs, intermediate calculation and observation. Logical annotations and backend support do not establish unobserved hardware execution.</p>
+<p><strong>Verify:</strong> Logical annotations and backend support do not establish unobserved hardware execution.</p>
 <p><strong>Hint 1:</strong> Count actual devices rather than course topic names.</p>
-<p><strong>Hint 2:</strong> Revisit the worked case that changes the same assumption, then close the reference and reconstruct the result from the stated contract.</p>
+<p><strong>Hint 2:</strong> The reference solution calls <code>jax.device_put</code> and <code>.devices</code> and then makes 1 assertion against the expected observation.</p>
 <h3 id="diagnosis-and-boundaries">Diagnosis and boundaries<a class="heading-anchor" href="#diagnosis-and-boundaries" aria-label="Link to this section">#</a></h3>
 <p>If a placed computation differs, inspect layout, global shape, local shard indexing and numerical logic independently. Do not infer communication cost or replica count from a one-device result. Multi-host addressability needs its own actual fixture.</p>
 <h3 id="transfer-and-review">Transfer and review<a class="heading-anchor" href="#transfer-and-review" aria-label="Link to this section">#</a></h3>
@@ -340,7 +336,7 @@ host <span class="syntax-operator">=</span> np<span class="syntax-operator">.</s
 <li><a href="https://docs.jax.dev/en/latest/jax.sharding.html">Sharding API</a></li>
 </ul>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Use the checked-in $guide-ds60sqlpy-learning skill for <code>jax-027</code>. Start with my own prediction and source. Ask me to explain one intermediate shape, derivative or state transition, then give a progressive hint for the first incorrect assumption. Distinguish authored examples, my actual receipt and any hardware or population claim requiring additional evidence.</p></article>
+<p>Use the checked-in $guide-ds60sqlpy-learning skill for <code>jax-027</code> (Array placement and sharding contracts on one CPU), focusing on Mesh, NamedSharding, PartitionSpec, addressable shard. Start with my own prediction and source for one exercise, such as <em>Inspect the specification</em>. Ask me to explain one intermediate shape, derivative or state transition, then give a progressive hint for the first incorrect assumption. Distinguish authored examples, my actual saved run output and any hardware or population claim requiring additional evidence.</p></article>
   </main>
 </body>
 </html>

@@ -194,37 +194,51 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/rust/solutions/rust-034_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="rust-034-explanation-and-comparison">rust-034: explanation and comparison<a class="heading-anchor" href="#rust-034-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="rust-034_solution.rs.html">rust-034_solution.rs</a>. Its assertions are always active under the prepared classroom compile settings.</p>
+<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="rust-034_solution.rs.html">rust-034_solution.rs</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Reconstruct a bounded borrowed view:</strong> The safety proof is tied to the pointer origin and exact length, not merely to the pointer being non-null. The reconstructed view matches the live initialized array.</p>
 <p><strong>Prefer the safe operation when available:</strong> Unsafe should be justified by a real boundary, not used because pointer syntax appears advanced. A normal slice provides the same read contract without a manual safety burden.</p>
-<h3 id="reason-through-the-six-tasks">Reason through the six tasks<a class="heading-anchor" href="#reason-through-the-six-tasks" aria-label="Link to this section">#</a></h3>
-<ol>
-<li><strong>Predict and explain.</strong> State every precondition needed by from_raw_parts.</li>
-</ol>
-<ol start="2">
-<li><strong>Guided modification.</strong> Reduce the borrowed length while retaining valid initialized storage.</li>
-</ol>
-<ol start="3">
-<li><strong>Independent construction.</strong> Write a safe wrapper specification before considering an unsafe implementation.</li>
-</ol>
-<ol start="4">
-<li><strong>Diagnose a defect.</strong> Diagnose returning a pointer after its owner is dropped.</li>
-</ol>
-<ol start="5">
-<li><strong>Boundary evidence.</strong> Review zero-length and alignment rules without executing undefined behavior.</li>
-</ol>
-<ol start="6">
-<li><strong>Transfer and justify.</strong> Design an FFI ownership document stating allocation, release, encoding and error conventions.</li>
-</ol>
-<p>For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.</p>
+<h3 id="task-answers">Task answers<a class="heading-anchor" href="#task-answers" aria-label="Link to this section">#</a></h3>
+<h4 id="task-1-predict-and-explain">Task 1: Predict and explain<a class="heading-anchor" href="#task-1-predict-and-explain" aria-label="Link to this section">#</a></h4>
+<p>State every precondition needed by from_raw_parts.</p>
+<p>No separate reference answer has been written for this task. Example A is the evidence to compare with: The safety proof is tied to the pointer origin and exact length, not merely to the pointer being non-null. The reconstructed view matches the live initialized array.</p>
+<h4 id="task-2-guided-modification">Task 2: Guided modification<a class="heading-anchor" href="#task-2-guided-modification" aria-label="Link to this section">#</a></h4>
+<p>Reduce the borrowed length while retaining valid initialized storage.</p>
+<p>No separate reference answer has been written for this task. Start from Example B: Unsafe should be justified by a real boundary, not used because pointer syntax appears advanced. A normal slice provides the same read contract without a manual safety burden.</p>
+<h4 id="task-3-independent-construction">Task 3: Independent construction<a class="heading-anchor" href="#task-3-independent-construction" aria-label="Link to this section">#</a></h4>
+<p>Write a safe wrapper specification before considering an unsafe implementation.</p>
+<p><strong>Reference answer.</strong> The same statements run as the <code>Task 3</code> block of the reference program; here they are wrapped in <code>main</code> as a complete file.</p>
+<pre class="highlighted-code"><code class="language-rust"><span class="syntax-keyword">fn</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">-&gt;</span> <span class="syntax-builtin">Result</span><span class="syntax-operator">&lt;</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">Box</span><span class="syntax-operator">&lt;</span><span class="syntax-keyword">dyn</span> std<span class="syntax-punctuation">::</span>error<span class="syntax-punctuation">::</span>Error<span class="syntax-operator">&gt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-string">/// Returns the first two values, or None when fewer than two exist.</span>
+    <span class="syntax-string">/// Never reads past the end of the slice and never panics.</span>
+    <span class="syntax-keyword">fn</span> <span class="syntax-function">first_two</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> <span class="syntax-keyword">&amp;</span><span class="syntax-punctuation">[</span><span class="syntax-keyword">i32</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">-&gt;</span> <span class="syntax-builtin">Option</span><span class="syntax-operator">&lt;</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">i32</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">i32</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&gt;</span> <span class="syntax-punctuation">{</span>
+        <span class="syntax-keyword">match</span> values <span class="syntax-punctuation">{</span>
+            <span class="syntax-punctuation">[</span>first<span class="syntax-punctuation">,</span> second<span class="syntax-punctuation">,</span> <span class="syntax-operator">..</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">Some</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span>first<span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span>second<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+            _ <span class="syntax-operator">=</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">None</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-punctuation">}</span>
+    <span class="syntax-punctuation">}</span>
+    <span class="syntax-function">assert_eq!</span><span class="syntax-punctuation">(</span>first_two<span class="syntax-punctuation">(</span><span class="syntax-operator">&amp;</span><span class="syntax-punctuation">[</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">Some</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-function">assert_eq!</span><span class="syntax-punctuation">(</span>first_two<span class="syntax-punctuation">(</span><span class="syntax-operator">&amp;</span><span class="syntax-punctuation">[</span><span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">None</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-builtin">Ok</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<p><strong>Observe:</strong> first_two returns Some((4, 5)) for three values and None for one.</p>
+<p>The specification fixes the input, the output and the no-panic guarantee before any implementation. A safe slice pattern already meets it; an unsafe body such as get_unchecked would be considered only if measurement showed a need, with a SAFETY comment proving each index is below the checked length.</p>
+<h4 id="task-4-diagnose-a-defect">Task 4: Diagnose a defect<a class="heading-anchor" href="#task-4-diagnose-a-defect" aria-label="Link to this section">#</a></h4>
+<p>Diagnose returning a pointer after its owner is dropped.</p>
+<p>No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson&#x27;s pitfalls: Never test undefined behavior by hoping it crashes predictably. A null check is insufficient to prove pointer validity. Panics crossing an incompatible FFI boundary need a deliberate policy.</p>
+<h4 id="task-5-boundary-evidence">Task 5: Boundary evidence<a class="heading-anchor" href="#task-5-boundary-evidence" aria-label="Link to this section">#</a></h4>
+<p>Review zero-length and alignment rules without executing undefined behavior.</p>
+<p>No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Reconstruct a bounded borrowed view) and Example B (Prefer the safe operation when available).</p>
+<h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
+<p>Design an FFI ownership document stating allocation, release, encoding and error conventions.</p>
+<p>No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry <strong>Unsafe operation</strong>, and state one limitation of your choice.</p>
 <h3 id="mechanism-and-diagnostic-reasoning">Mechanism and diagnostic reasoning<a class="heading-anchor" href="#mechanism-and-diagnostic-reasoning" aria-label="Link to this section">#</a></h3>
 <p>Unsafe permits a small set of operations whose correctness the compiler cannot fully establish. It does not disable every safety rule or turn wrong memory access into valid behavior. Each unsafe block needs an argument covering pointer validity, alignment, initialized length, aliasing and lifetime. Keep the block small and wrap it in a safe interface that enforces those conditions.</p>
 <p>Foreign-function interfaces add an ABI contract: layout, calling convention, string encoding, ownership and failure signaling must agree across languages. A successful link does not prove those agreements. The ordinary fixture uses a pointer obtained from a live array and immediately reconstructs a read-only slice under a documented invariant, without calling undeclared native libraries.</p>
 <p><code>as_ptr</code> borrows an address from live storage. <code>slice::from_raw_parts</code> is unsafe because the caller supplies validity and length. A SAFETY comment explains why this exact operation satisfies its preconditions.</p>
 <p>Never test undefined behavior by hoping it crashes predictably. A null check is insufficient to prove pointer validity. Panics crossing an incompatible FFI boundary need a deliberate policy.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.</p></article>
+<p>Run the reference and confirm that it prints <code>rust-034: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
   </main>
 </body>
 </html>

@@ -194,37 +194,36 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/rust/solutions/rust-033_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="rust-033-explanation-and-comparison">rust-033: explanation and comparison<a class="heading-anchor" href="#rust-033-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="rust-033_solution.rs.html">rust-033_solution.rs</a>. Its assertions are always active under the prepared classroom compile settings.</p>
+<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="rust-033_solution.rs.html">rust-033_solution.rs</a>. It runs both worked examples, and its assertions are always active under the prepared classroom compile settings.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Poll a ready computation:</strong> A no-op waker is sufficient only because this fixture cannot require a later external wakeup. The immediately ready future yields seven on its first poll.</p>
 <p><strong>Observe pending without spinning:</strong> The program stops after one inspection rather than wasting CPU pretending a tight loop is a runtime. The pending future reports no completed value.</p>
-<h3 id="reason-through-the-six-tasks">Reason through the six tasks<a class="heading-anchor" href="#reason-through-the-six-tasks" aria-label="Link to this section">#</a></h3>
-<ol>
-<li><strong>Predict and explain.</strong> Separate future creation, polling and completion.</li>
-</ol>
-<ol start="2">
-<li><strong>Guided modification.</strong> Compose two immediately ready async values and poll the combined fixture.</li>
-</ol>
-<ol start="3">
-<li><strong>Independent construction.</strong> Explain the ownership responsibilities of an executor in a written event trace.</li>
-</ol>
-<ol start="4">
-<li><strong>Diagnose a defect.</strong> Diagnose creating a future and expecting it to run without a consumer.</li>
-</ol>
-<ol start="5">
-<li><strong>Boundary evidence.</strong> Contrast Ready, Pending and dropping an uncompleted future.</li>
-</ol>
-<ol start="6">
-<li><strong>Transfer and justify.</strong> Plan a separately prepared Tokio service, naming runtime, cancellation, I/O and dependency requirements.</li>
-</ol>
-<p>For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.</p>
+<h3 id="task-answers">Task answers<a class="heading-anchor" href="#task-answers" aria-label="Link to this section">#</a></h3>
+<h4 id="task-1-predict-and-explain">Task 1: Predict and explain<a class="heading-anchor" href="#task-1-predict-and-explain" aria-label="Link to this section">#</a></h4>
+<p>Separate future creation, polling and completion.</p>
+<p>No separate reference answer has been written for this task. Example A is the evidence to compare with: A no-op waker is sufficient only because this fixture cannot require a later external wakeup. The immediately ready future yields seven on its first poll.</p>
+<h4 id="task-2-guided-modification">Task 2: Guided modification<a class="heading-anchor" href="#task-2-guided-modification" aria-label="Link to this section">#</a></h4>
+<p>Compose two immediately ready async values and poll the combined fixture.</p>
+<p>No separate reference answer has been written for this task. Start from Example B: The program stops after one inspection rather than wasting CPU pretending a tight loop is a runtime. The pending future reports no completed value.</p>
+<h4 id="task-3-independent-construction">Task 3: Independent construction<a class="heading-anchor" href="#task-3-independent-construction" aria-label="Link to this section">#</a></h4>
+<p>Explain the ownership responsibilities of an executor in a written event trace.</p>
+<p><strong>Written answer.</strong> One possible trace: (1) the caller creates the future and hands it to the executor, which now owns it and keeps it pinned; (2) the executor polls it with a Context whose Waker it supplies; (3) the future registers that waker with the resource it waits on and returns Pending; (4) the resource calls wake, which only schedules the task again; (5) the executor polls once more, the future returns Ready(value), and the executor drops the future and delivers the value to whoever awaits the task. The executor does none of the future&#x27;s work itself: it owns the future, polls it only when woken, and must drop it on completion or cancellation.</p>
+<h4 id="task-4-diagnose-a-defect">Task 4: Diagnose a defect<a class="heading-anchor" href="#task-4-diagnose-a-defect" aria-label="Link to this section">#</a></h4>
+<p>Diagnose creating a future and expecting it to run without a consumer.</p>
+<p>No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson&#x27;s pitfalls: Async is not automatically parallel. A no-op waker cannot drive real asynchronous I/O. Dropping a future does not necessarily reverse effects already performed by external systems.</p>
+<h4 id="task-5-boundary-evidence">Task 5: Boundary evidence<a class="heading-anchor" href="#task-5-boundary-evidence" aria-label="Link to this section">#</a></h4>
+<p>Contrast Ready, Pending and dropping an uncompleted future.</p>
+<p>No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Poll a ready computation) and Example B (Observe pending without spinning).</p>
+<h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
+<p>Plan a separately prepared Tokio service, naming runtime, cancellation, I/O and dependency requirements.</p>
+<p>No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry <strong>Future</strong>, and state one limitation of your choice.</p>
 <h3 id="mechanism-and-diagnostic-reasoning">Mechanism and diagnostic reasoning<a class="heading-anchor" href="#mechanism-and-diagnostic-reasoning" aria-label="Link to this section">#</a></h3>
 <p>A Future represents a computation that can make progress when polled. It may return Ready with a result or Pending and arrange a wakeup when progress becomes possible. Creating an async block does not automatically execute it or create a thread. An executor owns polling and scheduling.</p>
 <p>Rust&#x27;s standard library defines Future and task primitives but does not provide a general production async runtime. Tokio and similar ecosystems are separate prepared dependencies, not installed by this pad. This chapter polls immediately ready futures once to reveal the mechanism. It deliberately does not present a busy polling loop as a correct executor for arbitrary I/O.</p>
 <p>An async block produces a Future. Pin protects address-sensitive future state from invalid movement while polled. Context carries a Waker. Poll::Ready and Poll::Pending are distinct completion states.</p>
 <p>Async is not automatically parallel. A no-op waker cannot drive real asynchronous I/O. Dropping a future does not necessarily reverse effects already performed by external systems.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.</p></article>
+<p>Run the reference and confirm that it prints <code>rust-033: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
   </main>
 </body>
 </html>

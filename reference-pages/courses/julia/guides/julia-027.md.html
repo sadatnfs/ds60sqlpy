@@ -198,7 +198,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Advanced; approximately 150 minutes. Direct prerequisites: <code>julia-009</code>, <code>julia-011</code>.</p>
 <p>Separate namespaces from source files, execute a tiny owned multi-file project offline, and distinguish locked dependencies from code loading.</p>
 <h3 id="classroom-execution">Classroom execution<a class="heading-anchor" href="#classroom-execution" aria-label="Link to this section">#</a></h3>
-<p>Choose <strong>Julia language and scientific computing</strong> in <code>/classroom</code>, open this unit, and select its prepared <code>julia</code> runtime. The worker starts a fresh <code>main.jl</code> process with two Julia threads, a fixed package environment, no startup file and offline package settings. Both worked examples are complete under that environment. Save your current pad before replacing it. No package, model or dataset is fetched by a lesson.</p>
+<p>Open <code>julia-027</code> in <code>/classroom</code> with its prepared <code>julia</code> runtime. Worked case A (a small reusable namespace) and worked case B (exercise a real multi-file layout) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing <code>julia-027: all reference checks passed</code>. The <a href="../README.md.html">course overview</a> describes the shared runtime: a fresh offline <code>main.jl</code> process with two threads and a fixed package environment.</p>
 <h3 id="a-namespace-and-a-file-are-different-things">A namespace and a file are different things<a class="heading-anchor" href="#a-namespace-and-a-file-are-different-things" aria-label="Link to this section">#</a></h3>
 <p>A <code>module</code> creates a namespace with its own bindings. <code>export</code> declares names that a caller can bring into scope with <code>using</code>; it does not make other names private or inaccessible. Qualified access such as <code>LocalStats.center</code> makes ownership visible. <code>import</code> is useful when deliberately extending another module&#x27;s function, while defining your own function with the same short name can instead create a different generic function.</p>
 <p>A source file is just stored program text. <code>include(path)</code> evaluates that text in the target module and returns the final expression&#x27;s value. It can run arbitrary top-level code, so include only reviewed owned sources. Repeated inclusion can redefine methods or types. Source loading is not a security sandbox, dependency resolver or idempotent database migration.</p>
@@ -278,8 +278,8 @@ worked_b<span class="syntax-punctuation">(</span><span class="syntax-punctuation
 <p>Separate a pure numerical kernel from CSV preparation, plotting and command-line entrypoints. Pure functions are easier to test without files or services. Write tests against public behavior, including shape and invalid-input contracts. Record the Julia version and dependency graph used for a release, and qualify the real package workflow in its owned environment. The classroom fixture teaches the structural pieces while preserving the offline prepared runtime that makes these lessons reproducible.</p>
 <h3 id="six-investigations">Six investigations<a class="heading-anchor" href="#six-investigations" aria-label="Link to this section">#</a></h3>
 <h4 id="1-use-qualified-access">1. Use qualified access<a class="heading-anchor" href="#1-use-qualified-access" aria-label="Link to this section">#</a></h4>
-<p>Call LocalStats.center on[2,4].</p>
-<p><strong>Expected:</strong> The result is[-1,1].</p>
+<p>Call <code>LocalStats.center</code> on <code>[2, 4]</code>.</p>
+<p><strong>Expected:</strong> The result is <code>[-1, 1]</code>.</p>
 <p><strong>Hint:</strong> The module owns the name.</p>
 <h4 id="2-trace-exports">2. Trace exports<a class="heading-anchor" href="#2-trace-exports" aria-label="Link to this section">#</a></h4>
 <p>Explain whether export makes other names private.</p>
@@ -308,7 +308,7 @@ worked_b<span class="syntax-punctuation">(</span><span class="syntax-punctuation
 <li><a href="https://pkgdocs.julialang.org/v1/creating-packages/">Creating packages</a></li>
 </ul>
 <h3 id="study-companion">Study companion<a class="heading-anchor" href="#study-companion" aria-label="Link to this section">#</a></h3>
-<p>Use the repository learning-companion skill with this lesson ID, your prediction and your actual source/output. Ask for a diagnosis of the first incorrect type, shape, state transition or assumption. Keep observed execution distinct from a timing claim, inferred mathematical result or external deployment.</p></article>
+<p>A repository-aware assistant with the learning-companion skill can review <code>julia-027</code> with you. Give it your prediction for one investigation, your source and the actual output, and ask it to find the first incorrect assumption about modules, exports, include, package layout, Project.toml or Manifest.toml.</p></article>
   </main>
 </body>
 </html>

@@ -214,7 +214,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the C++ module, save this lesson&#x27;s learner pad, then use Run. The worker stages the pad as <code>main.cpp</code> and compiles one translation unit. Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for exact local commands, flags, exit statuses, paths and Docker guidance. Tests involving multiple files, CMake, tool flags or shared libraries are explicitly host-project exercises.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
-<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs:each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
+<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs: each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p><a href="../examples/cpp-022-example-1.cpp.html">Complete program 1</a></p>
 <pre class="highlighted-code"><code class="language-cpp"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;cassert&gt;</span>
@@ -229,7 +229,7 @@ std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>s
   std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpp-022 example 1 checks passed</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
   <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
-<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<p><strong>Expected:</strong> With assertions enabled, the program exits with status 0 and prints:</p>
 <pre class="highlighted-code"><code class="language-text">cpp-022 example 1 checks passed</code></pre>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p><a href="../examples/cpp-022-example-2.cpp.html">Complete program 2</a></p>
@@ -248,38 +248,38 @@ std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>s
   std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpp-022 example 2 checks passed</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
   <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
-<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<p><strong>Expected:</strong> With assertions enabled, the program exits with status 0 and prints:</p>
 <pre class="highlighted-code"><code class="language-text">cpp-022 example 2 checks passed</code></pre>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-specify-the-wire-format">Exercise 1: Specify the wire format<a class="heading-anchor" href="#exercise-1-specify-the-wire-format" aria-label="Link to this section">#</a></h4>
 <p>Document v1, 7, 125 field order and units.</p>
 <p><strong>Expected result/shape:</strong> Version v1, ID 7, cents 125, three fields.</p>
-<p><strong>Verify:</strong> Version v1, ID 7, cents 125, three fields.</p>
+<p><strong>Verify:</strong> Check your document against <code>encode(7, 125) == &quot;v1,7,125&quot;</code>: the version comes first, the ID second and the cents third, and the unit is named.</p>
 <p><strong>Progressive hints:</strong> Representation should be interpretable without the original struct.</p>
 <h4 id="exercise-2-check-zero-values">Exercise 2: Check zero values<a class="heading-anchor" href="#exercise-2-check-zero-values" aria-label="Link to this section">#</a></h4>
 <p>Encode ID 0 and cents 0.</p>
 <p><strong>Expected result/shape:</strong> v1, 0, 0.</p>
-<p><strong>Verify:</strong> v1, 0, 0.</p>
+<p><strong>Verify:</strong> Assert <code>encode(0, 0) == &quot;v1,0,0&quot;</code>; zero values must still produce all three fields.</p>
 <p><strong>Progressive hints:</strong> Zero must survive round-trip as data.</p>
 <h4 id="exercise-3-build-a-strict-decoder">Exercise 3: Build a strict decoder<a class="heading-anchor" href="#exercise-3-build-a-strict-decoder" aria-label="Link to this section">#</a></h4>
 <p>Require v1 and exactly three comma-separated fields.</p>
 <p><strong>Expected result/shape:</strong> v2, 7, 125 and v1, 7, 125, junk rejected.</p>
-<p><strong>Verify:</strong> v2, 7, 125 and v1, 7, 125, junk rejected.</p>
+<p><strong>Verify:</strong> Assert your decoder rejects <code>&quot;v2,7,125&quot;</code> and <code>&quot;v1,7,125,junk&quot;</code> but accepts <code>&quot;v1,7,125&quot;</code> as ID 7 and 125 cents.</p>
 <p><strong>Progressive hints:</strong> Version and full-field-count checks prevent ambiguity.</p>
 <h4 id="exercise-4-reject-raw-layout">Exercise 4: Reject raw layout<a class="heading-anchor" href="#exercise-4-reject-raw-layout" aria-label="Link to this section">#</a></h4>
 <p>Explain why writing sizeof(record) is not a portable format.</p>
 <p><strong>Expected result/shape:</strong> Padding, type width and byte order named.</p>
-<p><strong>Verify:</strong> Padding, type width and byte order named.</p>
+<p><strong>Verify:</strong> Check that your explanation ties each hazard to a concrete case, for example <code>sizeof(long)</code> being 4 on 64-bit Windows but 8 on 64-bit Linux.</p>
 <p><strong>Progressive hints:</strong> A memory representation is not a schema.</p>
 <h4 id="exercise-5-resolve-a-path">Exercise 5: Resolve a path<a class="heading-anchor" href="#exercise-5-resolve-a-path" aria-label="Link to this section">#</a></h4>
 <p>Print current_path and records/batch.csv absolute resolution in an owned directory.</p>
 <p><strong>Expected result/shape:</strong> Both anchor and resolved file documented.</p>
-<p><strong>Verify:</strong> Both anchor and resolved file documented.</p>
+<p><strong>Verify:</strong> Print <code>std::filesystem::current_path()</code> and <code>std::filesystem::absolute(&quot;records/batch.csv&quot;)</code>, and confirm the second path starts with the first.</p>
 <p><strong>Progressive hints:</strong> Relative locations depend on the working directory.</p>
 <h4 id="exercise-6-transfer-versioning">Exercise 6: Transfer versioning<a class="heading-anchor" href="#exercise-6-transfer-versioning" aria-label="Link to this section">#</a></h4>
 <p>Design v2 with a fourth status field.</p>
 <p><strong>Expected result/shape:</strong> Explicit v2 reader or rejection, never v1 silent truncation.</p>
-<p><strong>Verify:</strong> Explicit v2 reader or rejection, never v1 silent truncation.</p>
+<p><strong>Verify:</strong> Feed <code>&quot;v2,7,125,paid&quot;</code> to the v1 reader and confirm it is rejected rather than decoded as ID 7 and 125 cents; only the v2 reader may accept it.</p>
 <p><strong>Progressive hints:</strong> Schema changes need compatibility decisions.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain why this observation follows from the mechanism: The exact wire text is independent of struct padding. Then explain the changed condition in example 2 without opening the answer.</p>

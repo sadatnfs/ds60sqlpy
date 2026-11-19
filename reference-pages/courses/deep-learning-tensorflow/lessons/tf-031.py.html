@@ -200,20 +200,20 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 1: Check eager arithmetic</span></span>
-<span class="source-line"><span class="syntax-comment"># Evaluate x*x+1 at float32[1,2].</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: output[2,5].</span></span>
+<span class="source-line"><span class="syntax-comment"># Evaluate x*x+1 at float32[1, 2].</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: output [2, 5].</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 2: Trace a graph and compare</span></span>
 <span class="source-line"><span class="syntax-comment"># Wrap the expression in plain tf.function, run it and inspect the initial trace count.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: Graph output equals eager output; at least one trace exists. No XLA compilation is requested.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Reuse an equal signature</span></span>
-<span class="source-line"><span class="syntax-comment"># Call with float32[3,4] and inspect trace count.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: output[10,17]; trace count unchanged.</span></span>
+<span class="source-line"><span class="syntax-comment"># Call with float32[3, 4] and inspect trace count.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: output [10, 17]; trace count unchanged.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Change dtype deliberately</span></span>
-<span class="source-line"><span class="syntax-comment"># Call with float64[1,2] and inspect trace count and output dtype.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: float64 result[2,5]; at least one new trace.</span></span>
+<span class="source-line"><span class="syntax-comment"># Call with float64[1, 2] and inspect trace count and output dtype.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: float64 result [2, 5]; at least one new trace.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Measure only warmed calls</span></span>
 <span class="source-line"><span class="syntax-comment"># Warm the float32 graph, time ten completed calls, then check every collected result.</span></span>

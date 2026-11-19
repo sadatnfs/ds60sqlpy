@@ -194,33 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-025_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-025-explanatory-solutions">docker-025: explanatory solutions<a class="heading-anchor" href="#docker-025-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These are explanations of the supplied teaching fixtures, not fabricated engine results.</p>
-<h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
-<p>An image reference can contain a registry, repository, tag and digest. A tag is a mutable name. A digest identifies content according to its hash format. Tags are convenient for humans; immutable identities are stronger for repeatable delivery and audit.</p>
-<p>A local image cache is not a registry. Building an image with a tag does not upload it. <code>docker image save</code> exports image data into an archive, and <code>docker image load</code> imports an archive. This can support an offline machine after deliberately preparing the correct platform and dependencies.</p>
-<p>An archive must be treated as executable supply-chain input. Verify its source and checksum through a trustworthy channel, inspect the imported reference, and execute only the intended image. A checksum copied from the same untrusted source is an integrity hint, not independent authenticity.</p>
-<p>The course uses local builds and performs no registry pushes. Save only the study image to a file in your learner copy. Record the image ID, platform and archive checksum. Load into a deliberately chosen compatible engine and use <code>--pull never</code> to ensure the next run does not silently fetch a missing dependency.</p>
-<p>An offline application can still contain code that attempts network requests. Image presence is only one prerequisite. The lesson examples use local synthetic inputs so the default application behavior does not depend on external APIs.</p>
+<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-025.md</code>.</p>
 <h3 id="exercise-1-compare-tag-and-digest-identity">Exercise 1: Compare tag and digest identity.<a class="heading-anchor" href="#exercise-1-compare-tag-and-digest-identity" aria-label="Link to this section">#</a></h3>
-<p>A tag can resolve to new bytes later. Preserve immutable identity when you need to tie execution evidence to a specific artifact.</p>
-<p><strong>Expected:</strong> A movable label versus content identity.</p>
+<p><strong>Expected answer:</strong> A movable label versus content identity.</p>
+<p><strong>Why:</strong> A tag can resolve to new bytes later. Preserve immutable identity when you need to tie execution evidence to a specific artifact.</p>
 <h3 id="exercise-2-predict-whether-docker-build-uploads-an-image">Exercise 2: Predict whether docker build uploads an image.<a class="heading-anchor" href="#exercise-2-predict-whether-docker-build-uploads-an-image" aria-label="Link to this section">#</a></h3>
-<p>Building and publishing are separate operations. The course intentionally stays local so learners can inspect output without registry credentials.</p>
-<p><strong>Expected:</strong> It does not push merely because a tag was assigned.</p>
+<p><strong>Expected answer:</strong> It does not push merely because a tag was assigned.</p>
+<p><strong>Why:</strong> Building and publishing are separate operations. The course intentionally stays local so learners can inspect output without registry credentials.</p>
 <h3 id="exercise-3-design-an-offline-handoff-record">Exercise 3: Design an offline handoff record.<a class="heading-anchor" href="#exercise-3-design-an-offline-handoff-record" aria-label="Link to this section">#</a></h3>
-<p>The receiver needs enough context to verify both bytes and compatibility. A filename alone does not establish which program or architecture the archive contains.</p>
-<p><strong>Expected:</strong> Archive checksum, image identity, platform and expected command.</p>
+<p><strong>Expected evidence:</strong> Archive checksum, image identity, platform and expected command.</p>
+<p><strong>Why:</strong> The receiver needs enough context to verify both bytes and compatibility. A filename alone does not establish which program or architecture the archive contains.</p>
 <h3 id="exercise-4-diagnose-a-missing-image-with-pull-never">Exercise 4: Diagnose a missing image with --pull never.<a class="heading-anchor" href="#exercise-4-diagnose-a-missing-image-with-pull-never" aria-label="Link to this section">#</a></h3>
-<p>This is useful evidence of an incomplete prepared environment. Repair the preparation deliberately instead of hiding the dependency with an implicit pull.</p>
-<p><strong>Expected:</strong> The run fails rather than silently downloading.</p>
+<p><strong>Expected answer:</strong> The run fails rather than silently downloading.</p>
+<p><strong>Why:</strong> This is useful evidence of an incomplete prepared environment. Repair the preparation deliberately instead of hiding the dependency with an implicit pull.</p>
 <h3 id="exercise-5-explain-checksum-integrity-versus-authenticity">Exercise 5: Explain checksum integrity versus authenticity.<a class="heading-anchor" href="#exercise-5-explain-checksum-integrity-versus-authenticity" aria-label="Link to this section">#</a></h3>
-<p>An attacker could supply both a modified archive and its hash. Trust requires an independent source or a signature verification policy.</p>
-<p><strong>Expected:</strong> Matching bytes do not identify a trustworthy publisher by themselves.</p>
+<p><strong>Expected answer:</strong> Matching bytes do not identify a trustworthy publisher by themselves.</p>
+<p><strong>Why:</strong> An attacker could supply both a modified archive and its hash. Trust requires an independent source or a signature verification policy.</p>
 <h3 id="exercise-6-define-offline-acceptance-for-the-study-app">Exercise 6: Define offline acceptance for the study app.<a class="heading-anchor" href="#exercise-6-define-offline-acceptance-for-the-study-app" aria-label="Link to this section">#</a></h3>
-<p>The test should exercise the app behavior you plan to teach. A trivial arithmetic command proves the runtime is present but not every feature of a network-dependent application.</p>
-<p><strong>Expected:</strong> Imported image starts with local data and no required external services.</p>
+<p><strong>Expected evidence:</strong> Imported image starts with local data and no required external services.</p>
+<p><strong>Why:</strong> The test should exercise the app behavior you plan to teach. A trivial arithmetic command proves the runtime is present but not every feature of a network-dependent application.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful solution identifies the exact object, the phase when a setting takes effect, the expected normal result and an observation that disproves it. Repeating a command until it succeeds hides the mechanism. Change one variable, keep a failure record, and test the intended behavior again. Source examples here are small enough to inspect; a production system additionally needs ownership, lifecycle, data recovery and operational review. The host exercises are optional and must stay within the learner-created project.</p></article>
+<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>
 </body>
 </html>

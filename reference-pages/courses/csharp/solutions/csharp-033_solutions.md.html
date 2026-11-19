@@ -194,37 +194,54 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/csharp/solutions/csharp-033_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="csharp-033-explanation-and-comparison">csharp-033: explanation and comparison<a class="heading-anchor" href="#csharp-033-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="csharp-033_solution.cs.html">csharp-033_solution.cs</a>. Its assertions are always active under the prepared classroom compile settings.</p>
+<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="csharp-033_solution.cs.html">csharp-033_solution.cs</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Protect increments:</strong> The lock protects the read-modify-write transition, so the expected count does not depend on scheduling. Four tasks produce exactly 400 increments.</p>
 <p><strong>Protect a multi-field invariant:</strong> A synchronized writer with an unsynchronized reader does not establish the same contract. The reader uses the same gate as mutation.</p>
-<h3 id="reason-through-the-six-tasks">Reason through the six tasks<a class="heading-anchor" href="#reason-through-the-six-tasks" aria-label="Link to this section">#</a></h3>
-<ol>
-<li><strong>Predict and explain.</strong> Decompose an increment into its logical steps.</li>
-</ol>
-<ol start="2">
-<li><strong>Guided modification.</strong> Increase task count while keeping the exact expected total.</li>
-</ol>
-<ol start="3">
-<li><strong>Independent construction.</strong> Implement a locked transfer preserving the sum of two balances.</li>
-</ol>
-<ol start="4">
-<li><strong>Diagnose a defect.</strong> Describe a two-lock acquisition cycle and repair it with an ordering rule.</li>
-</ol>
-<ol start="5">
-<li><strong>Boundary evidence.</strong> Test zero operations and concurrent readers.</li>
-</ol>
-<ol start="6">
-<li><strong>Transfer and justify.</strong> Choose immutable snapshots or a lock for a shared report cache and justify the ownership model.</li>
-</ol>
-<p>For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.</p>
+<h3 id="task-answers">Task answers<a class="heading-anchor" href="#task-answers" aria-label="Link to this section">#</a></h3>
+<h4 id="task-1-predict-and-explain">Task 1: Predict and explain<a class="heading-anchor" href="#task-1-predict-and-explain" aria-label="Link to this section">#</a></h4>
+<p>Decompose an increment into its logical steps.</p>
+<p>No separate reference answer has been written for this task. Example A is the evidence to compare with: The lock protects the read-modify-write transition, so the expected count does not depend on scheduling. Four tasks produce exactly 400 increments.</p>
+<h4 id="task-2-guided-modification">Task 2: Guided modification<a class="heading-anchor" href="#task-2-guided-modification" aria-label="Link to this section">#</a></h4>
+<p>Increase task count while keeping the exact expected total.</p>
+<p>No separate reference answer has been written for this task. Start from Example B: A synchronized writer with an unsynchronized reader does not establish the same contract. The reader uses the same gate as mutation.</p>
+<h4 id="task-3-independent-construction">Task 3: Independent construction<a class="heading-anchor" href="#task-3-independent-construction" aria-label="Link to this section">#</a></h4>
+<p>Implement a locked transfer preserving the sum of two balances.</p>
+<p><strong>Reference answer.</strong> It runs as the <code>Task 3</code> block of the reference program.</p>
+<pre class="highlighted-code"><code class="language-csharp"><span class="syntax-keyword">var</span> gate <span class="syntax-operator">=</span> <span class="syntax-keyword">new</span> Lock<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">int</span> left <span class="syntax-operator">=</span> <span class="syntax-number">100</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">int</span> right <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">void</span> <span class="syntax-function">Transfer</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span> amount<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">lock</span> <span class="syntax-punctuation">(</span>gate<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    left <span class="syntax-operator">-=</span> amount<span class="syntax-punctuation">;</span>
+    right <span class="syntax-operator">+=</span> amount<span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span>
+Task <span class="syntax-function">Move</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=&gt;</span> Task<span class="syntax-punctuation">.</span>Run<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=&gt;</span> Transfer<span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">var</span> moves <span class="syntax-operator">=</span> <span class="syntax-keyword">new</span> List<span class="syntax-operator">&lt;</span>Task<span class="syntax-operator">&gt;</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">for</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span> i <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span> i <span class="syntax-operator">&lt;</span> <span class="syntax-number">10</span><span class="syntax-punctuation">;</span> i<span class="syntax-operator">++</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+  moves<span class="syntax-punctuation">.</span>Add<span class="syntax-punctuation">(</span>Move<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">await</span> Task<span class="syntax-punctuation">.</span>WhenAll<span class="syntax-punctuation">(</span>moves<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+Check<span class="syntax-punctuation">(</span>left <span class="syntax-operator">+</span> right <span class="syntax-operator">==</span> <span class="syntax-number">100</span> <span class="syntax-operator">&amp;&amp;</span> right <span class="syntax-operator">==</span> <span class="syntax-number">50</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;sum preserved&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Observe:</strong> After ten concurrent transfers of 5 the balances are 50 and 50, still summing to 100.</p>
+<p>Both balances change inside one lock, so no other transfer can observe or interleave with a half-finished move.</p>
+<h4 id="task-4-diagnose-a-defect">Task 4: Diagnose a defect<a class="heading-anchor" href="#task-4-diagnose-a-defect" aria-label="Link to this section">#</a></h4>
+<p>Describe a two-lock acquisition cycle and repair it with an ordering rule.</p>
+<p>No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson&#x27;s pitfalls: A passing unsynchronized stress run does not prove absence of races. Locking a different object in the reader does not protect the writer invariant. Never await inside a synchronous lock.</p>
+<h4 id="task-5-boundary-evidence">Task 5: Boundary evidence<a class="heading-anchor" href="#task-5-boundary-evidence" aria-label="Link to this section">#</a></h4>
+<p>Test zero operations and concurrent readers.</p>
+<p>No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Protect increments) and Example B (Protect a multi-field invariant).</p>
+<h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
+<p>Choose immutable snapshots or a lock for a shared report cache and justify the ownership model.</p>
+<p>No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry <strong>Atomicity</strong>, and state one limitation of your choice.</p>
 <h3 id="mechanism-and-diagnostic-reasoning">Mechanism and diagnostic reasoning<a class="heading-anchor" href="#mechanism-and-diagnostic-reasoning" aria-label="Link to this section">#</a></h3>
 <p>Concurrency permits operations to overlap. A data race occurs when unsynchronized access to shared mutable state violates the required memory and ordering rules. Even an apparently simple increment includes read, calculation and write, so it is not automatically atomic. Correctness requires protecting the entire invariant, not just individual fields.</p>
 <p>A lock establishes mutual exclusion and ordering for code using the same lock object. Keep the protected region small and avoid awaiting while holding a synchronous lock. Never choose a publicly accessible object or a mutable value as the lock identity. Deadlock is a separate risk when multiple locks are acquired in conflicting orders; a single documented ordering can prevent that class of cycle.</p>
-<p><code>lock (gate)</code> enters a protected region and exits even on exceptions. All accesses participating in the invariant must use the same gate. Task.WhenAll observes the completion of the scheduled work.</p>
+<p><code>lock (gate)</code> enters a protected region and exits even on exceptions. All accesses participating in the invariant must use the same gate. Since .NET 9 and C# 13, <code>System.Threading.Lock</code> is the dedicated lock type: <code>lock</code> on a <code>Lock</code> uses its scope API, and the compiler warns when a <code>Lock</code> is converted to <code>object</code>. Task.WhenAll observes the completion of the scheduled work.</p>
 <p>A passing unsynchronized stress run does not prove absence of races. Locking a different object in the reader does not protect the writer invariant. Never await inside a synchronous lock.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.</p></article>
+<p>Run the reference and confirm that it prints <code>csharp-033: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
   </main>
 </body>
 </html>

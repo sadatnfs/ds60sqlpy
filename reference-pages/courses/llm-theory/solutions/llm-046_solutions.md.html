@@ -202,14 +202,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>MHA:</strong> Attention with one key/value head per query head.</p>
 <p><strong>MQA:</strong> Attention sharing one key/value head across all query heads.</p>
 <p><strong>GQA:</strong> Attention sharing key/value heads within groups of query heads.</p>
-<p><strong>Online softmax state:</strong> A running maximum,normalizer and weighted-value numerator.</p>
-<p><strong>IO-aware kernel:</strong> An implementation designed around memory hierarchy and traffic,not only arithmetic count.</p>
+<p><strong>Online softmax state:</strong> A running maximum, normalizer and weighted-value numerator.</p>
+<p><strong>IO-aware kernel:</strong> An implementation designed around memory hierarchy and traffic, not only arithmetic count.</p>
 <h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
 <p>For the single-batch reference, Q has shape(Hq, T, d), K shape(Hkv, T, d), and V shape(Hkv, T, dv), with Hq divisible by Hkv. Query head h uses key/value head h//(Hq/Hkv). The dense helper normalizes allowed keys per query. The online helper processes legal key blocks, skips blocks with no allowed keys, and rescales old accumulated state whenever a larger score appears. It rejects an entirely masked row rather than returning an invented distribution.</p>
 <p>The online implementation checks its weighted-value numerator and denominator after every block, then checks the divided output. It raises ValueError when these intermediates exceed finite floating-point range, even if another evaluation order could produce a representable final average. Finite inputs and scores alone do not guarantee a finite unnormalized numerator.</p>
 <h3 id="exercise-1-count-cache-and-projection-dimensions">Exercise 1: Count cache and projection dimensions<a class="heading-anchor" href="#exercise-1-count-cache-and-projection-dimensions" aria-label="Link to this section">#</a></h3>
-<p>The question is: Use batch 1, time 5, query heads4, head width 2, float32, and compare KV heads 4, 2, 1.</p>
-<p>The cache factor2 counts keys and values. These are raw tensor/weight counts excluding allocator, activation, quantization-metadata and communication overhead.</p>
+<p>The question is: Use batch 1, time 5, 4 query heads, head width 2 and float32, and compare 4, 2 and 1 KV heads.</p>
+<p>The cache factor 2 counts keys and values. These are raw tensor/weight counts excluding allocator, activation, quantization-metadata and communication overhead.</p>
 <pre class="highlighted-code"><code class="language-python">query_heads <span class="syntax-operator">=</span> <span class="syntax-number">4</span>
 head_width <span class="syntax-operator">=</span> <span class="syntax-number">2</span>
 width <span class="syntax-operator">=</span> <span class="syntax-number">8</span>
@@ -223,7 +223,7 @@ parameters <span class="syntax-operator">=</span> <span class="syntax-punctuatio
 <span class="syntax-punctuation">]</span>
 <span class="syntax-keyword">assert</span> cache_bytes <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">320</span><span class="syntax-punctuation">,</span> <span class="syntax-number">160</span><span class="syntax-punctuation">,</span> <span class="syntax-number">80</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> parameters <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">256</span><span class="syntax-punctuation">,</span> <span class="syntax-number">192</span><span class="syntax-punctuation">,</span> <span class="syntax-number">160</span><span class="syntax-punctuation">]</span></code></pre>
 <p><strong>Expected:</strong> raw KV bytes 320, 160, 80; projection weights 256, 192, 160 for model width 8 without biases.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with raw KV bytes 320, 160, 80; projection weights 256, 192, 160 for model width 8 without biases.</p>
+<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>cache_bytes == [320, 160, 80]</code> and <code>parameters == [256, 192, 160]</code>.</p>
 <h3 id="exercise-2-verify-grouped-heads-against-an-equivalent-repeated-head-oracle">Exercise 2: Verify grouped heads against an equivalent repeated-head oracle<a class="heading-anchor" href="#exercise-2-verify-grouped-heads-against-an-equivalent-repeated-head-oracle" aria-label="Link to this section">#</a></h3>
 <p>The question is: Use 4 query heads and 2 KV heads; repeat each KV head twice only in the dense oracle.</p>
 <p>The comparison manufactures identical shared heads, so parity is expected. It does not say that an arbitrary trained four-KV-head model can be compressed to two heads without changing behavior.</p>
@@ -239,7 +239,7 @@ oracle <span class="syntax-operator">=</span> np<span class="syntax-operator">.<
 <span class="syntax-keyword">assert</span> grouped<span class="syntax-operator">.</span>shape <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
 np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>grouped<span class="syntax-punctuation">,</span> oracle<span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> outputs agree within 1e-12; shape(4, 3, 2).</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with outputs agree within 1e-12; shape(4, 3, 2).</p>
+<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>grouped.shape == (4, 3, 2)</code> and <code>grouped</code> matches <code>oracle</code> within 1e-12.</p>
 <h3 id="exercise-3-trace-online-softmax-at-extreme-scores">Exercise 3: Trace online softmax at extreme scores<a class="heading-anchor" href="#exercise-3-trace-online-softmax-at-extreme-scores" aria-label="Link to this section">#</a></h3>
 <p>The question is: Combine scores 1000, 999, 998 and values 1, 3, 5 in blocks of 2.</p>
 <p>When the running maximum changes, the old numerator and denominator must both be rescaled. Updating only one produces a plausible but incorrect weighted average.</p>
@@ -251,7 +251,7 @@ expected <span class="syntax-operator">=</span> <span class="syntax-punctuation"
 np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>online<span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">assert</span> peak <span class="syntax-operator">==</span> <span class="syntax-number">2</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>online<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> finite output equals a maximum-shifted dense calculation.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with finite output equals a maximum-shifted dense calculation.</p>
+<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>online</code> matches <code>expected</code> within 1e-12, <code>peak == 2</code> and <code>np.isfinite(online).all()</code>.</p>
 <h3 id="exercise-4-compare-several-block-sizes-under-causal-masking">Exercise 4: Compare several block sizes under causal masking<a class="heading-anchor" href="#exercise-4-compare-several-block-sizes-under-causal-masking" aria-label="Link to this section">#</a></h3>
 <p>The question is: Use five nonuniform query/key rows and compare block sizes 1, 2, 3, 5 with dense attention.</p>
 <p>The odd length exercises a partial final block. The mask makes some early-row blocks empty, which the implementation must skip without generating negative-infinity subtractionNaNs.</p>
@@ -265,7 +265,7 @@ expected <span class="syntax-operator">=</span> dense<span class="syntax-punctua
     np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>output<span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
     <span class="syntax-keyword">assert</span> peak <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> block</code></pre>
 <p><strong>Expected:</strong> all outputs agree within 1e-12; largest temporary score block does not exceed the chosen size.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with all outputs agree within 1e-12; largest temporary score block does not exceed the chosen size.</p>
+<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm for every <code>block</code> in <code>[1, 2, 3, 5]</code>, <code>output</code> matches <code>expected</code> within 1e-12 and for every <code>block</code> in <code>[1, 2, 3, 5]</code>, <code>peak &lt;= block</code>.</p>
 <h3 id="exercise-5-preserve-a-causal-prefix-under-future-changes">Exercise 5: Preserve a causal prefix under future changes<a class="heading-anchor" href="#exercise-5-preserve-a-causal-prefix-under-future-changes" aria-label="Link to this section">#</a></h3>
 <p>The question is: Change only value rows 3 and 4 and compare the first three online outputs.</p>
 <p>Block processing must preserve the same information boundary as dense attention. Tiling is not permission to normalize with future values or include masked keys in the denominator.</p>
@@ -274,7 +274,7 @@ changed<span class="syntax-punctuation">[</span><span class="syntax-number">3</s
 altered<span class="syntax-punctuation">,</span> _ <span class="syntax-operator">=</span> online_attention<span class="syntax-punctuation">(</span>queries<span class="syntax-punctuation">,</span> keys<span class="syntax-punctuation">,</span> changed<span class="syntax-punctuation">,</span> allowed<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
 np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>altered<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> first three rows unchanged.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with first three rows unchanged.</p>
+<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>altered[:3]</code> matches <code>expected[:3]</code> within 1e-12.</p>
 <h3 id="exercise-6-reject-invalid-grouping-and-empty-support">Exercise 6: Reject invalid grouping and empty support<a class="heading-anchor" href="#exercise-6-reject-invalid-grouping-and-empty-support" aria-label="Link to this section">#</a></h3>
 <p>The question is: Try 4 query heads with 3 KV heads, and an all-false attention row.</p>
 <p>Head mapping needs an integer group size, and each query needs at least one legal key. Clear validation separates architecture misuse from numerical-kernel failure.</p>
@@ -293,7 +293,7 @@ bad<span class="syntax-punctuation">[</span><span class="syntax-number">0</span>
 <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">empty attention support accepted</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> both raise ValueError; no output NaNs are accepted.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with both raise ValueError; no output NaNs are accepted.</p>
+<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>gqa(np.zeros((4, 2, 2)), np.zeros((3, 2, 2)), np.zeros((3, 2, 2)))</code> raises <code>ValueError</code> and <code>online_attention(queries, keys, values, bad, 2)</code> raises <code>ValueError</code>.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
 <p>Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.</p></article>
   </main>

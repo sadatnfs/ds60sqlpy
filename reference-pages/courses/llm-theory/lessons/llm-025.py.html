@@ -199,29 +199,30 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">Copy to .learning before editing. Six independent attempts belong below.</span></span>
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 1: Count attention scores</span></span>
-<span class="source-line"><span class="syntax-comment"># Use batch1,heads2 and contexts16,32.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: 512 and2048 score elements.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Count scores for a larger configuration</span></span>
+<span class="source-line"><span class="syntax-comment"># Use batch 2, heads 4 and context 64 with 4-byte score elements.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: 32768 score elements; 131072 bytes (128 KiB).</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 2: Count raw cache bytes</span></span>
-<span class="source-line"><span class="syntax-comment"># Use1 layer,2 heads,width per head16,float32 bytes4 and contexts16,32.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: 4096 and8192 bytes.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Predict cache growth with depth and context</span></span>
+<span class="source-line"><span class="syntax-comment"># Use 3 layers, 2 heads, width per head 16, 4-byte elements and contexts 48 and 96;</span></span>
+<span class="source-line"><span class="syntax-comment"># compare with the growth of the score matrix.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: 36864 and 73728 cache bytes; the cache doubles while score elements quadruple.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Compare element precision</span></span>
-<span class="source-line"><span class="syntax-comment"># Calculate cache bytes at context32 using2-byte versus4-byte elements.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: 4096 versus8192 bytes.</span></span>
+<span class="source-line"><span class="syntax-comment"># Calculate cache bytes at context 32 using 2-byte versus 4-byte elements.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: 4096 versus 8192 bytes.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Scale batch size</span></span>
-<span class="source-line"><span class="syntax-comment"># Increase batch from1 to3 with context32 and all other cache dimensions fixed.</span></span>
+<span class="source-line"><span class="syntax-comment"># Increase batch from 1 to 3 with context 32 and all other cache dimensions fixed.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: 24576 raw cache bytes.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Preserve total width</span></span>
-<span class="source-line"><span class="syntax-comment"># Compare4 heads of width8 with2 heads of width16.</span></span>
+<span class="source-line"><span class="syntax-comment"># Compare 4 heads of width 8 with 2 heads of width 16.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: equal raw cache bytes for the same context.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: State exclusions</span></span>
 <span class="source-line"><span class="syntax-comment"># Produce an estimate record naming omitted allocations and avoid calling it peak memory.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: record identifies parameters,temporary tensors,allocator overhead as excluded.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: record identifies parameters, temporary tensors, allocator overhead as excluded.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Read the guide and implement the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>

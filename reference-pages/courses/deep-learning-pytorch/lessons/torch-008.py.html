@@ -199,26 +199,28 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">Copy to .learning before editing. Six independent attempts belong below.</span></span>
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 1: Calculate the initial loss</span></span>
-<span class="source-line"><span class="syntax-comment"># Use float64 x1, 2, 3, y = 2x and scalar w = 0.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: mean squared loss 56/3.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Compute a new initial loss</span></span>
+<span class="source-line"><span class="syntax-comment"># Use float64 x = 1, 2, targets y = 3x and scalar w = 0, and calculate the mean squared</span></span>
+<span class="source-line"><span class="syntax-comment"># loss.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: loss 22.5.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 2: Inspect the gradient before updating</span></span>
-<span class="source-line"><span class="syntax-comment"># Back propagate the initial loss and compare with-56/3.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: gradient-56/3; weight still 0.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Predict the gradient before stepping</span></span>
+<span class="source-line"><span class="syntax-comment"># Backpropagate the new loss and compare the gradient with your hand calculation before</span></span>
+<span class="source-line"><span class="syntax-comment"># any update.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: gradient -15; w still 0.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 3: Apply exactly one SGD update</span></span>
-<span class="source-line"><span class="syntax-comment"># Use SGD learning rate 0.1 onw and recompute the objective afterward.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: w28/15; loss 56/675.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: Apply one step with a new rate</span></span>
+<span class="source-line"><span class="syntax-comment"># Take one SGD step with learning rate 0.05 and recompute the loss.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: w = 0.75; loss 12.65625.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Expose the broadcast counterexample</span></span>
-<span class="source-line"><span class="syntax-comment"># At a fresh w = 0, compare vector predictions with column targets shaped(3, 1).</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: initial loss still 56/3, but gradient-16.</span></span>
+<span class="source-line"><span class="syntax-comment"># At a fresh w = 0, compare vector predictions with column targets shaped (3, 1).</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: initial loss still 56/3, but gradient -16.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Check a finite-difference gradient</span></span>
 <span class="source-line"><span class="syntax-comment"># Use a plain NumPy scalar objective around \(w=0\) with finite-difference step</span></span>
 <span class="source-line"><span class="syntax-comment"># \(h=0.001\).</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: slope-56/3 within 1e-9.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: slope -56/3 within 1e-9.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Clear the consumed gradient</span></span>
 <span class="source-line"><span class="syntax-comment"># Call `optimizer.zero_grad(set_to_none=True)` after the step and inspect state.</span></span>

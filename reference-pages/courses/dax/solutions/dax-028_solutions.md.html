@@ -198,7 +198,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The complete <a href="dax-028_reference.dax.html">reference source</a> and <a href="../models/retail/model.json.html">named model</a> belong together. The reference-results sidecar binds both exact files by SHA-256. Those hashes identify bytes; they do not certify DAX execution.</p>
 <h3 id="worked-case-reconciliation">Worked-case reconciliation<a class="heading-anchor" href="#worked-case-reconciliation" aria-label="Link to this section">#</a></h3>
 <h4 id="case-a-intersection-and-one-sided-difference">Case A: Intersection and one-sided difference<a class="heading-anchor" href="#case-a-intersection-and-one-sided-difference" aria-label="Link to this section">#</a></h4>
-<p>Distinct Paper keys{1,2} and Blue keys{1,3} from the clean model.</p>
+<p>Distinct Paper keys {1,2} and Blue keys {1,3} from the clean model.</p>
 <div class="table-wrap"><table><thead><tr>
 <th>IntersectionRows</th>
 <th>PaperOnlyRows</th>
@@ -228,7 +228,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>If the downstream calculation iterates the concatenation, key 1 can contribute twice. A filter set and an iterator&#x27;s row population should not be conflated.</p>
 <ul>
 <li>UNION produces four rows, including key 1 twice.</li>
-<li>DISTINCT removes repeated key rows, leaving 1,2,3.</li>
+<li>DISTINCT removes repeated key rows, leaving 1, 2, 3.</li>
 <li>The two counts represent memberships versus unique product identities.</li>
 </ul>
 <h3 id="explained-practice-answers">Explained practice answers<a class="heading-anchor" href="#explained-practice-answers" aria-label="Link to this section">#</a></h3>

@@ -9,7 +9,7 @@
     content="default-src 'none'; style-src 'self' file: 'unsafe-inline'; font-src data:; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
   >
   <link rel="stylesheet" href="../src/ds60sqlpy/assets/vendor/textbook/fonts.css">
-  <title>sql-15 · Phase1 Project · DS60</title>
+  <title>sql-15 · Phase 1 Project: Multi-Dimensional Revenue Report · DS60</title>
   <style>
     :root {
       --paper: #f6f2e8;
@@ -312,7 +312,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <div class="shell">
       <section class="hero">
         <p class="eyebrow">sql · lesson sql-15</p>
-        <h1>Phase1 Project</h1>
+        <h1>Phase 1 Project: Multi-Dimensional Revenue Report</h1>
         <p class="hero-copy">SQL foundations and query building</p>
         <div class="meta">
           <span class="tag">foundation</span>
@@ -407,9 +407,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Start the Linux-container engine and run <code>./classroom</code> from the repository root. On Windows, use Ubuntu in WSL 2 or the thin <code>START_DOCKER_CLASSROOM.cmd</code> wrapper. Choose <strong>PostgreSQL</strong> on the shared <code>/classroom</code> home, then open <strong>sql-15</strong>. The <a href="../reference-pages/docs/one-command-classroom.md.html">launcher guide</a> covers first preparation, strict resume and the saved project selection. No host Python or PostgreSQL installation is required for this browser route.</p>
 <ol>
-<li>Read the prerequisite and fixture notes before running the file. Use only the local disposable <code>advanced_sql_training</code> database. A simple snippet such as <code>SELECT 1;</code> needs no training-schema reset.</li>
+<li>Read the prerequisite and fixture notes before running the file. Use only the local disposable <code>advanced_sql_training</code> database.</li>
 <li>Choose <strong>Whole SQL lesson (psql)</strong> for the cataloged learner script. This preserves the lesson&#x27;s reviewed psql directives, relative includes and transaction behavior. <strong>SQL snippet</strong> is appropriate for ordinary SQL statements, but is not a replacement for an entire script&#x27;s setup.</li>
-<li>When the lesson requires the course training data, use the explicit preparation action and read its reset acknowledgement. It replaces the course-owned <code>training</code> schema. Do not reset unrelated data or prepare every lesson by habit; stateful sequences have their own ordering.</li>
+<li>The <strong>Course database</strong> panel above the code shows whether the course training tables are loaded. Missing tables load automatically before your first run (or choose <strong>Load course tables</strong>) and stay loaded for later lessons. <strong>Reset training data</strong> restores the original rows only when your own changes made results differ; it keeps your saved code and notes.</li>
 <li>Edit the learner copy in the classroom and save your prediction before running. Its whole-script workspace is <code>.learning/sql/sql-15/lesson/workspace/sql/postgres-60day/day15_phase1_project.sql</code>. For browser work this path is inside the Docker learning volume, not a newly created host folder beside your checkout. The checked-in source remains the answer-free starting artifact.</li>
 <li>Run the whole script and inspect the full transcript. The runner uses <code>psql -X -v ON_ERROR_STOP=1 -f</code>. SELECT output has columns, rows and a row count; DDL/DML has command tags; intentional checks may produce NOTICE messages. An unexpected ERROR or nonzero exit is a failure to diagnose, even when an earlier query printed plausible values.</li>
 <li>Verify the lesson&#x27;s expected grain, ordering, constraints and declared transaction or cleanup outcome. Keep required ROLLBACK statements. The warehouse sequence and other explicitly stateful exercises explain when state is committed. Read saved output without rerunning it when reviewing an earlier attempt.</li>
@@ -428,7 +428,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is Metric contract, Dimensional report, Control total. Its worked SQL reads or creates <code>orders</code>, <code>order_items</code>, <code>customers</code>.</p>
 <p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
-<p>The worked walkthrough&#x27;s lesson-specific task is: Build one stable orderlines relation first, with one row per intended line or order and a single net-revenue formula. Reconcile its total, then add dimension joins one at a time and compare the total after each join. Only after totals remain stable should you add grouping sets and display labels. The expected contract is that One row per customer. Predict keys, row count, <code>NULL</code> behavior, and ordering before running. Afterwards, compare keys/counts/totals with an independent control. A blank string, SQL <code>NULL</code>, numeric zero, and a missing row are different facts; use <code>COALESCE</code> only after choosing which meaning the business question requires.</p>
+<p>The worked walkthrough&#x27;s lesson-specific task is: Build one stable <code>order_lines</code> relation first, with one row per intended line or order and a single net-revenue formula. Reconcile its total, then add dimension joins one at a time and compare the total after each join. Only after totals remain stable should you add grouping sets and display labels. Exercise 1 expects this result: one row per customer. Predict keys, row count, <code>NULL</code> behavior, and ordering before running. Afterwards, compare keys/counts/totals with an independent control. A blank string, SQL <code>NULL</code>, numeric zero, and a missing row are different facts; use <code>COALESCE</code> only after choosing which meaning the business question requires.</p>
 <h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
 <p>These worked excerpts come from <code>sql/postgres-60day/day15_phase1_project.sql</code>. Use <strong>Whole SQL lesson (psql)</strong> in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared <code>psql</code> routes are described above.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
@@ -589,13 +589,13 @@ segment <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">
 <li>Handling of NULL/unknown categories and segments</li>
 <li>Performance: indices on join keys; avoid unnecessary DISTINCT</li>
 </ul>
-<p>Current practice map</p>
+<p>Deliverable checklist</p>
 <ul>
-<li>The authoritative six prompts above replace the older single deliverable. Complete all six outputs and document grain, missing-side behavior, UTC boundaries, money definitions, and reconciliation evidence.</li>
+<li>Complete all six prompts above and document grain, missing-side behavior, UTC boundaries, money definitions, and reconciliation evidence.</li>
 </ul>
 <h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in the AI tutor:</p>
-<pre class="highlighted-code"><code class="language-text">Tutor me through sql-15 — Phase1 Project.
+<pre class="highlighted-code"><code class="language-text">Tutor me through sql-15: Phase 1 Project: Multi-Dimensional Revenue Report.
 
 I have completed the direct catalog prerequisite: `sql-14`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day15_phase1_project.md
@@ -605,7 +605,7 @@ Key terms to teach in context: Metric contract, Dimensional report, Control tota
 language and explain table, row, column, result set, row grain, SQL NULL, and
 deterministic ordering where they apply. Then explain the important clauses in
 logical order and state the expected row grain/shape before asking me to run
-anything. The guide&#x27;s lesson-specific worked-model focus is: Build one stable orderlines relation first, with one row per intended line or order and a single net-revenue formula. Reconcile its total, then add dimension joins one at a time and compare the total after each join. Only after totals remain stable should you add grouping sets and display labels.
+anything. The guide&#x27;s lesson-specific worked-model focus is: Build one stable `order_lines` relation first, with one row per intended line or order and a single net-revenue formula. Reconcile its total, then add dimension joins one at a time and compare the total after each join. Only after totals remain stable should you add grouping sets and display labels.
 
 Use only the local disposable advanced_sql_training database. Prefer the
 Docker classroom&#x27;s Whole SQL lesson (psql) workspace and its ignored
@@ -783,14 +783,12 @@ transfer task that I answer without looking back. Done when I can explain the ro
         <div class="artifact-content"><h3 id="solution-1--day-15-solutions-phase-1-project-multi-dimensional-revenue-report">Day 15 solutions: Phase 1 Project: Multi-Dimensional Revenue Report<a class="heading-anchor" href="#solution-1--day-15-solutions-phase-1-project-multi-dimensional-revenue-report" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
 <p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
-psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql\postgres-60day\solutions\day15_solutions.sql</span><span class="syntax-string">&quot;</span></code></pre>
-<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># Linux, macOS, or Windows through WSL 2, from the repository root</span>
 psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/postgres-60day/solutions/day15_solutions.sql</code></pre>
 <p><code>psql</code> prints each result/command tag in the terminal. Stop at the first unexpected <code>ERROR</code>; later output cannot repair an earlier failed invariant. Compare your own SQL, row grain, column names, row counts, <code>NULL</code> policy, and ordering with the explanation before comparing syntax.</p>
 <h4 id="solution-1--clause-by-clause-reading-map">Clause-by-clause reading map<a class="heading-anchor" href="#solution-1--clause-by-clause-reading-map" aria-label="Link to this section">#</a></h4>
-<p>The lesson&#x27;s main concepts are Metric contract, Dimensional report, Control total. Its worked-model focus is: Build one stable orderlines relation first, with one row per intended line or order and a single net-revenue formula. Reconcile its total, then add dimension joins one at a time and compare the total after each join. Only after totals remain stable should you add grouping sets and display labels.</p>
+<p>The lesson&#x27;s main concepts are Metric contract, Dimensional report, Control total. Its worked-model focus is: Build one stable <code>order_lines</code> relation first, with one row per intended line or order and a single net-revenue formula. Reconcile its total, then add dimension joins one at a time and compare the total after each join. Only after totals remain stable should you add grouping sets and display labels.</p>
 <ul>
 <li>Start at <code>FROM</code>/<code>JOIN</code> and state the intermediate row grain. Inspect join keys before adding aggregates; a one-to-many join is allowed to multiply rows only when the later contract accounts for it.</li>
 <li>Apply <code>WHERE</code> to input rows, <code>GROUP BY</code> to form buckets, and <code>HAVING</code> to completed groups. Window functions run over the surviving relation and normally preserve its row count.</li>
@@ -1136,7 +1134,7 @@ payment_kpis <span class="syntax-keyword">AS</span> <span class="syntax-punctuat
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- Day 15 executable solutions</span></span>
-<span class="source-line"><span class="syntax-comment">-- SOLUTION READING MAP — sql-15: Phase1 Project</span></span>
+<span class="source-line"><span class="syntax-comment">-- SOLUTION READING MAP for sql-15: Phase 1 Project: Multi-Dimensional Revenue Report</span></span>
 <span class="source-line"><span class="syntax-comment">-- Explanation: sql/postgres-60day/solutions/day15_solutions.md</span></span>
 <span class="source-line"><span class="syntax-comment">-- Run from the repository root only against advanced_sql_training:</span></span>
 <span class="source-line"><span class="syntax-comment">--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day15_solutions.sql</span></span>
@@ -1415,7 +1413,7 @@ payment_kpis <span class="syntax-keyword">AS</span> <span class="syntax-punctuat
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through sql-15 — Phase1 Project.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through sql-15: Phase 1 Project: Multi-Dimensional Revenue Report.
 
 I have completed the direct catalog prerequisite: `sql-14`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day15_phase1_project.md
@@ -1425,7 +1423,7 @@ Key terms to teach in context: Metric contract, Dimensional report, Control tota
 language and explain table, row, column, result set, row grain, SQL NULL, and
 deterministic ordering where they apply. Then explain the important clauses in
 logical order and state the expected row grain/shape before asking me to run
-anything. The guide&#x27;s lesson-specific worked-model focus is: Build one stable orderlines relation first, with one row per intended line or order and a single net-revenue formula. Reconcile its total, then add dimension joins one at a time and compare the total after each join. Only after totals remain stable should you add grouping sets and display labels.
+anything. The guide&#x27;s lesson-specific worked-model focus is: Build one stable `order_lines` relation first, with one row per intended line or order and a single net-revenue formula. Reconcile its total, then add dimension joins one at a time and compare the total after each join. Only after totals remain stable should you add grouping sets and display labels.
 
 Use only the local disposable advanced_sql_training database. Prefer the
 Docker classroom&#x27;s Whole SQL lesson (psql) workspace and its ignored
@@ -1448,7 +1446,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
       </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
-        <a class="nav-card" href="sql-14.html"><small>Previous lesson</small><strong>sql-14</strong><span>Numeric and Casting</span></a>
+        <a class="nav-card" href="sql-14.html"><small>Previous lesson</small><strong>sql-14</strong><span>Numeric Types, Casting, and Precision</span></a>
         <a class="nav-card next" href="sql-found-01.html"><small>Next lesson</small><strong>sql-found-01</strong><span>Relational Design, DDL, and Integrity Constraints</span></a>
       </nav>
     </div>

@@ -198,7 +198,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Intermediate; approximately 150 minutes. Direct prerequisites: <code>julia-015</code>, <code>julia-016</code>.</p>
 <p>Parse and export bounded CSV data using explicit types and missingness rules rather than accidental inference.</p>
 <h3 id="classroom-execution">Classroom execution<a class="heading-anchor" href="#classroom-execution" aria-label="Link to this section">#</a></h3>
-<p>Choose <strong>Julia language and scientific computing</strong> in <code>/classroom</code>, open this unit, and select its prepared <code>julia</code> runtime. The worker starts a fresh <code>main.jl</code> process with two Julia threads, a fixed package environment, no startup file and offline package settings. Both worked examples are complete under that environment. Save your current pad before replacing it. No package, model or dataset is fetched by a lesson.</p>
+<p>Open <code>julia-017</code> in <code>/classroom</code> with its prepared <code>julia</code> runtime. Worked case A (retain identifiers and missing values) and worked case B (reject malformed typed input and preserve quoting) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing <code>julia-017: all reference checks passed</code>. The <a href="../README.md.html">course overview</a> describes the shared runtime: a fresh offline <code>main.jl</code> process with two threads and a fixed package environment.</p>
 <h3 id="a-text-file-is-not-yet-a-typed-table">A text file is not yet a typed table<a class="heading-anchor" href="#a-text-file-is-not-yet-a-typed-table" aria-label="Link to this section">#</a></h3>
 <p>CSV represents delimited text. A reader must interpret headers, quoting, missing-value markers and data types. Those choices are part of a schema contract. An identifier that looks numeric may need to remain text, because parsing it as an integer can discard leading zeros that are meaningful to identity.</p>
 <p>The classroom prepares CSV 0.10.17 with DataFrames. The examples use that actual version&#x27;s API, including explicit column types and strict parsing. Newer public documentation can describe different behavior, so the pinned source reference is included. No URL or external file is read during these lessons; literal CSV text is wrapped in <code>IOBuffer</code>.</p>
@@ -291,7 +291,7 @@ worked_b<span class="syntax-punctuation">(</span><span class="syntax-punctuation
 <li><a href="https://dataframes.juliadata.org/stable/man/importing_and_exporting/">DataFrames IO</a></li>
 </ul>
 <h3 id="study-companion">Study companion<a class="heading-anchor" href="#study-companion" aria-label="Link to this section">#</a></h3>
-<p>Use the repository learning-companion skill with this lesson ID, your prediction and your actual source/output. Ask for a diagnosis of the first incorrect type, shape, state transition or assumption. Keep observed execution distinct from a timing claim, inferred mathematical result or external deployment.</p></article>
+<p>A repository-aware assistant with the learning-companion skill can review <code>julia-017</code> with you. Give it your prediction for one investigation, your source and the actual output, and ask it to find the first incorrect assumption about CSV, schema, strict parsing, identifier or round trip.</p></article>
   </main>
 </body>
 </html>

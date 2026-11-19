@@ -197,29 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-keyword">public</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Main</span> <span class="syntax-punctuation">{</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span></span>
-<span class="source-line">    <span class="syntax-comment">// Exercise 1: Call an owned loopback endpoint</span></span>
-<span class="source-line">    <span class="syntax-comment">// Start the fixture and request `GET /health`.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: status 200 and body ok.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Exercise 1: Call an owned loopback endpoint: change one input</span></span>
+<span class="source-line">    <span class="syntax-comment">// Copy Example A into a scratch `Main.java` and change</span></span>
+<span class="source-line">    <span class="syntax-comment">// `java.net.http.HttpRequest.newBuilder(server.uri(&quot;/health&quot;))` to</span></span>
+<span class="source-line">    <span class="syntax-comment">// `java.net.http.HttpRequest.newBuilder(server.uri(&quot;/health!&quot;))`. Before running it with</span></span>
+<span class="source-line">    <span class="syntax-comment">// `java -ea Main`, predict which assertion fails and which value it now sees; then run it</span></span>
+<span class="source-line">    <span class="syntax-comment">// and restore the original line.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` from the assertion on</span></span>
+<span class="source-line">    <span class="syntax-comment">// `response.statusCode() == 200 &amp;&amp; response.body().equals(&quot;ok&quot;)`. Restoring the original</span></span>
+<span class="source-line">    <span class="syntax-comment">// line brings back the worked observation: status 200 and body ok.</span></span>
 <span class="source-line"></span>
-<span class="source-line">    <span class="syntax-comment">// Exercise 2: Inspect content metadata</span></span>
-<span class="source-line">    <span class="syntax-comment">// ReadContent-Type on the successful response.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: text/plain with UTF-8 charset.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Exercise 2: Inspect content metadata: diagnose an edited check</span></span>
+<span class="source-line">    <span class="syntax-comment">// A careless edit changed the assertion that Example B adds after Example A so that it reads</span></span>
+<span class="source-line">    <span class="syntax-comment">// `.equals(&quot;text/plain; charset=utf-9&quot;);`. Run Example B with that line, explain why the</span></span>
+<span class="source-line">    <span class="syntax-comment">// edited assertion now fails for the same program state, and restore it.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` from the assertion on</span></span>
+<span class="source-line">    <span class="syntax-comment">// `response.headers().firstValue(&quot;Content-Type&quot;).orElseThrow().equals(&quot;text/plain;</span></span>
+<span class="source-line">    <span class="syntax-comment">// charset=utf-8&quot;)`; after it the line reads `.equals(&quot;text/plain; charset=utf-8&quot;);` again</span></span>
+<span class="source-line">    <span class="syntax-comment">// and text/plain with UTF-8 charset.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 3: Reject an unsupported method</span></span>
-<span class="source-line">    <span class="syntax-comment">// POSTto/health underaGET-onlycontract.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: status405 and method not allowed body.</span></span>
+<span class="source-line">    <span class="syntax-comment">// POST to /health under a GET-only contract.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: status 405 and method not allowed body.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 4: Reject a prefix lookalike</span></span>
-<span class="source-line">    <span class="syntax-comment">// GET/health-extra,which matches the context prefix but not the declared exact path.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: status404.</span></span>
+<span class="source-line">    <span class="syntax-comment">// GET/health-extra, which matches the context prefix but not the declared exact path.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: status 404.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 5: Keep error status separate from transport success</span></span>
-<span class="source-line">    <span class="syntax-comment">// GETanunknownpathandinspectthecompletedresponse.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: HTTP exchange completes with404 rather than a fabricated200.</span></span>
+<span class="source-line">    <span class="syntax-comment">// GET an unknown path and inspect the completed response.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: HTTP exchange completes with 404 rather than a fabricated 200.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 6: Verify local-only target and closure</span></span>
-<span class="source-line">    <span class="syntax-comment">// Inspect the bound host and positive ephemeral port,then close the wrapper.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: host 127.0.0.1;port positive; closed flag true.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Inspect the bound host and positive ephemeral port, then close the wrapper.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: host 127.0.0.1; port positive; closed flag true.</span></span>
 <span class="source-line">    System<span class="syntax-punctuation">.</span><span class="syntax-attribute">out</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">println</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement and check the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line">  <span class="syntax-punctuation">}</span></span>
 <span class="source-line"><span class="syntax-punctuation">}</span></span>

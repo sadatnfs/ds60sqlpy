@@ -200,15 +200,59 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">    <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">meta</span> <span class="syntax-attribute">name</span><span class="syntax-operator">=</span><span class="syntax-string">&quot;viewport&quot;</span> <span class="syntax-attribute">content</span><span class="syntax-operator">=</span><span class="syntax-string">&quot;width=device-width, initial-scale=1&quot;</span> <span class="syntax-punctuation">/</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">title</span><span class="syntax-punctuation">&gt;</span>Print styles, progressive enhancement and resilient delivery: my attempt<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">title</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">style</span><span class="syntax-punctuation">&gt;</span></span>
-<span class="source-line">      <span class="syntax-comment">/* Implement the lesson-specific CSS. Keep keyboard focus visible. */</span></span>
+<span class="source-line">      <span class="syntax-comment">/*</span></span>
+<span class="source-line"><span class="syntax-comment">        Worked example 1: A useful print view</span></span>
+<span class="source-line"><span class="syntax-comment">        @media print {</span></span>
+<span class="source-line"><span class="syntax-comment">          nav,</span></span>
+<span class="source-line"><span class="syntax-comment">          button {</span></span>
+<span class="source-line"><span class="syntax-comment">            display: none;</span></span>
+<span class="source-line"><span class="syntax-comment">          }</span></span>
+<span class="source-line"><span class="syntax-comment">          body {</span></span>
+<span class="source-line"><span class="syntax-comment">            color: black;</span></span>
+<span class="source-line"><span class="syntax-comment">            background: white;</span></span>
+<span class="source-line"><span class="syntax-comment">          }</span></span>
+<span class="source-line"><span class="syntax-comment">        }</span></span>
+<span class="source-line"><span class="syntax-comment">      */</span></span>
+<span class="source-line"></span>
+<span class="source-line">      <span class="syntax-comment">/*</span></span>
+<span class="source-line"><span class="syntax-comment">        Worked example 2: Optional layout enhancement</span></span>
+<span class="source-line"><span class="syntax-comment">        .cards {</span></span>
+<span class="source-line"><span class="syntax-comment">          display: block;</span></span>
+<span class="source-line"><span class="syntax-comment">        }</span></span>
+<span class="source-line"><span class="syntax-comment">        @supports (display: grid) {</span></span>
+<span class="source-line"><span class="syntax-comment">          .cards {</span></span>
+<span class="source-line"><span class="syntax-comment">            display: grid;</span></span>
+<span class="source-line"><span class="syntax-comment">            gap: 1rem;</span></span>
+<span class="source-line"><span class="syntax-comment">          }</span></span>
+<span class="source-line"><span class="syntax-comment">        }</span></span>
+<span class="source-line"><span class="syntax-comment">      */</span></span>
+<span class="source-line"></span>
+<span class="source-line">      <span class="syntax-comment">/* Write the CSS for the exercises here. Keep keyboard focus visible. */</span></span>
 <span class="source-line">    <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">style</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line">  <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">head</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line">  <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">body</span><span class="syntax-punctuation">&gt;</span></span>
-<span class="source-line">    <span class="syntax-comment">&lt;!-- web-023: Build printable study notes with a useful baseline layout. --&gt;</span></span>
-<span class="source-line">    <span class="syntax-comment">&lt;!-- Save your prediction, then implement the six exercises from the guide. --&gt;</span></span>
+<span class="source-line">    <span class="syntax-comment">&lt;!--</span></span>
+<span class="source-line"><span class="syntax-comment">      web-023 exercises. Hints are in the guide; answers are in the solutions folder.</span></span>
+<span class="source-line"><span class="syntax-comment">      1. Identify content that must survive when scripts fail.</span></span>
+<span class="source-line"><span class="syntax-comment">      2. Add a print rule that removes only irrelevant controls.</span></span>
+<span class="source-line"><span class="syntax-comment">      3. Build printable study notes with a useful baseline layout.</span></span>
+<span class="source-line"><span class="syntax-comment">      4. Diagnose a print rule that hides the main region.</span></span>
+<span class="source-line"><span class="syntax-comment">      5. Inspect multiple pages of print preview.</span></span>
+<span class="source-line"><span class="syntax-comment">      6. Explain what a feature query proves and what it does not.</span></span>
+<span class="source-line"><span class="syntax-comment">    --&gt;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">main</span><span class="syntax-punctuation">&gt;</span></span>
-<span class="source-line">      <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">h1</span><span class="syntax-punctuation">&gt;</span>Print styles, progressive enhancement and resilient delivery<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">h1</span><span class="syntax-punctuation">&gt;</span></span>
-<span class="source-line">      <span class="syntax-comment">&lt;!-- Build your own document here. The reference is separate. --&gt;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">nav</span> <span class="syntax-attribute">aria-label</span><span class="syntax-operator">=</span><span class="syntax-string">&quot;Notes&quot;</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-tag">a</span> <span class="syntax-attribute">href</span><span class="syntax-operator">=</span><span class="syntax-string">&quot;#notes&quot;</span><span class="syntax-punctuation">&gt;</span>Read notes<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">a</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">nav</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">article</span> <span class="syntax-attribute">id</span><span class="syntax-operator">=</span><span class="syntax-string">&quot;notes&quot;</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">h1</span><span class="syntax-punctuation">&gt;</span>Printable study notes<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">h1</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">section</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">          <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">h2</span><span class="syntax-punctuation">&gt;</span>Principle<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">h2</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">          <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">p</span><span class="syntax-punctuation">&gt;</span>Preserve useful content before adding presentation.<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">p</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">section</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">section</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">          <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">h2</span><span class="syntax-punctuation">&gt;</span>Evidence<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">h2</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">          <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">p</span><span class="syntax-punctuation">&gt;</span>Inspect both screen and print output.<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">p</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">section</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">article</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">main</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line">  <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">body</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line"><span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">html</span><span class="syntax-punctuation">&gt;</span></span>

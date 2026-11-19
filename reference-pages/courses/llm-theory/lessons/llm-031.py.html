@@ -200,28 +200,28 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 1: Align the target mask</span></span>
-<span class="source-line"><span class="syntax-comment"># Use sequence[1,2,5,6,3], where1,2 are prompt and5,6,3 answer.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: targets[2,5,6,3];mask[False,True,True,True].</span></span>
+<span class="source-line"><span class="syntax-comment"># Use sequence [1, 2, 5, 6, 3], where 1, 2 are prompt and 5, 6, 3 answer.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: targets [2, 5, 6, 3]; mask [False, True, True, True].</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 2: Compute answer-only loss</span></span>
-<span class="source-line"><span class="syntax-comment"># Use zero vocabulary8 logits and replace prompt targets with -100.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: 3 active targets;meanlog8.</span></span>
+<span class="source-line"><span class="syntax-comment"># Use zero vocabulary 8 logits and replace prompt targets with -100.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: 3 active targets; mean \(\log 8\).</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Compare loss sums</span></span>
 <span class="source-line"><span class="syntax-comment"># Calculate full-sequence and answer-only summed losses.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: 4log8 versus3log8.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: 4 log 8 versus 3 log 8.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Inspect ignored gradients</span></span>
 <span class="source-line"><span class="syntax-comment"># Backpropagate answer-only loss and examine the first logit position.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: first-position gradient all zero;answer gradients nonzero.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: first-position gradient all zero; answer gradients nonzero.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Detect template leakage</span></span>
-<span class="source-line"><span class="syntax-comment"># Assign two paraphrased prompts to familyT and split them across train/test.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: family intersectionT.</span></span>
+<span class="source-line"><span class="syntax-comment"># Assign two paraphrased prompts to family T and split them across train/test.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: family intersection T.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Refuse missing answers</span></span>
 <span class="source-line"><span class="syntax-comment"># Set an all-false answer mask and check the denominator before training.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: no active answer targets; explicitValueError.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: no active answer targets; explicit ValueError.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Read the guide and implement the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>

@@ -9,7 +9,7 @@
     content="default-src 'none'; style-src 'self' file: 'unsafe-inline'; font-src data:; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
   >
   <link rel="stylesheet" href="../src/ds60sqlpy/assets/vendor/textbook/fonts.css">
-  <title>python-48 · Transfer Learning CNN · DS60</title>
+  <title>python-48 · Transfer Learning with CNNs · DS60</title>
   <style>
     :root {
       --paper: #f6f2e8;
@@ -312,7 +312,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <div class="shell">
       <section class="hero">
         <p class="eyebrow">python · lesson python-48</p>
-        <h1>Transfer Learning CNN</h1>
+        <h1>Transfer Learning with CNNs</h1>
         <p class="hero-copy">Production, advanced topics, and capstone</p>
         <div class="meta">
           <span class="tag">advanced</span>
@@ -462,11 +462,8 @@ trainable <span class="syntax-operator">=</span> <span class="syntax-punctuation
 <li>Keep experiments in new scratch cells. Do not edit the official solution while attempting the numbered practice.</li>
 <li>Restart the kernel and run from the first cell before calling the lesson complete. A clean run catches hidden state and stale variables.</li>
 </ol>
-<p>Windows PowerShell:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m jupyter lab</code></pre>
-<p>macOS/Linux:</p>
+<p>Linux, macOS, or Ubuntu in Windows WSL 2:</p>
 <pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
-<p>If the Windows environment uses the documented conda-prefix fallback, use <code>.\.venv\python.exe</code> in place of <code>.\.venv\Scripts\python.exe</code>.</p>
 <h4 id="guide--concept-deep-dive-offline-safe-transfer-learning-frozen-parameters-and-cautious-fine-tuning">Concept deep dive: offline-safe transfer learning, frozen parameters, and cautious fine-tuning<a class="heading-anchor" href="#guide--concept-deep-dive-offline-safe-transfer-learning-frozen-parameters-and-cautious-fine-tuning" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
 <p>Transfer learning reuses a <strong>backbone</strong> that learned general image features and replaces its task-specific head. Freezing sets <code>requires_grad=False</code>; it does not automatically switch batch normalization or dropout into evaluation behavior. The optimizer should receive only parameters intended to change.</p>
@@ -477,7 +474,6 @@ trainable <span class="syntax-operator">=</span> <span class="syntax-punctuation
 <li><strong><code>parameter.requires_grad = False</code>:</strong> excludes a parameter from autograd updates but does not change module mode.</li>
 <li><strong><code>model.fc = nn.Linear(model.fc.in_features, classes)</code>:</strong> replaces the classifier head while preserving the backbone feature width.</li>
 </ul>
-<p>Read an API call from the inside out: identify the data entering the operation, the state learned (if any), the value returned, and the evidence that would make the result trustworthy. A method returning without an exception proves only that the syntax and immediate runtime path worked.</p>
 <h5 id="guide--focused-example-a-build-and-verify-a-no-download-frozen-backbone">Focused example A: build and verify a no-download frozen backbone<a class="heading-anchor" href="#guide--focused-example-a-build-and-verify-a-no-download-frozen-backbone" aria-label="Link to this section">#</a></h5>
 <p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> torch
@@ -494,7 +490,6 @@ trainable <span class="syntax-operator">=</span> <span class="syntax-punctuation
 <p><strong>Expected observation:</strong> Only the newly assigned head parameters are trainable; no pretrained asset was downloaded.</p>
 <p><strong>Assumption to name:</strong> Random backbone features are a mechanics fallback, not equivalent to pretrained transfer performance.</p>
 <h5 id="guide--focused-example-b-apply-the-matching-tensor-normalization-contract">Focused example B: apply the matching tensor normalization contract<a class="heading-anchor" href="#guide--focused-example-b-apply-the-matching-tensor-normalization-contract" aria-label="Link to this section">#</a></h5>
-<p>This second example changes one important condition. Compare it with Example A instead of reading it as unrelated syntax.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> torch
 <span class="syntax-keyword">from</span> torchvision.transforms <span class="syntax-keyword">import</span> Normalize
 
@@ -548,15 +543,15 @@ transformed <span class="syntax-operator">=</span> normalize<span class="syntax-
 <ol>
 <li>Load a small image folder with <code>ImageFolder</code> and <code>DataLoader</code>.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 1; offline-safe transfer learning, frozen parameters, and cautious fine-tuning; print train/validation class_to_idx mappings, dataset sizes, batch image/label shapes, and transform sizes; assert mappings agree and handle a missing image folder with the documented local FakeData fallback.</p>
+<p><strong>Verify:</strong> Print train/validation class_to_idx mappings, dataset sizes, batch image/label shapes, and transform sizes; assert mappings agree and handle a missing image folder with the documented local FakeData fallback.</p>
 <ol start="2">
 <li>Train only the classifier head for a few epochs.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 2; offline-safe transfer learning, frozen parameters, and cautious fine-tuning; freeze all backbone parameters, assert only classifier-head parameters enter the optimizer, print train/validation loss and accuracy per epoch, and save artifact/weight provenance.</p>
+<p><strong>Verify:</strong> Freeze all backbone parameters, assert only classifier-head parameters enter the optimizer, print train/validation loss and accuracy per epoch, and save artifact/weight provenance.</p>
 <ol start="3">
 <li>Unfreeze the final ResNet block and fine-tune it with a lower learning rate.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 3; offline-safe transfer learning, frozen parameters, and cautious fine-tuning; unfreeze only the final ResNet block plus head, print every trainable parameter and its learning rate, and compare frozen versus fine-tuned validation metrics from the same split while recording the best checkpoint.</p>
+<p><strong>Verify:</strong> Unfreeze only the final ResNet block plus head, print every trainable parameter and its learning rate, and compare frozen versus fine-tuned validation metrics from the same split while recording the best checkpoint.</p>
 <h5 id="guide--progressive-hints">Progressive hints<a class="heading-anchor" href="#guide--progressive-hints" aria-label="Link to this section">#</a></h5>
 <ol>
 <li>Use <code>data/train/&lt;class&gt;/...</code> and <code>data/valid/&lt;class&gt;/...</code>. Resize/crop to the expected input size and normalize with the selected weights&#x27; documented transform. Start with <code>num_workers=0</code> for portable notebooks.</li>
@@ -629,7 +624,7 @@ transformed <span class="syntax-operator">=</span> normalize<span class="syntax-
 </ul>
 <h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into the AI tutor while the repository root is open:</p>
-<pre class="highlighted-code"><code class="language-text">Tutor me through `python-48` : Day 48 : Transfer Learning with CNNs.
+<pre class="highlighted-code"><code class="language-text">Tutor me through `python-48` (Day 48: Transfer Learning with CNNs).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize offline-safe transfer learning, frozen parameters, and cautious fine-tuning. Use exactly these maintained learner materials:
@@ -682,7 +677,7 @@ merely ran is not evidence of mastery.</code></pre></div>
         </header>
 
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-48-transfer-learning-cnn-basics">Day 48 : Transfer learning &amp; CNN basics<a class="heading-anchor" href="#learner--cell-1--day-48-transfer-learning-cnn-basics" aria-label="Link to this section">#</a></h3>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-48-transfer-learning-with-cnns">Day 48: Transfer Learning with CNNs<a class="heading-anchor" href="#learner--cell-1--day-48-transfer-learning-with-cnns" aria-label="Link to this section">#</a></h3>
 <p>Objectives:</p>
 <ul>
 <li>Use a pretrained CNN (ResNet18) and fine-tune last layers.</li>
@@ -718,7 +713,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-3--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-3--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
 <p>Select the <code>Python (ds60sqlpy)</code> kernel, start at the first cell, and write each prediction before execution. Keep attempts in the provided scratch cell or new cells. Restart the kernel and run from the top before calling the work reproducible.</p>
-<h4 id="learner--cell-3--concept-lab-offline-safe-transfer-learning-frozen-parameters-and-cautious-fine-tuning">Concept lab : offline-safe transfer learning, frozen parameters, and cautious fine-tuning<a class="heading-anchor" href="#learner--cell-3--concept-lab-offline-safe-transfer-learning-frozen-parameters-and-cautious-fine-tuning" aria-label="Link to this section">#</a></h4>
+<h4 id="learner--cell-3--concept-lab-offline-safe-transfer-learning-frozen-parameters-and-cautious-fine-tuning">Concept lab: offline-safe transfer learning, frozen parameters, and cautious fine-tuning<a class="heading-anchor" href="#learner--cell-3--concept-lab-offline-safe-transfer-learning-frozen-parameters-and-cautious-fine-tuning" aria-label="Link to this section">#</a></h4>
 <h5 id="learner--cell-3--mental-model">Mental model<a class="heading-anchor" href="#learner--cell-3--mental-model" aria-label="Link to this section">#</a></h5>
 <p>Transfer learning reuses a <strong>backbone</strong> that learned general image features and replaces its task-specific head. Freezing sets <code>requires_grad=False</code>; it does not automatically switch batch normalization or dropout into evaluation behavior. The optimizer should receive only parameters intended to change.</p>
 <p>Pretrained weights are an external artifact with provenance, license, preprocessing, and cache requirements. The default lesson must make a connected first-use download explicit and provide a <code>weights=None</code> architecture-only fallback so offline execution never surprises the learner.</p>
@@ -729,7 +724,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <li><strong><code>model.fc = nn.Linear(model.fc.in_features, classes)</code>:</strong> replaces the classifier head while preserving the backbone feature width.</li>
 </ul>
 <p>For every call, identify input data, learned state, returned value, and a check that can fail. That habit prevents a successful cell from being mistaken for a correct analysis.</p></article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h5 id="learner--cell-4--focused-example-a-build-and-verify-a-no-download-frozen-backbone">Focused example A : build and verify a no-download frozen backbone<a class="heading-anchor" href="#learner--cell-4--focused-example-a-build-and-verify-a-no-download-frozen-backbone" aria-label="Link to this section">#</a></h5>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h5 id="learner--cell-4--focused-example-a-build-and-verify-a-no-download-frozen-backbone">Focused example A: build and verify a no-download frozen backbone<a class="heading-anchor" href="#learner--cell-4--focused-example-a-build-and-verify-a-no-download-frozen-backbone" aria-label="Link to this section">#</a></h5>
 <p><strong>Predict first:</strong> write down the expected shape, type, ordering, or direction of the result. Then run the next cell.</p>
 <p><strong>Assumption:</strong> Random backbone features are a mechanics fallback, not equivalent to pretrained transfer performance.</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> torch</span>
@@ -746,7 +741,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><p><strong>Expected observation:</strong> Only the newly assigned head parameters are trainable; no pretrained asset was downloaded.</p>
 <p>Do not force exact equality for estimates based on samples. Record the seed, sample size, tolerance, and metric where they matter.</p></article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><h5 id="learner--cell-7--focused-example-b-apply-the-matching-tensor-normalization-contract">Focused example B : apply the matching tensor normalization contract<a class="heading-anchor" href="#learner--cell-7--focused-example-b-apply-the-matching-tensor-normalization-contract" aria-label="Link to this section">#</a></h5>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><h5 id="learner--cell-7--focused-example-b-apply-the-matching-tensor-normalization-contract">Focused example B: apply the matching tensor normalization contract<a class="heading-anchor" href="#learner--cell-7--focused-example-b-apply-the-matching-tensor-normalization-contract" aria-label="Link to this section">#</a></h5>
 <p>This example changes one important condition. Predict how and why the result should differ from Example A.</p>
 <p><strong>Assumption:</strong> Those mean/std values are paired with the selected pretrained-weight recipe; arbitrary weights may require another contract.</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> torch</span>
@@ -802,15 +797,15 @@ merely ran is not evidence of mastery.</code></pre></div>
 <ol>
 <li>Load a small image folder with <code>ImageFolder</code> and <code>DataLoader</code>.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 1 : offline-safe transfer learning, frozen parameters, and cautious fine-tuning : print train/validation class_to_idx mappings, dataset sizes, batch image/label shapes, and transform sizes; assert mappings agree and handle a missing image folder with the documented local FakeData fallback.</p>
+<p><strong>Verify:</strong> Print train/validation class_to_idx mappings, dataset sizes, batch image/label shapes, and transform sizes; assert mappings agree and handle a missing image folder with the documented local FakeData fallback.</p>
 <ol start="2">
 <li>Train only the classifier head for a few epochs.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 2 : offline-safe transfer learning, frozen parameters, and cautious fine-tuning : freeze all backbone parameters, assert only classifier-head parameters enter the optimizer, print train/validation loss and accuracy per epoch, and save artifact/weight provenance.</p>
+<p><strong>Verify:</strong> Freeze all backbone parameters, assert only classifier-head parameters enter the optimizer, print train/validation loss and accuracy per epoch, and save artifact/weight provenance.</p>
 <ol start="3">
 <li>Unfreeze the final ResNet block and fine-tune it with a lower learning rate.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 3 : offline-safe transfer learning, frozen parameters, and cautious fine-tuning : unfreeze only the final ResNet block plus head, print every trainable parameter and its learning rate, and compare frozen versus fine-tuned validation metrics from the same split while recording the best checkpoint.</p>
+<p><strong>Verify:</strong> Unfreeze only the final ResNet block plus head, print every trainable parameter and its learning rate, and compare frozen versus fine-tuned validation metrics from the same split while recording the best checkpoint.</p>
 <h5 id="learner--cell-10--progressive-hints">Progressive hints<a class="heading-anchor" href="#learner--cell-10--progressive-hints" aria-label="Link to this section">#</a></h5>
 <ol>
 <li>Use <code>data/train/&lt;class&gt;/...</code> and <code>data/valid/&lt;class&gt;/...</code>. Resize/crop to the expected input size and normalize with the selected weights&#x27; documented transform. Start with <code>num_workers=0</code> for portable notebooks.</li>
@@ -824,15 +819,15 @@ merely ran is not evidence of mastery.</code></pre></div>
 <ol start="4">
 <li><strong>Transform mismatch diagnosis:</strong> Compare predictions when validation images use the training transform with random crop/flip versus a deterministic validation transform. Explain the metric instability. <strong>Progressive hint:</strong> Augmentation belongs to training. Validation should apply deterministic resize/crop and the normalization expected by the selected weights.</li>
 </ol>
-<p><strong>Verify:</strong> Transform mismatch diagnosis : evaluate the same validation images repeatedly under random training transforms and deterministic validation transforms; print prediction variance and metric samples, and assert the deterministic path is repeatable.</p>
+<p><strong>Verify:</strong> Transform mismatch diagnosis: evaluate the same validation images repeatedly under random training transforms and deterministic validation transforms; print prediction variance and metric samples, and assert the deterministic path is repeatable.</p>
 <ol start="5">
 <li><strong>Frozen-state edge case:</strong> Freeze a pretrained backbone containing BatchNorm. Explain the difference between <code>requires_grad=False</code> and putting frozen modules in evaluation mode. <strong>Progressive hint:</strong> requires_grad controls parameter gradients; train/eval controls BatchNorm running statistics and Dropout behavior.</li>
 </ol>
-<p><strong>Verify:</strong> Frozen-state edge case : print every requires_grad flag and BatchNorm training flag/running-stat checksum before/after an epoch; assert frozen weights do not change and document whether frozen BatchNorm statistics remain fixed.</p>
+<p><strong>Verify:</strong> Frozen-state edge case: print every requires_grad flag and BatchNorm training flag/running-stat checksum before/after an epoch; assert frozen weights do not change and document whether frozen BatchNorm statistics remain fixed.</p>
 <ol start="6">
 <li><strong>Offline fallback design:</strong> Make the lesson runnable when pretrained weights are not cached. Detect cache availability, offer an explicit connected preload step, and provide a tiny randomly initialized CNN smoke path. <strong>Progressive hint:</strong> Never trigger an undocumented download. Report whether results use pretrained or random weights because their learning goals differ.</li>
 </ol>
-<p><strong>Verify:</strong> Offline fallback design : print cached-weight capability without downloading; test cached pretrained, explicit connected-preload instruction, and random-CNN fallback branches, each producing a batch-shape/prediction smoke result.</p>
+<p><strong>Verify:</strong> Offline fallback design: print cached-weight capability without downloading; test cached pretrained, explicit connected-preload instruction, and random-CNN fallback branches, each producing a batch-shape/prediction smoke result.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Expanded mastery lab scratch space</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
@@ -873,7 +868,7 @@ merely ran is not evidence of mastery.</code></pre></div>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-48-solutions-transfer-learning-with-cnns">Day 48: Solutions: Transfer Learning with CNNs<a class="heading-anchor" href="#solution-1--day-48-solutions-transfer-learning-with-cnns" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-48-solutions-transfer-learning-with-cnns">Day 48 Solutions: Transfer Learning with CNNs<a class="heading-anchor" href="#solution-1--day-48-solutions-transfer-learning-with-cnns" aria-label="Link to this section">#</a></h3>
 <p>We fine-tune a pretrained ResNet on an ImageFolder dataset. We first train a linear head, then unfreeze the last block. We also add data augmentation and use OneCycleLR. Each block is followed by a step‑by‑step explanation.</p>
 <p>Contents</p>
 <ul>
@@ -950,7 +945,7 @@ valid_dl <span class="syntax-operator">=</span> DataLoader<span class="syntax-pu
 <li>DataLoader: <code>num_workers=0</code> is portable in notebooks and on Windows. Increase it only after moving loader creation under a script&#x27;s <code>if __name__ == &quot;__main__&quot;:</code> guard and measuring a benefit.</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 1; Linear head then unfreeze last block</p>
+<p>Worked reference for Exercise 1: Linear head then unfreeze last block</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-comment"># 1) Reuse cached weights without making a surprise network request</span>
 weights <span class="syntax-operator">=</span> models<span class="syntax-operator">.</span>ResNet18_Weights<span class="syntax-operator">.</span>DEFAULT
 checkpoint <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span>torch<span class="syntax-operator">.</span>hub<span class="syntax-operator">.</span>get_dir<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">checkpoints</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">/</span> Path<span class="syntax-punctuation">(</span>weights<span class="syntax-operator">.</span>url<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>name
@@ -1033,7 +1028,7 @@ hist_tune <span class="syntax-operator">=</span> <span class="syntax-punctuation
 <li>Two phases: first stabilize head, then unfreeze last block with smaller LR to avoid catastrophic forgetting</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 2; Augmentation</p>
+<p>Worked reference for Exercise 2: Augmentation</p>
 <pre class="highlighted-code"><code class="language-python">aug_tfms <span class="syntax-operator">=</span> transforms<span class="syntax-operator">.</span>Compose<span class="syntax-punctuation">(</span>
     <span class="syntax-punctuation">[</span>
         transforms<span class="syntax-operator">.</span>RandomResizedCrop<span class="syntax-punctuation">(</span><span class="syntax-number">64</span><span class="syntax-punctuation">,</span> scale<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-number">0.8</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
@@ -1075,7 +1070,7 @@ hist_aug <span class="syntax-operator">=</span> <span class="syntax-punctuation"
 <li>Expect slightly higher training loss but better generalization (val acc)</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 3; OneCycleLR</p>
+<p>Worked reference for Exercise 3: OneCycleLR</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-comment"># Reset optimizer for OneCycle</span>
 max_lr <span class="syntax-operator">=</span> <span class="syntax-number">1e-3</span>
 steps_per_epoch <span class="syntax-operator">=</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>train_dl<span class="syntax-punctuation">)</span>
@@ -1132,17 +1127,17 @@ plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(<
 <p><strong>Prompt:</strong> Load a small image folder with <code>ImageFolder</code> and <code>DataLoader</code>.</p>
 <p><strong>How to reason about it:</strong> ImageFolder derives class IDs from sorted directory names; preserve <code>class_to_idx</code>, use the selected weights&#x27; documented transforms, and start with <code>num_workers=0</code> for a portable first run.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 1; offline-safe transfer learning, frozen parameters, and cautious fine-tuning; print train/validation class_to_idx mappings, dataset sizes, batch image/label shapes, and transform sizes; assert mappings agree and handle a missing image folder with the documented local FakeData fallback.</p>
+<p><strong>Verify:</strong> Print train/validation class_to_idx mappings, dataset sizes, batch image/label shapes, and transform sizes; assert mappings agree and handle a missing image folder with the documented local FakeData fallback.</p>
 <h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Train only the classifier head for a few epochs.</p>
 <p><strong>How to reason about it:</strong> When training only the classifier head, pass only trainable head parameters to the optimizer and monitor validation loss and accuracy. Frozen parameters should have no gradients.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 2; offline-safe transfer learning, frozen parameters, and cautious fine-tuning; freeze all backbone parameters, assert only classifier-head parameters enter the optimizer, print train/validation loss and accuracy per epoch, and save artifact/weight provenance.</p>
+<p><strong>Verify:</strong> Freeze all backbone parameters, assert only classifier-head parameters enter the optimizer, print train/validation loss and accuracy per epoch, and save artifact/weight provenance.</p>
 <h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Unfreeze the final ResNet block and fine-tune it with a lower learning rate.</p>
 <p><strong>How to reason about it:</strong> Unfreezing the final block increases trainable capacity. Use a smaller backbone learning rate, keep the head rate explicit, and compare against the frozen baseline on the same split.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 3; offline-safe transfer learning, frozen parameters, and cautious fine-tuning; unfreeze only the final ResNet block plus head, print every trainable parameter and its learning rate, and compare frozen versus fine-tuned validation metrics from the same split while recording the best checkpoint.</p>
+<p><strong>Verify:</strong> Unfreeze only the final ResNet block plus head, print every trainable parameter and its learning rate, and compare frozen versus fine-tuned validation metrics from the same split while recording the best checkpoint.</p>
 <h5 id="solution-1--exercise-4-transform-mismatch-diagnosis">Exercise 4: Transform mismatch diagnosis<a class="heading-anchor" href="#solution-1--exercise-4-transform-mismatch-diagnosis" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Compare predictions when validation images use the training transform with random crop/flip versus a deterministic validation transform. Explain the metric instability.</p>
 <p><strong>Reasoning before implementation:</strong> Augmentation belongs to training. Validation should apply deterministic resize/crop and the normalization expected by the selected weights.</p>
@@ -1190,7 +1185,7 @@ plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(<
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="solution-2--cell-1--day-48-solutions-transfer-learning-with-cnns">Day 48: Solutions: Transfer Learning with CNNs<a class="heading-anchor" href="#solution-2--cell-1--day-48-solutions-transfer-learning-with-cnns" aria-label="Link to this section">#</a></h3>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="solution-2--cell-1--day-48-solutions-transfer-learning-with-cnns">Day 48 Solutions: Transfer Learning with CNNs<a class="heading-anchor" href="#solution-2--cell-1--day-48-solutions-transfer-learning-with-cnns" aria-label="Link to this section">#</a></h3>
 <p>We fine-tune a pretrained ResNet on an ImageFolder dataset. We first train a linear head, then unfreeze the last block. We also add data augmentation and use OneCycleLR. Each block is followed by a step‑by‑step explanation.</p>
 <p>Contents</p>
 <ul>
@@ -1269,7 +1264,7 @@ plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(<
 <li>DataLoader: <code>num_workers=0</code> is portable in notebooks and on Windows. Increase it only after moving loader creation under a script&#x27;s <code>if __name__ == &quot;__main__&quot;:</code> guard and measuring a benefit.</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 1; Linear head then unfreeze last block</p></article>
+<p>Worked reference for Exercise 1: Linear head then unfreeze last block</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># 1) Reuse cached weights without making a surprise network request</span></span>
 <span class="source-line">weights <span class="syntax-operator">=</span> models<span class="syntax-operator">.</span>ResNet18_Weights<span class="syntax-operator">.</span>DEFAULT</span>
 <span class="source-line">checkpoint <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span>torch<span class="syntax-operator">.</span>hub<span class="syntax-operator">.</span>get_dir<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-string">&quot;</span><span class="syntax-string">checkpoints</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">/</span> Path<span class="syntax-punctuation">(</span>weights<span class="syntax-operator">.</span>url<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>name</span>
@@ -1353,7 +1348,7 @@ plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(<
 <li>Two phases: first stabilize head, then unfreeze last block with smaller LR to avoid catastrophic forgetting</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 2; Augmentation</p></article>
+<p>Worked reference for Exercise 2: Augmentation</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line">aug_tfms <span class="syntax-operator">=</span> transforms<span class="syntax-operator">.</span>Compose<span class="syntax-punctuation">(</span></span>
 <span class="source-line">    <span class="syntax-punctuation">[</span></span>
 <span class="source-line">        transforms<span class="syntax-operator">.</span>RandomResizedCrop<span class="syntax-punctuation">(</span><span class="syntax-number">64</span><span class="syntax-punctuation">,</span> scale<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-number">0.8</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
@@ -1396,7 +1391,7 @@ plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(<
 <li>Expect slightly higher training loss but better generalization (val acc)</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 3; OneCycleLR</p></article>
+<p>Worked reference for Exercise 3: OneCycleLR</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Reset optimizer for OneCycle</span></span>
 <span class="source-line">max_lr <span class="syntax-operator">=</span> <span class="syntax-number">1e-3</span></span>
 <span class="source-line">steps_per_epoch <span class="syntax-operator">=</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>train_dl<span class="syntax-punctuation">)</span></span>
@@ -1454,17 +1449,17 @@ plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(<
 <p><strong>Prompt:</strong> Load a small image folder with <code>ImageFolder</code> and <code>DataLoader</code>.</p>
 <p><strong>How to reason about it:</strong> ImageFolder derives class IDs from sorted directory names; preserve <code>class_to_idx</code>, use the selected weights&#x27; documented transforms, and start with <code>num_workers=0</code> for a portable first run.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 1; offline-safe transfer learning, frozen parameters, and cautious fine-tuning; print train/validation class_to_idx mappings, dataset sizes, batch image/label shapes, and transform sizes; assert mappings agree and handle a missing image folder with the documented local FakeData fallback.</p>
+<p><strong>Verify:</strong> Print train/validation class_to_idx mappings, dataset sizes, batch image/label shapes, and transform sizes; assert mappings agree and handle a missing image folder with the documented local FakeData fallback.</p>
 <h5 id="solution-2--cell-9--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-2--cell-9--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Train only the classifier head for a few epochs.</p>
 <p><strong>How to reason about it:</strong> When training only the classifier head, pass only trainable head parameters to the optimizer and monitor validation loss and accuracy. Frozen parameters should have no gradients.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 2; offline-safe transfer learning, frozen parameters, and cautious fine-tuning; freeze all backbone parameters, assert only classifier-head parameters enter the optimizer, print train/validation loss and accuracy per epoch, and save artifact/weight provenance.</p>
+<p><strong>Verify:</strong> Freeze all backbone parameters, assert only classifier-head parameters enter the optimizer, print train/validation loss and accuracy per epoch, and save artifact/weight provenance.</p>
 <h5 id="solution-2--cell-9--exercise-3-original-lesson-practice">Exercise 3: Original lesson practice<a class="heading-anchor" href="#solution-2--cell-9--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Unfreeze the final ResNet block and fine-tune it with a lower learning rate.</p>
 <p><strong>How to reason about it:</strong> Unfreezing the final block increases trainable capacity. Use a smaller backbone learning rate, keep the head rate explicit, and compare against the frozen baseline on the same split.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 3; offline-safe transfer learning, frozen parameters, and cautious fine-tuning; unfreeze only the final ResNet block plus head, print every trainable parameter and its learning rate, and compare frozen versus fine-tuned validation metrics from the same split while recording the best checkpoint.</p>
+<p><strong>Verify:</strong> Unfreeze only the final ResNet block plus head, print every trainable parameter and its learning rate, and compare frozen versus fine-tuned validation metrics from the same split while recording the best checkpoint.</p>
 <h5 id="solution-2--cell-9--exercise-4-transform-mismatch-diagnosis">Exercise 4: Transform mismatch diagnosis<a class="heading-anchor" href="#solution-2--cell-9--exercise-4-transform-mismatch-diagnosis" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Compare predictions when validation images use the training transform with random crop/flip versus a deterministic validation transform. Explain the metric instability.</p>
 <p><strong>Reasoning before implementation:</strong> Augmentation belongs to training. Validation should apply deterministic resize/crop and the normalization expected by the selected weights.</p>
@@ -1500,7 +1495,7 @@ plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(<
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through `python-48` : Day 48 : Transfer Learning with CNNs.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through `python-48` (Day 48: Transfer Learning with CNNs).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize offline-safe transfer learning, frozen parameters, and cautious fine-tuning. Use exactly these maintained learner materials:
@@ -1534,8 +1529,8 @@ merely ran is not evidence of mastery.</textarea>
       </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
-        <a class="nav-card" href="python-47.html"><small>Previous lesson</small><strong>python-47</strong><span>PyTorch Basics NN Training Loop</span></a>
-        <a class="nav-card next" href="python-49.html"><small>Next lesson</small><strong>python-49</strong><span>NLP Basics Hugging Face Spacy</span></a>
+        <a class="nav-card" href="python-47.html"><small>Previous lesson</small><strong>python-47</strong><span>PyTorch Tensors, Modules, and Training Loops</span></a>
+        <a class="nav-card next" href="python-49.html"><small>Next lesson</small><strong>python-49</strong><span>NLP Basics with Hugging Face and spaCy</span></a>
       </nav>
     </div>
   </main>

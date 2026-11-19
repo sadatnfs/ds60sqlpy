@@ -197,7 +197,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The executable reference is <code>julia-022_reference.jl</code>. Its checks cover the stated authored inputs; they are not a claim of general scientific validity or mastery.</p>
 <h3 id="1-differentiate-analytically">1. Differentiate analytically<a class="heading-anchor" href="#1-differentiate-analytically" aria-label="Link to this section">#</a></h3>
 <p>An analytic case provides an independent reference for the AD implementation.</p>
-<p><strong>Expected observation:</strong> The result is[4,18].</p>
+<p><strong>Expected observation:</strong> The result is <code>[4, 18]</code>.</p>
 <h3 id="2-check-jacobian-axes">2. Check Jacobian axes<a class="heading-anchor" href="#2-check-jacobian-axes" aria-label="Link to this section">#</a></h3>
 <p>A transposed derivative array can have plausible values but the wrong meaning.</p>
 <p><strong>Expected observation:</strong> Rows correspond to outputs and columns to inputs.</p>
@@ -206,7 +206,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Expected observation:</strong> The dual-number path can retain derivative information.</p>
 <h3 id="4-compare-reductions">4. Compare reductions<a class="heading-anchor" href="#4-compare-reductions" aria-label="Link to this section">#</a></h3>
 <p>A reduction change alters gradient scale and cannot be treated as a cosmetic refactor.</p>
-<p><strong>Expected observation:</strong> Gradients are[1,1] and[0.5,0.5].</p>
+<p><strong>Expected observation:</strong> Gradients are <code>[1, 1]</code> and <code>[0.5, 0.5]</code>.</p>
 <h3 id="5-inspect-a-branch-boundary">5. Inspect a branch boundary<a class="heading-anchor" href="#5-inspect-a-branch-boundary" aria-label="Link to this section">#</a></h3>
 <p>At a nondifferentiable point, a returned convention should not be promoted to a unique mathematical derivative.</p>
 <p><strong>Expected observation:</strong> A library result needs a differentiability interpretation.</p>

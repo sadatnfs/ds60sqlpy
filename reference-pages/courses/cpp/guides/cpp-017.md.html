@@ -207,14 +207,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Treat the result as a tagged choice. For 0, the active alternative is int and the numeric value happens to be zero. For -1, the active alternative is ParseError with a reason string. Asking get&lt;int&gt; of the second value is a programmer error, not expected input rejection. A checked visitor or get_if branch handles both alternatives. Exceptions are useful at a file or process boundary only when that boundary can preserve context and decide whether to stop or recover.</p>
 <h3 id="representing-failure-as-data-or-control-flow">Representing failure as data or control flow<a class="heading-anchor" href="#representing-failure-as-data-or-control-flow" aria-label="Link to this section">#</a></h3>
 <p>An operation can fail without producing a valid result. The interface must make that distinction visible. optional&lt;T&gt; represents either a value or absence, but carries no detailed error by itself. variant&lt;int, ParseError&gt; can represent a successful integer or a structured reason. An exception transfers control to a matching handler and can unwind intermediate scopes. These choices express different contracts rather than one universally best error style.</p>
-<p>The positive function accepts zero because nonnegative includes the boundary. Its success alternative contains int0. The failure alternative for -1 contains ParseError with reason negative. holds_alternative checks which type is active before the caller extracts a value. Treating the variant as though it always held int would lose the error path; using get on the wrong alternative can itself throw bad_variant_access.</p>
+<p>The positive function accepts zero because nonnegative includes the boundary. Its success alternative contains int 0. The failure alternative for -1 contains ParseError with reason negative. holds_alternative checks which type is active before the caller extracts a value. Treating the variant as though it always held int would lose the error path; using get on the wrong alternative can itself throw bad_variant_access.</p>
 <p>Error context should explain the input boundary without exposing unnecessary data. A parser might retain row number and a reason code while avoiding a complete sensitive record. A small structured error also supports exact tests and programmatic handling more reliably than matching a long free-form sentence. The teaching reason string is deliberately simple, not a complete production diagnostic schema.</p>
 <p>Choose a consistent handling boundary. If a lower-level parser returns a variant, the caller should deliberately decide whether to count a rejected row, abort the operation or translate the error into an exception. Silently substituting zero for every failure makes invalid input indistinguishable from legitimate zero. Conversely, aborting an entire batch for one malformed row may violate a declared partial-acceptance policy.</p>
 <p>Exceptions and RAII work together when a failure crosses several calls. Returned error values can make expected local alternatives explicit. In both designs, test that success and failure have different observable results and that required cleanup/accounting still happens. A function that prints an error but returns an apparently valid value leaves callers unable to enforce the contract.</p>
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the C++ module, save this lesson&#x27;s learner pad, then use Run. The worker stages the pad as <code>main.cpp</code> and compiles one translation unit. Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for exact local commands, flags, exit statuses, paths and Docker guidance. Tests involving multiple files, CMake, tool flags or shared libraries are explicitly host-project exercises.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
-<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs:each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
+<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs: each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p><a href="../examples/cpp-017-example-1.cpp.html">Complete program 1</a></p>
 <pre class="highlighted-code"><code class="language-cpp"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;cassert&gt;</span>
@@ -239,7 +239,7 @@ Result <span class="syntax-function">positive</span><span class="syntax-punctuat
   std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpp-017 example 1 checks passed</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
   <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
-<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<p><strong>Expected:</strong> With assertions enabled, the program exits with status 0 and prints:</p>
 <pre class="highlighted-code"><code class="language-text">cpp-017 example 1 checks passed</code></pre>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p><a href="../examples/cpp-017-example-2.cpp.html">Complete program 2</a></p>
@@ -265,38 +265,38 @@ Result <span class="syntax-function">positive</span><span class="syntax-punctuat
   std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpp-017 example 2 checks passed</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
   <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
-<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<p><strong>Expected:</strong> With assertions enabled, the program exits with status 0 and prints:</p>
 <pre class="highlighted-code"><code class="language-text">cpp-017 example 2 checks passed</code></pre>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-classify-alternatives">Exercise 1: Classify alternatives<a class="heading-anchor" href="#exercise-1-classify-alternatives" aria-label="Link to this section">#</a></h4>
 <p>Evaluate positive for 0, 5, -1.</p>
 <p><strong>Expected result/shape:</strong> Two success values 0, 5 and one negative error.</p>
-<p><strong>Verify:</strong> Two success values 0, 5 and one negative error.</p>
+<p><strong>Verify:</strong> Assert <code>std::get&lt;int&gt;(positive(0)) == 0</code>, <code>std::get&lt;int&gt;(positive(5)) == 5</code> and <code>std::holds_alternative&lt;ParseError&gt;(positive(-1))</code>; zero is a success, not an error.</p>
 <p><strong>Progressive hints:</strong> Error state is encoded independently of numeric value.</p>
 <h4 id="exercise-2-write-an-observer">Exercise 2: Write an observer<a class="heading-anchor" href="#exercise-2-write-an-observer" aria-label="Link to this section">#</a></h4>
 <p>Use get_if to print value or reason without throwing.</p>
 <p><strong>Expected result/shape:</strong> All three inputs produce a classified outcome.</p>
-<p><strong>Verify:</strong> All three inputs produce a classified outcome.</p>
+<p><strong>Verify:</strong> Run 0, 5 and -1 through one <code>std::get_if</code> branch each and confirm three printed lines, with -1 showing <code>negative</code> and no exception escaping.</p>
 <p><strong>Progressive hints:</strong> Check the active variant before accessing it.</p>
 <h4 id="exercise-3-preserve-a-missing-value">Exercise 3: Preserve a missing value<a class="heading-anchor" href="#exercise-3-preserve-a-missing-value" aria-label="Link to this section">#</a></h4>
 <p>Distinguish optional&lt;int&gt;{0} from nullopt.</p>
 <p><strong>Expected result/shape:</strong> First present, second absent.</p>
-<p><strong>Verify:</strong> First present, second absent.</p>
+<p><strong>Verify:</strong> Assert <code>std::optional&lt;int&gt;{0}.has_value()</code> and <code>!std::optional&lt;int&gt;{}.has_value()</code>; comparing contained values alone would hide the difference.</p>
 <p><strong>Progressive hints:</strong> get_or_else-style defaults can erase missingness.</p>
 <h4 id="exercise-4-repair-bad-access">Exercise 4: Repair bad access<a class="heading-anchor" href="#exercise-4-repair-bad-access" aria-label="Link to this section">#</a></h4>
 <p>Call get&lt;int&gt; on the error in a scratch copy.</p>
 <p><strong>Expected result/shape:</strong> bad_variant_access; replace with checked dispatch.</p>
-<p><strong>Verify:</strong> bad_variant_access; replace with checked dispatch.</p>
+<p><strong>Verify:</strong> Wrap <code>std::get&lt;int&gt;(positive(-1))</code> in <code>try</code>/<code>catch</code> and assert <code>std::bad_variant_access</code> is caught; after switching to <code>std::get_if</code> or <code>std::visit</code>, no exception is possible.</p>
 <p><strong>Progressive hints:</strong> A wrong alternative is a program logic error.</p>
 <h4 id="exercise-5-choose-a-boundary">Exercise 5: Choose a boundary<a class="heading-anchor" href="#exercise-5-choose-a-boundary" aria-label="Link to this section">#</a></h4>
 <p>Explain why a missing required file is fatal while one bad row can be recorded.</p>
 <p><strong>Expected result/shape:</strong> Separate process-level error from row-level rejection.</p>
-<p><strong>Verify:</strong> Separate process-level error from row-level rejection.</p>
+<p><strong>Verify:</strong> Check that your explanation stops the whole run with a nonzero status for the missing file but records the bad row and continues with the next one.</p>
 <p><strong>Progressive hints:</strong> The caller needs enough context to choose recovery.</p>
 <h4 id="exercise-6-transfer-richer-reasons">Exercise 6: Transfer richer reasons<a class="heading-anchor" href="#exercise-6-transfer-richer-reasons" aria-label="Link to this section">#</a></h4>
 <p>Add too_large for values above 100.</p>
 <p><strong>Expected result/shape:</strong> 101 maps to too_large, -1 to negative, 100 succeeds.</p>
-<p><strong>Verify:</strong> 101 maps to too_large, -1 to negative, 100 succeeds.</p>
+<p><strong>Verify:</strong> Assert the reasons for 101 and -1 are <code>too_large</code> and <code>negative</code>, and that <code>std::get&lt;int&gt;(positive(100)) == 100</code>; 100 is the inclusive boundary.</p>
 <p><strong>Progressive hints:</strong> Named reasons preserve the failure taxonomy.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain why this observation follows from the mechanism: Zero is a present successful integer. Then explain the changed condition in example 2 without opening the answer.</p>

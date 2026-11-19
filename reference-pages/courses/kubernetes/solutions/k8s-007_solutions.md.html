@@ -204,13 +204,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Expected:</strong> Matching selector finds the intended set; wrong selector has no intended backends.</p>
 <h3 id="exercise-2-resolve-the-port-chain">Exercise 2: Resolve the port chain<a class="heading-anchor" href="#exercise-2-resolve-the-port-chain" aria-label="Link to this section">#</a></h3>
 <p>The chain connects client-facing and backend ports. A Service object can exist even if this mapping is wrong, so object creation alone is insufficient routing evidence.</p>
-<p><strong>Expected:</strong> Client8080 -&gt; targetPort http -&gt; container8080.</p>
+<p><strong>Expected:</strong> Client 8080 -&gt; targetPort http -&gt; container 8080.</p>
 <h3 id="exercise-3-count-unique-backends">Exercise 3: Count unique backends<a class="heading-anchor" href="#exercise-3-count-unique-backends" aria-label="Link to this section">#</a></h3>
 <p>Multiple slices or IP families can repeat a Pod identity. Set comparison avoids inflated backend counts and also detects an unrelated endpoint with the wrong UID.</p>
 <p><strong>Expected:</strong> Exactly two unique Pod UIDs matching the owned Ready set.</p>
 <h3 id="exercise-4-run-a-selector-negative-case">Exercise 4: Run a selector negative case<a class="heading-anchor" href="#exercise-4-run-a-selector-negative-case" aria-label="Link to this section">#</a></h3>
 <p>The negative case tests the connection between selection and routing. A later successful Run is a fresh operation with its own UIDs, not evidence that the earlier Service persisted and was patched.</p>
-<p><strong>Expected:</strong> No matching ready backends; bounded failure and cleanup; restored source can pass separately.</p>
+<p><strong>Expected:</strong> The unchanged starter has no matching ready backends and fails within its bound, with cleanup; the restored source can pass in a separate Run.</p>
 <h3 id="exercise-5-verify-an-independent-client">Exercise 5: Verify an independent client<a class="heading-anchor" href="#exercise-5-verify-an-independent-client" aria-label="Link to this section">#</a></h3>
 <p>The independent request establishes that the Service path reaches the expected fixture response. Job completion alone is tied to owned Pod identity and the fixed checker behavior; the result remains bounded to the observed request.</p>
 <p><strong>Expected:</strong> Job/Pod ownership and exit 0 accompany the expected ds60-fixture-v1 payload contract.</p>

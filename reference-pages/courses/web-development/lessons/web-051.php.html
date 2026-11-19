@@ -197,11 +197,37 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">declare</span><span class="syntax-punctuation">(</span>strict_types<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">);</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment">// web-051: Build a local PDO note store with prepared insert and lookup.</span></span>
-<span class="source-line"><span class="syntax-comment">// Implement the task with local synthetic values. Do not use real credentials.</span></span>
-<span class="source-line"><span class="syntax-comment">// Keep separate checks for the normal case and the boundary in Exercise 5.</span></span>
+<span class="source-line"><span class="syntax-comment">// web-051: PDO, prepared statements and the value-query boundary</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercises. Hints are in the guide; answers are in the solutions folder.</span></span>
+<span class="source-line"><span class="syntax-comment">// 1. Explain what a prepared value parameter can and cannot replace.</span></span>
+<span class="source-line"><span class="syntax-comment">// 2. Insert a title containing an apostrophe.</span></span>
+<span class="source-line"><span class="syntax-comment">// 3. Build a local PDO note store with prepared insert and lookup.</span></span>
+<span class="source-line"><span class="syntax-comment">// 4. Diagnose concatenating an untrusted sort key into SQL.</span></span>
+<span class="source-line"><span class="syntax-comment">// 5. Test an empty result and an attack-shaped title.</span></span>
+<span class="source-line"><span class="syntax-comment">// 6. Explain which checks must be repeated when moving to PostgreSQL.</span></span>
+<span class="source-line"><span class="syntax-comment">//</span></span>
+<span class="source-line"><span class="syntax-comment">// Worked example 1: A value parameter</span></span>
+<span class="source-line"><span class="syntax-comment">// $stmt = $db-&gt;prepare(&#x27;INSERT INTO notes (title) VALUES (:title)&#x27;);</span></span>
+<span class="source-line"><span class="syntax-comment">// $stmt-&gt;execute([&#x27;title&#x27; =&gt; &quot;Ada&#x27;s notes&quot;]);</span></span>
+<span class="source-line"><span class="syntax-comment">//</span></span>
+<span class="source-line"><span class="syntax-comment">// Worked example 2: An allowlisted identifier</span></span>
+<span class="source-line"><span class="syntax-comment">// $columns = [&#x27;title&#x27; =&gt; &#x27;title&#x27;, &#x27;created&#x27; =&gt; &#x27;id&#x27;];</span></span>
+<span class="source-line"><span class="syntax-comment">// $orderBy = $columns[$requested] ?? &#x27;id&#x27;;</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-keyword">echo</span> <span class="syntax-string">&quot;</span><span class="syntax-string">My implementation goes here.</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">function</span> <span class="syntax-function">check</span><span class="syntax-punctuation">(</span>bool $condition<span class="syntax-punctuation">,</span> string $message<span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> void</span>
+<span class="source-line"><span class="syntax-punctuation">{</span></span>
+<span class="source-line">  <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>$condition<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> RuntimeException<span class="syntax-punctuation">(</span>$message<span class="syntax-punctuation">);</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">// Synthetic fixture for the exercises.</span></span>
+<span class="source-line">$db <span class="syntax-operator">=</span> <span class="syntax-keyword">new</span> PDO<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">sqlite::memory:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span>PDO<span class="syntax-operator">::</span><span class="syntax-attribute">ATTR_ERRMODE</span> <span class="syntax-operator">=&gt;</span> PDO<span class="syntax-operator">::</span><span class="syntax-attribute">ERRMODE_EXCEPTION</span><span class="syntax-punctuation">]);</span></span>
+<span class="source-line">$db<span class="syntax-operator">-&gt;</span><span class="syntax-attribute">exec</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CREATE TABLE notes (id INTEGER PRIMARY KEY, title TEXT NOT NULL)</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">);</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">// Write your implementation here and add one check() call for each case you test.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">echo</span> <span class="syntax-string">&quot;</span><span class="syntax-string">web-051 attempt finished without a failed check</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span></code></pre></article>
   </main>
 </body>

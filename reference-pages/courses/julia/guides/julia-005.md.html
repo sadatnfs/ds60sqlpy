@@ -198,7 +198,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Beginner; approximately 90 minutes. Direct prerequisites: <code>julia-004</code>.</p>
 <p>Trace finite iteration and scope rules while using explicit empty-input and indexing policies.</p>
 <h3 id="classroom-execution">Classroom execution<a class="heading-anchor" href="#classroom-execution" aria-label="Link to this section">#</a></h3>
-<p>Choose <strong>Julia language and scientific computing</strong> in <code>/classroom</code>, open this unit, and select its prepared <code>julia</code> runtime. The worker starts a fresh <code>main.jl</code> process with two Julia threads, a fixed package environment, no startup file and offline package settings. Both worked examples are complete under that environment. Save your current pad before replacing it. No package, model or dataset is fetched by a lesson.</p>
+<p>Open <code>julia-005</code> in <code>/classroom</code> with its prepared <code>julia</code> runtime. Worked case A (accumulate inside a function) and worked case B (transform and filter explicitly) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing <code>julia-005: all reference checks passed</code>. The <a href="../README.md.html">course overview</a> describes the shared runtime: a fresh offline <code>main.jl</code> process with two threads and a fixed package environment.</p>
 <h3 id="iteration-follows-a-collection-contract">Iteration follows a collection contract<a class="heading-anchor" href="#iteration-follows-a-collection-contract" aria-label="Link to this section">#</a></h3>
 <p>A loop visits values supplied by an iterable. A range can describe many values without storing a full array, while a comprehension constructs a collection from an iteration rule. A generator can feed a reduction without first materializing every result. These choices affect representation and memory, not just syntax.</p>
 <p>Julia&#x27;s ordinary ranges include their endpoint when the step reaches it. A descending range needs a negative step. An empty range can be valid and produce no iterations. Standard arrays use one-based indices, but generic algorithms should use <code>eachindex</code> or <code>axes</code> rather than assuming that every possible array type shares the same index origin.</p>
@@ -256,14 +256,14 @@ worked_b<span class="syntax-punctuation">(</span><span class="syntax-punctuation
 <h3 id="six-investigations">Six investigations<a class="heading-anchor" href="#six-investigations" aria-label="Link to this section">#</a></h3>
 <h4 id="1-count-an-inclusive-range">1. Count an inclusive range<a class="heading-anchor" href="#1-count-an-inclusive-range" aria-label="Link to this section">#</a></h4>
 <p>List values from 1:3.</p>
-<p><strong>Expected:</strong> The range contains 1,2,3.</p>
+<p><strong>Expected:</strong> The range contains 1, 2 and 3.</p>
 <p><strong>Hint:</strong> Check both endpoints.</p>
 <h4 id="2-use-zero-iterations">2. Use zero iterations<a class="heading-anchor" href="#2-use-zero-iterations" aria-label="Link to this section">#</a></h4>
 <p>Run the accumulator over 1:0.</p>
 <p><strong>Expected:</strong> The result is its initial zero.</p>
 <p><strong>Hint:</strong> An empty iterable performs no loop body.</p>
 <h4 id="3-descend-explicitly">3. Descend explicitly<a class="heading-anchor" href="#3-descend-explicitly" aria-label="Link to this section">#</a></h4>
-<p>Construct 3,2,1 as a range.</p>
+<p>Construct the descending sequence 3, 2, 1 as a range.</p>
 <p><strong>Expected:</strong> Use 3:-1:1.</p>
 <p><strong>Hint:</strong> Specify the step direction.</p>
 <h4 id="4-keep-identity-separate">4. Keep identity separate<a class="heading-anchor" href="#4-keep-identity-separate" aria-label="Link to this section">#</a></h4>
@@ -284,7 +284,7 @@ worked_b<span class="syntax-punctuation">(</span><span class="syntax-punctuation
 <li><a href="https://docs.julialang.org/en/v1/manual/variables-and-scoping/">Julia scope</a></li>
 </ul>
 <h3 id="study-companion">Study companion<a class="heading-anchor" href="#study-companion" aria-label="Link to this section">#</a></h3>
-<p>Use the repository learning-companion skill with this lesson ID, your prediction and your actual source/output. Ask for a diagnosis of the first incorrect type, shape, state transition or assumption. Keep observed execution distinct from a timing claim, inferred mathematical result or external deployment.</p></article>
+<p>A repository-aware assistant with the learning-companion skill can review <code>julia-005</code> with you. Give it your prediction for one investigation, your source and the actual output, and ask it to find the first incorrect assumption about iteration, range, comprehension, generator or function scope.</p></article>
   </main>
 </body>
 </html>

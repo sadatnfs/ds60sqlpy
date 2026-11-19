@@ -194,31 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-015_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-015-explanatory-solutions">web-015: explanatory solutions<a class="heading-anchor" href="#web-015-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.</p>
-<h3 id="why-the-mechanism-works">Why the mechanism works<a class="heading-anchor" href="#why-the-mechanism-works" aria-label="Link to this section">#</a></h3>
-<p>Flexbox distributes space among items primarily along one axis. The main axis follows flex-direction, while the cross axis is perpendicular. justify-content distributes available space along the main axis; align-items aligns items along the cross axis. The names do not permanently mean horizontal and vertical because direction can change.</p>
-<p>Flexible items have a basis and rules for growing or shrinking. A row of long labels may overflow if wrapping is disabled or if an item&#x27;s automatic minimum size prevents shrinking. <code>min-inline-size:0</code> is often useful for a flex child that must allow its text to wrap or truncate deliberately. Flexbox is a layout tool, not permission to reorder content into a confusing keyboard sequence.</p>
-<p>Use display:flex, gap and flex-wrap:wrap for a simple responsive group. <code>flex: 1 1 12rem</code> gives an initial basis and permits growth and shrinkage. Set <code>align-items:stretch</code> when equal cross-axis size supports the component. Keep DOM order aligned with intended reading and focus order rather than using order to create a contradictory visual sequence.</p>
+<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-015.md</code>.</p>
 <h3 id="exercise-1-name-the-axes-for-flex-direction-column">Exercise 1: Name the axes for flex-direction:column.<a class="heading-anchor" href="#exercise-1-name-the-axes-for-flex-direction-column" aria-label="Link to this section">#</a></h3>
-<p>The main axis is vertical in the usual horizontal writing mode; the cross axis is horizontal.</p>
-<p>Trace the smallest example before editing. Name which values are source and which are observations.</p>
+<p><strong>Expected answer:</strong> The main axis is vertical in the usual horizontal writing mode; the cross axis is horizontal.</p>
+<p><strong>Why:</strong> flex-direction: column makes the main axis vertical, so justify-content distributes items vertically and align-items aligns them horizontally.</p>
 <h3 id="exercise-2-add-gap-between-navigation-items-without-per-item-margins">Exercise 2: Add gap between navigation items without per-item margins.<a class="heading-anchor" href="#exercise-2-add-gap-between-navigation-items-without-per-item-margins" aria-label="Link to this section">#</a></h3>
-<p>Spacing is owned by the container and stays consistent when wrapping.</p>
-<p>Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.</p>
+<p><strong>Expected evidence:</strong> Spacing is owned by the container and stays consistent when wrapping.</p>
+<p><strong>Why:</strong> gap adds space only between items, including after wrapping, so the outer edges stay flush.</p>
 <h3 id="exercise-3-build-a-wrapping-navigation-bar-and-flexible-card-row">Exercise 3: Build a wrapping navigation bar and flexible card row.<a class="heading-anchor" href="#exercise-3-build-a-wrapping-navigation-bar-and-flexible-card-row" aria-label="Link to this section">#</a></h3>
-<p>Long labels stay reachable at narrow widths and DOM order remains logical.</p>
-<p>Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.</p>
+<p><strong>Expected evidence:</strong> Long labels stay reachable at narrow widths and DOM order remains logical.</p>
+<p><strong>Why:</strong> Wrapping moves items to a new line instead of overflowing, while source order keeps reading and focus order logical.</p>
 <h3 id="exercise-4-diagnose-a-flex-child-that-refuses-to-shrink">Exercise 4: Diagnose a flex child that refuses to shrink.<a class="heading-anchor" href="#exercise-4-diagnose-a-flex-child-that-refuses-to-shrink" aria-label="Link to this section">#</a></h3>
-<p>Inspect its minimum size, long content and flex-basis before forcing overflow hidden.</p>
-<p>Keep the failing input. Identify the first layer where the observed result differs from the intended contract.</p>
+<p><strong>Expected answer:</strong> Inspect its minimum size, long content and flex-basis before forcing overflow hidden.</p>
+<p><strong>Why:</strong> Flex items default to min-width: auto, so they will not shrink below their longest content until you set min-width: 0 or allow wrapping.</p>
 <h3 id="exercise-5-test-one-item-many-items-and-a-very-long-label">Exercise 5: Test one item, many items and a very long label.<a class="heading-anchor" href="#exercise-5-test-one-item-many-items-and-a-very-long-label" aria-label="Link to this section">#</a></h3>
-<p>The layout remains readable without relying on exactly three equal strings.</p>
-<p>Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.</p>
+<p><strong>Expected evidence:</strong> The layout remains readable without relying on exactly three equal strings.</p>
+<p><strong>Why:</strong> A layout tuned for three equal labels can overflow or wrap badly when the content changes.</p>
 <h3 id="exercise-6-explain-when-flexbox-fits-better-than-grid">Exercise 6: Explain when Flexbox fits better than Grid.<a class="heading-anchor" href="#exercise-6-explain-when-flexbox-fits-better-than-grid" aria-label="Link to this section">#</a></h3>
-<p>Use Flexbox for distributing items along one primary dimension; use Grid for explicit two-dimensional alignment.</p>
-<p>Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.</p>
-<h3 id="reference-comparison-and-limits">Reference comparison and limits<a class="heading-anchor" href="#reference-comparison-and-limits" aria-label="Link to this section">#</a></h3>
-<p>Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.</p></article>
+<p><strong>Expected answer:</strong> Use Flexbox for distributing items along one primary dimension; use Grid for explicit two-dimensional alignment.</p>
+<p><strong>Why:</strong> Flexbox distributes items along one axis based on their content, while Grid places items in explicit rows and columns.</p>
+<h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
+<p>Open <code>courses/web-development/solutions/web-015_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
   </main>
 </body>
 </html>

@@ -214,7 +214,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the C++ module, save this lesson&#x27;s learner pad, then use Run. The worker stages the pad as <code>main.cpp</code> and compiles one translation unit. Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for exact local commands, flags, exit statuses, paths and Docker guidance. Tests involving multiple files, CMake, tool flags or shared libraries are explicitly host-project exercises.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
-<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs:each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
+<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs: each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p><a href="../examples/cpp-037-example-1.cpp.html">Complete program 1</a></p>
 <pre class="highlighted-code"><code class="language-cpp"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;cassert&gt;</span>
@@ -235,7 +235,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpp-037 example 1 checks passed</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
   <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
-<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<p><strong>Expected:</strong> With assertions enabled, the program exits with status 0 and prints:</p>
 <pre class="highlighted-code"><code class="language-text">cpp-037 example 1 checks passed</code></pre>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p><a href="../examples/cpp-037-example-2.cpp.html">Complete program 2</a></p>
@@ -256,38 +256,38 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpp-037 example 2 checks passed</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
   <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
-<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<p><strong>Expected:</strong> With assertions enabled, the program exits with status 0 and prints:</p>
 <pre class="highlighted-code"><code class="language-text">cpp-037 example 2 checks passed</code></pre>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-state-range-requirements">Exercise 1: State range requirements<a class="heading-anchor" href="#exercise-1-state-range-requirements" aria-label="Link to this section">#</a></h4>
 <p>Explain why one pass is sufficient for keep_positive.</p>
 <p><strong>Expected result/shape:</strong> Input-range traversal only, no size prepass.</p>
-<p><strong>Verify:</strong> Input-range traversal only, no size prepass.</p>
+<p><strong>Verify:</strong> Check your explanation against the function body: one <code>for</code> loop reads each element once, and nothing calls <code>std::ranges::size</code> or traverses <code>xs</code> again.</p>
 <p><strong>Progressive hints:</strong> A single-pass source cannot promise a second traversal.</p>
 <h4 id="exercise-2-preserve-multiplicity">Exercise 2: Preserve multiplicity<a class="heading-anchor" href="#exercise-2-preserve-multiplicity" aria-label="Link to this section">#</a></h4>
 <p>Filter [-1, 0, 2, 2] with &gt;0.</p>
 <p><strong>Expected result/shape:</strong> [2, 2].</p>
-<p><strong>Verify:</strong> [2, 2].</p>
+<p><strong>Verify:</strong> Assert <code>keep_positive(std::vector&lt;int&gt;{-1, 0, 2, 2}) == std::vector&lt;int&gt;{2, 2}</code>, as Worked example 1 does; the duplicate 2 must appear twice.</p>
 <p><strong>Progressive hints:</strong> Generic code still needs explicit bag semantics.</p>
 <h4 id="exercise-3-retain-ownership">Exercise 3: Retain ownership<a class="heading-anchor" href="#exercise-3-retain-ownership" aria-label="Link to this section">#</a></h4>
 <p>Call with a temporary vector and use result afterward.</p>
 <p><strong>Expected result/shape:</strong> Result remains valid and owns its elements.</p>
-<p><strong>Verify:</strong> Result remains valid and owns its elements.</p>
+<p><strong>Verify:</strong> Store <code>auto out = keep_positive(std::vector&lt;int&gt;{3, -1});</code> and assert <code>out == std::vector&lt;int&gt;{3}</code> on a later line, after the temporary is destroyed.</p>
 <p><strong>Progressive hints:</strong> An owning return separates result lifetime from input lifetime.</p>
 <h4 id="exercise-4-repair-two-pass-design">Exercise 4: Repair two-pass design<a class="heading-anchor" href="#exercise-4-repair-two-pass-design" aria-label="Link to this section">#</a></h4>
 <p>Review counting an input_range then traversing it again.</p>
 <p><strong>Expected result/shape:</strong> Use one pass or require forward_range with justification.</p>
-<p><strong>Verify:</strong> Use one pass or require forward_range with justification.</p>
+<p><strong>Verify:</strong> Run the reviewed function on a single-pass source such as <code>std::views::istream&lt;int&gt;</code> over a <code>std::istringstream</code>, and confirm the second traversal sees no elements.</p>
 <p><strong>Progressive hints:</strong> Constraints must match actual operations.</p>
 <h4 id="exercise-5-check-empty-input">Exercise 5: Check empty input<a class="heading-anchor" href="#exercise-5-check-empty-input" aria-label="Link to this section">#</a></h4>
 <p>Use an empty vector and an empty span.</p>
 <p><strong>Expected result/shape:</strong> Both yield empty vectors.</p>
-<p><strong>Verify:</strong> Both yield empty vectors.</p>
+<p><strong>Verify:</strong> Assert <code>keep_positive(std::vector&lt;int&gt;{}).empty()</code> and <code>keep_positive(std::span&lt;const int&gt;{}).empty()</code>.</p>
 <p><strong>Progressive hints:</strong> Different range types share the same semantic boundary.</p>
 <h4 id="exercise-6-transfer-a-projection">Exercise 6: Transfer a projection<a class="heading-anchor" href="#exercise-6-transfer-a-projection" aria-label="Link to this section">#</a></h4>
 <p>Filter records by their points while retaining complete records.</p>
 <p><strong>Expected result/shape:</strong> Output retains IDs, values and duplicate qualifying rows.</p>
-<p><strong>Verify:</strong> Output retains IDs, values and duplicate qualifying rows.</p>
+<p><strong>Verify:</strong> Use input with two qualifying records that have equal points, and assert the output keeps both with every field unchanged.</p>
 <p><strong>Progressive hints:</strong> A projection should not accidentally erase domain identity.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain why this observation follows from the mechanism: The owned result is [2, 2], retaining multiplicity after the temporary input dies. Then explain the changed condition in example 2 without opening the answer.</p>

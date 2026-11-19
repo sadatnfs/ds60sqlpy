@@ -204,7 +204,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Contiguous storage means the elements occupy adjacent positions, which makes indexed access and many algorithms efficient. It also explains reallocation. If growth requires a new buffer, the vector moves or copies elements into that buffer and releases the old storage. Every pointer, reference and iterator into the old element storage is then invalid. Do not demonstrate this by dereferencing a stale pointer: that is undefined behavior, so even an apparently correct printed value is not evidence of safety.</p>
 <p>The second program forces a capacity increase with reserve(capacity()+1) after adding one element. It retains an index, not an element pointer, and reacquires access as xs[index] after the operation. This is safe for that example because reallocation preserves the sequence and index 0 still names the same element. It is not a general fix for erase or insert before an index, which can change what a position means. Stable business identity may need an ID lookup rather than a remembered position.</p>
 <p>begin and end define a half-open range. begin names the first element when one exists; end names the position after the last and must not be dereferenced. Empty vectors have begin==end, so algorithms can handle them without a special invalid first-element access. Sorting rearranges values within the range. It preserves multiplicity: the two threes remain two elements. Copying original before sorting gives a separate owner, so the original order remains available for comparison.</p>
-<p>accumulate uses its initial value both as the starting total and to determine the accumulator type. Starting with 0LL selects long long and the additive identity. Starting with 10LL adds an unwanted ten even though the element traversal is otherwise correct. Starting with int0 can introduce a narrower intermediate accumulator for large values. A wider accumulator reduces some overflow risks but is not an unlimited arithmetic guarantee.</p>
+<p>accumulate uses its initial value both as the starting total and to determine the accumulator type. Starting with 0LL selects long long and the additive identity. Starting with 10LL adds an unwanted ten even though the element traversal is otherwise correct. Starting with int 0 can introduce a narrower intermediate accumulator for large values. A wider accumulator reduces some overflow risks but is not an unlimited arithmetic guarantee.</p>
 <p>The sort/unique/erase idiom has separate contracts. sort brings equal values together. unique rearranges a retained prefix and returns its logical end; it does not shrink the vector. erase removes the tail and changes size. Code that prints the whole vector after unique but before erase can show unspecified leftover tail values and mistakenly believe deduplication failed. Inspect the retained range and final size, not just one displayed element.</p>
 <p>Insertion and erasure have their own invalidation rules even when no reallocation occurs. Erasing shifts later elements left, invalidating positions at or after the erased point. The safe iteration pattern uses the iterator returned by erase rather than incrementing an invalid old iterator. These rules matter because a vector is a sequence with ownership and position semantics, not a set or a permanently stable collection of element addresses.</p>
 <h3 id="debugging-the-contract">Debugging the contract<a class="heading-anchor" href="#debugging-the-contract" aria-label="Link to this section">#</a></h3>
@@ -221,32 +221,32 @@ std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>s
 <p>Sort [3, 1, 3, 0] on paper.</p>
 <p><strong>Expected:</strong> [0, 1, 3, 3], size 4.</p>
 <p><strong>Reasoning:</strong> Ordering does not remove multiplicity.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Compare your paper result with the <code>sorted:</code> line printed by Worked example 1, element by element, and confirm the duplicate 3 appears twice.</p>
 <h3 id="exercise-2-preserve-evidence">Exercise 2: Preserve evidence<a class="heading-anchor" href="#exercise-2-preserve-evidence" aria-label="Link to this section">#</a></h3>
 <p>Sort a copy and compare the original.</p>
 <p><strong>Expected:</strong> Original remains [3, 1, 3, 0].</p>
 <p><strong>Reasoning:</strong> Copying creates a separately owned buffer.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Assert <code>original == std::vector&lt;int&gt;{3, 1, 3, 0}</code> after sorting the copy, and assert <code>std::ranges::is_sorted(copy)</code>.</p>
 <h3 id="exercise-3-count-a-boundary">Exercise 3: Count a boundary<a class="heading-anchor" href="#exercise-3-count-a-boundary" aria-label="Link to this section">#</a></h3>
 <p>Use count_if to count &gt;=3.</p>
 <p><strong>Expected:</strong> 2 matching elements.</p>
 <p><strong>Reasoning:</strong> Both equal-valued rows count.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Assert the <code>std::count_if</code> result with the predicate <code>x &gt;= 3</code> is 2 on <code>{3, 1, 3, 0}</code>; changing the predicate to <code>x &gt; 3</code> must give 0.</p>
 <h3 id="exercise-4-repair-a-wrong-total">Exercise 4: Repair a wrong total<a class="heading-anchor" href="#exercise-4-repair-a-wrong-total" aria-label="Link to this section">#</a></h3>
 <p>Replace accumulate start 0LL with 10LL, then repair.</p>
 <p><strong>Expected:</strong> Wrong total 17; correct total 7.</p>
 <p><strong>Reasoning:</strong> The initial value participates in the fold.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Run the scratch copy and confirm it prints <code>sum=17</code>, exactly 10 more than the data; after restoring <code>0LL</code> the <code>sum=7</code> line must return.</p>
 <h3 id="exercise-5-check-an-empty-vector">Exercise 5: Check an empty vector<a class="heading-anchor" href="#exercise-5-check-an-empty-vector" aria-label="Link to this section">#</a></h3>
 <p>Sort, count and sum an empty vector.</p>
 <p><strong>Expected:</strong> Size 0, count 0, sum 0; no dereference.</p>
 <p><strong>Reasoning:</strong> Algorithms accept an empty half-open range.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Assert <code>xs.size() == 0</code>, a count of 0 and <code>std::accumulate(xs.begin(), xs.end(), 0LL) == 0</code> in one program, with no <code>front()</code> or <code>[0]</code> call.</p>
 <h3 id="exercise-6-transfer-to-ordered-unique-values">Exercise 6: Transfer to ordered unique values<a class="heading-anchor" href="#exercise-6-transfer-to-ordered-unique-values" aria-label="Link to this section">#</a></h3>
 <p>Sort [3, 1, 3, 0], then erase the unique tail.</p>
 <p><strong>Expected:</strong> [0, 1, 3], size 3.</p>
 <p><strong>Reasoning:</strong> unique moves survivors but erase actually changes vector size.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p></article>
+<p><strong>Verify:</strong> Assert <code>xs == std::vector&lt;int&gt;{0, 1, 3}</code> after <code>xs.erase(std::unique(xs.begin(), xs.end()), xs.end())</code>; run <code>std::unique</code> once without sorting to see the non-adjacent 3 survive.</p></article>
   </main>
 </body>
 </html>

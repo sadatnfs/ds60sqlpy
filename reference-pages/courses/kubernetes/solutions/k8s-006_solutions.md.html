@@ -210,7 +210,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Expected:</strong> Two Ready owned Pod UIDs and cleanup evidence, with a new Run identity.</p>
 <h3 id="exercise-4-rehearse-scoped-pod-replacement">Exercise 4: Rehearse scoped Pod replacement<a class="heading-anchor" href="#exercise-4-rehearse-scoped-pod-replacement" aria-label="Link to this section">#</a></h3>
 <p>The replacement is caused by the ReplicaSet restoring desired replicas. It is not a new Deployment or necessarily a new template revision. The operation must use UID-aware targeting and preserve unrelated objects.</p>
-<p><strong>Expected:</strong> Pod set changes from{pod-1, pod-2} to{pod-2, pod-3} in the synthetic trace; live names/UIDs are recorded separately.</p>
+<p><strong>Expected:</strong> Pod set changes from {pod-1, pod-2} to {pod-2, pod-3} in the synthetic trace; live names/UIDs are recorded separately.</p>
 <h3 id="exercise-5-reject-a-count-only-shortcut">Exercise 5: Reject a count-only shortcut<a class="heading-anchor" href="#exercise-5-reject-a-count-only-shortcut" aria-label="Link to this section">#</a></h3>
 <p>An unrelated Pod cannot satisfy this Deployment&#x27;s desired replica contract. This negative case demonstrates why counting labels or phase values without ownership can produce a false success.</p>
 <p><strong>Expected:</strong> Raw count 2 but owned Ready count 1, so acceptance fails.</p>

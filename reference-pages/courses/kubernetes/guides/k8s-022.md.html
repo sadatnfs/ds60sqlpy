@@ -221,21 +221,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-tag">resources</span><span class="syntax-punctuation">:</span>
     <span class="syntax-tag">requests</span><span class="syntax-punctuation">:</span>
       <span class="syntax-tag">storage</span><span class="syntax-punctuation">:</span> 16Mi</code></pre>
-<p><strong>Expected:</strong> The requested class is lesson-local, capacity16Mi and access mode ReadWriteOnce; actual binding is a separate observation.</p>
+<p><strong>Expected:</strong> The requested class is lesson-local, capacity 16Mi and access mode ReadWriteOnce; actual binding is a separate observation.</p>
 <h4 id="worked-example-2-compare-replacement-evidence">Worked example 2: Compare replacement evidence<a class="heading-anchor" href="#worked-example-2-compare-replacement-evidence" aria-label="Link to this section">#</a></h4>
-<p>Synthetic before:Pod UID pod-a, PVC uid pvc-a, PV uid pv-a, marker hash h1. After:Pod UID pod-b, same pvc-a/pv-a, marker hash h1.</p>
+<p>Synthetic before: Pod UID pod-a, PVC uid pvc-a, PV uid pv-a, marker hash h1. After: Pod UID pod-b, same pvc-a/pv-a, marker hash h1.</p>
 <p><strong>Expected:</strong> The observed data survives Pod replacement; this does not establish survival after PVC or cluster deletion.</p>
 <h3 id="inspect-the-specific-owned-object">Inspect the specific owned object<a class="heading-anchor" href="#inspect-the-specific-owned-object" aria-label="Link to this section">#</a></h3>
 <p>Only after the chapter&#x27;s host capability is provisioned and its resources remain present, use the explicit receipt fields described in <a href="../host-labs.md.html">host-labs.md</a>. A completed one-shot browser Run has already cleaned its objects. The following read does not provision the missing capability and does not justify changing credentials after a Forbidden result.</p>
-<p>POSIX:</p>
+<p>Bash on Linux, macOS or Ubuntu under WSL 2:</p>
 <pre class="highlighted-code"><code class="language-bash">: <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_KUBECONFIG<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt path</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 : <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_CONTEXT<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt context</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 : <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_NAMESPACE<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt namespace</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<span class="syntax-string">&quot;</span> --context <span class="syntax-string">&quot;</span>$LAB_CONTEXT<span class="syntax-string">&quot;</span> --namespace <span class="syntax-string">&quot;</span>$LAB_NAMESPACE<span class="syntax-string">&quot;</span> get pvc data-store-0 -o json</code></pre>
-<p>PowerShell:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">-not</span> $env:LAB_KUBECONFIG <span class="syntax-operator">-or</span> <span class="syntax-operator">-not</span> $env:LAB_CONTEXT <span class="syntax-operator">-or</span> <span class="syntax-operator">-not</span> $env:LAB_NAMESPACE<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;Owned receipt fields are required.&#x27;</span> <span class="syntax-punctuation">}</span>
-<span class="syntax-punctuation">&amp;</span> kubectl <span class="syntax-punctuation">-</span>-kubeconfig $env:LAB_KUBECONFIG <span class="syntax-punctuation">-</span>-context $env:LAB_CONTEXT <span class="syntax-punctuation">-</span>-namespace $env:LAB_NAMESPACE get pvc data-store<span class="syntax-punctuation">-</span>0 -o json
-<span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>$LASTEXITCODE <span class="syntax-operator">-ne</span> 0<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;The scoped observation failed.&#x27;</span> <span class="syntax-punctuation">}</span></code></pre>
+<p>Windows uses the same Bash commands inside WSL 2. The lab adapter refuses native Windows credential handling, so do not run kubectl against the receipt from PowerShell. From PowerShell, only open your WSL 2 distribution (the name reported by <code>wsl.exe --list --verbose</code>), change to your checkout with its Linux path, then run the Bash block above unchanged:</p>
+<pre class="highlighted-code"><code class="language-powershell">wsl<span class="syntax-punctuation">.</span>exe <span class="syntax-punctuation">-</span>-distribution Ubuntu</code></pre>
 <p>Retain only the fields needed by this chapter&#x27;s prediction. A NotFound result may be expected after one-shot cleanup; a Forbidden result may identify a deliberately absent advanced capability. Neither result authorizes an ambient-context fallback.</p>
 <h3 id="concrete-finite-marker-operations">Concrete finite marker operations<a class="heading-anchor" href="#concrete-finite-marker-operations" aria-label="Link to this section">#</a></h3>
 <p>The separate <a href="../fixtures/k8s-022-marker-writer.json.html">exclusive-create writer</a> and <a href="../fixtures/k8s-022-marker-reader.json.html">read-only verifier</a> are host-only Job manifests. The writer opens <code>/data/marker</code> with mode <code>xb</code>, so an existing file causes failure instead of silently overwriting evidence. The reader requires the exact <code>persistent-demo</code> bytes followed by a newline and reports their SHA256. It never initializes data.</p>
@@ -248,32 +246,32 @@ kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<sp
 <h4 id="exercise-1-trace-storage-references">Exercise 1: Trace storage references<a class="heading-anchor" href="#exercise-1-trace-storage-references" aria-label="Link to this section">#</a></h4>
 <p>Connect StatefulSet volumeClaimTemplates, data mount and StorageClass.</p>
 <p><strong>Expected result/shape:</strong> The data claim is mounted at /data and depends on a qualified lesson-local class.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: The data claim is mounted at /data and depends on a qualified lesson-local class.</p>
+<p><strong>Verify:</strong> Follow the names from the volumeClaimTemplates entry to the volumeMounts entry and its mountPath, and from <code>storageClassName</code> to the StorageClass; each link must cite a field.</p>
 <p><strong>Progressive hints:</strong> Separate requested claim from bound volume.</p>
 <h4 id="exercise-2-record-initial-data-once">Exercise 2: Record initial data once<a class="heading-anchor" href="#exercise-2-record-initial-data-once" aria-label="Link to this section">#</a></h4>
 <p>Use a bounded exclusive-create writer for a synthetic marker and retain its hash.</p>
 <p><strong>Expected result/shape:</strong> One initialization receipt, claim/PV identities and a known marker checksum.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: One initialization receipt, claim/PV identities and a known marker checksum.</p>
+<p><strong>Verify:</strong> Confirm that the writer used exclusive create and record the claim UID, the bound PV name and the SHA-256 of the marker.</p>
 <p><strong>Progressive hints:</strong> Do not overwrite existing data during a verification step.</p>
 <h4 id="exercise-3-replace-only-the-pod">Exercise 3: Replace only the Pod<a class="heading-anchor" href="#exercise-3-replace-only-the-pod" aria-label="Link to this section">#</a></h4>
 <p>Use the host operation with the recorded Pod UID and observe its successor.</p>
 <p><strong>Expected result/shape:</strong> New Pod UID with the intended stable ordinal and same claim binding.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: New Pod UID with the intended stable ordinal and same claim binding.</p>
+<p><strong>Verify:</strong> Compare Pod UID, ordinal name and bound claim before and after; decide which of the three must change.</p>
 <p><strong>Progressive hints:</strong> Pod identity and claim identity have different lifetimes.</p>
 <h4 id="exercise-4-verify-the-marker-independently">Exercise 4: Verify the marker independently<a class="heading-anchor" href="#exercise-4-verify-the-marker-independently" aria-label="Link to this section">#</a></h4>
 <p>Read the marker after replacement without running the writer.</p>
 <p><strong>Expected result/shape:</strong> Hash remains h1 in the synthetic trace; actual live bytes/hash are recorded separately.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Hash remains h1 in the synthetic trace; actual live bytes/hash are recorded separately.</p>
+<p><strong>Verify:</strong> Run only the reader, which mounts the claim read-only, and compare its hash with the recorded initialization hash.</p>
 <p><strong>Progressive hints:</strong> A Ready condition is not a data checksum.</p>
 <h4 id="exercise-5-explain-retention-and-reclaim">Exercise 5: Explain retention and reclaim<a class="heading-anchor" href="#exercise-5-explain-retention-and-reclaim" aria-label="Link to this section">#</a></h4>
 <p>Compare StatefulSet claim retention with PV reclaim policy and cluster release.</p>
 <p><strong>Expected result/shape:</strong> Each lifecycle boundary has its own policy; retention is not backup.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Each lifecycle boundary has its own policy; retention is not backup.</p>
+<p><strong>Verify:</strong> For each deletion, name the object deleted and the policy, claim retention or PV reclaim, that decides what happens to the bytes.</p>
 <p><strong>Progressive hints:</strong> Ask which object is deleted and who owns the underlying bytes.</p>
 <h4 id="exercise-6-diagnose-a-pending-claim">Exercise 6: Diagnose a Pending claim<a class="heading-anchor" href="#exercise-6-diagnose-a-pending-claim" aria-label="Link to this section">#</a></h4>
 <p>Use supplied binding/events to propose a minimal class/capacity/topology check.</p>
 <p><strong>Expected result/shape:</strong> No destructive claim reset; the missing capability or binding condition is identified.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: No destructive claim reset; the missing capability or binding condition is identified.</p>
+<p><strong>Verify:</strong> Your check must come from the StorageClass, PVC events or binding status, and must not delete or recreate the claim.</p>
 <p><strong>Progressive hints:</strong> Inspect StorageClass and binding evidence before changing the application.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain the mechanism behind the first example, then distinguish it from this boundary case: The observed data survives Pod replacement; this does not establish survival after PVC or cluster deletion. State which observations are synthetic and which, if any, were read from your owned runtime.</p>
@@ -281,7 +279,7 @@ kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<sp
 <p>A healthy Pod or recreated constant file does not prove old data survived. Use a marker whose initialization is not silently repeated, and keep writer/read operations separate. A Bound PVC alone does not prove the application can read the intended bytes.</p>
 <p>Do not delete a claim as a routine repair for a Pending Pod. Inspect binding, events, access mode and ownership first. Live storage operations remain unavailable until the host capability and retention choice are explicit.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
-<p>Close the answer and reconstruct the reasoning for Exercise6, Diagnose a Pending claim. Name the exact source and observed identity you would require before claiming the changed case succeeded.</p>
+<p>Close the answer and reconstruct the reasoning for Exercise 6 (Diagnose a Pending claim). Name the exact source and observed identity you would require before claiming the changed case succeeded.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue to <code>k8s-023</code> after preserving the six evidence records.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>

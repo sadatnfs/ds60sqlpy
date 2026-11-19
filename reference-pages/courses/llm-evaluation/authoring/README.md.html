@@ -195,6 +195,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="maintained-evaluation-course-sources">Maintained evaluation course sources<a class="heading-anchor" href="#maintained-evaluation-course-sources" aria-label="Link to this section">#</a></h2>
 <p><code>unit-001.json</code> through <code>unit-024.json</code> hold route metadata and six concrete investigations per unit. <code>chapters/</code> holds original teaching prose. Each chapter has exactly one <code>{{WORKED_A}}</code> and <code>{{WORKED_B}}</code> insertion point. <code>programs/</code> holds standalone numerical or PyTorch reference programs, split by stable section comments. The builder extracts complete worked programs, formats Python using the repository Ruff configuration, and generates guides, learner files, executable references, explanatory solutions and manifests. Optional <code>_plotly.py.in</code> source fragments add three separate chart variants.</p>
+<p>Each unit&#x27;s <code>verification</code> field is the authored finish condition published in <code>track.json</code>, and every guide ends with an &quot;Ask an AI tutor about this lesson&quot; section whose fenced prompt names the unit, its files and prerequisites.</p>
 <p>Run from a prepared contributor environment:</p>
 <pre class="highlighted-code"><code class="language-bash">python courses/llm-evaluation/authoring/build.py
 python courses/llm-evaluation/authoring/build.py --check

@@ -199,24 +199,24 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">Copy to .learning before editing. Six independent attempts belong below.</span></span>
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 1: Predict a valid batch</span></span>
-<span class="source-line"><span class="syntax-comment"># Use float32 CPU rows 1, 2 and 3, 4.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: outputs 0, 2 with shape(2, ).</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Predict a new valid batch</span></span>
+<span class="source-line"><span class="syntax-comment"># Predict the float32 rows [0, 1], [2, 0] and [1, 1] with the lesson&#x27;s weight [2, -1].</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: outputs [-1, 4, 1] with shape (3,).</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 2: Check per-record batching parity</span></span>
-<span class="source-line"><span class="syntax-comment"># Predict each row alone and concatenate.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: same values as batch prediction.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Check the batch boundary</span></span>
+<span class="source-line"><span class="syntax-comment"># Predict a batch of four rows of ones, then a batch of five.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: four rows return shape (4,); five rows raise ValueError.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 3: Reject empty and oversized batches</span></span>
-<span class="source-line"><span class="syntax-comment"># Pass shapes 0 x2 and 5 x2.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: ValueError naming batch limit.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: Reject a float64 batch</span></span>
+<span class="source-line"><span class="syntax-comment"># Pass the three valid rows converted to float64.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: TypeError rather than a silent conversion.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Reject shape and dtype ambiguity</span></span>
-<span class="source-line"><span class="syntax-comment"># Pass a vector, a3-feature matrix and an int64 matrix.</span></span>
+<span class="source-line"><span class="syntax-comment"># Pass a vector, a 3-feature matrix and an int64 matrix.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: shape ValueErrors and dtype TypeError.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Reject nonfinite values</span></span>
-<span class="source-line"><span class="syntax-comment"># Pass aN aN feature and inspect the failure.</span></span>
+<span class="source-line"><span class="syntax-comment"># Pass a NaN feature and inspect the failure.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: ValueError for finite-value contract.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Preserve caller data</span></span>

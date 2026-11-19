@@ -194,33 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-037_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-037-explanatory-solutions">docker-037: explanatory solutions<a class="heading-anchor" href="#docker-037-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These are explanations of the supplied teaching fixtures, not fabricated engine results.</p>
-<h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
-<p>TLS authenticates a server identity and encrypts traffic in transit under its certificate trust model. A reverse proxy receives client requests and forwards them to an upstream application. It can terminate TLS, route hostnames and paths, apply limits and emit access logs. It does not automatically make the upstream application authorized or safe for public use.</p>
-<p>The study app is intentionally host-loopback only and uses HTTP for local teaching. Publishing it to the internet would create new requirements: identity, access control, TLS certificates, input limits, abuse handling, patching and operational ownership. This chapter designs that boundary without exposing your machine.</p>
-<p>Proxy headers such as a forwarded client address are claims from the proxy chain. An application should trust them only from known proxies under an explicit configuration. Accepting arbitrary client-supplied forwarding headers can break rate limits or audit attribution.</p>
-<p>Draw the full request path before configuring a proxy: client name resolution, public endpoint, TLS handshake, proxy routing, upstream connection and application response. Each hop has its own timeout and identity. A certificate for one hostname does not validate a different name merely because both resolve to the same IP.</p>
-<p>Use a synthetic configuration review and diagrams here. The course does not register a domain, request certificates or open firewall ports. A production configuration must use the chosen proxy’s actual documentation and a separate deployment review.</p>
+<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-037.md</code>.</p>
 <h3 id="exercise-1-distinguish-tls-and-application-authorization">Exercise 1: Distinguish TLS and application authorization.<a class="heading-anchor" href="#exercise-1-distinguish-tls-and-application-authorization" aria-label="Link to this section">#</a></h3>
-<p>A correctly encrypted request can still be unauthorized. The application must decide who may read or change its data.</p>
-<p><strong>Expected:</strong> Encrypted authenticated transport versus permission for an action.</p>
+<p><strong>Expected answer:</strong> Encrypted authenticated transport versus permission for an action.</p>
+<p><strong>Why:</strong> A correctly encrypted request can still be unauthorized. The application must decide who may read or change its data.</p>
 <h3 id="exercise-2-predict-the-effect-of-a-certificate-name-mismatch">Exercise 2: Predict the effect of a certificate name mismatch.<a class="heading-anchor" href="#exercise-2-predict-the-effect-of-a-certificate-name-mismatch" aria-label="Link to this section">#</a></h3>
-<p>Do not disable verification as the default fix. Correct the intended hostname and certificate relationship.</p>
-<p><strong>Expected:</strong> The client cannot validate the requested server name normally.</p>
+<p><strong>Expected answer:</strong> The client cannot validate the requested server name normally.</p>
+<p><strong>Why:</strong> Do not disable verification as the default fix. Correct the intended hostname and certificate relationship.</p>
 <h3 id="exercise-3-draw-proxy-and-upstream-trust-boundaries">Exercise 3: Draw proxy and upstream trust boundaries.<a class="heading-anchor" href="#exercise-3-draw-proxy-and-upstream-trust-boundaries" aria-label="Link to this section">#</a></h3>
-<p>The drawing should show where TLS terminates and which component validates each request or header.</p>
-<p><strong>Expected:</strong> Explicit client-facing and internal hops with identities and timeouts.</p>
+<p><strong>Expected answer:</strong> Explicit client-facing and internal hops with identities and timeouts.</p>
+<p><strong>Why:</strong> The drawing should show where TLS terminates and which component validates each request or header.</p>
 <h3 id="exercise-4-diagnose-a-proxy-502-separately-from-an-app-404">Exercise 4: Diagnose a proxy 502 separately from an app 404.<a class="heading-anchor" href="#exercise-4-diagnose-a-proxy-502-separately-from-an-app-404" aria-label="Link to this section">#</a></h3>
-<p>Use logs and direct owned upstream observations to locate the first failing hop without exposing new ports unnecessarily.</p>
-<p><strong>Expected:</strong> Upstream failure versus a completed app route response.</p>
+<p><strong>Expected answer:</strong> Upstream failure versus a completed app route response.</p>
+<p><strong>Why:</strong> Use logs and direct owned upstream observations to locate the first failing hop without exposing new ports unnecessarily.</p>
 <h3 id="exercise-5-explain-forwarded-header-spoofing">Exercise 5: Explain forwarded-header spoofing.<a class="heading-anchor" href="#exercise-5-explain-forwarded-header-spoofing" aria-label="Link to this section">#</a></h3>
-<p>Treat those values as claims, not facts. Trust only the configured proxy chain and document how original client identity is derived.</p>
-<p><strong>Expected:</strong> Untrusted clients can send headers unless the proxy boundary sanitizes them.</p>
+<p><strong>Expected answer:</strong> Untrusted clients can send headers unless the proxy boundary sanitizes them.</p>
+<p><strong>Why:</strong> Treat those values as claims, not facts. Trust only the configured proxy chain and document how original client identity is derived.</p>
 <h3 id="exercise-6-state-what-would-be-required-before-public-exposure">Exercise 6: State what would be required before public exposure.<a class="heading-anchor" href="#exercise-6-state-what-would-be-required-before-public-exposure" aria-label="Link to this section">#</a></h3>
-<p>The local fixture’s simplicity is intentional. Do not advertise a loopback teaching app as public production hosting merely by changing the bind address.</p>
-<p><strong>Expected:</strong> A separate deployment design covering access, TLS, limits, operations and data.</p>
+<p><strong>Expected evidence:</strong> A separate deployment design covering access, TLS, limits, operations and data.</p>
+<p><strong>Why:</strong> The local fixture’s simplicity is intentional. Do not advertise a loopback teaching app as public production hosting merely by changing the bind address.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful solution identifies the exact object, the phase when a setting takes effect, the expected normal result and an observation that disproves it. Repeating a command until it succeeds hides the mechanism. Change one variable, keep a failure record, and test the intended behavior again. Source examples here are small enough to inspect; a production system additionally needs ownership, lifecycle, data recovery and operational review. The host exercises are optional and must stay within the learner-created project.</p></article>
+<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>
 </body>
 </html>

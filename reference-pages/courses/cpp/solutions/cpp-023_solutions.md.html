@@ -201,7 +201,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The caller and library must agree on the function symbol and how its arguments/results cross the machine boundary. extern C reduces name-mangling ambiguity but does not specify all platform ABI details. The caller owns the output integer, while the function owns only the act of validating and assigning it. The overflow case returns before assignment, so the previous output value remains a useful check that failure did not publish a partial result.</p>
 <h3 id="c-compatible-boundaries-and-error-translation">C-compatible boundaries and error translation<a class="heading-anchor" href="#c-compatible-boundaries-and-error-translation" aria-label="Link to this section">#</a></h3>
 <p>A C-compatible function boundary is useful when code crosses a language or binary interface. extern &quot;C&quot; changes language linkage conventions for the named function; it does not automatically make every C++ parameter, exception or object layout safe for a C caller. The public signature should use a deliberately constrained representation and a documented ownership/error policy.</p>
-<p>add_checked takes two integers and an output pointer, returning a status code. Status0 means the output was written successfully; status 1 denotes a null output pointer; status 2 denotes signed-int overflow. Both failure paths return before assigning the output, so its previous value is preserved. The interface uses this platform&#x27;s int representation, not a fixed-width wire format. A caller must check status before consuming the output. Returning an integer sum alone would leave no distinct channel for a failure if every integer value could also be legitimate data.</p>
+<p>add_checked takes two integers and an output pointer, returning a status code. Status 0 means the output was written successfully; status 1 denotes a null output pointer; status 2 denotes signed-int overflow. Both failure paths return before assigning the output, so its previous value is preserved. The interface uses this platform&#x27;s int representation, not a fixed-width wire format. A caller must check status before consuming the output. Returning an integer sum alone would leave no distinct channel for a failure if every integer value could also be legitimate data.</p>
 <p>A null check can reject a missing pointer, but it cannot prove that an arbitrary nonnull pointer points to writable live storage. The caller still has a precondition to supply a valid output object. After an object is destroyed, a dangling address may remain nonnull. C-style interfaces therefore need precise lifetime and buffer-size contracts in addition to defensive null checks.</p>
 <p>Exceptions must not escape a boundary that promises not to throw. A wrapper around potentially throwing C++ work should catch exceptions and translate them into the declared status result while preserving cleanup through RAII. noexcept is a promise enforced by termination if an exception escapes, it is not a catch block. Marking a function noexcept without controlling its implementation can make failure less recoverable.</p>
 <p>The single-file program proves the illustrated call and error conventions within one C++ executable. It does not prove dynamic loading, ABI compatibility across compilers or successful use by another language. The later opaque-handle and host-library exercises add those boundaries separately. Keep source linkage, linker success and real foreign-consumer acceptance as distinct evidence.</p>
@@ -218,32 +218,32 @@ assert<span class="syntax-punctuation">(</span>add_checked<span class="syntax-pu
 <p>List the add_checked source contract and binary assumptions.</p>
 <p><strong>Expected:</strong> Names/types/statuses versus compiler/platform/linkage distinguished.</p>
 <p><strong>Reasoning:</strong> An ABI includes details the header alone cannot prove.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Check that your list puts the <code>int</code> parameters, the <code>out</code> pointer and statuses 0, 1 and 2 under the source contract, and <code>extern &quot;C&quot;</code> linkage, compiler and platform under binary assumptions.</p>
 <h3 id="exercise-2-call-a-valid-boundary">Exercise 2: Call a valid boundary<a class="heading-anchor" href="#exercise-2-call-a-valid-boundary" aria-label="Link to this section">#</a></h3>
 <p>Pass 2, 3 and a writable output integer.</p>
 <p><strong>Expected:</strong> Status 0 and output 5.</p>
 <p><strong>Reasoning:</strong> Caller owns the destination storage.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Initialize <code>out</code> to another value first, then assert <code>add_checked(2, 3, &amp;out) == 0 &amp;&amp; out == 5</code>, as Worked example 1 does.</p>
 <h3 id="exercise-3-reject-null-output">Exercise 3: Reject null output<a class="heading-anchor" href="#exercise-3-reject-null-output" aria-label="Link to this section">#</a></h3>
 <p>Pass nullptr for out.</p>
 <p><strong>Expected:</strong> Status 1, no invalid access.</p>
 <p><strong>Reasoning:</strong> Validate pointers before dereference.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Assert <code>add_checked(2, 3, nullptr) == 1</code>, as Worked example 2 does; the null check must come before any write through <code>out</code>.</p>
 <h3 id="exercise-4-repair-exception-leakage">Exercise 4: Repair exception leakage<a class="heading-anchor" href="#exercise-4-repair-exception-leakage" aria-label="Link to this section">#</a></h3>
 <p>Review a C wrapper that lets std::runtime_error escape.</p>
 <p><strong>Expected:</strong> Catch inside wrapper and map to a documented status.</p>
 <p><strong>Reasoning:</strong> Foreign callers cannot assume a compatible exception runtime.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Confirm the repaired wrapper catches inside the <code>extern &quot;C&quot;</code> function and returns a documented status; <code>noexcept</code> alone would call <code>std::terminate</code> instead.</p>
 <h3 id="exercise-5-check-overflow">Exercise 5: Check overflow<a class="heading-anchor" href="#exercise-5-check-overflow" aria-label="Link to this section">#</a></h3>
 <p>Call INT_MAX plus 1.</p>
 <p><strong>Expected:</strong> Status 2; no overflowing addition.</p>
 <p><strong>Reasoning:</strong> Check arithmetic before evaluating it.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Assert <code>add_checked(std::numeric_limits&lt;int&gt;::max(), 1, &amp;out) == 2</code> and that <code>out</code> still holds its previous value.</p>
 <h3 id="exercise-6-transfer-a-shared-library">Exercise 6: Transfer a shared library<a class="heading-anchor" href="#exercise-6-transfer-a-shared-library" aria-label="Link to this section">#</a></h3>
 <p>Build the wrapper separately in an owned host project and record compiler/architecture.</p>
 <p><strong>Expected:</strong> Real link/load receipt plus matching header, no inferred portability.</p>
 <p><strong>Reasoning:</strong> The browser single-file run does not exercise a shared-library ABI.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p></article>
+<p><strong>Verify:</strong> Record <code>g++ --version</code> and <code>uname -m</code> next to the successful link and test run, and confirm the header declaration matches the definition&#x27;s <code>extern &quot;C&quot;</code> signature.</p></article>
   </main>
 </body>
 </html>

@@ -194,37 +194,44 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/swift/solutions/swift-036_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="swift-036-explanation-and-comparison">swift-036: explanation and comparison<a class="heading-anchor" href="#swift-036-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="swift-036_solution.swift.html">swift-036_solution.swift</a>. Its assertions are always active under the prepared classroom compile settings.</p>
+<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="swift-036_solution.swift.html">swift-036_solution.swift</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Count a linear search:</strong> An exact operation count avoids fragile machine-speed assumptions. The last-element search performs four comparisons.</p>
 <p><strong>Build a reusable membership index:</strong> Index construction and storage are costs that should be justified by repeated queries. The index preserves four identities and answers membership.</p>
-<h3 id="reason-through-the-six-tasks">Reason through the six tasks<a class="heading-anchor" href="#reason-through-the-six-tasks" aria-label="Link to this section">#</a></h3>
-<ol>
-<li><strong>Predict and explain.</strong> Count comparisons for first, last and absent targets.</li>
-</ol>
-<ol start="2">
-<li><strong>Guided modification.</strong> Double input size and predict worst-case work.</li>
-</ol>
-<ol start="3">
-<li><strong>Independent construction.</strong> Compare repeated array scans with one built Set under the same identity policy.</li>
-</ol>
-<ol start="4">
-<li><strong>Diagnose a defect.</strong> Diagnose a benchmark that excludes index construction for a one-shot query.</li>
-</ol>
-<ol start="5">
-<li><strong>Boundary evidence.</strong> Test duplicate inputs and empty workloads.</li>
-</ol>
-<ol start="6">
-<li><strong>Transfer and justify.</strong> Write a measurement plan covering workload, correctness, optimization mode and allocation evidence.</li>
-</ol>
-<p>For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.</p>
+<h3 id="task-answers">Task answers<a class="heading-anchor" href="#task-answers" aria-label="Link to this section">#</a></h3>
+<h4 id="task-1-predict-and-explain">Task 1: Predict and explain<a class="heading-anchor" href="#task-1-predict-and-explain" aria-label="Link to this section">#</a></h4>
+<p>Count comparisons for first, last and absent targets.</p>
+<p>No separate reference answer has been written for this task. Example A is the evidence to compare with: An exact operation count avoids fragile machine-speed assumptions. The last-element search performs four comparisons.</p>
+<h4 id="task-2-guided-modification">Task 2: Guided modification<a class="heading-anchor" href="#task-2-guided-modification" aria-label="Link to this section">#</a></h4>
+<p>Double input size and predict worst-case work.</p>
+<p>No separate reference answer has been written for this task. Start from Example B: Index construction and storage are costs that should be justified by repeated queries. The index preserves four identities and answers membership.</p>
+<h4 id="task-3-independent-construction">Task 3: Independent construction<a class="heading-anchor" href="#task-3-independent-construction" aria-label="Link to this section">#</a></h4>
+<p>Compare repeated array scans with one built Set under the same identity policy.</p>
+<p><strong>Reference answer.</strong> It runs as the <code>Task 3</code> block of the reference program.</p>
+<pre class="highlighted-code"><code class="language-swift"><span class="syntax-keyword">let</span> names <span class="syntax-punctuation">=</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">pear</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">apple</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">fig</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">let</span> queries <span class="syntax-punctuation">=</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">fig</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">kiwi</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">pear</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">let</span> scanHits <span class="syntax-punctuation">=</span> queries<span class="syntax-punctuation">.</span><span class="syntax-builtin">filter</span> <span class="syntax-punctuation">{</span> names<span class="syntax-punctuation">.</span><span class="syntax-builtin">contains</span><span class="syntax-punctuation">(</span>$0<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">.</span><span class="syntax-builtin">count</span>
+<span class="syntax-keyword">let</span> index <span class="syntax-punctuation">=</span> Set<span class="syntax-punctuation">(</span>names<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">let</span> indexHits <span class="syntax-punctuation">=</span> queries<span class="syntax-punctuation">.</span><span class="syntax-builtin">filter</span> <span class="syntax-punctuation">{</span> index<span class="syntax-punctuation">.</span><span class="syntax-builtin">contains</span><span class="syntax-punctuation">(</span>$0<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">.</span><span class="syntax-builtin">count</span>
+<span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>scanHits <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-number">2</span> <span class="syntax-operator">&amp;&amp;</span> indexHits <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> scanHits<span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Observe:</strong> Both approaches find 2 of the 3 queries.</p>
+<p>The Set uses the same String equality as the scans, so it answers identically while replacing a linear search per query with one hash lookup.</p>
+<h4 id="task-4-diagnose-a-defect">Task 4: Diagnose a defect<a class="heading-anchor" href="#task-4-diagnose-a-defect" aria-label="Link to this section">#</a></h4>
+<p>Diagnose a benchmark that excludes index construction for a one-shot query.</p>
+<p>No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson&#x27;s pitfalls: Big-O is a growth model, not an elapsed-time promise. A single stopwatch observation is weak evidence. Avoid optimizing ownership complexity before measuring the real bottleneck.</p>
+<h4 id="task-5-boundary-evidence">Task 5: Boundary evidence<a class="heading-anchor" href="#task-5-boundary-evidence" aria-label="Link to this section">#</a></h4>
+<p>Test duplicate inputs and empty workloads.</p>
+<p>No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Count a linear search) and Example B (Build a reusable membership index).</p>
+<h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
+<p>Write a measurement plan covering workload, correctness, optimization mode and allocation evidence.</p>
+<p>No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry <strong>Complexity</strong>, and state one limitation of your choice.</p>
 <h3 id="mechanism-and-diagnostic-reasoning">Mechanism and diagnostic reasoning<a class="heading-anchor" href="#mechanism-and-diagnostic-reasoning" aria-label="Link to this section">#</a></h3>
 <p>Performance reasoning begins with the workload and the resource being measured. Array copy-on-write can make assignment cheap until mutation requires unique storage. Repeated front insertion still shifts elements and can dominate runtime regardless of that optimization. A collection&#x27;s semantic convenience does not imply every operation has the same cost.</p>
 <p>Use deterministic operation counts to explain algorithm growth, and use a prepared benchmark for elapsed-time claims. Warmup, optimization, allocation and system load can distort small measurements. Preserve correctness checks when comparing implementations. A faster result that omits validation or changes ordering is not an equivalent implementation.</p>
 <p>Set membership can replace repeated linear searches when an equality index is appropriate. reserveCapacity can reduce reallocations but does not change the algorithmic complexity of shifting elements.</p>
 <p>Big-O is a growth model, not an elapsed-time promise. A single stopwatch observation is weak evidence. Avoid optimizing ownership complexity before measuring the real bottleneck.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.</p></article>
+<p>Run the reference and confirm that it prints <code>swift-036: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
   </main>
 </body>
 </html>

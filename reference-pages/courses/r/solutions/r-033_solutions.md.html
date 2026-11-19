@@ -202,29 +202,23 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict the category sequence for fact keys B, A, B.</p>
 <p>Home, Paper, Home.</p>
-<p><strong>Expected evidence:</strong> Home, Paper, Home.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Add an unmatched key C.</p>
 <p>The missing index must be rejected or retained under an explicit diagnostic policy.</p>
-<p><strong>Expected evidence:</strong> The missing index must be rejected or retained under an explicit diagnostic policy.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Write a many-to-one join guard.</p>
 <p>No duplicated dimension key and no unmatched required fact key are admitted.</p>
-<p><strong>Expected evidence:</strong> No duplicated dimension key and no unmatched required fact key are admitted.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose a total rising after a dimension join.</p>
 <p>The join may have multiplied fact records.</p>
-<p><strong>Expected evidence:</strong> The join may have multiplied fact records.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Join an empty fact table.</p>
 <p>No facts or additive amounts should be created.</p>
-<p><strong>Expected evidence:</strong> No facts or additive amounts should be created.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Transfer the checks to SQL or Spark.</p>
 <p>Declare join keys, expected matches, unmatched policy and before/after reconciliation.</p>
-<p><strong>Expected evidence:</strong> Declare join keys, expected matches, unmatched policy and before/after reconciliation.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference contains explicit behavioral assertions for its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The reference makes 5 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>
 </body>
 </html>

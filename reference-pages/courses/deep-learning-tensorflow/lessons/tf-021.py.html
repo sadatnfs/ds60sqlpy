@@ -200,25 +200,25 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 1: Mark valid positions</span></span>
-<span class="source-line"><span class="syntax-comment"># Use token IDs[2,3,0] with zero declared padding.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: mask[True,True,False], count2.</span></span>
+<span class="source-line"><span class="syntax-comment"># Use token IDs [2, 3, 0] with zero declared padding.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: mask [True, True, False], count 2.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 2: Normalize masked losses</span></span>
-<span class="source-line"><span class="syntax-comment"># Use token losses[log2,log2,100] and exclude the padding position.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: masked meanlog2; padding loss100 has no effect.</span></span>
+<span class="source-line"><span class="syntax-comment"># Use token losses[log 2, log 2,100] and exclude the padding position.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: masked mean log 2; padding loss 100 has no effect.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Check embedding axes</span></span>
-<span class="source-line"><span class="syntax-comment"># Lookup IDs[2,3,0] in a fixed4x2 table.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: output shape(3,2); first row[2,2].</span></span>
+<span class="source-line"><span class="syntax-comment"># Lookup IDs [2, 3, 0] in a fixed 4x2 table.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: output shape (3, 2); first row [2, 2].</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Append padding</span></span>
 <span class="source-line"><span class="syntax-comment"># Add two padding IDs and arbitrary corresponding losses, then recalculate the masked</span></span>
 <span class="source-line"><span class="syntax-comment"># mean.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: mean unchanged atlog2.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: mean unchanged at \(\log 2\).</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Select the last valid state</span></span>
-<span class="source-line"><span class="syntax-comment"># For token states[[2,2],[3,-1],[99,99]], select the final valid position.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: state[3,-1], not padding state[99,99].</span></span>
+<span class="source-line"><span class="syntax-comment"># For token states [[2, 2], [3, -1], [99, 99]], select the final valid position.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: state [3, -1], not padding state [99, 99].</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Refuse an empty denominator</span></span>
 <span class="source-line"><span class="syntax-comment"># Write a masked-average helper and test an all-padding mask.</span></span>

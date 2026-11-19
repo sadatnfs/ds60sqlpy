@@ -197,7 +197,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Beginner. Allow about 90 minutes, then revisit the transfer case later. Prerequisites: go-006</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
-<p>By the end, explain byte, rune, utf-8; implement the six investigations below; and defend the expected result of a changed input before running it. A passing reference is evidence about that program, not a certification of your independent understanding.</p>
+<p>Count and slice text by bytes or runes deliberately and reject malformed UTF-8 instead of guessing. Along the way, explain byte, rune, utf-8; implement the six investigations below; and defend the expected result of a changed input before running it.</p>
 <h3 id="why-this-mechanism-matters">Why this mechanism matters<a class="heading-anchor" href="#why-this-mechanism-matters" aria-label="Link to this section">#</a></h3>
 <p>A Go string is an immutable sequence of bytes, not necessarily valid Unicode text. Source string literals are commonly UTF-8, but strings can contain arbitrary bytes. Indexing a string returns one byte. Ranging over a string decodes runes, which are Unicode code points; malformed encodings produce replacement runes. A user-perceived character can contain multiple code points, such as a letter plus combining accent. Byte length, rune count and displayed-character count therefore answer different questions. Choose a unit before slicing, counting or truncating text. Immutability protects a string value, while conversion to a mutable byte slice creates a separate editing representation.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
@@ -208,7 +208,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ul>
 <h3 id="syntax-anatomy-and-reasoning">Syntax anatomy and reasoning<a class="heading-anchor" href="#syntax-anatomy-and-reasoning" aria-label="Link to this section">#</a></h3>
 <p>len(text) counts bytes. []byte(text) and []rune(text) choose different element units. utf8.RuneCountInString counts decoded code points, while utf8.ValidString checks encoding validity. strings.TrimSpace removes surrounding Unicode whitespace and returns a string. A rune literal uses single quotes and has a numeric code-point value; a string literal uses double quotes.</p>
-<h3 id="classroom-execution-contract">Classroom execution contract<a class="heading-anchor" href="#classroom-execution-contract" aria-label="Link to this section">#</a></h3>
+<h3 id="run-this-lesson">Run this lesson<a class="heading-anchor" href="#run-this-lesson" aria-label="Link to this section">#</a></h3>
 <p>Choose Go in the unified Docker classroom. Save your own pad before experimenting. The prepared worker stages it as <code>main.go</code>, compiles it, and executes the resulting program with bounded time and output. The pad is one source file. It does not supply interactive input, arbitrary command-line arguments, package installation, Kubernetes credentials or a host Docker socket. Every ordinary reference here uses the standard library, synthetic local data and explicit checks. A failed <code>check</code> panics and produces a nonzero process result; do not remove it to make the run appear successful.</p>
 <p>The explanatory solution snippets belong inside <code>func main()</code> unless they declare a helper. <code>check</code> is a tiny teaching helper that panics when a condition is false. The separate reference supplies required imports and helpers and implements all six cases. Use that complete source only after an attempt or an explicit reveal. For an independently prepared Go project, the equivalent local build is <code>go build -o lesson main.go</code>, followed by <code>./lesson</code>; use Linux or WSL 2 for that optional workflow. Compiling proves syntax and type consistency, while the executed checks establish the stated example contracts.</p>
 <p>Each worked example below is a complete Go file. Copy one whole block into your saved pad and run it. Example 2 includes the first case as well as the second, so its setup is complete. Its supporting declarations may be reused in later investigations. The separate reference implements all six cases.</p>
@@ -274,75 +274,75 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>
 <p>For each example, write the input values, the state that can change, and the expected observation. Explain which result would disprove your current interpretation. For concurrency, predict a guaranteed relationship rather than an arbitrary scheduling order. For an error case, identify whether it is rejected at compilation or returned during execution.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
-<h4 id="exercise-1-count-two-units">Exercise 1: Count two units<a class="heading-anchor" href="#exercise-1-count-two-units" aria-label="Link to this section">#</a></h4>
-<p>Inspect A followed by a smiling face.</p>
-<p><strong>Expected:</strong> There are 5 bytes and 2 runes.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
-<h4 id="exercise-2-edit-a-copied-byte-slice">Exercise 2: Edit a copied byte slice<a class="heading-anchor" href="#exercise-2-edit-a-copied-byte-slice" aria-label="Link to this section">#</a></h4>
-<p>Convert cat to bytes, replace c with b and retain the original.</p>
-<p><strong>Expected:</strong> The original is cat and the new string is bat.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<h4 id="exercise-1-count-two-units-change-one-input">Exercise 1: Count two units: change one input<a class="heading-anchor" href="#exercise-1-count-two-units-change-one-input" aria-label="Link to this section">#</a></h4>
+<p>Copy worked example 1 into a scratch pad and change <code>text := &quot;A🙂&quot;</code> to <code>text := &quot;A🙂!&quot;</code>. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</p>
+<p><strong>Expected:</strong> The changed run panics with <code>text units</code> because <code>len(text) == 5 &amp;&amp; utf8.RuneCountInString(text) == 2</code> no longer holds. Restoring the original line brings back the worked observation: there are 5 bytes and 2 runes.</p>
+<p><strong>Verify:</strong> Compare your written prediction with the panic message <code>text units</code> and name the value that made <code>len(text) == 5 &amp;&amp; utf8.RuneCountInString(text) == 2</code> false. After restoring the input, the program must print its success line again.</p>
+<h4 id="exercise-2-edit-a-copied-byte-slice-debug-a-regression">Exercise 2: Edit a copied byte slice: debug a regression<a class="heading-anchor" href="#exercise-2-edit-a-copied-byte-slice-debug-a-regression" aria-label="Link to this section">#</a></h4>
+<p>A regression changed one token in worked example 2, so one line now reads <code>data[1] = &#x27;b&#x27;</code>. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.</p>
+<p><strong>Expected:</strong> Before the repair the program panics with <code>copy edit</code>; after it the line reads <code>data[0] = &#x27;b&#x27;</code> again and the original is cat and the new string is bat.</p>
+<p><strong>Verify:</strong> Keep the failing and the repaired runs. Explain why the changed token alters the value tested by <code>original == &quot;cat&quot; &amp;&amp; string(data) == &quot;bat&quot;</code> for this input.</p>
 <h4 id="exercise-3-reject-malformed-encoding">Exercise 3: Reject malformed encoding<a class="heading-anchor" href="#exercise-3-reject-malformed-encoding" aria-label="Link to this section">#</a></h4>
 <p>Build a string from the single byte 0xff.</p>
 <p><strong>Expected:</strong> UTF-8 validation returns false.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>!utf8.ValidString(text)</code>. As a control, change <code>check(!utf8.ValidString(text), &quot;invalid encoding&quot;)</code> to <code>check(utf8.ValidString(text), &quot;invalid encoding&quot;)</code> inside that check: it must panic with <code>invalid encoding</code>, which shows the check can fail. Restore it.</p>
 <h4 id="exercise-4-slice-by-rune-position">Exercise 4: Slice by rune position<a class="heading-anchor" href="#exercise-4-slice-by-rune-position" aria-label="Link to this section">#</a></h4>
 <p>Convert A and the emoji to runes and retain the second rune.</p>
 <p><strong>Expected:</strong> The resulting string is the intact emoji.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>string(r[1:]) == &quot;🙂&quot;</code>. As a control, change <code>check(string(r[1:]) == &quot;🙂&quot;, &quot;rune slice&quot;)</code> to <code>check(string(r[2:]) == &quot;🙂&quot;, &quot;rune slice&quot;)</code> inside that check: it must panic with <code>rune slice</code>, which shows the check can fail. Restore it.</p>
 <h4 id="exercise-5-separate-combining-forms">Exercise 5: Separate combining forms<a class="heading-anchor" href="#exercise-5-separate-combining-forms" aria-label="Link to this section">#</a></h4>
 <p>Count runes in e followed by a combining accent.</p>
 <p><strong>Expected:</strong> There are 2 runes even though it can display as one character.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>utf8.RuneCountInString(text) == 2</code>. As a control, change <code>text := &quot;e\u0301&quot;</code> to <code>text := &quot;e\u0301!&quot;</code>: the run must panic with <code>combining</code>. Restore the line before continuing.</p>
 <h4 id="exercise-6-transfer-a-whitespace-policy">Exercise 6: Transfer a whitespace policy<a class="heading-anchor" href="#exercise-6-transfer-a-whitespace-policy" aria-label="Link to this section">#</a></h4>
 <p>Trim surrounding whitespace from a label without changing its internal space.</p>
 <p><strong>Expected:</strong> The result is blue sky.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>label == &quot;blue sky&quot;</code>. As a control, change <code>label := strings.TrimSpace(&quot; \tblue sky\n&quot;)</code> to <code>label := strings.TrimSpace(&quot; \tblue sky\n!&quot;)</code>: the run must panic with <code>trim</code>. Restore the line before continuing.</p>
 <p>Implement these in the answer-free learner source. Keep one independent check per claim. A task can require tracing, construction, a changed input or a deliberate safe failure. Do not run a data race, corrupt memory or contact a shared cluster merely to demonstrate why it would be wrong.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Read a compiler error from the first location in your source, then fix one cause at a time. Unused imports and variables are errors in Go; add an import when its use exists, rather than copying a large unused import list. A panic from <code>check</code> identifies a violated example contract. Compare the actual value with the expected value and inspect the state transition that produced it. A returned <code>error</code> is a value that the caller must handle; an ignored error can make later output look plausible while the original operation failed.</p>
 <p>The lesson-specific explanations in the two examples identify the important counterexamples. Extend that reasoning to every investigation: explain why a plausible alternative would fail, and preserve a tiny input that distinguishes it. Treat empty data, missing values and cancellation as domain cases with explicit policies. In concurrent work, replace sleeps used as synchronization with channels, mutexes or an explicit ownership protocol.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<h4 id="hint-for-investigation-1-count-two-units">Hint for investigation 1: Count two units<a class="heading-anchor" href="#hint-for-investigation-1-count-two-units" aria-label="Link to this section">#</a></h4>
+<h4 id="hint-for-investigation-1-count-two-units-change-one-input">Hint for investigation 1: Count two units: change one input<a class="heading-anchor" href="#hint-for-investigation-1-count-two-units-change-one-input" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: There are 5 bytes and 2 runes.</li>
-<li>Identify the input and the state boundary relevant to count two units. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>len(text) == 5 &amp;&amp; utf8.RuneCountInString(text) == 2</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Compute the checked value with <code>text := &quot;A🙂!&quot;</code> in place before running, then compare it with the value <code>len(text) == 5 &amp;&amp; utf8.RuneCountInString(text) == 2</code> expects.</li>
 </ol>
-<h4 id="hint-for-investigation-2-edit-a-copied-byte-slice">Hint for investigation 2: Edit a copied byte slice<a class="heading-anchor" href="#hint-for-investigation-2-edit-a-copied-byte-slice" aria-label="Link to this section">#</a></h4>
+<h4 id="hint-for-investigation-2-edit-a-copied-byte-slice-debug-a-regression">Hint for investigation 2: Edit a copied byte slice: debug a regression<a class="heading-anchor" href="#hint-for-investigation-2-edit-a-copied-byte-slice-debug-a-regression" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The original is cat and the new string is bat.</li>
-<li>Identify the input and the state boundary relevant to edit a copied byte slice. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>original == &quot;cat&quot; &amp;&amp; string(data) == &quot;bat&quot;</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Compare <code>data[1] = &#x27;b&#x27;</code> with the same line in worked example 2 and state the claim each version makes.</li>
 </ol>
 <h4 id="hint-for-investigation-3-reject-malformed-encoding">Hint for investigation 3: Reject malformed encoding<a class="heading-anchor" href="#hint-for-investigation-3-reject-malformed-encoding" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: UTF-8 validation returns false.</li>
-<li>Identify the input and the state boundary relevant to reject malformed encoding. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>!utf8.ValidString(text)</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Name one input that would make <code>!utf8.ValidString(text)</code> false. A check that no input can falsify is not evidence.</li>
 </ol>
 <h4 id="hint-for-investigation-4-slice-by-rune-position">Hint for investigation 4: Slice by rune position<a class="heading-anchor" href="#hint-for-investigation-4-slice-by-rune-position" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The resulting string is the intact emoji.</li>
-<li>Identify the input and the state boundary relevant to slice by rune position. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>string(r[1:]) == &quot;🙂&quot;</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Name one input that would make <code>string(r[1:]) == &quot;🙂&quot;</code> false. A check that no input can falsify is not evidence.</li>
 </ol>
 <h4 id="hint-for-investigation-5-separate-combining-forms">Hint for investigation 5: Separate combining forms<a class="heading-anchor" href="#hint-for-investigation-5-separate-combining-forms" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: There are 2 runes even though it can display as one character.</li>
-<li>Identify the input and the state boundary relevant to separate combining forms. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>utf8.RuneCountInString(text) == 2</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Predict the effect of changing <code>text := &quot;e\u0301&quot;</code> to <code>text := &quot;e\u0301!&quot;</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
 </ol>
 <h4 id="hint-for-investigation-6-transfer-a-whitespace-policy">Hint for investigation 6: Transfer a whitespace policy<a class="heading-anchor" href="#hint-for-investigation-6-transfer-a-whitespace-policy" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The result is blue sky.</li>
-<li>Identify the input and the state boundary relevant to transfer a whitespace policy. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>label == &quot;blue sky&quot;</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Predict the effect of changing <code>label := strings.TrimSpace(&quot; \tblue sky\n&quot;)</code> to <code>label := strings.TrimSpace(&quot; \tblue sky\n!&quot;)</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
 </ol>
 <h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
 <p>Close the reference. Rebuild one normal case and one boundary case from a blank pad. Explain the role of byte without using its name in the definition. Then change the domain while keeping the same invariant. Record the new input, your prediction and the observed output. If your program passes only because its input is hard-coded, explain which part would need a reusable function in a larger project.</p>
 <h3 id="next-step-and-sources">Next step and sources<a class="heading-anchor" href="#next-step-and-sources" aria-label="Link to this section">#</a></h3>
-<p><a href="https://go.dev/ref/spec">Primary language or library documentation</a>, reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. This source supports the API contract; it does not verify the classroom worker. Runtime receipts are recorded separately by the repository validation tools. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.</p>
+<p><a href="https://go.dev/ref/spec">Primary language or library documentation</a>, reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for go-007: Strings, bytes, runes and Unicode boundaries.
 Read courses/go/guides/go-007.md and my saved attempt based on courses/go/lessons/go-007.go.

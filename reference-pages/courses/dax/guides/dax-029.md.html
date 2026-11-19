@@ -224,8 +224,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <pre class="highlighted-code"><code class="language-dax"><span class="syntax-keyword">EVALUATE</span> <span class="syntax-function">CALCULATETABLE</span> <span class="syntax-punctuation">(</span> <span class="syntax-function">ROW</span> <span class="syntax-punctuation">(</span> <span class="syntax-string">&quot;OrderRevenue&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-attribute">[NetRevenue]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;ShipRevenue&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-function">CALCULATE</span> <span class="syntax-punctuation">(</span> <span class="syntax-attribute">[NetRevenue]</span><span class="syntax-punctuation">,</span> <span class="syntax-function">USERELATIONSHIP</span> <span class="syntax-punctuation">(</span> Sales<span class="syntax-attribute">[ShipDate]</span><span class="syntax-punctuation">,</span> <span class="syntax-class">&#x27;Date&#x27;</span><span class="syntax-attribute">[Date]</span> <span class="syntax-punctuation">)</span> <span class="syntax-punctuation">)</span> <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-class">&#x27;Date&#x27;</span><span class="syntax-attribute">[Year]</span> <span class="syntax-operator">=</span> <span class="syntax-number">2025</span><span class="syntax-punctuation">,</span> <span class="syntax-class">&#x27;Date&#x27;</span><span class="syntax-attribute">[MonthNumber]</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span> <span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Context trace:</strong></p>
 <ol>
-<li>Orders S4,S5,S6 belong to January and total 67.</li>
-<li>Shipments S4 and S 5 occur in January and total 47.</li>
+<li>Orders S4, S5, S6 belong to January and total 67.</li>
+<li>Shipments S4 and S5 occur in January and total 47.</li>
 <li>S6&#x27;s 20 moves to shipment month February.</li>
 </ol>
 <p><strong>Hand-derived worked-reference result:</strong></p>
@@ -245,8 +245,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <pre class="highlighted-code"><code class="language-dax"><span class="syntax-keyword">EVALUATE</span> <span class="syntax-function">CALCULATETABLE</span> <span class="syntax-punctuation">(</span> <span class="syntax-function">ROW</span> <span class="syntax-punctuation">(</span> <span class="syntax-string">&quot;OrderRevenue&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-attribute">[NetRevenue]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;ShipRevenue&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-function">CALCULATE</span> <span class="syntax-punctuation">(</span> <span class="syntax-attribute">[NetRevenue]</span><span class="syntax-punctuation">,</span> <span class="syntax-function">USERELATIONSHIP</span> <span class="syntax-punctuation">(</span> Sales<span class="syntax-attribute">[ShipDate]</span><span class="syntax-punctuation">,</span> <span class="syntax-class">&#x27;Date&#x27;</span><span class="syntax-attribute">[Date]</span> <span class="syntax-punctuation">)</span> <span class="syntax-punctuation">)</span> <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-class">&#x27;Date&#x27;</span><span class="syntax-attribute">[Year]</span> <span class="syntax-operator">=</span> <span class="syntax-number">2025</span><span class="syntax-punctuation">,</span> <span class="syntax-class">&#x27;Date&#x27;</span><span class="syntax-attribute">[MonthNumber]</span> <span class="syntax-operator">=</span> <span class="syntax-number">2</span> <span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Context trace:</strong></p>
 <ol>
-<li>Orders S7,S8 total 56 in February.</li>
-<li>Shipments include S6,S7,S8, totaling 76.</li>
+<li>Orders S7, S8 total 56 in February.</li>
+<li>Shipments include S6, S7, S8, totaling 76.</li>
 <li>Across January and February, both date-role totals reconcile to 123.</li>
 </ol>
 <p><strong>Hand-derived worked-reference result:</strong></p>
@@ -262,7 +262,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Monthly attribution changes while the combined-period amount reconciles. A wider window is useful for checking that a role change has not duplicated facts.</p>
 <p>Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table.</p>
 <h3 id="practice-prediction-construction-and-diagnosis">Practice: prediction, construction and diagnosis<a class="heading-anchor" href="#practice-prediction-construction-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>Retain your formula or written reasoning, the stated context, contributing rows or values, and a conclusion with its unit. This is a manual learning record, not an execution receipt.</p>
+<p>Retain your formula or written reasoning, the stated context, contributing rows or values, and a conclusion with its unit. These notes are your own study record; they do not show that a formula ran.</p>
 <h4 id="exercise-1-predict">Exercise 1: Predict<a class="heading-anchor" href="#exercise-1-predict" aria-label="Link to this section">#</a></h4>
 <p>Predict all-2025 totals for both roles.</p>
 <h4 id="exercise-2-change-one-condition">Exercise 2: Change one condition<a class="heading-anchor" href="#exercise-2-change-one-condition" aria-label="Link to this section">#</a></h4>
@@ -289,8 +289,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Continue to <a href="dax-030.md.html">dax-030</a> when its prerequisites make sense, or revisit this stage from the <a href="../README.md.html">course map</a>.</p>
 <h3 id="official-references-and-evidence-limits">Official references and evidence limits<a class="heading-anchor" href="#official-references-and-evidence-limits" aria-label="Link to this section">#</a></h3>
 <ul>
-<li><a href="https://learn.microsoft.com/en-us/dax/userelationship-function-dax">Official documentation 1</a></li>
-<li><a href="https://learn.microsoft.com/en-us/power-bi/guidance/relationships-active-inactive">Official documentation 2</a></li>
+<li><a href="https://learn.microsoft.com/en-us/dax/userelationship-function-dax">DAX function: USERELATIONSHIP</a></li>
+<li><a href="https://learn.microsoft.com/en-us/power-bi/guidance/relationships-active-inactive">Power BI guidance: active and inactive relationships</a></li>
 </ul>
 <p>Documentation was reviewed for this original course on 2026-10-25. Version-sensitive features have explicit notes. Source/model checks and independent fixture arithmetic are not a DAX parser, compiler, semantic engine, real RLS test or performance measurement.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>

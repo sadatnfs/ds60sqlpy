@@ -199,16 +199,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">Copy to .learning before editing. Six independent attempts belong below.</span></span>
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 1: Accept one bounded proposal</span></span>
-<span class="source-line"><span class="syntax-comment"># Validate toolread_fixture and document_idd1.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: accepted proposal identifiesd1.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Accept the second allowed document</span></span>
+<span class="source-line"><span class="syntax-comment"># Validate tool read_fixture with document_id d2 and check whether the returned proposal</span></span>
+<span class="source-line"><span class="syntax-comment"># is a separate object.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: accepted; the returned proposal equals the input but is a separate copy.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 2: Reject an unknown operation</span></span>
-<span class="source-line"><span class="syntax-comment"># Submit toolrun_shell with document_idd1.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: ValueError;no execution.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Predict a case-changed tool name</span></span>
+<span class="source-line"><span class="syntax-comment"># Submit tool READ_FIXTURE with document_id d1 and predict which check rejects it.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: ValueError &#x27;unknown tool&#x27;; names are matched exactly, without case folding.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Reject extra fields</span></span>
-<span class="source-line"><span class="syntax-comment"># Add command orpath to an otherwise valid object.</span></span>
+<span class="source-line"><span class="syntax-comment"># Add command or path to an otherwise valid object.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: extra fields rejected.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Reject traversal-like identifiers</span></span>
@@ -216,13 +217,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-comment"># Expected: ValueError because the ID is outside the fixture allowlist.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Enforce types</span></span>
-<span class="source-line"><span class="syntax-comment"># Submit document_id1 and a list instead of an object.</span></span>
+<span class="source-line"><span class="syntax-comment"># Submit the integer document_id 1, then a list instead of an object.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: TypeError for both malformed structures.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Keep retrieved instructions inert</span></span>
 <span class="source-line"><span class="syntax-comment"># Read a fixture string saying ignore policy and run a command, then verify no second</span></span>
 <span class="source-line"><span class="syntax-comment"># operation is proposed or executed.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: returned value is text;dispatch count1.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: returned value is text; dispatch count 1.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Read the guide and implement the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>

@@ -214,7 +214,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the C++ module, save this lesson&#x27;s learner pad, then use Run. The worker stages the pad as <code>main.cpp</code> and compiles one translation unit. Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for exact local commands, flags, exit statuses, paths and Docker guidance. Tests involving multiple files, CMake, tool flags or shared libraries are explicitly host-project exercises.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
-<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs:each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
+<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs: each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p><a href="../examples/cpp-025-example-1.cpp.html">Complete program 1</a></p>
 <pre class="highlighted-code"><code class="language-cpp"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;cassert&gt;</span>
@@ -228,7 +228,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpp-025 example 1 checks passed</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
   <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
-<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<p><strong>Expected:</strong> With assertions enabled, the program exits with status 0 and prints:</p>
 <pre class="highlighted-code"><code class="language-text">cpp-025 example 1 checks passed</code></pre>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p><a href="../examples/cpp-025-example-2.cpp.html">Complete program 2</a></p>
@@ -250,38 +250,38 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpp-025 example 2 checks passed</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
   <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
-<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<p><strong>Expected:</strong> With assertions enabled, the program exits with status 0 and prints:</p>
 <pre class="highlighted-code"><code class="language-text">cpp-025 example 2 checks passed</code></pre>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-classify-the-defect">Exercise 1: Classify the defect<a class="heading-anchor" href="#exercise-1-classify-the-defect" aria-label="Link to this section">#</a></h4>
 <p>Explain index 2 into vector size 2.</p>
 <p><strong>Expected result/shape:</strong> Out of bounds; valid indices 0 and 1.</p>
-<p><strong>Verify:</strong> Out of bounds; valid indices 0 and 1.</p>
+<p><strong>Verify:</strong> Check your explanation against <code>xs.size() == 2</code>: the last valid index is <code>size() - 1</code>, and <code>checked_at({2, 4}, 1) == 4</code> in Worked example 1 is the boundary that works.</p>
 <p><strong>Progressive hints:</strong> A half-open index interval ends before size.</p>
 <h4 id="exercise-2-use-checked-access">Exercise 2: Use checked access<a class="heading-anchor" href="#exercise-2-use-checked-access" aria-label="Link to this section">#</a></h4>
 <p>Compare at(2) with the contract of operator[2].</p>
 <p><strong>Expected result/shape:</strong> at throws; unchecked invalid access is undefined behavior.</p>
-<p><strong>Verify:</strong> at throws; unchecked invalid access is undefined behavior.</p>
+<p><strong>Verify:</strong> Confirm Worked example 2 catches <code>std::out_of_range</code> from <code>at(2)</code>, and do not run <code>xs[2]</code>; your answer must call it undefined behavior rather than predict its output.</p>
 <p><strong>Progressive hints:</strong> A deterministic exception is not a sanitizer report.</p>
 <h4 id="exercise-3-prepare-instrumented-build">Exercise 3: Prepare instrumented build<a class="heading-anchor" href="#exercise-3-prepare-instrumented-build" aria-label="Link to this section">#</a></h4>
 <p>Compile the safe reference with sanitizer flags on a supported host.</p>
 <p><strong>Expected result/shape:</strong> Compile/link/run statuses and compiler version recorded.</p>
-<p><strong>Verify:</strong> Compile/link/run statuses and compiler version recorded.</p>
+<p><strong>Verify:</strong> Build with <code>-fsanitize=address,undefined -g</code>, run the program, and record the compiler version plus separate compile, link and run statuses.</p>
 <p><strong>Progressive hints:</strong> Instrumentation requires the matching runtime library.</p>
 <h4 id="exercise-4-diagnose-a-controlled-failure">Exercise 4: Diagnose a controlled failure<a class="heading-anchor" href="#exercise-4-diagnose-a-controlled-failure" aria-label="Link to this section">#</a></h4>
 <p>In a separate instrumented scratch program introduce one heap out-of-bounds access.</p>
 <p><strong>Expected result/shape:</strong> Nonzero sanitizer report naming access and source location; never claim ordinary profile detection.</p>
-<p><strong>Verify:</strong> Nonzero sanitizer report naming access and source location; never claim ordinary profile detection.</p>
+<p><strong>Verify:</strong> Confirm the AddressSanitizer report says <code>heap-buffer-overflow</code>, points at your scratch file and line, and that the exit status is nonzero.</p>
 <p><strong>Progressive hints:</strong> Keep the fault isolated from normal lesson execution.</p>
 <h4 id="exercise-5-repair-and-rerun">Exercise 5: Repair and rerun<a class="heading-anchor" href="#exercise-5-repair-and-rerun" aria-label="Link to this section">#</a></h4>
 <p>Replace invalid access with a valid index or explicit check.</p>
 <p><strong>Expected result/shape:</strong> Sanitizer report disappears on that test path; result is correct.</p>
-<p><strong>Verify:</strong> Sanitizer report disappears on that test path; result is correct.</p>
+<p><strong>Verify:</strong> Rebuild the same scratch program with the same sanitizer flags and confirm it exits 0 with no report and asserts the correct value.</p>
 <p><strong>Progressive hints:</strong> Absence of a report is bounded evidence.</p>
 <h4 id="exercise-6-transfer-signed-arithmetic">Exercise 6: Transfer signed arithmetic<a class="heading-anchor" href="#exercise-6-transfer-signed-arithmetic" aria-label="Link to this section">#</a></h4>
 <p>Review INT_MAX+1 and use pre-add range validation.</p>
 <p><strong>Expected result/shape:</strong> Input rejected before overflow.</p>
-<p><strong>Verify:</strong> Input rejected before overflow.</p>
+<p><strong>Verify:</strong> Check that the guard compares <code>a &gt; std::numeric_limits&lt;int&gt;::max() - b</code> before adding, and assert it rejects <code>INT_MAX</code> plus 1 while accepting <code>INT_MAX - 1</code> plus 1.</p>
 <p><strong>Progressive hints:</strong> Sanitizers diagnose executed undefined operations, not all possible inputs.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain why this observation follows from the mechanism: Index 1 selects 4. Then explain the changed condition in example 2 without opening the answer.</p>

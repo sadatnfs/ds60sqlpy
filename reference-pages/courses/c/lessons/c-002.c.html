@@ -196,13 +196,20 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-c"><code><span class="source-line"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;stdio.h&gt;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">void</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
-<span class="source-line">  <span class="syntax-comment">/* Exercise 1: Compare integer and floating division</span></span>
-<span class="source-line"><span class="syntax-comment">     Compute 7/2 and 7/2.0.</span></span>
-<span class="source-line"><span class="syntax-comment">     Expected: The results are 3 and 3.5. */</span></span>
+<span class="source-line">  <span class="syntax-comment">/* Exercise 1: Compare integer and floating division: change one input</span></span>
+<span class="source-line"><span class="syntax-comment">     Copy worked example 1 into a scratch pad and change `int whole = 7 / 2;` to</span></span>
+<span class="source-line"><span class="syntax-comment">     `int whole = 8 / 2;`. Before running, predict which CHECK fails and which</span></span>
+<span class="source-line"><span class="syntax-comment">     value it now sees; then run it and restore the original line. Expected: The</span></span>
+<span class="source-line"><span class="syntax-comment">     changed run stops with `Check failed` at the CHECK on `whole == 3 &amp;&amp;</span></span>
+<span class="source-line"><span class="syntax-comment">     fraction == 3.5`. Restoring the original line brings back the worked</span></span>
+<span class="source-line"><span class="syntax-comment">     observation: the results are 3 and 3.5. */</span></span>
 <span class="source-line"></span>
-<span class="source-line">  <span class="syntax-comment">/* Exercise 2: Observe defined unsigned wrap</span></span>
-<span class="source-line"><span class="syntax-comment">     Add one to UINT_MAX in unsigned arithmetic.</span></span>
-<span class="source-line"><span class="syntax-comment">     Expected: The result is zero. */</span></span>
+<span class="source-line">  <span class="syntax-comment">/* Exercise 2: Observe defined unsigned wrap: debug a regression</span></span>
+<span class="source-line"><span class="syntax-comment">     A regression changed one token in worked example 2, so one line now reads</span></span>
+<span class="source-line"><span class="syntax-comment">     `n -= 1U;`. Run worked example 2 with that line, use the failing CHECK to</span></span>
+<span class="source-line"><span class="syntax-comment">     locate the defect and repair it without changing the CHECK. Expected:</span></span>
+<span class="source-line"><span class="syntax-comment">     Before the repair the run stops with `Check failed` at the CHECK on `n ==</span></span>
+<span class="source-line"><span class="syntax-comment">     0U`; after it the line reads `n += 1U;` again and the result is zero. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 3: Inspect representation facts</span></span>
 <span class="source-line"><span class="syntax-comment">     Check sizeof(char) and minimum CHAR_BIT.</span></span>

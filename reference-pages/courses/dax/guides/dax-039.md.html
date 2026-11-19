@@ -214,6 +214,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
                     Date (one)
                        | inactive ShipDate
                        +------&gt; Sales</code></pre>
+<p>This lesson also uses the <code>analytics</code> model&#x27;s <code>Inventory</code> table. Its declared one-to-many relationships are <code>Product[ProductKey]</code> → <code>Inventory[ProductKey]</code> and <code>Date[Date]</code> → <code>Inventory[SnapshotDate]</code>.</p>
 <p>All amounts in ordinary Sales are USD after the line discount, before tax and returns. The Date fixture is complete for 2024 and 2025; a short result table is a selected slice, not the whole calendar. JSON <code>null</code> in the worked-results sidecar means DAX BLANK, not the text &quot;null&quot;.</p>
 <h3 id="worked-cases">Worked cases<a class="heading-anchor" href="#worked-cases" aria-label="Link to this section">#</a></h3>
 <h4 id="case-a-two-states-are-not-one-closing-balance">Case A: Two states are not one closing balance<a class="heading-anchor" href="#case-a-two-states-are-not-one-closing-balance" aria-label="Link to this section">#</a></h4>
@@ -221,8 +222,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <pre class="highlighted-code"><code class="language-dax"><span class="syntax-keyword">EVALUATE</span> <span class="syntax-function">CALCULATETABLE</span> <span class="syntax-punctuation">(</span> <span class="syntax-function">ROW</span> <span class="syntax-punctuation">(</span> <span class="syntax-string">&quot;SummedSnapshots&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-function">SUM</span> <span class="syntax-punctuation">(</span> Inventory<span class="syntax-attribute">[Units]</span> <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;ClosingUnits&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-function">CALCULATE</span> <span class="syntax-punctuation">(</span> <span class="syntax-function">SUM</span> <span class="syntax-punctuation">(</span> Inventory<span class="syntax-attribute">[Units]</span> <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-function">LASTDATE</span> <span class="syntax-punctuation">(</span> <span class="syntax-class">&#x27;Date&#x27;</span><span class="syntax-attribute">[Date]</span> <span class="syntax-punctuation">)</span> <span class="syntax-punctuation">)</span> <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-class">&#x27;Date&#x27;</span><span class="syntax-attribute">[Year]</span> <span class="syntax-operator">=</span> <span class="syntax-number">2025</span><span class="syntax-punctuation">,</span> <span class="syntax-class">&#x27;Date&#x27;</span><span class="syntax-attribute">[MonthNumber]</span> <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">{</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span> <span class="syntax-punctuation">}</span> <span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Context trace:</strong></p>
 <ol>
-<li>January 31 has 10 +20 +5 =35 units.</li>
-<li>February 28 has 8 +15 +7 =30 units.</li>
+<li>January 31 has 10 + 20 + 5 = 35 units.</li>
+<li>February 28 has 8 + 15 + 7 = 30 units.</li>
 <li>All snapshot rows sum to 65; the closing selected-date balance is 30.</li>
 </ol>
 <p><strong>Hand-derived worked-reference result:</strong></p>
@@ -257,7 +258,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>This is a model-based as-of estimate, not a measured February 15 snapshot. Real systems may require stricter freshness or complete change-event accounting.</p>
 <p>Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table.</p>
 <h3 id="practice-prediction-construction-and-diagnosis">Practice: prediction, construction and diagnosis<a class="heading-anchor" href="#practice-prediction-construction-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>Retain your formula or written reasoning, the stated context, contributing rows or values, and a conclusion with its unit. This is a manual learning record, not an execution receipt.</p>
+<p>Retain your formula or written reasoning, the stated context, contributing rows or values, and a conclusion with its unit. These notes are your own study record; they do not show that a formula ran.</p>
 <h4 id="exercise-1-predict">Exercise 1: Predict<a class="heading-anchor" href="#exercise-1-predict" aria-label="Link to this section">#</a></h4>
 <p>Predict the closing balance for Notebook and Mug at February 28.</p>
 <h4 id="exercise-2-change-one-condition">Exercise 2: Change one condition<a class="heading-anchor" href="#exercise-2-change-one-condition" aria-label="Link to this section">#</a></h4>
@@ -284,8 +285,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Continue to <a href="dax-040.md.html">dax-040</a> when its prerequisites make sense, or revisit this stage from the <a href="../README.md.html">course map</a>.</p>
 <h3 id="official-references-and-evidence-limits">Official references and evidence limits<a class="heading-anchor" href="#official-references-and-evidence-limits" aria-label="Link to this section">#</a></h3>
 <ul>
-<li><a href="https://learn.microsoft.com/en-us/dax/lastdate-function-dax">Official documentation 1</a></li>
-<li><a href="https://learn.microsoft.com/en-us/dax/lastnonblank-function-dax">Official documentation 2</a></li>
+<li><a href="https://learn.microsoft.com/en-us/dax/lastdate-function-dax">DAX function: LASTDATE</a></li>
+<li><a href="https://learn.microsoft.com/en-us/dax/lastnonblank-function-dax">DAX function: LASTNONBLANK</a></li>
 </ul>
 <p>Documentation was reviewed for this original course on 2026-10-25. Version-sensitive features have explicit notes. Source/model checks and independent fixture arithmetic are not a DAX parser, compiler, semantic engine, real RLS test or performance measurement.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>

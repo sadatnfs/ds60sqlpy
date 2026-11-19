@@ -214,7 +214,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the C++ module, save this lesson&#x27;s learner pad, then use Run. The worker stages the pad as <code>main.cpp</code> and compiles one translation unit. Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for exact local commands, flags, exit statuses, paths and Docker guidance. Tests involving multiple files, CMake, tool flags or shared libraries are explicitly host-project exercises.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
-<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs:each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
+<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs: each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p><a href="../examples/cpp-040-example-1.cpp.html">Complete program 1</a></p>
 <pre class="highlighted-code"><code class="language-cpp"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;cassert&gt;</span>
@@ -235,7 +235,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpp-040 example 1 checks passed</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
   <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
-<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<p><strong>Expected:</strong> With assertions enabled, the program exits with status 0 and prints:</p>
 <pre class="highlighted-code"><code class="language-text">cpp-040 example 1 checks passed</code></pre>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p><a href="../examples/cpp-040-example-2.cpp.html">Complete program 2</a></p>
@@ -257,38 +257,38 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpp-040 example 2 checks passed</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
   <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
-<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<p><strong>Expected:</strong> With assertions enabled, the program exits with status 0 and prints:</p>
 <pre class="highlighted-code"><code class="language-text">cpp-040 example 2 checks passed</code></pre>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-write-the-grammar">Exercise 1: Write the grammar<a class="heading-anchor" href="#exercise-1-write-the-grammar" aria-label="Link to this section">#</a></h4>
 <p>Specify accepted identifier characters and length.</p>
 <p><strong>Expected result/shape:</strong> 1 to 16 lowercase ASCII letters, digits or underscore.</p>
-<p><strong>Verify:</strong> 1 to 16 lowercase ASCII letters, digits or underscore.</p>
+<p><strong>Verify:</strong> Check your specification against <code>safe_id</code>: it rejects an empty string, accepts at most 16 characters and allows only <code>a-z</code>, <code>0-9</code> and <code>_</code>, so no uppercase letter, dot or slash.</p>
 <p><strong>Progressive hints:</strong> A narrow contract is easier to inspect than arbitrary path sanitization.</p>
 <h4 id="exercise-2-test-normal-input">Exercise 2: Test normal input<a class="heading-anchor" href="#exercise-2-test-normal-input" aria-label="Link to this section">#</a></h4>
 <p>Validate batch_7 and 0.</p>
 <p><strong>Expected result/shape:</strong> Both accepted.</p>
-<p><strong>Verify:</strong> Both accepted.</p>
+<p><strong>Verify:</strong> Assert <code>safe_id(&quot;batch_7&quot;)</code> and <code>safe_id(&quot;0&quot;)</code>; a single digit is a valid identifier under this grammar.</p>
 <p><strong>Progressive hints:</strong> An identifier may be numeric without becoming a path.</p>
 <h4 id="exercise-3-reject-traversal-shapes">Exercise 3: Reject traversal shapes<a class="heading-anchor" href="#exercise-3-reject-traversal-shapes" aria-label="Link to this section">#</a></h4>
 <p>Test ../secret, a/b and a backslash-separated path.</p>
 <p><strong>Expected result/shape:</strong> All rejected before filesystem access.</p>
-<p><strong>Verify:</strong> All rejected before filesystem access.</p>
+<p><strong>Verify:</strong> Assert <code>!safe_id(&quot;../secret&quot;)</code>, <code>!safe_id(&quot;a/b&quot;)</code> and <code>!safe_id(&quot;a\\b&quot;)</code>, and confirm the program makes no <code>std::filesystem</code> call for a rejected name.</p>
 <p><strong>Progressive hints:</strong> Separators are outside the grammar.</p>
 <h4 id="exercise-4-repair-overclaim">Exercise 4: Repair overclaim<a class="heading-anchor" href="#exercise-4-repair-overclaim" aria-label="Link to this section">#</a></h4>
 <p>Explain why this is not a general symlink-safe path sandbox.</p>
 <p><strong>Expected result/shape:</strong> No claim of arbitrary path containment; scope remains identifiers.</p>
-<p><strong>Verify:</strong> No claim of arbitrary path containment; scope remains identifiers.</p>
+<p><strong>Verify:</strong> Check that your explanation says <code>safe_id</code> only validates a name, and names a case it cannot cover, such as a symbolic link inside the data directory that points elsewhere.</p>
 <p><strong>Progressive hints:</strong> Filesystem races and links require stronger host operations.</p>
 <h4 id="exercise-5-enforce-size">Exercise 5: Enforce size<a class="heading-anchor" href="#exercise-5-enforce-size" aria-label="Link to this section">#</a></h4>
 <p>Test empty, 16-character and 17-character strings.</p>
 <p><strong>Expected result/shape:</strong> Reject, accept, reject.</p>
-<p><strong>Verify:</strong> Reject, accept, reject.</p>
+<p><strong>Verify:</strong> Assert <code>!safe_id(&quot;&quot;)</code>, <code>safe_id(std::string(16, &#x27;a&#x27;))</code> and <code>!safe_id(std::string(17, &#x27;a&#x27;))</code>.</p>
 <p><strong>Progressive hints:</strong> Length is checked before per-character work.</p>
 <h4 id="exercise-6-transfer-row-budgets">Exercise 6: Transfer row budgets<a class="heading-anchor" href="#exercise-6-transfer-row-budgets" aria-label="Link to this section">#</a></h4>
 <p>Set max 100 rows and 256 bytes per row before parsing a file.</p>
 <p><strong>Expected result/shape:</strong> Oversized input rejected with counts and no partial publication.</p>
-<p><strong>Verify:</strong> Oversized input rejected with counts and no partial publication.</p>
+<p><strong>Verify:</strong> Feed 101 short rows, then a single 257-byte row, and confirm each run reports the limit and count it hit and writes no output file.</p>
 <p><strong>Progressive hints:</strong> Input limits and output publication must form one contract.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain why this observation follows from the mechanism: The seven-character identifier uses only the allowed alphabet. Then explain the changed condition in example 2 without opening the answer.</p>

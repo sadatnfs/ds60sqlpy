@@ -194,9 +194,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/scala-spark/guides/spark-003.md</code></p>
     </header>
     <article class="document"><h2 id="spark-003-functions-arguments-and-explicit-return-contracts">spark-003: Functions, arguments, and explicit return contracts<a class="heading-anchor" href="#spark-003-functions-arguments-and-explicit-return-contracts" aria-label="Link to this section">#</a></h2>
-<p>Authored classroom lesson. Content availability and runtime readiness are separate checks. Read the current capability notice before running. No opening or saving this lesson installs tools, starts a cluster or proves mastery.</p>
+<p>Authored classroom lesson. Content availability and runtime readiness are separate checks. Read the current capability notice before running. Opening or saving this lesson does not install tools, start a cluster or prove mastery.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
-<p>Beginner; 60 minutes. Direct design prerequisites: <code>spark-002</code>. Use the subject browser to open prerequisite lessons or review their concepts. Runtime readiness is checked separately before execution.</p>
+<p>Beginner; 60 minutes. Direct prerequisites: <code>spark-002</code>. Use the subject browser to open prerequisite lessons or review their concepts. Runtime readiness is checked separately before execution.</p>
 <p>Learner artifact: <a href="../lessons/spark-003.scala.html">spark-003.scala</a>. Keep <a href="../solutions/spark-003_solutions.md.html">solutions</a> closed until an attempt or explicit reveal.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
 <ul>
@@ -205,7 +205,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ul>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p>A function names a rule with input parameters and a result type. <code>def addCents(left: Long, right: Long): Long = left + right</code> reads: accept two Long values, return a Long, and evaluate their sum. Calling it supplies argument values; defining it does not run it. A pure function has no hidden state change and returns the same answer for the same inputs. An explicit return type makes the contract visible to both the reader and compiler.</p>
-<p>The fee domain is deliberately bounded to amounts from-1000000 through1000000 cents. Nonpositive amounts cost zero. A nonmember with a positive amount pays20 cents. A member pays zero below500 cents and five percent at or above500, rounded down by integer division. This makes every branch and numeric boundary inspectable. Multiplication is safe inside this domain; the lesson does not promise arbitrary Long multiplication cannot overflow.</p>
+<p>The fee domain is deliberately bounded to amounts from -1000000 through 1000000 cents. Nonpositive amounts cost zero. A nonmember with a positive amount pays 20 cents. A member pays zero below 500 cents and five percent at or above 500, rounded down by integer division. This makes every branch and numeric boundary inspectable. Multiplication is safe inside this domain; the lesson does not promise arbitrary Long multiplication cannot overflow.</p>
 <ul>
 <li><strong>def:</strong> introduces a named function</li>
 <li><strong>parameter:</strong> a named input inside the definition</li>
@@ -219,18 +219,18 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">def</span> <span class="syntax-function">addCents</span><span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">:</span> <span class="syntax-class">Long</span><span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">:</span> <span class="syntax-class">Long</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Long</span> <span class="syntax-operator">=</span> a <span class="syntax-operator">+</span> b
 assert<span class="syntax-punctuation">(</span>addCents<span class="syntax-punctuation">(</span><span class="syntax-number">30L</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5L</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">35L</span><span class="syntax-punctuation">)</span>
 assert<span class="syntax-punctuation">(</span>addCents<span class="syntax-punctuation">(</span><span class="syntax-number">0L</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5L</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">5L</span><span class="syntax-punctuation">)</span></code></pre>
-<p><strong>Expected:</strong> 35L and5L, from the same function definition.</p>
+<p><strong>Expected:</strong> 35L and 5L, from the same function definition.</p>
 <h4 id="worked-example-2-make-a-total-bounded-branch">Worked example 2: Make a total bounded branch<a class="heading-anchor" href="#worked-example-2-make-a-total-bounded-branch" aria-label="Link to this section">#</a></h4>
-<p>The equality boundary belongs to one branch deliberately; testing only20 would miss it.</p>
+<p>The equality boundary belongs to one branch deliberately; testing only 20 would miss it.</p>
 <pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">def</span> <span class="syntax-function">bonus</span><span class="syntax-punctuation">(</span>points<span class="syntax-punctuation">:</span> <span class="syntax-class">Long</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Long</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>points <span class="syntax-operator">&gt;=</span> <span class="syntax-number">10L</span><span class="syntax-punctuation">)</span> <span class="syntax-number">2L</span> <span class="syntax-keyword">else</span> <span class="syntax-number">0L</span>
 assert<span class="syntax-punctuation">(</span>bonus<span class="syntax-punctuation">(</span><span class="syntax-number">9L</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0L</span><span class="syntax-punctuation">)</span>
 assert<span class="syntax-punctuation">(</span>bonus<span class="syntax-punctuation">(</span><span class="syntax-number">10L</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">2L</span><span class="syntax-punctuation">)</span></code></pre>
-<p><strong>Expected:</strong> 9 maps to0L and10 maps to2L.</p>
+<p><strong>Expected:</strong> 9 maps to 0L and 10 maps to 2L.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-separate-definition-and-call">Exercise 1: Separate definition and call<a class="heading-anchor" href="#exercise-1-separate-definition-and-call" aria-label="Link to this section">#</a></h4>
 <p>Explain addCents then evaluate two calls.</p>
-<p><strong>Inputs/evidence:</strong> For spark-003 Exercise 1, addCents(100L,25L),addCents(0L,25L).</p>
-<p><strong>Expected result/shape:</strong> For spark-003 Exercise 1, 125L and25L.</p>
+<p><strong>Inputs/evidence:</strong> For spark-003 Exercise 1, addCents(100L, 25L), addCents(0L, 25L).</p>
+<p><strong>Expected result/shape:</strong> For spark-003 Exercise 1, 125L and 25L.</p>
 <p><strong>Verify:</strong> For spark-003 Exercise 1, assert both returned values; distinguish parameter names from arguments.</p>
 <p><strong>Progressive hints:</strong></p>
 <ol>
@@ -241,7 +241,7 @@ assert<span class="syntax-punctuation">(</span>bonus<span class="syntax-punctuat
 <h4 id="exercise-2-implement-branch-order">Exercise 2: Implement branch order<a class="heading-anchor" href="#exercise-2-implement-branch-order" aria-label="Link to this section">#</a></h4>
 <p>Implement the fee rule with the nonpositive guard first.</p>
 <p><strong>Inputs/evidence:</strong> For spark-003 Exercise 2, 0L with both membership values;100L with both values.</p>
-<p><strong>Expected result/shape:</strong> For spark-003 Exercise 2, fees0/0 for zero and0/20 for100.</p>
+<p><strong>Expected result/shape:</strong> For spark-003 Exercise 2, fees 0/0 for zero and 0/20 for 100.</p>
 <p><strong>Verify:</strong> For spark-003 Exercise 2, assert all four cases and inspect guard order.</p>
 <p><strong>Progressive hints:</strong></p>
 <ol>
@@ -250,9 +250,9 @@ assert<span class="syntax-punctuation">(</span>bonus<span class="syntax-punctuat
 <li>Start if(amount&lt;=0L)0L.</li>
 </ol>
 <h4 id="exercise-3-test-the-membership-threshold">Exercise 3: Test the membership threshold<a class="heading-anchor" href="#exercise-3-test-the-membership-threshold" aria-label="Link to this section">#</a></h4>
-<p>Cover just below, exactly at and just above500.</p>
-<p><strong>Inputs/evidence:</strong> For spark-003 Exercise 3, member499L,500L,501L.</p>
-<p><strong>Expected result/shape:</strong> For spark-003 Exercise 3, fees0L,25L,25L.</p>
+<p>Cover just below, exactly at and just above 500.</p>
+<p><strong>Inputs/evidence:</strong> For spark-003 Exercise 3, member 499L, 500L, 501L.</p>
+<p><strong>Expected result/shape:</strong> For spark-003 Exercise 3, fees 0L, 25L, 25L.</p>
 <p><strong>Verify:</strong> For spark-003 Exercise 3, assert the exact three outputs and explain integer division.</p>
 <p><strong>Progressive hints:</strong></p>
 <ol>
@@ -262,9 +262,9 @@ assert<span class="syntax-punctuation">(</span>bonus<span class="syntax-punctuat
 </ol>
 <h4 id="exercise-4-use-named-arguments">Exercise 4: Use named arguments<a class="heading-anchor" href="#exercise-4-use-named-arguments" aria-label="Link to this section">#</a></h4>
 <p>Call the same function with named parameters in reverse order.</p>
-<p><strong>Inputs/evidence:</strong> For spark-003 Exercise 4, feeCents(isMember=true,amount=1000L).</p>
+<p><strong>Inputs/evidence:</strong> For spark-003 Exercise 4, feeCents(isMember=true, amount=1000L).</p>
 <p><strong>Expected result/shape:</strong> For spark-003 Exercise 4, 50L, equal to the positional call.</p>
-<p><strong>Verify:</strong> For spark-003 Exercise 4, assert both calls give50L; do not change the definition.</p>
+<p><strong>Verify:</strong> For spark-003 Exercise 4, assert both calls give 50L; do not change the definition.</p>
 <p><strong>Progressive hints:</strong></p>
 <ol>
 <li>Read names rather than position.</li>
@@ -273,18 +273,18 @@ assert<span class="syntax-punctuation">(</span>bonus<span class="syntax-punctuat
 </ol>
 <h4 id="exercise-5-reject-hidden-state">Exercise 5: Reject hidden state<a class="heading-anchor" href="#exercise-5-reject-hidden-state" aria-label="Link to this section">#</a></h4>
 <p>Compare a proposed call counter with the fee contract.</p>
-<p><strong>Inputs/evidence:</strong> For spark-003 Exercise 5, two consecutive feeCents(1000L,true) calls and negative amount-1L.</p>
-<p><strong>Expected result/shape:</strong> For spark-003 Exercise 5, both calls50L; negative amount yields0L even for a nonmember.</p>
+<p><strong>Inputs/evidence:</strong> For spark-003 Exercise 5, two consecutive feeCents(1000L, true) calls and negative amount-1L.</p>
+<p><strong>Expected result/shape:</strong> For spark-003 Exercise 5, both calls 50L; negative amount yields 0L even for a nonmember.</p>
 <p><strong>Verify:</strong> For spark-003 Exercise 5, repeat exact calls and explain why a call counter must not alter the returned fee.</p>
 <p><strong>Progressive hints:</strong></p>
 <ol>
 <li>Does history belong in this input contract?</li>
 <li>Same inputs must preserve the fee.</li>
-<li>Return50L both times, and guard the negative boundary.</li>
+<li>Return 50L both times, and guard the negative boundary.</li>
 </ol>
 <h4 id="exercise-6-transfer-and-explain-the-domain">Exercise 6: Transfer and explain the domain<a class="heading-anchor" href="#exercise-6-transfer-and-explain-the-domain" aria-label="Link to this section">#</a></h4>
-<p>Predict member2000L and nonmember2000L; review an out-of-domain value.</p>
-<p><strong>Inputs/evidence:</strong> For spark-003 Exercise 6, 2000L,true/false and2000000L.</p>
+<p>Predict member 2000L and nonmember 2000L; review an out-of-domain value.</p>
+<p><strong>Inputs/evidence:</strong> For spark-003 Exercise 6, 2000L, true/false and 2000000L.</p>
 <p><strong>Expected result/shape:</strong> For spark-003 Exercise 6, 100L/20L; the out-of-domain input is rejected by the reference precondition.</p>
 <p><strong>Verify:</strong> For spark-003 Exercise 6, assert the two valid results and identify the violated bound for the third.</p>
 <p><strong>Progressive hints:</strong></p>
@@ -307,7 +307,7 @@ assert<span class="syntax-punctuation">(</span>bonus<span class="syntax-punctuat
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to coach spark-003.
 Read courses/scala-spark/guides/spark-003.md and courses/scala-spark/lessons/spark-003.scala.
-Direct design prerequisites: `spark-002`. This lesson is authored; check its current runtime readiness and direct prerequisites.
+Direct prerequisites: `spark-002`. This lesson is authored; check its current runtime readiness and direct prerequisites.
 Explain one mechanism, ask me to predict, let me attempt one exercise, then give one hint at a time.
 Do not read courses/scala-spark/solutions/ until I make an honest attempt or explicitly ask for a reveal.
 Review my exact values, diagnostics or written evidence; distinguish source inspection, process success and verified understanding.

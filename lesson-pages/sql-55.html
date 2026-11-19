@@ -9,7 +9,7 @@
     content="default-src 'none'; style-src 'self' file: 'unsafe-inline'; font-src data:; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
   >
   <link rel="stylesheet" href="../src/ds60sqlpy/assets/vendor/textbook/fonts.css">
-  <title>sql-55 · Project 4 BI Part 1 · DS60</title>
+  <title>sql-55 · BI Project, Part 1: Drill-Downs and Subtotals · DS60</title>
   <style>
     :root {
       --paper: #f6f2e8;
@@ -312,7 +312,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <div class="shell">
       <section class="hero">
         <p class="eyebrow">sql · lesson sql-55</p>
-        <h1>Project 4 BI Part 1</h1>
+        <h1>BI Project, Part 1: Drill-Downs and Subtotals</h1>
         <p class="hero-copy">Applied analytics and capstones</p>
         <div class="meta">
           <span class="tag">advanced</span>
@@ -407,9 +407,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Start the Linux-container engine and run <code>./classroom</code> from the repository root. On Windows, use Ubuntu in WSL 2 or the thin <code>START_DOCKER_CLASSROOM.cmd</code> wrapper. Choose <strong>PostgreSQL</strong> on the shared <code>/classroom</code> home, then open <strong>sql-55</strong>. The <a href="../reference-pages/docs/one-command-classroom.md.html">launcher guide</a> covers first preparation, strict resume and the saved project selection. No host Python or PostgreSQL installation is required for this browser route.</p>
 <ol>
-<li>Read the prerequisite and fixture notes before running the file. Use only the local disposable <code>advanced_sql_training</code> database. A simple snippet such as <code>SELECT 1;</code> needs no training-schema reset.</li>
+<li>Read the prerequisite and fixture notes before running the file. Use only the local disposable <code>advanced_sql_training</code> database.</li>
 <li>Choose <strong>Whole SQL lesson (psql)</strong> for the cataloged learner script. This preserves the lesson&#x27;s reviewed psql directives, relative includes and transaction behavior. <strong>SQL snippet</strong> is appropriate for ordinary SQL statements, but is not a replacement for an entire script&#x27;s setup.</li>
-<li>When the lesson requires the course training data, use the explicit preparation action and read its reset acknowledgement. It replaces the course-owned <code>training</code> schema. Do not reset unrelated data or prepare every lesson by habit; stateful sequences have their own ordering.</li>
+<li>The <strong>Course database</strong> panel above the code shows whether the course training tables are loaded. Missing tables load automatically before your first run (or choose <strong>Load course tables</strong>) and stay loaded for later lessons. <strong>Reset training data</strong> restores the original rows only when your own changes made results differ; it keeps your saved code and notes.</li>
 <li>Edit the learner copy in the classroom and save your prediction before running. Its whole-script workspace is <code>.learning/sql/sql-55/lesson/workspace/sql/postgres-60day/day55_project4_bi_part1.sql</code>. For browser work this path is inside the Docker learning volume, not a newly created host folder beside your checkout. The checked-in source remains the answer-free starting artifact.</li>
 <li>Run the whole script and inspect the full transcript. The runner uses <code>psql -X -v ON_ERROR_STOP=1 -f</code>. SELECT output has columns, rows and a row count; DDL/DML has command tags; intentional checks may produce NOTICE messages. An unexpected ERROR or nonzero exit is a failure to diagnose, even when an earlier query printed plausible values.</li>
 <li>Verify the lesson&#x27;s expected grain, ordering, constraints and declared transaction or cleanup outcome. Keep required ROLLBACK statements. The warehouse sequence and other explicitly stateful exercises explain when state is committed. Read saved output without rerunning it when reviewing an earlier attempt.</li>
@@ -428,7 +428,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is ROLLUP, CUBE, GROUPING flag. Its worked SQL reads or creates <code>payments</code>, <code>orders</code>, <code>customers</code>, <code>order_items</code>, <code>products</code>.</p>
 <p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
-<p>The worked walkthrough&#x27;s lesson-specific task is: Compare ROLLUP(country, category) with CUBE(country, category). Both include detail, country subtotal, and grand total; CUBE also adds category-only subtotals. Use GROUPING(country) and GROUPING(category) to label each level, then reconcile the grand total with source line revenue. The first runnable example has a concrete contract: Example 1 returns one grouped row per <code>category</code>, <code>month</code>, and <code>g_country</code> with columns <code>category</code>, <code>payment_method</code>, <code>month</code>, <code>revenue</code>, <code>qty</code>, and <code>units</code> from <code>payments</code>, <code>orders</code>, <code>customers</code>, <code>order_items</code>, and <code>products</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present. Its final projection is <code>country</code>, <code>category</code>, <code>payment_method</code>, <code>month</code>, <code>revenue</code>, <code>units</code>, <code>g_country</code>, and <code>g_category</code>. Independently group <code>payments</code>, <code>payment_by_method</code>, <code>orders</code>, <code>customers</code>, and <code>order_items</code> by the shown grouping expressions and compare every displayed aggregate at that exact grain. For tied business values, inspect the final ordering expression and verify its last key makes the displayed order reproducible.</p>
+<p>The worked walkthrough&#x27;s lesson-specific task is: Compare <code>ROLLUP(country, category)</code> with <code>CUBE(country, category)</code>. Both include detail, country subtotal, and grand total; <code>CUBE</code> also adds category-only subtotals. Use <code>GROUPING(country)</code> and <code>GROUPING(category)</code> to label each level, then reconcile the grand total with source line revenue. The first runnable example has a concrete contract: Example 1 returns one grouped row per <code>category</code>, <code>month</code>, and <code>g_country</code> with columns <code>category</code>, <code>payment_method</code>, <code>month</code>, <code>revenue</code>, <code>qty</code>, and <code>units</code> from <code>payments</code>, <code>orders</code>, <code>customers</code>, <code>order_items</code>, and <code>products</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present. Its final projection is <code>country</code>, <code>category</code>, <code>payment_method</code>, <code>month</code>, <code>revenue</code>, <code>units</code>, <code>g_country</code>, and <code>g_category</code>. Independently group <code>payments</code>, <code>payment_by_method</code>, <code>orders</code>, <code>customers</code>, and <code>order_items</code> by the shown grouping expressions and compare every displayed aggregate at that exact grain. For tied business values, inspect the final ordering expression and verify its last key makes the displayed order reproducible.</p>
 <h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
 <p>These worked excerpts come from <code>sql/postgres-60day/day55_project4_bi_part1.sql</code>. Use <strong>Whole SQL lesson (psql)</strong> in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared <code>psql</code> routes are described above.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
@@ -560,7 +560,7 @@ ranked <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(
 <p>Test one real NULL/unknown dimension value.</p>
 <h4 id="guide--common-mistakes-and-how-to-recover">Common mistakes and how to recover<a class="heading-anchor" href="#guide--common-mistakes-and-how-to-recover" aria-label="Link to this section">#</a></h4>
 <ul>
-<li><strong>Lesson-specific semantic mistake:</strong> A raw payment join fans out split-payment orders. Keep the declared primary</li>
+<li><strong>Lesson-specific semantic mistake:</strong> A raw payment join fans out split-payment orders. Keep the declared primary method policy, or document a different allocation, before using that dimension.</li>
 <li><strong>Unexpected row count:</strong> display keys before aggregates, count rows after each join/filter stage, and find the first stage whose grain differs from the contract. Do not hide fanout with <code>DISTINCT</code>.</li>
 <li><strong>Unexpected <code>NULL</code> or missing row:</strong> decide whether the fact is unknown, inapplicable, zero, or absent before using <code>COALESCE</code>; inspect outer-join predicate placement and empty-input aggregate behavior.</li>
 <li><strong>Unstable top/first/last output:</strong> add <code>ORDER BY</code> with a unique final tie-breaker before <code>LIMIT</code> or order-sensitive windows/aggregates.</li>
@@ -600,7 +600,7 @@ ranked <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(
 </ul>
 <h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in the AI tutor:</p>
-<pre class="highlighted-code"><code class="language-text">Tutor me through sql-55 — Project4 BI Part1.
+<pre class="highlighted-code"><code class="language-text">Tutor me through sql-55: BI Project, Part 1: Drill-Downs and Subtotals.
 
 I have completed the direct catalog prerequisite: `sql-54`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day55_project4_bi_part1.md
@@ -610,7 +610,7 @@ Key terms to teach in context: ROLLUP, CUBE, GROUPING flag. First define those t
 language and explain table, row, column, result set, row grain, SQL NULL, and
 deterministic ordering where they apply. Then explain the important clauses in
 logical order and state the expected row grain/shape before asking me to run
-anything. The guide&#x27;s lesson-specific worked-model focus is: Compare ROLLUP(country, category) with CUBE(country, category). Both include detail, country subtotal, and grand total; CUBE also adds category-only subtotals. Use GROUPING(country) and GROUPING(category) to label each level, then reconcile the grand total with source line revenue.
+anything. The guide&#x27;s lesson-specific worked-model focus is: Compare `ROLLUP(country, category)` with `CUBE(country, category)`. Both include detail, country subtotal, and grand total; `CUBE` also adds category-only subtotals. Use `GROUPING(country)` and `GROUPING(category)` to label each level, then reconcile the grand total with source line revenue.
 
 Use only the local disposable advanced_sql_training database. Prefer the
 Docker classroom&#x27;s Whole SQL lesson (psql) workspace and its ignored
@@ -843,14 +843,12 @@ transfer task that I answer without looking back. Done when I can explain the ro
         <div class="artifact-content"><h3 id="solution-1--day-55-solutions-bi-drill-down-and-subtotals">Day 55 Solutions: BI Drill-down and Subtotals<a class="heading-anchor" href="#solution-1--day-55-solutions-bi-drill-down-and-subtotals" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
 <p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
-psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql\postgres-60day\solutions\day55_solutions.sql</span><span class="syntax-string">&quot;</span></code></pre>
-<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># Linux, macOS, or Windows through WSL 2, from the repository root</span>
 psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/postgres-60day/solutions/day55_solutions.sql</code></pre>
 <p><code>psql</code> prints each result/command tag in the terminal. Stop at the first unexpected <code>ERROR</code>; later output cannot repair an earlier failed invariant. Compare your own SQL, row grain, column names, row counts, <code>NULL</code> policy, and ordering with the explanation before comparing syntax.</p>
 <h4 id="solution-1--clause-by-clause-reading-map">Clause-by-clause reading map<a class="heading-anchor" href="#solution-1--clause-by-clause-reading-map" aria-label="Link to this section">#</a></h4>
-<p>The lesson&#x27;s main concepts are ROLLUP, CUBE, GROUPING flag. Its worked-model focus is: Compare ROLLUP(country, category) with CUBE(country, category). Both include detail, country subtotal, and grand total; CUBE also adds category-only subtotals. Use GROUPING(country) and GROUPING(category) to label each level, then reconcile the grand total with source line revenue.</p>
+<p>The lesson&#x27;s main concepts are ROLLUP, CUBE, GROUPING flag. Its worked-model focus is: Compare <code>ROLLUP(country, category)</code> with <code>CUBE(country, category)</code>. Both include detail, country subtotal, and grand total; <code>CUBE</code> also adds category-only subtotals. Use <code>GROUPING(country)</code> and <code>GROUPING(category)</code> to label each level, then reconcile the grand total with source line revenue.</p>
 <ul>
 <li>Start at <code>FROM</code>/<code>JOIN</code> and state the intermediate row grain. Inspect join keys before adding aggregates; a one-to-many join is allowed to multiply rows only when the later contract accounts for it.</li>
 <li>Apply <code>WHERE</code> to input rows, <code>GROUP BY</code> to form buckets, and <code>HAVING</code> to completed groups. Window functions run over the surviving relation and normally preserve its row count.</li>
@@ -1071,7 +1069,7 @@ ranked <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- Day 55 solutions: BI drill-down and subtotal design</span></span>
-<span class="source-line"><span class="syntax-comment">-- SOLUTION READING MAP — sql-55: Project4 BI Part1</span></span>
+<span class="source-line"><span class="syntax-comment">-- SOLUTION READING MAP for sql-55: BI Project, Part 1: Drill-Downs and Subtotals</span></span>
 <span class="source-line"><span class="syntax-comment">-- Explanation: sql/postgres-60day/solutions/day55_solutions.md</span></span>
 <span class="source-line"><span class="syntax-comment">-- Run from the repository root only against advanced_sql_training:</span></span>
 <span class="source-line"><span class="syntax-comment">--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day55_solutions.sql</span></span>
@@ -1320,7 +1318,7 @@ ranked <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through sql-55 — Project4 BI Part1.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through sql-55: BI Project, Part 1: Drill-Downs and Subtotals.
 
 I have completed the direct catalog prerequisite: `sql-54`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day55_project4_bi_part1.md
@@ -1330,7 +1328,7 @@ Key terms to teach in context: ROLLUP, CUBE, GROUPING flag. First define those t
 language and explain table, row, column, result set, row grain, SQL NULL, and
 deterministic ordering where they apply. Then explain the important clauses in
 logical order and state the expected row grain/shape before asking me to run
-anything. The guide&#x27;s lesson-specific worked-model focus is: Compare ROLLUP(country, category) with CUBE(country, category). Both include detail, country subtotal, and grand total; CUBE also adds category-only subtotals. Use GROUPING(country) and GROUPING(category) to label each level, then reconcile the grand total with source line revenue.
+anything. The guide&#x27;s lesson-specific worked-model focus is: Compare `ROLLUP(country, category)` with `CUBE(country, category)`. Both include detail, country subtotal, and grand total; `CUBE` also adds category-only subtotals. Use `GROUPING(country)` and `GROUPING(category)` to label each level, then reconcile the grand total with source line revenue.
 
 Use only the local disposable advanced_sql_training database. Prefer the
 Docker classroom&#x27;s Whole SQL lesson (psql) workspace and its ignored
@@ -1353,8 +1351,8 @@ transfer task that I answer without looking back. Done when I can explain the ro
       </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
-        <a class="nav-card" href="sql-54.html"><small>Previous lesson</small><strong>sql-54</strong><span>Project 3 DWH Part 3 Aggregations</span></a>
-        <a class="nav-card next" href="sql-56.html"><small>Next lesson</small><strong>sql-56</strong><span>Project 4 BI Part 2</span></a>
+        <a class="nav-card" href="sql-54.html"><small>Previous lesson</small><strong>sql-54</strong><span>Data Warehouse Project, Part 3: Aggregate Tables</span></a>
+        <a class="nav-card next" href="sql-56.html"><small>Next lesson</small><strong>sql-56</strong><span>BI Project, Part 2: Percentiles and CUBE</span></a>
       </nav>
     </div>
   </main>

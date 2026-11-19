@@ -198,7 +198,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Intermediate; approximately 150 minutes. Direct prerequisites: <code>julia-010</code>.</p>
 <p>Design generic operations over owned types and resolve overlapping method signatures explicitly.</p>
 <h3 id="classroom-execution">Classroom execution<a class="heading-anchor" href="#classroom-execution" aria-label="Link to this section">#</a></h3>
-<p>Choose <strong>Julia language and scientific computing</strong> in <code>/classroom</code>, open this unit, and select its prepared <code>julia</code> runtime. The worker starts a fresh <code>main.jl</code> process with two Julia threads, a fixed package environment, no startup file and offline package settings. Both worked examples are complete under that environment. Save your current pad before replacing it. No package, model or dataset is fetched by a lesson.</p>
+<p>Open <code>julia-011</code> in <code>/classroom</code> with its prepared <code>julia</code> runtime. Worked case A (one operation over two shapes) and worked case B (specify an intersection) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing <code>julia-011: all reference checks passed</code>. The <a href="../README.md.html">course overview</a> describes the shared runtime: a fresh offline <code>main.jl</code> process with two threads and a fixed package environment.</p>
 <h3 id="a-function-can-have-several-methods">A function can have several methods<a class="heading-anchor" href="#a-function-can-have-several-methods" aria-label="Link to this section">#</a></h3>
 <p>Julia selects a method using the types of its positional arguments. The selection can depend on several arguments, not only a distinguished receiver object. This makes generic operations convenient when behavior depends on combinations of representations.</p>
 <p>An abstract type can describe a category without defining storage for every subtype. Concrete subtypes supply their own fields. A generic operation such as area can then have methods for the concrete shapes while a higher-level function calls that operation without hardcoding every case.</p>
@@ -324,7 +324,7 @@ worked_b<span class="syntax-punctuation">(</span><span class="syntax-punctuation
 <li><a href="https://docs.julialang.org/en/v1/manual/interfaces/">Julia interfaces</a></li>
 </ul>
 <h3 id="study-companion">Study companion<a class="heading-anchor" href="#study-companion" aria-label="Link to this section">#</a></h3>
-<p>Use the repository learning-companion skill with this lesson ID, your prediction and your actual source/output. Ask for a diagnosis of the first incorrect type, shape, state transition or assumption. Keep observed execution distinct from a timing claim, inferred mathematical result or external deployment.</p></article>
+<p>A repository-aware assistant with the learning-companion skill can review <code>julia-011</code> with you. Give it your prediction for one investigation, your source and the actual output, and ask it to find the first incorrect assumption about multiple dispatch, abstract type, method specificity, ambiguity or type ownership.</p></article>
   </main>
 </body>
 </html>

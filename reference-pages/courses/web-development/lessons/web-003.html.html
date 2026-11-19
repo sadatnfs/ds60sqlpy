@@ -200,15 +200,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">    <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">meta</span> <span class="syntax-attribute">name</span><span class="syntax-operator">=</span><span class="syntax-string">&quot;viewport&quot;</span> <span class="syntax-attribute">content</span><span class="syntax-operator">=</span><span class="syntax-string">&quot;width=device-width, initial-scale=1&quot;</span> <span class="syntax-punctuation">/</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">title</span><span class="syntax-punctuation">&gt;</span>Semantic structure, headings and landmarks: my attempt<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">title</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">style</span><span class="syntax-punctuation">&gt;</span></span>
-<span class="source-line">      <span class="syntax-comment">/* Implement the lesson-specific CSS. Keep keyboard focus visible. */</span></span>
+<span class="source-line">      <span class="syntax-comment">/* Write the CSS for the exercises here. Keep keyboard focus visible. */</span></span>
 <span class="source-line">    <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">style</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line">  <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">head</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line">  <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">body</span><span class="syntax-punctuation">&gt;</span></span>
-<span class="source-line">    <span class="syntax-comment">&lt;!-- web-003: Build a study page with landmarks and a working skip link. --&gt;</span></span>
-<span class="source-line">    <span class="syntax-comment">&lt;!-- Save your prediction, then implement the six exercises from the guide. --&gt;</span></span>
+<span class="source-line">    <span class="syntax-comment">&lt;!--</span></span>
+<span class="source-line"><span class="syntax-comment">      web-003 exercises. Hints are in the guide; answers are in the solutions folder.</span></span>
+<span class="source-line"><span class="syntax-comment">      1. Draw the heading outline of the first example.</span></span>
+<span class="source-line"><span class="syntax-comment">      2. Add a sibling CSS section at the correct level.</span></span>
+<span class="source-line"><span class="syntax-comment">      3. Build a study page with landmarks and a working skip link.</span></span>
+<span class="source-line"><span class="syntax-comment">      4. Replace a heading used only for large text with an appropriate element.</span></span>
+<span class="source-line"><span class="syntax-comment">      5. Check the document with CSS disabled or unavailable.</span></span>
+<span class="source-line"><span class="syntax-comment">      6. Explain when a div is more appropriate than section.</span></span>
+<span class="source-line"><span class="syntax-comment">    --&gt;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">main</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">h1</span><span class="syntax-punctuation">&gt;</span>Semantic structure, headings and landmarks<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">h1</span><span class="syntax-punctuation">&gt;</span></span>
-<span class="source-line">      <span class="syntax-comment">&lt;!-- Build your own document here. The reference is separate. --&gt;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">section</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">h2</span><span class="syntax-punctuation">&gt;</span>HTML<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">h2</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">p</span><span class="syntax-punctuation">&gt;</span>Structure first.<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">p</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">section</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">h3</span><span class="syntax-punctuation">&gt;</span>Remember to save your work.<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">h3</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">      <span class="syntax-comment">&lt;!--</span></span>
+<span class="source-line"><span class="syntax-comment">        Worked example 1: A useful outline</span></span>
+<span class="source-line"><span class="syntax-comment">        &lt;main&gt;</span></span>
+<span class="source-line"><span class="syntax-comment">          &lt;h1&gt;Study notes&lt;/h1&gt;</span></span>
+<span class="source-line"><span class="syntax-comment">          &lt;section&gt;</span></span>
+<span class="source-line"><span class="syntax-comment">            &lt;h2&gt;HTML&lt;/h2&gt;</span></span>
+<span class="source-line"><span class="syntax-comment">            &lt;p&gt;Structure first.&lt;/p&gt;</span></span>
+<span class="source-line"><span class="syntax-comment">          &lt;/section&gt;</span></span>
+<span class="source-line"><span class="syntax-comment">        &lt;/main&gt;</span></span>
+<span class="source-line"><span class="syntax-comment">      --&gt;</span></span>
+<span class="source-line">      <span class="syntax-comment">&lt;!--</span></span>
+<span class="source-line"><span class="syntax-comment">        Worked example 2: Skip repeated navigation</span></span>
+<span class="source-line"><span class="syntax-comment">        &lt;a href=&quot;#content&quot;&gt;Skip to content&lt;/a&gt;</span></span>
+<span class="source-line"><span class="syntax-comment">        &lt;main id=&quot;content&quot; tabindex=&quot;-1&quot;&gt;&lt;h1&gt;Notes&lt;/h1&gt;&lt;/main&gt;</span></span>
+<span class="source-line"><span class="syntax-comment">      --&gt;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">main</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line">  <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">body</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line"><span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">html</span><span class="syntax-punctuation">&gt;</span></span>

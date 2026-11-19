@@ -194,31 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-012_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-012-explanatory-solutions">web-012: explanatory solutions<a class="heading-anchor" href="#web-012-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.</p>
-<h3 id="why-the-mechanism-works">Why the mechanism works<a class="heading-anchor" href="#why-the-mechanism-works" aria-label="Link to this section">#</a></h3>
-<p>Typography controls the effort required to read. A font stack lists preferred fonts followed by a generic fallback, so text remains usable when a particular font is absent. This course uses system fonts and makes no external font request. Relative units allow the design to respond to user settings. A rem is relative to the root font size; em often depends on the current element&#x27;s font size, with property-specific details.</p>
-<p>Line length, line height and spacing interact. Very long lines make it difficult to find the next line; very short lines create constant interruptions. A max-width expressed in ch can approximate a readable character measure, though it is based on the zero glyph width rather than an exact count of all characters. A unitless line-height scales naturally with the element&#x27;s font size.</p>
-<p>Use <code>font: 1rem/1.6 system-ui, sans-serif</code> to set size, unitless line-height and family. Avoid fixing the root to a tiny pixel size to make arithmetic convenient. Preserve user zoom. Headings can use a bounded fluid size with clamp, while body text should remain comfortable and predictable. Text alignment is content-sensitive; full justification can create distracting gaps in narrow columns.</p>
+<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-012.md</code>.</p>
 <h3 id="exercise-1-explain-the-reference-for-rem-and-a-typical-em-use">Exercise 1: Explain the reference for rem and a typical em use.<a class="heading-anchor" href="#exercise-1-explain-the-reference-for-rem-and-a-typical-em-use" aria-label="Link to this section">#</a></h3>
-<p>Rem uses the root font size; em commonly scales with the relevant element&#x27;s font size.</p>
-<p>Trace the smallest example before editing. Name which values are source and which are observations.</p>
+<p><strong>Expected answer:</strong> Rem uses the root font size; em commonly scales with the relevant element&#x27;s font size.</p>
+<p><strong>Why:</strong> rem always refers to the root element&#x27;s font size, while em refers to the current element&#x27;s font size, or to the parent&#x27;s when it is used in font-size itself.</p>
 <h3 id="exercise-2-apply-a-system-font-stack-without-network-dependencies">Exercise 2: Apply a system font stack without network dependencies.<a class="heading-anchor" href="#exercise-2-apply-a-system-font-stack-without-network-dependencies" aria-label="Link to this section">#</a></h3>
-<p>The page remains readable offline on different operating systems.</p>
-<p>Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.</p>
+<p><strong>Expected evidence:</strong> The page remains readable offline on different operating systems.</p>
+<p><strong>Why:</strong> A system font stack uses fonts that are already installed, so text renders offline without network requests.</p>
 <h3 id="exercise-3-build-a-reading-page-with-bounded-measure-and-scalable-headings">Exercise 3: Build a reading page with bounded measure and scalable headings.<a class="heading-anchor" href="#exercise-3-build-a-reading-page-with-bounded-measure-and-scalable-headings" aria-label="Link to this section">#</a></h3>
-<p>Text stays comfortable at wide and narrow sizes without fixed-height clipping.</p>
-<p>Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.</p>
+<p><strong>Expected evidence:</strong> Text stays comfortable at wide and narrow sizes without fixed-height clipping.</p>
+<p><strong>Why:</strong> A bounded measure keeps line length readable, and clamp scales headings between safe limits while respecting the reader&#x27;s font size.</p>
 <h3 id="exercise-4-diagnose-text-that-overlaps-after-zooming">Exercise 4: Diagnose text that overlaps after zooming.<a class="heading-anchor" href="#exercise-4-diagnose-text-that-overlaps-after-zooming" aria-label="Link to this section">#</a></h3>
-<p>Inspect fixed heights, line heights and positioned containers rather than disabling zoom.</p>
-<p>Keep the failing input. Identify the first layer where the observed result differs from the intended contract.</p>
+<p><strong>Expected answer:</strong> Inspect fixed heights, line heights and positioned containers rather than disabling zoom.</p>
+<p><strong>Why:</strong> Zoom enlarges text but fixed boxes keep their size, so content spills out and overlaps.</p>
 <h3 id="exercise-5-test-at-increased-browser-zoom-with-long-content">Exercise 5: Test at increased browser zoom with long content.<a class="heading-anchor" href="#exercise-5-test-at-increased-browser-zoom-with-long-content" aria-label="Link to this section">#</a></h3>
-<p>Reading order, text visibility and controls remain intact.</p>
-<p>Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.</p>
+<p><strong>Expected evidence:</strong> Reading order, text visibility and controls remain intact.</p>
+<p><strong>Why:</strong> Text must remain usable when resized to 200 percent, which reveals fixed-size assumptions in the layout.</p>
 <h3 id="exercise-6-explain-why-ch-is-a-useful-approximation-rather-than-a-word-count-guarantee">Exercise 6: Explain why ch is a useful approximation rather than a word-count guarantee.<a class="heading-anchor" href="#exercise-6-explain-why-ch-is-a-useful-approximation-rather-than-a-word-count-guarantee" aria-label="Link to this section">#</a></h3>
-<p>It measures the font&#x27;s zero glyph, and actual character widths vary.</p>
-<p>Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.</p>
-<h3 id="reference-comparison-and-limits">Reference comparison and limits<a class="heading-anchor" href="#reference-comparison-and-limits" aria-label="Link to this section">#</a></h3>
-<p>Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.</p></article>
+<p><strong>Expected answer:</strong> It measures the font&#x27;s zero glyph, and actual character widths vary.</p>
+<p><strong>Why:</strong> 1ch is the advance width of the 0 glyph, so a line of narrow letters fits more characters and a line of wide letters fewer.</p>
+<h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
+<p>Open <code>courses/web-development/solutions/web-012_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
   </main>
 </body>
 </html>

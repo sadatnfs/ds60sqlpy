@@ -243,32 +243,32 @@ match <span class="syntax-operator">=</span> np<span class="syntax-operator">.</
 <h4 id="exercise-1-build-the-corpus-matrix">Exercise 1: Build the corpus matrix<a class="heading-anchor" href="#exercise-1-build-the-corpus-matrix" aria-label="Link to this section">#</a></h4>
 <p>Fit a count vocabulary on the four authored documents and retain its column mapping.</p>
 <p><strong>Expected:</strong> Four rows with a fixed vocabulary; held-out newplanet does not add a column.</p>
-<p><strong>Verify:</strong> Four rows with a fixed vocabulary; held-out newplanet does not add a column. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Verify:</strong> Assert the matrix has four rows, the vocabulary order is fixed, and transforming newplanet adds no column.</p>
 <p><strong>Hints:</strong> Inspect get_feature_names_out and use transform for the probe.</p>
 <h4 id="exercise-2-fit-and-inspect-lsa">Exercise 2: Fit and inspect LSA<a class="heading-anchor" href="#exercise-2-fit-and-inspect-lsa" aria-label="Link to this section">#</a></h4>
 <p>Fit two-component <code>TruncatedSVD</code> on TF-IDF and reconstruct the matrix.</p>
 <p><strong>Expected:</strong> Document coordinates shape(4,2); reconstruction error below the zero-matrix baseline.</p>
-<p><strong>Verify:</strong> Document coordinates shape(4,2); reconstruction error below the zero-matrix baseline. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Verify:</strong> Assert the document coordinates have shape (4, 2) and that the reconstruction error is below the error of predicting all zeros.</p>
 <p><strong>Hints:</strong> Use transform output times components_ without claiming probability meaning.</p>
 <h4 id="exercise-3-fit-nonnegative-components">Exercise 3: Fit nonnegative components<a class="heading-anchor" href="#exercise-3-fit-nonnegative-components" aria-label="Link to this section">#</a></h4>
 <p>Fit two-component NMF on counts and inspect pet and wheel loadings.</p>
 <p><strong>Expected:</strong> W and H nonnegative; pet and wheel have different dominant component indices.</p>
-<p><strong>Verify:</strong> W and H nonnegative; pet and wheel have different dominant component indices. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Verify:</strong> Assert W and H have no negative entries and that pet and wheel load most heavily on different components.</p>
 <p><strong>Hints:</strong> Use a deterministic initialization and record convergence behavior.</p>
 <h4 id="exercise-4-inspect-lda-mixtures">Exercise 4: Inspect LDA mixtures<a class="heading-anchor" href="#exercise-4-inspect-lda-mixtures" aria-label="Link to this section">#</a></h4>
 <p>Fit actual two-topic LDA to the count matrix and inspect document mixtures.</p>
 <p><strong>Expected:</strong> Four rows, two columns and each row sums to one.</p>
-<p><strong>Verify:</strong> Four rows, two columns and each row sums to one. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Verify:</strong> Assert the LDA document-topic matrix has shape (4, 2) and that every row sums to 1.</p>
 <p><strong>Hints:</strong> Use count events rather than signed LSA coordinates.</p>
 <h4 id="exercise-5-align-topic-identities">Exercise 5: Align topic identities<a class="heading-anchor" href="#exercise-5-align-topic-identities" aria-label="Link to this section">#</a></h4>
 <p>Compare H with its reversed row order using cosine and assignment.</p>
 <p><strong>Expected:</strong> Permutation[1,0] and matched similarities[1,1].</p>
-<p><strong>Verify:</strong> Permutation[1,0] and matched similarities[1,1]. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Verify:</strong> Assert the alignment between H and its reversed rows is permutation [1, 0] with matched cosine similarities [1, 1].</p>
 <p><strong>Hints:</strong> Match across the shared vocabulary before comparing numeric topic IDs.</p>
 <h4 id="exercise-6-write-an-error-aware-topic-interpretation">Exercise 6: Write an error-aware topic interpretation<a class="heading-anchor" href="#exercise-6-write-an-error-aware-topic-interpretation" aria-label="Link to this section">#</a></h4>
 <p>Label one component using top words and source documents, then state what remains unproven.</p>
 <p><strong>Expected:</strong> A label linked to concrete words/documents, plus limits on uniqueness, coherence and downstream causal meaning.</p>
-<p><strong>Verify:</strong> A label linked to concrete words/documents, plus limits on uniqueness, coherence and downstream causal meaning. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Verify:</strong> Check that the topic label cites concrete top words and source documents and states what remains unproven about uniqueness, coherence and causal meaning.</p>
 <p><strong>Hints:</strong> Keep the component ID, corpus version and human label separate.</p>
 <h3 id="interview-reasoning">Interview reasoning<a class="heading-anchor" href="#interview-reasoning" aria-label="Link to this section">#</a></h3>
 <p><strong>Interview: Are NMF weights topic probabilities?</strong> Not by the factorization alone. They are nonnegative factors with scaling ambiguity. A display normalization is a useful convention but does not change the original optimization into a probabilistic generative model.</p>

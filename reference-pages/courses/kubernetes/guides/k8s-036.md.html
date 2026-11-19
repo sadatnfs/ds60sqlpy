@@ -219,15 +219,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Expected:</strong> The recovery is incomplete despite API presence and readiness; the independent data restore is required.</p>
 <h3 id="inspect-the-specific-owned-object">Inspect the specific owned object<a class="heading-anchor" href="#inspect-the-specific-owned-object" aria-label="Link to this section">#</a></h3>
 <p>Only after the chapter&#x27;s host capability is provisioned and its resources remain present, use the explicit receipt fields described in <a href="../host-labs.md.html">host-labs.md</a>. A completed one-shot browser Run has already cleaned its objects. The following read does not provision the missing capability and does not justify changing credentials after a Forbidden result.</p>
-<p>POSIX:</p>
+<p>Bash on Linux, macOS or Ubuntu under WSL 2:</p>
 <pre class="highlighted-code"><code class="language-bash">: <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_KUBECONFIG<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt path</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 : <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_CONTEXT<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt context</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 : <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_NAMESPACE<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt namespace</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<span class="syntax-string">&quot;</span> --context <span class="syntax-string">&quot;</span>$LAB_CONTEXT<span class="syntax-string">&quot;</span> --namespace <span class="syntax-string">&quot;</span>$LAB_NAMESPACE<span class="syntax-string">&quot;</span> get pvc data-store-0 -o json</code></pre>
-<p>PowerShell:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">-not</span> $env:LAB_KUBECONFIG <span class="syntax-operator">-or</span> <span class="syntax-operator">-not</span> $env:LAB_CONTEXT <span class="syntax-operator">-or</span> <span class="syntax-operator">-not</span> $env:LAB_NAMESPACE<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;Owned receipt fields are required.&#x27;</span> <span class="syntax-punctuation">}</span>
-<span class="syntax-punctuation">&amp;</span> kubectl <span class="syntax-punctuation">-</span>-kubeconfig $env:LAB_KUBECONFIG <span class="syntax-punctuation">-</span>-context $env:LAB_CONTEXT <span class="syntax-punctuation">-</span>-namespace $env:LAB_NAMESPACE get pvc data-store<span class="syntax-punctuation">-</span>0 -o json
-<span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>$LASTEXITCODE <span class="syntax-operator">-ne</span> 0<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;The scoped observation failed.&#x27;</span> <span class="syntax-punctuation">}</span></code></pre>
+<p>Windows uses the same Bash commands inside WSL 2. The lab adapter refuses native Windows credential handling, so do not run kubectl against the receipt from PowerShell. From PowerShell, only open your WSL 2 distribution (the name reported by <code>wsl.exe --list --verbose</code>), change to your checkout with its Linux path, then run the Bash block above unchanged:</p>
+<pre class="highlighted-code"><code class="language-powershell">wsl<span class="syntax-punctuation">.</span>exe <span class="syntax-punctuation">-</span>-distribution Ubuntu</code></pre>
 <p>Retain only the fields needed by this chapter&#x27;s prediction. A NotFound result may be expected after one-shot cleanup; a Forbidden result may identify a deliberately absent advanced capability. Neither result authorizes an ambient-context fallback.</p>
 <h3 id="run-and-bounded-evidence">Run and bounded evidence<a class="heading-anchor" href="#run-and-bounded-evidence" aria-label="Link to this section">#</a></h3>
 <p>The app artifact is a reading worksheet, <code>courses/kubernetes/lessons/k8s-036.md</code>. The current browser adapter does not provide the full <strong>dedicated synthetic control-plane snapshot/restore plus independent application-data backup</strong> operation. Use the synthetic fixture and offline check first. Live work follows <a href="../host-labs.md.html">the scoped host-lab guide</a> only when the named capability and owned target have been provisioned. A worksheet or static check is never a cluster execution receipt.</p>
@@ -236,32 +234,32 @@ kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<sp
 <h4 id="exercise-1-build-the-source-inventory">Exercise 1: Build the source inventory<a class="heading-anchor" href="#exercise-1-build-the-source-inventory" aria-label="Link to this section">#</a></h4>
 <p>Assign API objects and persistent marker bytes to their backup sources.</p>
 <p><strong>Expected result/shape:</strong> Two distinct sources and restore checks.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Two distinct sources and restore checks.</p>
+<p><strong>Verify:</strong> For each item, name where its bytes live, the API store or the volume, and which backup captures them.</p>
 <p><strong>Progressive hints:</strong> Ask where each byte is actually stored.</p>
 <h4 id="exercise-2-record-a-synthetic-data-checksum">Exercise 2: Record a synthetic data checksum<a class="heading-anchor" href="#exercise-2-record-a-synthetic-data-checksum" aria-label="Link to this section">#</a></h4>
 <p>Hash the fixed marker and compare it with a changed marker.</p>
 <p><strong>Expected result/shape:</strong> Equal bytes match; changed bytes fail the reference digest.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Equal bytes match; changed bytes fail the reference digest.</p>
+<p><strong>Verify:</strong> Hash both byte strings with SHA-256 and compare each digest with the independent reference digest.</p>
 <p><strong>Progressive hints:</strong> Keep the reference independent from the restored copy.</p>
 <h4 id="exercise-3-define-consistency-assumptions">Exercise 3: Define consistency assumptions<a class="heading-anchor" href="#exercise-3-define-consistency-assumptions" aria-label="Link to this section">#</a></h4>
 <p>State why the immutable marker is simpler than a live transactional database.</p>
 <p><strong>Expected result/shape:</strong> No claim of database-consistent backup or log replay.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: No claim of database-consistent backup or log replay.</p>
+<p><strong>Verify:</strong> Name one property of a live database, such as concurrent writes or transactions, that this fixture does not have.</p>
 <p><strong>Progressive hints:</strong> Concurrent writes change the backup problem.</p>
 <h4 id="exercise-4-evaluate-the-partial-restore">Exercise 4: Evaluate the partial restore<a class="heading-anchor" href="#exercise-4-evaluate-the-partial-restore" aria-label="Link to this section">#</a></h4>
 <p>Accept API objects but reject the wrong data hash in the supplied trace.</p>
 <p><strong>Expected result/shape:</strong> Overall recovery fails until both API and data gates pass.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Overall recovery fails until both API and data gates pass.</p>
+<p><strong>Verify:</strong> Evaluate the API gate and the data gate separately, then combine them with AND.</p>
 <p><strong>Progressive hints:</strong> Ready does not mean correct data.</p>
 <h4 id="exercise-5-protect-backup-material">Exercise 5: Protect backup material<a class="heading-anchor" href="#exercise-5-protect-backup-material" aria-label="Link to this section">#</a></h4>
 <p>Classify private snapshots, credentials and public receipt fields.</p>
 <p><strong>Expected result/shape:</strong> No snapshots or secrets in portable progress; only bounded metadata and synthetic checksums.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: No snapshots or secrets in portable progress; only bounded metadata and synthetic checksums.</p>
+<p><strong>Verify:</strong> Check each item against the rule that snapshots and secrets stay private while bounded metadata and checksums may be shared.</p>
 <p><strong>Progressive hints:</strong> API snapshots can include sensitive objects.</p>
 <h4 id="exercise-6-review-target-isolation-and-cleanup">Exercise 6: Review target isolation and cleanup<a class="heading-anchor" href="#exercise-6-review-target-isolation-and-cleanup" aria-label="Link to this section">#</a></h4>
 <p>Document the dedicated source/destination ownership and eventual disposal.</p>
 <p><strong>Expected result/shape:</strong> No restore into an ambient or shared target; exact owned cleanup.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: No restore into an ambient or shared target; exact owned cleanup.</p>
+<p><strong>Verify:</strong> Confirm that the destination is a dedicated owned target and that the disposal step names exact identities.</p>
 <p><strong>Progressive hints:</strong> A restore is a state replacement operation.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain the mechanism behind the first example, then distinguish it from this boundary case: The recovery is incomplete despite API presence and readiness; the independent data restore is required. State which observations are synthetic and which, if any, were read from your owned runtime.</p>
@@ -269,7 +267,7 @@ kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<sp
 <p>If the API object exists but the marker hash is wrong, recovery has not met the application-data contract. If the marker is correct but the Service route is broken, recovery has not met the serving contract. A Ready Pod alone proves neither complete restoration nor acceptable data loss.</p>
 <p>Never use a live production snapshot as a convenient classroom fixture. The synthetic rehearsal makes scope visible while avoiding personal or organizational data. A passed rehearsal establishes the tested procedure and version combination, not universal restore compatibility.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
-<p>Close the answer and reconstruct the reasoning for Exercise6, Review target isolation and cleanup. Name the exact source and observed identity you would require before claiming the changed case succeeded.</p>
+<p>Close the answer and reconstruct the reasoning for Exercise 6 (Review target isolation and cleanup). Name the exact source and observed identity you would require before claiming the changed case succeeded.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue to <code>k8s-037</code> after preserving the six evidence records.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>

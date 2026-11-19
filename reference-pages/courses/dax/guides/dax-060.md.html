@@ -230,8 +230,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <pre class="highlighted-code"><code class="language-dax"><span class="syntax-keyword">EVALUATE</span> <span class="syntax-function">ROW</span> <span class="syntax-punctuation">(</span> <span class="syntax-string">&quot;Revenue&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-attribute">[NetRevenue]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;LineCost&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-attribute">[Cost]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;GroupedCost&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-function">SUMX</span> <span class="syntax-punctuation">(</span> <span class="syntax-function">VALUES</span> <span class="syntax-punctuation">(</span> Product<span class="syntax-attribute">[ProductKey]</span> <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-function">CALCULATE</span> <span class="syntax-punctuation">(</span> <span class="syntax-function">SUM</span> <span class="syntax-punctuation">(</span> Sales<span class="syntax-attribute">[Quantity]</span> <span class="syntax-punctuation">)</span> <span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> <span class="syntax-function">CALCULATE</span> <span class="syntax-punctuation">(</span> <span class="syntax-function">MAX</span> <span class="syntax-punctuation">(</span> Product<span class="syntax-attribute">[UnitCost]</span> <span class="syntax-punctuation">)</span> <span class="syntax-punctuation">)</span> <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;AfterCustomerFilterRemoval&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-function">CALCULATE</span> <span class="syntax-punctuation">(</span> <span class="syntax-attribute">[NetRevenue]</span><span class="syntax-punctuation">,</span> <span class="syntax-function">REMOVEFILTERS</span> <span class="syntax-punctuation">(</span> Customer <span class="syntax-punctuation">)</span> <span class="syntax-punctuation">)</span> <span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Context trace:</strong></p>
 <ol>
-<li>North permits Ada and Cy, giving revenue 51 +56 =107.</li>
-<li>Their product quantities are 5 Notebook,5 Pen and 2 Mug, costing 10 +5 +10 =25.</li>
+<li>North permits Ada and Cy, giving revenue 51 + 56 = 107.</li>
+<li>Their product quantities are 5 Notebook,5 Pen and 2 Mug, costing 10 + 5 + 10 = 25.</li>
 <li>Both cost forms agree; a real security restriction must remain after ordinary Customer-filter removal.</li>
 </ol>
 <p><strong>Hand-derived worked-reference result:</strong></p>
@@ -312,7 +312,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </tbody></table></div>
 <p>The classroom supplies the first four for offline study. Its draft save, source comparison or completion marker does not manufacture the final three. An optional PBIP/TMDL project must follow the current supported external editing contract and exclude credentials, local caches and personal settings.</p>
 <h3 id="practice-prediction-construction-and-diagnosis">Practice: prediction, construction and diagnosis<a class="heading-anchor" href="#practice-prediction-construction-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>Retain your formula or written reasoning, the stated context, contributing rows or values, and a conclusion with its unit. This is a manual learning record, not an execution receipt.</p>
+<p>Retain your formula or written reasoning, the stated context, contributing rows or values, and a conclusion with its unit. These notes are your own study record; they do not show that a formula ran.</p>
 <h4 id="exercise-1-predict">Exercise 1: Predict<a class="heading-anchor" href="#exercise-1-predict" aria-label="Link to this section">#</a></h4>
 <p>Reconcile the two role-specific cost rows.</p>
 <h4 id="exercise-2-change-one-condition">Exercise 2: Change one condition<a class="heading-anchor" href="#exercise-2-change-one-condition" aria-label="Link to this section">#</a></h4>
@@ -339,9 +339,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Use the <a href="../README.md.html">course map</a> to revisit a mechanism or extend one of the completed capstones.</p>
 <h3 id="official-references-and-evidence-limits">Official references and evidence limits<a class="heading-anchor" href="#official-references-and-evidence-limits" aria-label="Link to this section">#</a></h3>
 <ul>
-<li><a href="https://learn.microsoft.com/en-us/power-bi/developer/projects/projects-overview">Official documentation 1</a></li>
-<li><a href="https://learn.microsoft.com/en-us/analysis-services/tmdl/tmdl-overview">Official documentation 2</a></li>
-<li><a href="https://learn.microsoft.com/en-us/fabric/security/service-admin-row-level-security">Official documentation 3</a></li>
+<li><a href="https://learn.microsoft.com/en-us/power-bi/developer/projects/projects-overview">Power BI Desktop projects</a></li>
+<li><a href="https://learn.microsoft.com/en-us/analysis-services/tmdl/tmdl-overview">Analysis Services: TMDL</a></li>
+<li><a href="https://learn.microsoft.com/en-us/fabric/security/service-admin-row-level-security">Fabric and Power BI: row-level security</a></li>
 </ul>
 <p>Documentation was reviewed for this original course on 2026-10-25. Version-sensitive features have explicit notes. Source/model checks and independent fixture arithmetic are not a DAX parser, compiler, semantic engine, real RLS test or performance measurement.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>

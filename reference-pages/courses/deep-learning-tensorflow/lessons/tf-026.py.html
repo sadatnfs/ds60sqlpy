@@ -200,28 +200,28 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 1: Create an identity residual</span></span>
-<span class="source-line"><span class="syntax-comment"># Call a width2 residual with zero kernel on[[1,2],[3,4]].</span></span>
+<span class="source-line"><span class="syntax-comment"># Call a width 2 residual with zero kernel on [[1, 2], [3, 4]].</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: output equals input; one tracked kernel.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 2: Reuse the state</span></span>
 <span class="source-line"><span class="syntax-comment"># Call the layer on another batch of the same width and compare variable object identity.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: same variable object and variable count1.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: same variable object and variable count 1.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Assign a known transform</span></span>
 <span class="source-line"><span class="syntax-comment"># Set the kernel to identity and inspect the residual output.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: output2*x.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: output 2*x.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Reject an incompatible width</span></span>
-<span class="source-line"><span class="syntax-comment"># Call the built width2 layer with a width3 input.</span></span>
+<span class="source-line"><span class="syntax-comment"># Call the built width 2 layer with a width 3 input.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: ValueError naming feature width.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Check branch gradients</span></span>
 <span class="source-line"><span class="syntax-comment"># Differentiate the sum of output entries with respect to the kernel.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: gradient matrix[[4,4],[6,6]].</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: gradient matrix [[4, 4], [6, 6]].</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Count parameters by width</span></span>
-<span class="source-line"><span class="syntax-comment"># Build a separate width3 layer and count its square kernel entries.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: 9 parameters; width2 layer remains4.</span></span>
+<span class="source-line"><span class="syntax-comment"># Build a separate width 3 layer and count its square kernel entries.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: 9 parameters; width 2 layer remains 4.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Read the guide and implement the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>

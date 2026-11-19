@@ -206,9 +206,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Focus:</strong> The element receiving keyboard interaction.</p>
 <h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
 <p>Select an element after its markup exists, guard its expected type, and attach a named listener. textContent inserts text without parsing HTML. event.target identifies the originating target, while event.currentTarget identifies the listener owner during dispatch. closest can locate an action button from a nested child. A native button has type=button when it should not submit a surrounding form. hidden changes visibility and participation in layout; aria-expanded communicates the control state but does not itself hide content.</p>
-<h3 id="exercise-1-use-a-native-button-and-live-result">Exercise 1: Use a native button and live result<a class="heading-anchor" href="#exercise-1-use-a-native-button-and-live-result" aria-label="Link to this section">#</a></h3>
-<p>Task: Open the complete snippet, activate Add twice by pointer and once by keyboard, then inspect the count.</p>
+<h3 id="exercise-1-use-a-native-button-and-live-result-change-one-input">Exercise 1: Use a native button and live result: change one input<a class="heading-anchor" href="#exercise-1-use-a-native-button-and-live-result-change-one-input" aria-label="Link to this section">#</a></h3>
+<p>Task: Rebuild Example A in your copy of the lesson&#x27;s browser fixture without looking at it. Then change one attribute, label or handler and write down the visible, focus or announcement change you expect before reloading.</p>
 <p>The browser supplies native button activation. The script handles click once rather than separately counting keydown and click, which could double-count keyboard use.</p>
+<p>The unchanged code is the exercise block of Example A:</p>
 <pre class="highlighted-code"><code class="language-html"><span class="syntax-comment">&lt;!doctype html&gt;</span>
 <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">html</span> <span class="syntax-attribute">lang</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;en&#x27;</span>
   <span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-tag">meta</span> <span class="syntax-attribute">charset</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;utf-8&#x27;</span> <span class="syntax-punctuation">/</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-tag">title</span><span class="syntax-punctuation">&gt;</span>Counter<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">title</span><span class="syntax-punctuation">&gt;</span>
@@ -222,11 +223,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 button<span class="syntax-punctuation">.</span>addEventListener<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;click&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span> count <span class="syntax-operator">+=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span> output<span class="syntax-punctuation">.</span>textContent <span class="syntax-operator">=</span> <span class="syntax-string">`</span><span class="syntax-string">Count: </span><span class="syntax-string">${</span>count<span class="syntax-string">}</span><span class="syntax-string">`</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">script</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">html</span>
 <span class="syntax-punctuation">&gt;</span></code></pre>
-<p><strong>Expected:</strong> count 3; button remains keyboard reachable.</p>
-<p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
-<h3 id="exercise-2-trace-target-and-currenttarget-through-delegation">Exercise 2: Trace target and currentTarget through delegation<a class="heading-anchor" href="#exercise-2-trace-target-and-currenttarget-through-delegation" aria-label="Link to this section">#</a></h3>
-<p>Task: Click the nested word inside the list button in the snippet.</p>
+<p><strong>Expected:</strong> Your rebuild reproduces the worked observation (count 3; button remains keyboard reachable), and the changed copy shows the difference you predicted.</p>
+<p><strong>Verify:</strong> Record the browser observation before and after your change, including where focus lands and any live-region text, and explain which line caused the difference.</p>
+<h3 id="exercise-2-trace-target-and-currenttarget-through-delegation-debug-a-regression">Exercise 2: Trace target and currentTarget through delegation: debug a regression<a class="heading-anchor" href="#exercise-2-trace-target-and-currenttarget-through-delegation-debug-a-regression" aria-label="Link to this section">#</a></h3>
+<p>Task: Introduce one deliberate defect into a copy of Example B, such as a wrong selector, a missing attribute or a handler on the wrong element. Predict which browser behavior will expose it, confirm that prediction, then repair it.</p>
 <p>The listener belongs to the list, but the original target can be a child inside the button. Delegation checks both the matching action and its containment in the component.</p>
+<p>The unchanged code is the exercise block of Example B:</p>
 <pre class="highlighted-code"><code class="language-html"><span class="syntax-comment">&lt;!doctype html&gt;</span>
 <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">html</span> <span class="syntax-attribute">lang</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;en&#x27;</span>
   <span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-tag">meta</span> <span class="syntax-attribute">charset</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;utf-8&#x27;</span> <span class="syntax-punctuation">/</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-tag">title</span><span class="syntax-punctuation">&gt;</span>Delegation<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">title</span><span class="syntax-punctuation">&gt;</span>
@@ -248,8 +250,8 @@ list<span class="syntax-punctuation">.</span>addEventListener<span class="syntax
 <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">script</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">html</span>
 <span class="syntax-punctuation">&gt;</span></code></pre>
-<p><strong>Expected:</strong> selected A; target SPAN and currentTarget UL.</p>
-<p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
+<p><strong>Expected:</strong> The defective copy no longer shows: selected A; target SPAN and currentTarget UL. The repaired copy shows it again.</p>
+<p><strong>Verify:</strong> Keep notes on the failing and the repaired behavior and name the first browser observation that differed between them.</p>
 <h3 id="exercise-3-handle-a-dynamically-appended-action">Exercise 3: Handle a dynamically appended action<a class="heading-anchor" href="#exercise-3-handle-a-dynamically-appended-action" aria-label="Link to this section">#</a></h3>
 <p>Task: Create a new list item with button B after the listener is installed and activate it.</p>
 <p>Delegation observes future descendants through the same event path. It avoids installing a second listener for every new row, but its selector and containment checks still define the allowed action surface.</p>
@@ -261,7 +263,7 @@ button.textContent = &#x27;Choose B&#x27;;
 item.append(button);
 list.append(item);</code></pre>
 <p><strong>Expected:</strong> the existing ancestor listener reports B without a new per-button listener.</p>
-<p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
+<p><strong>Verify:</strong> In the browser fixture, record the observation that shows: the existing ancestor listener reports B without a new per-button listener. Then change one input and record what changes, keeping keyboard and pointer results separate.</p>
 <h3 id="exercise-4-implement-an-accessible-disclosure">Exercise 4: Implement an accessible disclosure<a class="heading-anchor" href="#exercise-4-implement-an-accessible-disclosure" aria-label="Link to this section">#</a></h3>
 <p>Task: Toggle a details region and keep hidden and aria-expanded synchronized.</p>
 <p>The visual state and accessibility state describe the same Boolean. A disclosure normally keeps focus on its toggle; moving focus on every open can make repeated keyboard interaction unpredictable.</p>
@@ -269,7 +271,7 @@ list.append(item);</code></pre>
 toggle.setAttribute(&#x27;aria-expanded&#x27;, String(!expanded));
 details.hidden = expanded;</code></pre>
 <p><strong>Expected:</strong> opening reveals details and sets true; closing hides it and sets false.</p>
-<p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
+<p><strong>Verify:</strong> In the browser fixture, record the observation that shows: opening reveals details and sets true; closing hides it and sets false. Then change one input and record what changes, keeping keyboard and pointer results separate.</p>
 <h3 id="exercise-5-remove-listeners-through-their-lifecycle-signal">Exercise 5: Remove listeners through their lifecycle signal<a class="heading-anchor" href="#exercise-5-remove-listeners-through-their-lifecycle-signal" aria-label="Link to this section">#</a></h3>
 <p>Task: Attach a counter listener with a signal, click once, abort, and click again.</p>
 <p>Removing a listener is separate from deleting visible content. The lifecycle signal releases the event subscription so a retired component no longer handles input.</p>
@@ -277,7 +279,7 @@ details.hidden = expanded;</code></pre>
 button.addEventListener(&#x27;click&#x27;, onClick, { signal: controller.signal });
 controller.abort();</code></pre>
 <p><strong>Expected:</strong> the count stops increasing after abort.</p>
-<p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
+<p><strong>Verify:</strong> In the browser fixture, record the observation that shows: the count stops increasing after abort. Then change one input and record what changes, keeping keyboard and pointer results separate.</p>
 <h3 id="exercise-6-diagnose-a-missing-required-element">Exercise 6: Diagnose a missing required element<a class="heading-anchor" href="#exercise-6-diagnose-a-missing-required-element" aria-label="Link to this section">#</a></h3>
 <p>Task: Query a deliberately absent id and report the failed startup contract.</p>
 <p>A typo or changed HTML structure can invalidate selectors. An explicit startup check gives a useful diagnosis instead of a later cannot-read-property exception.</p>
@@ -286,7 +288,7 @@ if (missing === null) {
   output.textContent = &#x27;Required element not found&#x27;;
 }</code></pre>
 <p><strong>Expected:</strong> null is detected before accessing a property.</p>
-<p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
+<p><strong>Verify:</strong> In the browser fixture, record the observation that shows: null is detected before accessing a property. Then change one input and record what changes, keeping keyboard and pointer results separate.</p>
 <h3 id="after-comparison">After comparison<a class="heading-anchor" href="#after-comparison" aria-label="Link to this section">#</a></h3>
 <p>Return to your saved implementation and repeat a case with different values. Keep compiler diagnostics, process output and browser observations separate. Do not suppress a failing assertion or use a type assertion to declare an unvalidated value safe. Resource-owning examples must finish cleanup even when work fails. Describe each result with its actual host and fixture scope rather than as production acceptance.</p></article>
   </main>

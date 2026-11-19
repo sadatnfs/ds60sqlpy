@@ -201,23 +201,23 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Severity:</strong> The consequence category of a failure, separate from frequency.</p>
 <p><strong>Finite evidence:</strong> Observations from a bounded set of tested cases.</p>
 <h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
-<p>Read the supplied rows as family,group,count,failures,severity. Calculate rates only with nonzero counts. Keep severe failures visible even when overall success is high. For a counterfactual pair, list the changed attribute and the behavior that should remain stable. An untested group receives an unknown result, not a zero failure rate. State the scope and the next evidence needed in the conclusion.</p>
-<h3 id="exercise-1-read-group-denominators">Exercise 1: Read group denominators<a class="heading-anchor" href="#exercise-1-read-group-denominators" aria-label="Link to this section">#</a></h3>
-<p>The question is: GroupA has0 failures in10 cases;groupB has0 in1. Compare what is established.</p>
-<p>Equal observed rates do not imply equal uncertainty. The denominator is a central part of the result and should remain visible in a report.</p>
-<pre class="highlighted-code"><code class="language-text">A: failures0,count10,observed rate0/10
-B: failures0,count1,observed rate0/1
-Neither establishes a zero population failure probability.</code></pre>
-<p><strong>Expected:</strong> both observed zero;B has much less evidence.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with both observed zero;B has much less evidence.</p>
-<h3 id="exercise-2-expose-a-severe-failure">Exercise 2: Expose a severe failure<a class="heading-anchor" href="#exercise-2-expose-a-severe-failure" aria-label="Link to this section">#</a></h3>
-<p>The question is: Nine minor cases pass and one severe case fails. Calculate total pass rate and state the release implication under a no-severe-failure gate.</p>
-<p>Averages cannot override an explicitly required critical condition. The decision rule should be established before seeing which case failed.</p>
-<pre class="highlighted-code"><code class="language-text">Pass rate = 9/10 = 90percent
-Severe failures = 1
+<p>Read the supplied rows as family, group, count, failures, severity. Calculate rates only with nonzero counts. Keep severe failures visible even when overall success is high. For a counterfactual pair, list the changed attribute and the behavior that should remain stable. An untested group receives an unknown result, not a zero failure rate. State the scope and the next evidence needed in the conclusion.</p>
+<h3 id="exercise-1-compare-uneven-denominators">Exercise 1: Compare uneven denominators<a class="heading-anchor" href="#exercise-1-compare-uneven-denominators" aria-label="Link to this section">#</a></h3>
+<p>The question is: Group D has 1 failure in 50 cases; group E has 0 failures in 5. Compare the observed rates and what each establishes.</p>
+<p>A lower observed rate on a much smaller denominator is weak evidence. Report both counts so a reader can see how little E was tested.</p>
+<pre class="highlighted-code"><code class="language-text">D: failures 1, count 50, observed rate 1/50 = 0.02
+E: failures 0, count 5, observed rate 0/5
+A zero count in 5 cases does not establish that E is safer than D.</code></pre>
+<p><strong>Expected:</strong> D observed 1/50 = 0.02; E observed 0/5; five cases do not show that E is safer than D.</p>
+<p><strong>Verify:</strong> Check that 1/50 is written as 0.02 (2 percent), that both denominators 50 and 5 are reported, and that the answer does not rank E above D.</p>
+<h3 id="exercise-2-recompute-a-gate-with-two-severe-failures">Exercise 2: Recompute a gate with two severe failures<a class="heading-anchor" href="#exercise-2-recompute-a-gate-with-two-severe-failures" aria-label="Link to this section">#</a></h3>
+<p>The question is: Eighteen minor cases pass and two severe cases fail. Calculate the pass rate and the gate result.</p>
+<p>The pass rate matches the earlier case, yet the decision depends on the severe-failure count, which is now two. An aggregate rate cannot replace the gate.</p>
+<pre class="highlighted-code"><code class="language-text">Pass rate = 18/20 = 90 percent
+Severe failures = 2
 Required severe-failure gate = fail</code></pre>
-<p><strong>Expected:</strong> 90percent passes;gate fails.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with 90percent passes;gate fails.</p>
+<p><strong>Expected:</strong> 18/20 = 90 percent passes; 2 severe failures; the gate fails.</p>
+<p><strong>Verify:</strong> Check that the pass rate is 18/20 = 0.9 and that the gate decision is taken from the severe-failure count 2, not from the 90 percent pass rate.</p>
 <h3 id="exercise-3-analyze-a-counterfactual-pair">Exercise 3: Analyze a counterfactual pair<a class="heading-anchor" href="#exercise-3-analyze-a-counterfactual-pair" aria-label="Link to this section">#</a></h3>
 <p>The question is: Two fictional applicants have identical task-relevant qualifications; only a neutral name token differs, and the system gives opposite eligibility outcomes.</p>
 <p>The pair controls the relevant input information for the stated task. It does not by itself characterize all fairness properties or all real populations.</p>
@@ -227,23 +227,23 @@ Changed field: fictional name token
 Expected eligibility: equal
 Observed eligibility: opposite</code></pre>
 <p><strong>Expected:</strong> inconsistency requires investigation under this fixture rubric.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with inconsistency requires investigation under this fixture rubric.</p>
+<p><strong>Verify:</strong> Check that the record holds qualifications identical, names the single changed field and contrasts the expected equal eligibility with the observed opposite outcomes.</p>
 <h3 id="exercise-4-handle-an-untested-group">Exercise 4: Handle an untested group<a class="heading-anchor" href="#exercise-4-handle-an-untested-group" aria-label="Link to this section">#</a></h3>
-<p>The question is: GroupC hascount0. Decide what rate and claim to report.</p>
+<p>The question is: Group C has count 0. Decide what rate and claim to report.</p>
 <p>Reporting zero would turn absence of observations into apparent success. A missing group should remain a visible gap in the evidence.</p>
-<pre class="highlighted-code"><code class="language-text">Group C: count0,failuresnot observed
+<pre class="highlighted-code"><code class="language-text">Group C: count 0, failures not observed
 Rate: undefined
 Claim: no evaluation evidence for this group</code></pre>
-<p><strong>Expected:</strong> rate unknown;group untested.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with rate unknown;group untested.</p>
+<p><strong>Expected:</strong> rate unknown; group untested.</p>
+<p><strong>Verify:</strong> Check that group C reports count 0 with an undefined rate, not 0 percent or a pass, and that the claim says no evaluation evidence exists for the group.</p>
 <h3 id="exercise-5-separate-families-from-paraphrases">Exercise 5: Separate families from paraphrases<a class="heading-anchor" href="#exercise-5-separate-families-from-paraphrases" aria-label="Link to this section">#</a></h3>
 <p>The question is: Twenty prompts are paraphrases of one attack family. State the independent coverage count under family-based evaluation.</p>
 <p>Repeated variants can reveal local sensitivity, but they do not expand conceptual coverage as much as new families. The evaluation unit must match the conclusion.</p>
-<pre class="highlighted-code"><code class="language-text">Prompt variants:20
-Independent authored families:1
-Report both; do not claim20 independent threat classes.</code></pre>
-<p><strong>Expected:</strong> one tested family,twenty variants.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with one tested family,twenty variants.</p>
+<pre class="highlighted-code"><code class="language-text">Prompt variants: 20
+Independent authored families: 1
+Report both; do not claim 20 independent threat classes.</code></pre>
+<p><strong>Expected:</strong> one tested family, twenty variants.</p>
+<p><strong>Verify:</strong> Check that the report carries both counts, 20 variants and 1 independent family, and never presents the variants as 20 threat classes.</p>
 <h3 id="exercise-6-write-a-finite-claim">Exercise 6: Write a finite claim<a class="heading-anchor" href="#exercise-6-write-a-finite-claim" aria-label="Link to this section">#</a></h3>
 <p>The question is: Draft a conclusion for the cases above including the severe failure and untested group.</p>
 <p>A negative decision can be the most useful outcome. Preserving the failed family and its exact conditions supports repair and a meaningful future retest.</p>
@@ -252,7 +252,7 @@ Decision: no-go under the stated severe-failure gate.
 Limit: this finite suite cannot establish universal safety.
 Next evidence: investigate the failure and evaluate additional independent families.</code></pre>
 <p><strong>Expected:</strong> conclusion rejects a universal safety guarantee.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with conclusion rejects a universal safety guarantee.</p>
+<p><strong>Verify:</strong> Check that the conclusion mentions the one severe failure, the untested group C and the no-go decision, and that it limits the claim to this finite suite.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
 <p>Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.</p></article>
   </main>

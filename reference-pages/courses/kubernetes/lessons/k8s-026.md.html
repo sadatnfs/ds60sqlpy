@@ -197,32 +197,26 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Use the guide and synthetic case ledger. A prediction or copied fixture is not a live runtime observation.</p>
 <h3 id="exercise-1-compare-controller-intent">Exercise 1: Compare controller intent<a class="heading-anchor" href="#exercise-1-compare-controller-intent" aria-label="Link to this section">#</a></h3>
 <p>Explain replicas 2 Deployment versus a DaemonSet over eligible nodes.</p>
-<p>Expected: Fixed replica count versus topology-derived desired placement.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-2-evaluate-node-labels">Exercise 2: Evaluate node labels<a class="heading-anchor" href="#exercise-2-evaluate-node-labels" aria-label="Link to this section">#</a></h3>
 <p>Apply the zone=a selector to the three supplied node facts.</p>
-<p>Expected: node-a and node-c pass the label condition; node-b does not.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-3-evaluate-the-custom-taint">Exercise 3: Evaluate the custom taint<a class="heading-anchor" href="#exercise-3-evaluate-the-custom-taint" aria-label="Link to this section">#</a></h3>
 <p>Add the untolerated dedicated NoSchedule condition.</p>
-<p>Expected: Only node-a remains eligible in the simplified model.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-4-observe-actual-placement">Exercise 4: Observe actual placement<a class="heading-anchor" href="#exercise-4-observe-actual-placement" aria-label="Link to this section">#</a></h3>
 <p>In the qualified host topology, compare desired/ready counts and Pod nodeName/UIDs.</p>
-<p>Expected: Observed eligible-node and controller evidence agree or a specific condition explains the gap.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-5-reject-automatic-node-edits">Exercise 5: Reject automatic node edits<a class="heading-anchor" href="#exercise-5-reject-automatic-node-edits" aria-label="Link to this section">#</a></h3>
 <p>Review a proposal to remove a taint from a shared Node to make the lab pass.</p>
-<p>Expected: No learner Node mutation; request the correct owned capability or report unavailable placement.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-6-clean-up-the-right-resources">Exercise 6: Clean up the right resources<a class="heading-anchor" href="#exercise-6-clean-up-the-right-resources" aria-label="Link to this section">#</a></h3>
 <p>Describe DaemonSet UID-aware cleanup and retained host configuration.</p>
-<p>Expected: Only the owned DaemonSet/controller children are removed; unrelated agents and node settings preserved.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p></article>
   </main>

@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/advanced-spark-modeling/guides/asm-003.md</code></p>
     </header>
     <article class="document"><h2 id="asm-003-independent-group-fits-and-one-shared-model">asm-003: Independent group fits and one shared model<a class="heading-anchor" href="#asm-003-independent-group-fits-and-one-shared-model" aria-label="Link to this section">#</a></h2>
-<p>Tutorial mode. Stage: beginner. Direct prerequisites: <code>asm-002</code>, <code>spark-016</code>.</p>
+<p>Tutorial mode. Stage: intermediate. Direct prerequisites: <code>asm-002</code>, <code>spark-016</code>.</p>
 <h3 id="starting-point-and-result">Starting point and result<a class="heading-anchor" href="#starting-point-and-result" aria-label="Link to this section">#</a></h3>
 <p>“Fit a model on Spark” can describe two very different operations. You might want one independent model per product, with separate parameter vectors. Or you might want one shared parameter vector fit to all products. This chapter makes the distinction observable before any complicated optimization enters the picture.</p>
 <p>The example fits Gaussian means for a two-record group and a six-record group. It computes separate group MLEs, the pooled global MLE, and an unweighted average of group MLEs. All three are sensible numbers, but they answer different questions. You will also change the group sizes to see when two of the formulas happen to coincide.</p>

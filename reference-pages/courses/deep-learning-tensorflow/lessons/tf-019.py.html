@@ -200,27 +200,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 1: Compute local differences</span></span>
-<span class="source-line"><span class="syntax-comment"># Apply kernel[[1,0],[0,-1]] to the image1..9 arranged3x3.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: all four outputs-4.</span></span>
+<span class="source-line"><span class="syntax-comment"># Apply kernel [[1, 0], [0, -1]] to the image 1..9 arranged 3x3.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: all four outputs -4.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 2: Rotate the kernel</span></span>
 <span class="source-line"><span class="syntax-comment"># Reverse both spatial axes and repeat the calculation.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: all outputs+4.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Count output positions</span></span>
-<span class="source-line"><span class="syntax-comment"># Compare VALID stride1 and stride2.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: shapes(1,2,2,1) and(1,1,1,1).</span></span>
+<span class="source-line"><span class="syntax-comment"># Compare VALID stride 1 and stride 2.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: shapes (1, 2, 2, 1) and (1, 1, 1, 1).</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Trace one pixel influence</span></span>
-<span class="source-line"><span class="syntax-comment"># Add10 to the top-left image pixel and inspect which output changes.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: only output[0,0] increases10.</span></span>
+<span class="source-line"><span class="syntax-comment"># Add 10 to the top-left image pixel and inspect which output changes.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: only output [0, 0] increases 10.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Count shared parameters</span></span>
-<span class="source-line"><span class="syntax-comment"># Construct a bias-free Conv2D layer with2 filters of size2x2 on one input channel.</span></span>
+<span class="source-line"><span class="syntax-comment"># Construct a bias-free Conv2D layer with 2 filters of size 2x2 on one input channel.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: 8 trainable scalars regardless of image height.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Add a constant image offset</span></span>
-<span class="source-line"><span class="syntax-comment"># Add100 to every pixel and compare outputs under the zero-sum kernel.</span></span>
+<span class="source-line"><span class="syntax-comment"># Add 100 to every pixel and compare outputs under the zero-sum kernel.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: output unchanged.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>

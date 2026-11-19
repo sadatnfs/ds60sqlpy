@@ -198,19 +198,21 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
 <p>A struct groups named fields into one value. Naming fields makes the domain visible: a coordinate with X and Y is more readable than an unexplained two-element slice. Struct assignment copies fields, but fields containing slices, maps or pointers can continue to share referenced storage. Exported fields begin with uppercase letters, which also affects reflection-based encoders. Zero values are predictable, yet not every zero struct is a valid domain object. A constructor-like function can validate inputs and return a value plus error, but Go does not require all construction to pass through such a function. Choose visibility and validation together.</p>
 <p>type Point struct { X, Y int } creates a named type with fields. Point{X:2,Y:3} uses keyed construction, so field meaning survives reordering. p.X selects a field. Comparable structs can be compared with == only if every field is comparable. A struct with a slice cannot be a map key. An anonymous embedded field promotes selectors but does not create class inheritance.</p>
-<h3 id="1-model-a-coordinate">1. Model a coordinate<a class="heading-anchor" href="#1-model-a-coordinate" aria-label="Link to this section">#</a></h3>
-<p>Construct Point with X 2 and Y 3 and calculate Manhattan distance from the origin.</p>
+<h3 id="1-model-a-coordinate-change-one-input">1. Model a coordinate: change one input<a class="heading-anchor" href="#1-model-a-coordinate-change-one-input" aria-label="Link to this section">#</a></h3>
+<p>Copy worked example 1 into a scratch pad and change <code>p := Point{X: 2, Y: 3}</code> to <code>p := Point{X: 3, Y: 3}</code>. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</p>
+<p>The unchanged code is worked example 1:</p>
 <pre class="highlighted-code"><code class="language-go">p <span class="syntax-operator">:=</span> Point<span class="syntax-punctuation">{</span>X<span class="syntax-punctuation">:</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> Y<span class="syntax-punctuation">:</span> <span class="syntax-number">3</span><span class="syntax-punctuation">}</span>
 check<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">.</span>X<span class="syntax-operator">+</span>p<span class="syntax-punctuation">.</span>Y <span class="syntax-operator">==</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;point&quot;</span><span class="syntax-punctuation">)</span></code></pre>
-<p><strong>Expected:</strong> The distance is 5.</p>
+<p><strong>Expected:</strong> The changed run panics with <code>point</code> because <code>p.X+p.Y == 5</code> no longer holds. Restoring the original line brings back the worked observation: the distance is 5.</p>
 <p>Named fields document the coordinate meaning. This tiny case assumes nonnegative coordinates; a general distance function needs absolute values.</p>
-<h3 id="2-observe-scalar-copy">2. Observe scalar copy<a class="heading-anchor" href="#2-observe-scalar-copy" aria-label="Link to this section">#</a></h3>
-<p>Copy a Point and change the copied X field.</p>
+<h3 id="2-observe-scalar-copy-debug-a-regression">2. Observe scalar copy: debug a regression<a class="heading-anchor" href="#2-observe-scalar-copy-debug-a-regression" aria-label="Link to this section">#</a></h3>
+<p>A regression changed one token in worked example 2, so one line now reads <code>a := Point{X: 3, Y: 3}</code>. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.</p>
+<p>The unchanged code is worked example 2:</p>
 <pre class="highlighted-code"><code class="language-go">a <span class="syntax-operator">:=</span> Point<span class="syntax-punctuation">{</span>X<span class="syntax-punctuation">:</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> Y<span class="syntax-punctuation">:</span> <span class="syntax-number">3</span><span class="syntax-punctuation">}</span>
 b <span class="syntax-operator">:=</span> a
 b<span class="syntax-punctuation">.</span>X <span class="syntax-punctuation">=</span> <span class="syntax-number">9</span>
 check<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">.</span>X <span class="syntax-operator">==</span> <span class="syntax-number">2</span> <span class="syntax-operator">&amp;&amp;</span> b<span class="syntax-punctuation">.</span>X <span class="syntax-operator">==</span> <span class="syntax-number">9</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;struct copy&quot;</span><span class="syntax-punctuation">)</span></code></pre>
-<p><strong>Expected:</strong> The original X remains 2.</p>
+<p><strong>Expected:</strong> Before the repair the program panics with <code>struct copy</code>; after it the line reads <code>a := Point{X: 2, Y: 3}</code> again and the original X remains 2.</p>
 <p>Both fields contain scalar values, so assignment produces independent field storage.</p>
 <h3 id="3-expose-a-shallow-field">3. Expose a shallow field<a class="heading-anchor" href="#3-expose-a-shallow-field" aria-label="Link to this section">#</a></h3>
 <p>Copy a Batch struct containing a slice and mutate its first item.</p>

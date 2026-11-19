@@ -214,10 +214,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the C++ module, save this lesson&#x27;s learner pad, then use Run. The worker stages the pad as <code>main.cpp</code> and compiles one translation unit. Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for exact local commands, flags, exit statuses, paths and Docker guidance. Tests involving multiple files, CMake, tool flags or shared libraries are explicitly host-project exercises.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
-<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs:each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
+<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs: each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p><a href="../examples/cpp-016-example-1.cpp.html">Complete program 1</a></p>
-<pre class="highlighted-code"><code class="language-cpp"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;iostream&gt;</span>
+<pre class="highlighted-code"><code class="language-cpp"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;cassert&gt;</span>
+<span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;iostream&gt;</span>
 <span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;string&gt;</span>
 <span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;vector&gt;</span>
 
@@ -229,10 +230,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   Batch a<span class="syntax-punctuation">{</span><span class="syntax-punctuation">{</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
   Batch b <span class="syntax-operator">=</span> a<span class="syntax-punctuation">;</span>
   b<span class="syntax-punctuation">.</span>values<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-number">9</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">.</span>values <span class="syntax-operator">=</span><span class="syntax-operator">=</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>vector<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span><span class="syntax-punctuation">{</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">.</span>values <span class="syntax-operator">=</span><span class="syntax-operator">=</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>vector<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span><span class="syntax-punctuation">{</span><span class="syntax-number">9</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
   std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpp-016 example 1 checks passed</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
   <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
-<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<p><strong>Expected:</strong> With assertions enabled, the program exits with status 0 and prints:</p>
 <pre class="highlighted-code"><code class="language-text">cpp-016 example 1 checks passed</code></pre>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p><a href="../examples/cpp-016-example-2.cpp.html">Complete program 2</a></p>
@@ -255,38 +258,38 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpp-016 example 2 checks passed</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
   <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
-<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<p><strong>Expected:</strong> With assertions enabled, the program exits with status 0 and prints:</p>
 <pre class="highlighted-code"><code class="language-text">cpp-016 example 2 checks passed</code></pre>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-contrast-copy-and-move">Exercise 1: Contrast copy and move<a class="heading-anchor" href="#exercise-1-contrast-copy-and-move" aria-label="Link to this section">#</a></h4>
 <p>Copy a Batch and mutate the copy.</p>
 <p><strong>Expected result/shape:</strong> Original values unchanged.</p>
-<p><strong>Verify:</strong> Original values unchanged.</p>
+<p><strong>Verify:</strong> After <code>b.values[0] = 9</code>, assert <code>a.values == std::vector&lt;int&gt;{1, 2}</code> and <code>b.values == std::vector&lt;int&gt;{9, 2}</code>, as Worked example 1 does.</p>
 <p><strong>Progressive hints:</strong> The vector member owns its own copied storage.</p>
 <h4 id="exercise-2-inspect-the-receiver">Exercise 2: Inspect the receiver<a class="heading-anchor" href="#exercise-2-inspect-the-receiver" aria-label="Link to this section">#</a></h4>
 <p>Move Batch([1, 2, 3]) into a new owner.</p>
 <p><strong>Expected result/shape:</strong> Receiver values exactly [1, 2, 3].</p>
-<p><strong>Verify:</strong> Receiver values exactly [1, 2, 3].</p>
+<p><strong>Verify:</strong> Assert <code>receiver.values == std::vector&lt;int&gt;{1, 2, 3}</code> after <code>std::move</code>, and make no assertion about the source&#x27;s contents.</p>
 <p><strong>Progressive hints:</strong> The target has a specified transferred value.</p>
 <h4 id="exercise-3-reuse-the-source">Exercise 3: Reuse the source<a class="heading-anchor" href="#exercise-3-reuse-the-source" aria-label="Link to this section">#</a></h4>
 <p>Assign Batch([4]) to the moved-from source.</p>
 <p><strong>Expected result/shape:</strong> Source is safely usable with value [4].</p>
-<p><strong>Verify:</strong> Source is safely usable with value [4].</p>
+<p><strong>Verify:</strong> After the move, assign <code>a = Batch{{4}, &quot;new&quot;}</code> and assert <code>a.values == std::vector&lt;int&gt;{4}</code>, as Worked example 2 does with <code>a.values[0] == 4</code>.</p>
 <p><strong>Progressive hints:</strong> Valid but unspecified permits reassignment.</p>
 <h4 id="exercise-4-repair-an-invalid-assumption">Exercise 4: Repair an invalid assumption<a class="heading-anchor" href="#exercise-4-repair-an-invalid-assumption" aria-label="Link to this section">#</a></h4>
 <p>Remove a test requiring every moved-from vector to be empty.</p>
 <p><strong>Expected result/shape:</strong> Test verifies receiver and source validity only.</p>
-<p><strong>Verify:</strong> Test verifies receiver and source validity only.</p>
+<p><strong>Verify:</strong> Confirm no remaining assertion reads a moved-from vector&#x27;s size or elements; the tests may only check the receiver&#x27;s values and that the source can be assigned or destroyed.</p>
 <p><strong>Progressive hints:</strong> An implementation observation is not a portable postcondition.</p>
 <h4 id="exercise-5-keep-rule-of-zero">Exercise 5: Keep rule of zero<a class="heading-anchor" href="#exercise-5-keep-rule-of-zero" aria-label="Link to this section">#</a></h4>
 <p>List special members needed for Batch.</p>
 <p><strong>Expected result/shape:</strong> No custom destructor/copy/move needed.</p>
-<p><strong>Verify:</strong> No custom destructor/copy/move needed.</p>
+<p><strong>Verify:</strong> Check that your list adds no destructor, copy or move member, then confirm Worked examples 1 and 2 still compile and pass with the struct unchanged.</p>
 <p><strong>Progressive hints:</strong> Standard fields already express ownership.</p>
 <h4 id="exercise-6-transfer-to-return-values">Exercise 6: Transfer to return values<a class="heading-anchor" href="#exercise-6-transfer-to-return-values" aria-label="Link to this section">#</a></h4>
 <p>Return Batch from a factory and store it.</p>
 <p><strong>Expected result/shape:</strong> Correct owned vector after factory scope ends.</p>
-<p><strong>Verify:</strong> Correct owned vector after factory scope ends.</p>
+<p><strong>Verify:</strong> Write a function returning <code>Batch{{5, 6}, &quot;made&quot;}</code>, store the result, and assert its values and label on a later line, after the factory has returned.</p>
 <p><strong>Progressive hints:</strong> Return by value allows elision or moves without a dangling reference.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain why this observation follows from the mechanism: a remains [1, 2]; b becomes [9, 2]. Then explain the changed condition in example 2 without opening the answer.</p>

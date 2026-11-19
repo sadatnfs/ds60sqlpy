@@ -197,28 +197,36 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-keyword">public</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Main</span> <span class="syntax-punctuation">{</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span></span>
-<span class="source-line">    <span class="syntax-comment">// Exercise 1: Call a pure calculation</span></span>
-<span class="source-line">    <span class="syntax-comment">// Implement doubleValue(int x) and evaluate 7 and 0.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: 14 and 0.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Exercise 1: Call a pure calculation: predict an edited check</span></span>
+<span class="source-line">    <span class="syntax-comment">// Copy Example A into a scratch `Main.java` and change `assert doubleValue(0) == 0;` to</span></span>
+<span class="source-line">    <span class="syntax-comment">// `assert doubleValue(1) == 0;` inside its assertion. Before running it with `java -ea</span></span>
+<span class="source-line">    <span class="syntax-comment">// Main`, predict whether the assertion still holds and explain why; then restore it.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` from the assertion on</span></span>
+<span class="source-line">    <span class="syntax-comment">// `doubleValue(0) == 0`. Restoring the original line brings back the worked observation: 14</span></span>
+<span class="source-line">    <span class="syntax-comment">// and 0.</span></span>
 <span class="source-line"></span>
-<span class="source-line">    <span class="syntax-comment">// Exercise 2: Validate a precondition</span></span>
-<span class="source-line">    <span class="syntax-comment">// Implement positiveArea(width,height) rejecting nonpositive dimensions.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: 3by4 gives12;zero width throwsIllegalArgumentException.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Exercise 2: Validate a precondition: debug a regression</span></span>
+<span class="source-line">    <span class="syntax-comment">// A regression changed one token in the code that Example B adds after Example A, so one</span></span>
+<span class="source-line">    <span class="syntax-comment">// line now reads `positiveArea(1, 4);`. Run Example B with that line, use the failing</span></span>
+<span class="source-line">    <span class="syntax-comment">// assertion to locate the defect and repair it without changing the assertion.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` from the assertion on</span></span>
+<span class="source-line">    <span class="syntax-comment">// `badArea`; after it the line reads `positiveArea(0, 4);` again and 3 by 4 gives 12; zero</span></span>
+<span class="source-line">    <span class="syntax-comment">// width throws IllegalArgumentException.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 3: Observe copied primitive values</span></span>
-<span class="source-line">    <span class="syntax-comment">// Passint5 to a helper that reassigns its local parameter to99.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: caller value remains5.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Pass int 5 to a helper that reassigns its local parameter to 99.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: caller value remains 5.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 4: Observe shared object mutation</span></span>
-<span class="source-line">    <span class="syntax-comment">// Pass a list containing1 to a helper that appends2.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: caller list becomes1,2.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Pass a list containing 1 to a helper that appends 2.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: caller list becomes 1, 2.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 5: Distinguish reference reassignment</span></span>
 <span class="source-line">    <span class="syntax-comment">// Pass the list to a helper that replaces only its local parameter with a new list.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: caller list remains1,2.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: caller list remains 1, 2.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 6: Inspect overload selection</span></span>
-<span class="source-line">    <span class="syntax-comment">// Call describe withint1 andlong1L using two overloads.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Call describe with int 1 and long 1L using two overloads.</span></span>
 <span class="source-line">    <span class="syntax-comment">// Expected: int and long respectively.</span></span>
 <span class="source-line">    System<span class="syntax-punctuation">.</span><span class="syntax-attribute">out</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">println</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement and check the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line">  <span class="syntax-punctuation">}</span></span>

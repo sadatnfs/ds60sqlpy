@@ -198,21 +198,23 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism-and-assumptions">Mechanism and assumptions<a class="heading-anchor" href="#mechanism-and-assumptions" aria-label="Link to this section">#</a></h3>
 <p>A pointer identifies an object or function, or holds a null value. Dereferencing a pointer requires a live target with appropriate type, alignment and access permissions. C does not keep an object alive merely because a pointer still refers to it. A pointer to an automatic local object becomes invalid when that object lifetime ends. Passing a pointer copies the pointer value, while mutation through it can affect the caller-owned target. Prefer an explicit pointer contract over hidden global state. A null check is necessary for optional pointers, but it cannot prove that a non-null pointer still refers to valid storage.</p>
 <p>&amp;object obtains an address and <em>pointer accesses its target. int </em>p declares a pointer to int. Parentheses matter: *p += 1 changes the target, while p += 1 changes the pointer position. NULL is a null pointer constant. A function can return a pointer to caller-owned or static storage if its lifetime is documented, but must not return a pointer to an expired automatic local.</p>
-<h3 id="exercise-1-change-a-caller-owned-value">Exercise 1: Change a caller-owned value<a class="heading-anchor" href="#exercise-1-change-a-caller-owned-value" aria-label="Link to this section">#</a></h3>
-<p>Increment integer 4 through its address.</p>
+<h3 id="exercise-1-change-a-caller-owned-value-change-one-input">Exercise 1: Change a caller-owned value: change one input<a class="heading-anchor" href="#exercise-1-change-a-caller-owned-value-change-one-input" aria-label="Link to this section">#</a></h3>
+<p>Copy worked example 1 into a scratch pad and change <code>int n = 4;</code> to <code>int n = 5;</code>. Before running, predict which CHECK fails and which value it now sees; then run it and restore the original line.</p>
+<p>The unchanged code is worked example 1:</p>
 <pre class="highlighted-code"><code class="language-c"><span class="syntax-keyword">int</span> n <span class="syntax-operator">=</span> <span class="syntax-number">4</span><span class="syntax-punctuation">;</span>
 increment<span class="syntax-punctuation">(</span><span class="syntax-operator">&amp;</span>n<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 CHECK<span class="syntax-punctuation">(</span>n <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
-<p><strong>Expected:</strong> The caller value becomes 5.</p>
+<p><strong>Expected:</strong> The changed run stops with <code>Check failed</code> at the CHECK on <code>n == 5</code>. Restoring the original line brings back the worked observation: the caller value becomes 5.</p>
 <p>The helper receives a pointer copy, but that copy still designates the original integer.</p>
-<h3 id="exercise-2-read-a-target-copy">Exercise 2: Read a target copy<a class="heading-anchor" href="#exercise-2-read-a-target-copy" aria-label="Link to this section">#</a></h3>
-<p>Copy the integer behind a pointer, then change the target.</p>
+<h3 id="exercise-2-read-a-target-copy-debug-a-regression">Exercise 2: Read a target copy: debug a regression<a class="heading-anchor" href="#exercise-2-read-a-target-copy-debug-a-regression" aria-label="Link to this section">#</a></h3>
+<p>A regression changed <code>int n = 3;</code> to <code>int n = 4;</code> in worked example 2. Run worked example 2 with that change, use the failing CHECK to explain the defect and repair it without changing the CHECK.</p>
+<p>The unchanged code is worked example 2:</p>
 <pre class="highlighted-code"><code class="language-c"><span class="syntax-keyword">int</span> n <span class="syntax-operator">=</span> <span class="syntax-number">3</span><span class="syntax-punctuation">;</span>
 <span class="syntax-keyword">int</span> <span class="syntax-operator">*</span>p <span class="syntax-operator">=</span> <span class="syntax-operator">&amp;</span>n<span class="syntax-punctuation">;</span>
 <span class="syntax-keyword">int</span> copy <span class="syntax-operator">=</span> <span class="syntax-operator">*</span>p<span class="syntax-punctuation">;</span>
 <span class="syntax-operator">*</span>p <span class="syntax-operator">=</span> <span class="syntax-number">9</span><span class="syntax-punctuation">;</span>
 CHECK<span class="syntax-punctuation">(</span>copy <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">3</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> n <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">9</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
-<p><strong>Expected:</strong> The copied value stays 3 and the target becomes 9.</p>
+<p><strong>Expected:</strong> Before the repair the run stops with <code>Check failed</code> at the CHECK on <code>copy == 3 &amp;&amp; n == 9</code>; after it the line reads <code>int n = 3;</code> again and the copied value stays 3 and the target becomes 9.</p>
 <p>Dereferencing to obtain an int copies that scalar value. Retaining the pointer would retain access to future target changes.</p>
 <h3 id="exercise-3-reject-an-absent-target">Exercise 3: Reject an absent target<a class="heading-anchor" href="#exercise-3-reject-an-absent-target" aria-label="Link to this section">#</a></h3>
 <p>Pass NULL to an optional update helper.</p>

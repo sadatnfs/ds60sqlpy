@@ -200,28 +200,28 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 1: Calculate penalties</span></span>
-<span class="source-line"><span class="syntax-comment"># Compute L1 and squared L2 sums for weights[1,-2].</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: L1=3; squaredL2=5.</span></span>
+<span class="source-line"><span class="syntax-comment"># Compute L1 and squared L2 sums for weights [1, -2].</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: L1=3; squared L2=5.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 2: Switch dropout to evaluation</span></span>
-<span class="source-line"><span class="syntax-comment"># Apply dropout.5 twice to ones with training=False.</span></span>
+<span class="source-line"><span class="syntax-comment"># Apply dropout 0.5 twice to ones with training=False.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: both outputs equal the input.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Inspect training invariants</span></span>
 <span class="source-line"><span class="syntax-comment"># Call the same dropout layer with training=True and examine allowed output values.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: shape(4,8), values only0 or2.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: shape (4, 8), values only 0 or 2.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Separate objective terms</span></span>
-<span class="source-line"><span class="syntax-comment"># Combine data loss2 with coefficient.1 times squaredL2 and report both components.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: data2, penalty.5, total2.5.</span></span>
+<span class="source-line"><span class="syntax-comment"># Combine data loss 2 with coefficient 0.1 times squared L2 and report both components.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: data 2, penalty 0.5, total 2.5.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Differentiate the penalty</span></span>
-<span class="source-line"><span class="syntax-comment"># Differentiate.1*sum(w²) at[1,-2].</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: gradient[.2,-.4].</span></span>
+<span class="source-line"><span class="syntax-comment"># Differentiate 0.1*sum(w²) at [1, -2].</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: gradient [0.2, -0.4].</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Scale weights deliberately</span></span>
 <span class="source-line"><span class="syntax-comment"># Double both weights and compare the new penalties with the original values.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: L1 doubles to6; squaredL2 quadruples to20.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: L1 doubles to 6; squared L2 quadruples to 20.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Read the guide and implement the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>

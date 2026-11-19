@@ -194,33 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-040_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-040-explanatory-solutions">docker-040: explanatory solutions<a class="heading-anchor" href="#docker-040-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These are explanations of the supplied teaching fixtures, not fabricated engine results.</p>
-<h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
-<p>A runtime secret is sensitive input required while an application runs. It has a different lifecycle from a build secret. Compose can expose declared secrets as files to selected services, while ordinary configuration can be passed through environment variables or files. The exact storage and protection depend on the deployment platform.</p>
-<p>Local Compose file-based secrets are not a universal encrypted secret vault. The source file exists on the host and must be protected there. File mounts can avoid some environment-variable exposure paths, but the application can still read and accidentally log the value. Secret handling is a complete data-flow concern.</p>
-<p>This lesson uses only an invented value. Never copy a real credential into the repository, a screenshot or a public report. The course fixture needs no password, so the optional example belongs in a separate scratch project and demonstrates a file-reading contract rather than adding a secret requirement to the app.</p>
-<p>A top-level <code>secrets</code> entry declares a source, and a service grants itself access by name. Inside the service the file commonly appears under <code>/run/secrets/NAME</code>. The app must explicitly read that file or support a documented file-based configuration option.</p>
-<p>Rotate a credential by updating the controlled source and applying the appropriate service lifecycle, then verify the new identity and revoke the old credential according to the external service policy. A container restart alone does not prove that an old credential has been invalidated.</p>
+<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-040.md</code>.</p>
 <h3 id="exercise-1-compare-build-and-runtime-secrets">Exercise 1: Compare build and runtime secrets.<a class="heading-anchor" href="#exercise-1-compare-build-and-runtime-secrets" aria-label="Link to this section">#</a></h3>
-<p>Their consumers and lifetimes differ. A build-only credential should not be copied into the final runtime image.</p>
-<p><strong>Expected:</strong> Temporary build input versus application-time input.</p>
+<p><strong>Expected answer:</strong> Temporary build input versus application-time input.</p>
+<p><strong>Why:</strong> Their consumers and lifetimes differ. A build-only credential should not be copied into the final runtime image.</p>
 <h3 id="exercise-2-predict-whether-a-local-secret-file-is-automatically-encrypted-everywhere">Exercise 2: Predict whether a local secret file is automatically encrypted everywhere.<a class="heading-anchor" href="#exercise-2-predict-whether-a-local-secret-file-is-automatically-encrypted-everywhere" aria-label="Link to this section">#</a></h3>
-<p>The secret abstraction controls delivery, not every storage layer. Describe the actual local Compose implementation honestly.</p>
-<p><strong>Expected:</strong> No; host storage and platform behavior require separate protection.</p>
+<p><strong>Expected answer:</strong> No; host storage and platform behavior require separate protection.</p>
+<p><strong>Why:</strong> The secret abstraction controls delivery, not every storage layer. Describe the actual local Compose implementation honestly.</p>
 <h3 id="exercise-3-design-a-no-disclosure-validation-message">Exercise 3: Design a no-disclosure validation message.<a class="heading-anchor" href="#exercise-3-design-a-no-disclosure-validation-message" aria-label="Link to this section">#</a></h3>
-<p>Useful diagnostics need not reveal bytes. Avoid including environment dumps, full headers or file contents in error reports.</p>
-<p><strong>Expected:</strong> Report presence or a bounded error without the sensitive value.</p>
+<p><strong>Expected evidence:</strong> Report presence or a bounded error without the sensitive value.</p>
+<p><strong>Why:</strong> Useful diagnostics need not reveal bytes. Avoid including environment dumps, full headers or file contents in error reports.</p>
 <h3 id="exercise-4-diagnose-a-secret-declared-but-not-granted-to-a-service">Exercise 4: Diagnose a secret declared but not granted to a service.<a class="heading-anchor" href="#exercise-4-diagnose-a-secret-declared-but-not-granted-to-a-service" aria-label="Link to this section">#</a></h3>
-<p>Check the effective model and service access list before changing file permissions or adding a broad host mount.</p>
-<p><strong>Expected:</strong> The service lacks the intended mounted input.</p>
+<p><strong>Expected answer:</strong> The service lacks the intended mounted input.</p>
+<p><strong>Why:</strong> Check the effective model and service access list before changing file permissions or adding a broad host mount.</p>
 <h3 id="exercise-5-explain-credential-rotation-beyond-restarting-a-container">Exercise 5: Explain credential rotation beyond restarting a container.<a class="heading-anchor" href="#exercise-5-explain-credential-rotation-beyond-restarting-a-container" aria-label="Link to this section">#</a></h3>
-<p>The external service decides which credential remains valid. A process lifecycle event alone cannot establish that policy change.</p>
-<p><strong>Expected:</strong> New input must be applied and old authority revoked deliberately.</p>
+<p><strong>Expected answer:</strong> New input must be applied and old authority revoked deliberately.</p>
+<p><strong>Why:</strong> The external service decides which credential remains valid. A process lifecycle event alone cannot establish that policy change.</p>
 <h3 id="exercise-6-write-a-secret-data-flow-review">Exercise 6: Write a secret data-flow review.<a class="heading-anchor" href="#exercise-6-write-a-secret-data-flow-review" aria-label="Link to this section">#</a></h3>
-<p>Following the bytes through their lifetime reveals exposure paths that a single Compose setting cannot address.</p>
-<p><strong>Expected:</strong> Source, host protection, service grant, read path, logs, rotation and deletion.</p>
+<p><strong>Expected evidence:</strong> Source, host protection, service grant, read path, logs, rotation and deletion.</p>
+<p><strong>Why:</strong> Following the bytes through their lifetime reveals exposure paths that a single Compose setting cannot address.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful solution identifies the exact object, the phase when a setting takes effect, the expected normal result and an observation that disproves it. Repeating a command until it succeeds hides the mechanism. Change one variable, keep a failure record, and test the intended behavior again. Source examples here are small enough to inspect; a production system additionally needs ownership, lifecycle, data recovery and operational review. The host exercises are optional and must stay within the learner-created project.</p></article>
+<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>
 </body>
 </html>

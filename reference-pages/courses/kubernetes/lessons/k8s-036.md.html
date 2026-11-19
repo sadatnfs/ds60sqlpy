@@ -197,32 +197,26 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Use the guide and synthetic case ledger. A prediction or copied fixture is not a live runtime observation.</p>
 <h3 id="exercise-1-build-the-source-inventory">Exercise 1: Build the source inventory<a class="heading-anchor" href="#exercise-1-build-the-source-inventory" aria-label="Link to this section">#</a></h3>
 <p>Assign API objects and persistent marker bytes to their backup sources.</p>
-<p>Expected: Two distinct sources and restore checks.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-2-record-a-synthetic-data-checksum">Exercise 2: Record a synthetic data checksum<a class="heading-anchor" href="#exercise-2-record-a-synthetic-data-checksum" aria-label="Link to this section">#</a></h3>
 <p>Hash the fixed marker and compare it with a changed marker.</p>
-<p>Expected: Equal bytes match; changed bytes fail the reference digest.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-3-define-consistency-assumptions">Exercise 3: Define consistency assumptions<a class="heading-anchor" href="#exercise-3-define-consistency-assumptions" aria-label="Link to this section">#</a></h3>
 <p>State why the immutable marker is simpler than a live transactional database.</p>
-<p>Expected: No claim of database-consistent backup or log replay.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-4-evaluate-the-partial-restore">Exercise 4: Evaluate the partial restore<a class="heading-anchor" href="#exercise-4-evaluate-the-partial-restore" aria-label="Link to this section">#</a></h3>
 <p>Accept API objects but reject the wrong data hash in the supplied trace.</p>
-<p>Expected: Overall recovery fails until both API and data gates pass.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-5-protect-backup-material">Exercise 5: Protect backup material<a class="heading-anchor" href="#exercise-5-protect-backup-material" aria-label="Link to this section">#</a></h3>
 <p>Classify private snapshots, credentials and public receipt fields.</p>
-<p>Expected: No snapshots or secrets in portable progress; only bounded metadata and synthetic checksums.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-6-review-target-isolation-and-cleanup">Exercise 6: Review target isolation and cleanup<a class="heading-anchor" href="#exercise-6-review-target-isolation-and-cleanup" aria-label="Link to this section">#</a></h3>
 <p>Document the dedicated source/destination ownership and eventual disposal.</p>
-<p>Expected: No restore into an ambient or shared target; exact owned cleanup.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p></article>
   </main>

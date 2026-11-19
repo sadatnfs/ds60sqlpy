@@ -199,31 +199,34 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">Copy to .learning before editing. Six independent attempts belong below.</span></span>
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 1: Calculate a top2 expert mixture</span></span>
-<span class="source-line"><span class="syntax-comment"># UseexpertsI, 2I, -I andthree token/router rows with selected probabilities3/4 and1/4.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: outputs[1.25, 0], [0, 1.75], [-.25, -.25].</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Calculate a top-2 expert mixture</span></span>
+<span class="source-line"><span class="syntax-comment"># Use experts I, 2I, -I and three token/router rows with selected probabilities 3/4 and</span></span>
+<span class="source-line"><span class="syntax-comment"># 1/4.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: outputs [1.25, 0], [0, 1.75], [-0.25, -0.25].</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 2: Enforce expert capacity with residual fallback</span></span>
-<span class="source-line"><span class="syntax-comment"># Routefourtokens toexperts0, 0, 1, 0 withcapacity2 andunit top1 gates.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: assignedcounts3, 1; accepted2, 1; lasttoken drops its expert delta andkeeps its input.</span></span>
+<span class="source-line"><span class="syntax-comment"># Route four tokens to experts 0, 0, 1, 0 with capacity 2 and unit top-1 gates.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: assigned counts 3, 1; accepted2, 1; last token drops its expert delta and keeps its input.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Compute a load-balancing term</span></span>
-<span class="source-line"><span class="syntax-comment"># Usehard fractionsf[.75, .25], mean routerprobabilitiesP[.7, .3], expertcount2</span></span>
-<span class="source-line"><span class="syntax-comment"># andcoefficient.01.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: auxiliaryloss.012; balancedfixture.01.</span></span>
+<span class="source-line"><span class="syntax-comment"># Use hard fractions f = [0.75, 0.25], mean router probabilities P = [0.7, 0.3], expert</span></span>
+<span class="source-line"><span class="syntax-comment"># count 2 and coefficient 0.01.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: auxiliary loss .012; balanced fixture .01.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Trace a local router gradient</span></span>
-<span class="source-line"><span class="syntax-comment"># Perturb thefirstlogit ofthefirsttop2mixture row without changing selectedexperts.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: derivative offirstoutputcoordinate is-3/16 within1e-8.</span></span>
+<span class="source-line"><span class="syntax-comment"># Perturb the first logit of the first top-2 mixture row without changing selected</span></span>
+<span class="source-line"><span class="syntax-comment"># experts.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: derivative of first output coordinate is -3/16 within1e-8.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 5: Separate total andactive parameter counts</span></span>
-<span class="source-line"><span class="syntax-comment"># Use8two-layerexperts withwidth64, hidden128 andtop2activation, excludingrouter</span></span>
-<span class="source-line"><span class="syntax-comment"># andbiases.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: total131072expertweights; 32768selectedexpertweights pertoken.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5: Separate total and active parameter counts</span></span>
+<span class="source-line"><span class="syntax-comment"># Use 8 two-layer experts with width 64, hidden width 128 and top-2 activation, excluding</span></span>
+<span class="source-line"><span class="syntax-comment"># router and biases.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: total 131072 expert weights; 32768selectedexpertweights per token.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 6: Validate routing policy andties</span></span>
-<span class="source-line"><span class="syntax-comment"># Rejecttopk0 andcapacity0; checkequal routerlogits choose lowerindices deterministically.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: invalid policiesraiseValueError; top2tieindices0, 1.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6: Validate routing policy and ties</span></span>
+<span class="source-line"><span class="syntax-comment"># Reject top-k 0 and capacity 0; check that equal router logits choose lower indices</span></span>
+<span class="source-line"><span class="syntax-comment"># deterministically.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: invalid policies raise ValueError; top-2 tie indices 0, 1.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Read the guide and implement the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>

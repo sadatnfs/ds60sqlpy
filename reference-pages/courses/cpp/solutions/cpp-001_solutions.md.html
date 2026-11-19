@@ -243,9 +243,9 @@ process: not run</code></pre>
 <p><strong>Verify:</strong> For cpp-001 Exercise 4, identify the missing definition or omitted object as the next check.</p>
 <p>A declaration tells the compiler a signature; the linker still needs a matching definition. This is not solved by ignoring the link command result.</p>
 <h4 id="exercise-5-read-a-runtime-failure">Exercise 5: Read a runtime failure<a class="heading-anchor" href="#exercise-5-read-a-runtime-failure" aria-label="Link to this section">#</a></h4>
-<p><strong>Inputs/evidence:</strong> For cpp-001 Exercise 5, program prints started then exits2.</p>
+<p><strong>Inputs/evidence:</strong> For cpp-001 Exercise 5, program prints started then exits 2.</p>
 <p><strong>Expected result/shape:</strong> For cpp-001 Exercise 5, the process ran and failed its declared contract despite producing text.</p>
-<p><strong>Verify:</strong> For cpp-001 Exercise 5, record both started and exit2; do not call output alone success.</p>
+<p><strong>Verify:</strong> For cpp-001 Exercise 5, record both started and exit 2; do not call output alone success.</p>
 <p>Diagnostic text can precede a failure. A verifier must inspect the status as well as expected values, and a partial output stream cannot make a failing process green.</p>
 <h4 id="exercise-6-transfer-the-phase-trace">Exercise 6: Transfer the phase trace<a class="heading-anchor" href="#exercise-6-transfer-the-phase-trace" aria-label="Link to this section">#</a></h4>
 <p><strong>Inputs/evidence:</strong> For cpp-001 Exercise 6, old executable prints hello, learner; source now says hello, reviewer; no rebuild.</p>

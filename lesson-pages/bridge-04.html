@@ -9,7 +9,7 @@
     content="default-src 'none'; style-src 'self' file: 'unsafe-inline'; font-src data:; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
   >
   <link rel="stylesheet" href="../src/ds60sqlpy/assets/vendor/textbook/fonts.css">
-  <title>bridge-04 · Transactions Idempotency Retries · DS60</title>
+  <title>bridge-04 · Transactions, Idempotency, and Retries · DS60</title>
   <style>
     :root {
       --paper: #f6f2e8;
@@ -312,7 +312,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <div class="shell">
       <section class="hero">
         <p class="eyebrow">bridge · lesson bridge-04</p>
-        <h1>Transactions Idempotency Retries</h1>
+        <h1>Transactions, Idempotency, and Retries</h1>
         <p class="hero-copy">Python and PostgreSQL engineering</p>
         <div class="meta">
           <span class="tag">intermediate</span>
@@ -389,10 +389,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python + PostgreSQL engineering</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
 <p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>Start at the repository root. The answer-free starter is deliberately safe to run: it prints orientation text and does not call unfinished functions or contact PostgreSQL.</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell</span>
-<span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe bridge<span class="syntax-punctuation">\</span>lessons<span class="syntax-punctuation">\</span>day04_transactions_idempotency_retries<span class="syntax-punctuation">.</span>py
-<span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m pytest bridge<span class="syntax-punctuation">\</span>tests -q</code></pre>
-<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux</span>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># Linux, macOS, or Windows through WSL 2</span>
 .venv/bin/python bridge/lessons/day04_transactions_idempotency_retries.py
 .venv/bin/python -m pytest bridge/tests -q</code></pre>
 <p>Read this guide first, implement one boundary at a time in <code>bridge/lessons/day04_transactions_idempotency_retries.py</code>, and use small fakes or recording doubles for the default evidence path. Any PostgreSQL step is optional, explicitly gated, and restricted to <code>DS60_DATABASE_URL</code> plus the disposable <code>advanced_sql_training</code> database. Never place a credential in source, notebook output, test fixtures, or logs.</p>
@@ -445,6 +442,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
         sleeper<span class="syntax-punctuation">(</span>delay_for<span class="syntax-punctuation">(</span>attempt<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>The retry loop does not catch <code>Exception</code>. A syntax error, failed validation, or constraint violation needs investigation, not repetition. In production, Psycopg exception classes and SQLSTATE codes provide the classification; this exercise uses a deterministic custom exception.</p>
 <p>For idempotency, the database must enforce uniqueness. An application-side “check then insert” has a race between the two statements.</p>
+<h5 id="guide--the-real-driver-transactions-and-error-classes">The real driver: transactions and error classes<a class="heading-anchor" href="#guide--the-real-driver-transactions-and-error-classes" aria-label="Link to this section">#</a></h5>
+<p><code>conn.transaction()</code> is Psycopg&#x27;s transaction owner. On an <code>autocommit=True</code> connection, the outermost block issues <code>BEGIN</code> and then <code>COMMIT</code>, or <code>ROLLBACK</code> when the block raises; a nested block becomes a <code>SAVEPOINT</code> that is released or rolled back on its own. Retry classification uses the exception classes in <code>psycopg.errors</code>, each tied to one SQLSTATE: <code>SerializationFailure</code> (<code>40001</code>), <code>DeadlockDetected</code> (<code>40P01</code>), and <code>LockNotAvailable</code> (<code>55P03</code>). The reference <code>run_with_retry()</code> accepts that tuple unchanged through <code>retry_on</code>, and <code>exc.sqlstate</code> gives the same classification when you prefer codes. Exercise 8 asks where these blocks belong relative to the retry loop.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> os
+
+<span class="syntax-keyword">import</span> psycopg
+<span class="syntax-keyword">from</span> psycopg <span class="syntax-keyword">import</span> errors
+
+RETRYABLE <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>errors<span class="syntax-operator">.</span>SerializationFailure<span class="syntax-punctuation">,</span> errors<span class="syntax-operator">.</span>DeadlockDetected<span class="syntax-punctuation">,</span> errors<span class="syntax-operator">.</span>LockNotAvailable<span class="syntax-punctuation">)</span>
+
+<span class="syntax-keyword">with</span> psycopg<span class="syntax-operator">.</span>connect<span class="syntax-punctuation">(</span>os<span class="syntax-operator">.</span>environ<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">DS60_DATABASE_URL</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> autocommit<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> conn<span class="syntax-punctuation">:</span>
+    conn<span class="syntax-operator">.</span>execute<span class="syntax-punctuation">(</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">CREATE TEMP TABLE bridge_jobs (idempotency_key text PRIMARY KEY, payload text NOT NULL)</span><span class="syntax-string">&quot;</span>
+    <span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">with</span> conn<span class="syntax-operator">.</span>transaction<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>  <span class="syntax-comment"># BEGIN; COMMIT on success, ROLLBACK on an exception</span>
+        conn<span class="syntax-operator">.</span>execute<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">INSERT INTO bridge_jobs VALUES (</span><span class="syntax-string">%s</span><span class="syntax-string">, </span><span class="syntax-string">%s</span><span class="syntax-string">)</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">job-1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">first</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
+            <span class="syntax-keyword">with</span> conn<span class="syntax-operator">.</span>transaction<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>  <span class="syntax-comment"># SAVEPOINT; ROLLBACK TO SAVEPOINT on an exception</span>
+                conn<span class="syntax-operator">.</span>execute<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">INSERT INTO bridge_jobs VALUES (</span><span class="syntax-string">%s</span><span class="syntax-string">, </span><span class="syntax-string">%s</span><span class="syntax-string">)</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">job-1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">again</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">except</span> errors<span class="syntax-operator">.</span>UniqueViolation <span class="syntax-keyword">as</span> exc<span class="syntax-punctuation">:</span>
+            <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">duplicate rejected:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> exc<span class="syntax-operator">.</span>sqlstate<span class="syntax-punctuation">)</span>  <span class="syntax-comment"># 23505</span></code></pre>
+<p>The outer transaction still commits <code>job-1</code> once: the failed nested block rolled back only its own savepoint.</p>
 <h4 id="guide--mental-model-three-policies-that-must-agree">Mental model: three policies that must agree<a class="heading-anchor" href="#guide--mental-model-three-policies-that-must-agree" aria-label="Link to this section">#</a></h4>
 <p>Transactions, idempotency, and retries solve different failure problems. A transaction defines which effects commit together. Idempotency defines what a repeated logical request means. Retry policy defines which failures may be attempted again, how often, and after what delay. Reliable code requires all three policies to agree; adding exponential backoff to an unsafe write only makes duplication slower.</p>
 <p>For this lesson, the database unique constraint is the concurrency authority. <code>INSERT ... ON CONFLICT DO NOTHING RETURNING ...</code> lets one statement decide whether a logical job was created. A prior <code>SELECT</code> followed by <code>INSERT</code> has a race between the two statements. The idempotency key also needs a product scope: which requests share it, how long it is retained, and whether the same key with different payloads is rejected.</p>
@@ -584,8 +602,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></code></pre>
 <p>Call your insert twice with the same key and verify that the second result is <code>None</code>. Then explicitly call <code>rollback()</code>. The solution targets <code>pg_temp.bridge_jobs</code>, so it cannot accidentally write a persistent table.</p>
 <p>Set the URL in the current shell only:</p>
-<pre class="highlighted-code"><code class="language-powershell">$env:DS60_DATABASE_URL <span class="syntax-punctuation">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">postgresql://USER:PASSWORD@localhost:5432/advanced_sql_training</span><span class="syntax-string">&quot;</span></code></pre>
-<pre class="highlighted-code"><code class="language-bash"><span class="syntax-builtin">export</span> DS60_DATABASE_URL<span class="syntax-operator">=</span><span class="syntax-string">&quot;postgresql://USER:PASSWORD@localhost:5432/advanced_sql_training&quot;</span></code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-builtin">export</span> DS60_DATABASE_URL<span class="syntax-operator">=</span><span class="syntax-string">&quot;postgresql://admin@127.0.0.1:PORT/advanced_sql_training&quot;</span></code></pre>
+<p>Replace <code>PORT</code> with the forwarded PostgreSQL port that <code>./classroom status</code> reports (55432 by default). Keep the password out of the URL: supply it through a private libpq password file as the <a href="../reference-pages/docs/setup/jupyter-postgresql.md.html">JupySQL setup guide</a> shows.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Is uniqueness enforced by PostgreSQL, not only Python?</li>
@@ -604,7 +622,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ul>
 <h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Use the checked-in <code>guide-ds60sqlpy-learning</code> skill as a tutor, not as an answer generator. The direct catalog prerequisites are <code>bridge-03</code>. The prompt below deliberately names exact paths so a new AI tutoring session can orient itself without guessing.</p>
-<pre class="highlighted-code"><code class="language-text">Tutor me through stable lesson ID bridge-04: Transactions Idempotency Retries.
+<pre class="highlighted-code"><code class="language-text">Tutor me through stable lesson ID bridge-04: Transactions, Idempotency, and Retries.
 Direct catalog prerequisites: bridge-03. Assume I completed exactly those
 prerequisites, then begin with one short Retrieval question that connects each
 prerequisite to this lesson.
@@ -617,12 +635,12 @@ Do not open, quote, summarize, or copy anything under solutions/ until I
 explicitly say I have finished my attempt and ask to compare.
 
 Use these coaching phases in order:
-1. Predict — ask what I expect before I run or change code.
-2. Attempt — let me implement or explain one numbered exercise at a time.
-3. Hint — give the smallest useful conceptual hint, never a finished answer.
-4. Evidence — ask for the exact return value, exception type, recorded calls,
+1. Predict: ask what I expect before I run or change code.
+2. Attempt: let me implement or explain one numbered exercise at a time.
+3. Hint: give the smallest useful conceptual hint, never a finished answer.
+4. Evidence: ask for the exact return value, exception type, recorded calls,
    query plus bound parameters, or written decision required by that exercise.
-5. Retrieval — close with two no-notes questions and one transfer problem.
+5. Retrieval: close with two no-notes questions and one transfer problem.
 
 Keep the default path offline and fake-first. If the lesson has an optional
 PostgreSQL step, require my explicit opt-in, DS60_DATABASE_URL, and the
@@ -1001,6 +1019,7 @@ result <span class="syntax-operator">=</span> run_with_retry<span class="syntax-
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations</span>
 <span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">import</span> math</span>
 <span class="source-line"><span class="syntax-keyword">import</span> time</span>
 <span class="source-line"><span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> Callable<span class="syntax-punctuation">,</span> Sequence</span>
 <span class="source-line"><span class="syntax-keyword">from</span> dataclasses <span class="syntax-keyword">import</span> dataclass</span>
@@ -1037,8 +1056,8 @@ result <span class="syntax-operator">=</span> run_with_retry<span class="syntax-
 <span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">__post_init__</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>max_attempts <span class="syntax-operator">&lt;</span> <span class="syntax-number">1</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">max_attempts must be at least 1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>base_delay_seconds <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">base_delay_seconds cannot be negative</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> math<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-operator">.</span>base_delay_seconds<span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>base_delay_seconds <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">base_delay_seconds must be finite and non-negative</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line"></span>
 <span class="source-line"></span>
 <span class="source-line">DEFAULT_RETRY_POLICY <span class="syntax-operator">=</span> RetryPolicy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
@@ -1114,7 +1133,7 @@ result <span class="syntax-operator">=</span> run_with_retry<span class="syntax-
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through stable lesson ID bridge-04: Transactions Idempotency Retries.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through stable lesson ID bridge-04: Transactions, Idempotency, and Retries.
 Direct catalog prerequisites: bridge-03. Assume I completed exactly those
 prerequisites, then begin with one short Retrieval question that connects each
 prerequisite to this lesson.
@@ -1127,12 +1146,12 @@ Do not open, quote, summarize, or copy anything under solutions/ until I
 explicitly say I have finished my attempt and ask to compare.
 
 Use these coaching phases in order:
-1. Predict — ask what I expect before I run or change code.
-2. Attempt — let me implement or explain one numbered exercise at a time.
-3. Hint — give the smallest useful conceptual hint, never a finished answer.
-4. Evidence — ask for the exact return value, exception type, recorded calls,
+1. Predict: ask what I expect before I run or change code.
+2. Attempt: let me implement or explain one numbered exercise at a time.
+3. Hint: give the smallest useful conceptual hint, never a finished answer.
+4. Evidence: ask for the exact return value, exception type, recorded calls,
    query plus bound parameters, or written decision required by that exercise.
-5. Retrieval — close with two no-notes questions and one transfer problem.
+5. Retrieval: close with two no-notes questions and one transfer problem.
 
 Keep the default path offline and fake-first. If the lesson has an optional
 PostgreSQL step, require my explicit opt-in, DS60_DATABASE_URL, and the
@@ -1148,8 +1167,8 @@ solve the final transfer problem without opening solutions/.</textarea>
       </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
-        <a class="nav-card" href="bridge-03.html"><small>Previous lesson</small><strong>bridge-03</strong><span>Safe Psycopg Queries</span></a>
-        <a class="nav-card next" href="bridge-05.html"><small>Next lesson</small><strong>bridge-05</strong><span>DB Testing Fixtures Doubles</span></a>
+        <a class="nav-card" href="bridge-03.html"><small>Previous lesson</small><strong>bridge-03</strong><span>Safe Parameterized Queries with Psycopg</span></a>
+        <a class="nav-card next" href="bridge-05.html"><small>Next lesson</small><strong>bridge-05</strong><span>Database Tests, Fixtures, and Test Doubles</span></a>
       </nav>
     </div>
   </main>

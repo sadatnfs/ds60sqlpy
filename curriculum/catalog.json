@@ -49,7 +49,7 @@
       "id": "python-01",
       "track": "python",
       "day": 1,
-      "title": "Setup and REPL",
+      "title": "Python Setup and the REPL",
       "level": "foundation",
       "phase": "Python foundations",
       "estimated_minutes": 75,
@@ -62,6 +62,7 @@
       ],
       "dependency_group": "core",
       "network": "offline",
+      "outcome": "Run a short program in the classroom, read its output, and fix a first NameError.",
       "runner": "python"
     },
     {
@@ -83,13 +84,14 @@
         "python/professional/solutions/py_foundations_01_read_trace_state_solutions.md",
         "python/professional/solutions/py_foundations_01_read_trace_state_solution.py"
       ],
+      "outcome": "Distinguish source text, a running program, and terminal output.",
       "runner": "python"
     },
     {
       "id": "python-02",
       "track": "python",
       "day": 2,
-      "title": "Basics Types",
+      "title": "Variables and Core Types",
       "level": "foundation",
       "phase": "Python foundations",
       "estimated_minutes": 75,
@@ -104,13 +106,14 @@
       ],
       "dependency_group": "core",
       "network": "offline",
+      "outcome": "Convert text to numbers and Booleans on purpose, then format the result.",
       "runner": "python"
     },
     {
       "id": "python-03",
       "track": "python",
       "day": 3,
-      "title": "Control Flow Exceptions",
+      "title": "Control Flow, Truthiness, and Exceptions",
       "level": "foundation",
       "phase": "Python foundations",
       "estimated_minutes": 75,
@@ -125,6 +128,7 @@
       ],
       "dependency_group": "core",
       "network": "offline",
+      "outcome": "Order branches correctly and catch only the errors you can handle.",
       "runner": "python"
     },
     {
@@ -146,13 +150,14 @@
         "python/professional/solutions/py_foundations_02_debug_evidence_solutions.md",
         "python/professional/solutions/py_foundations_02_debug_evidence_solution.py"
       ],
+      "outcome": "Classify syntax, runtime, and incorrect-result failures.",
       "runner": "python"
     },
     {
       "id": "python-04",
       "track": "python",
       "day": 4,
-      "title": "Loops Comprehensions Generators",
+      "title": "Loops, Comprehensions, and Generators",
       "level": "foundation",
       "phase": "Python foundations",
       "estimated_minutes": 75,
@@ -167,13 +172,14 @@
       ],
       "dependency_group": "core",
       "network": "offline",
+      "outcome": "Repeat work with loops, build lists with comprehensions, and consume generators lazily.",
       "runner": "python"
     },
     {
       "id": "python-05",
       "track": "python",
       "day": 5,
-      "title": "Functions Type Hints",
+      "title": "Functions, Docstrings, and Type Hints",
       "level": "foundation",
       "phase": "Python foundations",
       "estimated_minutes": 75,
@@ -188,13 +194,14 @@
       ],
       "dependency_group": "core",
       "network": "offline",
+      "outcome": "Write functions with clear parameters, return values, docstrings, and type hints.",
       "runner": "python"
     },
     {
       "id": "python-06",
       "track": "python",
       "day": 6,
-      "title": "Data Structures",
+      "title": "Lists, Tuples, Sets, and Dictionaries",
       "level": "foundation",
       "phase": "Python foundations",
       "estimated_minutes": 75,
@@ -209,13 +216,14 @@
       ],
       "dependency_group": "core",
       "network": "offline",
+      "outcome": "Choose a list, tuple, set, or dictionary for what the data must guarantee.",
       "runner": "python"
     },
     {
       "id": "python-07",
       "track": "python",
       "day": 7,
-      "title": "Strings Regex Pathlib",
+      "title": "Strings, Regular Expressions, and pathlib",
       "level": "foundation",
       "phase": "Python foundations",
       "estimated_minutes": 75,
@@ -230,13 +238,14 @@
       ],
       "dependency_group": "core",
       "network": "offline",
+      "outcome": "Clean text, match patterns with regular expressions, and build portable paths.",
       "runner": "python"
     },
     {
       "id": "python-08",
       "track": "python",
       "day": 8,
-      "title": "Files JSON Csv Context",
+      "title": "Files, JSON, CSV, and Context Managers",
       "level": "foundation",
       "phase": "Python foundations",
       "estimated_minutes": 75,
@@ -251,6 +260,7 @@
       ],
       "dependency_group": "core",
       "network": "offline",
+      "outcome": "Read and write text, JSON, and CSV files safely with context managers.",
       "runner": "python"
     },
     {
@@ -272,13 +282,14 @@
         "python/professional/solutions/py_foundations_03_clean_records_solutions.md",
         "python/professional/solutions/py_foundations_03_clean_records_solution.py"
       ],
+      "outcome": "Declare accepted input representations and reject ambiguous ones.",
       "runner": "python"
     },
     {
       "id": "python-09",
       "track": "python",
       "day": 9,
-      "title": "Modules Packages",
+      "title": "Modules, Packages, and Imports",
       "level": "foundation",
       "phase": "Python foundations",
       "estimated_minutes": 75,
@@ -293,13 +304,14 @@
       ],
       "dependency_group": "core",
       "network": "offline",
+      "outcome": "Split code into modules and packages and run a package with python -m.",
       "runner": "python"
     },
     {
       "id": "python-10",
       "track": "python",
       "day": 10,
-      "title": "Testing Pytest",
+      "title": "Testing with pytest",
       "level": "foundation",
       "phase": "Python foundations",
       "estimated_minutes": 75,
@@ -314,11 +326,12 @@
       ],
       "dependency_group": "core",
       "network": "offline",
+      "outcome": "Write pytest tests for normal, boundary, and invalid inputs and read the failures.",
       "runner": "python"
     },
     {
       "id": "python-foundations-04",
-      "title": "Build Your First Auditable Data Investigation",
+      "title": "Build Your First Data Investigation",
       "level": "foundation",
       "prerequisites": [
         "python-foundations-03",
@@ -336,13 +349,14 @@
         "python/professional/solutions/py_foundations_04_first_investigation_solutions.md",
         "python/professional/solutions/py_foundations_04_first_investigation_solution.py"
       ],
+      "outcome": "Turn a question into a small, testable project charter.",
       "runner": "python"
     },
     {
       "id": "python-11",
       "track": "python",
       "day": 11,
-      "title": "Debug Logging Profiling",
+      "title": "Debugging, Logging, and Profiling",
       "level": "foundation",
       "phase": "Python foundations",
       "estimated_minutes": 75,
@@ -357,13 +371,14 @@
       ],
       "dependency_group": "core",
       "network": "offline",
+      "outcome": "Find bugs from tracebacks and logs, and measure before optimizing.",
       "runner": "python"
     },
     {
       "id": "python-12",
       "track": "python",
       "day": 12,
-      "title": "OOP Dataclasses",
+      "title": "Classes and Dataclasses",
       "level": "foundation",
       "phase": "Python foundations",
       "estimated_minutes": 75,
@@ -378,13 +393,14 @@
       ],
       "dependency_group": "core",
       "network": "offline",
+      "outcome": "Model related data and behavior with classes and dataclasses.",
       "runner": "python"
     },
     {
       "id": "python-13",
       "track": "python",
       "day": 13,
-      "title": "Functional Tools",
+      "title": "Functional Tools: itertools and functools",
       "level": "foundation",
       "phase": "Python foundations",
       "estimated_minutes": 75,
@@ -399,13 +415,14 @@
       ],
       "dependency_group": "core",
       "network": "offline",
+      "outcome": "Compose iterators with itertools and functools instead of hand-written loops.",
       "runner": "python"
     },
     {
       "id": "python-14",
       "track": "python",
       "day": 14,
-      "title": "Code Quality Tooling",
+      "title": "Code Quality with Ruff, mypy, and pytest",
       "level": "foundation",
       "phase": "Python foundations",
       "estimated_minutes": 75,
@@ -420,13 +437,14 @@
       ],
       "dependency_group": "core",
       "network": "offline",
+      "outcome": "Format, lint, and type-check code with Ruff and mypy.",
       "runner": "python"
     },
     {
       "id": "python-15",
       "track": "python",
       "day": 15,
-      "title": "CLI Project",
+      "title": "Project: A Testable Command-Line Data Tool",
       "level": "foundation",
       "phase": "Python foundations",
       "estimated_minutes": 75,
@@ -441,13 +459,14 @@
       ],
       "dependency_group": "core",
       "network": "offline",
+      "outcome": "Build and test a small command-line tool that summarizes a CSV file.",
       "runner": "python"
     },
     {
       "id": "python-16",
       "track": "python",
       "day": 16,
-      "title": "NumPy Fundamentals",
+      "title": "NumPy Arrays, Vectorization, and Broadcasting",
       "level": "intermediate",
       "phase": "Data analysis and visualization",
       "estimated_minutes": 90,
@@ -462,13 +481,14 @@
       ],
       "dependency_group": "data",
       "network": "offline",
+      "outcome": "Create NumPy arrays and replace loops with vectorized, broadcast operations.",
       "runner": "python"
     },
     {
       "id": "python-17",
       "track": "python",
       "day": 17,
-      "title": "pandas Intro",
+      "title": "pandas Series, DataFrames, and Indexing",
       "level": "intermediate",
       "phase": "Data analysis and visualization",
       "estimated_minutes": 90,
@@ -483,13 +503,14 @@
       ],
       "dependency_group": "data",
       "network": "offline",
+      "outcome": "Select pandas rows and columns by label, position, and Boolean mask.",
       "runner": "python"
     },
     {
       "id": "python-18",
       "track": "python",
       "day": 18,
-      "title": "pandas Io Cleaning",
+      "title": "Loading and Cleaning Data with pandas",
       "level": "intermediate",
       "phase": "Data analysis and visualization",
       "estimated_minutes": 90,
@@ -504,13 +525,14 @@
       ],
       "dependency_group": "data",
       "network": "offline",
+      "outcome": "Load a dataset, profile it, and clean it without changing the raw data.",
       "runner": "python"
     },
     {
       "id": "python-19",
       "track": "python",
       "day": 19,
-      "title": "pandas Groupby Pivot",
+      "title": "Grouping, Pivoting, and Melting in pandas",
       "level": "intermediate",
       "phase": "Data analysis and visualization",
       "estimated_minutes": 90,
@@ -525,13 +547,14 @@
       ],
       "dependency_group": "data",
       "network": "offline",
+      "outcome": "Summarize groups and reshape tables with groupby, pivot_table, and melt.",
       "runner": "python"
     },
     {
       "id": "python-20",
       "track": "python",
       "day": 20,
-      "title": "pandas Merging Joins",
+      "title": "Merging and Joining DataFrames",
       "level": "intermediate",
       "phase": "Data analysis and visualization",
       "estimated_minutes": 90,
@@ -546,13 +569,14 @@
       ],
       "dependency_group": "data",
       "network": "offline",
+      "outcome": "Join tables on keys and check row counts and unmatched records.",
       "runner": "python"
     },
     {
       "id": "python-21",
       "track": "python",
       "day": 21,
-      "title": "Time Series pandas",
+      "title": "Time Series with pandas",
       "level": "intermediate",
       "phase": "Data analysis and visualization",
       "estimated_minutes": 90,
@@ -567,13 +591,14 @@
       ],
       "dependency_group": "data",
       "network": "offline",
+      "outcome": "Resample, roll, and lag time-stamped data with an explicit time zone.",
       "runner": "python"
     },
     {
       "id": "python-22",
       "track": "python",
       "day": 22,
-      "title": "Advanced pandas Apply Query Eval",
+      "title": "Advanced pandas: Vectorization, query, and Categoricals",
       "level": "intermediate",
       "phase": "Data analysis and visualization",
       "estimated_minutes": 90,
@@ -588,13 +613,14 @@
       ],
       "dependency_group": "data",
       "network": "offline",
+      "outcome": "Replace row-wise apply with vectorized code, query, and categoricals.",
       "runner": "python"
     },
     {
       "id": "python-23",
       "track": "python",
       "day": 23,
-      "title": "Data Pipelines Generators",
+      "title": "Streaming Data Pipelines with Generators",
       "level": "intermediate",
       "phase": "Data analysis and visualization",
       "estimated_minutes": 90,
@@ -609,13 +635,14 @@
       ],
       "dependency_group": "data",
       "network": "offline",
+      "outcome": "Build lazy, batched data pipelines from generator functions.",
       "runner": "python"
     },
     {
       "id": "python-24",
       "track": "python",
       "day": 24,
-      "title": "EDA Best Practices",
+      "title": "Exploratory Data Analysis Best Practices",
       "level": "intermediate",
       "phase": "Data analysis and visualization",
       "estimated_minutes": 90,
@@ -630,13 +657,14 @@
       ],
       "dependency_group": "data",
       "network": "offline",
+      "outcome": "Profile a dataset and record questions, caveats, and quality checks.",
       "runner": "python"
     },
     {
       "id": "python-25",
       "track": "python",
       "day": 25,
-      "title": "Visualization Matplotlib Seaborn",
+      "title": "Visualization with Matplotlib and seaborn",
       "level": "intermediate",
       "phase": "Data analysis and visualization",
       "estimated_minutes": 90,
@@ -651,13 +679,14 @@
       ],
       "dependency_group": "data",
       "network": "offline",
+      "outcome": "Make labeled Matplotlib and seaborn charts and export them reproducibly.",
       "runner": "python"
     },
     {
       "id": "python-26",
       "track": "python",
       "day": 26,
-      "title": "Visualization Plotly Altair",
+      "title": "Interactive Visualization with Plotly and Altair",
       "level": "intermediate",
       "phase": "Data analysis and visualization",
       "estimated_minutes": 90,
@@ -672,13 +701,14 @@
       ],
       "dependency_group": "data",
       "network": "offline",
+      "outcome": "Make interactive Plotly and Altair charts and export offline HTML.",
       "runner": "python"
     },
     {
       "id": "python-27",
       "track": "python",
       "day": 27,
-      "title": "Geospatial or Domain Visualization",
+      "title": "Geospatial and Domain-Specific Visualization",
       "level": "intermediate",
       "phase": "Data analysis and visualization",
       "estimated_minutes": 90,
@@ -693,13 +723,14 @@
       ],
       "dependency_group": "geo",
       "network": "optional-map-download",
+      "outcome": "Map geographic data with the right coordinate reference system.",
       "runner": "python"
     },
     {
       "id": "python-28",
       "track": "python",
       "day": 28,
-      "title": "Feature Engineering",
+      "title": "Feature Engineering with scikit-learn",
       "level": "intermediate",
       "phase": "Data analysis and visualization",
       "estimated_minutes": 90,
@@ -714,13 +745,14 @@
       ],
       "dependency_group": "data",
       "network": "offline",
+      "outcome": "Encode, scale, and bin features in scikit-learn without leaking test data.",
       "runner": "python"
     },
     {
       "id": "python-29",
       "track": "python",
       "day": 29,
-      "title": "Data Validation Schemas",
+      "title": "Data Validation with Schemas",
       "level": "intermediate",
       "phase": "Data analysis and visualization",
       "estimated_minutes": 90,
@@ -735,13 +767,14 @@
       ],
       "dependency_group": "data",
       "network": "offline",
+      "outcome": "Turn data expectations into pandera schemas that fail with clear messages.",
       "runner": "python"
     },
     {
       "id": "python-30",
       "track": "python",
       "day": 30,
-      "title": "Project EDA Preprocessing",
+      "title": "Project: Reproducible EDA and Preprocessing",
       "level": "intermediate",
       "phase": "Data analysis and visualization",
       "estimated_minutes": 90,
@@ -756,6 +789,7 @@
       ],
       "dependency_group": "data",
       "network": "offline",
+      "outcome": "Deliver a reproducible EDA and preprocessing project with a decision log.",
       "runner": "python"
     },
     {
@@ -777,13 +811,14 @@
       ],
       "dependency_group": "data",
       "network": "offline",
+      "outcome": "Simulate probabilities and apply Bayes' rule to base-rate problems.",
       "runner": "python"
     },
     {
       "id": "python-32",
       "track": "python",
       "day": 32,
-      "title": "Statistical Inference",
+      "title": "Statistical Inference: Intervals and Tests",
       "level": "intermediate",
       "phase": "Statistics and machine learning",
       "estimated_minutes": 105,
@@ -798,13 +833,14 @@
       ],
       "dependency_group": "data",
       "network": "offline",
+      "outcome": "Compute confidence intervals and hypothesis tests and interpret them correctly.",
       "runner": "python"
     },
     {
       "id": "python-33",
       "track": "python",
       "day": 33,
-      "title": "Linear Algebra Matrices",
+      "title": "Linear Algebra and Matrices",
       "level": "intermediate",
       "phase": "Statistics and machine learning",
       "estimated_minutes": 105,
@@ -819,13 +855,14 @@
       ],
       "dependency_group": "data",
       "network": "offline",
+      "outcome": "Use matrix shapes, rank, and least squares to fit a linear model.",
       "runner": "python"
     },
     {
       "id": "python-34",
       "track": "python",
       "day": 34,
-      "title": "scikit-learn Intro Pipelines",
+      "title": "scikit-learn Estimators and Pipelines",
       "level": "intermediate",
       "phase": "Statistics and machine learning",
       "estimated_minutes": 105,
@@ -840,13 +877,14 @@
       ],
       "dependency_group": "data",
       "network": "offline",
+      "outcome": "Fit scikit-learn estimators inside leakage-safe pipelines.",
       "runner": "python"
     },
     {
       "id": "python-35",
       "track": "python",
       "day": 35,
-      "title": "Model Evaluation CV",
+      "title": "Model Evaluation and Cross-Validation",
       "level": "intermediate",
       "phase": "Statistics and machine learning",
       "estimated_minutes": 105,
@@ -861,13 +899,14 @@
       ],
       "dependency_group": "data",
       "network": "offline",
+      "outcome": "Choose metrics and cross-validation designs that give honest estimates.",
       "runner": "python"
     },
     {
       "id": "python-36",
       "track": "python",
       "day": 36,
-      "title": "Dimensionality Reduction PCA",
+      "title": "PCA and Feature Selection",
       "level": "intermediate",
       "phase": "Statistics and machine learning",
       "estimated_minutes": 105,
@@ -882,13 +921,14 @@
       ],
       "dependency_group": "data",
       "network": "offline",
+      "outcome": "Reduce dimensions with PCA and select features, fitting both inside CV.",
       "runner": "python"
     },
     {
       "id": "python-37",
       "track": "python",
       "day": 37,
-      "title": "Regularization Linear Models",
+      "title": "Regularized Linear Models",
       "level": "intermediate",
       "phase": "Statistics and machine learning",
       "estimated_minutes": 105,
@@ -903,13 +943,14 @@
       ],
       "dependency_group": "data",
       "network": "offline",
+      "outcome": "Tune ridge and lasso penalties and interpret coefficient shrinkage.",
       "runner": "python"
     },
     {
       "id": "python-38",
       "track": "python",
       "day": 38,
-      "title": "Tree Models Random Forest",
+      "title": "Decision Trees and Random Forests",
       "level": "intermediate",
       "phase": "Statistics and machine learning",
       "estimated_minutes": 105,
@@ -924,13 +965,14 @@
       ],
       "dependency_group": "data",
       "network": "offline",
+      "outcome": "Train decision trees and random forests and measure held-out importance.",
       "runner": "python"
     },
     {
       "id": "python-39",
       "track": "python",
       "day": 39,
-      "title": "Gradient Boosting XGBoost LightGBM",
+      "title": "Gradient Boosting with XGBoost and LightGBM",
       "level": "intermediate",
       "phase": "Statistics and machine learning",
       "estimated_minutes": 105,
@@ -945,13 +987,14 @@
       ],
       "dependency_group": "ml",
       "network": "offline",
+      "outcome": "Train gradient-boosted models with early stopping and a fair comparison.",
       "runner": "python"
     },
     {
       "id": "python-40",
       "track": "python",
       "day": 40,
-      "title": "Model Tuning SearchCV",
+      "title": "Hyperparameter Tuning with Grid and Randomized Search",
       "level": "intermediate",
       "phase": "Statistics and machine learning",
       "estimated_minutes": 105,
@@ -966,13 +1009,14 @@
       ],
       "dependency_group": "data",
       "network": "offline",
+      "outcome": "Tune hyperparameters with grid and randomized search and nested CV.",
       "runner": "python"
     },
     {
       "id": "python-41",
       "track": "python",
       "day": 41,
-      "title": "Imbalance Handling",
+      "title": "Handling Class Imbalance",
       "level": "intermediate",
       "phase": "Statistics and machine learning",
       "estimated_minutes": 105,
@@ -987,13 +1031,14 @@
       ],
       "dependency_group": "ml",
       "network": "offline",
+      "outcome": "Evaluate rare-class models and choose a decision threshold deliberately.",
       "runner": "python"
     },
     {
       "id": "python-42",
       "track": "python",
       "day": 42,
-      "title": "Unsupervised K-means Anomaly",
+      "title": "K-Means Clustering and Anomaly Detection",
       "level": "intermediate",
       "phase": "Statistics and machine learning",
       "estimated_minutes": 105,
@@ -1008,13 +1053,14 @@
       ],
       "dependency_group": "data",
       "network": "offline",
+      "outcome": "Cluster with k-means and rank anomalies, checking stability.",
       "runner": "python"
     },
     {
       "id": "python-43",
       "track": "python",
       "day": 43,
-      "title": "Model Interpretation SHAP PDP",
+      "title": "Model Interpretation with SHAP and Partial Dependence",
       "level": "intermediate",
       "phase": "Statistics and machine learning",
       "estimated_minutes": 105,
@@ -1029,13 +1075,14 @@
       ],
       "dependency_group": "ml",
       "network": "offline",
+      "outcome": "Explain a model with SHAP, partial dependence, and permutation importance, without causal claims.",
       "runner": "python"
     },
     {
       "id": "python-44",
       "track": "python",
       "day": 44,
-      "title": "Model Deployment FastAPI",
+      "title": "Serving a Model with FastAPI",
       "level": "intermediate",
       "phase": "Statistics and machine learning",
       "estimated_minutes": 105,
@@ -1050,13 +1097,14 @@
       ],
       "dependency_group": "production",
       "network": "offline",
+      "outcome": "Serve a trained pipeline behind a validated FastAPI endpoint.",
       "runner": "python"
     },
     {
       "id": "python-45",
       "track": "python",
       "day": 45,
-      "title": "End to End Modeling Project",
+      "title": "Project: End-to-End Modeling",
       "level": "intermediate",
       "phase": "Statistics and machine learning",
       "estimated_minutes": 105,
@@ -1071,6 +1119,7 @@
       ],
       "dependency_group": "data",
       "network": "offline",
+      "outcome": "Deliver an end-to-end modeling project with a baseline and a saved pipeline.",
       "runner": "python"
     },
     {
@@ -1092,13 +1141,14 @@
       ],
       "dependency_group": "deep-learning",
       "network": "offline",
+      "outcome": "Explain tensors, gradients, and the optimizer loop behind neural networks.",
       "runner": "python"
     },
     {
       "id": "python-47",
       "track": "python",
       "day": 47,
-      "title": "PyTorch Basics NN Training Loop",
+      "title": "PyTorch Tensors, Modules, and Training Loops",
       "level": "advanced",
       "phase": "Production, advanced topics, and capstone",
       "estimated_minutes": 120,
@@ -1113,13 +1163,14 @@
       ],
       "dependency_group": "deep-learning",
       "network": "offline",
+      "outcome": "Write a correct PyTorch training and evaluation loop.",
       "runner": "python"
     },
     {
       "id": "python-48",
       "track": "python",
       "day": 48,
-      "title": "Transfer Learning CNN",
+      "title": "Transfer Learning with CNNs",
       "level": "advanced",
       "phase": "Production, advanced topics, and capstone",
       "estimated_minutes": 120,
@@ -1134,13 +1185,14 @@
       ],
       "dependency_group": "deep-learning",
       "network": "optional-model-download",
+      "outcome": "Adapt a pretrained CNN with frozen layers and an offline fallback.",
       "runner": "python"
     },
     {
       "id": "python-49",
       "track": "python",
       "day": 49,
-      "title": "NLP Basics Hugging Face Spacy",
+      "title": "NLP Basics with Hugging Face and spaCy",
       "level": "advanced",
       "phase": "Production, advanced topics, and capstone",
       "estimated_minutes": 120,
@@ -1155,18 +1207,19 @@
       ],
       "dependency_group": "nlp",
       "network": "optional-model-download",
+      "outcome": "Tokenize text and compare a local baseline with a cached pretrained model.",
       "runner": "python"
     },
     {
       "id": "python-50",
       "track": "python",
       "day": 50,
-      "title": "Time Series Modeling",
+      "title": "Time-Series Forecasting and Evaluation",
       "level": "advanced",
       "phase": "Production, advanced topics, and capstone",
       "estimated_minutes": 120,
       "prerequisites": [
-        "python-49"
+        "python-45"
       ],
       "lesson_path": "python/ds-60day/notebooks/day50_time_series_modeling.ipynb",
       "guide_path": "python/ds-60day/companion-guides/day50_time_series_modeling.md",
@@ -1176,13 +1229,14 @@
       ],
       "dependency_group": "ml",
       "network": "offline",
+      "outcome": "Forecast with time-safe splits and compare against naive baselines.",
       "runner": "python"
     },
     {
       "id": "python-51",
       "track": "python",
       "day": 51,
-      "title": "Advanced Feature Engineering Target Encoding",
+      "title": "Target Encoding and Leakage-Safe Features",
       "level": "advanced",
       "phase": "Production, advanced topics, and capstone",
       "estimated_minutes": 120,
@@ -1197,13 +1251,14 @@
       ],
       "dependency_group": "data",
       "network": "offline",
+      "outcome": "Build out-of-fold target encodings that do not leak labels.",
       "runner": "python"
     },
     {
       "id": "python-52",
       "track": "python",
       "day": 52,
-      "title": "Scalability Dask",
+      "title": "Scaling with Dask and Chunked pandas",
       "level": "advanced",
       "phase": "Production, advanced topics, and capstone",
       "estimated_minutes": 120,
@@ -1218,13 +1273,14 @@
       ],
       "dependency_group": "production",
       "network": "offline",
+      "outcome": "Process larger-than-memory data with Dask partitions and chunked pandas.",
       "runner": "python"
     },
     {
       "id": "python-53",
       "track": "python",
       "day": 53,
-      "title": "MLOps MLflow Experiment Tracking",
+      "title": "Experiment Tracking with MLflow",
       "level": "advanced",
       "phase": "Production, advanced topics, and capstone",
       "estimated_minutes": 120,
@@ -1239,13 +1295,14 @@
       ],
       "dependency_group": "production",
       "network": "offline",
+      "outcome": "Track runs, parameters, metrics, and artifacts with MLflow.",
       "runner": "python"
     },
     {
       "id": "python-54",
       "track": "python",
       "day": 54,
-      "title": "Monitoring Model Governance",
+      "title": "Model Monitoring and Governance",
       "level": "advanced",
       "phase": "Production, advanced topics, and capstone",
       "estimated_minutes": 120,
@@ -1260,13 +1317,14 @@
       ],
       "dependency_group": "data",
       "network": "offline",
+      "outcome": "Monitor drift and delayed labels and decide when to retrain.",
       "runner": "python"
     },
     {
       "id": "python-55",
       "track": "python",
       "day": 55,
-      "title": "APIs Containerization Docker",
+      "title": "Containerizing a FastAPI Model Service",
       "level": "advanced",
       "phase": "Production, advanced topics, and capstone",
       "estimated_minutes": 120,
@@ -1281,13 +1339,14 @@
       ],
       "dependency_group": "production",
       "network": "offline",
+      "outcome": "Containerize a FastAPI model service with a small image and a health check.",
       "runner": "python"
     },
     {
       "id": "python-56",
       "track": "python",
       "day": 56,
-      "title": "Orchestration Prefect Intro",
+      "title": "Workflow Orchestration with Prefect",
       "level": "advanced",
       "phase": "Production, advanced topics, and capstone",
       "estimated_minutes": 120,
@@ -1302,13 +1361,14 @@
       ],
       "dependency_group": "production",
       "network": "offline",
+      "outcome": "Orchestrate retryable, idempotent tasks with Prefect.",
       "runner": "python"
     },
     {
       "id": "python-57",
       "track": "python",
       "day": 57,
-      "title": "Security Privacy Ethics",
+      "title": "Security, Privacy, and Ethics",
       "level": "advanced",
       "phase": "Production, advanced topics, and capstone",
       "estimated_minutes": 120,
@@ -1323,13 +1383,14 @@
       ],
       "dependency_group": "data",
       "network": "offline",
+      "outcome": "Minimize and protect personal data and check fairness evidence.",
       "runner": "python"
     },
     {
       "id": "python-58",
       "track": "python",
       "day": 58,
-      "title": "Code Review Refactor Tests",
+      "title": "Code Review, Refactoring, and Tests",
       "level": "advanced",
       "phase": "Production, advanced topics, and capstone",
       "estimated_minutes": 120,
@@ -1344,13 +1405,14 @@
       ],
       "dependency_group": "quality",
       "network": "offline",
+      "outcome": "Refactor safely behind tests and review code changes.",
       "runner": "python"
     },
     {
       "id": "python-59",
       "track": "python",
       "day": 59,
-      "title": "Capstone Kickoff",
+      "title": "Capstone Kickoff and Planning",
       "level": "advanced",
       "phase": "Production, advanced topics, and capstone",
       "estimated_minutes": 120,
@@ -1365,13 +1427,14 @@
       ],
       "dependency_group": "advanced",
       "network": "offline",
+      "outcome": "Scope a capstone: decision, data contract, baseline, and stop rules.",
       "runner": "python"
     },
     {
       "id": "python-60",
       "track": "python",
       "day": 60,
-      "title": "Capstone Completion Presentation",
+      "title": "Capstone Completion and Presentation",
       "level": "advanced",
       "phase": "Production, advanced topics, and capstone",
       "estimated_minutes": 120,
@@ -1386,13 +1449,14 @@
       ],
       "dependency_group": "advanced",
       "network": "offline",
+      "outcome": "Finish, reproduce, and present a capstone with clearly scoped claims.",
       "runner": "python"
     },
     {
       "id": "python-pro-01",
       "track": "python",
       "day": 61,
-      "title": "Package Engineering and Local Release Workflow",
+      "title": "Package Engineering and a Local Release Workflow",
       "level": "intermediate",
       "phase": "Professional Python engineering",
       "estimated_minutes": 150,
@@ -1407,13 +1471,14 @@
       ],
       "dependency_group": "professional",
       "network": "offline",
+      "outcome": "Explain why a src/ layout catches accidental working-tree imports.",
       "runner": "python"
     },
     {
       "id": "python-svc-01",
       "track": "python",
       "day": 62,
-      "title": "Reliable HTTP Clients and External-Service Boundaries",
+      "title": "Reliable HTTP Clients for External Services",
       "level": "intermediate",
       "phase": "Professional Python engineering",
       "estimated_minutes": 150,
@@ -1428,13 +1493,14 @@
       ],
       "dependency_group": "professional",
       "network": "offline",
+      "outcome": "Put an explicit timeout on every request attempt.",
       "runner": "python"
     },
     {
       "id": "python-pro-02",
       "track": "python",
       "day": 63,
-      "title": "Concurrency and Parallelism Decision Lab",
+      "title": "Choosing Concurrency or Parallelism",
       "level": "advanced",
       "phase": "Professional Python engineering",
       "estimated_minutes": 180,
@@ -1449,13 +1515,14 @@
       ],
       "dependency_group": "professional",
       "network": "offline",
+      "outcome": "Distinguish concurrency from parallel execution.",
       "runner": "python"
     },
     {
       "id": "python-data-01",
       "track": "python",
       "day": 64,
-      "title": "Columnar Data, Arrow, and Embedded Analytical SQL",
+      "title": "Columnar Data with Arrow, Parquet, and DuckDB",
       "level": "intermediate",
       "phase": "Professional data engineering",
       "estimated_minutes": 180,
@@ -1470,6 +1537,7 @@
       ],
       "dependency_group": "professional",
       "network": "offline",
+      "outcome": "Compare CSV and Parquet by portability, schema, nulls, and scan behavior.",
       "runner": "python"
     },
     {
@@ -1491,6 +1559,7 @@
       ],
       "dependency_group": "professional",
       "network": "offline",
+      "outcome": "Choose fixture scope from ownership and lifetime.",
       "runner": "python"
     },
     {
@@ -1512,13 +1581,14 @@
       ],
       "dependency_group": "quality",
       "network": "offline",
+      "outcome": "Build a generic read-only Protocol and explain practical covariance.",
       "runner": "python"
     },
     {
       "id": "python-stats-01",
       "track": "python",
       "day": 67,
-      "title": "Resampling, Experiments, and Causal Boundaries",
+      "title": "Resampling, Experiments, and Causal Limits",
       "level": "advanced",
       "phase": "Advanced statistics and experimentation",
       "estimated_minutes": 210,
@@ -1533,6 +1603,7 @@
       ],
       "dependency_group": "data",
       "network": "offline",
+      "outcome": "Compute and interpret an unstandardized and standardized effect.",
       "runner": "python"
     },
     {
@@ -1554,6 +1625,7 @@
       ],
       "dependency_group": "production",
       "network": "offline",
+      "outcome": "Create an order-stable data snapshot identity.",
       "runner": "python"
     },
     {
@@ -1578,6 +1650,7 @@
       ],
       "dependency_group": "production",
       "network": "offline",
+      "outcome": "Validate concurrency and rate configuration before startup.",
       "runner": "python"
     },
     {
@@ -1600,11 +1673,12 @@
       ],
       "dependency_group": "data",
       "network": "offline",
+      "outcome": "Define a representative workload and exact output semantics.",
       "runner": "python"
     },
     {
       "id": "python-data-02",
-      "title": "Exact Values, Unicode Identity, and Calendar Boundaries",
+      "title": "Exact Decimals, Unicode Text, and Calendar Boundaries",
       "level": "advanced",
       "prerequisites": [
         "python-21",
@@ -1622,11 +1696,12 @@
         "python/professional/solutions/py_data_02_exact_values_time_text_solutions.md",
         "python/professional/solutions/py_data_02_exact_values_time_text_solution.py"
       ],
+      "outcome": "Parse a bounded exact monetary representation without silent rounding.",
       "runner": "python"
     },
     {
       "id": "python-ml-02",
-      "title": "Leakage-Resistant Evaluation Across Groups and Time",
+      "title": "Leakage-Safe Evaluation Across Groups and Time",
       "level": "advanced",
       "prerequisites": [
         "python-35",
@@ -1644,11 +1719,12 @@
         "python/professional/solutions/py_ml_02_group_time_evaluation_solutions.md",
         "python/professional/solutions/py_ml_02_group_time_evaluation_solution.py"
       ],
+      "outcome": "Choose held-out groups or forward time windows from the deployment question.",
       "runner": "python"
     },
     {
       "id": "python-pro-03",
-      "title": "Restartable File Pipelines and Honest Durability Guarantees",
+      "title": "Restartable File Pipelines and Durability Guarantees",
       "level": "advanced",
       "prerequisites": [
         "python-23",
@@ -1666,13 +1742,14 @@
         "python/professional/solutions/py_pro_03_restartable_file_pipeline_solutions.md",
         "python/professional/solutions/py_pro_03_restartable_file_pipeline_solution.py"
       ],
+      "outcome": "Pin exact source bytes before processing and reject a changed source on resume.",
       "runner": "python"
     },
     {
       "id": "python-numpy-01",
       "track": "python",
       "day": 74,
-      "title": "NumPy Memory Ownership, Strides, and Safe Mutation",
+      "title": "NumPy Views, Copies, Strides, and Safe Mutation",
       "level": "intermediate",
       "phase": "Python data mechanics and algorithmic reasoning",
       "estimated_minutes": 150,
@@ -1731,7 +1808,7 @@
       "id": "python-numpy-03",
       "track": "python",
       "day": 76,
-      "title": "Gather, Scatter, Masks, and Deterministic Selection",
+      "title": "NumPy Indexing: Gather, Scatter, and Masks",
       "level": "intermediate",
       "phase": "Python data mechanics and algorithmic reasoning",
       "estimated_minutes": 150,
@@ -1760,7 +1837,7 @@
       "id": "python-numpy-04",
       "track": "python",
       "day": 77,
-      "title": "Stable Numerical Computation and Honest Error Bounds",
+      "title": "Numerically Stable Computation and Error Bounds",
       "level": "intermediate",
       "phase": "Python data mechanics and algorithmic reasoning",
       "estimated_minutes": 150,
@@ -1821,7 +1898,7 @@
       "id": "python-pandas-02",
       "track": "python",
       "day": 79,
-      "title": "Join Contracts and Point-in-Time Feature Lookup",
+      "title": "Validated Joins and Point-in-Time Lookups",
       "level": "intermediate",
       "phase": "Python data mechanics and algorithmic reasoning",
       "estimated_minutes": 150,
@@ -1851,7 +1928,7 @@
       "id": "python-pandas-03",
       "track": "python",
       "day": 80,
-      "title": "Grouped Transforms, Temporal Windows, and Session Boundaries",
+      "title": "Grouped Transforms, Time Windows, and Sessions",
       "level": "intermediate",
       "phase": "Python data mechanics and algorithmic reasoning",
       "estimated_minutes": 150,
@@ -1943,7 +2020,7 @@
       "id": "python-algo-02",
       "track": "python",
       "day": 83,
-      "title": "Stable Ordering, Binary-Search Boundaries, and Merge Algorithms",
+      "title": "Stable Sorting, Binary Search, and Merging",
       "level": "intermediate",
       "phase": "Python data mechanics and algorithmic reasoning",
       "estimated_minutes": 150,
@@ -1973,7 +2050,7 @@
       "id": "python-algo-03",
       "track": "python",
       "day": 84,
-      "title": "Graph Traversal, Priority Queues, and Shortest-Path Evidence",
+      "title": "Graph Traversal, Priority Queues, and Shortest Paths",
       "level": "intermediate",
       "phase": "Python data mechanics and algorithmic reasoning",
       "estimated_minutes": 150,
@@ -2003,7 +2080,7 @@
       "id": "python-algo-04",
       "track": "python",
       "day": 85,
-      "title": "Dynamic Programming, State Design, and Reconstructable Decisions",
+      "title": "Dynamic Programming and Solution Reconstruction",
       "level": "intermediate",
       "phase": "Python data mechanics and algorithmic reasoning",
       "estimated_minutes": 150,
@@ -2033,7 +2110,7 @@
       "id": "python-lang-02",
       "track": "python",
       "day": 86,
-      "title": "Scope, Closures, and Observable Decorator Contracts",
+      "title": "Scope, Closures, and Decorators",
       "level": "advanced",
       "phase": "Python language mechanics and structured execution",
       "estimated_minutes": 180,
@@ -2093,7 +2170,7 @@
       "id": "python-lang-04",
       "track": "python",
       "day": 88,
-      "title": "Structured Asyncio, Cancellation, and Context Ownership",
+      "title": "Structured asyncio, Cancellation, and Context Variables",
       "level": "advanced",
       "phase": "Python language mechanics and structured execution",
       "estimated_minutes": 210,
@@ -2123,7 +2200,7 @@
       "id": "python-numpy-05",
       "track": "python",
       "day": 89,
-      "title": "NumPy Dtypes, Promotion, and Overflow Contracts",
+      "title": "NumPy Dtypes, Type Promotion, and Overflow",
       "level": "advanced",
       "phase": "Python data mechanics and algorithmic reasoning",
       "estimated_minutes": 100,
@@ -2212,7 +2289,7 @@
       "id": "python-numpy-08",
       "track": "python",
       "day": 92,
-      "title": "Sliding Windows, Convolution, and FFT Boundaries",
+      "title": "Sliding Windows, Convolution, and the FFT",
       "level": "advanced",
       "phase": "Python data mechanics and algorithmic reasoning",
       "estimated_minutes": 100,
@@ -2243,7 +2320,7 @@
       "id": "python-pandas-05",
       "track": "python",
       "day": 93,
-      "title": "MultiIndex and Lossless Reshaping Contracts",
+      "title": "MultiIndex and Lossless Reshaping",
       "level": "advanced",
       "phase": "Python data mechanics and algorithmic reasoning",
       "estimated_minutes": 180,
@@ -2306,7 +2383,7 @@
       "id": "python-pandas-07",
       "track": "python",
       "day": 95,
-      "title": "Typed I/O, Text, and Categorical Domains",
+      "title": "Typed I/O, Text, and Categorical Data",
       "level": "advanced",
       "phase": "Python data mechanics and algorithmic reasoning",
       "estimated_minutes": 180,
@@ -2442,13 +2519,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Identify the fact represented by a row before writing a query.",
       "runner": "sql"
     },
     {
       "id": "sql-start-02",
       "track": "sql",
       "day": -3,
-      "title": "Values NULL and Deterministic Order",
+      "title": "Values, NULL, and Deterministic Order",
       "level": "foundation",
       "phase": "Beginner practice",
       "estimated_minutes": 90,
@@ -2463,6 +2541,7 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Separate an unknown value from zero and empty text.",
       "runner": "sql"
     },
     {
@@ -2484,13 +2563,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Build a query one clause at a time and inspect surviving identities.",
       "runner": "sql"
     },
     {
       "id": "sql-01",
       "track": "sql",
       "day": 1,
-      "title": "SELECT, WHERE, ORDER BY and LIMIT",
+      "title": "SELECT, WHERE, ORDER BY, and LIMIT",
       "level": "foundation",
       "phase": "SQL foundations and query building",
       "estimated_minutes": 75,
@@ -2505,13 +2585,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Query execution order and basic filtering/sorting.",
       "runner": "sql"
     },
     {
       "id": "sql-02",
       "track": "sql",
       "day": 2,
-      "title": "Aggregates, GROUP BY and HAVING",
+      "title": "Aggregates, GROUP BY, and HAVING",
       "level": "foundation",
       "phase": "SQL foundations and query building",
       "estimated_minutes": 75,
@@ -2526,13 +2607,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Aggregate rows only after naming the grouping grain, then filter groups with HAVING and preserve numeric meaning.",
       "runner": "sql"
     },
     {
       "id": "sql-03",
       "track": "sql",
       "day": 3,
-      "title": "Inner Joins",
+      "title": "Inner Joins and Predicate Placement",
       "level": "foundation",
       "phase": "SQL foundations and query building",
       "estimated_minutes": 75,
@@ -2547,13 +2629,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Use inner joins only when unmatched rows should disappear, and verify key cardinality before aggregating.",
       "runner": "sql"
     },
     {
       "id": "sql-04",
       "track": "sql",
       "day": 4,
-      "title": "Outer Joins",
+      "title": "Outer Joins and Unmatched Rows",
       "level": "foundation",
       "phase": "SQL foundations and query building",
       "estimated_minutes": 75,
@@ -2568,13 +2651,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Use outer joins to preserve a declared side and make absence visible without accidentally filtering it away.",
       "runner": "sql"
     },
     {
       "id": "sql-05",
       "track": "sql",
       "day": 5,
-      "title": "Cross Self Joins",
+      "title": "Cross Joins and Self-Joins",
       "level": "foundation",
       "phase": "SQL foundations and query building",
       "estimated_minutes": 75,
@@ -2589,13 +2673,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Use cross joins for intentional combinations and self joins for relationships within one table, with explicit cardinality controls.",
       "runner": "sql"
     },
     {
       "id": "sql-06",
       "track": "sql",
       "day": 6,
-      "title": "Set Operations",
+      "title": "Set Operations: UNION, INTERSECT, and EXCEPT",
       "level": "foundation",
       "phase": "SQL foundations and query building",
       "estimated_minutes": 75,
@@ -2610,13 +2695,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Combine compatible row sets with explicit duplicate semantics: UNION, UNION ALL, INTERSECT, and EXCEPT.",
       "runner": "sql"
     },
     {
       "id": "sql-07",
       "track": "sql",
       "day": 7,
-      "title": "Week 1 Project",
+      "title": "Week 1 Project: From Questions to Queries",
       "level": "foundation",
       "phase": "SQL foundations and query building",
       "estimated_minutes": 75,
@@ -2631,13 +2717,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Integrate foundational SELECT, aggregation, joins, NULL handling, and set reasoning into reconciled business outputs.",
       "runner": "sql"
     },
     {
       "id": "sql-08",
       "track": "sql",
       "day": 8,
-      "title": "Scalar Inline Subqueries",
+      "title": "Scalar and Inline Subqueries",
       "level": "foundation",
       "phase": "SQL foundations and query building",
       "estimated_minutes": 75,
@@ -2652,13 +2739,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Use scalar and inline subqueries only when their one-row or one-value cardinality is guaranteed and visible.",
       "runner": "sql"
     },
     {
       "id": "sql-09",
       "track": "sql",
       "day": 9,
-      "title": "Correlated Subqueries",
+      "title": "Correlated Subqueries and EXISTS",
       "level": "foundation",
       "phase": "SQL foundations and query building",
       "estimated_minutes": 75,
@@ -2673,13 +2761,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Use correlated subqueries for row-specific existence or comparison while keeping correlation keys and NULL behavior explicit.",
       "runner": "sql"
     },
     {
       "id": "sql-10",
       "track": "sql",
       "day": 10,
-      "title": "DML with Subqueries",
+      "title": "Changing Data with Subqueries: INSERT, UPDATE, DELETE, and Upsert",
       "level": "foundation",
       "phase": "SQL foundations and query building",
       "estimated_minutes": 75,
@@ -2694,13 +2783,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Modify only reviewed row sets, inspect writes with RETURNING, and make repeat behavior explicit through constraints and rollback-safe tests.",
       "runner": "sql"
     },
     {
       "id": "sql-11",
       "track": "sql",
       "day": 11,
-      "title": "Case Expressions",
+      "title": "CASE Expressions and Conditional Logic",
       "level": "foundation",
       "phase": "SQL foundations and query building",
       "estimated_minutes": 75,
@@ -2715,13 +2805,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Use CASE to encode mutually exclusive business rules in deliberate order while preserving NULL as a distinct state when required.",
       "runner": "sql"
     },
     {
       "id": "sql-12",
       "track": "sql",
       "day": 12,
-      "title": "String Functions",
+      "title": "String Functions and Text Processing",
       "level": "foundation",
       "phase": "SQL foundations and query building",
       "estimated_minutes": 75,
@@ -2736,13 +2827,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Normalize and parse text with explicit locale/case assumptions, preserving original values when a transformation may be lossy.",
       "runner": "sql"
     },
     {
       "id": "sql-13",
       "track": "sql",
       "day": 13,
-      "title": "Date Time Functions",
+      "title": "Date and Time Functions and Time Zones",
       "level": "foundation",
       "phase": "SQL foundations and query building",
       "estimated_minutes": 75,
@@ -2757,13 +2849,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Treat timestamps as instants, dates as calendar values, and reporting zones/window boundaries as explicit parts of the query.",
       "runner": "sql"
     },
     {
       "id": "sql-14",
       "track": "sql",
       "day": 14,
-      "title": "Numeric and Casting",
+      "title": "Numeric Types, Casting, and Precision",
       "level": "foundation",
       "phase": "SQL foundations and query building",
       "estimated_minutes": 75,
@@ -2778,13 +2871,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Choose numeric types and casts from domain precision, validate text before casting, and postpone rounding until presentation.",
       "runner": "sql"
     },
     {
       "id": "sql-15",
       "track": "sql",
       "day": 15,
-      "title": "Phase1 Project",
+      "title": "Phase 1 Project: Multi-Dimensional Revenue Report",
       "level": "foundation",
       "phase": "SQL foundations and query building",
       "estimated_minutes": 75,
@@ -2799,6 +2893,7 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Deliver a reconciled Phase 1 report that combines filtering, joins, aggregation, text/time handling, and exact money semantics.",
       "runner": "sql"
     },
     {
@@ -2820,13 +2915,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "State a table's grain, map one-to-one and one-to-many requirements to keys, and create a normalized schema.",
       "runner": "sql"
     },
     {
       "id": "sql-16",
       "track": "sql",
       "day": 16,
-      "title": "Window Functions Fundamentals",
+      "title": "Window Function Fundamentals: OVER, PARTITION BY, and Frames",
       "level": "intermediate",
       "phase": "Windows, CTEs, and advanced querying",
       "estimated_minutes": 90,
@@ -2841,13 +2937,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Use window functions to add partition-level context while preserving row grain, with explicit partition and ordering semantics.",
       "runner": "sql"
     },
     {
       "id": "sql-17",
       "track": "sql",
       "day": 17,
-      "title": "ROW_NUMBER, RANK and DENSE_RANK",
+      "title": "Ranking with ROW_NUMBER, RANK, and DENSE_RANK",
       "level": "intermediate",
       "phase": "Windows, CTEs, and advanced querying",
       "estimated_minutes": 90,
@@ -2862,13 +2959,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Choose ROW_NUMBER, RANK, or DENSE_RANK from tie semantics, and separate ranking from top-N filtering.",
       "runner": "sql"
     },
     {
       "id": "sql-18",
       "track": "sql",
       "day": 18,
-      "title": "LAG and LEAD",
+      "title": "LAG and LEAD: Comparing Neighboring Rows",
       "level": "intermediate",
       "phase": "Windows, CTEs, and advanced querying",
       "estimated_minutes": 90,
@@ -2883,13 +2981,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Use LAG and LEAD to compare adjacent rows only after defining partition, chronology, tie-breakers, and first/last-row behavior.",
       "runner": "sql"
     },
     {
       "id": "sql-19",
       "track": "sql",
       "day": 19,
-      "title": "Running Aggregates",
+      "title": "Running Totals and Moving Windows",
       "level": "intermediate",
       "phase": "Windows, CTEs, and advanced querying",
       "estimated_minutes": 90,
@@ -2904,13 +3003,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Define cumulative and moving window frames explicitly so peers, boundaries, and partition resets match the business question.",
       "runner": "sql"
     },
     {
       "id": "sql-20",
       "track": "sql",
       "day": 20,
-      "title": "FIRST_VALUE and LAST_VALUE",
+      "title": "FIRST_VALUE, LAST_VALUE, and Window Frames",
       "level": "intermediate",
       "phase": "Windows, CTEs, and advanced querying",
       "estimated_minutes": 90,
@@ -2925,13 +3025,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Use FIRST_VALUE and LAST_VALUE only with an ordering and frame that covers the intended partition.",
       "runner": "sql"
     },
     {
       "id": "sql-21",
       "track": "sql",
       "day": 21,
-      "title": "Distribution Functions",
+      "title": "Distribution Functions: NTILE, PERCENT_RANK, and CUME_DIST",
       "level": "intermediate",
       "phase": "Windows, CTEs, and advanced querying",
       "estimated_minutes": 90,
@@ -2946,13 +3047,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Use distribution windows to express relative position while documenting ties, small partitions, and bucket size.",
       "runner": "sql"
     },
     {
       "id": "sql-22",
       "track": "sql",
       "day": 22,
-      "title": "Advanced Windows",
+      "title": "Advanced Windows: Named Windows, Multiple Partitions, and Exclusions",
       "level": "intermediate",
       "phase": "Windows, CTEs, and advanced querying",
       "estimated_minutes": 90,
@@ -2967,13 +3069,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Combine named windows, explicit frames, exclusions, and gap/session logic while keeping each intermediate grain inspectable.",
       "runner": "sql"
     },
     {
       "id": "sql-23",
       "track": "sql",
       "day": 23,
-      "title": "Common Table Expressions",
+      "title": "Common Table Expressions (CTEs)",
       "level": "intermediate",
       "phase": "Windows, CTEs, and advanced querying",
       "estimated_minutes": 90,
@@ -2988,13 +3091,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Use CTEs to name grains and decisions in a multi-stage query, while understanding that readability, not forced materialization, is the default goal.",
       "runner": "sql"
     },
     {
       "id": "sql-24",
       "track": "sql",
       "day": 24,
-      "title": "Recursive CTEs",
+      "title": "Recursive CTEs for Hierarchies and Graphs",
       "level": "intermediate",
       "phase": "Windows, CTEs, and advanced querying",
       "estimated_minutes": 90,
@@ -3009,6 +3113,7 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Build recursive CTEs from compatible anchor and recursive members, carrying depth/path evidence and an explicit termination or cycle rule.",
       "runner": "sql"
     },
     {
@@ -3030,6 +3135,7 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Compose multiple CTEs so hierarchy traversal, employee grain, and management summaries remain individually testable.",
       "runner": "sql"
     },
     {
@@ -3051,13 +3157,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Combine CTE grain control with window comparisons so time-series and ranking logic remain readable and reconcilable.",
       "runner": "sql"
     },
     {
       "id": "sql-27",
       "track": "sql",
       "day": 27,
-      "title": "Pivot Unpivot",
+      "title": "Pivoting and Unpivoting",
       "level": "intermediate",
       "phase": "Windows, CTEs, and advanced querying",
       "estimated_minutes": 90,
@@ -3072,13 +3179,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Pivot with conditional aggregation when output categories are known, and unpivot with explicit typed rows while preserving missing-value meaning.",
       "runner": "sql"
     },
     {
       "id": "sql-28",
       "track": "sql",
       "day": 28,
-      "title": "JSON XML",
+      "title": "JSONB and XML in PostgreSQL",
       "level": "intermediate",
       "phase": "Windows, CTEs, and advanced querying",
       "estimated_minutes": 90,
@@ -3093,13 +3201,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Query JSONB and XML with explicit path, type, missing-key, and safe-cast behavior instead of assuming semi-structured data is schema-free.",
       "runner": "sql"
     },
     {
       "id": "sql-29",
       "track": "sql",
       "day": 29,
-      "title": "Pattern Matching",
+      "title": "Pattern Matching: LIKE, Regular Expressions, and Full-Text Search",
       "level": "intermediate",
       "phase": "Windows, CTEs, and advanced querying",
       "estimated_minutes": 90,
@@ -3114,13 +3223,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Choose literal, wildcard, or regular-expression matching from the text grammar and make case, escaping, and anchoring explicit.",
       "runner": "sql"
     },
     {
       "id": "sql-30",
       "track": "sql",
       "day": 30,
-      "title": "Phase2 Project",
+      "title": "Phase 2 Project: Cohort Retention and Customer Lifetime Value",
       "level": "intermediate",
       "phase": "Windows, CTEs, and advanced querying",
       "estimated_minutes": 90,
@@ -3135,13 +3245,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Build a cohort-retention analysis through explicit grains, a stable denominator, a dense calendar, reconciled revenue, and clearly limited projections.",
       "runner": "sql"
     },
     {
       "id": "sql-31",
       "track": "sql",
       "day": 31,
-      "title": "EXPLAIN and EXPLAIN ANALYZE",
+      "title": "Reading Plans with EXPLAIN and EXPLAIN ANALYZE",
       "level": "advanced",
       "phase": "Performance, transactions, and operations",
       "estimated_minutes": 105,
@@ -3156,13 +3267,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Read a plan tree from its leaf nodes through the final output.",
       "runner": "sql"
     },
     {
       "id": "sql-32",
       "track": "sql",
       "day": 32,
-      "title": "Index Fundamentals",
+      "title": "B-Tree Index Fundamentals",
       "level": "advanced",
       "phase": "Performance, transactions, and operations",
       "estimated_minutes": 105,
@@ -3177,13 +3289,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Match a B-tree index to equality, range, and ordering requirements.",
       "runner": "sql"
     },
     {
       "id": "sql-33",
       "track": "sql",
       "day": 33,
-      "title": "Index Optimization Strategies",
+      "title": "Composite, Covering, and Partial Indexes",
       "level": "advanced",
       "phase": "Performance, transactions, and operations",
       "estimated_minutes": 105,
@@ -3198,13 +3311,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Order composite search keys from real predicate and ordering requirements.",
       "runner": "sql"
     },
     {
       "id": "sql-34",
       "track": "sql",
       "day": 34,
-      "title": "Query Optimization",
+      "title": "Query Optimization Techniques",
       "level": "advanced",
       "phase": "Performance, transactions, and operations",
       "estimated_minutes": 105,
@@ -3219,13 +3333,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Optimize one measured bottleneck while preserving result semantics.",
       "runner": "sql"
     },
     {
       "id": "sql-35",
       "track": "sql",
       "day": 35,
-      "title": "Avoiding Pitfalls",
+      "title": "Avoiding Common Performance Pitfalls",
       "level": "advanced",
       "phase": "Performance, transactions, and operations",
       "estimated_minutes": 105,
@@ -3240,13 +3355,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Rewrite non-sargable temporal predicates as correct raw-column ranges.",
       "runner": "sql"
     },
     {
       "id": "sql-36",
       "track": "sql",
       "day": 36,
-      "title": "Materialized Views",
+      "title": "Materialized Views and Caching",
       "level": "advanced",
       "phase": "Performance, transactions, and operations",
       "estimated_minutes": 105,
@@ -3261,13 +3377,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Materialize a query at a declared grain and reconcile it with source data.",
       "runner": "sql"
     },
     {
       "id": "sql-37",
       "track": "sql",
       "day": 37,
-      "title": "Partitioning Sharding",
+      "title": "Partitioning and Sharding",
       "level": "advanced",
       "phase": "Performance, transactions, and operations",
       "estimated_minutes": 105,
@@ -3282,13 +3399,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Define non-overlapping range partitions and prove pruning.",
       "runner": "sql"
     },
     {
       "id": "sql-38",
       "track": "sql",
       "day": 38,
-      "title": "Transactions Isolation",
+      "title": "Transactions and Isolation Levels",
       "level": "advanced",
       "phase": "Performance, transactions, and operations",
       "estimated_minutes": 105,
@@ -3303,13 +3421,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Reproduce isolation behavior with an explicit two-session statement schedule.",
       "runner": "sql"
     },
     {
       "id": "sql-39",
       "track": "sql",
       "day": 39,
-      "title": "Locks Deadlocks",
+      "title": "Locks, Blocking, and Deadlocks",
       "level": "advanced",
       "phase": "Performance, transactions, and operations",
       "estimated_minutes": 105,
@@ -3324,6 +3443,7 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Observe blocking and deadlock state without intervening blindly.",
       "runner": "sql"
     },
     {
@@ -3346,13 +3466,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Explain why applied migrations are immutable, read a migration manifest, and separate repeatable seeds from schema versions.",
       "runner": "sql"
     },
     {
       "id": "sql-40",
       "track": "sql",
       "day": 40,
-      "title": "Analytic Functions Advanced",
+      "title": "Advanced Analytic Functions",
       "level": "advanced",
       "phase": "Performance, transactions, and operations",
       "estimated_minutes": 105,
@@ -3367,13 +3488,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Calculate rolling dispersion, ordered-set percentiles, shares, and z-scores at explicit grains.",
       "runner": "sql"
     },
     {
       "id": "sql-41",
       "track": "sql",
       "day": 41,
-      "title": "Complex Aggregations",
+      "title": "Complex Aggregations: FILTER, String Aggregation, and CUBE",
       "level": "advanced",
       "phase": "Performance, transactions, and operations",
       "estimated_minutes": 105,
@@ -3388,13 +3510,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Produce several conditional measures from one controlled fact grain.",
       "runner": "sql"
     },
     {
       "id": "sql-42",
       "track": "sql",
       "day": 42,
-      "title": "Data Quality Validation",
+      "title": "Data Quality and Validation",
       "level": "advanced",
       "phase": "Performance, transactions, and operations",
       "estimated_minutes": 105,
@@ -3409,13 +3532,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Encode repeatable quality rules with stable names, grains, and failure counts.",
       "runner": "sql"
     },
     {
       "id": "sql-43",
       "track": "sql",
       "day": 43,
-      "title": "Backup Recovery",
+      "title": "Logical Export, Staging, and Restore Checks",
       "level": "advanced",
       "phase": "Performance, transactions, and operations",
       "estimated_minutes": 105,
@@ -3430,13 +3554,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Stage and validate a logical extract before merging it.",
       "runner": "sql"
     },
     {
       "id": "sql-44",
       "track": "sql",
       "day": 44,
-      "title": "Monitoring Diagnostics",
+      "title": "Monitoring and Diagnostics",
       "level": "advanced",
       "phase": "Performance, transactions, and operations",
       "estimated_minutes": 105,
@@ -3451,13 +3576,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Distinguish active session state from aggregated statement history.",
       "runner": "sql"
     },
     {
       "id": "sql-45",
       "track": "sql",
       "day": 45,
-      "title": "Phase3 Optimization Project",
+      "title": "Phase 3 Project: Query Optimization",
       "level": "advanced",
       "phase": "Performance, transactions, and operations",
       "estimated_minutes": 105,
@@ -3472,13 +3598,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Run a controlled optimization experiment with comparable plans and outputs.",
       "runner": "sql"
     },
     {
       "id": "sql-46",
       "track": "sql",
       "day": 46,
-      "title": "Project 1 Ecommerce Part 1",
+      "title": "E-Commerce Project, Part 1: Lifetime Value and Cohorts",
       "level": "advanced",
       "phase": "Applied analytics and capstones",
       "estimated_minutes": 120,
@@ -3493,13 +3620,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Calculate customer lifetime value (LTV) at one row per customer.",
       "runner": "sql"
     },
     {
       "id": "sql-47",
       "track": "sql",
       "day": 47,
-      "title": "Project 1 Ecommerce Part 2",
+      "title": "E-Commerce Project, Part 2: Cohort Retention",
       "level": "advanced",
       "phase": "Applied analytics and capstones",
       "estimated_minutes": 120,
@@ -3514,13 +3642,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Define cohort size independently from later activity.",
       "runner": "sql"
     },
     {
       "id": "sql-48",
       "track": "sql",
       "day": 48,
-      "title": "Project 1 Ecommerce Part 3",
+      "title": "E-Commerce Project, Part 3: Product Affinity and Attribution",
       "level": "advanced",
       "phase": "Applied analytics and capstones",
       "estimated_minutes": 120,
@@ -3535,13 +3664,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Count each undirected basket pair once per order.",
       "runner": "sql"
     },
     {
       "id": "sql-49",
       "track": "sql",
       "day": 49,
-      "title": "Project 2 Finance Part 1",
+      "title": "Finance Project, Part 1: Revenue Forecasting",
       "level": "advanced",
       "phase": "Applied analytics and capstones",
       "estimated_minutes": 120,
@@ -3556,13 +3686,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Backtest moving-average and seasonal-naive forecasts without target leakage.",
       "runner": "sql"
     },
     {
       "id": "sql-50",
       "track": "sql",
       "day": 50,
-      "title": "Project 2 Finance Part 2",
+      "title": "Finance Project, Part 2: Budget Variance",
       "level": "advanced",
       "phase": "Applied analytics and capstones",
       "estimated_minutes": 120,
@@ -3577,13 +3708,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Align actual and budget values without discarding one-sided periods.",
       "runner": "sql"
     },
     {
       "id": "sql-51",
       "track": "sql",
       "day": 51,
-      "title": "Project 2 Finance Part 3",
+      "title": "Finance Project, Part 3: Cash Flow",
       "level": "advanced",
       "phase": "Applied analytics and capstones",
       "estimated_minutes": 120,
@@ -3598,13 +3730,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Separate cash movement from booked order revenue.",
       "runner": "sql"
     },
     {
       "id": "sql-52",
       "track": "sql",
       "day": 52,
-      "title": "Project 3 DWH Part 1",
+      "title": "Data Warehouse Project, Part 1: Star Schema",
       "level": "advanced",
       "phase": "Applied analytics and capstones",
       "estimated_minutes": 120,
@@ -3620,13 +3753,14 @@
       "dependency_group": "postgres",
       "network": "offline",
       "stateful_group": "dwh-project",
+      "outcome": "Declare fact and dimension grains before creating a star schema.",
       "runner": "sql"
     },
     {
       "id": "sql-53",
       "track": "sql",
       "day": 53,
-      "title": "Project 3 DWH Part 2 SCD",
+      "title": "Data Warehouse Project, Part 2: Slowly Changing Dimensions",
       "level": "advanced",
       "phase": "Applied analytics and capstones",
       "estimated_minutes": 120,
@@ -3642,13 +3776,14 @@
       "dependency_group": "postgres",
       "network": "offline",
       "stateful_group": "dwh-project",
+      "outcome": "Close one current dimension version and insert its successor atomically.",
       "runner": "sql"
     },
     {
       "id": "sql-54",
       "track": "sql",
       "day": 54,
-      "title": "Project 3 DWH Part 3 Aggregations",
+      "title": "Data Warehouse Project, Part 3: Aggregate Tables",
       "level": "advanced",
       "phase": "Applied analytics and capstones",
       "estimated_minutes": 120,
@@ -3664,13 +3799,14 @@
       "dependency_group": "postgres",
       "network": "offline",
       "stateful_group": "dwh-project",
+      "outcome": "Build aggregate tables with an enforced monthly grain.",
       "runner": "sql"
     },
     {
       "id": "sql-55",
       "track": "sql",
       "day": 55,
-      "title": "Project 4 BI Part 1",
+      "title": "BI Project, Part 1: Drill-Downs and Subtotals",
       "level": "advanced",
       "phase": "Applied analytics and capstones",
       "estimated_minutes": 120,
@@ -3685,13 +3821,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Generate hierarchical subtotal levels with ROLLUP and distinguish them from all-combination CUBE output.",
       "runner": "sql"
     },
     {
       "id": "sql-56",
       "track": "sql",
       "day": 56,
-      "title": "Project 4 BI Part 2",
+      "title": "BI Project, Part 2: Percentiles and CUBE",
       "level": "advanced",
       "phase": "Applied analytics and capstones",
       "estimated_minutes": 120,
@@ -3706,13 +3843,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Control order, payment, and line grain before multidimensional aggregation.",
       "runner": "sql"
     },
     {
       "id": "sql-57",
       "track": "sql",
       "day": 57,
-      "title": "Project 4 BI Part 3",
+      "title": "BI Project, Part 3: Trends and Anomalies",
       "level": "advanced",
       "phase": "Applied analytics and capstones",
       "estimated_minutes": 120,
@@ -3727,13 +3865,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Backtest observation-based moving average and calendar-week seasonal naive without leakage.",
       "runner": "sql"
     },
     {
       "id": "sql-58",
       "track": "sql",
       "day": 58,
-      "title": "Final Capstone Part 1",
+      "title": "Final Capstone, Part 1: Ingestion and Data Quality",
       "level": "advanced",
       "phase": "Applied analytics and capstones",
       "estimated_minutes": 120,
@@ -3748,13 +3887,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Real-world messy data, data quality fixes, staging, and normalization.",
       "runner": "sql"
     },
     {
       "id": "sql-59",
       "track": "sql",
       "day": 59,
-      "title": "Final Capstone Part 2",
+      "title": "Final Capstone, Part 2: Stakeholder Analytics",
       "level": "advanced",
       "phase": "Applied analytics and capstones",
       "estimated_minutes": 120,
@@ -3769,13 +3909,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Complex business logic, performance requirements, stakeholder queries.",
       "runner": "sql"
     },
     {
       "id": "sql-60",
       "track": "sql",
       "day": 60,
-      "title": "Final Capstone Part 3",
+      "title": "Final Capstone, Part 3: End-to-End Sign-Off",
       "level": "advanced",
       "phase": "Applied analytics and capstones",
       "estimated_minutes": 120,
@@ -3790,6 +3931,7 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "End-to-end solution: DQ -> Transform -> Analytics -> Performance sign-off.",
       "runner": "sql"
     },
     {
@@ -3812,6 +3954,7 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Separate ownership from privileges, explain schema USAGE and a safe search_path, and grant minimum table/sequence/function capabilities.",
       "runner": "sql"
     },
     {
@@ -3833,13 +3976,14 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Create composable SQL functions, caller-transaction procedures, and BEFORE/AFTER triggers.",
       "runner": "sql"
     },
     {
       "id": "sql-types-01",
       "track": "sql",
       "day": 63,
-      "title": "PostgreSQL-Native Types and Searchable Documents",
+      "title": "Native PostgreSQL Types and Full-Text Search",
       "level": "advanced",
       "phase": "PostgreSQL data modelling",
       "estimated_minutes": 180,
@@ -3854,6 +3998,7 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Model and query domains, enums, UUIDs, arrays, ranges, multiranges, JSONB, and JSONPath.",
       "runner": "sql"
     },
     {
@@ -3876,6 +4021,7 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Match B-tree, GIN, GiST, SP-GiST, and BRIN operator classes to concrete query shapes.",
       "runner": "sql"
     },
     {
@@ -3898,6 +4044,7 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Build fail-fast SQL assertions, deterministic owned fixtures, and schema contract comparisons.",
       "runner": "sql"
     },
     {
@@ -3920,6 +4067,7 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Implement deterministic deduplication, sessionization, and gaps-and-islands patterns.",
       "runner": "sql"
     },
     {
@@ -3942,6 +4090,7 @@
       ],
       "dependency_group": "postgres",
       "network": "optional-container-image",
+      "outcome": "Distinguish logical dumps, physical base backups, WAL archiving, replication, and point-in-time recovery (PITR).",
       "runner": "sql"
     },
     {
@@ -3964,6 +4113,7 @@
       ],
       "dependency_group": "postgres",
       "network": "optional-container-image",
+      "outcome": "Inspect extension capability/version boundaries and compare pg_trgm, citext, pgcrypto, PostGIS, pgvector, and postgres_fdw with bounded built-in fallbacks.",
       "runner": "sql"
     },
     {
@@ -3987,13 +4137,14 @@
       ],
       "dependency_group": "postgres",
       "network": "optional-container-image",
+      "outcome": "Implement a transactional outbox and an idempotent consumer with immutable event fingerprints.",
       "runner": "sql"
     },
     {
       "id": "sql-temporal-01",
       "track": "sql",
       "day": 70,
-      "title": "Temporal and Domain Modelling",
+      "title": "Temporal Data and Domain Modelling",
       "level": "advanced",
       "phase": "PostgreSQL specialization",
       "estimated_minutes": 210,
@@ -4012,6 +4163,7 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Distinguish valid and system time and query bitemporal state as-of two clocks.",
       "runner": "sql"
     },
     {
@@ -4035,6 +4187,7 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Expose mismatches hidden by equal counts and totals.",
       "runner": "sql"
     },
     {
@@ -4058,6 +4211,7 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Build a compound continuation predicate that matches a complete result order.",
       "runner": "sql"
     },
     {
@@ -4080,6 +4234,7 @@
       ],
       "dependency_group": "postgres",
       "network": "offline",
+      "outcome": "Express a single-row write precondition in an atomic UPDATE predicate.",
       "runner": "sql"
     },
     {
@@ -4210,7 +4365,7 @@
       "id": "sql-deep-05",
       "track": "sql",
       "day": 78,
-      "title": "Predicate Proof, Partial Indexes, and Conditional Mutation Contracts",
+      "title": "Predicate Implication, Partial Indexes, and Conditional Writes",
       "level": "advanced",
       "phase": "SQL semantics, temporal metrics and correctness",
       "estimated_minutes": 150,
@@ -4274,7 +4429,7 @@
       "id": "sql-write-01",
       "track": "sql",
       "day": 80,
-      "title": "PostgreSQL 17 Change Application: MERGE and ON CONFLICT",
+      "title": "Applying Change Feeds with MERGE and ON CONFLICT",
       "level": "advanced",
       "phase": "Current PostgreSQL change and document contracts",
       "estimated_minutes": 150,
@@ -4299,13 +4454,14 @@
         "source cardinality",
         "snapshots",
         "mutation contracts"
-      ]
+      ],
+      "outcome": "Choose a change-application statement from a declared feed contract."
     },
     {
       "id": "sql-json-01",
       "track": "sql",
       "day": 81,
-      "title": "PostgreSQL 17 JSON_TABLE: Typed Projection and Result Grain",
+      "title": "JSON_TABLE: Typed Projection and Result Grain",
       "level": "advanced",
       "phase": "Current PostgreSQL change and document contracts",
       "estimated_minutes": 150,
@@ -4331,13 +4487,14 @@
         "NULL",
         "grain",
         "coverage"
-      ]
+      ],
+      "outcome": "Turn a declared JSON array into typed relational columns with JSON_TABLE."
     },
     {
       "id": "bridge-01",
       "track": "bridge",
       "day": 1,
-      "title": "Config Logging CLI",
+      "title": "Configuration, Logging, and Typed CLI Boundaries",
       "level": "intermediate",
       "phase": "Python and PostgreSQL engineering",
       "estimated_minutes": 105,
@@ -4353,13 +4510,14 @@
       ],
       "dependency_group": "bridge",
       "network": "offline",
+      "outcome": "Build one typed configuration boundary that combines environment and CLI input without leaking connection credentials.",
       "runner": "python"
     },
     {
       "id": "bridge-02",
       "track": "bridge",
       "day": 2,
-      "title": "Protocols Context Decorators",
+      "title": "Protocols, Context Managers, and Decorators",
       "level": "intermediate",
       "phase": "Python and PostgreSQL engineering",
       "estimated_minutes": 105,
@@ -4374,13 +4532,14 @@
       ],
       "dependency_group": "bridge",
       "network": "offline",
+      "outcome": "Express resource ownership with small Protocols, a transaction-aware context manager, and a signature-preserving safe logger.",
       "runner": "python"
     },
     {
       "id": "bridge-03",
       "track": "bridge",
       "day": 3,
-      "title": "Safe Psycopg Queries",
+      "title": "Safe Parameterized Queries with Psycopg",
       "level": "intermediate",
       "phase": "Python and PostgreSQL engineering",
       "estimated_minutes": 105,
@@ -4395,13 +4554,14 @@
       ],
       "dependency_group": "bridge",
       "network": "offline",
+      "outcome": "Keep SQL structure trusted, bind data values separately, and compose the rare dynamic identifier through an allowlist plus Psycopg.",
       "runner": "python"
     },
     {
       "id": "bridge-04",
       "track": "bridge",
       "day": 4,
-      "title": "Transactions Idempotency Retries",
+      "title": "Transactions, Idempotency, and Retries",
       "level": "intermediate",
       "phase": "Python and PostgreSQL engineering",
       "estimated_minutes": 105,
@@ -4416,13 +4576,14 @@
       ],
       "dependency_group": "bridge",
       "network": "offline",
+      "outcome": "Make writes safe to repeat by combining a database uniqueness boundary, explicit transaction ownership, and narrowly classified retries.",
       "runner": "python"
     },
     {
       "id": "bridge-05",
       "track": "bridge",
       "day": 5,
-      "title": "DB Testing Fixtures Doubles",
+      "title": "Database Tests, Fixtures, and Test Doubles",
       "level": "intermediate",
       "phase": "Python and PostgreSQL engineering",
       "estimated_minutes": 105,
@@ -4437,13 +4598,14 @@
       ],
       "dependency_group": "bridge",
       "network": "offline",
+      "outcome": "Separate deterministic domain tests, recording database adapters, and explicitly opt-in rollback-only PostgreSQL integration tests.",
       "runner": "python"
     },
     {
       "id": "bridge-06",
       "track": "bridge",
       "day": 6,
-      "title": "Bulk ETL Validation",
+      "title": "Bulk ETL and Data Validation",
       "level": "advanced",
       "phase": "Python and PostgreSQL engineering",
       "estimated_minutes": 120,
@@ -4458,13 +4620,14 @@
       ],
       "dependency_group": "bridge",
       "network": "offline",
+      "outcome": "Validate untrusted rows before I/O, retain minimal rejection evidence, batch deterministically, and submit typed parameters through an idempotent bulk boundary.",
       "runner": "python"
     },
     {
       "id": "bridge-07",
       "track": "bridge",
       "day": 7,
-      "title": "Async Bounded Concurrency",
+      "title": "Async I/O and Bounded Concurrency",
       "level": "advanced",
       "phase": "Python and PostgreSQL engineering",
       "estimated_minutes": 120,
@@ -4479,13 +4642,14 @@
       ],
       "dependency_group": "bridge",
       "network": "offline",
+      "outcome": "Own async connection cleanup, bound active work with structured concurrency, preserve input order, and keep PostgreSQL value binding safe.",
       "runner": "python"
     },
     {
       "id": "bridge-08",
       "track": "bridge",
       "day": 8,
-      "title": "Production Capstone",
+      "title": "Production Capstone: Observability, Security, and Recovery",
       "level": "advanced",
       "phase": "Python and PostgreSQL engineering",
       "estimated_minutes": 120,
@@ -4500,6 +4664,7 @@
       ],
       "dependency_group": "bridge",
       "network": "offline",
+      "outcome": "Orchestrate a restart-safe batch job through injected effects, validation-before-write, post-write checkpoints, bounded observability, and safe database transport.",
       "runner": "python"
     },
     {
@@ -4523,6 +4688,7 @@
       ],
       "dependency_group": "sql-notebooks",
       "network": "offline",
+      "outcome": "Distinguish IPython line and cell magics.",
       "runner": "python"
     },
     {
@@ -4545,6 +4711,7 @@
       ],
       "dependency_group": "bridge",
       "network": "offline",
+      "outcome": "Deliver immutable ordered PostgreSQL migrations with fake-tested retry/commit uncertainty, redacted observability, readiness probes, and evidence-driven recovery.",
       "runner": "python"
     },
     {
@@ -4567,6 +4734,7 @@
       ],
       "dependency_group": "bridge",
       "network": "offline",
+      "outcome": "Build an offline, deterministic retrieval-and-generation boundary with authorization-before-embedding, untrusted context, exact output schemas, budgets, leakage checks, and evaluation.",
       "runner": "python"
     },
     {
@@ -4590,6 +4758,7 @@
       ],
       "dependency_group": "professional",
       "network": "offline",
+      "outcome": "Build a local dbt-style DuckDB project with producer contracts, deterministic DAG order, layered grain, table/metric contracts, violation tests, and independent reconciliation.",
       "runner": "python"
     },
     {
@@ -4613,6 +4782,7 @@
       ],
       "dependency_group": "core",
       "network": "offline",
+      "outcome": "Reject an apparently healthy release using independently expected identities and values instead of matching grand totals alone.",
       "runner": "python"
     }
   ]

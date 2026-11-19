@@ -194,33 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-020_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-020-explanatory-solutions">docker-020: explanatory solutions<a class="heading-anchor" href="#docker-020-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These are explanations of the supplied teaching fixtures, not fabricated engine results.</p>
-<h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
-<p>A user ID, or UID, is a numeric operating-system identity used for ownership and permission checks. A username is a label mapped to that number. The same username on the host and in a container can refer to different numbers. File access follows effective identities and mount behavior, not matching display names.</p>
-<p>Running an application as a non-root user reduces the privileges of its ordinary process. It does not make a hostile program harmless or replace container isolation. The image must arrange readable application files and an intentionally writable data directory before switching users.</p>
-<p>Bind mounts expose host ownership more directly than an image’s files. Broad recursive ownership changes on a host project can break unrelated files. Diagnose the exact UID, path and mount before modifying permissions. A named teaching volume can have a deliberately prepared owner without changing your repository ownership.</p>
-<p>The fixture creates <code>/data</code>, assigns it to UID 10001 and uses <code>USER 10001:10001</code>. Application code is readable and the root filesystem is read-only at runtime. The named volume is mounted at the intended data path. Check the actual mounted permissions rather than assuming every volume driver behaves identically.</p>
-<p>A permission denied error is a useful boundary. Inspect identity and path. Do not respond with <code>chmod -R 777</code>, privileged mode or a blanket root user. Those changes can make the symptom disappear while invalidating the intended operating contract.</p>
+<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-020.md</code>.</p>
 <h3 id="exercise-1-predict-whether-matching-usernames-guarantee-file-access">Exercise 1: Predict whether matching usernames guarantee file access.<a class="heading-anchor" href="#exercise-1-predict-whether-matching-usernames-guarantee-file-access" aria-label="Link to this section">#</a></h3>
-<p>Names are lookup labels. Compare numeric IDs and the actual mount ownership before diagnosing a cross-environment permission mismatch.</p>
-<p><strong>Expected:</strong> No; numeric identity and permission bits matter.</p>
+<p><strong>Expected answer:</strong> No; numeric identity and permission bits matter.</p>
+<p><strong>Why:</strong> Names are lookup labels. Compare numeric IDs and the actual mount ownership before diagnosing a cross-environment permission mismatch.</p>
 <h3 id="exercise-2-separate-read-only-code-and-writable-data-paths">Exercise 2: Separate read-only code and writable data paths.<a class="heading-anchor" href="#exercise-2-separate-read-only-code-and-writable-data-paths" aria-label="Link to this section">#</a></h3>
-<p>This layout limits accidental code mutation while allowing the app’s intended state changes. Do not make the entire filesystem writable to support one data directory.</p>
-<p><strong>Expected:</strong> /app is code, /data is retained application state.</p>
+<p><strong>Expected evidence:</strong> /app is code, /data is retained application state.</p>
+<p><strong>Why:</strong> This layout limits accidental code mutation while allowing the app’s intended state changes. Do not make the entire filesystem writable to support one data directory.</p>
 <h3 id="exercise-3-design-a-non-root-image-setup-sequence">Exercise 3: Design a non-root image setup sequence.<a class="heading-anchor" href="#exercise-3-design-a-non-root-image-setup-sequence" aria-label="Link to this section">#</a></h3>
-<p>The sequence makes startup deterministic. Deferring broad permission changes to every launch can hide incorrect packaging and require unnecessary privilege.</p>
-<p><strong>Expected:</strong> Create required paths, set ownership, then select the runtime user.</p>
+<p><strong>Expected evidence:</strong> Create required paths, set ownership, then select the runtime user.</p>
+<p><strong>Why:</strong> The sequence makes startup deterministic. Deferring broad permission changes to every launch can hide incorrect packaging and require unnecessary privilege.</p>
 <h3 id="exercise-4-diagnose-a-bind-mount-permission-failure">Exercise 4: Diagnose a bind-mount permission failure.<a class="heading-anchor" href="#exercise-4-diagnose-a-bind-mount-permission-failure" aria-label="Link to this section">#</a></h3>
-<p>A targeted observation narrows the repair. Recursive host ownership changes can damage a developer checkout and are not a general container fix.</p>
-<p><strong>Expected:</strong> Identify mount path, effective UID and exact denied operation.</p>
+<p><strong>Expected answer:</strong> Identify mount path, effective UID and exact denied operation.</p>
+<p><strong>Why:</strong> A targeted observation narrows the repair. Recursive host ownership changes can damage a developer checkout and are not a general container fix.</p>
 <h3 id="exercise-5-explain-why-chmod-777-weakens-the-evidence">Exercise 5: Explain why chmod 777 weakens the evidence.<a class="heading-anchor" href="#exercise-5-explain-why-chmod-777-weakens-the-evidence" aria-label="Link to this section">#</a></h3>
-<p>The repaired system no longer tests the same access contract. Prefer the smallest permission change that grants the required operation to the intended identity.</p>
-<p><strong>Expected:</strong> It allows more writers instead of proving intended ownership.</p>
+<p><strong>Expected answer:</strong> It allows more writers instead of proving intended ownership.</p>
+<p><strong>Why:</strong> The repaired system no longer tests the same access contract. Prefer the smallest permission change that grants the required operation to the intended identity.</p>
 <h3 id="exercise-6-write-a-permission-acceptance-check">Exercise 6: Write a permission acceptance check.<a class="heading-anchor" href="#exercise-6-write-a-permission-acceptance-check" aria-label="Link to this section">#</a></h3>
-<p>Both positive and negative checks matter. Successful persistence alone does not prove that code paths remain protected from accidental writes.</p>
-<p><strong>Expected:</strong> Non-root process can write data and cannot mutate packaged code.</p>
+<p><strong>Expected evidence:</strong> Non-root process can write data and cannot mutate packaged code.</p>
+<p><strong>Why:</strong> Both positive and negative checks matter. Successful persistence alone does not prove that code paths remain protected from accidental writes.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful solution identifies the exact object, the phase when a setting takes effect, the expected normal result and an observation that disproves it. Repeating a command until it succeeds hides the mechanism. Change one variable, keep a failure record, and test the intended behavior again. Source examples here are small enough to inspect; a production system additionally needs ownership, lifecycle, data recovery and operational review. The host exercises are optional and must stay within the learner-created project.</p></article>
+<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>
 </body>
 </html>

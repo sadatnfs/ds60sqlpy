@@ -221,8 +221,7 @@ s-225.272,467,-225.272,467s-235,486,-235,486c-2.7,4.7,-9,7,-19,7
 c-6,0,-10,-1,-12,-3s-194,-422,-194,-422s-65,47,-65,47z
 M834 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.1947em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">ϵ</span><span class="mclose">)</span></span></span></span>. Each denominator is a complete expression; the exponent belongs to beta with its subscript.</p>
 <h3 id="run-this-investigation">Run this investigation<a class="heading-anchor" href="#run-this-investigation" aria-label="Link to this section">#</a></h3>
-<p>Use the <strong>JAX</strong> subject in the shared <code>/classroom</code> interface and its prepared <code>jax-cpu</code> profile. A Run starts a fresh Python process; save source and notes before replacing an attempt. The examples below are each complete programs, including their setup. They use tiny offline fixtures and deliberately enable 64-bit arithmetic before constructing arrays. This is a course precision choice, not the usual JAX default. No packages, models or data are downloaded.</p>
-<p>Learner source: <code>courses/jax/lessons/jax-014.py</code>. Guide: <code>courses/jax/guides/jax-014.md</code>. Predict the value and failure behavior before running. A passing assertion supports that particular contract; it does not establish statistical validity, mastery or accelerator performance.</p>
+<p>Open <code>jax-014</code> under the <strong>JAX</strong> subject in <code>/classroom</code> with its prepared <code>jax-cpu</code> profile. Worked example 1, <em>Momentum remembers</em>, and worked example 2, <em>Audit Adam&#x27;s first correction</em>, are complete programs that include only the setup they use and each print <code>jax-014: 1 asserted case passed</code>. The learner file <code>courses/jax/lessons/jax-014.py</code> leaves the six exercises, from <em>Trace plain SGD</em> to <em>Reverse the gradient</em>, for you to implement; the complete reference prints <code>jax-014: 8 asserted cases passed</code>. Every program enables 64-bit arithmetic before creating arrays, a course choice since JAX defaults to 32 bit, and every Run is a fresh Python process, so save source and notes before replacing an attempt. A passing assertion supports its stated contract only, not statistical validity, mastery or accelerator performance.</p>
 <h3 id="worked-investigations">Worked investigations<a class="heading-anchor" href="#worked-investigations" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-momentum-remembers">Worked example 1: Momentum remembers<a class="heading-anchor" href="#worked-example-1-momentum-remembers" aria-label="Link to this section">#</a></h4>
 <p>Apply gradient two at weight zero with velocity zero, then velocity one.</p>
@@ -232,10 +231,8 @@ M834 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">�
 
 <span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
 
-<span class="syntax-keyword">import</span> math
 <span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 <span class="syntax-keyword">import</span> jax
-<span class="syntax-keyword">import</span> jax.numpy <span class="syntax-keyword">as</span> jnp
 
 
 <span class="syntax-comment"># Choose precision before creating arrays; the usual JAX default is 32 bit.</span>
@@ -251,20 +248,6 @@ jax<span class="syntax-operator">.</span>config<span class="syntax-operator">.</
     <span class="syntax-keyword">return</span> weight <span class="syntax-operator">-</span> rate <span class="syntax-operator">*</span> new_velocity<span class="syntax-punctuation">,</span> new_velocity
 
 
-<span class="syntax-keyword">def</span> <span class="syntax-function">adam_step</span><span class="syntax-punctuation">(</span>weight<span class="syntax-punctuation">,</span> state<span class="syntax-punctuation">,</span> gradient<span class="syntax-punctuation">,</span> rate<span class="syntax-operator">=</span><span class="syntax-number">0.1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
-    mean<span class="syntax-punctuation">,</span> square<span class="syntax-punctuation">,</span> step <span class="syntax-operator">=</span> state
-    step <span class="syntax-operator">=</span> step <span class="syntax-operator">+</span> <span class="syntax-number">1</span>
-    mean <span class="syntax-operator">=</span> <span class="syntax-number">0.9</span> <span class="syntax-operator">*</span> mean <span class="syntax-operator">+</span> <span class="syntax-number">0.1</span> <span class="syntax-operator">*</span> gradient
-    square <span class="syntax-operator">=</span> <span class="syntax-number">0.999</span> <span class="syntax-operator">*</span> square <span class="syntax-operator">+</span> <span class="syntax-number">0.001</span> <span class="syntax-operator">*</span> gradient <span class="syntax-operator">*</span> gradient
-    corrected_mean <span class="syntax-operator">=</span> mean <span class="syntax-operator">/</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span> <span class="syntax-operator">-</span> <span class="syntax-number">0.9</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span>step<span class="syntax-punctuation">)</span>
-    corrected_square <span class="syntax-operator">=</span> square <span class="syntax-operator">/</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span> <span class="syntax-operator">-</span> <span class="syntax-number">0.999</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span>step<span class="syntax-punctuation">)</span>
-    updated <span class="syntax-operator">=</span> weight <span class="syntax-operator">-</span> rate <span class="syntax-operator">*</span> corrected_mean <span class="syntax-operator">/</span> <span class="syntax-punctuation">(</span>jnp<span class="syntax-operator">.</span>sqrt<span class="syntax-punctuation">(</span>corrected_square<span class="syntax-punctuation">)</span> <span class="syntax-operator">+</span> <span class="syntax-number">1e-8</span><span class="syntax-punctuation">)</span>
-    <span class="syntax-keyword">return</span> updated<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span>mean<span class="syntax-punctuation">,</span> square<span class="syntax-punctuation">,</span> step<span class="syntax-punctuation">)</span>
-
-
-zero_state <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>jnp<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">(</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> jnp<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">(</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> jnp<span class="syntax-operator">.</span>int64<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
-
-
 <span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-comment"># Case 1: Momentum remembers</span>
     fresh<span class="syntax-punctuation">,</span> v0 <span class="syntax-operator">=</span> momentum_step<span class="syntax-punctuation">(</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">)</span>
@@ -273,7 +256,7 @@ zero_state <span class="syntax-operator">=</span> <span class="syntax-punctuatio
     close<span class="syntax-punctuation">(</span>continued<span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">0.29</span><span class="syntax-punctuation">)</span>
     close<span class="syntax-punctuation">(</span>v1<span class="syntax-punctuation">,</span> <span class="syntax-number">2.9</span><span class="syntax-punctuation">)</span>
 
-    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">jax-014</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&quot;</span><span class="syntax-string">: 1 asserted cases passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">jax-014: 1 asserted case passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
@@ -286,7 +269,6 @@ zero_state <span class="syntax-operator">=</span> <span class="syntax-punctuatio
 
 <span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
 
-<span class="syntax-keyword">import</span> math
 <span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 <span class="syntax-keyword">import</span> jax
 <span class="syntax-keyword">import</span> jax.numpy <span class="syntax-keyword">as</span> jnp
@@ -298,11 +280,6 @@ jax<span class="syntax-operator">.</span>config<span class="syntax-operator">.</
 
 <span class="syntax-keyword">def</span> <span class="syntax-function">close</span><span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-10</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">1e-10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span>atol<span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span>rtol<span class="syntax-punctuation">)</span>
-
-
-<span class="syntax-keyword">def</span> <span class="syntax-function">momentum_step</span><span class="syntax-punctuation">(</span>weight<span class="syntax-punctuation">,</span> velocity<span class="syntax-punctuation">,</span> gradient<span class="syntax-punctuation">,</span> rate<span class="syntax-operator">=</span><span class="syntax-number">0.1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
-    new_velocity <span class="syntax-operator">=</span> <span class="syntax-number">0.9</span> <span class="syntax-operator">*</span> velocity <span class="syntax-operator">+</span> gradient
-    <span class="syntax-keyword">return</span> weight <span class="syntax-operator">-</span> rate <span class="syntax-operator">*</span> new_velocity<span class="syntax-punctuation">,</span> new_velocity
 
 
 <span class="syntax-keyword">def</span> <span class="syntax-function">adam_step</span><span class="syntax-punctuation">(</span>weight<span class="syntax-punctuation">,</span> state<span class="syntax-punctuation">,</span> gradient<span class="syntax-punctuation">,</span> rate<span class="syntax-operator">=</span><span class="syntax-number">0.1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
@@ -327,7 +304,7 @@ zero_state <span class="syntax-operator">=</span> <span class="syntax-punctuatio
     <span class="syntax-keyword">assert</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>state<span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span>
     close<span class="syntax-punctuation">(</span>weight<span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">0.2</span> <span class="syntax-operator">/</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2.0</span> <span class="syntax-operator">+</span> <span class="syntax-number">1e-8</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
 
-    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">jax-014</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&quot;</span><span class="syntax-string">: 1 asserted cases passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">jax-014: 1 asserted case passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
@@ -336,39 +313,39 @@ zero_state <span class="syntax-operator">=</span> <span class="syntax-punctuatio
 <h4 id="exercise-1-trace-plain-sgd">Exercise 1: Trace plain SGD<a class="heading-anchor" href="#exercise-1-trace-plain-sgd" aria-label="Link to this section">#</a></h4>
 <p>Update w=1 with gradient three and rate 0.2.</p>
 <p><strong>Expected:</strong> 0.4.</p>
-<p><strong>Verify:</strong> Retain the relevant inputs, intermediate calculation and observation. Plain SGD uses no history in this defined rule.</p>
+<p><strong>Verify:</strong> Plain SGD uses no history in this defined rule.</p>
 <p><strong>Hint 1:</strong> Subtract, rather than add, the gradient step.</p>
-<p><strong>Hint 2:</strong> Revisit the worked case that changes the same assumption, then close the reference and reconstruct the result from the stated contract.</p>
+<p><strong>Hint 2:</strong> The reference solution calls <code>jnp.float64</code> and then makes 1 assertion against the expected observation.</p>
 <h4 id="exercise-2-continue-momentum">Exercise 2: Continue momentum<a class="heading-anchor" href="#exercise-2-continue-momentum" aria-label="Link to this section">#</a></h4>
 <p>Apply gradient two twice from weight and velocity zero.</p>
 <p><strong>Expected:</strong> First weight -0.2; second -0.58; final velocity 3.8.</p>
-<p><strong>Verify:</strong> Retain the relevant inputs, intermediate calculation and observation. The second velocity includes 90 percent of the first plus the new gradient.</p>
+<p><strong>Verify:</strong> The second velocity includes 90 percent of the first plus the new gradient.</p>
 <p><strong>Hint 1:</strong> Feed both returned values into the next transition.</p>
-<p><strong>Hint 2:</strong> Revisit the worked case that changes the same assumption, then close the reference and reconstruct the result from the stated contract.</p>
+<p><strong>Hint 2:</strong> The reference solution calls <code>momentum_step</code> and then makes 2 assertions against the expected observation.</p>
 <h4 id="exercise-3-continue-adam-s-counter">Exercise 3: Continue Adam&#x27;s counter<a class="heading-anchor" href="#exercise-3-continue-adam-s-counter" aria-label="Link to this section">#</a></h4>
 <p>Apply the same gradient twice while retaining Adam state.</p>
 <p><strong>Expected:</strong> Step two; weight approximately -0.2.</p>
-<p><strong>Verify:</strong> Retain the relevant inputs, intermediate calculation and observation. For this constant gradient, corrected moments remain two and four on both steps.</p>
+<p><strong>Verify:</strong> For this constant gradient, corrected moments remain two and four on both steps.</p>
 <p><strong>Hint 1:</strong> A counter reset changes the bias correction.</p>
-<p><strong>Hint 2:</strong> Revisit the worked case that changes the same assumption, then close the reference and reconstruct the result from the stated contract.</p>
+<p><strong>Hint 2:</strong> The reference solution calls <code>adam_step</code> and then makes 2 assertions against the expected observation.</p>
 <h4 id="exercise-4-preserve-zero-gradient-history">Exercise 4: Preserve zero-gradient history<a class="heading-anchor" href="#exercise-4-preserve-zero-gradient-history" aria-label="Link to this section">#</a></h4>
 <p>After one positive gradient, apply a zero gradient with retained Adam state.</p>
 <p><strong>Expected:</strong> The parameter still moves because the first moment retains history.</p>
-<p><strong>Verify:</strong> Retain the relevant inputs, intermediate calculation and observation. Zero current gradient is not equivalent to a fresh optimizer or no update.</p>
+<p><strong>Verify:</strong> Zero current gradient is not equivalent to a fresh optimizer or no update.</p>
 <p><strong>Hint 1:</strong> Inspect retained moments before predicting displacement.</p>
-<p><strong>Hint 2:</strong> Revisit the worked case that changes the same assumption, then close the reference and reconstruct the result from the stated contract.</p>
+<p><strong>Hint 2:</strong> The reference solution calls <code>adam_step</code> and then makes 2 assertions against the expected observation.</p>
 <h4 id="exercise-5-compile-the-transition">Exercise 5: Compile the transition<a class="heading-anchor" href="#exercise-5-compile-the-transition" aria-label="Link to this section">#</a></h4>
 <p>JIT adam_step and compare its first update with eager execution.</p>
 <p><strong>Expected:</strong> Equal parameter and state leaves.</p>
-<p><strong>Verify:</strong> Retain the relevant inputs, intermediate calculation and observation. Pure state transitions compose with compilation when their structures and operations are supported.</p>
+<p><strong>Verify:</strong> Pure state transitions compose with compilation when their structures and operations are supported.</p>
 <p><strong>Hint 1:</strong> Compare all state, not only the displayed weight.</p>
-<p><strong>Hint 2:</strong> Revisit the worked case that changes the same assumption, then close the reference and reconstruct the result from the stated contract.</p>
+<p><strong>Hint 2:</strong> The reference solution calls <code>adam_step</code> and <code>jax.jit</code> and then makes 2 assertions against the expected observation.</p>
 <h4 id="exercise-6-reverse-the-gradient">Exercise 6: Reverse the gradient<a class="heading-anchor" href="#exercise-6-reverse-the-gradient" aria-label="Link to this section">#</a></h4>
 <p>Apply gradient minus two from zero state.</p>
 <p><strong>Expected:</strong> A positive parameter update of 0.2/(2+1e-8).</p>
-<p><strong>Verify:</strong> Retain the relevant inputs, intermediate calculation and observation. The first moment changes sign while the squared moment does not.</p>
+<p><strong>Verify:</strong> The first moment changes sign while the squared moment does not.</p>
 <p><strong>Hint 1:</strong> Separate sign-sensitive and squared state.</p>
-<p><strong>Hint 2:</strong> Revisit the worked case that changes the same assumption, then close the reference and reconstruct the result from the stated contract.</p>
+<p><strong>Hint 2:</strong> The reference solution calls <code>adam_step</code> and then makes 3 assertions against the expected observation.</p>
 <h3 id="diagnosis-and-boundaries">Diagnosis and boundaries<a class="heading-anchor" href="#diagnosis-and-boundaries" aria-label="Link to this section">#</a></h3>
 <p>If continued training differs, compare parameters, moments, step count, learning-rate policy and the actual next batch/key. An optimizer name is not proof that returned state was retained. Match epsilon placement and reduction before comparing frameworks.</p>
 <h3 id="transfer-and-review">Transfer and review<a class="heading-anchor" href="#transfer-and-review" aria-label="Link to this section">#</a></h3>
@@ -379,7 +356,7 @@ zero_state <span class="syntax-operator">=</span> <span class="syntax-punctuatio
 <li><a href="https://arxiv.org/abs/1412.6980">Adam paper</a></li>
 </ul>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Use the checked-in $guide-ds60sqlpy-learning skill for <code>jax-014</code>. Start with my own prediction and source. Ask me to explain one intermediate shape, derivative or state transition, then give a progressive hint for the first incorrect assumption. Distinguish authored examples, my actual receipt and any hardware or population claim requiring additional evidence.</p></article>
+<p>Use the checked-in $guide-ds60sqlpy-learning skill for <code>jax-014</code> (Optimizer updates are explicit state transitions), focusing on SGD, momentum, Adam, optimizer state, bias correction. Start with my own prediction and source for one exercise, such as <em>Continue Adam&#x27;s counter</em>. Ask me to explain one intermediate shape, derivative or state transition, then give a progressive hint for the first incorrect assumption. Distinguish authored examples, my actual saved run output and any hardware or population claim requiring additional evidence.</p></article>
   </main>
 </body>
 </html>

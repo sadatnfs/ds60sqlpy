@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/advanced-spark-modeling/guides/asm-009.md</code></p>
     </header>
     <article class="document"><h2 id="asm-009-retry-safe-evaluation-and-external-side-effects">asm-009: Retry-safe evaluation and external side effects<a class="heading-anchor" href="#asm-009-retry-safe-evaluation-and-external-side-effects" aria-label="Link to this section">#</a></h2>
-<p>Tutorial mode. Stage: intermediate. Direct prerequisites: <code>asm-008</code>, <code>spark-035</code>.</p>
+<p>Tutorial mode. Stage: advanced. Direct prerequisites: <code>asm-008</code>, <code>spark-035</code>.</p>
 <h3 id="starting-point-and-result">Starting point and result<a class="heading-anchor" href="#starting-point-and-result" aria-label="Link to this section">#</a></h3>
 <p>Spark may recompute a partition after failure or run speculative attempts. An objective evaluation must not count those attempts as additional observations. This lesson performs two real bounded evaluations and separately models duplicate external deliveries. It does not claim to have injected a real executor failure or qualified speculative execution.</p>
 <h3 id="mechanism-logical-work-differs-from-attempts">Mechanism: logical work differs from attempts<a class="heading-anchor" href="#mechanism-logical-work-differs-from-attempts" aria-label="Link to this section">#</a></h3>

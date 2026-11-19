@@ -194,31 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-057_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-057-explanatory-solutions">web-057: explanatory solutions<a class="heading-anchor" href="#web-057-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.</p>
-<h3 id="why-the-mechanism-works">Why the mechanism works<a class="heading-anchor" href="#why-the-mechanism-works" aria-label="Link to this section">#</a></h3>
-<p>The earlier PHP pads isolated language and application logic. A real HTTP lab adds a browser, request headers, cookies, server process and persistent storage. Each boundary introduces behavior that a pure function cannot prove. The maintained optional fixture runs a local PHP development server in its own Linux container and binds its published port to host loopback. It is a learning server, not an internet deployment.</p>
-<p>The fixture stores synthetic notes under an anonymous browser session. That demonstrates session continuity and separation, not verified user identity. A session cookie carries an identifier; the server stores the session and a random owner key. Prepared statements store notes in SQLite. A form includes a CSRF token, the server validates it before writing, and successful POST handling redirects to a GET page. Source, database and session state have distinct lifetimes.</p>
-<p>Read the fixture README and copy the lab into an ignored learner directory before editing. Its Compose project name is ds60-web-study and its loopback port is 18088. Inspect whether those names belong to existing work before starting. The fixture builds only when you deliberately run the documented command. It does not mount the Docker socket, contact the classroom database or expose a public port. Named volumes retain notes and sessions across container replacement; removing those volumes is a separate reset.</p>
+<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-057.md</code>.</p>
 <h3 id="exercise-1-draw-the-lifecycle-from-browser-cookie-to-server-session-to-stored-note">Exercise 1: Draw the lifecycle from browser cookie to server session to stored note.<a class="heading-anchor" href="#exercise-1-draw-the-lifecycle-from-browser-cookie-to-server-session-to-stored-note" aria-label="Link to this section">#</a></h3>
-<p>The cookie identifies session state; the session supplies an owner key and CSRF token; the database stores the owned note.</p>
-<p>Trace the smallest example before editing. Name which values are source and which are observations.</p>
+<p><strong>Expected answer:</strong> The cookie identifies session state; the session supplies an owner key and CSRF token; the database stores the owned note.</p>
+<p><strong>Why:</strong> The cookie selects the server session, the session provides the owner key and CSRF token, and the database stores the note under that owner.</p>
 <h3 id="exercise-2-inspect-the-real-content-type-and-redirect-status">Exercise 2: Inspect the real Content-Type and redirect status.<a class="heading-anchor" href="#exercise-2-inspect-the-real-content-type-and-redirect-status" aria-label="Link to this section">#</a></h3>
-<p>Record actual response headers instead of inferring them from PHP source.</p>
-<p>Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.</p>
+<p><strong>Expected evidence:</strong> Record actual response headers instead of inferring them from PHP source.</p>
+<p><strong>Why:</strong> Observed headers show what the server really sent, which can differ from what the source suggests.</p>
 <h3 id="exercise-3-run-the-owned-lab-and-create-one-synthetic-note-through-the-browser">Exercise 3: Run the owned lab and create one synthetic note through the browser.<a class="heading-anchor" href="#exercise-3-run-the-owned-lab-and-create-one-synthetic-note-through-the-browser" aria-label="Link to this section">#</a></h3>
-<p>The note survives a page reload and appears after a successful POST-redirect-GET sequence.</p>
-<p>Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.</p>
+<p><strong>Expected evidence:</strong> The note survives a page reload and appears after a successful POST-redirect-GET sequence.</p>
+<p><strong>Why:</strong> POST/redirect/GET makes the reload repeat a safe GET, so the note appears once and is not submitted twice.</p>
 <h3 id="exercise-4-submit-a-request-with-a-missing-or-wrong-csrf-token">Exercise 4: Submit a request with a missing or wrong CSRF token.<a class="heading-anchor" href="#exercise-4-submit-a-request-with-a-missing-or-wrong-csrf-token" aria-label="Link to this section">#</a></h3>
-<p>The server returns a rejection and inserts no note.</p>
-<p>Keep the failing input. Identify the first layer where the observed result differs from the intended contract.</p>
+<p><strong>Expected evidence:</strong> The server returns a rejection and inserts no note.</p>
+<p><strong>Why:</strong> The server compares the submitted token with the session token and rejects mismatches before writing.</p>
 <h3 id="exercise-5-stop-and-resume-the-lab-without-deleting-volumes">Exercise 5: Stop and resume the lab without deleting volumes.<a class="heading-anchor" href="#exercise-5-stop-and-resume-the-lab-without-deleting-volumes" aria-label="Link to this section">#</a></h3>
-<p>The same browser session can recover its notes while the named data and session volumes remain.</p>
-<p>Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.</p>
+<p><strong>Expected evidence:</strong> The same browser session can recover its notes while the named data and session volumes remain.</p>
+<p><strong>Why:</strong> Named volumes keep the database and session files, so the same browser session can see its notes after resume.</p>
 <h3 id="exercise-6-explain-which-properties-this-local-server-has-not-qualified">Exercise 6: Explain which properties this local server has not qualified.<a class="heading-anchor" href="#exercise-6-explain-which-properties-this-local-server-has-not-qualified" aria-label="Link to this section">#</a></h3>
-<p>It does not establish production TLS, verified accounts, multi-instance concurrency, internet hardening or high availability.</p>
-<p>Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.</p>
-<h3 id="reference-comparison-and-limits">Reference comparison and limits<a class="heading-anchor" href="#reference-comparison-and-limits" aria-label="Link to this section">#</a></h3>
-<p>Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.</p></article>
+<p><strong>Expected answer:</strong> It does not establish production TLS, verified accounts, multi-instance concurrency, internet hardening or high availability.</p>
+<p><strong>Why:</strong> Production needs TLS, verified accounts, horizontal scaling, hardening and monitored availability, none of which a loopback lab provides.</p>
+<h3 id="comparing-your-worksheet">Comparing your worksheet<a class="heading-anchor" href="#comparing-your-worksheet" aria-label="Link to this section">#</a></h3>
+<p>This lesson has no executable reference. Compare your worksheet with the answers above. The optional lab in <code>courses/web-development/fixtures/php-http-lab/</code> gives real request evidence only when you deliberately run it.</p></article>
   </main>
 </body>
 </html>

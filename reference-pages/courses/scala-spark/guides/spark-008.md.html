@@ -196,7 +196,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="spark-008-assertions-numeric-boundaries-and-independent-oracles">spark-008: Assertions, numeric boundaries, and independent oracles<a class="heading-anchor" href="#spark-008-assertions-numeric-boundaries-and-independent-oracles" aria-label="Link to this section">#</a></h2>
 <p>Authored tutorial and practice content. The prepared Scala/JVM worker executes a bounded program; process success and understanding remain distinct. No source file installs a tool or downloads a dependency.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
-<p>Beginner; approximately 105 minutes. Direct design prerequisites: <code>spark-007</code>. The lesson uses Scala 2.13 syntax and the prepared JDK 17 worker. The older design document proposed a different Spark/JDK tuple; use the current <a href="../execution-baseline.md.html">execution baseline</a> for this authored material.</p>
+<p>Beginner; approximately 75 minutes. Direct prerequisites: <code>spark-007</code>. The lesson uses Scala 2.13 syntax and the prepared JDK 17 worker. The <a href="../execution-baseline.md.html">execution baseline</a> lists the exact Scala, JDK and Spark versions.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
 <p>Open <code>spark-008</code> in the classroom, select the Scala source, prepare the <code>scala-jvm</code> profile and run the saved pad. The worker stages the single source as <code>Main.scala</code> and invokes <code>object Main</code>. Read the terminal output and exact assertions. The <a href="../lessons/spark-008.scala.html">learner source</a> runs two complete demonstrations; its six task functions remain explicit stubs until you implement them. Preserve your saved attempt. The <a href="../solutions/spark-008_solution.scala.html">reference program</a> and <a href="../solutions/spark-008_solutions.md.html">explained solutions</a> are separate and should be opened after an attempt or an explicit worked-comparison request. If the profile is unavailable, reading and saving remain available; opening this guide does not prepare a runtime.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
@@ -282,7 +282,7 @@ println<span class="syntax-punctuation">(</span><span class="syntax-string">s&qu
 <li><a href="https://docs.scala-lang.org/overviews/collections-2.13/operations.html">Scala 2.13 collections operations</a>.</li>
 </ul>
 <ul>
-<li><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Math.html#addExact(long,long">Java17 Math.addExact</a>).</li>
+<li><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Math.html#addExact(long,long">Java 17 Math.addExact</a>).</li>
 </ul>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to coach me through spark-008: Assertions, numeric boundaries, and independent oracles.

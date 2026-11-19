@@ -194,33 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-028_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-028-explanatory-solutions">docker-028: explanatory solutions<a class="heading-anchor" href="#docker-028-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These are explanations of the supplied teaching fixtures, not fabricated engine results.</p>
-<h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
-<p>A registry stores image manifests and blobs for distribution. A repository groups related image names inside that registry. Authentication determines who can access the registry; authorization determines which operations that identity may perform. Public pull access is different from permission to overwrite a release tag.</p>
-<p>A local tag does not publish anything. Publication is a deliberate operation with credentials, destination, retention and rollback implications. This course uses local builds and offline exports by default. You can study a registry workflow without pushing the course or your private code anywhere.</p>
-<p>Mutable tags such as latest are useful conveniences but weak deployment identities. A release procedure should resolve or record an immutable digest and relate it to source, build inputs and acceptance evidence. A registry availability problem should not cause an operator to deploy a different unreviewed image merely because its tag looks similar.</p>
-<p>Read a reference as registry/repository:tag or registry/repository@digest. A tag may point to a platform index, which then selects a platform manifest. Keep that level of identity clear when comparing builds. Registry credentials belong in an approved credential store or short-lived CI mechanism, never in a Dockerfile.</p>
-<p>The examples below inspect local metadata and a conceptual release record. They intentionally contain no push command. If you later publish your own project, make the destination and intended visibility explicit and verify the uploaded immutable identity after publication.</p>
+<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-028.md</code>.</p>
 <h3 id="exercise-1-parse-the-components-of-an-image-reference">Exercise 1: Parse the components of an image reference.<a class="heading-anchor" href="#exercise-1-parse-the-components-of-an-image-reference" aria-label="Link to this section">#</a></h3>
-<p>The registry location and image identity should be unambiguous before any authenticated operation. A familiar short tag can hide a different destination.</p>
-<p><strong>Expected:</strong> Registry, repository, optional tag and optional digest.</p>
+<p><strong>Expected evidence:</strong> Registry, repository, optional tag and optional digest.</p>
+<p><strong>Why:</strong> The registry location and image identity should be unambiguous before any authenticated operation. A familiar short tag can hide a different destination.</p>
 <h3 id="exercise-2-predict-whether-adding-a-local-tag-uploads-bytes">Exercise 2: Predict whether adding a local tag uploads bytes.<a class="heading-anchor" href="#exercise-2-predict-whether-adding-a-local-tag-uploads-bytes" aria-label="Link to this section">#</a></h3>
-<p>This separation lets you prepare and inspect an artifact without distributing it. Publication requires its own intentional command and authorization.</p>
-<p><strong>Expected:</strong> No; local naming and registry publication are separate.</p>
+<p><strong>Expected answer:</strong> No; local naming and registry publication are separate.</p>
+<p><strong>Why:</strong> This separation lets you prepare and inspect an artifact without distributing it. Publication requires its own intentional command and authorization.</p>
 <h3 id="exercise-3-design-a-release-identity-record">Exercise 3: Design a release identity record.<a class="heading-anchor" href="#exercise-3-design-a-release-identity-record" aria-label="Link to this section">#</a></h3>
-<p>The record should join source and runtime evidence. A tag alone cannot preserve that relationship if it is later moved.</p>
-<p><strong>Expected:</strong> Source revision, immutable image identity, platform and tested behavior.</p>
+<p><strong>Expected evidence:</strong> Source revision, immutable image identity, platform and tested behavior.</p>
+<p><strong>Why:</strong> The record should join source and runtime evidence. A tag alone cannot preserve that relationship if it is later moved.</p>
 <h3 id="exercise-4-diagnose-an-overwritten-mutable-release-tag">Exercise 4: Diagnose an overwritten mutable release tag.<a class="heading-anchor" href="#exercise-4-diagnose-an-overwritten-mutable-release-tag" aria-label="Link to this section">#</a></h3>
-<p>The same label can name different content. Resolve the exact identity before concluding that earlier acceptance evidence applies.</p>
-<p><strong>Expected:</strong> Compare recorded digest with the currently resolved artifact.</p>
+<p><strong>Expected answer:</strong> Compare recorded digest with the currently resolved artifact.</p>
+<p><strong>Why:</strong> The same label can name different content. Resolve the exact identity before concluding that earlier acceptance evidence applies.</p>
 <h3 id="exercise-5-explain-why-credentials-do-not-belong-in-the-build-context">Exercise 5: Explain why credentials do not belong in the build context.<a class="heading-anchor" href="#exercise-5-explain-why-credentials-do-not-belong-in-the-build-context" aria-label="Link to this section">#</a></h3>
-<p>Registry access is an operation credential, not application source. Use a reviewed credential channel and avoid printing values during diagnostics.</p>
-<p><strong>Expected:</strong> They can be transferred, layered or logged beyond the intended lifetime.</p>
+<p><strong>Expected answer:</strong> They can be transferred, layered or logged beyond the intended lifetime.</p>
+<p><strong>Why:</strong> Registry access is an operation credential, not application source. Use a reviewed credential channel and avoid printing values during diagnostics.</p>
 <h3 id="exercise-6-describe-a-safe-publication-review-without-performing-it">Exercise 6: Describe a safe publication review without performing it.<a class="heading-anchor" href="#exercise-6-describe-a-safe-publication-review-without-performing-it" aria-label="Link to this section">#</a></h3>
-<p>A reviewable proposal is concrete enough to approve. It should not upload a different artifact later or silently change repository visibility.</p>
-<p><strong>Expected:</strong> Explicit destination, visibility, immutable artifact and rollback plan.</p>
+<p><strong>Expected answer:</strong> Explicit destination, visibility, immutable artifact and rollback plan.</p>
+<p><strong>Why:</strong> A reviewable proposal is concrete enough to approve. It should not upload a different artifact later or silently change repository visibility.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful solution identifies the exact object, the phase when a setting takes effect, the expected normal result and an observation that disproves it. Repeating a command until it succeeds hides the mechanism. Change one variable, keep a failure record, and test the intended behavior again. Source examples here are small enough to inspect; a production system additionally needs ownership, lifecycle, data recovery and operational review. The host exercises are optional and must stay within the learner-created project.</p></article>
+<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>
 </body>
 </html>

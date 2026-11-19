@@ -198,7 +198,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Beginner; approximately 90 minutes. Direct prerequisites: <code>julia-004</code>, <code>julia-007</code>.</p>
 <p>Choose collection representations according to identity, ordering, mutability and lookup needs.</p>
 <h3 id="classroom-execution">Classroom execution<a class="heading-anchor" href="#classroom-execution" aria-label="Link to this section">#</a></h3>
-<p>Choose <strong>Julia language and scientific computing</strong> in <code>/classroom</code>, open this unit, and select its prepared <code>julia</code> runtime. The worker starts a fresh <code>main.jl</code> process with two Julia threads, a fixed package environment, no startup file and offline package settings. Both worked examples are complete under that environment. Save your current pad before replacing it. No package, model or dataset is fetched by a lesson.</p>
+<p>Open <code>julia-008</code> in <code>/classroom</code> with its prepared <code>julia</code> runtime. Worked case A (a record with explicit fields) and worked case B (count categories and inspect membership) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing <code>julia-008: all reference checks passed</code>. The <a href="../README.md.html">course overview</a> describes the shared runtime: a fresh offline <code>main.jl</code> process with two threads and a fixed package environment.</p>
 <h3 id="a-collection-has-a-contract-beyond-its-contents">A collection has a contract beyond its contents<a class="heading-anchor" href="#a-collection-has-a-contract-beyond-its-contents" aria-label="Link to this section">#</a></h3>
 <p>A tuple is an immutable ordered collection whose element types can differ. A named tuple adds field names, making a small record easier to interpret. A dictionary maps keys to values, while a set records membership. These structures answer different questions and should not be selected only because they can all hold several values.</p>
 <p>A one-element tuple needs a trailing comma to distinguish it from parentheses around an expression. Named tuples expose fields by name as well as position. Their field names and order are part of their type, which can support clear small record interfaces. They do not automatically make nested mutable values immutable.</p>
@@ -245,14 +245,14 @@ worked_b<span class="syntax-punctuation">(</span><span class="syntax-punctuation
 <h3 id="six-investigations">Six investigations<a class="heading-anchor" href="#six-investigations" aria-label="Link to this section">#</a></h3>
 <h4 id="1-make-one-tuple-element">1. Make one tuple element<a class="heading-anchor" href="#1-make-one-tuple-element" aria-label="Link to this section">#</a></h4>
 <p>Represent a single integer as a tuple.</p>
-<p><strong>Expected:</strong> Use(7,), including its comma.</p>
+<p><strong>Expected:</strong> Use <code>(7,)</code>, including its comma.</p>
 <p><strong>Hint:</strong> Parentheses alone group an expression.</p>
 <h4 id="2-name-a-returned-record">2. Name a returned record<a class="heading-anchor" href="#2-name-a-returned-record" aria-label="Link to this section">#</a></h4>
 <p>Return an ID, score and eligibility field.</p>
 <p><strong>Expected:</strong> Callers can access fields by their names.</p>
 <p><strong>Hint:</strong> Prefer explicit semantic labels to remembered positions.</p>
 <h4 id="3-preserve-multiplicity">3. Preserve multiplicity<a class="heading-anchor" href="#3-preserve-multiplicity" aria-label="Link to this section">#</a></h4>
-<p>Count labels a,b,b before converting to a set.</p>
+<p>Count the labels <code>a</code>, <code>b</code>, <code>b</code> before converting them to a set.</p>
 <p><strong>Expected:</strong> Counts are 1 and 2 while the set has two distinct labels.</p>
 <p><strong>Hint:</strong> Frequency and membership are different questions.</p>
 <h4 id="4-control-presentation-order">4. Control presentation order<a class="heading-anchor" href="#4-control-presentation-order" aria-label="Link to this section">#</a></h4>
@@ -273,7 +273,7 @@ worked_b<span class="syntax-punctuation">(</span><span class="syntax-punctuation
 <li><a href="https://docs.julialang.org/en/v1/manual/functions/">Named tuples and functions</a></li>
 </ul>
 <h3 id="study-companion">Study companion<a class="heading-anchor" href="#study-companion" aria-label="Link to this section">#</a></h3>
-<p>Use the repository learning-companion skill with this lesson ID, your prediction and your actual source/output. Ask for a diagnosis of the first incorrect type, shape, state transition or assumption. Keep observed execution distinct from a timing claim, inferred mathematical result or external deployment.</p></article>
+<p>A repository-aware assistant with the learning-companion skill can review <code>julia-008</code> with you. Give it your prediction for one investigation, your source and the actual output, and ask it to find the first incorrect assumption about tuple, NamedTuple, dictionary, set or key equality.</p></article>
   </main>
 </body>
 </html>

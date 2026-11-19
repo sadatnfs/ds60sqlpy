@@ -197,32 +197,26 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Use the guide and synthetic case ledger. A prediction or copied fixture is not a live runtime observation.</p>
 <h3 id="exercise-1-draw-container-order">Exercise 1: Draw container order<a class="heading-anchor" href="#exercise-1-draw-container-order" aria-label="Link to this section">#</a></h3>
 <p>Identify init completion as a prerequisite for the application reader.</p>
-<p>Expected: prepare completes before read starts.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-2-trace-the-shared-volume">Exercise 2: Trace the shared volume<a class="heading-anchor" href="#exercise-2-trace-the-shared-volume" aria-label="Link to this section">#</a></h3>
 <p>Match volume name work across Pod, init and application mounts.</p>
-<p>Expected: Both containers access the same /work emptyDir within one Pod.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-3-observe-one-application-restart">Exercise 3: Observe one application restart<a class="heading-anchor" href="#exercise-3-observe-one-application-restart" aria-label="Link to this section">#</a></h3>
 <p>Use the exact teacher-provided finite fixture and retain UID, marker and restart count.</p>
-<p>Expected: Same Pod UID/marker across the failed first and successful next application attempt.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-4-compare-a-new-pod">Exercise 4: Compare a new Pod<a class="heading-anchor" href="#exercise-4-compare-a-new-pod" aria-label="Link to this section">#</a></h3>
 <p>Replace only the recorded owned Pod under the host capability.</p>
-<p>Expected: New Pod UID, new marker and fresh attempt sequence.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-5-diagnose-an-init-failure">Exercise 5: Diagnose an init failure<a class="heading-anchor" href="#exercise-5-diagnose-an-init-failure" aria-label="Link to this section">#</a></h3>
 <p>Review a missing mount or denied write in prepare.</p>
-<p>Expected: Application absence is explained by init failure; the smallest mount/permission repair is identified.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-6-state-the-storage-limit">Exercise 6: State the storage limit<a class="heading-anchor" href="#exercise-6-state-the-storage-limit" aria-label="Link to this section">#</a></h3>
 <p>Explain why this marker is neither persistent storage nor a backup.</p>
-<p>Expected: emptyDir lifetime is tied to the Pod; durability and independent recovery require later storage/backup contracts.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p></article>
   </main>

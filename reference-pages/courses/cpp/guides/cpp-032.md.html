@@ -208,13 +208,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="futures-launch-policy-and-bounded-work-ownership">Futures, launch policy and bounded work ownership<a class="heading-anchor" href="#futures-launch-policy-and-bounded-work-ownership" aria-label="Link to this section">#</a></h3>
 <p>A future represents a result that may become available later. It carries either a value or an exception from the asynchronous operation. Calling get waits as needed and retrieves that outcome. A valid future is normally consumed once by get; treating it as a reusable result object can produce a no-state error on a later call.</p>
 <p>The examples use std::launch::async explicitly so the operation is launched asynchronously rather than leaving a deferred policy choice to the implementation. That still does not define a production thread pool. Launching one async task per row in a very large input can create an unacceptable amount of concurrency or resource pressure. The lesson uses a fixed small number of tasks so the ownership and result flow are visible.</p>
-<p>The success program computes the square of 3 and observes9 through get. The failure program launches a task with -1, where checked_square throws invalid_argument. The exception is stored and rethrown when main calls get. A flag confirms that the specific error was observed. Ignoring the future or never retrieving its outcome can hide a failed task from the application report.</p>
+<p>The success program computes the square of 3 and observes 9 through get. The failure program launches a task with -1, where checked_square throws invalid_argument. The exception is stored and rethrown when main calls get. A flag confirms that the specific error was observed. Ignoring the future or never retrieving its outcome can hide a failed task from the application report.</p>
 <p>When combining multiple tasks, define whether one failure aborts the whole result or whether partial results have a valid meaning. A total assembled from successful tasks alone can look plausible while silently omitting failures. Keep accepted, completed, failed and cancelled work accounting explicit. Cancellation of pending work also needs a mechanism; future by itself is not a general cancel operation.</p>
 <p>A real executor has at least worker count, queue capacity, submission policy, result ownership and shutdown behavior. Those are separate choices. The fixed-two-task example illustrates result propagation but does not implement every executor feature. The final capstone returns to bounded admission and conservation of work so that a failed parallel computation cannot publish an unexplained partial total.</p>
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the C++ module, save this lesson&#x27;s learner pad, then use Run. The worker stages the pad as <code>main.cpp</code> and compiles one translation unit. Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for exact local commands, flags, exit statuses, paths and Docker guidance. Tests involving multiple files, CMake, tool flags or shared libraries are explicitly host-project exercises.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
-<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs:each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
+<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs: each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p><a href="../examples/cpp-032-example-1.cpp.html">Complete program 1</a></p>
 <pre class="highlighted-code"><code class="language-cpp"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;cassert&gt;</span>
@@ -233,7 +233,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpp-032 example 1 checks passed</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
   <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
-<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<p><strong>Expected:</strong> With assertions enabled, the program exits with status 0 and prints:</p>
 <pre class="highlighted-code"><code class="language-text">cpp-032 example 1 checks passed</code></pre>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p><a href="../examples/cpp-032-example-2.cpp.html">Complete program 2</a></p>
@@ -259,38 +259,38 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpp-032 example 2 checks passed</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
   <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
-<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<p><strong>Expected:</strong> With assertions enabled, the program exits with status 0 and prints:</p>
 <pre class="highlighted-code"><code class="language-text">cpp-032 example 2 checks passed</code></pre>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-set-a-budget">Exercise 1: Set a budget<a class="heading-anchor" href="#exercise-1-set-a-budget" aria-label="Link to this section">#</a></h4>
 <p>Define maximum workers 2 and queued tasks 4.</p>
 <p><strong>Expected result/shape:</strong> Both bounds documented independently.</p>
-<p><strong>Verify:</strong> Both bounds documented independently.</p>
+<p><strong>Verify:</strong> Check that your document gives two separate numbers, 2 running and 4 waiting, and says what happens to a fifth waiting task.</p>
 <p><strong>Progressive hints:</strong> Limiting workers alone can still allow an unbounded queue.</p>
 <h4 id="exercise-2-compare-serial-results">Exercise 2: Compare serial results<a class="heading-anchor" href="#exercise-2-compare-serial-results" aria-label="Link to this section">#</a></h4>
 <p>Square 3 and 4 serially and in two futures.</p>
 <p><strong>Expected result/shape:</strong> Exact total 25 in both paths.</p>
-<p><strong>Verify:</strong> Exact total 25 in both paths.</p>
+<p><strong>Verify:</strong> Assert <code>checked_square(3) + checked_square(4) == 25</code>, and that the sum of <code>get()</code> on two <code>std::async</code> futures is also 25.</p>
 <p><strong>Progressive hints:</strong> Parallelism must preserve the correctness contract.</p>
 <h4 id="exercise-3-propagate-a-failure">Exercise 3: Propagate a failure<a class="heading-anchor" href="#exercise-3-propagate-a-failure" aria-label="Link to this section">#</a></h4>
 <p>Include task -1 and call get.</p>
 <p><strong>Expected result/shape:</strong> invalid_argument reaches the owner.</p>
-<p><strong>Verify:</strong> invalid_argument reaches the owner.</p>
+<p><strong>Verify:</strong> Assert that <code>get()</code> on the future for -1 throws <code>std::invalid_argument</code> in the calling thread, as Worked example 2 does with its <code>rejected</code> flag.</p>
 <p><strong>Progressive hints:</strong> A future carries exceptions as well as values.</p>
 <h4 id="exercise-4-repair-fire-and-forget">Exercise 4: Repair fire-and-forget<a class="heading-anchor" href="#exercise-4-repair-fire-and-forget" aria-label="Link to this section">#</a></h4>
 <p>Review discarded futures and missing result accounting.</p>
 <p><strong>Expected result/shape:</strong> Observe every result or exception and join owned work.</p>
-<p><strong>Verify:</strong> Observe every result or exception and join owned work.</p>
+<p><strong>Verify:</strong> Confirm every <code>std::async</code> future is stored and <code>get()</code> is called on each, then check that results plus caught exceptions equal the number of submitted tasks.</p>
 <p><strong>Progressive hints:</strong> Unhandled failure cannot be labeled successful completion.</p>
 <h4 id="exercise-5-test-empty-workload">Exercise 5: Test empty workload<a class="heading-anchor" href="#exercise-5-test-empty-workload" aria-label="Link to this section">#</a></h4>
 <p>Run no tasks through the serial/reference contract.</p>
 <p><strong>Expected result/shape:</strong> Empty results and total 0.</p>
-<p><strong>Verify:</strong> Empty results and total 0.</p>
+<p><strong>Verify:</strong> Run an empty task list and assert the results are empty and the total is 0 without starting any future.</p>
 <p><strong>Progressive hints:</strong> Do not create unnecessary workers for no input.</p>
 <h4 id="exercise-6-transfer-backpressure">Exercise 6: Transfer backpressure<a class="heading-anchor" href="#exercise-6-transfer-backpressure" aria-label="Link to this section">#</a></h4>
 <p>Sketch a capacity-4 queue for ten tasks and two consumers.</p>
 <p><strong>Expected result/shape:</strong> At most 2 running plus 4 queued, remaining producer work blocked.</p>
-<p><strong>Verify:</strong> At most 2 running plus 4 queued, remaining producer work blocked.</p>
+<p><strong>Verify:</strong> Check that the sketch blocks the producer when the queue holds 4 tasks, so running plus queued tasks never exceed 6 of the 10.</p>
 <p><strong>Progressive hints:</strong> Admission and completion counts provide inspectable bounds.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain why this observation follows from the mechanism: The future yields 9 and waits for completion if necessary. Then explain the changed condition in example 2 without opening the answer.</p>

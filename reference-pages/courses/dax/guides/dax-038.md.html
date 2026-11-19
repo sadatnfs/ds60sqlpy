@@ -222,7 +222,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-attribute">[Line]</span></code></pre>
 <p><strong>Context trace:</strong></p>
 <ol>
-<li>The first two keys are S1 and S 2.</li>
+<li>The first two keys are S1 and S2.</li>
 <li>Both rows belong to order 101 and date 2024-01-02.</li>
 <li>The window contains two lines, not two distinct dates; amounts are 20 and 4.</li>
 </ol>
@@ -248,7 +248,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-attribute">[Line]</span></code></pre>
 <p><strong>Context trace:</strong></p>
 <ol>
-<li>Position-1 identifies S8; position-2 identifies S7.</li>
+<li>Position -1 identifies S8; position -2 identifies S7.</li>
 <li>The inclusive window includes both rows.</li>
 <li>Their amounts total 56, but the relation contract remains line-based.</li>
 </ol>
@@ -309,7 +309,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>OFFSET needs an unambiguous current-row contract. Adding columns, partitions or ties can change matching requirements; specify MATCHBY where identity differs from sort columns.</p>
 <p>Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table.</p>
 <h3 id="practice-prediction-construction-and-diagnosis">Practice: prediction, construction and diagnosis<a class="heading-anchor" href="#practice-prediction-construction-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>Retain your formula or written reasoning, the stated context, contributing rows or values, and a conclusion with its unit. This is a manual learning record, not an execution receipt.</p>
+<p>Retain your formula or written reasoning, the stated context, contributing rows or values, and a conclusion with its unit. These notes are your own study record; they do not show that a formula ran.</p>
 <h4 id="exercise-1-predict">Exercise 1: Predict<a class="heading-anchor" href="#exercise-1-predict" aria-label="Link to this section">#</a></h4>
 <p>Identify the first position that INDEX(1,...) would select in this relation.</p>
 <h4 id="exercise-2-change-one-condition">Exercise 2: Change one condition<a class="heading-anchor" href="#exercise-2-change-one-condition" aria-label="Link to this section">#</a></h4>
@@ -325,7 +325,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reuse exactly the same relation and ordering.</li>
-<li>The preceding SaleID in this declared order is S 3.</li>
+<li>The preceding SaleID in this declared order is S3.</li>
 <li>Separate partition membership from within-partition order.</li>
 <li>Several lines share amount 20.</li>
 <li>The requested relative position can lie outside the partition.</li>
@@ -336,11 +336,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Continue to <a href="dax-039.md.html">dax-039</a> when its prerequisites make sense, or revisit this stage from the <a href="../README.md.html">course map</a>.</p>
 <h3 id="official-references-and-evidence-limits">Official references and evidence limits<a class="heading-anchor" href="#official-references-and-evidence-limits" aria-label="Link to this section">#</a></h3>
 <ul>
-<li><a href="https://learn.microsoft.com/en-us/dax/window-function-dax">Official documentation 1</a></li>
-<li><a href="https://learn.microsoft.com/en-us/dax/index-function-dax">Official documentation 2</a></li>
-<li><a href="https://learn.microsoft.com/en-us/dax/offset-function-dax">Official documentation 3</a></li>
-<li><a href="https://learn.microsoft.com/en-us/dax/index-function-dax">Official documentation 4</a></li>
-<li><a href="https://learn.microsoft.com/en-us/dax/offset-function-dax">Official documentation 5</a></li>
+<li><a href="https://learn.microsoft.com/en-us/dax/window-function-dax">DAX function: WINDOW</a></li>
+<li><a href="https://learn.microsoft.com/en-us/dax/index-function-dax">DAX function: INDEX</a></li>
+<li><a href="https://learn.microsoft.com/en-us/dax/offset-function-dax">DAX function: OFFSET</a></li>
+<li><a href="https://learn.microsoft.com/en-us/dax/index-function-dax">DAX function: INDEX</a></li>
+<li><a href="https://learn.microsoft.com/en-us/dax/offset-function-dax">DAX function: OFFSET</a></li>
 </ul>
 <p>Documentation was reviewed for this original course on 2026-10-25. Version-sensitive features have explicit notes. Source/model checks and independent fixture arithmetic are not a DAX parser, compiler, semantic engine, real RLS test or performance measurement.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>

@@ -194,31 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-010_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-010-explanatory-solutions">web-010: explanatory solutions<a class="heading-anchor" href="#web-010-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.</p>
-<h3 id="why-the-mechanism-works">Why the mechanism works<a class="heading-anchor" href="#why-the-mechanism-works" aria-label="Link to this section">#</a></h3>
-<p>A CSS rule has a selector and a declaration block. The selector chooses elements; each declaration sets a property to a value. Several rules can match the same element. The cascade resolves conflicts using origin, importance, layer order, specificity, scoping proximity where applicable and source order. Specificity is not the entire algorithm. A later rule wins only after the earlier priorities tie.</p>
-<p>Inheritance is another mechanism: some properties, such as text color, naturally pass from a parent to children unless overridden. Other properties, such as margins, normally do not. A value inherited from a parent does not beat a declaration directly targeting the child just because the parent selector is more specific. Browser developer tools reveal which rule won and which declaration was crossed out.</p>
-<p>Start with low-specificity class selectors for reusable components. <code>.note</code> targets a class, <code>#summary</code> targets one id, and <code>p</code> targets an element type. <code>color: #17324d</code> is a declaration. Use the computed-style view to inspect the resolved value. Avoid adding important flags repeatedly to fight a conflict whose origin you have not identified.</p>
+<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-010.md</code>.</p>
 <h3 id="exercise-1-predict-the-winning-color-in-the-second-example">Exercise 1: Predict the winning color in the second example.<a class="heading-anchor" href="#exercise-1-predict-the-winning-color-in-the-second-example" aria-label="Link to this section">#</a></h3>
-<p>The later equally specific declaration wins.</p>
-<p>Trace the smallest example before editing. Name which values are source and which are observations.</p>
+<p><strong>Expected answer:</strong> The later equally specific declaration wins.</p>
+<p><strong>Why:</strong> When origin, importance, layer and specificity are equal, the declaration that appears later in the source wins.</p>
 <h3 id="exercise-2-move-a-shared-text-color-to-a-parent-and-inspect-inheritance">Exercise 2: Move a shared text color to a parent and inspect inheritance.<a class="heading-anchor" href="#exercise-2-move-a-shared-text-color-to-a-parent-and-inspect-inheritance" aria-label="Link to this section">#</a></h3>
-<p>Children inherit it unless a direct declaration overrides it.</p>
-<p>Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.</p>
+<p><strong>Expected evidence:</strong> Children inherit it unless a direct declaration overrides it.</p>
+<p><strong>Why:</strong> color is inherited, so descendants use the parent&#x27;s value unless they have a declaration of their own.</p>
 <h3 id="exercise-3-style-two-note-cards-using-one-low-specificity-class">Exercise 3: Style two note cards using one low-specificity class.<a class="heading-anchor" href="#exercise-3-style-two-note-cards-using-one-low-specificity-class" aria-label="Link to this section">#</a></h3>
-<p>Both cards share styling without duplicate ids or inline declarations.</p>
-<p>Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.</p>
+<p><strong>Expected evidence:</strong> Both cards share styling without duplicate ids or inline declarations.</p>
+<p><strong>Why:</strong> A single class has low specificity and is reusable, so later or more specific rules can still adjust one card.</p>
 <h3 id="exercise-4-diagnose-a-crossed-out-declaration-in-developer-tools">Exercise 4: Diagnose a crossed-out declaration in developer tools.<a class="heading-anchor" href="#exercise-4-diagnose-a-crossed-out-declaration-in-developer-tools" aria-label="Link to this section">#</a></h3>
-<p>Identify the winning rule and the cascade reason rather than guessing.</p>
-<p>Keep the failing input. Identify the first layer where the observed result differs from the intended contract.</p>
+<p><strong>Expected answer:</strong> Identify the winning rule and the cascade reason rather than guessing.</p>
+<p><strong>Why:</strong> Developer tools strike through declarations that lost the cascade, and the winning rule reveals the reason: importance, layer, specificity or order.</p>
 <h3 id="exercise-5-add-a-child-color-rule-under-a-highly-specific-parent-selector">Exercise 5: Add a child color rule under a highly specific parent selector.<a class="heading-anchor" href="#exercise-5-add-a-child-color-rule-under-a-highly-specific-parent-selector" aria-label="Link to this section">#</a></h3>
-<p>A direct declaration on the child overrides an otherwise inherited color.</p>
-<p>Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.</p>
+<p><strong>Expected evidence:</strong> A direct declaration on the child overrides an otherwise inherited color.</p>
+<p><strong>Why:</strong> Inheritance only supplies a value when an element has none of its own, so any declaration that matches the child beats an inherited value, whatever the parent selector&#x27;s specificity.</p>
 <h3 id="exercise-6-explain-why-specificity-alone-does-not-describe-the-cascade">Exercise 6: Explain why specificity alone does not describe the cascade.<a class="heading-anchor" href="#exercise-6-explain-why-specificity-alone-does-not-describe-the-cascade" aria-label="Link to this section">#</a></h3>
-<p>Origin, importance and layer ordering can be decided before selector specificity.</p>
-<p>Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.</p>
-<h3 id="reference-comparison-and-limits">Reference comparison and limits<a class="heading-anchor" href="#reference-comparison-and-limits" aria-label="Link to this section">#</a></h3>
-<p>Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.</p></article>
+<p><strong>Expected answer:</strong> Origin, importance and layer ordering can be decided before selector specificity.</p>
+<p><strong>Why:</strong> The cascade compares origin and importance, then cascade layers, and only then specificity and order, so a simple selector in a later layer can still win.</p>
+<h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
+<p>Open <code>courses/web-development/solutions/web-010_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
   </main>
 </body>
 </html>

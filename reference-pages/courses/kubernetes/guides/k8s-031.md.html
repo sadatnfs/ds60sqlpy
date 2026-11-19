@@ -208,26 +208,24 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>failurePolicy Fail specifies the treatment of applicable evaluation failures. It is not a substitute for writing a correct expression. A malformed or overbroad policy can block legitimate changes. Use an exclusive lesson scope, a known allowed object and a reversible host-managed lifecycle.</p>
 <h3 id="design-a-controlled-denial">Design a controlled denial<a class="heading-anchor" href="#design-a-controlled-denial" aria-label="Link to this section">#</a></h3>
 <p>Start with the unchanged approved Deployment and record acceptance in the intended namespace. Then change only its image to a clearly unapproved synthetic value while keeping the object valid. The admission denial should name the matching policy reason, and no workload with the rejected new spec should be persisted.</p>
-<p>Compare three observations: a normal-worker local parser rejection, a server admission denial under the advanced lease, and an accepted object that later cannot pull an image. They may all prevent a useful Pod, but they establish different controls. A network timeout or generic403 is not evidence for this CEL predicate.</p>
+<p>Compare three observations: a normal-worker local parser rejection, a server admission denial under the advanced lease, and an accepted object that later cannot pull an image. They may all prevent a useful Pod, but they establish different controls. A network timeout or generic 403 is not evidence for this CEL predicate.</p>
 <p>Finally restore the approved source and confirm the positive path. Test order and field isolation matter: if the negative request also contains invalid YAML or lacks authorization, it may never reach the intended admission decision. Retain the request identity and denied field without printing credentials.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-evaluate-the-cel-predicate">Worked example 1: Evaluate the CEL predicate<a class="heading-anchor" href="#worked-example-1-evaluate-the-cel-predicate" aria-label="Link to this section">#</a></h4>
-<p>Allowed images [ds60sqlpy-k8s-fixture:0.2.0] make all return true. A two-container list containing that value and unapproved:0 makes it false. The predicate is a universal condition over the matched Deployment container list.</p>
+<p>Allowed images [<code>ds60sqlpy-k8s-fixture:0.2.0</code>] make all return true. A two-container list containing that value and <code>unapproved:0</code> makes it false. The predicate is a universal condition over the matched Deployment container list.</p>
 <p><strong>Expected:</strong> One unapproved ordinary container is enough to deny a matched request.</p>
 <h4 id="worked-example-2-classify-three-failures">Worked example 2: Classify three failures<a class="heading-anchor" href="#worked-example-2-classify-three-failures" aria-label="Link to this section">#</a></h4>
 <p>Trace A: browser says source image is outside the allowlist before an API call. Trace B: server names lesson-approved-image and rejects the request. Trace C: Deployment persisted, Pod reports ImagePullBackOff.</p>
 <p><strong>Expected:</strong> A proves the local source boundary; B proves the scoped admission path; C is a post-acceptance runtime failure.</p>
 <h3 id="inspect-the-specific-owned-object">Inspect the specific owned object<a class="heading-anchor" href="#inspect-the-specific-owned-object" aria-label="Link to this section">#</a></h3>
 <p>Only after the chapter&#x27;s host capability is provisioned and its resources remain present, use the explicit receipt fields described in <a href="../host-labs.md.html">host-labs.md</a>. A completed one-shot browser Run has already cleaned its objects. The following read does not provision the missing capability and does not justify changing credentials after a Forbidden result.</p>
-<p>POSIX:</p>
+<p>Bash on Linux, macOS or Ubuntu under WSL 2:</p>
 <pre class="highlighted-code"><code class="language-bash">: <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_KUBECONFIG<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt path</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 : <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_CONTEXT<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt context</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 : <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_NAMESPACE<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt namespace</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<span class="syntax-string">&quot;</span> --context <span class="syntax-string">&quot;</span>$LAB_CONTEXT<span class="syntax-string">&quot;</span> --namespace <span class="syntax-string">&quot;</span>$LAB_NAMESPACE<span class="syntax-string">&quot;</span> get deployment hello -o json</code></pre>
-<p>PowerShell:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">-not</span> $env:LAB_KUBECONFIG <span class="syntax-operator">-or</span> <span class="syntax-operator">-not</span> $env:LAB_CONTEXT <span class="syntax-operator">-or</span> <span class="syntax-operator">-not</span> $env:LAB_NAMESPACE<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;Owned receipt fields are required.&#x27;</span> <span class="syntax-punctuation">}</span>
-<span class="syntax-punctuation">&amp;</span> kubectl <span class="syntax-punctuation">-</span>-kubeconfig $env:LAB_KUBECONFIG <span class="syntax-punctuation">-</span>-context $env:LAB_CONTEXT <span class="syntax-punctuation">-</span>-namespace $env:LAB_NAMESPACE get deployment hello -o json
-<span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>$LASTEXITCODE <span class="syntax-operator">-ne</span> 0<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;The scoped observation failed.&#x27;</span> <span class="syntax-punctuation">}</span></code></pre>
+<p>Windows uses the same Bash commands inside WSL 2. The lab adapter refuses native Windows credential handling, so do not run kubectl against the receipt from PowerShell. From PowerShell, only open your WSL 2 distribution (the name reported by <code>wsl.exe --list --verbose</code>), change to your checkout with its Linux path, then run the Bash block above unchanged:</p>
+<pre class="highlighted-code"><code class="language-powershell">wsl<span class="syntax-punctuation">.</span>exe <span class="syntax-punctuation">-</span>-distribution Ubuntu</code></pre>
 <p>Retain only the fields needed by this chapter&#x27;s prediction. A NotFound result may be expected after one-shot cleanup; a Forbidden result may identify a deliberately absent advanced capability. Neither result authorizes an ambient-context fallback.</p>
 <h3 id="run-and-bounded-evidence">Run and bounded evidence<a class="heading-anchor" href="#run-and-bounded-evidence" aria-label="Link to this section">#</a></h3>
 <p>The app artifact is a reading worksheet, <code>courses/kubernetes/lessons/k8s-031.md</code>. The current browser adapter does not provide the full <strong>host-installed namespace-selected admission policy and server denial capture</strong> operation. Use the synthetic fixture and offline check first. Live work follows <a href="../host-labs.md.html">the scoped host-lab guide</a> only when the named capability and owned target have been provisioned. A worksheet or static check is never a cluster execution receipt.</p>
@@ -236,32 +234,32 @@ kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<sp
 <h4 id="exercise-1-map-the-enforcement-chain">Exercise 1: Map the enforcement chain<a class="heading-anchor" href="#exercise-1-map-the-enforcement-chain" aria-label="Link to this section">#</a></h4>
 <p>Place authentication, authorization, validation/admission and persistence in the request story.</p>
 <p><strong>Expected result/shape:</strong> A rejected earlier boundary cannot prove a later policy ran.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: A rejected earlier boundary cannot prove a later policy ran.</p>
+<p><strong>Verify:</strong> Check that your sequence puts authentication before authorization and admission before persistence, and that it stops at the first rejecting step.</p>
 <p><strong>Progressive hints:</strong> Follow the request until its actual stopping point.</p>
 <h4 id="exercise-2-inspect-policy-scope">Exercise 2: Inspect policy scope<a class="heading-anchor" href="#exercise-2-inspect-policy-scope" aria-label="Link to this section">#</a></h4>
 <p>Identify matched API group, version, resource, operations and namespace binding.</p>
 <p><strong>Expected result/shape:</strong> apps/v1 Deployments on CREATE/UPDATE in the labeled owned namespace only.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: apps/v1 Deployments on CREATE/UPDATE in the labeled owned namespace only.</p>
+<p><strong>Verify:</strong> Read the policy&#x27;s <code>matchConstraints</code> and the binding&#x27;s namespace selector as one rule and list each matched value.</p>
 <p><strong>Progressive hints:</strong> Read policy and binding as one configuration.</p>
 <h4 id="exercise-3-evaluate-all-container-logic">Exercise 3: Evaluate all-container logic<a class="heading-anchor" href="#exercise-3-evaluate-all-container-logic" aria-label="Link to this section">#</a></h4>
 <p>Compare approved-only with approved-plus-unapproved lists.</p>
 <p><strong>Expected result/shape:</strong> True for approved-only and false for the mixed list.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: True for approved-only and false for the mixed list.</p>
+<p><strong>Verify:</strong> Evaluate the expression one container at a time; a single false element makes <code>all</code> false.</p>
 <p><strong>Progressive hints:</strong> all is a universal quantifier.</p>
 <h4 id="exercise-4-capture-a-real-denial">Exercise 4: Capture a real denial<a class="heading-anchor" href="#exercise-4-capture-a-real-denial" aria-label="Link to this section">#</a></h4>
 <p>In the qualified host test, change only the image and record the server response.</p>
 <p><strong>Expected result/shape:</strong> Policy-specific denial and no persisted rejected revision.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Policy-specific denial and no persisted rejected revision.</p>
+<p><strong>Verify:</strong> Confirm that the denial message names the policy and that a readback shows the previous revision unchanged.</p>
 <p><strong>Progressive hints:</strong> A parser refusal or image-pull error is a different control.</p>
 <h4 id="exercise-5-restore-the-positive-control">Exercise 5: Restore the positive control<a class="heading-anchor" href="#exercise-5-restore-the-positive-control" aria-label="Link to this section">#</a></h4>
 <p>Submit the approved source through the same scoped server path.</p>
 <p><strong>Expected result/shape:</strong> Allowed request accepted and its application observation recorded separately.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Allowed request accepted and its application observation recorded separately.</p>
+<p><strong>Verify:</strong> Submit through the same path and record the acceptance separately from any readiness or client result.</p>
 <p><strong>Progressive hints:</strong> Admission success is not readiness.</p>
 <h4 id="exercise-6-document-gaps-and-teardown">Exercise 6: Document gaps and teardown<a class="heading-anchor" href="#exercise-6-document-gaps-and-teardown" aria-label="Link to this section">#</a></h4>
 <p>Name uncovered fields and remove only the host-owned policy/binding.</p>
 <p><strong>Expected result/shape:</strong> No claim of signature verification or universal workload enforcement.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: No claim of signature verification or universal workload enforcement.</p>
+<p><strong>Verify:</strong> List at least two fields the policy does not inspect and confirm that teardown removes only the host-owned policy and binding UIDs.</p>
 <p><strong>Progressive hints:</strong> A tag equality rule has a small, explicit purpose.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain the mechanism behind the first example, then distinguish it from this boundary case: A proves the local source boundary; B proves the scoped admission path; C is a post-acceptance runtime failure. State which observations are synthetic and which, if any, were read from your owned runtime.</p>
@@ -269,7 +267,7 @@ kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<sp
 <p>The expression protects only the resource and container list it names. A complete production policy would need a separately reviewed threat model, workload coverage, digest/provenance semantics and rollout strategy. Do not quietly broaden this teaching policy across the cluster.</p>
 <p>A failed admission request should not be repaired by disabling safeguards globally. Correct the intended object or report that the requested behavior is outside the lesson. The host removes only its own policy and binding after all scoped evidence is captured.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
-<p>Close the answer and reconstruct the reasoning for Exercise6, Document gaps and teardown. Name the exact source and observed identity you would require before claiming the changed case succeeded.</p>
+<p>Close the answer and reconstruct the reasoning for Exercise 6 (Document gaps and teardown). Name the exact source and observed identity you would require before claiming the changed case succeeded.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue to <code>k8s-032</code> after preserving the six evidence records.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>

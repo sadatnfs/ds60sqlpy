@@ -289,7 +289,7 @@ held_scores <span class="syntax-operator">=</span> <span class="syntax-punctuati
 <p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: score shape(2, 2); one positive per query. actual gradient updates True; pretrained_semantic_encoder False. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
-<li><strong>Construct paired retrieval features.</strong> Use queries and documents equal to the 2x2identity matrix, with positive labels 0, 1. <strong>Expected:</strong> score shape(2, 2); one positive per query. <strong>Verify:</strong> Save the assertion results for exercise 1, including score shape(2, 2); one positive per query.</li>
+<li><strong>Construct paired retrieval features.</strong> Use queries and documents equal to the 2-by-2 identity matrix, with positive labels 0, 1. <strong>Expected:</strong> score shape(2, 2); one positive per query. <strong>Verify:</strong> Save the assertion results for exercise 1, including score shape(2, 2); one positive per query.</li>
 </ol>
 <ol start="2">
 <li><strong>Train the query projection.</strong> Run 30SGD at 0.5 updates on cross entropy against diagonal positives. <strong>Expected:</strong> loss decreases; each query ranks its paired document first. <strong>Verify:</strong> Save the assertion results for exercise 2, including loss decreases; each query ranks its paired document first.</li>

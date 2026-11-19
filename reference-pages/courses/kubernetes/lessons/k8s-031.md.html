@@ -197,32 +197,26 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Use the guide and synthetic case ledger. A prediction or copied fixture is not a live runtime observation.</p>
 <h3 id="exercise-1-map-the-enforcement-chain">Exercise 1: Map the enforcement chain<a class="heading-anchor" href="#exercise-1-map-the-enforcement-chain" aria-label="Link to this section">#</a></h3>
 <p>Place authentication, authorization, validation/admission and persistence in the request story.</p>
-<p>Expected: A rejected earlier boundary cannot prove a later policy ran.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-2-inspect-policy-scope">Exercise 2: Inspect policy scope<a class="heading-anchor" href="#exercise-2-inspect-policy-scope" aria-label="Link to this section">#</a></h3>
 <p>Identify matched API group, version, resource, operations and namespace binding.</p>
-<p>Expected: apps/v1 Deployments on CREATE/UPDATE in the labeled owned namespace only.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-3-evaluate-all-container-logic">Exercise 3: Evaluate all-container logic<a class="heading-anchor" href="#exercise-3-evaluate-all-container-logic" aria-label="Link to this section">#</a></h3>
 <p>Compare approved-only with approved-plus-unapproved lists.</p>
-<p>Expected: True for approved-only and false for the mixed list.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-4-capture-a-real-denial">Exercise 4: Capture a real denial<a class="heading-anchor" href="#exercise-4-capture-a-real-denial" aria-label="Link to this section">#</a></h3>
 <p>In the qualified host test, change only the image and record the server response.</p>
-<p>Expected: Policy-specific denial and no persisted rejected revision.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-5-restore-the-positive-control">Exercise 5: Restore the positive control<a class="heading-anchor" href="#exercise-5-restore-the-positive-control" aria-label="Link to this section">#</a></h3>
 <p>Submit the approved source through the same scoped server path.</p>
-<p>Expected: Allowed request accepted and its application observation recorded separately.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-6-document-gaps-and-teardown">Exercise 6: Document gaps and teardown<a class="heading-anchor" href="#exercise-6-document-gaps-and-teardown" aria-label="Link to this section">#</a></h3>
 <p>Name uncovered fields and remove only the host-owned policy/binding.</p>
-<p>Expected: No claim of signature verification or universal workload enforcement.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p></article>
   </main>

@@ -200,12 +200,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 1: Build a literal model bundle</span></span>
-<span class="source-line"><span class="syntax-comment"># Create a float32 two-feature model with coefficient[2,-1] and schema width2.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: probe[3,4] predicts2.</span></span>
+<span class="source-line"><span class="syntax-comment"># Create a float32 two-feature model with coefficient [2, -1] and schema width 2.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: probe [3, 4] predicts 2.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 2: Freeze and hash a split manifest</span></span>
-<span class="source-line"><span class="syntax-comment"># Hash train IDs[a,b] and test IDs[c,d] using canonical JSON.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: disjoint IDs and a64-character SHA256.</span></span>
+<span class="source-line"><span class="syntax-comment"># Hash train IDs [a, b] and test IDs [c, d] using canonical JSON.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: disjoint IDs and a 64-character SHA256.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Catch tampered lineage</span></span>
 <span class="source-line"><span class="syntax-comment"># Change one test ID and compare the resulting digest.</span></span>
@@ -214,17 +214,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Block incompatible schemas</span></span>
 <span class="source-line"><span class="syntax-comment"># Compare an incoming three-feature schema with the frozen two-feature schema before</span></span>
 <span class="source-line"><span class="syntax-comment"># prediction.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: schema gate isFalse.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: schema gate is False.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Make the decision fail closed</span></span>
-<span class="source-line"><span class="syntax-comment"># Evaluate required gates with an unexecuted restart proof represented asNone, then with</span></span>
+<span class="source-line"><span class="syntax-comment"># Evaluate required gates with an unexecuted restart proof represented as None, then with</span></span>
 <span class="source-line"><span class="syntax-comment"># an actual failed schema gate.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: both decisionsno-go.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: both decisions no-go.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Retain a rollback decision</span></span>
 <span class="source-line"><span class="syntax-comment"># Construct a release record with previous artifact ID, holdout count and limits; keep no-</span></span>
 <span class="source-line"><span class="syntax-comment"># go when any gate fails.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: decisionno-go and previous artifactv1 retained.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: decision no-go and previous artifact v1 retained.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Read the guide and implement the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>

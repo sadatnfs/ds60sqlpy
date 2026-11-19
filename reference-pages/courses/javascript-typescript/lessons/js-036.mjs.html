@@ -194,13 +194,21 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/javascript-typescript/lessons/js-036.mjs</code></p>
     </header>
     <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-javascript"><code><span class="source-line"><span class="syntax-comment">// Answer-free learner source. Save your own copy before editing.</span></span>
-<span class="source-line"><span class="syntax-comment">// Exercise 1: Import the public package entry</span></span>
-<span class="source-line"><span class="syntax-comment">// Create a package with exports pointing at index.mjs and import its version value.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: actual child prints 1.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 1: Import the public package entry: predict an edited check</span></span>
+<span class="source-line"><span class="syntax-comment">// Copy Example A into a scratch `main.mjs` and change `assert.equal(result.stdout.trim(),</span></span>
+<span class="source-line"><span class="syntax-comment">// &#x27;1&#x27;);` to `assert.equal(result.stdout.trim(), &#x27;2&#x27;);` inside its check. Before running it,</span></span>
+<span class="source-line"><span class="syntax-comment">// predict whether the check still passes and explain why; then restore it.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` at the check</span></span>
+<span class="source-line"><span class="syntax-comment">// `assert.equal(result.stdout.trim(), &#x27;1&#x27;)`. Restoring the original line brings back the</span></span>
+<span class="source-line"><span class="syntax-comment">// worked observation: actual child prints 1.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment">// Exercise 2: Use an explicitly exported subpath</span></span>
-<span class="source-line"><span class="syntax-comment">// Import twice from course-fixture/math.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: actual child prints 6.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 2: Use an explicitly exported subpath: debug a regression</span></span>
+<span class="source-line"><span class="syntax-comment">// A regression changed one token in Example B, so one line now reads</span></span>
+<span class="source-line"><span class="syntax-comment">// `console.log(twice(4));`. Run Example B with that line, use the failing check to locate</span></span>
+<span class="source-line"><span class="syntax-comment">// the defect and repair it without changing the check.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at the check</span></span>
+<span class="source-line"><span class="syntax-comment">// `assert.equal(result.stdout.trim(), &#x27;6&#x27;)`; after it the line reads</span></span>
+<span class="source-line"><span class="syntax-comment">// `console.log(twice(3));` again and actual child prints 6.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 3: Reject an undeclared private path</span></span>
 <span class="source-line"><span class="syntax-comment">// Attempt a package-name import of private.mjs even though the file exists.</span></span>

@@ -196,13 +196,24 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-c"><code><span class="source-line"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;stdio.h&gt;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">void</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
-<span class="source-line">  <span class="syntax-comment">/* Exercise 1: Insert and retrieve</span></span>
-<span class="source-line"><span class="syntax-comment">     Store key 1 with value 7.</span></span>
-<span class="source-line"><span class="syntax-comment">     Expected: Lookup succeeds with 7. */</span></span>
+<span class="source-line">  <span class="syntax-comment">/* Exercise 1: Insert and retrieve: predict an edited check</span></span>
+<span class="source-line"><span class="syntax-comment">     Copy worked example 1 into a scratch pad and change `CHECK(table_put(&amp;t, 1,</span></span>
+<span class="source-line"><span class="syntax-comment">     7) &amp;&amp; table_get(&amp;t, 1, &amp;out) &amp;&amp; out == 7);` to `CHECK(table_put(&amp;t, 2, 7)</span></span>
+<span class="source-line"><span class="syntax-comment">     &amp;&amp; table_get(&amp;t, 1, &amp;out) &amp;&amp; out == 7);` inside its CHECK. Before running,</span></span>
+<span class="source-line"><span class="syntax-comment">     predict whether the CHECK still holds and explain why; then restore it.</span></span>
+<span class="source-line"><span class="syntax-comment">     Expected: The changed run stops with `Check failed` at the CHECK on</span></span>
+<span class="source-line"><span class="syntax-comment">     `table_put(&amp;t, 1, 7) &amp;&amp; table_get(&amp;t, 1, &amp;out) &amp;&amp; out == 7`. Restoring the</span></span>
+<span class="source-line"><span class="syntax-comment">     original line brings back the worked observation: lookup succeeds with 7.</span></span>
+<span class="source-line"><span class="syntax-comment">   */</span></span>
 <span class="source-line"></span>
-<span class="source-line">  <span class="syntax-comment">/* Exercise 2: Resolve a collision</span></span>
-<span class="source-line"><span class="syntax-comment">     Insert keys 1 and 9, which share the initial slot.</span></span>
-<span class="source-line"><span class="syntax-comment">     Expected: Both values remain retrievable. */</span></span>
+<span class="source-line">  <span class="syntax-comment">/* Exercise 2: Resolve a collision: diagnose an edited check</span></span>
+<span class="source-line"><span class="syntax-comment">     A careless edit changed the CHECK in worked example 2 so that it reads</span></span>
+<span class="source-line"><span class="syntax-comment">     `CHECK(table_put(&amp;t, 1, 10) &amp;&amp; table_put(&amp;t, 10, 90));`. Run worked example</span></span>
+<span class="source-line"><span class="syntax-comment">     2 with that line, explain why the edited CHECK now fails for the same</span></span>
+<span class="source-line"><span class="syntax-comment">     program state, and restore it. Expected: Before the repair the run stops</span></span>
+<span class="source-line"><span class="syntax-comment">     with `Check failed` at the CHECK on `table_get(&amp;t, 9, &amp;out) &amp;&amp; out == 90`;</span></span>
+<span class="source-line"><span class="syntax-comment">     after it the line reads `CHECK(table_put(&amp;t, 1, 10) &amp;&amp; table_put(&amp;t, 9,</span></span>
+<span class="source-line"><span class="syntax-comment">     90));` again and both values remain retrievable. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 3: Replace an existing key</span></span>
 <span class="source-line"><span class="syntax-comment">     Write key 2 twice with different values.</span></span>

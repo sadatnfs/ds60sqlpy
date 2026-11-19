@@ -201,6 +201,26 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Expected:</strong> The request is explicitly retained or counted as unmatched.</p>
 <h3 id="2-change-the-availability-clock">2. Change the availability clock<a class="heading-anchor" href="#2-change-the-availability-clock" aria-label="Link to this section">#</a></h3>
 <p>The result changes because the source history changed. Preserve that history/version when reporting a retrospective analysis.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-comment"># Uses the tempfile import and the project(), invoke() and rows() helpers in main.py.</span>
+<span class="syntax-keyword">with</span> tempfile<span class="syntax-operator">.</span>TemporaryDirectory<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> d<span class="syntax-punctuation">:</span>
+    sql <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">select request_id, value from (select r.request_id, f.value, </span><span class="syntax-string">&quot;</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">row_number() over (partition by r.request_id order by f.event_at desc, </span><span class="syntax-string">&quot;</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">f.known_at desc) as rank from </span><span class="syntax-string">{{</span><span class="syntax-string"> ref(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">requests</span><span class="syntax-string">&#x27;</span><span class="syntax-string">) }} r join </span><span class="syntax-string">&quot;</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">{{</span><span class="syntax-string"> ref(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">features</span><span class="syntax-string">&#x27;</span><span class="syntax-string">) }} f on r.customer = f.customer </span><span class="syntax-string">&quot;</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">and f.event_at &lt;= r.cutoff and f.known_at &lt;= r.cutoff) where rank = 1</span><span class="syntax-string">&quot;</span>
+    <span class="syntax-punctuation">)</span>
+    p <span class="syntax-operator">=</span> project<span class="syntax-punctuation">(</span>
+        d<span class="syntax-punctuation">,</span>
+        models<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">training_features</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> sql<span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+        seeds<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span>
+            <span class="syntax-string">&quot;</span><span class="syntax-string">requests</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">request_id,customer,cutoff</span><span class="syntax-string">\n</span><span class="syntax-string">1,10,5</span><span class="syntax-string">\n</span><span class="syntax-string">2,10,9</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+            <span class="syntax-string">&quot;</span><span class="syntax-string">features</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">customer,event_at,known_at,value</span><span class="syntax-string">\n</span><span class="syntax-string">10,2,3,10</span><span class="syntax-string">\n</span><span class="syntax-string">10,4,4,999</span><span class="syntax-string">\n</span><span class="syntax-string">10,8,8,30</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">)</span>
+    invoke<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">build</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    result <span class="syntax-operator">=</span> rows<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">select request_id, value from training_features order by request_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> result <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">999</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">30</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span></code></pre>
 <p><strong>Expected:</strong> It is eligible for cutoff 5.</p>
 <h3 id="3-test-equal-cutoffs">3. Test equal cutoffs<a class="heading-anchor" href="#3-test-equal-cutoffs" aria-label="Link to this section">#</a></h3>
 <p>The example uses &lt;=. Some systems require a transaction or ingestion watermark that changes what equality means operationally.</p>
@@ -299,17 +319,46 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 
 <span class="syntax-keyword">def</span> <span class="syntax-function">temporal_case</span><span class="syntax-punctuation">(</span>available<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">with</span> tempfile<span class="syntax-operator">.</span>TemporaryDirectory<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> d<span class="syntax-punctuation">:</span>
-        clause <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">and f.known_at &lt;= r.cutoff</span><span class="syntax-string">&quot;</span> <span class="syntax-keyword">if</span> available <span class="syntax-keyword">else</span> <span class="syntax-string">&quot;</span><span class="syntax-string">&quot;</span>
+        <span class="syntax-comment"># Only the point-in-time version also requires f.known_at &lt;= r.cutoff.</span>
         sql <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>
             <span class="syntax-punctuation">(</span>
-                <span class="syntax-string">&quot;</span><span class="syntax-string">select request_id, value from (select </span><span class="syntax-string">&quot;</span>
-                <span class="syntax-string">&quot;</span><span class="syntax-string">r.request_id,f.value,row_number() over(partition by </span><span class="syntax-string">&quot;</span>
-                <span class="syntax-string">&quot;</span><span class="syntax-string">r.request_id order by f.event_at desc,f.known_at desc) as </span><span class="syntax-string">&quot;</span>
-                <span class="syntax-string">&quot;</span><span class="syntax-string">rank from </span><span class="syntax-string">{{</span><span class="syntax-string"> ref(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">requests</span><span class="syntax-string">&#x27;</span><span class="syntax-string">) }} r join </span><span class="syntax-string">{{</span><span class="syntax-string"> ref(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">features</span><span class="syntax-string">&#x27;</span><span class="syntax-string">) </span><span class="syntax-string">&quot;</span>
-                <span class="syntax-string">&quot;</span><span class="syntax-string">}} f on r.customer=f.customer and f.event_at&lt;=r.cutoff </span><span class="syntax-string">&quot;</span>
+                <span class="syntax-string">&quot;</span><span class="syntax-string">select request_id, value</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span>
+                <span class="syntax-string">&quot;</span><span class="syntax-string">from</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span>
+                <span class="syntax-string">&quot;</span><span class="syntax-string">    (</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span>
+                <span class="syntax-string">&quot;</span><span class="syntax-string">        select</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span>
+                <span class="syntax-string">&quot;</span><span class="syntax-string">            r.request_id,</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span>
+                <span class="syntax-string">&quot;</span><span class="syntax-string">            f.value,</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span>
+                <span class="syntax-string">&quot;</span><span class="syntax-string">            row_number() over (</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span>
+                <span class="syntax-string">&quot;</span><span class="syntax-string">                partition by r.request_id order by f.event_at desc, f.known_at </span><span class="syntax-string">&quot;</span>
+                <span class="syntax-string">&quot;</span><span class="syntax-string">desc</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span>
+                <span class="syntax-string">&quot;</span><span class="syntax-string">            ) as rank</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span>
+                <span class="syntax-string">&quot;</span><span class="syntax-string">        from </span><span class="syntax-string">{{</span><span class="syntax-string"> ref(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">requests</span><span class="syntax-string">&#x27;</span><span class="syntax-string">) }} r</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span>
+                <span class="syntax-string">&quot;</span><span class="syntax-string">        join</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span>
+                <span class="syntax-string">&quot;</span><span class="syntax-string">            </span><span class="syntax-string">{{</span><span class="syntax-string"> ref(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">features</span><span class="syntax-string">&#x27;</span><span class="syntax-string">) }} f</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span>
+                <span class="syntax-string">&quot;</span><span class="syntax-string">            on r.customer = f.customer</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span>
+                <span class="syntax-string">&quot;</span><span class="syntax-string">            and f.event_at &lt;= r.cutoff</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span>
+                <span class="syntax-string">&quot;</span><span class="syntax-string">            and f.known_at &lt;= r.cutoff</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span>
+                <span class="syntax-string">&quot;</span><span class="syntax-string">    )</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span>
+                <span class="syntax-string">&quot;</span><span class="syntax-string">where rank = 1</span><span class="syntax-string">&quot;</span>
             <span class="syntax-punctuation">)</span>
-            <span class="syntax-operator">+</span> clause
-            <span class="syntax-operator">+</span> <span class="syntax-string">&quot;</span><span class="syntax-string">) where rank=1</span><span class="syntax-string">&quot;</span>
+            <span class="syntax-keyword">if</span> available
+            <span class="syntax-keyword">else</span> <span class="syntax-punctuation">(</span>
+                <span class="syntax-string">&quot;</span><span class="syntax-string">select request_id, value</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span>
+                <span class="syntax-string">&quot;</span><span class="syntax-string">from</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span>
+                <span class="syntax-string">&quot;</span><span class="syntax-string">    (</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span>
+                <span class="syntax-string">&quot;</span><span class="syntax-string">        select</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span>
+                <span class="syntax-string">&quot;</span><span class="syntax-string">            r.request_id,</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span>
+                <span class="syntax-string">&quot;</span><span class="syntax-string">            f.value,</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span>
+                <span class="syntax-string">&quot;</span><span class="syntax-string">            row_number() over (</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span>
+                <span class="syntax-string">&quot;</span><span class="syntax-string">                partition by r.request_id order by f.event_at desc, f.known_at </span><span class="syntax-string">&quot;</span>
+                <span class="syntax-string">&quot;</span><span class="syntax-string">desc</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span>
+                <span class="syntax-string">&quot;</span><span class="syntax-string">            ) as rank</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span>
+                <span class="syntax-string">&quot;</span><span class="syntax-string">        from </span><span class="syntax-string">{{</span><span class="syntax-string"> ref(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">requests</span><span class="syntax-string">&#x27;</span><span class="syntax-string">) }} r</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span>
+                <span class="syntax-string">&quot;</span><span class="syntax-string">        join </span><span class="syntax-string">{{</span><span class="syntax-string"> ref(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">features</span><span class="syntax-string">&#x27;</span><span class="syntax-string">) }} f on r.customer = f.customer and f.event_at &lt;= </span><span class="syntax-string">&quot;</span>
+                <span class="syntax-string">&quot;</span><span class="syntax-string">r.cutoff</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span>
+                <span class="syntax-string">&quot;</span><span class="syntax-string">    )</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span>
+                <span class="syntax-string">&quot;</span><span class="syntax-string">where rank = 1</span><span class="syntax-string">&quot;</span>
+            <span class="syntax-punctuation">)</span>
         <span class="syntax-punctuation">)</span>
         p <span class="syntax-operator">=</span> project<span class="syntax-punctuation">(</span>
             d<span class="syntax-punctuation">,</span>
@@ -342,7 +391,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
     main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="interpretation">Interpretation<a class="heading-anchor" href="#interpretation" aria-label="Link to this section">#</a></h3>
-<p>Produce a historical feature relation with explicit entity, time and version semantics. Demonstrate a late-known counterexample and retain request coverage. This prepares the feature-store and ML engineering route to test actual retrieval against a meaningful temporal oracle.</p></article>
+<p>Demonstrate a late-known counterexample and retain request coverage. This prepares the feature-store and ML engineering route to test actual retrieval against a meaningful temporal oracle.</p></article>
   </main>
 </body>
 </html>

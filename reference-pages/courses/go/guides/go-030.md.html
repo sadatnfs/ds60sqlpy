@@ -197,7 +197,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Intermediate. Allow about 120 minutes, then revisit the transfer case later. Prerequisites: go-029</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
-<p>By the end, explain complexity, monotone predicate, preallocation; implement the six investigations below; and defend the expected result of a changed input before running it. A passing reference is evidence about that program, not a certification of your independent understanding.</p>
+<p>Implement a binary search with correct boundaries and compare work and allocation instead of guessing performance. Along the way, explain complexity, monotone predicate, preallocation; implement the six investigations below; and defend the expected result of a changed input before running it.</p>
 <h3 id="why-this-mechanism-matters">Why this mechanism matters<a class="heading-anchor" href="#why-this-mechanism-matters" aria-label="Link to this section">#</a></h3>
 <p>Performance work starts with a behavioral contract and representative input. Complexity predicts growth in work, while a benchmark measures a particular implementation and environment. A linear scan visits each item; binary search repeatedly narrows a sorted interval. Faster execution is useful only if it preserves the result and failure policy. Preallocating slice capacity can avoid growth allocations, but preallocating length creates real zero elements. Tiny timings are noisy. Separate setup from measurement, repeat a representative workload, record environment and check results outside the timing loop. A profile should answer a hypothesis about where time or allocations are spent.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
@@ -208,7 +208,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ul>
 <h3 id="syntax-anatomy-and-reasoning">Syntax anatomy and reasoning<a class="heading-anchor" href="#syntax-anatomy-and-reasoning" aria-label="Link to this section">#</a></h3>
 <p>sort.Search finds the first index where a monotone predicate becomes true, or n when none does. It does not sort or validate input. make([]int,0,n) reserves capacity with zero length; make([]int,n) creates n elements. Prepared project benchmarks use testing.B in _test.go files; pprof investigates CPU or allocation evidence rather than establishing a universal speed ranking.</p>
-<h3 id="classroom-execution-contract">Classroom execution contract<a class="heading-anchor" href="#classroom-execution-contract" aria-label="Link to this section">#</a></h3>
+<h3 id="run-this-lesson">Run this lesson<a class="heading-anchor" href="#run-this-lesson" aria-label="Link to this section">#</a></h3>
 <p>Choose Go in the unified Docker classroom. Save your own pad before experimenting. The prepared worker stages it as <code>main.go</code>, compiles it, and executes the resulting program with bounded time and output. The pad is one source file. It does not supply interactive input, arbitrary command-line arguments, package installation, Kubernetes credentials or a host Docker socket. Every ordinary reference here uses the standard library, synthetic local data and explicit checks. A failed <code>check</code> panics and produces a nonzero process result; do not remove it to make the run appear successful.</p>
 <p>The explanatory solution snippets belong inside <code>func main()</code> unless they declare a helper. <code>check</code> is a tiny teaching helper that panics when a condition is false. The separate reference supplies required imports and helpers and implements all six cases. Use that complete source only after an attempt or an explicit reveal. For an independently prepared Go project, the equivalent local build is <code>go build -o lesson main.go</code>, followed by <code>./lesson</code>; use Linux or WSL 2 for that optional workflow. Compiling proves syntax and type consistency, while the executed checks establish the stated example contracts.</p>
 <p>Each worked example below is a complete Go file. Copy one whole block into your saved pad and run it. Example 2 includes the first case as well as the second, so its setup is complete. Its supporting declarations may be reused in later investigations. The separate reference implements all six cases.</p>
@@ -275,75 +275,75 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>
 <p>For each example, write the input values, the state that can change, and the expected observation. Explain which result would disprove your current interpretation. For concurrency, predict a guaranteed relationship rather than an arbitrary scheduling order. For an error case, identify whether it is rejected at compilation or returned during execution.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
-<h4 id="exercise-1-find-a-lower-boundary">Exercise 1: Find a lower boundary<a class="heading-anchor" href="#exercise-1-find-a-lower-boundary" aria-label="Link to this section">#</a></h4>
-<p>Find the first value at least 5 in 2, 4, 6, 8.</p>
-<p><strong>Expected:</strong> The index is 2.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
-<h4 id="exercise-2-represent-no-match">Exercise 2: Represent no match<a class="heading-anchor" href="#exercise-2-represent-no-match" aria-label="Link to this section">#</a></h4>
-<p>Search for a value at least 9 in the same data.</p>
-<p><strong>Expected:</strong> The index equals the collection length.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<h4 id="exercise-1-find-a-lower-boundary-change-one-input">Exercise 1: Find a lower boundary: change one input<a class="heading-anchor" href="#exercise-1-find-a-lower-boundary-change-one-input" aria-label="Link to this section">#</a></h4>
+<p>Copy worked example 1 into a scratch pad and change <code>items := []int{2, 4, 6, 8}</code> to <code>items := []int{2, 5, 6, 8}</code>. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</p>
+<p><strong>Expected:</strong> The changed run panics with <code>boundary</code> because <code>i == 2</code> no longer holds. Restoring the original line brings back the worked observation: the index is 2.</p>
+<p><strong>Verify:</strong> Compare your written prediction with the panic message <code>boundary</code> and name the value that made <code>i == 2</code> false. After restoring the input, the program must print its success line again.</p>
+<h4 id="exercise-2-represent-no-match-debug-a-regression">Exercise 2: Represent no match: debug a regression<a class="heading-anchor" href="#exercise-2-represent-no-match-debug-a-regression" aria-label="Link to this section">#</a></h4>
+<p>A regression changed one token in worked example 2, so one line now reads <code>items := []int{2, 4, 6, 9}</code>. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.</p>
+<p><strong>Expected:</strong> Before the repair the program panics with <code>not found</code>; after it the line reads <code>items := []int{2, 4, 6, 8}</code> again and the index equals the collection length.</p>
+<p><strong>Verify:</strong> Keep the failing and the repaired runs. Explain why the changed token alters the value tested by <code>i == len(items)</code> for this input.</p>
 <h4 id="exercise-3-separate-length-and-capacity">Exercise 3: Separate length and capacity<a class="heading-anchor" href="#exercise-3-separate-length-and-capacity" aria-label="Link to this section">#</a></h4>
 <p>Reserve capacity four, then append one value.</p>
 <p><strong>Expected:</strong> Length is 1, capacity is 4.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>len(items) == 1 &amp;&amp; cap(items) == 4 &amp;&amp; items[0] == 7</code>. As a control, change <code>items := make([]int, 0, 4)</code> to <code>items := make([]int, 1, 4)</code>: the run must panic with <code>capacity</code>. Restore the line before continuing.</p>
 <h4 id="exercise-4-count-linear-work">Exercise 4: Count linear work<a class="heading-anchor" href="#exercise-4-count-linear-work" aria-label="Link to this section">#</a></h4>
 <p>Sum five values and count visits.</p>
 <p><strong>Expected:</strong> There are five visits and the sum is 15.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>visits == 5 &amp;&amp; sum == 15</code>. As a control, change <code>sum += v</code> to <code>sum -= v</code>: the run must panic with <code>work</code>. Restore the line before continuing.</p>
 <h4 id="exercise-5-handle-empty-search">Exercise 5: Handle empty search<a class="heading-anchor" href="#exercise-5-handle-empty-search" aria-label="Link to this section">#</a></h4>
 <p>Search a zero-length interval.</p>
 <p><strong>Expected:</strong> Index is 0 and the predicate is never called.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>i == 0 &amp;&amp; calls == 0</code>. As a control, change <code>calls := 0</code> to <code>calls := 1</code>: the run must panic with <code>empty</code>. Restore the line before continuing.</p>
 <h4 id="exercise-6-transfer-duplicate-boundaries">Exercise 6: Transfer duplicate boundaries<a class="heading-anchor" href="#exercise-6-transfer-duplicate-boundaries" aria-label="Link to this section">#</a></h4>
 <p>Find the first value at least 3 in 1, 3, 3, 5.</p>
 <p><strong>Expected:</strong> The first duplicate has index 1.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>i == 1</code>. As a control, change <code>i := sort.Search(len(items), func(i int) bool { return items[i] &gt;= 3 })</code> to <code>i := sort.Search(len(items), func(i int) bool { return items[i] &gt; 3 })</code>: the run must panic with <code>duplicates</code>. Restore the line before continuing.</p>
 <p>Implement these in the answer-free learner source. Keep one independent check per claim. A task can require tracing, construction, a changed input or a deliberate safe failure. Do not run a data race, corrupt memory or contact a shared cluster merely to demonstrate why it would be wrong.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Read a compiler error from the first location in your source, then fix one cause at a time. Unused imports and variables are errors in Go; add an import when its use exists, rather than copying a large unused import list. A panic from <code>check</code> identifies a violated example contract. Compare the actual value with the expected value and inspect the state transition that produced it. A returned <code>error</code> is a value that the caller must handle; an ignored error can make later output look plausible while the original operation failed.</p>
 <p>The lesson-specific explanations in the two examples identify the important counterexamples. Extend that reasoning to every investigation: explain why a plausible alternative would fail, and preserve a tiny input that distinguishes it. Treat empty data, missing values and cancellation as domain cases with explicit policies. In concurrent work, replace sleeps used as synchronization with channels, mutexes or an explicit ownership protocol.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<h4 id="hint-for-investigation-1-find-a-lower-boundary">Hint for investigation 1: Find a lower boundary<a class="heading-anchor" href="#hint-for-investigation-1-find-a-lower-boundary" aria-label="Link to this section">#</a></h4>
+<h4 id="hint-for-investigation-1-find-a-lower-boundary-change-one-input">Hint for investigation 1: Find a lower boundary: change one input<a class="heading-anchor" href="#hint-for-investigation-1-find-a-lower-boundary-change-one-input" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The index is 2.</li>
-<li>Identify the input and the state boundary relevant to find a lower boundary. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>i == 2</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Compute the checked value with <code>items := []int{2, 5, 6, 8}</code> in place before running, then compare it with the value <code>i == 2</code> expects.</li>
 </ol>
-<h4 id="hint-for-investigation-2-represent-no-match">Hint for investigation 2: Represent no match<a class="heading-anchor" href="#hint-for-investigation-2-represent-no-match" aria-label="Link to this section">#</a></h4>
+<h4 id="hint-for-investigation-2-represent-no-match-debug-a-regression">Hint for investigation 2: Represent no match: debug a regression<a class="heading-anchor" href="#hint-for-investigation-2-represent-no-match-debug-a-regression" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The index equals the collection length.</li>
-<li>Identify the input and the state boundary relevant to represent no match. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>i == len(items)</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Compare <code>items := []int{2, 4, 6, 9}</code> with the same line in worked example 2 and state the claim each version makes.</li>
 </ol>
 <h4 id="hint-for-investigation-3-separate-length-and-capacity">Hint for investigation 3: Separate length and capacity<a class="heading-anchor" href="#hint-for-investigation-3-separate-length-and-capacity" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Length is 1, capacity is 4.</li>
-<li>Identify the input and the state boundary relevant to separate length and capacity. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>len(items) == 1 &amp;&amp; cap(items) == 4 &amp;&amp; items[0] == 7</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Predict the effect of changing <code>items := make([]int, 0, 4)</code> to <code>items := make([]int, 1, 4)</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
 </ol>
 <h4 id="hint-for-investigation-4-count-linear-work">Hint for investigation 4: Count linear work<a class="heading-anchor" href="#hint-for-investigation-4-count-linear-work" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: There are five visits and the sum is 15.</li>
-<li>Identify the input and the state boundary relevant to count linear work. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>visits == 5 &amp;&amp; sum == 15</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Predict the effect of changing <code>sum += v</code> to <code>sum -= v</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
 </ol>
 <h4 id="hint-for-investigation-5-handle-empty-search">Hint for investigation 5: Handle empty search<a class="heading-anchor" href="#hint-for-investigation-5-handle-empty-search" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Index is 0 and the predicate is never called.</li>
-<li>Identify the input and the state boundary relevant to handle empty search. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>i == 0 &amp;&amp; calls == 0</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Predict the effect of changing <code>calls := 0</code> to <code>calls := 1</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
 </ol>
 <h4 id="hint-for-investigation-6-transfer-duplicate-boundaries">Hint for investigation 6: Transfer duplicate boundaries<a class="heading-anchor" href="#hint-for-investigation-6-transfer-duplicate-boundaries" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The first duplicate has index 1.</li>
-<li>Identify the input and the state boundary relevant to transfer duplicate boundaries. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>i == 1</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Predict the effect of changing <code>i := sort.Search(len(items), func(i int) bool { return items[i] &gt;= 3 })</code> to <code>i := sort.Search(len(items), func(i int) bool { return items[i] &gt; 3 })</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
 </ol>
 <h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
 <p>Close the reference. Rebuild one normal case and one boundary case from a blank pad. Explain the role of complexity without using its name in the definition. Then change the domain while keeping the same invariant. Record the new input, your prediction and the observed output. If your program passes only because its input is hard-coded, explain which part would need a reusable function in a larger project.</p>
 <h3 id="next-step-and-sources">Next step and sources<a class="heading-anchor" href="#next-step-and-sources" aria-label="Link to this section">#</a></h3>
-<p><a href="https://pkg.go.dev/testing#hdr-Benchmarks">Primary language or library documentation</a>, reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. This source supports the API contract; it does not verify the classroom worker. Runtime receipts are recorded separately by the repository validation tools. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.</p>
+<p><a href="https://pkg.go.dev/testing#hdr-Benchmarks">Primary language or library documentation</a>, reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for go-030: Algorithms, benchmarks and allocation-aware design.
 Read courses/go/guides/go-030.md and my saved attempt based on courses/go/lessons/go-030.go.

@@ -199,18 +199,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">Copy to .learning before editing. Six independent attempts belong below.</span></span>
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 1: Count batches and updates</span></span>
-<span class="source-line"><span class="syntax-comment"># Partition IDs 1..6 into batches of 2.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: three batches[[1, 2], [3, 4], [5, 6]].</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Partition with batch size 4</span></span>
+<span class="source-line"><span class="syntax-comment"># Partition IDs 1..10 into batches of 4 without dropping the tail.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: batch sizes 4, 4, 2; the last batch is [9, 10].</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 2: Retain a short tail</span></span>
-<span class="source-line"><span class="syntax-comment"># Partition five IDs with batch size 2.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: batch sizes 2, 2, 1.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Count updates with a dropped tail</span></span>
+<span class="source-line"><span class="syntax-comment"># With 10 records, batch size 4 and the short tail dropped, count optimizer steps per</span></span>
+<span class="source-line"><span class="syntax-comment"># epoch and over 3 epochs.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: 2 steps per epoch and 6 in total; records 9 and 10 never contribute in unshuffled order.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 3: Run three independent updates</span></span>
-<span class="source-line"><span class="syntax-comment"># Train x = 1..6, y = 2x, w = 0 with batch size 2, rate 0.01, clearing gradients each</span></span>
-<span class="source-line"><span class="syntax-comment"># batch.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: three finite distinct weights.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: Trace two single-record updates</span></span>
+<span class="source-line"><span class="syntax-comment"># Train w from 0 on x = 1, 2 with y = 2x, batch size 1 and learning rate 0.1, clearing</span></span>
+<span class="source-line"><span class="syntax-comment"># gradients before each step.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: weights 0.4 then 1.68.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Expose accidental accumulation</span></span>
 <span class="source-line"><span class="syntax-comment"># Repeat the loop without zero_grad and compare its final weight with the correct run.</span></span>

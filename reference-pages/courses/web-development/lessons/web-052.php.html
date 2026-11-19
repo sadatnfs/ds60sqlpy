@@ -197,11 +197,47 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">declare</span><span class="syntax-punctuation">(</span>strict_types<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">);</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment">// web-052: Implement a version-checked update in a disposable database.</span></span>
-<span class="source-line"><span class="syntax-comment">// Implement the task with local synthetic values. Do not use real credentials.</span></span>
-<span class="source-line"><span class="syntax-comment">// Keep separate checks for the normal case and the boundary in Exercise 5.</span></span>
+<span class="source-line"><span class="syntax-comment">// web-052: Transactions, constraints and concurrent changes</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercises. Hints are in the guide; answers are in the solutions folder.</span></span>
+<span class="source-line"><span class="syntax-comment">// 1. Explain atomicity without claiming every transaction is serializable.</span></span>
+<span class="source-line"><span class="syntax-comment">// 2. Add a database constraint for nonnegative minutes.</span></span>
+<span class="source-line"><span class="syntax-comment">// 3. Implement a version-checked update in a disposable database.</span></span>
+<span class="source-line"><span class="syntax-comment">// 4. Diagnose accepting a zero-row update as success.</span></span>
+<span class="source-line"><span class="syntax-comment">// 5. Force a failure after a write and verify rollback.</span></span>
+<span class="source-line"><span class="syntax-comment">// 6. Explain the limits of the single-connection concurrency demonstration.</span></span>
+<span class="source-line"><span class="syntax-comment">//</span></span>
+<span class="source-line"><span class="syntax-comment">// Worked example 1: A guarded update</span></span>
+<span class="source-line"><span class="syntax-comment">// UPDATE</span></span>
+<span class="source-line"><span class="syntax-comment">//   plans</span></span>
+<span class="source-line"><span class="syntax-comment">// SET</span></span>
+<span class="source-line"><span class="syntax-comment">//   minutes = :minutes,</span></span>
+<span class="source-line"><span class="syntax-comment">//   version = version + 1</span></span>
+<span class="source-line"><span class="syntax-comment">// WHERE</span></span>
+<span class="source-line"><span class="syntax-comment">//   id = :id</span></span>
+<span class="source-line"><span class="syntax-comment">//   AND version = :expected_version;</span></span>
+<span class="source-line"><span class="syntax-comment">//</span></span>
+<span class="source-line"><span class="syntax-comment">// Worked example 2: Rollback ownership</span></span>
+<span class="source-line"><span class="syntax-comment">// $db-&gt;beginTransaction();</span></span>
+<span class="source-line"><span class="syntax-comment">// try { /* related writes */ $db-&gt;commit(); }</span></span>
+<span class="source-line"><span class="syntax-comment">// catch (Throwable $error) { if ($db-&gt;inTransaction()) $db-&gt;rollBack(); throw $error; }</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-keyword">echo</span> <span class="syntax-string">&quot;</span><span class="syntax-string">My implementation goes here.</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">function</span> <span class="syntax-function">check</span><span class="syntax-punctuation">(</span>bool $condition<span class="syntax-punctuation">,</span> string $message<span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> void</span>
+<span class="source-line"><span class="syntax-punctuation">{</span></span>
+<span class="source-line">  <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>$condition<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> RuntimeException<span class="syntax-punctuation">(</span>$message<span class="syntax-punctuation">);</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">// Synthetic fixture for the exercises.</span></span>
+<span class="source-line">$db <span class="syntax-operator">=</span> <span class="syntax-keyword">new</span> PDO<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">sqlite::memory:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span>PDO<span class="syntax-operator">::</span><span class="syntax-attribute">ATTR_ERRMODE</span> <span class="syntax-operator">=&gt;</span> PDO<span class="syntax-operator">::</span><span class="syntax-attribute">ERRMODE_EXCEPTION</span><span class="syntax-punctuation">]);</span></span>
+<span class="source-line">$db<span class="syntax-operator">-&gt;</span><span class="syntax-attribute">exec</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-string">&quot;</span><span class="syntax-string">CREATE TABLE plans (id INTEGER PRIMARY KEY, minutes INTEGER NOT NULL, version INTEGER NOT NULL)</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">);</span></span>
+<span class="source-line">$db<span class="syntax-operator">-&gt;</span><span class="syntax-attribute">exec</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">INSERT INTO plans VALUES (1, 30, 1)</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">);</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">// Write your implementation here and add one check() call for each case you test.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">echo</span> <span class="syntax-string">&quot;</span><span class="syntax-string">web-052 attempt finished without a failed check</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span></code></pre></article>
   </main>
 </body>

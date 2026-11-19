@@ -194,37 +194,51 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/rust/solutions/rust-005_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="rust-005-explanation-and-comparison">rust-005: explanation and comparison<a class="heading-anchor" href="#rust-005-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="rust-005_solution.rs.html">rust-005_solution.rs</a>. Its assertions are always active under the prepared classroom compile settings.</p>
+<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="rust-005_solution.rs.html">rust-005_solution.rs</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Choose a value with if:</strong> Both branches return the same kind of value, so the result has one static type. The branch expression supplies one immutable label.</p>
 <p><strong>Classify explicit boundaries:</strong> A tiny boundary fixture rejects an off-by-one policy error. The transition at sixty and the invalid upper range are distinct.</p>
-<h3 id="reason-through-the-six-tasks">Reason through the six tasks<a class="heading-anchor" href="#reason-through-the-six-tasks" aria-label="Link to this section">#</a></h3>
-<ol>
-<li><strong>Predict and explain.</strong> Identify the value produced by each branch.</li>
-</ol>
-<ol start="2">
-<li><strong>Guided modification.</strong> Change the threshold and update neighboring tests.</li>
-</ol>
-<ol start="3">
-<li><strong>Independent construction.</strong> Write a negative, zero and positive classifier.</li>
-</ol>
-<ol start="4">
-<li><strong>Diagnose a defect.</strong> Diagnose a semicolon that changes a branch result into unit.</li>
-</ol>
-<ol start="5">
-<li><strong>Boundary evidence.</strong> Test both valid endpoints and one value beyond each.</li>
-</ol>
-<ol start="6">
-<li><strong>Transfer and justify.</strong> Choose explicit enum matches or a wildcard for a finite application state model.</li>
-</ol>
-<p>For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.</p>
+<h3 id="task-answers">Task answers<a class="heading-anchor" href="#task-answers" aria-label="Link to this section">#</a></h3>
+<h4 id="task-1-predict-and-explain">Task 1: Predict and explain<a class="heading-anchor" href="#task-1-predict-and-explain" aria-label="Link to this section">#</a></h4>
+<p>Identify the value produced by each branch.</p>
+<p>No separate reference answer has been written for this task. Example A is the evidence to compare with: Both branches return the same kind of value, so the result has one static type. The branch expression supplies one immutable label.</p>
+<h4 id="task-2-guided-modification">Task 2: Guided modification<a class="heading-anchor" href="#task-2-guided-modification" aria-label="Link to this section">#</a></h4>
+<p>Change the threshold and update neighboring tests.</p>
+<p>No separate reference answer has been written for this task. Start from Example B: A tiny boundary fixture rejects an off-by-one policy error. The transition at sixty and the invalid upper range are distinct.</p>
+<h4 id="task-3-independent-construction">Task 3: Independent construction<a class="heading-anchor" href="#task-3-independent-construction" aria-label="Link to this section">#</a></h4>
+<p>Write a negative, zero and positive classifier.</p>
+<p><strong>Reference answer.</strong> The same statements run as the <code>Task 3</code> block of the reference program; here they are wrapped in <code>main</code> as a complete file.</p>
+<pre class="highlighted-code"><code class="language-rust"><span class="syntax-keyword">fn</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">-&gt;</span> <span class="syntax-builtin">Result</span><span class="syntax-operator">&lt;</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">Box</span><span class="syntax-operator">&lt;</span><span class="syntax-keyword">dyn</span> std<span class="syntax-punctuation">::</span>error<span class="syntax-punctuation">::</span>Error<span class="syntax-operator">&gt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">fn</span> <span class="syntax-function">classify</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">:</span> <span class="syntax-keyword">i32</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">-&gt;</span> <span class="syntax-keyword">&amp;</span><span class="syntax-operator">&#x27;</span><span class="syntax-builtin">static</span> <span class="syntax-keyword">str</span> <span class="syntax-punctuation">{</span>
+        <span class="syntax-keyword">match</span> value <span class="syntax-punctuation">{</span>
+            <span class="syntax-keyword">i32</span><span class="syntax-punctuation">::</span>MIN<span class="syntax-operator">..=</span><span class="syntax-operator">-</span><span class="syntax-number">1</span> <span class="syntax-operator">=</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">negative</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+            <span class="syntax-number">0</span> <span class="syntax-operator">=</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">zero</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+            <span class="syntax-number">1</span><span class="syntax-operator">..=</span><span class="syntax-keyword">i32</span><span class="syntax-punctuation">::</span>MAX <span class="syntax-operator">=</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">positive</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-punctuation">}</span>
+    <span class="syntax-punctuation">}</span>
+    <span class="syntax-function">assert_eq!</span><span class="syntax-punctuation">(</span>classify<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">negative</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-function">assert_eq!</span><span class="syntax-punctuation">(</span>classify<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">zero</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-function">assert_eq!</span><span class="syntax-punctuation">(</span>classify<span class="syntax-punctuation">(</span><span class="syntax-number">9</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">positive</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-builtin">Ok</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<p><strong>Observe:</strong> -4, 0 and 9 are classified as negative, zero and positive.</p>
+<p>The three ranges cover every i32 exactly once, so the match is exhaustive without a catch-all arm that could hide a mistake.</p>
+<h4 id="task-4-diagnose-a-defect">Task 4: Diagnose a defect<a class="heading-anchor" href="#task-4-diagnose-a-defect" aria-label="Link to this section">#</a></h4>
+<p>Diagnose a semicolon that changes a branch result into unit.</p>
+<p>No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson&#x27;s pitfalls: A semicolon can change a block value. Match arm order matters when patterns overlap. A wildcard that hides an unhandled domain state weakens maintenance feedback.</p>
+<h4 id="task-5-boundary-evidence">Task 5: Boundary evidence<a class="heading-anchor" href="#task-5-boundary-evidence" aria-label="Link to this section">#</a></h4>
+<p>Test both valid endpoints and one value beyond each.</p>
+<p>No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Choose a value with if) and Example B (Classify explicit boundaries).</p>
+<h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
+<p>Choose explicit enum matches or a wildcard for a finite application state model.</p>
+<p>No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry <strong>Expression</strong>, and state one limitation of your choice.</p>
 <h3 id="mechanism-and-diagnostic-reasoning">Mechanism and diagnostic reasoning<a class="heading-anchor" href="#mechanism-and-diagnostic-reasoning" aria-label="Link to this section">#</a></h3>
 <p>Rust treats many control-flow constructs as expressions producing values. An if expression must return compatible types from its branches. This encourages deriving one result instead of initializing a mutable variable and assigning it inconsistently on several paths.</p>
 <p>Match handles patterns and requires coverage of possibilities. A broad wildcard can be useful for invalid numeric ranges but can hide newly added enum cases. Make boundaries explicit and test adjacent inputs. A correct normal example does not prove that an inclusive versus exclusive threshold is right.</p>
 <p><code>let label = if condition { &quot;yes&quot; } else { &quot;no&quot; };</code> uses a branch result. The final expression in a block has no semicolon when it supplies the value. <code>0..=59</code> is an inclusive pattern range.</p>
 <p>A semicolon can change a block value. Match arm order matters when patterns overlap. A wildcard that hides an unhandled domain state weakens maintenance feedback.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.</p></article>
+<p>Run the reference and confirm that it prints <code>rust-005: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
   </main>
 </body>
 </html>

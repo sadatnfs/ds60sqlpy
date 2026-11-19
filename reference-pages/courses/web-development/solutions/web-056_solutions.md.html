@@ -194,31 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-056_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-056-explanatory-solutions">web-056: explanatory solutions<a class="heading-anchor" href="#web-056-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.</p>
-<h3 id="why-the-mechanism-works">Why the mechanism works<a class="heading-anchor" href="#why-the-mechanism-works" aria-label="Link to this section">#</a></h3>
-<p>The application core coordinates a use case without pretending to be an HTTP server. It receives a trusted actor identity and untrusted proposed values, validates the proposal, writes through a repository and returns a result. Keeping these boundaries visible makes it possible to reason about what is trusted and which failures prevent a write.</p>
-<p>This milestone combines the earlier mechanisms in a small study planner. The database is disposable SQLite memory. The input is synthetic. Validation rejects unsupported topics and out-of-range durations. A prepared statement stores an accepted plan under the supplied actor. A query scopes retrieval by that actor. Rendering and HTTP adaptation remain separate so the same core can later be integrated and tested through a real server.</p>
-<p>Write the acceptance matrix before implementation: a valid plan is stored once, invalid input stores nothing, one actor cannot read another&#x27;s plan, and output has a clear type contract. A production service would add session verification, CSRF where relevant, idempotency, concurrent behavior, migrations and operational controls. Do not infer those properties from this small core.</p>
+<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-056.md</code>.</p>
 <h3 id="exercise-1-draw-the-trust-boundary-around-actor-identity-and-form-values">Exercise 1: Draw the trust boundary around actor identity and form values.<a class="heading-anchor" href="#exercise-1-draw-the-trust-boundary-around-actor-identity-and-form-values" aria-label="Link to this section">#</a></h3>
-<p>The adapter verifies identity; the application validates proposed domain values.</p>
-<p>Trace the smallest example before editing. Name which values are source and which are observations.</p>
+<p><strong>Expected answer:</strong> The adapter verifies identity; the application validates proposed domain values.</p>
+<p><strong>Why:</strong> Identity comes from the adapter after verification, while form values are untrusted proposals that the application validates.</p>
 <h3 id="exercise-2-write-the-acceptance-matrix-before-implementing-the-service">Exercise 2: Write the acceptance matrix before implementing the service.<a class="heading-anchor" href="#exercise-2-write-the-acceptance-matrix-before-implementing-the-service" aria-label="Link to this section">#</a></h3>
-<p>Normal, invalid and cross-owner cases have explicit observations.</p>
-<p>Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.</p>
+<p><strong>Expected evidence:</strong> Normal, invalid and cross-owner cases have explicit observations.</p>
+<p><strong>Why:</strong> An acceptance matrix written first prevents the tests from simply copying what the implementation does.</p>
 <h3 id="exercise-3-build-a-tested-planner-core-with-validation-and-prepared-storage">Exercise 3: Build a tested planner core with validation and prepared storage.<a class="heading-anchor" href="#exercise-3-build-a-tested-planner-core-with-validation-and-prepared-storage" aria-label="Link to this section">#</a></h3>
-<p>Accepted plans persist in the disposable database and rejected inputs create no rows.</p>
-<p>Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.</p>
+<p><strong>Expected evidence:</strong> Accepted plans persist in the disposable database and rejected inputs create no rows.</p>
+<p><strong>Why:</strong> Validating before mutation means a rejected request leaves no partial rows.</p>
 <h3 id="exercise-4-diagnose-a-service-that-writes-before-validating-all-fields">Exercise 4: Diagnose a service that writes before validating all fields.<a class="heading-anchor" href="#exercise-4-diagnose-a-service-that-writes-before-validating-all-fields" aria-label="Link to this section">#</a></h3>
-<p>Move complete validation before mutation or ensure a correctly owned transaction aborts the entire unit.</p>
-<p>Keep the failing input. Identify the first layer where the observed result differs from the intended contract.</p>
+<p><strong>Expected answer:</strong> Move complete validation before mutation or ensure a correctly owned transaction aborts the entire unit.</p>
+<p><strong>Why:</strong> A write before validation completes can leave partial state unless one transaction rolls it back.</p>
 <h3 id="exercise-5-test-cross-owner-retrieval-and-an-invalid-duration">Exercise 5: Test cross-owner retrieval and an invalid duration.<a class="heading-anchor" href="#exercise-5-test-cross-owner-retrieval-and-an-invalid-duration" aria-label="Link to this section">#</a></h3>
-<p>No other actor&#x27;s row is exposed and the invalid request changes no stored state.</p>
-<p>Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.</p>
+<p><strong>Expected evidence:</strong> No other actor&#x27;s row is exposed and the invalid request changes no stored state.</p>
+<p><strong>Why:</strong> Owner scoping hides other actors&#x27; rows, and an invalid request must leave the row count unchanged.</p>
 <h3 id="exercise-6-explain-the-remaining-work-before-this-core-becomes-a-deployed-application">Exercise 6: Explain the remaining work before this core becomes a deployed application.<a class="heading-anchor" href="#exercise-6-explain-the-remaining-work-before-this-core-becomes-a-deployed-application" aria-label="Link to this section">#</a></h3>
-<p>Real HTTP, session, CSRF, persistence, concurrency, accessibility and operational acceptance remain separate integration tasks.</p>
-<p>Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.</p>
-<h3 id="reference-comparison-and-limits">Reference comparison and limits<a class="heading-anchor" href="#reference-comparison-and-limits" aria-label="Link to this section">#</a></h3>
-<p>Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.</p></article>
+<p><strong>Expected answer:</strong> Real HTTP, session, CSRF, persistence, concurrency, accessibility and operational acceptance remain separate integration tasks.</p>
+<p><strong>Why:</strong> Real HTTP handling, sessions, CSRF, durable storage, concurrency, accessibility and operations each need their own acceptance tests.</p>
+<h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
+<p>Open <code>courses/web-development/solutions/web-056_solution.php</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.</p></article>
   </main>
 </body>
 </html>

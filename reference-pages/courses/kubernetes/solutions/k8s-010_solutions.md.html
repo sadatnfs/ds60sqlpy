@@ -201,10 +201,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The allowed source runs the small server with modest requests and limits. Quota and deliberate memory-failure experiments require a teacher-provided bounded host fixture; the current worker does not create ResourceQuotas or install a metrics stack. A source-validation refusal must remain distinct from an actual admission, scheduling or runtime observation.</p>
 <h3 id="exercise-1-read-requests-versus-limits">Exercise 1: Read requests versus limits<a class="heading-anchor" href="#exercise-1-read-requests-versus-limits" aria-label="Link to this section">#</a></h3>
 <p>The fields describe different contracts. A request is not a measured usage value, and a limit is not a guaranteed reservation. Preserve the configured values alongside actual runtime evidence when diagnosing performance.</p>
-<p><strong>Expected:</strong> 10m/16Mi requests and100m/64Mi limits in the baseline; requests influence placement, limits constrain runtime.</p>
+<p><strong>Expected:</strong> Starter requests 100m/64Mi equal its limits; the edited source keeps limits 100m/64Mi with requests 10m/16Mi. Requests influence placement and quota; limits constrain runtime use.</p>
 <h3 id="exercise-2-calculate-the-replica-budget">Exercise 2: Calculate the replica budget<a class="heading-anchor" href="#exercise-2-calculate-the-replica-budget" aria-label="Link to this section">#</a></h3>
 <p>Binary memory units use powers of two. Include extra clients or rollout surge Pods in a real quota calculation. A count of desired application replicas alone can understate total namespace resource use.</p>
-<p><strong>Expected:</strong> 20m CPU, 32Mi memory and67, 108, 864 bytes for64Mi.</p>
+<p><strong>Expected:</strong> 20m CPU, 32Mi memory and 67,108,864 bytes for 64Mi.</p>
 <h3 id="exercise-3-reject-invalid-source-budgets">Exercise 3: Reject invalid source budgets<a class="heading-anchor" href="#exercise-3-reject-invalid-source-budgets" aria-label="Link to this section">#</a></h3>
 <p>This is source admission by the course adapter. It does not establish that Kubernetes scheduled or killed a Pod. The distinction keeps a local validation error from being confused with runtime resource exhaustion.</p>
 <p><strong>Expected:</strong> Broker refuses requests greater than limits before creating resources.</p>
@@ -213,7 +213,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Expected:</strong> Admission budget versus scheduler placement, with separate minimal investigations.</p>
 <h3 id="exercise-5-interpret-memory-failure">Exercise 5: Interpret memory failure<a class="heading-anchor" href="#exercise-5-interpret-memory-failure" aria-label="Link to this section">#</a></h3>
 <p>An exit code can have multiple causes. The reason field and contextual evidence narrow the diagnosis. The lesson does not authorize unbounded memory stress or changing node-wide settings.</p>
-<p><strong>Expected:</strong> OOMKilled is specific memory-enforcement evidence; exit137 alone is insufficient to prove that cause.</p>
+<p><strong>Expected:</strong> OOMKilled is specific memory-enforcement evidence; exit 137 alone is insufficient to prove that cause.</p>
 <h3 id="exercise-6-plan-a-bounded-repair">Exercise 6: Plan a bounded repair<a class="heading-anchor" href="#exercise-6-plan-a-bounded-repair" aria-label="Link to this section">#</a></h3>
 <p>A useful repair targets the observed mechanism. It should state what new evidence would confirm recovery and remain within the owned resource budget. A Ready Pod after a broad set of changes does not explain which change fixed the problem.</p>
 <p><strong>Expected:</strong> One justified source/resource change, phase-specific success evidence and owned cleanup.</p>

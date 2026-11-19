@@ -194,31 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-009_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-009-explanatory-solutions">web-009: explanatory solutions<a class="heading-anchor" href="#web-009-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.</p>
-<h3 id="why-the-mechanism-works">Why the mechanism works<a class="heading-anchor" href="#why-the-mechanism-works" aria-label="Link to this section">#</a></h3>
-<p>Validation checks whether input satisfies a contract. Browser constraint validation gives immediate feedback through attributes such as required, type, min and maxlength. It improves the interaction but is not a security boundary because a client can bypass it or send a request without using the form at all. A server must repeat the relevant validation and authorization decisions.</p>
-<p>An error message should identify the field, explain the problem and offer a useful correction without losing the user&#x27;s work. Color alone is insufficient. Connect instructions and errors with aria-describedby, and use aria-invalid when an actual invalid state has been identified. Do not mark every untouched field invalid when the page first opens.</p>
-<p><code>checkValidity()</code> reports whether a control meets its constraints. <code>reportValidity()</code> also requests the browser&#x27;s feedback interface. An empty required field is invalid, while a non-required empty email field may be valid. Email type checks syntax, not whether the mailbox exists or belongs to the user. This lesson uses native constraints and explicit explanatory text; it does not send data.</p>
+<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-009.md</code>.</p>
 <h3 id="exercise-1-predict-required-minimum-and-maximum-outcomes-for-empty-4-30-and-121">Exercise 1: Predict required, minimum and maximum outcomes for empty, 4, 30 and 121.<a class="heading-anchor" href="#exercise-1-predict-required-minimum-and-maximum-outcomes-for-empty-4-30-and-121" aria-label="Link to this section">#</a></h3>
-<p>Empty, 4 and 121 fail; 30 satisfies the numeric bounds.</p>
-<p>Trace the smallest example before editing. Name which values are source and which are observations.</p>
+<p><strong>Expected answer:</strong> Empty, 4 and 121 fail; 30 satisfies the numeric bounds.</p>
+<p><strong>Why:</strong> An empty value fails required, 4 is below min and 121 is above max, while 30 satisfies every constraint.</p>
 <h3 id="exercise-2-add-a-clear-unit-and-range-to-a-control-s-label">Exercise 2: Add a clear unit and range to a control&#x27;s label.<a class="heading-anchor" href="#exercise-2-add-a-clear-unit-and-range-to-a-control-s-label" aria-label="Link to this section">#</a></h3>
-<p>The rule is understandable before an error occurs.</p>
-<p>Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.</p>
+<p><strong>Expected evidence:</strong> The rule is understandable before an error occurs.</p>
+<p><strong>Why:</strong> Stating the rule up front prevents errors instead of explaining them after a failed attempt.</p>
 <h3 id="exercise-3-build-a-bounded-study-time-form-with-linked-help">Exercise 3: Build a bounded study-time form with linked help.<a class="heading-anchor" href="#exercise-3-build-a-bounded-study-time-form-with-linked-help" aria-label="Link to this section">#</a></h3>
-<p>The user can identify the rule, enter a valid value and retain it after a failed attempt.</p>
-<p>Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.</p>
+<p><strong>Expected evidence:</strong> The user can identify the rule, enter a valid value and retain it after a failed attempt.</p>
+<p><strong>Why:</strong> aria-describedby makes the rule part of the field&#x27;s announcement, and preserving the value lets the user correct it instead of retyping.</p>
 <h3 id="exercise-4-explain-why-type-email-does-not-prove-mailbox-ownership">Exercise 4: Explain why type=email does not prove mailbox ownership.<a class="heading-anchor" href="#exercise-4-explain-why-type-email-does-not-prove-mailbox-ownership" aria-label="Link to this section">#</a></h3>
-<p>It checks a syntactic format, not identity or delivery.</p>
-<p>Keep the failing input. Identify the first layer where the observed result differs from the intended contract.</p>
+<p><strong>Expected answer:</strong> It checks a syntactic format, not identity or delivery.</p>
+<p><strong>Why:</strong> The browser checks only the address syntax; proving ownership requires sending a message and confirming the response.</p>
 <h3 id="exercise-5-test-validation-with-keyboard-and-an-empty-field">Exercise 5: Test validation with keyboard and an empty field.<a class="heading-anchor" href="#exercise-5-test-validation-with-keyboard-and-an-empty-field" aria-label="Link to this section">#</a></h3>
-<p>The error is discoverable and the entered values are preserved.</p>
-<p>Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.</p>
+<p><strong>Expected evidence:</strong> The error is discoverable and the entered values are preserved.</p>
+<p><strong>Why:</strong> Errors must be perceivable and reachable by keyboard, otherwise a keyboard user may not learn that the submission failed.</p>
 <h3 id="exercise-6-separate-client-feedback-from-server-side-acceptance">Exercise 6: Separate client feedback from server-side acceptance.<a class="heading-anchor" href="#exercise-6-separate-client-feedback-from-server-side-acceptance" aria-label="Link to this section">#</a></h3>
-<p>The backend repeats contract checks and authorization regardless of browser validation.</p>
-<p>Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.</p>
-<h3 id="reference-comparison-and-limits">Reference comparison and limits<a class="heading-anchor" href="#reference-comparison-and-limits" aria-label="Link to this section">#</a></h3>
-<p>Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.</p></article>
+<p><strong>Expected evidence:</strong> The backend repeats contract checks and authorization regardless of browser validation.</p>
+<p><strong>Why:</strong> Client constraints improve feedback but can be bypassed, so the server repeats validation and authorization before accepting data.</p>
+<h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
+<p>Open <code>courses/web-development/solutions/web-009_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
   </main>
 </body>
 </html>

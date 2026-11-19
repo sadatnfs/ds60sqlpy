@@ -9,7 +9,7 @@
     content="default-src 'none'; style-src 'self' file: 'unsafe-inline'; font-src data:; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
   >
   <link rel="stylesheet" href="../src/ds60sqlpy/assets/vendor/textbook/fonts.css">
-  <title>python-data-01 · Columnar Data, Arrow, and Embedded Analytical SQL · DS60</title>
+  <title>python-data-01 · Columnar Data with Arrow, Parquet, and DuckDB · DS60</title>
   <style>
     :root {
       --paper: #f6f2e8;
@@ -312,7 +312,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <div class="shell">
       <section class="hero">
         <p class="eyebrow">python · lesson python-data-01</p>
-        <h1>Columnar Data, Arrow, and Embedded Analytical SQL</h1>
+        <h1>Columnar Data with Arrow, Parquet, and DuckDB</h1>
         <p class="hero-copy">Professional data engineering</p>
         <div class="meta">
           <span class="tag">intermediate</span>
@@ -384,11 +384,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
         <div class="artifact-content"><h3 id="guide--columnar-data-arrow-parquet-and-embedded-analytical-sql">Columnar data, Arrow, Parquet, and embedded analytical SQL<a class="heading-anchor" href="#guide--columnar-data-arrow-parquet-and-embedded-analytical-sql" aria-label="Link to this section">#</a></h3>
 <p><strong>Stable ID:</strong> <code>python-data-01</code></p>
 <p><strong>Level:</strong> intermediate/advanced</p>
-<p><strong>Estimated time:</strong> 180–240 minutes</p>
+<p><strong>Estimated time:</strong> 180-240 minutes</p>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Catalog prerequisite:</strong> <code>python-23</code></li>
-<li>Python Days 1–23, especially CSV, pandas I/O, generators, and data pipelines</li>
+<li>Python Days 1-23, especially CSV, pandas I/O, generators, and data pipelines</li>
 <li>SQL <code>SELECT</code>, <code>WHERE</code>, aggregation, and <code>GROUP BY</code></li>
 <li>Core setup for the CSV path</li>
 <li>Optional local <code>pandas</code>, <code>pyarrow</code>, and <code>duckdb</code> packages for the columnar path</li>
@@ -441,7 +441,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <pre class="highlighted-code"><code class="language-bash">uv run --no-sync python python/professional/solutions/py_data_01_arrow_duckdb_solution.py</code></pre>
 <p>If PyArrow or DuckDB is absent, the program says so and still completes the CSV and partition exercises. It never tries to install a package.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
-<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python and data science</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
 <p><strong>Optional contributor route:</strong> use the prepared environment in <a href="../reference-pages/CONTRIBUTING.md.html">CONTRIBUTING</a> on Linux, macOS or Windows through WSL 2. The commands below assume its packages are already installed. They are not prerequisites for opening this lesson in the Docker classroom. Local <code>.learning/</code> files and CLI progress belong to this checkout; they do not read or update the Docker classroom&#x27;s named learning volume.</p>
 <p>Work from the repository root. First run the answer-free learner module named in this guide&#x27;s original walkthrough. Read each TODO as a contract: record the input, returned value, raised exception, and side effect before implementing it. Then run the focused test command in <strong>Self-check</strong>. Keep exploratory changes in a copy or a new test; the checked-in solution remains a comparison artifact.</p>
 <p>Prepared POSIX/WSL contributor terminal:</p>
@@ -626,7 +626,7 @@ region=west/part-000.csv</code></pre>
 </ul>
 <h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into the AI tutor while the repository root is open:</p>
-<pre class="highlighted-code"><code class="language-text">Tutor me through `python-data-01` — Columnar data, Arrow, Parquet, and embedded analytical SQL.
+<pre class="highlighted-code"><code class="language-text">Tutor me through `python-data-01`: Columnar data, Arrow, Parquet, and embedded analytical SQL.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize typed data boundaries, Arrow/Parquet schema, partitions, and pushdown evidence. Use exactly these maintained learner materials:
@@ -1498,7 +1498,7 @@ types <span class="syntax-operator">=</span> <span class="syntax-punctuation">{<
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through `python-data-01` — Columnar data, Arrow, Parquet, and embedded analytical SQL.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through `python-data-01`: Columnar data, Arrow, Parquet, and embedded analytical SQL.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize typed data boundaries, Arrow/Parquet schema, partitions, and pushdown evidence. Use exactly these maintained learner materials:
@@ -1532,7 +1532,7 @@ merely ran is not evidence of mastery.</textarea>
       </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
-        <a class="nav-card" href="python-pro-02.html"><small>Previous lesson</small><strong>python-pro-02</strong><span>Concurrency and Parallelism Decision Lab</span></a>
+        <a class="nav-card" href="python-pro-02.html"><small>Previous lesson</small><strong>python-pro-02</strong><span>Choosing Concurrency or Parallelism</span></a>
         <a class="nav-card next" href="python-test-01.html"><small>Next lesson</small><strong>python-test-01</strong><span>Test Architecture, Doubles, and Generative Testing</span></a>
       </nav>
     </div>

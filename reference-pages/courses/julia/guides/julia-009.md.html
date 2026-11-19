@@ -198,7 +198,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Beginner; approximately 90 minutes. Direct prerequisites: <code>julia-006</code>, <code>julia-008</code>.</p>
 <p>Validate scientific inputs, test expected failures and preserve unexpected errors instead of turning them into successful results.</p>
 <h3 id="classroom-execution">Classroom execution<a class="heading-anchor" href="#classroom-execution" aria-label="Link to this section">#</a></h3>
-<p>Choose <strong>Julia language and scientific computing</strong> in <code>/classroom</code>, open this unit, and select its prepared <code>julia</code> runtime. The worker starts a fresh <code>main.jl</code> process with two Julia threads, a fixed package environment, no startup file and offline package settings. Both worked examples are complete under that environment. Save your current pad before replacing it. No package, model or dataset is fetched by a lesson.</p>
+<p>Open <code>julia-009</code> in <code>/classroom</code> with its prepared <code>julia</code> runtime. Worked case A (a finite nonempty mean) and worked case B (a bounded outcome record) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing <code>julia-009: all reference checks passed</code>. The <a href="../README.md.html">course overview</a> describes the shared runtime: a fresh offline <code>main.jl</code> process with two threads and a fixed package environment.</p>
 <h3 id="an-error-policy-is-part-of-an-api">An error policy is part of an API<a class="heading-anchor" href="#an-error-policy-is-part-of-an-api" aria-label="Link to this section">#</a></h3>
 <p>A calculation can fail because its input is outside the intended domain, because information is absent, or because the implementation has a defect. These situations deserve different handling. Returning an ordinary numeric value for every failure can make an invalid result look scientifically meaningful.</p>
 <p><code>throw</code> raises an exception. <code>try</code> and <code>catch</code> can handle an expected failure at a boundary. <code>rethrow</code> preserves an unexpected exception rather than replacing it with a misleading success. The standard <code>Test</code> library provides checks for values and expected exceptions. Tests should state the contract using inputs that expose normal and boundary behavior.</p>
@@ -305,7 +305,7 @@ worked_b<span class="syntax-punctuation">(</span><span class="syntax-punctuation
 <li><a href="https://docs.julialang.org/en/v1/stdlib/Test/">Julia Test standard library</a></li>
 </ul>
 <h3 id="study-companion">Study companion<a class="heading-anchor" href="#study-companion" aria-label="Link to this section">#</a></h3>
-<p>Use the repository learning-companion skill with this lesson ID, your prediction and your actual source/output. Ask for a diagnosis of the first incorrect type, shape, state transition or assumption. Keep observed execution distinct from a timing claim, inferred mathematical result or external deployment.</p></article>
+<p>A repository-aware assistant with the learning-companion skill can review <code>julia-009</code> with you. Give it your prediction for one investigation, your source and the actual output, and ask it to find the first incorrect assumption about ArgumentError, DomainError, test set, boundary case or rethrow.</p></article>
   </main>
 </body>
 </html>

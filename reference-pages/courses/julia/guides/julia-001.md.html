@@ -198,7 +198,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Beginner; approximately 90 minutes. Direct prerequisites: No previous Julia experience.</p>
 <p>Run a complete Julia script, trace bindings and distinguish a computed value from printed output.</p>
 <h3 id="classroom-execution">Classroom execution<a class="heading-anchor" href="#classroom-execution" aria-label="Link to this section">#</a></h3>
-<p>Choose <strong>Julia language and scientific computing</strong> in <code>/classroom</code>, open this unit, and select its prepared <code>julia</code> runtime. The worker starts a fresh <code>main.jl</code> process with two Julia threads, a fixed package environment, no startup file and offline package settings. Both worked examples are complete under that environment. Save your current pad before replacing it. No package, model or dataset is fetched by a lesson.</p>
+<p>Open <code>julia-001</code> in <code>/classroom</code> with its prepared <code>julia</code> runtime. Worked case A (trace a calculation) and worked case B (rebinding a scalar) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing <code>julia-001: all reference checks passed</code>. The <a href="../README.md.html">course overview</a> describes the shared runtime: a fresh offline <code>main.jl</code> process with two threads and a fixed package environment.</p>
 <h3 id="the-execution-model">The execution model<a class="heading-anchor" href="#the-execution-model" aria-label="Link to this section">#</a></h3>
 <p>Julia evaluates expressions to values. A value has a type, such as an integer, floating-point number or string. A name is a binding to a value. Assignment changes that binding; it is not a mathematical equation that must remain true after later assignments. This distinction is the first tool for explaining what a program actually did.</p>
 <p>The classroom executes a source file called <code>main.jl</code> in a fresh Julia process. It does not preserve variables from an earlier Run. Saving a source draft or note is separate from retaining a running interpreter. A script also differs from the interactive REPL: a bare expression can be displayed automatically in the REPL, while a script generally needs <code>println</code> or another output operation to make a result visible.</p>
@@ -243,7 +243,7 @@ worked_b<span class="syntax-punctuation">(</span><span class="syntax-punctuation
 <p><strong>Expected:</strong> The total is 23.</p>
 <p><strong>Hint:</strong> Change one input and recompute the arithmetic.</p>
 <h4 id="2-keep-a-scalar-snapshot">2. Keep a scalar snapshot<a class="heading-anchor" href="#2-keep-a-scalar-snapshot" aria-label="Link to this section">#</a></h4>
-<p>Bind y to x=4, then rebind x to 10.</p>
+<p>Bind <code>y</code> to <code>x = 4</code>, then rebind <code>x</code> to 10.</p>
 <p><strong>Expected:</strong> y remains 4.</p>
 <p><strong>Hint:</strong> Trace bindings separately.</p>
 <h4 id="3-print-deliberately">3. Print deliberately<a class="heading-anchor" href="#3-print-deliberately" aria-label="Link to this section">#</a></h4>
@@ -251,7 +251,7 @@ worked_b<span class="syntax-punctuation">(</span><span class="syntax-punctuation
 <p><strong>Expected:</strong> Only explicit output is guaranteed to appear in the script transcript.</p>
 <p><strong>Hint:</strong> Separate computation from presentation.</p>
 <h4 id="4-inspect-a-type">4. Inspect a type<a class="heading-anchor" href="#4-inspect-a-type" aria-label="Link to this section">#</a></h4>
-<p>Compare typeof(2) and typeof(2.5).</p>
+<p>Compare <code>typeof(2)</code> and <code>typeof(2.5)</code>.</p>
 <p><strong>Expected:</strong> They are the environment integer type and Float64.</p>
 <p><strong>Hint:</strong> A literal selects a representation.</p>
 <h4 id="5-diagnose-a-name">5. Diagnose a name<a class="heading-anchor" href="#5-diagnose-a-name" aria-label="Link to this section">#</a></h4>
@@ -268,7 +268,7 @@ worked_b<span class="syntax-punctuation">(</span><span class="syntax-punctuation
 <li><a href="https://docs.julialang.org/en/v1/manual/variables/">Julia variables</a></li>
 </ul>
 <h3 id="study-companion">Study companion<a class="heading-anchor" href="#study-companion" aria-label="Link to this section">#</a></h3>
-<p>Use the repository learning-companion skill with this lesson ID, your prediction and your actual source/output. Ask for a diagnosis of the first incorrect type, shape, state transition or assumption. Keep observed execution distinct from a timing claim, inferred mathematical result or external deployment.</p></article>
+<p>A repository-aware assistant with the learning-companion skill can review <code>julia-001</code> with you. Give it your prediction for one investigation, your source and the actual output, and ask it to find the first incorrect assumption about script, expression, binding, type or compilation.</p></article>
   </main>
 </body>
 </html>

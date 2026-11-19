@@ -213,12 +213,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">  <span class="syntax-punctuation">}</span></span>
 <span class="source-line"><span class="syntax-punctuation">}</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment">// Exercise 1: Compute the basket. Inputs: 125L,200L,75L. Expected: total is400L. Verify: assert total==400L and print the named value.</span></span>
-<span class="source-line"><span class="syntax-comment">// Exercise 2: Preserve the type boundary. Inputs: 2147483647L+1L and an intentionally reviewed Int-only variant. Expected: Long result2147483648L; reject relying on the overflowing Int value as money. Verify: run the Long assertion; explain why the narrower arithmetic is a different contract.</span></span>
-<span class="source-line"><span class="syntax-comment">// Exercise 3: Calculate remaining budget. Inputs: budget450L,total400L. Expected: remaining50L. Verify: assert the difference, not merely the total.</span></span>
-<span class="source-line"><span class="syntax-comment">// Exercise 4: Return a branch value. Inputs: remaining50L, threshold0L. Expected: String message is within budget. Verify: assert the exact String and its nonnegative condition.</span></span>
-<span class="source-line"><span class="syntax-comment">// Exercise 5: Diagnose reassignment. Inputs: one immutable binding and a proposed reassignment. Expected: compile-time rejection; repaired code uses a new name revisedBudget with350L. Verify: retain the compiler error category and show the new-name repair; do not include broken code in the final reference.</span></span>
-<span class="source-line"><span class="syntax-comment">// Exercise 6: Transfer the budget. Inputs: same400L basket,new350L budget. Expected: remaining-50L and over budget label. Verify: assert both changed outputs while the original total stays400L.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 1: Compute the basket. Inputs: 125L, 200L, 75L. Expected: total is 400L. Verify: assert total==400L and print the named value.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 2: Preserve the type boundary. Inputs: 2147483647L+1L and an intentionally reviewed Int-only variant. Expected: Long result 2147483648L; reject relying on the overflowing Int value as money. Verify: run the Long assertion; explain why the narrower arithmetic is a different contract.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 3: Calculate remaining budget. Inputs: budget 450L, total 400L. Expected: remaining 50L. Verify: assert the difference, not merely the total.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 4: Return a branch value. Inputs: remaining 50L, threshold 0L. Expected: String message is within budget. Verify: assert the exact String and its nonnegative condition.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 5: Diagnose reassignment. Inputs: one immutable binding and a proposed reassignment. Expected: compile-time rejection; repaired code uses a new name revisedBudget with 350L. Verify: retain the compiler error category and show the new-name repair; do not include broken code in the final reference.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 6: Transfer the budget. Inputs: same 400L basket, new 350L budget. Expected: remaining-50L and over budget label. Verify: assert both changed outputs while the original total stays 400L.</span></span>
 <span class="source-line"></span></code></pre></article>
   </main>
 </body>

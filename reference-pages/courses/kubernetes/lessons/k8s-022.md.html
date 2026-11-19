@@ -197,32 +197,26 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Use the guide and synthetic case ledger. A prediction or copied fixture is not a live runtime observation.</p>
 <h3 id="exercise-1-trace-storage-references">Exercise 1: Trace storage references<a class="heading-anchor" href="#exercise-1-trace-storage-references" aria-label="Link to this section">#</a></h3>
 <p>Connect StatefulSet volumeClaimTemplates, data mount and StorageClass.</p>
-<p>Expected: The data claim is mounted at /data and depends on a qualified lesson-local class.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-2-record-initial-data-once">Exercise 2: Record initial data once<a class="heading-anchor" href="#exercise-2-record-initial-data-once" aria-label="Link to this section">#</a></h3>
 <p>Use a bounded exclusive-create writer for a synthetic marker and retain its hash.</p>
-<p>Expected: One initialization receipt, claim/PV identities and a known marker checksum.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-3-replace-only-the-pod">Exercise 3: Replace only the Pod<a class="heading-anchor" href="#exercise-3-replace-only-the-pod" aria-label="Link to this section">#</a></h3>
 <p>Use the host operation with the recorded Pod UID and observe its successor.</p>
-<p>Expected: New Pod UID with the intended stable ordinal and same claim binding.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-4-verify-the-marker-independently">Exercise 4: Verify the marker independently<a class="heading-anchor" href="#exercise-4-verify-the-marker-independently" aria-label="Link to this section">#</a></h3>
 <p>Read the marker after replacement without running the writer.</p>
-<p>Expected: Hash remains h1 in the synthetic trace; actual live bytes/hash are recorded separately.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-5-explain-retention-and-reclaim">Exercise 5: Explain retention and reclaim<a class="heading-anchor" href="#exercise-5-explain-retention-and-reclaim" aria-label="Link to this section">#</a></h3>
 <p>Compare StatefulSet claim retention with PV reclaim policy and cluster release.</p>
-<p>Expected: Each lifecycle boundary has its own policy; retention is not backup.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-6-diagnose-a-pending-claim">Exercise 6: Diagnose a Pending claim<a class="heading-anchor" href="#exercise-6-diagnose-a-pending-claim" aria-label="Link to this section">#</a></h3>
 <p>Use supplied binding/events to propose a minimal class/capacity/topology check.</p>
-<p>Expected: No destructive claim reset; the missing capability or binding condition is identified.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p></article>
   </main>

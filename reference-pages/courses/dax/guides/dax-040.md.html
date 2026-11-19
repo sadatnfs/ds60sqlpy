@@ -214,6 +214,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
                     Date (one)
                        | inactive ShipDate
                        +------&gt; Sales</code></pre>
+<p>This lesson also uses the <code>analytics</code> model&#x27;s <code>Activity</code> and <code>CohortMember</code> tables. Its declared one-to-many relationships are <code>CohortMember[MemberKey]</code> → <code>Activity[MemberKey]</code>.</p>
 <p>All amounts in ordinary Sales are USD after the line discount, before tax and returns. The Date fixture is complete for 2024 and 2025; a short result table is a selected slice, not the whole calendar. JSON <code>null</code> in the worked-results sidecar means DAX BLANK, not the text &quot;null&quot;.</p>
 <h3 id="worked-cases">Worked cases<a class="heading-anchor" href="#worked-cases" aria-label="Link to this section">#</a></h3>
 <p>The following query-local declarations are shared by these cases. They do not create persisted measures in this classroom.</p>
@@ -270,7 +271,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The two 50-percent values in the lesson have different ages and meanings. A matrix must expose both cohort month and observation age.</p>
 <p>Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table.</p>
 <h3 id="practice-prediction-construction-and-diagnosis">Practice: prediction, construction and diagnosis<a class="heading-anchor" href="#practice-prediction-construction-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>Retain your formula or written reasoning, the stated context, contributing rows or values, and a conclusion with its unit. This is a manual learning record, not an execution receipt.</p>
+<p>Retain your formula or written reasoning, the stated context, contributing rows or values, and a conclusion with its unit. These notes are your own study record; they do not show that a formula ran.</p>
 <h4 id="exercise-1-predict">Exercise 1: Predict<a class="heading-anchor" href="#exercise-1-predict" aria-label="Link to this section">#</a></h4>
 <p>Predict January retention if member 100 has three February events.</p>
 <h4 id="exercise-2-change-one-condition">Exercise 2: Change one condition<a class="heading-anchor" href="#exercise-2-change-one-condition" aria-label="Link to this section">#</a></h4>
@@ -280,7 +281,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-4-diagnose">Exercise 4: Diagnose<a class="heading-anchor" href="#exercise-4-diagnose" aria-label="Link to this section">#</a></h4>
 <p>Diagnose dropping inactive member 400 before calculating the February entry rate.</p>
 <h4 id="exercise-5-check-a-boundary">Exercise 5: Check a boundary<a class="heading-anchor" href="#exercise-5-check-a-boundary" aria-label="Link to this section">#</a></h4>
-<p>Explain why 202512 +1 is not a valid next-month calculation.</p>
+<p>Explain why 202512 + 1 is not a valid next-month calculation.</p>
 <h4 id="exercise-6-transfer">Exercise 6: Transfer<a class="heading-anchor" href="#exercise-6-transfer" aria-label="Link to this section">#</a></h4>
 <p>Transfer the coverage rule to survival follow-up.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
@@ -297,8 +298,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Continue to <a href="dax-041.md.html">dax-041</a> when its prerequisites make sense, or revisit this stage from the <a href="../README.md.html">course map</a>.</p>
 <h3 id="official-references-and-evidence-limits">Official references and evidence limits<a class="heading-anchor" href="#official-references-and-evidence-limits" aria-label="Link to this section">#</a></h3>
 <ul>
-<li><a href="https://learn.microsoft.com/en-us/dax/distinctcount-function-dax">Official documentation 1</a></li>
-<li><a href="https://learn.microsoft.com/en-us/dax/edate-function-dax">Official documentation 2</a></li>
+<li><a href="https://learn.microsoft.com/en-us/dax/distinctcount-function-dax">DAX function: DISTINCTCOUNT</a></li>
+<li><a href="https://learn.microsoft.com/en-us/dax/edate-function-dax">DAX function: EDATE</a></li>
 </ul>
 <p>Documentation was reviewed for this original course on 2026-10-25. Version-sensitive features have explicit notes. Source/model checks and independent fixture arithmetic are not a DAX parser, compiler, semantic engine, real RLS test or performance measurement.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>

@@ -194,33 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-003_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-003-explanatory-solutions">docker-003: explanatory solutions<a class="heading-anchor" href="#docker-003-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These are explanations of the supplied teaching fixtures, not fabricated engine results.</p>
-<h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
-<p>A filesystem maps paths to objects such as files and directories. An image supplies initial read-only layers. A running container sees a merged view plus its own writable changes. Creating or modifying a file in that writable layer does not alter the underlying image used by other containers.</p>
-<p>The layer belongs to that container. A restart of the same container generally retains it. Removing and recreating a container creates a different layer, even when the new process has the same name and image. Persistent application data therefore belongs on an explicit volume or other durable store, not accidentally in a disposable container’s root filesystem.</p>
-<p>A path is meaningful inside a filesystem namespace. <code>/app/server.py</code> inside a container need not exist at that path on your laptop. A bind mount can deliberately map a host directory into a container; it also creates a path by which container processes can change host files. Later lessons treat that relationship explicitly rather than assuming all paths are interchangeable.</p>
-<p>The fixture Dockerfile sets <code>WORKDIR /app</code> and copies <code>server.py</code> there. <code>docker run IMAGE python -c ...</code> starts in that image’s configured directory unless overridden. <code>--read-only</code> makes the container root filesystem read-only, but a separately mounted temporary filesystem or volume can still be writable. This is a property of each mount, not a promise that the process has no state.</p>
-<p>For diagnosis, first identify whether a file came from the image, the writable layer, a bind mount, a named volume or a temporary filesystem. Then ask which lifecycle operation affects that storage. Do not test persistence by deleting the learner’s real classroom volume.</p>
+<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-003.md</code>.</p>
 <h3 id="exercise-1-classify-app-server-py-in-the-fixture">Exercise 1: Classify /app/server.py in the fixture.<a class="heading-anchor" href="#exercise-1-classify-app-server-py-in-the-fixture" aria-label="Link to this section">#</a></h3>
-<p>The Dockerfile COPY instruction places it into a build layer. Reading it from a container demonstrates that the image content is visible through the container filesystem view.</p>
-<p><strong>Expected:</strong> An image-provided application file.</p>
+<p><strong>Expected answer:</strong> An image-provided application file.</p>
+<p><strong>Why:</strong> The Dockerfile COPY instruction places it into a build layer. Reading it from a container demonstrates that the image content is visible through the container filesystem view.</p>
 <h3 id="exercise-2-predict-whether-a-sibling-container-sees-an-unmounted-new-file">Exercise 2: Predict whether a sibling container sees an unmounted new file.<a class="heading-anchor" href="#exercise-2-predict-whether-a-sibling-container-sees-an-unmounted-new-file" aria-label="Link to this section">#</a></h3>
-<p>Both instances start from the image. Changes in one private writable layer are not broadcast into another container simply because both use the same tag.</p>
-<p><strong>Expected:</strong> It does not share the first container writable layer.</p>
+<p><strong>Expected answer:</strong> It does not share the first container writable layer.</p>
+<p><strong>Why:</strong> Both instances start from the image. Changes in one private writable layer are not broadcast into another container simply because both use the same tag.</p>
 <h3 id="exercise-3-make-a-restart-versus-recreate-persistence-table">Exercise 3: Make a restart-versus-recreate persistence table.<a class="heading-anchor" href="#exercise-3-make-a-restart-versus-recreate-persistence-table" aria-label="Link to this section">#</a></h3>
-<p>A restart preserves the container object. A recreate replaces it. A mounted volume is independent, so the table must name storage rather than make one blanket persistence claim.</p>
-<p><strong>Expected:</strong> Writable layer survives restart but not removal; volumes follow their own lifetime.</p>
+<p><strong>Expected evidence:</strong> Writable layer survives restart but not removal; volumes follow their own lifetime.</p>
+<p><strong>Why:</strong> A restart preserves the container object. A recreate replaces it. A mounted volume is independent, so the table must name storage rather than make one blanket persistence claim.</p>
 <h3 id="exercise-4-diagnose-a-missing-file-after-compose-up-recreates-a-service">Exercise 4: Diagnose a missing file after compose up recreates a service.<a class="heading-anchor" href="#exercise-4-diagnose-a-missing-file-after-compose-up-recreates-a-service" aria-label="Link to this section">#</a></h3>
-<p>The service name can stay the same while the container ID changes. A familiar name is not proof that the underlying writable layer or process is the same object.</p>
-<p><strong>Expected:</strong> Check whether it was written to the old disposable layer.</p>
+<p><strong>Expected answer:</strong> Check whether it was written to the old disposable layer.</p>
+<p><strong>Why:</strong> The service name can stay the same while the container ID changes. A familiar name is not proof that the underlying writable layer or process is the same object.</p>
 <h3 id="exercise-5-explain-why-read-only-plus-tmpfs-permits-temporary-writes">Exercise 5: Explain why read-only plus tmpfs permits temporary writes.<a class="heading-anchor" href="#exercise-5-explain-why-read-only-plus-tmpfs-permits-temporary-writes" aria-label="Link to this section">#</a></h3>
-<p>Read-only is evaluated for the target mount. A bounded tmpfs intentionally supplies volatile writable storage without making the application directory writable.</p>
-<p><strong>Expected:</strong> The root mount and tmpfs have different write policies.</p>
+<p><strong>Expected answer:</strong> The root mount and tmpfs have different write policies.</p>
+<p><strong>Why:</strong> Read-only is evaluated for the target mount. A bounded tmpfs intentionally supplies volatile writable storage without making the application directory writable.</p>
 <h3 id="exercise-6-choose-storage-for-user-progress-and-transient-scratch-data">Exercise 6: Choose storage for user progress and transient scratch data.<a class="heading-anchor" href="#exercise-6-choose-storage-for-user-progress-and-transient-scratch-data" aria-label="Link to this section">#</a></h3>
-<p>The choice should follow retention and recovery requirements. Keeping every file forever increases cleanup and privacy costs; discarding user progress on replacement violates the product contract.</p>
-<p><strong>Expected:</strong> A named volume for progress and bounded temporary storage for scratch.</p>
+<p><strong>Expected answer:</strong> A named volume for progress and bounded temporary storage for scratch.</p>
+<p><strong>Why:</strong> The choice should follow retention and recovery requirements. Keeping every file forever increases cleanup and privacy costs; discarding user progress on replacement violates the product contract.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful solution identifies the exact object, the phase when a setting takes effect, the expected normal result and an observation that disproves it. Repeating a command until it succeeds hides the mechanism. Change one variable, keep a failure record, and test the intended behavior again. Source examples here are small enough to inspect; a production system additionally needs ownership, lifecycle, data recovery and operational review. The host exercises are optional and must stay within the learner-created project.</p></article>
+<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>
 </body>
 </html>

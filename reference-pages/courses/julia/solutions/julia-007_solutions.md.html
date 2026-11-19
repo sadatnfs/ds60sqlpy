@@ -197,10 +197,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The executable reference is <code>julia-007_reference.jl</code>. Its checks cover the stated authored inputs; they are not a claim of general scientific validity or mastery.</p>
 <h3 id="1-read-a-shape">1. Read a shape<a class="heading-anchor" href="#1-read-a-shape" aria-label="Link to this section">#</a></h3>
 <p>Operations can dispatch or broadcast differently for these shapes.</p>
-<p><strong>Expected observation:</strong> Their sizes are(2,) and(2,1).</p>
+<p><strong>Expected observation:</strong> Their sizes are <code>(2,)</code> and <code>(2, 1)</code>.</p>
 <h3 id="2-trace-column-order">2. Trace column order<a class="heading-anchor" href="#2-trace-column-order" aria-label="Link to this section">#</a></h3>
 <p>The storage order is explicit and should not be confused with the scientific interpretation of axes.</p>
-<p><strong>Expected observation:</strong> It is at row 1,column 3.</p>
+<p><strong>Expected observation:</strong> It is at row 1, column 3.</p>
 <h3 id="3-take-a-snapshot">3. Take a snapshot<a class="heading-anchor" href="#3-take-a-snapshot" aria-label="Link to this section">#</a></h3>
 <p>A snapshot protects later reads from this mutation, with an allocation cost.</p>
 <p><strong>Expected observation:</strong> The original scalar-element vector is unchanged.</p>

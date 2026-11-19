@@ -199,31 +199,32 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">Copy to .learning before editing. Six independent attempts belong below.</span></span>
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 1: Fit a tiny baseline</span></span>
-<span class="source-line"><span class="syntax-comment"># Use vocabularyA,B,C and documentsABAB,AC; count transitions within documents.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: AtoB2,BtoA1,AtoC1; total4.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Count transitions in new documents</span></span>
+<span class="source-line"><span class="syntax-comment"># Use vocabulary A=0, B=1, C=2 and the documents CAAB and BCA; count transitions within</span></span>
+<span class="source-line"><span class="syntax-comment"># each document.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: C to A: 2, A to A: 1, A to B: 1, B to C: 1; total 5; no B to B transition across the document boundary.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 2: Normalize smoothed rows</span></span>
-<span class="source-line"><span class="syntax-comment"># Apply add-one smoothing to the count matrix.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: row sums1; unseen C context is uniform.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Predict two smoothed rows</span></span>
+<span class="source-line"><span class="syntax-comment"># Apply add-one smoothing to the new counts and predict the rows for contexts A and C.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: row A [2/5, 2/5, 1/5]; row C [3/5, 1/5, 1/5].</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Score held-out transitions</span></span>
-<span class="source-line"><span class="syntax-comment"># Evaluate held-out sequenceA,C,B using the frozen table.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: 2 targets; NLL log3+log3.</span></span>
+<span class="source-line"><span class="syntax-comment"># Evaluate held-out sequence A, C, B using the frozen table.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: 2 targets; NLL log 3+log 3.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Prove no assessment update</span></span>
 <span class="source-line"><span class="syntax-comment"># Compare the count matrix before and after scoring.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: counts unchanged exactly.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Verify a causal prefix oracle</span></span>
-<span class="source-line"><span class="syntax-comment"># For zero-score attention values2,4,8 calculate prefix means and independently recompute</span></span>
-<span class="source-line"><span class="syntax-comment"># each prefix.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: outputs2,3,14/3.</span></span>
+<span class="source-line"><span class="syntax-comment"># For zero-score attention values 2, 4, 8 calculate prefix means and independently</span></span>
+<span class="source-line"><span class="syntax-comment"># recompute each prefix.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: outputs 2, 3, 14/3.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Write the bounded comparison</span></span>
-<span class="source-line"><span class="syntax-comment"># Create a report with vocabulary size3,2 held-out targets and a limitation about unseen</span></span>
+<span class="source-line"><span class="syntax-comment"># Create a report with vocabulary size 3, 2 held-out targets and a limitation about unseen</span></span>
 <span class="source-line"><span class="syntax-comment"># tasks.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: report includes finite meanNLL and no broad competence claim.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: report includes finite mean NLL and no broad competence claim.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Read the guide and implement the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>

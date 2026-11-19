@@ -200,28 +200,28 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 1: Measure a small linear layer</span></span>
-<span class="source-line"><span class="syntax-comment"># Apply.01*identity to input[1,-1,2,-2].</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: output norm.01*sqrt10.</span></span>
+<span class="source-line"><span class="syntax-comment"># Apply 0.01*identity to input [1, -1, 2, -2].</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: output norm \(0.01\sqrt{10}\).</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 2: Increase only the scale</span></span>
-<span class="source-line"><span class="syntax-comment"># Replace.01*identity with100*identity.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: activation norm increases by factor10000.</span></span>
+<span class="source-line"><span class="syntax-comment"># Replace 0.01*identity with 100*identity.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: activation norm increases by factor 10000.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Trace gradients</span></span>
 <span class="source-line"><span class="syntax-comment"># Differentiate mean squared output for the small and large matrices and compare norms.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: both finite; large-scale gradient norm is larger.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Find the first overflow</span></span>
-<span class="source-line"><span class="syntax-comment"># Apply a float32 matrix scaled1e38, then inspect matrix product and squared loss.</span></span>
+<span class="source-line"><span class="syntax-comment"># Apply a float32 matrix scaled 1e38, then inspect matrix product and squared loss.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: squared loss is nonfinite.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Repair on the same input</span></span>
-<span class="source-line"><span class="syntax-comment"># Restore the small scale and recalculate output and loss for the unchangedx.</span></span>
+<span class="source-line"><span class="syntax-comment"># Restore the small scale and recalculate output and loss for the unchanged x.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: both output and loss finite.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Check residual dimensions</span></span>
-<span class="source-line"><span class="syntax-comment"># Compare residualx+x@small with an incompatible three-feature branch.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: valid residual shape(1,4); width3 branch rejected.</span></span>
+<span class="source-line"><span class="syntax-comment"># Compare residual x+x@small with an incompatible three-feature branch.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: valid residual shape (1, 4); width 3 branch rejected.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Read the guide and implement the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>

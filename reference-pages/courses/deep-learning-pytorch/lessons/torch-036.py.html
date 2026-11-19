@@ -199,17 +199,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">Copy to .learning before editing. Six independent attempts belong below.</span></span>
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 1: Freeze the scalar experiment</span></span>
-<span class="source-line"><span class="syntax-comment"># Use train x = [1, 2, 3] and holdout 4, 5 with target 2 x and disjoint IDs.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: 3 training and 2 holdout records.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Freeze a new split</span></span>
+<span class="source-line"><span class="syntax-comment"># Assign IDs a, b, c, d to training and e, f to holdout and check that the sets are</span></span>
+<span class="source-line"><span class="syntax-comment"># disjoint.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: 4 training and 2 holdout IDs with no overlap.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 2: Train within a declared budget</span></span>
-<span class="source-line"><span class="syntax-comment"># Zero-initialize float64 Linear and run 30 SGD.01 updates.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: finite weights; holdout error below constant training-mean baseline 26.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Predict a ten-step weight</span></span>
+<span class="source-line"><span class="syntax-comment"># Train a zero-initialized float64 Linear(1, 1) without bias for 10 SGD steps with</span></span>
+<span class="source-line"><span class="syntax-comment"># learning rate 0.01 on x = 1, 2, 3 and y = 2x.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: weight 2-2*(68/75)**10, about 1.2492, within 1e-12.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 3: Build the owned release bundle</span></span>
-<span class="source-line"><span class="syntax-comment"># Save weights, schema and split manifest with a weight SHA256.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: manifest has feature x, float64, width 1 and matching hash.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: Hash bytes deterministically</span></span>
+<span class="source-line"><span class="syntax-comment"># Compute the SHA-256 of the bytes weights-v2 twice and of weights-v3 once.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: identical bytes give identical 64-character digests; one changed byte changes the digest.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Verify fresh-process prediction parity</span></span>
 <span class="source-line"><span class="syntax-comment"># Run the checked loader in a fresh interpreter and compare holdout predictions.</span></span>

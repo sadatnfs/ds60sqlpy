@@ -194,37 +194,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/rust/solutions/rust-001_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="rust-001-explanation-and-comparison">rust-001: explanation and comparison<a class="heading-anchor" href="#rust-001-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="rust-001_solution.rs.html">rust-001_solution.rs</a>. Its assertions are always active under the prepared classroom compile settings.</p>
+<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="rust-001_solution.rs.html">rust-001_solution.rs</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Check a greeting:</strong> The explicit check connects a value to its expected observation. Hello, Rust appears before the lesson marker.</p>
 <p><strong>Calculate instead of copying output:</strong> A second check rejects a plausible wrong operator rather than merely confirming that printing works. The calculated capacity is 24, while addition would give 10.</p>
-<h3 id="reason-through-the-six-tasks">Reason through the six tasks<a class="heading-anchor" href="#reason-through-the-six-tasks" aria-label="Link to this section">#</a></h3>
-<ol>
-<li><strong>Predict and explain.</strong> Predict the greeting and final marker order.</li>
-</ol>
-<ol start="2">
-<li><strong>Guided modification.</strong> Change the greeting and keep its expected value independent.</li>
-</ol>
-<ol start="3">
-<li><strong>Independent construction.</strong> Compute the capacity of three shelves with eight books each.</li>
-</ol>
-<ol start="4">
-<li><strong>Diagnose a defect.</strong> Remove a closing brace temporarily and classify the compiler diagnostic.</li>
-</ol>
-<ol start="5">
-<li><strong>Boundary evidence.</strong> Check zero shelves and one shelf.</li>
-</ol>
-<ol start="6">
-<li><strong>Transfer and justify.</strong> Model a three-level capacity calculation and explain every intermediate value.</li>
-</ol>
-<p>For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.</p>
+<h3 id="task-answers">Task answers<a class="heading-anchor" href="#task-answers" aria-label="Link to this section">#</a></h3>
+<h4 id="task-1-predict-and-explain">Task 1: Predict and explain<a class="heading-anchor" href="#task-1-predict-and-explain" aria-label="Link to this section">#</a></h4>
+<p>Predict the greeting and final marker order.</p>
+<p>No separate reference answer has been written for this task. Example A is the evidence to compare with: The explicit check connects a value to its expected observation. Hello, Rust appears before the lesson marker.</p>
+<h4 id="task-2-guided-modification">Task 2: Guided modification<a class="heading-anchor" href="#task-2-guided-modification" aria-label="Link to this section">#</a></h4>
+<p>Change the greeting and keep its expected value independent.</p>
+<p>No separate reference answer has been written for this task. Start from Example B: A second check rejects a plausible wrong operator rather than merely confirming that printing works. The calculated capacity is 24, while addition would give 10.</p>
+<h4 id="task-3-independent-construction">Task 3: Independent construction<a class="heading-anchor" href="#task-3-independent-construction" aria-label="Link to this section">#</a></h4>
+<p>Compute the capacity of three shelves with eight books each.</p>
+<p><strong>Reference answer.</strong> The same statements run as the <code>Task 3</code> block of the reference program; here they are wrapped in <code>main</code> as a complete file.</p>
+<pre class="highlighted-code"><code class="language-rust"><span class="syntax-keyword">fn</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">-&gt;</span> <span class="syntax-builtin">Result</span><span class="syntax-operator">&lt;</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">Box</span><span class="syntax-operator">&lt;</span><span class="syntax-keyword">dyn</span> std<span class="syntax-punctuation">::</span>error<span class="syntax-punctuation">::</span>Error<span class="syntax-operator">&gt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">let</span> shelves <span class="syntax-operator">=</span> <span class="syntax-number">3</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">let</span> books_per_shelf <span class="syntax-operator">=</span> <span class="syntax-number">8</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">let</span> capacity <span class="syntax-operator">=</span> shelves <span class="syntax-operator">*</span> books_per_shelf<span class="syntax-punctuation">;</span>
+    <span class="syntax-function">assert_eq!</span><span class="syntax-punctuation">(</span>capacity<span class="syntax-punctuation">,</span> <span class="syntax-number">24</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-builtin">Ok</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<p><strong>Observe:</strong> Three shelves of eight books hold 24 books.</p>
+<p>The product is written as a calculation, and assert_eq! compares it with 24, a value worked out independently.</p>
+<h4 id="task-4-diagnose-a-defect">Task 4: Diagnose a defect<a class="heading-anchor" href="#task-4-diagnose-a-defect" aria-label="Link to this section">#</a></h4>
+<p>Remove a closing brace temporarily and classify the compiler diagnostic.</p>
+<p>No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson&#x27;s pitfalls: A compiler success does not establish business correctness. Do not replace a failing assertion with a success print. The Result-returning main wrapper is scaffolding for later error propagation; its full meaning is taught in the error chapters.</p>
+<h4 id="task-5-boundary-evidence">Task 5: Boundary evidence<a class="heading-anchor" href="#task-5-boundary-evidence" aria-label="Link to this section">#</a></h4>
+<p>Check zero shelves and one shelf.</p>
+<p>No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Check a greeting) and Example B (Calculate instead of copying output).</p>
+<h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
+<p>Model a three-level capacity calculation and explain every intermediate value.</p>
+<p>No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry <strong>Compiler</strong>, and state one limitation of your choice.</p>
 <h3 id="mechanism-and-diagnostic-reasoning">Mechanism and diagnostic reasoning<a class="heading-anchor" href="#mechanism-and-diagnostic-reasoning" aria-label="Link to this section">#</a></h3>
 <p>Rust checks source before producing a native executable. A compiler diagnostic means the program has not reached its entrypoint. A panic during execution means an operation violated a checked assumption. Successful output means only the path that actually ran completed. Keep these forms of evidence separate when learning to diagnose a program.</p>
 <p>The classroom supplies a pinned compiler and Arrow library inside Linux Docker. The browser sends a single source file, not a Cargo project or arbitrary shell command. Start by tracing a tiny calculation and independently checking its result. This builds the habit of distinguishing observed behavior from a printed success claim.</p>
 <p><code>fn main</code> declares the entry function. <code>let</code> introduces a binding. <code>println!</code> is a macro, indicated by the exclamation mark. <code>assert_eq!</code> compares actual and expected values and panics on disagreement. A semicolon turns an expression into a statement whose value is discarded.</p>
 <p>A compiler success does not establish business correctness. Do not replace a failing assertion with a success print. The Result-returning main wrapper is scaffolding for later error propagation; its full meaning is taught in the error chapters.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.</p></article>
+<p>Run the reference and confirm that it prints <code>rust-001: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
   </main>
 </body>
 </html>

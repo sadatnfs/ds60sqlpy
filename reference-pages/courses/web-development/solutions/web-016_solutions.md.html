@@ -194,31 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-016_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-016-explanatory-solutions">web-016: explanatory solutions<a class="heading-anchor" href="#web-016-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.</p>
-<h3 id="why-the-mechanism-works">Why the mechanism works<a class="heading-anchor" href="#why-the-mechanism-works" aria-label="Link to this section">#</a></h3>
-<p>Grid arranges items along rows and columns. A track is the space between two adjacent grid lines. Fractional fr units share remaining space after fixed sizes and gaps have been considered. They are not a fixed percentage of the full container. An item&#x27;s minimum content contribution can still affect track size, which explains why a long unbroken value may widen an apparently equal grid.</p>
-<p>Grid is useful when rows and columns must align across a collection. An auto-fit repeat with minmax can create as many columns as fit a preferred minimum, then distribute remaining room. The minimum must still fit a narrow viewport. A layout should adapt to its content, not depend on one device model or a fixed card count.</p>
-<p>Use <code>grid-template-columns:repeat(auto-fit,minmax(min(100%,14rem),1fr))</code> for a resilient card collection. The inner min permits a track to fit a container narrower than the preferred minimum. <code>gap</code> adds separation without changing source order. Named grid areas are useful for a page shell, but the source order must remain understandable when the layout collapses.</p>
+<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-016.md</code>.</p>
 <h3 id="exercise-1-explain-why-two-1fr-tracks-plus-a-gap-are-not-two-50-widths-plus-a-gap">Exercise 1: Explain why two 1fr tracks plus a gap are not two 50% widths plus a gap.<a class="heading-anchor" href="#exercise-1-explain-why-two-1fr-tracks-plus-a-gap-are-not-two-50-widths-plus-a-gap" aria-label="Link to this section">#</a></h3>
-<p>Fractional tracks divide the remaining space after the gap.</p>
-<p>Trace the smallest example before editing. Name which values are source and which are observations.</p>
+<p><strong>Expected answer:</strong> Fractional tracks divide the remaining space after the gap.</p>
+<p><strong>Why:</strong> fr units share the space left after gaps and fixed tracks, so two 1fr tracks plus a 1rem gap are each half of the remaining width, not 50 percent of the container.</p>
 <h3 id="exercise-2-add-a-fourth-card-without-new-positional-rules">Exercise 2: Add a fourth card without new positional rules.<a class="heading-anchor" href="#exercise-2-add-a-fourth-card-without-new-positional-rules" aria-label="Link to this section">#</a></h3>
-<p>Auto placement incorporates the item using the same layout contract.</p>
-<p>Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.</p>
+<p><strong>Expected evidence:</strong> Auto placement incorporates the item using the same layout contract.</p>
+<p><strong>Why:</strong> Auto placement fills the next available cell, so the existing column definition decides where a new item goes.</p>
 <h3 id="exercise-3-build-an-adaptive-topic-grid-that-survives-a-narrow-container">Exercise 3: Build an adaptive topic grid that survives a narrow container.<a class="heading-anchor" href="#exercise-3-build-an-adaptive-topic-grid-that-survives-a-narrow-container" aria-label="Link to this section">#</a></h3>
-<p>Cards change column count while preserving reading order and avoiding page overflow.</p>
-<p>Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.</p>
+<p><strong>Expected evidence:</strong> Cards change column count while preserving reading order and avoiding page overflow.</p>
+<p><strong>Why:</strong> minmax with min(100%, 14rem) lets each track shrink to the container width on narrow screens, and auto-fit chooses the column count from the available space.</p>
 <h3 id="exercise-4-diagnose-a-long-value-widening-a-track">Exercise 4: Diagnose a long value widening a track.<a class="heading-anchor" href="#exercise-4-diagnose-a-long-value-widening-a-track" aria-label="Link to this section">#</a></h3>
-<p>Inspect minimum content sizing and use a deliberate minmax or wrapping policy.</p>
-<p>Keep the failing input. Identify the first layer where the observed result differs from the intended contract.</p>
+<p><strong>Expected answer:</strong> Inspect minimum content sizing and use a deliberate minmax or wrapping policy.</p>
+<p><strong>Why:</strong> A 1fr track has an automatic minimum equal to its min-content size, so minmax(0, 1fr) or wrapping is needed to stop one long value from widening it.</p>
 <h3 id="exercise-5-test-empty-one-card-and-seven-card-collections">Exercise 5: Test empty, one-card and seven-card collections.<a class="heading-anchor" href="#exercise-5-test-empty-one-card-and-seven-card-collections" aria-label="Link to this section">#</a></h3>
-<p>The layout remains coherent without a special case tied to three cards.</p>
-<p>Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.</p>
+<p><strong>Expected evidence:</strong> The layout remains coherent without a special case tied to three cards.</p>
+<p><strong>Why:</strong> Intrinsic grid rules adapt to any item count, while rules written for exactly three cards break when content changes.</p>
 <h3 id="exercise-6-explain-auto-fit-versus-auto-fill-at-a-high-level">Exercise 6: Explain auto-fit versus auto-fill at a high level.<a class="heading-anchor" href="#exercise-6-explain-auto-fit-versus-auto-fill-at-a-high-level" aria-label="Link to this section">#</a></h3>
-<p>Auto-fit can collapse empty repeated tracks; auto-fill preserves the generated track slots.</p>
-<p>Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.</p>
-<h3 id="reference-comparison-and-limits">Reference comparison and limits<a class="heading-anchor" href="#reference-comparison-and-limits" aria-label="Link to this section">#</a></h3>
-<p>Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.</p></article>
+<p><strong>Expected answer:</strong> Auto-fit can collapse empty repeated tracks; auto-fill preserves the generated track slots.</p>
+<p><strong>Why:</strong> auto-fill keeps empty tracks reserved, while auto-fit collapses empty tracks so the existing cards stretch to fill the row.</p>
+<h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
+<p>Open <code>courses/web-development/solutions/web-016_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
   </main>
 </body>
 </html>

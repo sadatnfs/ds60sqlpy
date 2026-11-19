@@ -200,15 +200,51 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">    <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">meta</span> <span class="syntax-attribute">name</span><span class="syntax-operator">=</span><span class="syntax-string">&quot;viewport&quot;</span> <span class="syntax-attribute">content</span><span class="syntax-operator">=</span><span class="syntax-string">&quot;width=device-width, initial-scale=1&quot;</span> <span class="syntax-punctuation">/</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">title</span><span class="syntax-punctuation">&gt;</span>Custom properties, tokens and component themes: my attempt<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">title</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">style</span><span class="syntax-punctuation">&gt;</span></span>
-<span class="source-line">      <span class="syntax-comment">/* Implement the lesson-specific CSS. Keep keyboard focus visible. */</span></span>
+<span class="source-line">      <span class="syntax-comment">/*</span></span>
+<span class="source-line"><span class="syntax-comment">        Worked example 1: Named decisions</span></span>
+<span class="source-line"><span class="syntax-comment">        :root {</span></span>
+<span class="source-line"><span class="syntax-comment">          --surface: #ffffff;</span></span>
+<span class="source-line"><span class="syntax-comment">          --ink: #172033;</span></span>
+<span class="source-line"><span class="syntax-comment">          --space: 1rem;</span></span>
+<span class="source-line"><span class="syntax-comment">        }</span></span>
+<span class="source-line"><span class="syntax-comment">        .card {</span></span>
+<span class="source-line"><span class="syntax-comment">          background: var(--surface);</span></span>
+<span class="source-line"><span class="syntax-comment">          color: var(--ink);</span></span>
+<span class="source-line"><span class="syntax-comment">          padding: var(--space);</span></span>
+<span class="source-line"><span class="syntax-comment">        }</span></span>
+<span class="source-line"><span class="syntax-comment">      */</span></span>
+<span class="source-line"></span>
+<span class="source-line">      <span class="syntax-comment">/*</span></span>
+<span class="source-line"><span class="syntax-comment">        Worked example 2: A scoped variation</span></span>
+<span class="source-line"><span class="syntax-comment">        .card.featured {</span></span>
+<span class="source-line"><span class="syntax-comment">          --surface: #e0f2fe;</span></span>
+<span class="source-line"><span class="syntax-comment">          --space: 1.5rem;</span></span>
+<span class="source-line"><span class="syntax-comment">        }</span></span>
+<span class="source-line"><span class="syntax-comment">      */</span></span>
+<span class="source-line"></span>
+<span class="source-line">      <span class="syntax-comment">/* Write the CSS for the exercises here. Keep keyboard focus visible. */</span></span>
 <span class="source-line">    <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">style</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line">  <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">head</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line">  <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">body</span><span class="syntax-punctuation">&gt;</span></span>
-<span class="source-line">    <span class="syntax-comment">&lt;!-- web-018: Build two themed cards using one component rule. --&gt;</span></span>
-<span class="source-line">    <span class="syntax-comment">&lt;!-- Save your prediction, then implement the six exercises from the guide. --&gt;</span></span>
+<span class="source-line">    <span class="syntax-comment">&lt;!--</span></span>
+<span class="source-line"><span class="syntax-comment">      web-018 exercises. Hints are in the guide; answers are in the solutions folder.</span></span>
+<span class="source-line"><span class="syntax-comment">      1. Predict which card inherits a scoped token override.</span></span>
+<span class="source-line"><span class="syntax-comment">      2. Replace repeated spacing literals with a semantic token.</span></span>
+<span class="source-line"><span class="syntax-comment">      3. Build two themed cards using one component rule.</span></span>
+<span class="source-line"><span class="syntax-comment">      4. Diagnose a custom property used with an incompatible value.</span></span>
+<span class="source-line"><span class="syntax-comment">      5. Remove an optional variable and inspect its fallback.</span></span>
+<span class="source-line"><span class="syntax-comment">      6. Explain a token name that survives a palette change.</span></span>
+<span class="source-line"><span class="syntax-comment">    --&gt;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">main</span><span class="syntax-punctuation">&gt;</span></span>
-<span class="source-line">      <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">h1</span><span class="syntax-punctuation">&gt;</span>Custom properties, tokens and component themes<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">h1</span><span class="syntax-punctuation">&gt;</span></span>
-<span class="source-line">      <span class="syntax-comment">&lt;!-- Build your own document here. The reference is separate. --&gt;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">h1</span><span class="syntax-punctuation">&gt;</span>Shared component decisions<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">h1</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">article</span> <span class="syntax-attribute">class</span><span class="syntax-operator">=</span><span class="syntax-string">&quot;card&quot;</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">h2</span><span class="syntax-punctuation">&gt;</span>Standard lesson<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">h2</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">p</span><span class="syntax-punctuation">&gt;</span>Core reading.<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">p</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">article</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">article</span> <span class="syntax-attribute">class</span><span class="syntax-operator">=</span><span class="syntax-string">&quot;card featured&quot;</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">h2</span><span class="syntax-punctuation">&gt;</span>Featured lesson<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">h2</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">p</span><span class="syntax-punctuation">&gt;</span>Optional project practice.<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">p</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">article</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">main</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line">  <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">body</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line"><span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">html</span><span class="syntax-punctuation">&gt;</span></span>

@@ -239,32 +239,32 @@ macro <span class="syntax-operator">=</span> <span class="syntax-punctuation">(<
 <h4 id="exercise-1-measure-representation-units">Exercise 1: Measure representation units<a class="heading-anchor" href="#exercise-1-measure-representation-units" aria-label="Link to this section">#</a></h4>
 <p>Count code points, UTF-8 bytes and whitespace segments for the supplied Chinese string.</p>
 <p><strong>Expected:</strong> Counts4,12,1 respectively, with no claim that whitespace identifies linguistic words.</p>
-<p><strong>Verify:</strong> Counts4,12,1 respectively, with no claim that whitespace identifies linguistic words. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Verify:</strong> Assert len(text) == 4, len(text.encode(&#x27;utf-8&#x27;)) == 12 and len(text.split()) == 1 for the Chinese string.</p>
 <p><strong>Hints:</strong> Use len(text),len(text.encode(&quot;utf-8&quot;)) and len(text.split()) separately.</p>
 <h4 id="exercise-2-retain-ambiguous-language">Exercise 2: Retain ambiguous language<a class="heading-anchor" href="#exercise-2-retain-ambiguous-language" aria-label="Link to this section">#</a></h4>
 <p>Implement the narrow cue rule and test English,Spanish,bank and the mixed cue sentence.</p>
 <p><strong>Expected:</strong> en,es,None,None under the declared cue inventory.</p>
-<p><strong>Verify:</strong> en,es,None,None under the declared cue inventory. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Verify:</strong> Assert the cue rule returns en, es, None and None, abstaining on bank and on the mixed-cue sentence.</p>
 <p><strong>Hints:</strong> Ties and zero evidence should abstain.</p>
 <h4 id="exercise-3-trace-normalization-loss">Exercise 3: Trace normalization loss<a class="heading-anchor" href="#exercise-3-trace-normalization-loss" aria-label="Link to this section">#</a></h4>
 <p>Apply mark removal to résumé and compare with the original resume string.</p>
 <p><strong>Expected:</strong> Both transformed strings equal resume although raw strings differ.</p>
-<p><strong>Verify:</strong> Both transformed strings equal resume although raw strings differ. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Verify:</strong> Assert the mark-stripped forms of résumé and resume are equal while the raw strings differ.</p>
 <p><strong>Hints:</strong> Separate canonical normalization from intentionally deleting marks.</p>
 <h4 id="exercise-4-check-length-changing-case-operations">Exercise 4: Check length-changing case operations<a class="heading-anchor" href="#exercise-4-check-length-changing-case-operations" aria-label="Link to this section">#</a></h4>
 <p>Inspect lowercased İ and casefolded Straße.</p>
 <p><strong>Expected:</strong> i plus combining dot has length2; Straße casefolds to strasse.</p>
-<p><strong>Verify:</strong> i plus combining dot has length2; Straße casefolds to strasse. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Verify:</strong> Assert &#x27;İ&#x27;.lower() has length 2 (i plus a combining dot) and &#x27;Straße&#x27;.casefold() == &#x27;strasse&#x27;.</p>
 <p><strong>Hints:</strong> Print repr and code points rather than relying only on appearance.</p>
 <h4 id="exercise-5-report-language-slices">Exercise 5: Report language slices<a class="heading-anchor" href="#exercise-5-report-language-slices" aria-label="Link to this section">#</a></h4>
 <p>Compute pooled and equal-language accuracy from the two sample arrays.</p>
 <p><strong>Expected:</strong> English.9,Spanish.5,pooled5/6,macro.7 with counts10 and2.</p>
-<p><strong>Verify:</strong> English.9,Spanish.5,pooled5/6,macro.7 with counts10 and2. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Verify:</strong> Assert per-language accuracies 0.9 and 0.5, pooled 5/6 and macro 0.7, and report the counts 10 and 2 beside them.</p>
 <p><strong>Hints:</strong> Choose weights from the target population, then show the slices.</p>
 <h4 id="exercise-6-design-target-domain-evidence">Exercise 6: Design target-domain evidence<a class="heading-anchor" href="#exercise-6-design-target-domain-evidence" aria-label="Link to this section">#</a></h4>
 <p>Analyze charge in payment versus battery messages and propose a held-out transfer evaluation.</p>
 <p><strong>Expected:</strong> A plan includes target labels, ambiguous cases, source/target family separation and an abstention policy.</p>
-<p><strong>Verify:</strong> A plan includes target labels, ambiguous cases, source/target family separation and an abstention policy. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Verify:</strong> Check that the transfer plan names target labels, ambiguous charge cases, source/target family separation and an abstention policy.</p>
 <p><strong>Hints:</strong> Identify whether the failure comes from meaning, representation or missing knowledge.</p>
 <h3 id="interview-reasoning">Interview reasoning<a class="heading-anchor" href="#interview-reasoning" aria-label="Link to this section">#</a></h3>
 <p><strong>Interview: Does Unicode support imply multilingual quality?</strong> It establishes an encoding capability. Tokenization efficiency, representation learning, label validity and task performance require separate evidence.</p>

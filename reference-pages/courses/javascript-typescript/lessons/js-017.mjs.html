@@ -194,13 +194,22 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/javascript-typescript/lessons/js-017.mjs</code></p>
     </header>
     <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-javascript"><code><span class="source-line"><span class="syntax-comment">// Answer-free learner source. Save your own copy before editing.</span></span>
-<span class="source-line"><span class="syntax-comment">// Exercise 1: Request a valid local calculation</span></span>
-<span class="source-line"><span class="syntax-comment">// GET /sum with a=2 and b=3 and inspect status, content type and JSON.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: status 200; application/json; total 5.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 1: Request a valid local calculation: change one input</span></span>
+<span class="source-line"><span class="syntax-comment">// Copy Example A into a scratch `main.mjs` and change `new URL(&#x27;/sum?a=2&amp;b=3&#x27;, base)` to</span></span>
+<span class="source-line"><span class="syntax-comment">// `new URL(&#x27;/sum?a=3&amp;b=3&#x27;, base)`. Before running it, predict which check fails and which</span></span>
+<span class="source-line"><span class="syntax-comment">// value it now sees; then run it and restore the original line.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` at the check</span></span>
+<span class="source-line"><span class="syntax-comment">// `assert.deepEqual(await response.json(), { total: 5 })`. Restoring the original line</span></span>
+<span class="source-line"><span class="syntax-comment">// brings back the worked observation: status 200; application/json; total 5.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment">// Exercise 2: Inspect an HTTP error without expecting fetch rejection</span></span>
-<span class="source-line"><span class="syntax-comment">// Request an unknown route and inspect the actual response.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: fetch resolves; status 404, ok false, error not_found.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 2: Inspect an HTTP error without expecting fetch rejection: diagnose an edited check</span></span>
+<span class="source-line"><span class="syntax-comment">// A careless edit changed a check in Example B so that it reads `assert.deepEqual(await</span></span>
+<span class="source-line"><span class="syntax-comment">// response.json(), { error: &#x27;not_found!&#x27; });`. Run Example B with that line, explain why the</span></span>
+<span class="source-line"><span class="syntax-comment">// edited check now fails for the same program state, and restore it.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at the check</span></span>
+<span class="source-line"><span class="syntax-comment">// `assert.deepEqual(await response.json(), { error: &#x27;not_found&#x27; })`; after it the line reads</span></span>
+<span class="source-line"><span class="syntax-comment">// `assert.deepEqual(await response.json(), { error: &#x27;not_found&#x27; });` again and fetch</span></span>
+<span class="source-line"><span class="syntax-comment">// resolves; status 404, ok false, error not_found.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 3: Encode query values through the URL API</span></span>
 <span class="source-line"><span class="syntax-comment">// Round-trip a query containing spaces, ampersand and equals without contacting a server.</span></span>

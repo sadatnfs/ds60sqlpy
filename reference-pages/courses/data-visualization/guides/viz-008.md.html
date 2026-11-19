@@ -9,7 +9,7 @@
     content="default-src 'none'; style-src 'self' file: 'unsafe-inline'; font-src data:; img-src data:; form-action 'none'"
   >
   <link rel="stylesheet" href="../../../../src/ds60sqlpy/assets/vendor/textbook/fonts.css">
-  <title>viz-008: Export a reviewable figure with accessible evidence · DS60 reference</title>
+  <title>viz-008: Accessible output and reviewable figure export · DS60 reference</title>
   <style>
     :root {
       --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
@@ -190,10 +190,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <main class="shell">
     <header class="hero">
       <p class="eyebrow">Rendered course document</p>
-      <h1>viz-008: Export a reviewable figure with accessible evidence</h1>
+      <h1>viz-008: Accessible output and reviewable figure export</h1>
       <p class="source-path">Generated from <code>courses/data-visualization/guides/viz-008.md</code></p>
     </header>
-    <article class="document"><h2 id="viz-008-export-a-reviewable-figure-with-accessible-evidence">viz-008: Export a reviewable figure with accessible evidence<a class="heading-anchor" href="#viz-008-export-a-reviewable-figure-with-accessible-evidence" aria-label="Link to this section">#</a></h2>
+    <article class="document"><h2 id="viz-008-accessible-output-and-reviewable-figure-export">viz-008: Accessible output and reviewable figure export<a class="heading-anchor" href="#viz-008-accessible-output-and-reviewable-figure-export" aria-label="Link to this section">#</a></h2>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Advanced. Direct prerequisites: <code>viz-006</code>, <code>viz-007</code>. The core workflow stays offline and does not require a static-image export service or additional browser installation.</p>
 <h3 id="preserve-the-claim-with-the-figure">Preserve the claim with the figure<a class="heading-anchor" href="#preserve-the-claim-with-the-figure" aria-label="Link to this section">#</a></h3>
@@ -208,6 +208,47 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="review-accessibility-as-behavior">Review accessibility as behavior<a class="heading-anchor" href="#review-accessibility-as-behavior" aria-label="Link to this section">#</a></h3>
 <p>Read the caption and table without hovering. Use keyboard navigation for native controls. Check labels at increased zoom and a narrow panel. Inspect contrast, clipping and noncolor distinctions. A table node or ARIA attribute is useful structure, but it does not prove that a screen reader announces the intended information in the actual browser.</p>
 <p>Python figures attach a plain description and primitive-cell table under <code>layout.meta</code>; the classroom&#x27;s figure panel can render them as accessible text and HTML. These are data fields, not arbitrary HTML or executable callbacks. The JavaScript reference builds its own caption, table headers and cells with safe text insertion.</p>
+<h3 id="expression-anatomy">Expression anatomy<a class="heading-anchor" href="#expression-anatomy" aria-label="Link to this section">#</a></h3>
+<p><code>marker_color</code> accepts one color per bar, and <code>marker_pattern_shape</code> adds a hatch pattern per bar (<code>&quot;&quot;</code>, <code>&quot;/&quot;</code> and <code>&quot;x&quot;</code>), so the three statuses stay distinguishable without color. <code>text</code> with <code>textposition=&quot;outside&quot;</code> prints each count. The <code>describe</code> helper then sets the title and stores <code>layout.meta</code> with a <code>description</code> and a primitive <code>table</code>, which the classroom&#x27;s capture interface shows beside the figure. In JavaScript the pattern is <code>marker: { pattern: { shape: [...] } }</code>, and <code>renderCase</code> builds a native HTML table from the same rows.</p>
+<p>Python, from <code>case_08</code> in the subject&#x27;s durable Plotly source:</p>
+<pre class="highlighted-code"><code class="language-python">fig <span class="syntax-operator">=</span> go<span class="syntax-operator">.</span>Figure<span class="syntax-punctuation">(</span>
+    go<span class="syntax-operator">.</span>Bar<span class="syntax-punctuation">(</span>
+        x<span class="syntax-operator">=</span><span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>counts<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        y<span class="syntax-operator">=</span><span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>counts<span class="syntax-operator">.</span>values<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        text<span class="syntax-operator">=</span><span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>counts<span class="syntax-operator">.</span>values<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        textposition<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">outside</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        marker_color<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">#176b87</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">#a66000</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">#a61c3c</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+        marker_pattern_shape<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">/</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span>
+fig<span class="syntax-operator">.</span>update_xaxes<span class="syntax-punctuation">(</span>title<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">Recorded status</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+fig<span class="syntax-operator">.</span>update_yaxes<span class="syntax-punctuation">(</span>title<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">Jobs</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> rangemode<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">tozero</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+fig <span class="syntax-operator">=</span> describe<span class="syntax-punctuation">(</span>
+    fig<span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">Twelve jobs at a declared observation cutoff</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">(</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">Eight completed, three pending and one failed. Pending is not </span><span class="syntax-string">&quot;</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">failure. Labels, bar patterns and the table preserve meaning </span><span class="syntax-string">&quot;</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">without relying only on color.</span><span class="syntax-string">&quot;</span>
+    <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">status</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">count</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span>key<span class="syntax-punctuation">,</span> value<span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> key<span class="syntax-punctuation">,</span> value <span class="syntax-operator">in</span> counts<span class="syntax-operator">.</span>items<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">)</span></code></pre>
+<p>JavaScript, from browser specification 8, which <code>renderCase</code> passes to <code>Plotly.newPlot</code> with the shared caption and table:</p>
+<pre class="highlighted-code"><code class="language-javascript">data<span class="syntax-operator">:</span> <span class="syntax-punctuation">[</span>
+  <span class="syntax-punctuation">{</span>
+    type<span class="syntax-operator">:</span> <span class="syntax-string">&quot;bar&quot;</span><span class="syntax-punctuation">,</span>
+    x<span class="syntax-operator">:</span> labels<span class="syntax-punctuation">,</span>
+    y<span class="syntax-operator">:</span> counts<span class="syntax-punctuation">,</span>
+    text<span class="syntax-operator">:</span> counts<span class="syntax-punctuation">,</span>
+    textposition<span class="syntax-operator">:</span> <span class="syntax-string">&quot;outside&quot;</span><span class="syntax-punctuation">,</span>
+    marker<span class="syntax-operator">:</span> <span class="syntax-punctuation">{</span> color<span class="syntax-operator">:</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;#176b87&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;#a66000&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;#a61c3c&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> pattern<span class="syntax-operator">:</span> <span class="syntax-punctuation">{</span> shape<span class="syntax-operator">:</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;/&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;x&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-punctuation">}</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+layout<span class="syntax-operator">:</span> <span class="syntax-punctuation">{</span>
+  xaxis<span class="syntax-operator">:</span> <span class="syntax-punctuation">{</span> title<span class="syntax-operator">:</span> <span class="syntax-punctuation">{</span> text<span class="syntax-operator">:</span> <span class="syntax-string">&quot;Recorded status&quot;</span> <span class="syntax-punctuation">}</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+  yaxis<span class="syntax-operator">:</span> <span class="syntax-punctuation">{</span> title<span class="syntax-operator">:</span> <span class="syntax-punctuation">{</span> text<span class="syntax-operator">:</span> <span class="syntax-string">&quot;Jobs&quot;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> rangemode<span class="syntax-operator">:</span> <span class="syntax-string">&quot;tozero&quot;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span></code></pre>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Audit the denominator.</strong> Reconcile all statuses. Expected evidence: total twelve, with pending retained as its own state.</li>

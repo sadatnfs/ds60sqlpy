@@ -197,32 +197,26 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Use the guide and synthetic case ledger. A prediction or copied fixture is not a live runtime observation.</p>
 <h3 id="exercise-1-inventory-the-vendored-chart">Exercise 1: Inventory the vendored chart<a class="heading-anchor" href="#exercise-1-inventory-the-vendored-chart" aria-label="Link to this section">#</a></h3>
 <p>List metadata, values, schema, template and expected output.</p>
-<p>Expected: One local template, no dependencies/plugins/hooks/CRDs.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-2-render-the-default-locally">Exercise 2: Render the default locally<a class="heading-anchor" href="#exercise-2-render-the-default-locally" aria-label="Link to this section">#</a></h3>
 <p>Use already prepared pinned Helm and compare output with expected-default.json.</p>
-<p>Expected: One Deployment with replicas 1 and approved image; record actual renderer receipt or unavailable status.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-3-review-an-allowed-override">Exercise 3: Review an allowed override<a class="heading-anchor" href="#exercise-3-review-an-allowed-override" aria-label="Link to this section">#</a></h3>
 <p>Render replicas 2 and diff the full object.</p>
-<p>Expected: Only spec.replicas changes.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-4-reject-invalid-values">Exercise 4: Reject invalid values<a class="heading-anchor" href="#exercise-4-reject-invalid-values" aria-label="Link to this section">#</a></h3>
 <p>Try replicas 3, an unapproved image or an extra unknown key in a scratch values file.</p>
-<p>Expected: Schema/review rejection before any cluster operation.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-5-detect-lifecycle-resources">Exercise 5: Detect lifecycle resources<a class="heading-anchor" href="#exercise-5-detect-lifecycle-resources" aria-label="Link to this section">#</a></h3>
 <p>Review a supplied hook annotation or cluster-scoped kind.</p>
-<p>Expected: The output is outside the normal worker contract and is not installed.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-6-hand-off-a-reviewed-render">Exercise 6: Hand off a reviewed render<a class="heading-anchor" href="#exercise-6-hand-off-a-reviewed-render" aria-label="Link to this section">#</a></h3>
 <p>Record chart/values hashes, renderer version, full diff and separate apply/application acceptance.</p>
-<p>Expected: A reviewer can reproduce the local render and identify the exact owned runtime boundary.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p></article>
   </main>

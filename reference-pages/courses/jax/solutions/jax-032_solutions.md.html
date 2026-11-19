@@ -198,7 +198,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-1-separate-cpu-evidence">Exercise 1: Separate CPU evidence<a class="heading-anchor" href="#exercise-1-separate-cpu-evidence" aria-label="Link to this section">#</a></h3>
 <p>The same mathematics can be correct while the accelerator toolchain or device operation remains untested.</p>
 <p><strong>Expected:</strong> It supports CPU numerical behavior only.</p>
-<p>Retain the CPU receipt as a baseline and list the missing accelerator stages.</p>
+<p>Retain the CPU test record as a baseline and list the missing accelerator stages.</p>
 <h3 id="exercise-2-separate-compilation-from-execution">Exercise 2: Separate compilation from execution<a class="heading-anchor" href="#exercise-2-separate-compilation-from-execution" aria-label="Link to this section">#</a></h3>
 <p>Compilation can succeed without establishing that the intended device operation completed correctly.</p>
 <p><strong>Expected:</strong> Compilation evidence, with execution/readback still missing.</p>
@@ -212,13 +212,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Expected:</strong> A plan with analytic/reference values, conditioning, tolerances, actual dtype and separately synchronized timings.</p>
 <p>Hold inputs and operation fixed; validate numerical error first; then measure completed execution under the chosen precision policy.</p>
 <h3 id="exercise-5-distinguish-tpu-qualification">Exercise 5: Distinguish TPU qualification<a class="heading-anchor" href="#exercise-5-distinguish-tpu-qualification" aria-label="Link to this section">#</a></h3>
-<p>The GPU receipt does not establish another backend&#x27;s package or hardware behavior.</p>
+<p>The GPU test record does not establish another backend&#x27;s package or hardware behavior.</p>
 <p><strong>Expected:</strong> A separately prepared TPU environment, actual TPU allocation/computation/readback and target-specific measurements.</p>
 <p>Use the same mathematical oracle where appropriate, while retaining separate environment and device evidence.</p>
 <h3 id="exercise-6-handle-uncertain-device-health">Exercise 6: Handle uncertain device health<a class="heading-anchor" href="#exercise-6-handle-uncertain-device-health" aria-label="Link to this section">#</a></h3>
 <p>The repository&#x27;s optional-device workflow treats serious faults separately from an ordinary repairable syntax error and never resets a shared GPU automatically.</p>
 <p><strong>Expected:</strong> Process cleanup alone does not prove device recovery; retain the outcome for the resource owner to inspect.</p>
-<p>Preserve the receipt, identify the owned device and require the explicit recovery workflow before requalification.</p>
+<p>Preserve the interrupted run record, identify the owned device and require the explicit recovery workflow before requalification.</p>
 <h3 id="scope-of-this-evidence">Scope of this evidence<a class="heading-anchor" href="#scope-of-this-evidence" aria-label="Link to this section">#</a></h3>
 <p>Hardware acceptance needs actual observations from the selected backend. No source snippet, imported package, CPU fallback or compiler artifact substitutes for allocation, synchronized computation and readback. Avoid global driver changes or device resets as incidental troubleshooting.</p>
 <p>Prepare an optional device-study specification with ownership, bounded inputs, source identity, correctness oracle, timing boundary, memory measurements and recovery responsibility. Execute it only through an explicitly prepared compatible workflow; this reading lesson launches nothing.</p></article>

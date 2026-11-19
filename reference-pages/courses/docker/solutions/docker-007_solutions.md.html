@@ -194,33 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-007_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-007-explanatory-solutions">docker-007: explanatory solutions<a class="heading-anchor" href="#docker-007-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These are explanations of the supplied teaching fixtures, not fabricated engine results.</p>
-<h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
-<p>A layer records filesystem changes from a build step. Build cache can reuse a prior result when the builder considers an instruction and its relevant inputs unchanged. Caching is a performance mechanism, not proof that a dependency is current or that a security update has been applied.</p>
-<p>Instruction order creates a dependency chain. If a source copy changes before an expensive dependency installation, later steps may need to run again. Separating dependency metadata from frequently edited source can improve iteration. The correct split depends on the package manager and lockfile, not on memorizing one Dockerfile pattern.</p>
-<p>A cache hit is visible in build logs. A fast build is not automatically cached, and a cache miss is not automatically a bug. Reproducibility requires identifying inputs, versions and build settings. The same text can still download different bytes if it refers to mutable remote dependencies.</p>
-<p>Compare an unchanged rebuild with a rebuild after changing only a harmless source string in your learner copy. Record which instruction first stops being cached. A build with <code>--no-cache</code> intentionally ignores build-step cache, but it does not inherently replace every already available base image. Fetching newer bases is a separate operation.</p>
-<p>Cache mounts, covered in the next stage, preserve download caches without baking their contents into the runtime image. Do not put real credentials into cache keys, ARG values or copied files. Build output and dependency recovery are observable concerns, so keep plain logs for your experiments.</p>
+<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-007.md</code>.</p>
 <h3 id="exercise-1-predict-the-first-invalidated-step-after-editing-server-py">Exercise 1: Predict the first invalidated step after editing server.py.<a class="heading-anchor" href="#exercise-1-predict-the-first-invalidated-step-after-editing-server-py" aria-label="Link to this section">#</a></h3>
-<p>The builder tracks relevant inputs. Earlier independent operations can remain reusable while operations based on changed filesystem state require new results.</p>
-<p><strong>Expected:</strong> The COPY using that file and dependent later steps.</p>
+<p><strong>Expected answer:</strong> The COPY using that file and dependent later steps.</p>
+<p><strong>Why:</strong> The builder tracks relevant inputs. Earlier independent operations can remain reusable while operations based on changed filesystem state require new results.</p>
 <h3 id="exercise-2-record-evidence-of-a-real-cache-hit">Exercise 2: Record evidence of a real cache hit.<a class="heading-anchor" href="#exercise-2-record-evidence-of-a-real-cache-hit" aria-label="Link to this section">#</a></h3>
-<p>Elapsed time alone is ambiguous because network and CPU vary. A named cached step ties the observation to the builder decision being studied.</p>
-<p><strong>Expected:</strong> A specific step labeled cached in plain build logs.</p>
+<p><strong>Expected evidence:</strong> A specific step labeled cached in plain build logs.</p>
+<p><strong>Why:</strong> Elapsed time alone is ambiguous because network and CPU vary. A named cached step ties the observation to the builder decision being studied.</p>
 <h3 id="exercise-3-reorder-dependency-metadata-and-app-source-conceptually">Exercise 3: Reorder dependency metadata and app source conceptually.<a class="heading-anchor" href="#exercise-3-reorder-dependency-metadata-and-app-source-conceptually" aria-label="Link to this section">#</a></h3>
-<p>This allows source edits to reuse dependencies when lockfiles remain unchanged. It does not justify ignoring a lockfile change or copying too little to perform a correct build.</p>
-<p><strong>Expected:</strong> Stable dependency inputs precede rapidly changing source.</p>
+<p><strong>Expected evidence:</strong> Stable dependency inputs precede rapidly changing source.</p>
+<p><strong>Why:</strong> This allows source edits to reuse dependencies when lockfiles remain unchanged. It does not justify ignoring a lockfile change or copying too little to perform a correct build.</p>
 <h3 id="exercise-4-diagnose-a-cached-step-that-downloads-a-mutable-dependency">Exercise 4: Diagnose a cached step that downloads a mutable dependency.<a class="heading-anchor" href="#exercise-4-diagnose-a-cached-step-that-downloads-a-mutable-dependency" aria-label="Link to this section">#</a></h3>
-<p>The command can have external inputs absent from the visible file hash. Pinning and deliberate update procedures provide a stronger reproducibility story than relying on caching behavior.</p>
-<p><strong>Expected:</strong> A cache hit can preserve old bytes even with unchanged command text.</p>
+<p><strong>Expected answer:</strong> A cache hit can preserve old bytes even with unchanged command text.</p>
+<p><strong>Why:</strong> The command can have external inputs absent from the visible file hash. Pinning and deliberate update procedures provide a stronger reproducibility story than relying on caching behavior.</p>
 <h3 id="exercise-5-explain-no-cache-versus-pulling-a-base">Exercise 5: Explain no-cache versus pulling a base.<a class="heading-anchor" href="#exercise-5-explain-no-cache-versus-pulling-a-base" aria-label="Link to this section">#</a></h3>
-<p>One option changes cache reuse; another changes the image resolved by the base reference. Conflating them makes debugging rebuilds needlessly expensive and hard to interpret.</p>
-<p><strong>Expected:</strong> Reexecuting build steps and refreshing a base are separate choices.</p>
+<p><strong>Expected answer:</strong> Reexecuting build steps and refreshing a base are separate choices.</p>
+<p><strong>Why:</strong> One option changes cache reuse; another changes the image resolved by the base reference. Conflating them makes debugging rebuilds needlessly expensive and hard to interpret.</p>
 <h3 id="exercise-6-design-a-build-performance-experiment">Exercise 6: Design a build-performance experiment.<a class="heading-anchor" href="#exercise-6-design-a-build-performance-experiment" aria-label="Link to this section">#</a></h3>
-<p>Record build identity and changed inputs so timing is interpretable. Optimize the expensive invalidated step after confirming it is actually the bottleneck.</p>
-<p><strong>Expected:</strong> Same engine and context, one controlled edit, named cache observations.</p>
+<p><strong>Expected evidence:</strong> Same engine and context, one controlled edit, named cache observations.</p>
+<p><strong>Why:</strong> Record build identity and changed inputs so timing is interpretable. Optimize the expensive invalidated step after confirming it is actually the bottleneck.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful solution identifies the exact object, the phase when a setting takes effect, the expected normal result and an observation that disproves it. Repeating a command until it succeeds hides the mechanism. Change one variable, keep a failure record, and test the intended behavior again. Source examples here are small enough to inspect; a production system additionally needs ownership, lifecycle, data recovery and operational review. The host exercises are optional and must stay within the learner-created project.</p></article>
+<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>
 </body>
 </html>

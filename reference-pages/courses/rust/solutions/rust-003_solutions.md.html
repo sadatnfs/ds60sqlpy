@@ -194,37 +194,48 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/rust/solutions/rust-003_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="rust-003-explanation-and-comparison">rust-003: explanation and comparison<a class="heading-anchor" href="#rust-003-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="rust-003_solution.rs.html">rust-003_solution.rs</a>. Its assertions are always active under the prepared classroom compile settings.</p>
+<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="rust-003_solution.rs.html">rust-003_solution.rs</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Choose a visible overflow policy:</strong> The choice is semantic and should not depend on a compiler optimization setting. The same boundary produces absence, zero or 255 under three distinct policies.</p>
 <p><strong>Keep numeric units explicit:</strong> Integer smallest units avoid accidental decimal approximation in this bounded pricing example. Three items cost 375 cents, while the floating fixture uses an explicit tolerance.</p>
-<h3 id="reason-through-the-six-tasks">Reason through the six tasks<a class="heading-anchor" href="#reason-through-the-six-tasks" aria-label="Link to this section">#</a></h3>
-<ol>
-<li><strong>Predict and explain.</strong> Predict the three overflow policies.</li>
-</ol>
-<ol start="2">
-<li><strong>Guided modification.</strong> Repeat the investigation with subtraction at zero.</li>
-</ol>
-<ol start="3">
-<li><strong>Independent construction.</strong> Write a checked quantity-total calculation returning an explicit failure.</li>
-</ol>
-<ol start="4">
-<li><strong>Diagnose a defect.</strong> Diagnose relying on debug-mode overflow behavior in production logic.</li>
-</ol>
-<ol start="5">
-<li><strong>Boundary evidence.</strong> Test zero, maximum and one beyond an accepted application range.</li>
-</ol>
-<ol start="6">
-<li><strong>Transfer and justify.</strong> Choose numeric representation, units and rounding rules for a pricing contract.</li>
-</ol>
-<p>For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.</p>
+<h3 id="task-answers">Task answers<a class="heading-anchor" href="#task-answers" aria-label="Link to this section">#</a></h3>
+<h4 id="task-1-predict-and-explain">Task 1: Predict and explain<a class="heading-anchor" href="#task-1-predict-and-explain" aria-label="Link to this section">#</a></h4>
+<p>Predict the three overflow policies.</p>
+<p>No separate reference answer has been written for this task. Example A is the evidence to compare with: The choice is semantic and should not depend on a compiler optimization setting. The same boundary produces absence, zero or 255 under three distinct policies.</p>
+<h4 id="task-2-guided-modification">Task 2: Guided modification<a class="heading-anchor" href="#task-2-guided-modification" aria-label="Link to this section">#</a></h4>
+<p>Repeat the investigation with subtraction at zero.</p>
+<p>No separate reference answer has been written for this task. Start from Example B: Integer smallest units avoid accidental decimal approximation in this bounded pricing example. Three items cost 375 cents, while the floating fixture uses an explicit tolerance.</p>
+<h4 id="task-3-independent-construction">Task 3: Independent construction<a class="heading-anchor" href="#task-3-independent-construction" aria-label="Link to this section">#</a></h4>
+<p>Write a checked quantity-total calculation returning an explicit failure.</p>
+<p><strong>Reference answer.</strong> The same statements run as the <code>Task 3</code> block of the reference program; here they are wrapped in <code>main</code> as a complete file.</p>
+<pre class="highlighted-code"><code class="language-rust"><span class="syntax-keyword">fn</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">-&gt;</span> <span class="syntax-builtin">Result</span><span class="syntax-operator">&lt;</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">Box</span><span class="syntax-operator">&lt;</span><span class="syntax-keyword">dyn</span> std<span class="syntax-punctuation">::</span>error<span class="syntax-punctuation">::</span>Error<span class="syntax-operator">&gt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">fn</span> <span class="syntax-function">total_cents</span><span class="syntax-punctuation">(</span>price<span class="syntax-punctuation">:</span> <span class="syntax-keyword">u64</span><span class="syntax-punctuation">,</span> quantity<span class="syntax-punctuation">:</span> <span class="syntax-keyword">u64</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">-&gt;</span> <span class="syntax-builtin">Result</span><span class="syntax-operator">&lt;</span><span class="syntax-keyword">u64</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">String</span><span class="syntax-operator">&gt;</span> <span class="syntax-punctuation">{</span>
+        price
+            <span class="syntax-punctuation">.</span>checked_mul<span class="syntax-punctuation">(</span>quantity<span class="syntax-punctuation">)</span>
+            <span class="syntax-punctuation">.</span>ok_or_else<span class="syntax-punctuation">(</span><span class="syntax-operator">|</span><span class="syntax-operator">|</span> <span class="syntax-builtin">String</span><span class="syntax-punctuation">::</span>from<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">total overflows u64</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-punctuation">}</span>
+    <span class="syntax-function">assert_eq!</span><span class="syntax-punctuation">(</span>total_cents<span class="syntax-punctuation">(</span><span class="syntax-number">125</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">Ok</span><span class="syntax-punctuation">(</span><span class="syntax-number">375</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-function">assert!</span><span class="syntax-punctuation">(</span>total_cents<span class="syntax-punctuation">(</span><span class="syntax-keyword">u64</span><span class="syntax-punctuation">::</span>MAX<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>is_err<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-builtin">Ok</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<p><strong>Observe:</strong> 125 cents times 3 is Ok(375); u64::MAX times 2 is an explicit Err.</p>
+<p>checked_mul returns None on overflow, and ok_or_else turns that into a named failure instead of a wrapped or saturated total.</p>
+<h4 id="task-4-diagnose-a-defect">Task 4: Diagnose a defect<a class="heading-anchor" href="#task-4-diagnose-a-defect" aria-label="Link to this section">#</a></h4>
+<p>Diagnose relying on debug-mode overflow behavior in production logic.</p>
+<p>No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson&#x27;s pitfalls: Wrapping is usually wrong for counts even when it avoids a panic. A tolerance does not repair unit conversion errors. Converting with as can truncate or reinterpret values; use checked conversion when range matters.</p>
+<h4 id="task-5-boundary-evidence">Task 5: Boundary evidence<a class="heading-anchor" href="#task-5-boundary-evidence" aria-label="Link to this section">#</a></h4>
+<p>Test zero, maximum and one beyond an accepted application range.</p>
+<p>No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Choose a visible overflow policy) and Example B (Keep numeric units explicit).</p>
+<h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
+<p>Choose numeric representation, units and rounding rules for a pricing contract.</p>
+<p>No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry <strong>Overflow</strong>, and state one limitation of your choice.</p>
 <h3 id="mechanism-and-diagnostic-reasoning">Mechanism and diagnostic reasoning<a class="heading-anchor" href="#mechanism-and-diagnostic-reasoning" aria-label="Link to this section">#</a></h3>
 <p>Fixed-width integers have finite ranges. Rust provides explicit checked, wrapping, saturating and overflowing arithmetic so an API can state what happens at a boundary. Do not rely on differences between debug and optimized overflow settings for business correctness. Choose the intended policy directly.</p>
 <p>Floating-point arithmetic approximates many decimal fractions. A tolerance should reflect scale and numerical error, not hide a unit mismatch. Money often needs an integer smallest-unit representation or a separately prepared decimal library with a documented rounding policy. The standard library does not make every numerical domain exact automatically.</p>
 <p><code>checked_add</code> returns Option and reports overflow as None. <code>wrapping_add</code> performs modular arithmetic. <code>saturating_add</code> stays at the limit. An explicit integer type makes the tested range unambiguous.</p>
 <p>Wrapping is usually wrong for counts even when it avoids a panic. A tolerance does not repair unit conversion errors. Converting with as can truncate or reinterpret values; use checked conversion when range matters.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.</p></article>
+<p>Run the reference and confirm that it prints <code>rust-003: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
   </main>
 </body>
 </html>

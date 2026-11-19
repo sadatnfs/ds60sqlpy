@@ -197,7 +197,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Intermediate. Allow about 120 minutes, then revisit the transfer case later. Prerequisites: go-017</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
-<p>By the end, explain filesystem interface, path confinement, owned resource; implement the six investigations below; and defend the expected result of a changed input before running it. A passing reference is evidence about that program, not a certification of your independent understanding.</p>
+<p>Read files through fs.FS, distinguish missing from empty files, and confine real file access to an owned directory with os.Root. Along the way, explain filesystem interface, path confinement, owned resource; implement the six investigations below; and defend the expected result of a changed input before running it.</p>
 <h3 id="why-this-mechanism-matters">Why this mechanism matters<a class="heading-anchor" href="#why-this-mechanism-matters" aria-label="Link to this section">#</a></h3>
 <p>A filesystem path is a name interpreted by a filesystem, not proof of ownership or permission. Logical path cleaning removes redundant components but does not prevent symlink escapes or authorize deletion. The io/fs interfaces let programs consume files without depending on a particular disk layout. A deterministic in-memory filesystem makes success, missing-file and malformed-path behavior easy to inspect. When real temporary files are needed, create a unique owned directory, defer its cleanup and never infer ownership from a familiar filename. Persistent learner work belongs in the classroom storage layer; a worker scratch file is temporary and should not be treated as saved progress.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
@@ -207,8 +207,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li><strong>Owned resource:</strong> A resource whose creation and cleanup responsibility are known.</li>
 </ul>
 <h3 id="syntax-anatomy-and-reasoning">Syntax anatomy and reasoning<a class="heading-anchor" href="#syntax-anatomy-and-reasoning" aria-label="Link to this section">#</a></h3>
-<p>fs.ReadFile accepts an fs.FS and a slash-separated relative path. fs.ValidPath rejects empty paths, leading slashes and dot-dot components under the logical contract. fstest.MapFS provides test files in memory. errors.Is(err, fs.ErrNotExist) detects a missing-file cause across wrapping. filepath.Clean alone is normalization, not a containment security boundary.</p>
-<h3 id="classroom-execution-contract">Classroom execution contract<a class="heading-anchor" href="#classroom-execution-contract" aria-label="Link to this section">#</a></h3>
+<p>fs.ReadFile accepts an fs.FS and a slash-separated relative path. fs.ValidPath rejects empty paths, leading slashes and dot-dot components under the logical contract. fstest.MapFS provides test files in memory. errors.Is(err, fs.ErrNotExist) detects a missing-file cause across wrapping. filepath.Clean alone is normalization, not a containment security boundary. fs.Sub narrows the names a consumer sees, but its safety depends on the filesystem underneath. For a real directory, os.OpenRoot returns an os.Root whose methods refuse any name that resolves outside that directory, including through symbolic links.</p>
+<h3 id="run-this-lesson">Run this lesson<a class="heading-anchor" href="#run-this-lesson" aria-label="Link to this section">#</a></h3>
 <p>Choose Go in the unified Docker classroom. Save your own pad before experimenting. The prepared worker stages it as <code>main.go</code>, compiles it, and executes the resulting program with bounded time and output. The pad is one source file. It does not supply interactive input, arbitrary command-line arguments, package installation, Kubernetes credentials or a host Docker socket. Every ordinary reference here uses the standard library, synthetic local data and explicit checks. A failed <code>check</code> panics and produces a nonzero process result; do not remove it to make the run appear successful.</p>
 <p>The explanatory solution snippets belong inside <code>func main()</code> unless they declare a helper. <code>check</code> is a tiny teaching helper that panics when a condition is false. The separate reference supplies required imports and helpers and implements all six cases. Use that complete source only after an attempt or an explicit reveal. For an independently prepared Go project, the equivalent local build is <code>go build -o lesson main.go</code>, followed by <code>./lesson</code>; use Linux or WSL 2 for that optional workflow. Compiling proves syntax and type consistency, while the executed checks establish the stated example contracts.</p>
 <p>Each worked example below is a complete Go file. Copy one whole block into your saved pad and run it. Example 2 includes the first case as well as the second, so its setup is complete. Its supporting declarations may be reused in later investigations. The separate reference implements all six cases.</p>
@@ -277,75 +277,75 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>
 <p>For each example, write the input values, the state that can change, and the expected observation. Explain which result would disprove your current interpretation. For concurrency, predict a guaranteed relationship rather than an arbitrary scheduling order. For an error case, identify whether it is rejected at compilation or returned during execution.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
-<h4 id="exercise-1-read-an-in-memory-file">Exercise 1: Read an in-memory file<a class="heading-anchor" href="#exercise-1-read-an-in-memory-file" aria-label="Link to this section">#</a></h4>
-<p>Read data/input.txt containing red and a newline.</p>
-<p><strong>Expected:</strong> The bytes decode to red followed by a newline.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
-<h4 id="exercise-2-observe-a-missing-file">Exercise 2: Observe a missing file<a class="heading-anchor" href="#exercise-2-observe-a-missing-file" aria-label="Link to this section">#</a></h4>
-<p>Read absent.txt from an empty filesystem.</p>
-<p><strong>Expected:</strong> The error matches fs.ErrNotExist.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<h4 id="exercise-1-read-an-in-memory-file-change-one-input">Exercise 1: Read an in-memory file: change one input<a class="heading-anchor" href="#exercise-1-read-an-in-memory-file-change-one-input" aria-label="Link to this section">#</a></h4>
+<p>Copy worked example 1 into a scratch pad and change <code>files := fstest.MapFS{&quot;data/input.txt&quot;: &amp;fstest.MapFile{Data: []byte(&quot;red\n&quot;)}}</code> to <code>files := fstest.MapFS{&quot;data/input.txt!&quot;: &amp;fstest.MapFile{Data: []byte(&quot;red\n&quot;)}}</code>. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</p>
+<p><strong>Expected:</strong> The changed run panics with <code>file read</code> because <code>err == nil &amp;&amp; string(v) == &quot;red\n&quot;</code> no longer holds. Restoring the original line brings back the worked observation: the bytes decode to red followed by a newline.</p>
+<p><strong>Verify:</strong> Compare your written prediction with the panic message <code>file read</code> and name the value that made <code>err == nil &amp;&amp; string(v) == &quot;red\n&quot;</code> false. After restoring the input, the program must print its success line again.</p>
+<h4 id="exercise-2-observe-a-missing-file-debug-a-regression">Exercise 2: Observe a missing file: debug a regression<a class="heading-anchor" href="#exercise-2-observe-a-missing-file-debug-a-regression" aria-label="Link to this section">#</a></h4>
+<p>Introduce one deliberate defect into a copy of worked example 2 that makes <code>errors.Is(err, fs.ErrNotExist)</code> fail, then explain how the panic message leads back to the faulty line.</p>
+<p><strong>Expected:</strong> The defective copy panics with <code>missing file</code>; the repaired copy reproduces the worked observation: the error matches fs.ErrNotExist.</p>
+<p><strong>Verify:</strong> Keep the failing and the repaired runs. Explain why the changed token alters the value tested by <code>errors.Is(err, fs.ErrNotExist)</code> for this input.</p>
 <h4 id="exercise-3-reject-traversal-syntax">Exercise 3: Reject traversal syntax<a class="heading-anchor" href="#exercise-3-reject-traversal-syntax" aria-label="Link to this section">#</a></h4>
 <p>Validate ../private and data/input.txt.</p>
 <p><strong>Expected:</strong> The traversal path is invalid and the relative data path is valid.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>!fs.ValidPath(&quot;../private&quot;) &amp;&amp; fs.ValidPath(&quot;data/input.txt&quot;)</code>. As a control, change <code>check(!fs.ValidPath(&quot;../private&quot;) &amp;&amp; fs.ValidPath(&quot;data/input.txt&quot;), &quot;relative paths&quot;)</code> to <code>check(fs.ValidPath(&quot;../private&quot;) &amp;&amp; fs.ValidPath(&quot;data/input.txt&quot;), &quot;relative paths&quot;)</code> inside that check: it must panic with <code>relative paths</code>, which shows the check can fail. Restore it.</p>
 <h4 id="exercise-4-walk-only-owned-entries">Exercise 4: Walk only owned entries<a class="heading-anchor" href="#exercise-4-walk-only-owned-entries" aria-label="Link to this section">#</a></h4>
 <p>Walk a two-file in-memory tree and count regular files.</p>
 <p><strong>Expected:</strong> Exactly two files are observed.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>err == nil &amp;&amp; count == 2</code>. As a control, change <code>if e != nil {</code> to <code>if e == nil {</code>: the run must panic with <code>walk</code>. Restore the line before continuing.</p>
 <h4 id="exercise-5-separate-empty-content-from-absence">Exercise 5: Separate empty content from absence<a class="heading-anchor" href="#exercise-5-separate-empty-content-from-absence" aria-label="Link to this section">#</a></h4>
 <p>Read an existing zero-byte file.</p>
 <p><strong>Expected:</strong> Reading succeeds and returns zero bytes.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
-<h4 id="exercise-6-transfer-a-subtree-boundary">Exercise 6: Transfer a subtree boundary<a class="heading-anchor" href="#exercise-6-transfer-a-subtree-boundary" aria-label="Link to this section">#</a></h4>
-<p>Create an fs.Sub rooted at data and read only its relative item.</p>
-<p><strong>Expected:</strong> item.txt is readable within the logical subtree.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>err == nil &amp;&amp; len(v) == 0</code>. As a control, change <code>v, err := fs.ReadFile(fstest.MapFS{&quot;empty&quot;: &amp;fstest.MapFile{}}, &quot;empty&quot;)</code> to <code>v, err := fs.ReadFile(fstest.MapFS{&quot;empty!&quot;: &amp;fstest.MapFile{}}, &quot;empty&quot;)</code>: the run must panic with <code>empty file</code>. Restore the line before continuing.</p>
+<h4 id="exercise-6-transfer-confinement-to-a-real-directory-with-os-root">Exercise 6: Transfer confinement to a real directory with os.Root<a class="heading-anchor" href="#exercise-6-transfer-confinement-to-a-real-directory-with-os-root" aria-label="Link to this section">#</a></h4>
+<p>Open an owned temporary directory as an os.Root, create item.txt through it, then try to open ../outside.txt through the same root.</p>
+<p><strong>Expected:</strong> item.txt is created inside the root and the escaping name is rejected.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>err != nil</code>. As a control, change <code>check(err != nil, &quot;escape rejected&quot;)</code> to <code>check(err == nil, &quot;escape rejected&quot;)</code> inside that check: it must panic with <code>escape rejected</code>, which shows the check can fail. Restore it.</p>
 <p>Implement these in the answer-free learner source. Keep one independent check per claim. A task can require tracing, construction, a changed input or a deliberate safe failure. Do not run a data race, corrupt memory or contact a shared cluster merely to demonstrate why it would be wrong.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Read a compiler error from the first location in your source, then fix one cause at a time. Unused imports and variables are errors in Go; add an import when its use exists, rather than copying a large unused import list. A panic from <code>check</code> identifies a violated example contract. Compare the actual value with the expected value and inspect the state transition that produced it. A returned <code>error</code> is a value that the caller must handle; an ignored error can make later output look plausible while the original operation failed.</p>
 <p>The lesson-specific explanations in the two examples identify the important counterexamples. Extend that reasoning to every investigation: explain why a plausible alternative would fail, and preserve a tiny input that distinguishes it. Treat empty data, missing values and cancellation as domain cases with explicit policies. In concurrent work, replace sleeps used as synchronization with channels, mutexes or an explicit ownership protocol.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<h4 id="hint-for-investigation-1-read-an-in-memory-file">Hint for investigation 1: Read an in-memory file<a class="heading-anchor" href="#hint-for-investigation-1-read-an-in-memory-file" aria-label="Link to this section">#</a></h4>
+<h4 id="hint-for-investigation-1-read-an-in-memory-file-change-one-input">Hint for investigation 1: Read an in-memory file: change one input<a class="heading-anchor" href="#hint-for-investigation-1-read-an-in-memory-file-change-one-input" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The bytes decode to red followed by a newline.</li>
-<li>Identify the input and the state boundary relevant to read an in-memory file. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>err == nil &amp;&amp; string(v) == &quot;red\n&quot;</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Compute the checked value with <code>files := fstest.MapFS{&quot;data/input.txt!&quot;: &amp;fstest.MapFile{Data: []byte(&quot;red\n&quot;)}}</code> in place before running, then compare it with the value <code>err == nil &amp;&amp; string(v) == &quot;red\n&quot;</code> expects.</li>
 </ol>
-<h4 id="hint-for-investigation-2-observe-a-missing-file">Hint for investigation 2: Observe a missing file<a class="heading-anchor" href="#hint-for-investigation-2-observe-a-missing-file" aria-label="Link to this section">#</a></h4>
+<h4 id="hint-for-investigation-2-observe-a-missing-file-debug-a-regression">Hint for investigation 2: Observe a missing file: debug a regression<a class="heading-anchor" href="#hint-for-investigation-2-observe-a-missing-file-debug-a-regression" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The error matches fs.ErrNotExist.</li>
-<li>Identify the input and the state boundary relevant to observe a missing file. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>errors.Is(err, fs.ErrNotExist)</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Name one input that would make <code>errors.Is(err, fs.ErrNotExist)</code> false. A check that no input can falsify is not evidence.</li>
 </ol>
 <h4 id="hint-for-investigation-3-reject-traversal-syntax">Hint for investigation 3: Reject traversal syntax<a class="heading-anchor" href="#hint-for-investigation-3-reject-traversal-syntax" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The traversal path is invalid and the relative data path is valid.</li>
-<li>Identify the input and the state boundary relevant to reject traversal syntax. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>!fs.ValidPath(&quot;../private&quot;) &amp;&amp; fs.ValidPath(&quot;data/input.txt&quot;)</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Name one input that would make <code>!fs.ValidPath(&quot;../private&quot;) &amp;&amp; fs.ValidPath(&quot;data/input.txt&quot;)</code> false. A check that no input can falsify is not evidence.</li>
 </ol>
 <h4 id="hint-for-investigation-4-walk-only-owned-entries">Hint for investigation 4: Walk only owned entries<a class="heading-anchor" href="#hint-for-investigation-4-walk-only-owned-entries" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Exactly two files are observed.</li>
-<li>Identify the input and the state boundary relevant to walk only owned entries. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>err == nil &amp;&amp; count == 2</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Predict the effect of changing <code>if e != nil {</code> to <code>if e == nil {</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
 </ol>
 <h4 id="hint-for-investigation-5-separate-empty-content-from-absence">Hint for investigation 5: Separate empty content from absence<a class="heading-anchor" href="#hint-for-investigation-5-separate-empty-content-from-absence" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Reading succeeds and returns zero bytes.</li>
-<li>Identify the input and the state boundary relevant to separate empty content from absence. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>err == nil &amp;&amp; len(v) == 0</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Predict the effect of changing <code>v, err := fs.ReadFile(fstest.MapFS{&quot;empty&quot;: &amp;fstest.MapFile{}}, &quot;empty&quot;)</code> to <code>v, err := fs.ReadFile(fstest.MapFS{&quot;empty!&quot;: &amp;fstest.MapFile{}}, &quot;empty&quot;)</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
 </ol>
-<h4 id="hint-for-investigation-6-transfer-a-subtree-boundary">Hint for investigation 6: Transfer a subtree boundary<a class="heading-anchor" href="#hint-for-investigation-6-transfer-a-subtree-boundary" aria-label="Link to this section">#</a></h4>
+<h4 id="hint-for-investigation-6-transfer-confinement-to-a-real-directory-with-os-root">Hint for investigation 6: Transfer confinement to a real directory with os.Root<a class="heading-anchor" href="#hint-for-investigation-6-transfer-confinement-to-a-real-directory-with-os-root" aria-label="Link to this section">#</a></h4>
 <ol>
-<li>Restate the expected observation: item.txt is readable within the logical subtree.</li>
-<li>Identify the input and the state boundary relevant to transfer a subtree boundary. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>Restate the expected observation: item.txt is created inside the root and the escaping name is rejected.</li>
+<li>The check <code>err != nil</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Name one input that would make <code>err != nil</code> false. A check that no input can falsify is not evidence.</li>
 </ol>
 <h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
 <p>Close the reference. Rebuild one normal case and one boundary case from a blank pad. Explain the role of filesystem interface without using its name in the definition. Then change the domain while keeping the same invariant. Record the new input, your prediction and the observed output. If your program passes only because its input is hard-coded, explain which part would need a reusable function in a larger project.</p>
 <h3 id="next-step-and-sources">Next step and sources<a class="heading-anchor" href="#next-step-and-sources" aria-label="Link to this section">#</a></h3>
-<p><a href="https://pkg.go.dev/io/fs">Primary language or library documentation</a>, reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. This source supports the API contract; it does not verify the classroom worker. Runtime receipts are recorded separately by the repository validation tools. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.</p>
+<p><a href="https://pkg.go.dev/io/fs">Primary language or library documentation</a>, reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for go-018: Filesystems, paths and owned cleanup.
 Read courses/go/guides/go-018.md and my saved attempt based on courses/go/lessons/go-018.go.

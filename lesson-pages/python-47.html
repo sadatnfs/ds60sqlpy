@@ -9,7 +9,7 @@
     content="default-src 'none'; style-src 'self' file: 'unsafe-inline'; font-src data:; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
   >
   <link rel="stylesheet" href="../src/ds60sqlpy/assets/vendor/textbook/fonts.css">
-  <title>python-47 · PyTorch Basics NN Training Loop · DS60</title>
+  <title>python-47 · PyTorch Tensors, Modules, and Training Loops · DS60</title>
   <style>
     :root {
       --paper: #f6f2e8;
@@ -312,7 +312,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <div class="shell">
       <section class="hero">
         <p class="eyebrow">python · lesson python-47</p>
-        <h1>PyTorch Basics NN Training Loop</h1>
+        <h1>PyTorch Tensors, Modules, and Training Loops</h1>
         <p class="hero-copy">Production, advanced topics, and capstone</p>
         <div class="meta">
           <span class="tag">advanced</span>
@@ -396,7 +396,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="guide--prerequisites">Prerequisites<a class="heading-anchor" href="#guide--prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Complete <code>python-46</code> (deep learning overview).</li>
-<li>Know stratified splitting and scaling from <code>python-34</code>–<code>python-35</code>.</li>
+<li>Know stratified splitting and scaling from <code>python-34</code> to <code>python-35</code>.</li>
 <li>Use CPU by default; CUDA-specific acceleration is optional.</li>
 </ul>
 <h4 id="guide--vocabulary-and-mental-models">Vocabulary and mental models<a class="heading-anchor" href="#guide--vocabulary-and-mental-models" aria-label="Link to this section">#</a></h4>
@@ -477,11 +477,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Keep experiments in new scratch cells. Do not edit the official solution while attempting the numbered practice.</li>
 <li>Restart the kernel and run from the first cell before calling the lesson complete. A clean run catches hidden state and stale variables.</li>
 </ol>
-<p>Windows PowerShell:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m jupyter lab</code></pre>
-<p>macOS/Linux:</p>
+<p>Linux, macOS, or Ubuntu in Windows WSL 2:</p>
 <pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
-<p>If the Windows environment uses the documented conda-prefix fallback, use <code>.\.venv\python.exe</code> in place of <code>.\.venv\Scripts\python.exe</code>.</p>
 <h4 id="guide--concept-deep-dive-logits-minibatches-modes-and-a-correct-pytorch-training-loop">Concept deep dive: logits, minibatches, modes, and a correct PyTorch training loop<a class="heading-anchor" href="#guide--concept-deep-dive-logits-minibatches-modes-and-a-correct-pytorch-training-loop" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
 <p><code>nn.Module</code> composes registered parameters and operations. For multiclass classification, the final layer returns one <strong>logit</strong> per class; <code>CrossEntropyLoss</code> combines log-softmax and negative log-likelihood, so the model should not apply softmax first. Targets are integer class indices with <code>torch.long</code> dtype.</p>
@@ -492,7 +489,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li><strong><code>model(features)</code>:</strong> returns logits shaped <code>(batch, classes)</code> for multiclass classification.</li>
 <li><strong><code>CrossEntropyLoss(logits, labels)</code>:</strong> expects floating logits and <code>long</code> class indices shaped <code>(batch,)</code>.</li>
 </ul>
-<p>Read an API call from the inside out: identify the data entering the operation, the state learned (if any), the value returned, and the evidence that would make the result trustworthy. A method returning without an exception proves only that the syntax and immediate runtime path worked.</p>
 <h5 id="guide--focused-example-a-make-the-logits-and-label-contract-executable">Focused example A: make the logits-and-label contract executable<a class="heading-anchor" href="#guide--focused-example-a-make-the-logits-and-label-contract-executable" aria-label="Link to this section">#</a></h5>
 <p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> torch
@@ -508,7 +504,6 @@ loss <span class="syntax-operator">=</span> nn<span class="syntax-operator">.</s
 <p><strong>Expected observation:</strong> Two rows and two classes produce a <code>(2, 2)</code> logit tensor and one scalar batch loss.</p>
 <p><strong>Assumption to name:</strong> Class labels are zero-based indices and no softmax was applied before the loss.</p>
 <h5 id="guide--focused-example-b-observe-dropout-differ-between-train-and-eval-modes">Focused example B: observe dropout differ between train and eval modes<a class="heading-anchor" href="#guide--focused-example-b-observe-dropout-differ-between-train-and-eval-modes" aria-label="Link to this section">#</a></h5>
-<p>This second example changes one important condition. Compare it with Example A instead of reading it as unrelated syntax.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> torch
 <span class="syntax-keyword">from</span> torch <span class="syntax-keyword">import</span> nn
 
@@ -569,11 +564,11 @@ layer<span class="syntax-operator">.</span>eval<span class="syntax-punctuation">
 <ol>
 <li>Add dropout to the MLP and compare results.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 1; logits, minibatches, modes, and a correct PyTorch training loop; from identical initial weights and split, print train/eval metrics for dropout=0 and the chosen dropout rate; assert repeated eval-mode predictions are equal while train-mode outputs can differ.</p>
+<p><strong>Verify:</strong> From identical initial weights and split, print train/eval metrics for dropout=0 and the chosen dropout rate; assert repeated eval-mode predictions are equal while train-mode outputs can differ.</p>
 <ol start="2">
 <li>Implement a small minibatch training loop with <code>DataLoader</code>.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 2; logits, minibatches, modes, and a correct PyTorch training loop; for a fixed toy dataset, assert each DataLoader batch shape/dtype, account for every example once per epoch, print sample-weighted epoch loss, and show at least one parameter tensor changes after optimizer.step().</p>
+<p><strong>Verify:</strong> For a fixed toy dataset, assert each DataLoader batch shape/dtype, account for every example once per epoch, print sample-weighted epoch loss, and show at least one parameter tensor changes after optimizer.step().</p>
 <h5 id="guide--progressive-hints">Progressive hints<a class="heading-anchor" href="#guide--progressive-hints" aria-label="Link to this section">#</a></h5>
 <ol>
 <li>Place <code>Dropout(p=...)</code> after an activation. Compare multiple seeded runs or validation curves, because one final accuracy is noisy.</li>
@@ -649,7 +644,7 @@ layer<span class="syntax-operator">.</span>eval<span class="syntax-punctuation">
 </ul>
 <h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into the AI tutor while the repository root is open:</p>
-<pre class="highlighted-code"><code class="language-text">Tutor me through `python-47` : Day 47 : PyTorch Tensors, Modules, and Training Loops.
+<pre class="highlighted-code"><code class="language-text">Tutor me through `python-47` (Day 47: PyTorch Tensors, Modules, and Training Loops).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize logits, minibatches, modes, and a correct PyTorch training loop. Use exactly these maintained learner materials:
@@ -702,7 +697,7 @@ merely ran is not evidence of mastery.</code></pre></div>
         </header>
 
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-47-pytorch-basics-tensors-autograd-simple-nn">Day 47 : PyTorch basics: tensors, autograd, simple NN<a class="heading-anchor" href="#learner--cell-1--day-47-pytorch-basics-tensors-autograd-simple-nn" aria-label="Link to this section">#</a></h3>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-47-pytorch-tensors-modules-and-training-loops">Day 47: PyTorch Tensors, Modules, and Training Loops<a class="heading-anchor" href="#learner--cell-1--day-47-pytorch-tensors-modules-and-training-loops" aria-label="Link to this section">#</a></h3>
 <p>Objectives:</p>
 <ul>
 <li>Build an MLP.</li>
@@ -746,7 +741,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-3--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-3--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
 <p>Select the <code>Python (ds60sqlpy)</code> kernel, start at the first cell, and write each prediction before execution. Keep attempts in the provided scratch cell or new cells. Restart the kernel and run from the top before calling the work reproducible.</p>
-<h4 id="learner--cell-3--concept-lab-logits-minibatches-modes-and-a-correct-pytorch-training-loop">Concept lab : logits, minibatches, modes, and a correct PyTorch training loop<a class="heading-anchor" href="#learner--cell-3--concept-lab-logits-minibatches-modes-and-a-correct-pytorch-training-loop" aria-label="Link to this section">#</a></h4>
+<h4 id="learner--cell-3--concept-lab-logits-minibatches-modes-and-a-correct-pytorch-training-loop">Concept lab: logits, minibatches, modes, and a correct PyTorch training loop<a class="heading-anchor" href="#learner--cell-3--concept-lab-logits-minibatches-modes-and-a-correct-pytorch-training-loop" aria-label="Link to this section">#</a></h4>
 <h5 id="learner--cell-3--mental-model">Mental model<a class="heading-anchor" href="#learner--cell-3--mental-model" aria-label="Link to this section">#</a></h5>
 <p><code>nn.Module</code> composes registered parameters and operations. For multiclass classification, the final layer returns one <strong>logit</strong> per class; <code>CrossEntropyLoss</code> combines log-softmax and negative log-likelihood, so the model should not apply softmax first. Targets are integer class indices with <code>torch.long</code> dtype.</p>
 <p>A <code>DataLoader</code> defines batch and shuffle behavior. Training mode enables dropout and batch-normalization updates; evaluation mode disables those training behaviors but does not itself disable gradients. Use <code>model.eval()</code> together with <code>torch.no_grad()</code> for validation.</p>
@@ -757,7 +752,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <li><strong><code>CrossEntropyLoss(logits, labels)</code>:</strong> expects floating logits and <code>long</code> class indices shaped <code>(batch,)</code>.</li>
 </ul>
 <p>For every call, identify input data, learned state, returned value, and a check that can fail. That habit prevents a successful cell from being mistaken for a correct analysis.</p></article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h5 id="learner--cell-4--focused-example-a-make-the-logits-and-label-contract-executable">Focused example A : make the logits-and-label contract executable<a class="heading-anchor" href="#learner--cell-4--focused-example-a-make-the-logits-and-label-contract-executable" aria-label="Link to this section">#</a></h5>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h5 id="learner--cell-4--focused-example-a-make-the-logits-and-label-contract-executable">Focused example A: make the logits-and-label contract executable<a class="heading-anchor" href="#learner--cell-4--focused-example-a-make-the-logits-and-label-contract-executable" aria-label="Link to this section">#</a></h5>
 <p><strong>Predict first:</strong> write down the expected shape, type, ordering, or direction of the result. Then run the next cell.</p>
 <p><strong>Assumption:</strong> Class labels are zero-based indices and no softmax was applied before the loss.</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> torch</span>
@@ -773,7 +768,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><p><strong>Expected observation:</strong> Two rows and two classes produce a <code>(2, 2)</code> logit tensor and one scalar batch loss.</p>
 <p>Do not force exact equality for estimates based on samples. Record the seed, sample size, tolerance, and metric where they matter.</p></article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><h5 id="learner--cell-7--focused-example-b-observe-dropout-differ-between-train-and-eval-modes">Focused example B : observe dropout differ between train and eval modes<a class="heading-anchor" href="#learner--cell-7--focused-example-b-observe-dropout-differ-between-train-and-eval-modes" aria-label="Link to this section">#</a></h5>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><h5 id="learner--cell-7--focused-example-b-observe-dropout-differ-between-train-and-eval-modes">Focused example B: observe dropout differ between train and eval modes<a class="heading-anchor" href="#learner--cell-7--focused-example-b-observe-dropout-differ-between-train-and-eval-modes" aria-label="Link to this section">#</a></h5>
 <p>This example changes one important condition. Predict how and why the result should differ from Example A.</p>
 <p><strong>Assumption:</strong> A fixed seed controls the demonstration; production quality is not inferred from one mask.</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> torch</span>
@@ -836,11 +831,11 @@ merely ran is not evidence of mastery.</code></pre></div>
 <ol>
 <li>Add dropout to the MLP and compare results.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 1 : logits, minibatches, modes, and a correct PyTorch training loop : from identical initial weights and split, print train/eval metrics for dropout=0 and the chosen dropout rate; assert repeated eval-mode predictions are equal while train-mode outputs can differ.</p>
+<p><strong>Verify:</strong> From identical initial weights and split, print train/eval metrics for dropout=0 and the chosen dropout rate; assert repeated eval-mode predictions are equal while train-mode outputs can differ.</p>
 <ol start="2">
 <li>Implement a small minibatch training loop with <code>DataLoader</code>.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 2 : logits, minibatches, modes, and a correct PyTorch training loop : for a fixed toy dataset, assert each DataLoader batch shape/dtype, account for every example once per epoch, print sample-weighted epoch loss, and show at least one parameter tensor changes after optimizer.step().</p>
+<p><strong>Verify:</strong> For a fixed toy dataset, assert each DataLoader batch shape/dtype, account for every example once per epoch, print sample-weighted epoch loss, and show at least one parameter tensor changes after optimizer.step().</p>
 <h5 id="learner--cell-10--progressive-hints">Progressive hints<a class="heading-anchor" href="#learner--cell-10--progressive-hints" aria-label="Link to this section">#</a></h5>
 <ol>
 <li>Place <code>Dropout(p=...)</code> after an activation. Compare multiple seeded runs or validation curves, because one final accuracy is noisy.</li>
@@ -853,19 +848,19 @@ merely ran is not evidence of mastery.</code></pre></div>
 <ol start="3">
 <li><strong>Shape and dtype contract:</strong> Write assertions at the start of a classification training step for feature shape/dtype, target shape/dtype, and logits shape. <strong>Progressive hint:</strong> CrossEntropyLoss expects floating logits <code>(batch, classes)</code> and integer class indices <code>(batch,)</code> with dtype long.</li>
 </ol>
-<p><strong>Verify:</strong> Shape and dtype contract : assert features are floating shape (batch,input_features), targets are long shape (batch,), and logits are floating shape (batch,num_classes); include one wrong-dtype and one wrong-width fixture that raise clear errors.</p>
+<p><strong>Verify:</strong> Shape and dtype contract: assert features are floating shape (batch,input_features), targets are long shape (batch,), and logits are floating shape (batch,num_classes); include one wrong-dtype and one wrong-width fixture that raise clear errors.</p>
 <ol start="4">
 <li><strong>Validation implementation:</strong> Implement an evaluation function that returns sample-weighted loss and accuracy, restores the caller&#x27;s prior train/eval mode, and never retains an autograd graph. <strong>Progressive hint:</strong> Remember <code>was_training = model.training</code>, call eval and no_grad, aggregate counts, then restore train mode only if it was previously active.</li>
 </ol>
-<p><strong>Verify:</strong> Validation implementation : call evaluation from both prior train and eval modes; assert returned loss/accuracy use all sample counts, outputs carry no grad graph, parameters have no new gradients, and the original mode is restored.</p>
+<p><strong>Verify:</strong> Validation implementation: call evaluation from both prior train and eval modes; assert returned loss/accuracy use all sample counts, outputs carry no grad graph, parameters have no new gradients, and the original mode is restored.</p>
 <ol start="5">
 <li><strong>DataLoader reproducibility:</strong> Run two shuffled DataLoaders with the same seed and compare batch order. Then state what changes when using worker processes. <strong>Progressive hint:</strong> Pass a seeded <code>torch.Generator</code>; worker initialization and external NumPy/Python randomness need their own deliberate seeds.</li>
 </ol>
-<p><strong>Verify:</strong> DataLoader reproducibility : with identical torch.Generator seeds, assert two num_workers=0 loaders emit identical sample-ID order; with worker processes, record worker seeding/persistent-worker settings and rerun the equality check.</p>
+<p><strong>Verify:</strong> DataLoader reproducibility: with identical torch.Generator seeds, assert two num_workers=0 loaders emit identical sample-ID order; with worker processes, record worker seeding/persistent-worker settings and rerun the equality check.</p>
 <ol start="6">
 <li><strong>Portable checkpoint:</strong> Save model, optimizer, epoch, metric history, and configuration, then reload on CPU and resume one step. Explain <code>state_dict</code> versus serializing the entire model object. <strong>Progressive hint:</strong> Save plain state dictionaries plus architecture/config metadata. Use <code>map_location=&#x27;cpu&#x27;</code> and recreate the model class before loading.</li>
 </ol>
-<p><strong>Verify:</strong> Portable checkpoint : save state dicts, epoch, metric history, config, and RNG/seed metadata; load with map_location=&#x27;cpu&#x27;, assert fixed-fixture prediction parity, then resume one step and increment epoch/history.</p>
+<p><strong>Verify:</strong> Portable checkpoint: save state dicts, epoch, metric history, config, and RNG/seed metadata; load with map_location=&#x27;cpu&#x27;, assert fixed-fixture prediction parity, then resume one step and increment epoch/history.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Expanded mastery lab scratch space</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
@@ -909,7 +904,7 @@ merely ran is not evidence of mastery.</code></pre></div>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-47-solutions-pytorch-basics-modules-and-the-training-loop">Day 47: Solutions: PyTorch Basics, Modules, and the Training Loop<a class="heading-anchor" href="#solution-1--day-47-solutions-pytorch-basics-modules-and-the-training-loop" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-47-solutions-pytorch-tensors-modules-and-training-loops">Day 47 Solutions: PyTorch Tensors, Modules, and Training Loops<a class="heading-anchor" href="#solution-1--day-47-solutions-pytorch-tensors-modules-and-training-loops" aria-label="Link to this section">#</a></h3>
 <p>We build a minimal, correct training loop; add early stopping; add a LR scheduler; and enable mixed precision training. After each code block you’ll find a line‑by‑line explanation.</p>
 <p>Contents</p>
 <ul>
@@ -967,7 +962,7 @@ opt <span class="syntax-operator">=</span> torch<span class="syntax-operator">.<
 <li>CrossEntropyLoss expects logits and Long labels 0..C-1</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 1; Early stopping on validation loss</p>
+<p>Worked reference for Exercise 1: Early stopping on validation loss</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">class</span> <span class="syntax-class">EarlyStopper</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">def</span> <span class="syntax-function">__init__</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> patience<span class="syntax-operator">=</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> min_delta<span class="syntax-operator">=</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
         <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>patience<span class="syntax-punctuation">,</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>min_delta <span class="syntax-operator">=</span> patience<span class="syntax-punctuation">,</span> min_delta
@@ -1045,7 +1040,7 @@ plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(<
 <li>Loop: record metrics, check stopper; plot to verify no overfitting after stop</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 2; StepLR scheduler</p>
+<p>Worked reference for Exercise 2: StepLR scheduler</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-comment"># Reset model and optimizer for a fair comparison</span>
 model2 <span class="syntax-operator">=</span> MLP<span class="syntax-punctuation">(</span><span class="syntax-number">20</span><span class="syntax-punctuation">,</span> <span class="syntax-number">128</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>to<span class="syntax-punctuation">(</span>device<span class="syntax-punctuation">)</span>
 opt2 <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>optim<span class="syntax-operator">.</span>SGD<span class="syntax-punctuation">(</span>model2<span class="syntax-operator">.</span>parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> lr<span class="syntax-operator">=</span><span class="syntax-number">0.1</span><span class="syntax-punctuation">,</span> momentum<span class="syntax-operator">=</span><span class="syntax-number">0.9</span><span class="syntax-punctuation">)</span>
@@ -1070,7 +1065,7 @@ plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(<
 <li>StepLR reduces LR by gamma every step_size epochs; observe loss drops after LR steps</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 3; Mixed precision training</p>
+<p>Worked reference for Exercise 3: Mixed precision training</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-comment"># The modern AMP extension requires PyTorch 2.3 or newer. Some optional</span>
 <span class="syntax-comment"># Intel macOS environments retain 2.2; their earlier FP32 examples still work.</span>
 <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">hasattr</span><span class="syntax-punctuation">(</span>torch<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">amp</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> <span class="syntax-builtin">hasattr</span><span class="syntax-punctuation">(</span>torch<span class="syntax-operator">.</span>amp<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">GradScaler</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
@@ -1130,12 +1125,12 @@ plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(<
 <p><strong>Prompt:</strong> Add dropout to the MLP and compare results.</p>
 <p><strong>How to reason about it:</strong> Dropout is active only in training mode and its effect is noisy. Compare seeded runs or validation curves, and place it deliberately after an activation rather than assuming one final score proves benefit.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 1; logits, minibatches, modes, and a correct PyTorch training loop; from identical initial weights and split, print train/eval metrics for dropout=0 and the chosen dropout rate; assert repeated eval-mode predictions are equal while train-mode outputs can differ.</p>
+<p><strong>Verify:</strong> From identical initial weights and split, print train/eval metrics for dropout=0 and the chosen dropout rate; assert repeated eval-mode predictions are equal while train-mode outputs can differ.</p>
 <h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Implement a small minibatch training loop with <code>DataLoader</code>.</p>
 <p><strong>How to reason about it:</strong> A minibatch loop keeps zero-grad, forward, loss, backward, and step inside the batch iteration. Shuffle training only, use float features and class-index long targets, and aggregate epoch metrics by support.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 2; logits, minibatches, modes, and a correct PyTorch training loop; for a fixed toy dataset, assert each DataLoader batch shape/dtype, account for every example once per epoch, print sample-weighted epoch loss, and show at least one parameter tensor changes after optimizer.step().</p>
+<p><strong>Verify:</strong> For a fixed toy dataset, assert each DataLoader batch shape/dtype, account for every example once per epoch, print sample-weighted epoch loss, and show at least one parameter tensor changes after optimizer.step().</p>
 <h5 id="solution-1--exercise-3-shape-and-dtype-contract">Exercise 3: Shape and dtype contract<a class="heading-anchor" href="#solution-1--exercise-3-shape-and-dtype-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Write assertions at the start of a classification training step for feature shape/dtype, target shape/dtype, and logits shape.</p>
 <p><strong>Reasoning before implementation:</strong> CrossEntropyLoss expects floating logits <code>(batch, classes)</code> and integer class indices <code>(batch,)</code> with dtype long.</p>
@@ -1194,7 +1189,7 @@ plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(<
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="solution-2--cell-1--day-47-solutions-pytorch-basics-modules-and-the-training-loop">Day 47: Solutions: PyTorch Basics, Modules, and the Training Loop<a class="heading-anchor" href="#solution-2--cell-1--day-47-solutions-pytorch-basics-modules-and-the-training-loop" aria-label="Link to this section">#</a></h3>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="solution-2--cell-1--day-47-solutions-pytorch-tensors-modules-and-training-loops">Day 47 Solutions: PyTorch Tensors, Modules, and Training Loops<a class="heading-anchor" href="#solution-2--cell-1--day-47-solutions-pytorch-tensors-modules-and-training-loops" aria-label="Link to this section">#</a></h3>
 <p>We build a minimal, correct training loop; add early stopping; add a LR scheduler; and enable mixed precision training. After each code block you’ll find a line‑by‑line explanation.</p>
 <p>Contents</p>
 <ul>
@@ -1254,7 +1249,7 @@ plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(<
 <li>CrossEntropyLoss expects logits and Long labels 0..C-1</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 1; Early stopping on validation loss</p></article>
+<p>Worked reference for Exercise 1: Early stopping on validation loss</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">EarlyStopper</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-keyword">def</span> <span class="syntax-function">__init__</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> patience<span class="syntax-operator">=</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> min_delta<span class="syntax-operator">=</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">        <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>patience<span class="syntax-punctuation">,</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>min_delta <span class="syntax-operator">=</span> patience<span class="syntax-punctuation">,</span> min_delta</span>
@@ -1333,7 +1328,7 @@ plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(<
 <li>Loop: record metrics, check stopper; plot to verify no overfitting after stop</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 2; StepLR scheduler</p></article>
+<p>Worked reference for Exercise 2: StepLR scheduler</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Reset model and optimizer for a fair comparison</span></span>
 <span class="source-line">model2 <span class="syntax-operator">=</span> MLP<span class="syntax-punctuation">(</span><span class="syntax-number">20</span><span class="syntax-punctuation">,</span> <span class="syntax-number">128</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>to<span class="syntax-punctuation">(</span>device<span class="syntax-punctuation">)</span></span>
 <span class="source-line">opt2 <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>optim<span class="syntax-operator">.</span>SGD<span class="syntax-punctuation">(</span>model2<span class="syntax-operator">.</span>parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> lr<span class="syntax-operator">=</span><span class="syntax-number">0.1</span><span class="syntax-punctuation">,</span> momentum<span class="syntax-operator">=</span><span class="syntax-number">0.9</span><span class="syntax-punctuation">)</span></span>
@@ -1359,7 +1354,7 @@ plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(<
 <li>StepLR reduces LR by gamma every step_size epochs; observe loss drops after LR steps</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 3; Mixed precision training</p></article>
+<p>Worked reference for Exercise 3: Mixed precision training</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># The modern AMP extension requires PyTorch 2.3 or newer. Some optional</span></span>
 <span class="source-line"><span class="syntax-comment"># Intel macOS environments retain 2.2; their earlier FP32 examples still work.</span></span>
 <span class="source-line"><span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">hasattr</span><span class="syntax-punctuation">(</span>torch<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">amp</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> <span class="syntax-builtin">hasattr</span><span class="syntax-punctuation">(</span>torch<span class="syntax-operator">.</span>amp<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">GradScaler</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
@@ -1420,12 +1415,12 @@ plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(<
 <p><strong>Prompt:</strong> Add dropout to the MLP and compare results.</p>
 <p><strong>How to reason about it:</strong> Dropout is active only in training mode and its effect is noisy. Compare seeded runs or validation curves, and place it deliberately after an activation rather than assuming one final score proves benefit.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 1; logits, minibatches, modes, and a correct PyTorch training loop; from identical initial weights and split, print train/eval metrics for dropout=0 and the chosen dropout rate; assert repeated eval-mode predictions are equal while train-mode outputs can differ.</p>
+<p><strong>Verify:</strong> From identical initial weights and split, print train/eval metrics for dropout=0 and the chosen dropout rate; assert repeated eval-mode predictions are equal while train-mode outputs can differ.</p>
 <h5 id="solution-2--cell-9--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-2--cell-9--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Implement a small minibatch training loop with <code>DataLoader</code>.</p>
 <p><strong>How to reason about it:</strong> A minibatch loop keeps zero-grad, forward, loss, backward, and step inside the batch iteration. Shuffle training only, use float features and class-index long targets, and aggregate epoch metrics by support.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 2; logits, minibatches, modes, and a correct PyTorch training loop; for a fixed toy dataset, assert each DataLoader batch shape/dtype, account for every example once per epoch, print sample-weighted epoch loss, and show at least one parameter tensor changes after optimizer.step().</p>
+<p><strong>Verify:</strong> For a fixed toy dataset, assert each DataLoader batch shape/dtype, account for every example once per epoch, print sample-weighted epoch loss, and show at least one parameter tensor changes after optimizer.step().</p>
 <h5 id="solution-2--cell-9--exercise-3-shape-and-dtype-contract">Exercise 3: Shape and dtype contract<a class="heading-anchor" href="#solution-2--cell-9--exercise-3-shape-and-dtype-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Write assertions at the start of a classification training step for feature shape/dtype, target shape/dtype, and logits shape.</p>
 <p><strong>Reasoning before implementation:</strong> CrossEntropyLoss expects floating logits <code>(batch, classes)</code> and integer class indices <code>(batch,)</code> with dtype long.</p></article>
@@ -1473,7 +1468,7 @@ plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(<
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through `python-47` : Day 47 : PyTorch Tensors, Modules, and Training Loops.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through `python-47` (Day 47: PyTorch Tensors, Modules, and Training Loops).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize logits, minibatches, modes, and a correct PyTorch training loop. Use exactly these maintained learner materials:
@@ -1508,7 +1503,7 @@ merely ran is not evidence of mastery.</textarea>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
         <a class="nav-card" href="python-46.html"><small>Previous lesson</small><strong>python-46</strong><span>Deep Learning Overview</span></a>
-        <a class="nav-card next" href="python-48.html"><small>Next lesson</small><strong>python-48</strong><span>Transfer Learning CNN</span></a>
+        <a class="nav-card next" href="python-48.html"><small>Next lesson</small><strong>python-48</strong><span>Transfer Learning with CNNs</span></a>
       </nav>
     </div>
   </main>

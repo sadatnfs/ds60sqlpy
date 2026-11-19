@@ -194,17 +194,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/scala-spark/guides/spark-022.md</code></p>
     </header>
     <article class="document"><h2 id="spark-022-shuffles-stages-tasks-and-aggregation-cost">spark-022: Shuffles, stages, tasks and aggregation cost<a class="heading-anchor" href="#spark-022-shuffles-stages-tasks-and-aggregation-cost" aria-label="Link to this section">#</a></h2>
-<p>Authored paired Scala/PySpark teaching content. The default fixtures are tiny,local and deterministic. Runtime acceptance,logical correctness and learner understanding remain separate evidence.</p>
+<p>Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
-<p>Intermediate; approximately 120 minutes. Direct design prerequisites: <code>spark-021</code>. The prepared baseline is Spark 4.0.1,Scala binary2.13,JDK 17 and Python 3.12. Read the <a href="../execution-baseline.md.html">execution baseline</a>; a proposed future tuple is not a runtime receipt.</p>
+<p>Intermediate; approximately 90 minutes. Direct prerequisites: <code>spark-021</code>. The prepared baseline is Spark 4.0.1, Scala binary 2.13, JDK 17 and Python 3.12. Read the <a href="../execution-baseline.md.html">execution baseline</a>.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open <code>spark-022</code> in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed <code>spark-local-scala</code> or <code>spark-local-python</code> profile,save your pad and run the complete source. Scala stages as <code>Main.scala</code> with <code>object Main</code>; Python stages as <code>main.py</code> with a main guard. Each program creates its own local[2] session,disables the UI,binds the driver to loopback and stops the session in finally. No external dataset,package download,JDBC connection or cloud service is requested.</p>
+<p>Open <code>spark-022</code> in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed <code>spark-local-scala</code> or <code>spark-local-python</code> profile, save your pad and run the complete source. Scala stages as <code>Main.scala</code> with <code>object Main</code>; Python stages as <code>main.py</code> with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.</p>
 <p>The <a href="../lessons/spark-022.scala.html">Scala learner</a> and <a href="../lessons/spark-022.py.html">PySpark learner</a> run two complete demonstrations and retain six explicit task stubs. Use the <a href="../solutions/spark-022_solutions.md.html">explained solutions</a> only after an attempt or an explicit worked comparison; the <a href="../solutions/spark-022_solution.scala.html">Scala reference</a> and <a href="../solutions/spark-022_solution.py.html">PySpark reference</a> contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
 <ul>
 <li>Explain why a wide transformation moves data and distinguish partition count from row count.</li>
-<li>State the input and output grain,schema,NULL policy and ordering before executing a transformation.</li>
-<li>Compare each language implementation with independent literal expectations,not only with the other implementation.</li>
+<li>State the input and output grain, schema, NULL policy and ordering before executing a transformation.</li>
+<li>Compare each language implementation with independent literal expectations, not only with the other implementation.</li>
 </ul>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <ul>
@@ -284,7 +284,7 @@ println<span class="syntax-punctuation">(</span><span class="syntax-string">&quo
 <p><strong>Progressive hint:</strong> Separate generated-population reasoning from execution-partition reasoning.</p>
 <h4 id="exercise-2-build-and-execute-a-controlled-grouped-query">Exercise 2: Build and execute a controlled grouped query<a class="heading-anchor" href="#exercise-2-build-and-execute-a-controlled-grouped-query" aria-label="Link to this section">#</a></h4>
 <p>Require 1..16 shuffle partitions, set that configuration in the owned session and return key, n from groupBy/count. Execute the two-partition case under the supplied unique job group.</p>
-<p><strong>Expected result/shape:</strong> Sorted output[(0,20),...,(999,20)], with total counts 20000 and an Exchange in the executed plan.</p>
+<p><strong>Expected result/shape:</strong> Sorted output [(0,20),...,(999,20)], with total counts 20000 and an Exchange in the executed plan.</p>
 <p><strong>Verify:</strong> Assert every key/count pair and the plan Exchange marker. Reject an out-of-budget partition request.</p>
 <p><strong>Progressive hint:</strong> Set configuration before building and materializing the new query; keep driver-side sorting outside the measured Spark plan.</p>
 <h4 id="exercise-3-read-actual-exchange-metrics-after-the-action">Exercise 3: Read actual exchange metrics after the action<a class="heading-anchor" href="#exercise-3-read-actual-exchange-metrics-after-the-action" aria-label="Link to this section">#</a></h4>
@@ -305,14 +305,14 @@ println<span class="syntax-punctuation">(</span><span class="syntax-string">&quo
 <h4 id="exercise-6-separate-a-workload-model-from-measured-evidence">Exercise 6: Separate a workload model from measured evidence<a class="heading-anchor" href="#exercise-6-separate-a-workload-model-from-measured-evidence" aria-label="Link to this section">#</a></h4>
 <p>For the declared 20000-row,1000-key, four-mapper fixture, return source_rows_per_mapper, partial_group_upper and average_output_groups_per_reducer for a positive reducer count. Label them as arithmetic estimates and print version/configuration beside the actual metrics.</p>
 <p><strong>Expected result/shape:</strong> For reducers 2:5000,4000,500. For reducers 5:5000,4000,200. These values do not assert actual balanced hash buckets or network bytes.</p>
-<p><strong>Verify:</strong> Assert the two model tuples and print Spark 4.0.1, AQEfalse, local[2] with the distinct p2/p5 observations.</p>
+<p><strong>Verify:</strong> Assert the two model tuples and print Spark 4.0.1, AQE false, local[2] with the distinct p2/p5 observations.</p>
 <p><strong>Progressive hint:</strong> The local-combine bound is mappers times distinct keys; the average is groups divided by reducers.</p>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
 <p>Do not equate 20000 input rows with 20000 tasks or 1000 output groups with 1000 partitions. Do not inspect a newly constructed unexecuted plan and call its zero counters measurements of the completed query. Keep the exact DataFrame and action group together. Internal JVM metric access is version-specific and unavailable under some remote APIs; it is an explicit diagnostic boundary. A status-tracker gap is unavailable evidence, not zero work. The default worker does not start a UI or history server and does not contact a remote cluster.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
-<p>Explain the contract of <code>sourceMetrics</code> / <code>source_metrics</code> without reading its solution. Trace the specified boundary case,then explain the final exercise&#x27;s evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.</p>
+<p>Explain the contract of <code>sourceMetrics</code> / <code>source_metrics</code> without reading its solution. Trace the specified boundary case, then explain the final exercise&#x27;s evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
-<p>Use the <a href="../README.md.html">course route</a> to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. Keep runtime/profile receipts separate from any cluster-performance or production-recovery claim.</p>
+<p>Use the <a href="../README.md.html">course route</a> to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.</p>
 <h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://spark.apache.org/docs/4.0.1/monitoring.html">Spark 4.0.1 monitoring and task metrics</a></li>
@@ -325,9 +325,9 @@ println<span class="syntax-punctuation">(</span><span class="syntax-string">&quo
 </ul>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to coach me through spark-022: Shuffles, stages, tasks and aggregation cost.
-Read courses/scala-spark/guides/spark-022.md and courses/scala-spark/lessons/spark-022.py;the paired sources are courses/scala-spark/lessons/spark-022.scala and courses/scala-spark/lessons/spark-022.py.
-Direct prerequisites: spark-021. Explain the schema,row grain and new Scala/Python/Spark syntax,ask me to predict a concrete result,then inspect my attempt. Give one hint at a time,review exact result and boundary evidence,and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
-Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies,start a remote service,reset existing checkpoints or alter unrelated learner work.
+Read courses/scala-spark/guides/spark-022.md and courses/scala-spark/lessons/spark-022.py; the paired sources are courses/scala-spark/lessons/spark-022.scala and courses/scala-spark/lessons/spark-022.py.
+Direct prerequisites: spark-021. Explain the schema, row grain and new Scala/Python/Spark syntax, ask me to predict a concrete result, then inspect my attempt. Give one hint at a time, review exact result and boundary evidence, and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
+Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies, start a remote service, reset existing checkpoints or alter unrelated learner work.
 Done when all six contracts have inspected evidence and I can explain the stated assumptions and a meaningful failure case.</code></pre></article>
   </main>
 </body>

@@ -197,7 +197,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Compare after an attempt or an explicit reveal. The <a href="../guides/spark-003.md.html">guide</a> defines the learner contract. An authored reference is not a platform acceptance receipt.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p>A function names a rule with input parameters and a result type. <code>def addCents(left: Long, right: Long): Long = left + right</code> reads: accept two Long values, return a Long, and evaluate their sum. Calling it supplies argument values; defining it does not run it. A pure function has no hidden state change and returns the same answer for the same inputs. An explicit return type makes the contract visible to both the reader and compiler.</p>
-<p>The fee domain is deliberately bounded to amounts from-1000000 through1000000 cents. Nonpositive amounts cost zero. A nonmember with a positive amount pays20 cents. A member pays zero below500 cents and five percent at or above500, rounded down by integer division. This makes every branch and numeric boundary inspectable. Multiplication is safe inside this domain; the lesson does not promise arbitrary Long multiplication cannot overflow.</p>
+<p>The fee domain is deliberately bounded to amounts from -1000000 through 1000000 cents. Nonpositive amounts cost zero. A nonmember with a positive amount pays 20 cents. A member pays zero below 500 cents and five percent at or above 500, rounded down by integer division. This makes every branch and numeric boundary inspectable. Multiplication is safe inside this domain; the lesson does not promise arbitrary Long multiplication cannot overflow.</p>
 <ul>
 <li><strong>def:</strong> introduces a named function</li>
 <li><strong>parameter:</strong> a named input inside the definition</li>
@@ -211,41 +211,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">def</span> <span class="syntax-function">addCents</span><span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">:</span> <span class="syntax-class">Long</span><span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">:</span> <span class="syntax-class">Long</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Long</span> <span class="syntax-operator">=</span> a <span class="syntax-operator">+</span> b
 assert<span class="syntax-punctuation">(</span>addCents<span class="syntax-punctuation">(</span><span class="syntax-number">30L</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5L</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">35L</span><span class="syntax-punctuation">)</span>
 assert<span class="syntax-punctuation">(</span>addCents<span class="syntax-punctuation">(</span><span class="syntax-number">0L</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5L</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">5L</span><span class="syntax-punctuation">)</span></code></pre>
-<p><strong>Expected:</strong> 35L and5L, from the same function definition.</p>
+<p><strong>Expected:</strong> 35L and 5L, from the same function definition.</p>
 <h4 id="worked-example-2-make-a-total-bounded-branch">Worked example 2: Make a total bounded branch<a class="heading-anchor" href="#worked-example-2-make-a-total-bounded-branch" aria-label="Link to this section">#</a></h4>
-<p>The equality boundary belongs to one branch deliberately; testing only20 would miss it.</p>
+<p>The equality boundary belongs to one branch deliberately; testing only 20 would miss it.</p>
 <pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">def</span> <span class="syntax-function">bonus</span><span class="syntax-punctuation">(</span>points<span class="syntax-punctuation">:</span> <span class="syntax-class">Long</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Long</span> <span class="syntax-operator">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>points <span class="syntax-operator">&gt;=</span> <span class="syntax-number">10L</span><span class="syntax-punctuation">)</span> <span class="syntax-number">2L</span> <span class="syntax-keyword">else</span> <span class="syntax-number">0L</span>
 assert<span class="syntax-punctuation">(</span>bonus<span class="syntax-punctuation">(</span><span class="syntax-number">9L</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0L</span><span class="syntax-punctuation">)</span>
 assert<span class="syntax-punctuation">(</span>bonus<span class="syntax-punctuation">(</span><span class="syntax-number">10L</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">2L</span><span class="syntax-punctuation">)</span></code></pre>
-<p><strong>Expected:</strong> 9 maps to0L and10 maps to2L.</p>
+<p><strong>Expected:</strong> 9 maps to 0L and 10 maps to 2L.</p>
 <h3 id="exercises-and-explanatory-solutions">Exercises and explanatory solutions<a class="heading-anchor" href="#exercises-and-explanatory-solutions" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-separate-definition-and-call">Exercise 1: Separate definition and call<a class="heading-anchor" href="#exercise-1-separate-definition-and-call" aria-label="Link to this section">#</a></h4>
-<p><strong>Inputs/evidence:</strong> For spark-003 Exercise 1, addCents(100L,25L),addCents(0L,25L).</p>
-<p><strong>Expected result/shape:</strong> For spark-003 Exercise 1, 125L and25L.</p>
+<p><strong>Inputs/evidence:</strong> For spark-003 Exercise 1, addCents(100L, 25L), addCents(0L, 25L).</p>
+<p><strong>Expected result/shape:</strong> For spark-003 Exercise 1, 125L and 25L.</p>
 <p><strong>Verify:</strong> For spark-003 Exercise 1, assert both returned values; distinguish parameter names from arguments.</p>
-<p>left/right name inputs in the definition. 100L and25L are arguments in a call. The function definition is reused rather than copied and edited.</p>
+<p>left/right name inputs in the definition. 100L and 25L are arguments in a call. The function definition is reused rather than copied and edited.</p>
 <h4 id="exercise-2-implement-branch-order">Exercise 2: Implement branch order<a class="heading-anchor" href="#exercise-2-implement-branch-order" aria-label="Link to this section">#</a></h4>
 <p><strong>Inputs/evidence:</strong> For spark-003 Exercise 2, 0L with both membership values;100L with both values.</p>
-<p><strong>Expected result/shape:</strong> For spark-003 Exercise 2, fees0/0 for zero and0/20 for100.</p>
+<p><strong>Expected result/shape:</strong> For spark-003 Exercise 2, fees 0/0 for zero and 0/20 for 100.</p>
 <p><strong>Verify:</strong> For spark-003 Exercise 2, assert all four cases and inspect guard order.</p>
-<p>If nonmember is checked first, zero can incorrectly receive the flat20-cent fee. The boundary guard must take precedence over membership.</p>
+<p>If nonmember is checked first, zero can incorrectly receive the flat 20-cent fee. The boundary guard must take precedence over membership.</p>
 <h4 id="exercise-3-test-the-membership-threshold">Exercise 3: Test the membership threshold<a class="heading-anchor" href="#exercise-3-test-the-membership-threshold" aria-label="Link to this section">#</a></h4>
-<p><strong>Inputs/evidence:</strong> For spark-003 Exercise 3, member499L,500L,501L.</p>
-<p><strong>Expected result/shape:</strong> For spark-003 Exercise 3, fees0L,25L,25L.</p>
+<p><strong>Inputs/evidence:</strong> For spark-003 Exercise 3, member 499L, 500L, 501L.</p>
+<p><strong>Expected result/shape:</strong> For spark-003 Exercise 3, fees 0L, 25L, 25L.</p>
 <p><strong>Verify:</strong> For spark-003 Exercise 3, assert the exact three outputs and explain integer division.</p>
-<p>The500 equality belongs to the percentage branch. 501*5/100 floors25.05 to25 integer cents under the stated policy; this is a deliberate rounding rule.</p>
+<p>The 500 equality belongs to the percentage branch. 501*5/100 floors 25.05 to 25 integer cents under the stated policy; this is a deliberate rounding rule.</p>
 <h4 id="exercise-4-use-named-arguments">Exercise 4: Use named arguments<a class="heading-anchor" href="#exercise-4-use-named-arguments" aria-label="Link to this section">#</a></h4>
-<p><strong>Inputs/evidence:</strong> For spark-003 Exercise 4, feeCents(isMember=true,amount=1000L).</p>
+<p><strong>Inputs/evidence:</strong> For spark-003 Exercise 4, feeCents(isMember=true, amount=1000L).</p>
 <p><strong>Expected result/shape:</strong> For spark-003 Exercise 4, 50L, equal to the positional call.</p>
-<p><strong>Verify:</strong> For spark-003 Exercise 4, assert both calls give50L; do not change the definition.</p>
+<p><strong>Verify:</strong> For spark-003 Exercise 4, assert both calls give 50L; do not change the definition.</p>
 <p>Named arguments bind by parameter name. Reordering them is a readability choice and does not change the fee rule or types.</p>
 <h4 id="exercise-5-reject-hidden-state">Exercise 5: Reject hidden state<a class="heading-anchor" href="#exercise-5-reject-hidden-state" aria-label="Link to this section">#</a></h4>
-<p><strong>Inputs/evidence:</strong> For spark-003 Exercise 5, two consecutive feeCents(1000L,true) calls and negative amount-1L.</p>
-<p><strong>Expected result/shape:</strong> For spark-003 Exercise 5, both calls50L; negative amount yields0L even for a nonmember.</p>
+<p><strong>Inputs/evidence:</strong> For spark-003 Exercise 5, two consecutive feeCents(1000L, true) calls and negative amount-1L.</p>
+<p><strong>Expected result/shape:</strong> For spark-003 Exercise 5, both calls 50L; negative amount yields 0L even for a nonmember.</p>
 <p><strong>Verify:</strong> For spark-003 Exercise 5, repeat exact calls and explain why a call counter must not alter the returned fee.</p>
 <p>Counting calls inside a pricing rule can make retries change business output. Preserve a pure calculation and keep operational counting separate.</p>
 <h4 id="exercise-6-transfer-and-explain-the-domain">Exercise 6: Transfer and explain the domain<a class="heading-anchor" href="#exercise-6-transfer-and-explain-the-domain" aria-label="Link to this section">#</a></h4>
-<p><strong>Inputs/evidence:</strong> For spark-003 Exercise 6, 2000L,true/false and2000000L.</p>
+<p><strong>Inputs/evidence:</strong> For spark-003 Exercise 6, 2000L, true/false and 2000000L.</p>
 <p><strong>Expected result/shape:</strong> For spark-003 Exercise 6, 100L/20L; the out-of-domain input is rejected by the reference precondition.</p>
 <p><strong>Verify:</strong> For spark-003 Exercise 6, assert the two valid results and identify the violated bound for the third.</p>
 <p>The rule scales within the bounded domain. The require guard is evidence of that domain, not a claim that all financial products can use this rounding or fee policy.</p>

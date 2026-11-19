@@ -216,7 +216,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Detached cache:</strong> Stored K/V tensors disconnected from the prior autograd graph for inference use.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
 <p>Start or resume the Docker classroom with <code>./classroom</code> from the repository root. On Windows, run that command in WSL 2. In the shared home, choose the <strong>Language models: mechanisms, training and evidence</strong> subject and select <code>llm-016</code>. Use its <code>llm-torch-cpu</code> worker and wait for readiness before choosing <strong>Run</strong>; the <a href="../../../docs/one-command-classroom.md.html">classroom instructions</a> explain how to prepare a missing profile. The worker supplies the declared packages and starts a fresh Python process, so no host Python or framework installation is needed. Save your current attempt before replacing the pad with a complete worked example. Keep the example sequence specified below together. Inputs are small local fixtures, with no package installation, dataset or model download, or online service call. For an optional contributor workflow on Linux, macOS or Windows through WSL 2, deliberately prepare an interpreter with the same declared dependencies, then invoke that interpreter on an owned copy of <code>courses/llm-theory/lessons/llm-016.py</code> under <code>.learning/expansion/llm-016/</code>. The general contributor uv environment does not imply that TensorFlow or PyTorch is installed. The Docker profile is the default execution route.</p>
-<p>Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Example B changes an assumption that matters to this mechanism. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact.</p>
+<p>Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. {&#x27;Examples B and C change assumptions&#x27; if len(worked) == 3 else &#x27;Example B changes an assumption&#x27;} that matters to this mechanism. Compare {&#x27;the&#x27; if len(worked) == 3 else &#x27;both&#x27;} observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact.</p>
 <h3 id="syntax-anatomy-and-reasoning-sequence">Syntax anatomy and reasoning sequence<a class="heading-anchor" href="#syntax-anatomy-and-reasoning-sequence" aria-label="Link to this section">#</a></h3>
 <h4 id="exact-parameter-ledger">Exact parameter ledger<a class="heading-anchor" href="#exact-parameter-ledger" aria-label="Link to this section">#</a></h4>
 <div class="table-wrap"><table><thead><tr>
@@ -236,7 +236,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </tr>
 <tr>
 <td>Two LayerNorm modules</td>
-<td>two sets of gain32 plus bias32</td>
+<td>two sets of gain 32 plus bias 32</td>
 <td>128</td>
 </tr>
 <tr>
@@ -251,12 +251,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </tr>
 <tr>
 <td>Feed-forward first affine map</td>
-<td>64 by 32 plus bias64</td>
+<td>64 by 32 plus bias 64</td>
 <td>2,112</td>
 </tr>
 <tr>
 <td>Feed-forward second affine map</td>
-<td>32 by 64 plus bias32</td>
+<td>32 by 64 plus bias 32</td>
 <td>2,080</td>
 </tr>
 <tr>
@@ -270,7 +270,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <td>10,464</td>
 </tr>
 </tbody></table></div>
-<p>PyTorch Linear stores [out_features,in_features] and applies the transposed weight to a row-oriented input. That is why the QKV weight is [96,32], while a mathematical row-vector projection may be written as multiplication by a [32,96] matrix. Biases are omitted in the attention and vocabulary projections but present in both feed-forward Linear modules. Forgetting these 96 bias entries changes the parameter ledger.</p>
+<p>PyTorch Linear stores [out_features, in_features] and applies the transposed weight to a row-oriented input. That is why the QKV weight is [96, 32], while a mathematical row-vector projection may be written as multiplication by a [32, 96] matrix. Biases are omitted in the attention and vocabulary projections but present in both feed-forward Linear modules. Forgetting these 96 bias entries changes the parameter ledger.</p>
 <h4 id="trace-batch-1-time-4-through-the-forward-pass">Trace batch 1, time 4 through the forward pass<a class="heading-anchor" href="#trace-batch-1-time-4-through-the-forward-pass" aria-label="Link to this section">#</a></h4>
 <div class="table-wrap"><table><thead><tr>
 <th>Stage</th>
@@ -279,62 +279,62 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </tr></thead><tbody>
 <tr>
 <td>Input IDs</td>
-<td>[1,4], int64</td>
+<td>[1, 4], int64</td>
 <td>four discrete token identities</td>
 </tr>
 <tr>
 <td>Token plus position vectors</td>
-<td>[1,4,32], float32</td>
+<td>[1, 4, 32], float32</td>
 <td>32 features for each position</td>
 </tr>
 <tr>
 <td>First LayerNorm</td>
-<td>[1,4,32]</td>
+<td>[1, 4, 32]</td>
 <td>feature statistics within each token</td>
 </tr>
 <tr>
 <td>Combined QKV projection</td>
-<td>[1,4,96]</td>
+<td>[1, 4, 96]</td>
 <td>three width-32 projected vectors</td>
 </tr>
 <tr>
 <td>Each split Q, K or V</td>
-<td>[1,2,4,16]</td>
+<td>[1, 2, 4, 16]</td>
 <td>head, token, head feature</td>
 </tr>
 <tr>
 <td>Scores and weights</td>
-<td>[1,2,4,4]</td>
+<td>[1, 2, 4, 4]</td>
 <td>query position, key position</td>
 </tr>
 <tr>
 <td>Weighted values</td>
-<td>[1,2,4,16]</td>
+<td>[1, 2, 4, 16]</td>
 <td>one mixture per head and query</td>
 </tr>
 <tr>
 <td>Rejoined heads and output projection</td>
-<td>[1,4,32]</td>
+<td>[1, 4, 32]</td>
 <td>model-width contextual branch</td>
 </tr>
 <tr>
 <td>First residual</td>
-<td>[1,4,32]</td>
+<td>[1, 4, 32]</td>
 <td>input plus contextual branch</td>
 </tr>
 <tr>
 <td>Feed-forward hidden activation</td>
-<td>[1,4,64]</td>
+<td>[1, 4, 64]</td>
 <td>expanded tokenwise feature space</td>
 </tr>
 <tr>
 <td>Second residual</td>
-<td>[1,4,32]</td>
+<td>[1, 4, 32]</td>
 <td>transformed contextual representation</td>
 </tr>
 <tr>
 <td>Vocabulary logits</td>
-<td>[1,4,16]</td>
+<td>[1, 4, 16]</td>
 <td>one score per vocabulary ID</td>
 </tr>
 </tbody></table></div>
@@ -349,17 +349,17 @@ c5.3,-9.3,12,-14,20,-14
 H400000v40H845.2724
 s-225.272,467,-225.272,467s-235,486,-235,486c-2.7,4.7,-9,7,-19,7
 c-6,0,-10,-1,-12,-3s-194,-422,-194,-422s-65,47,-65,47z
-M834 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.1328em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">4</span></span></span></span>. The Boolean triangle [4,4] broadcasts across batch and heads. Softmax reduces the final key axis, not the query axis or the vocabulary axis. The diagonal is allowed because the representation at input position t predicts the following token when training uses correctly shifted targets. The current input is therefore legal information under that objective.</p>
-<p>After attention, transpose restores [batch,time,head,head_width]. contiguous makes the requested layout explicit before reshape combines the last two axes into model width. A reshape with the correct number of elements can still scramble token/head membership if the transpose order is wrong. The exact shape ledger and prefix checks are complementary; neither substitutes for the other.</p>
+M834 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.1328em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">4</span></span></span></span>. The Boolean triangle [4, 4] broadcasts across batch and heads. Softmax reduces the final key axis, not the query axis or the vocabulary axis. The diagonal is allowed because the representation at input position t predicts the following token when training uses correctly shifted targets. The current input is therefore legal information under that objective.</p>
+<p>After attention, transpose restores [batch, time, head, head_width]. contiguous makes the requested layout explicit before reshape combines the last two axes into model width. A reshape with the correct number of elements can still scramble token/head membership if the transpose order is wrong. The exact shape ledger and prefix checks are complementary; neither substitutes for the other.</p>
 <h3 id="what-the-block-computes">What the block computes<a class="heading-anchor" href="#what-the-block-computes" aria-label="Link to this section">#</a></h3>
 <p>Write <code>E_token[ids] + E_position[position]</code> as x. The first branch is <code>Attention(LayerNorm1(x))</code>, followed by an output projection W_o. The residual result is <code>h = x + projected_attention</code>. The second branch is <code>Linear2(ReLU(Linear1(LayerNorm2(h))))</code>, and the second residual adds that branch back to h. Finally, a vocabulary projection produces logits. There is no softmax on the vocabulary output inside <code>TinyDecoder</code> because a later cross-entropy objective consumes logits directly; sampling converts them to a probability distribution under an explicit inference policy.</p>
 <p>Combined QKV storage is an implementation convenience. The last dimension is split into three width-32 blocks, each with its own learned weights. Splitting into two heads then partitions each projected feature vector, not the token sequence: both heads can inspect every allowed earlier token. At fixed model width, increasing the number of heads changes head width and the attention distributions without multiplying the QKV parameter count by the head count. Assigning a full width-32 vector to each of two heads would be a different parameterization.</p>
 <p>The model uses a learned absolute position table. Position 0 and position 1 can add different vectors even when the token IDs are equal. A 33-token request exceeds the 32-row table and is rejected. This explicit range bound is not a claim that formula-based position methods automatically generalize to arbitrary lengths; the later RoPE/ALiBi chapter distinguishes evaluable positions from validated long-context behavior.</p>
 <h3 id="prefix-tests-model-mode-and-gradient-recording">Prefix tests, model mode and gradient recording<a class="heading-anchor" href="#prefix-tests-model-mode-and-gradient-recording" aria-label="Link to this section">#</a></h3>
-<p>The full input [2,5,7,3] produces four vocabulary-score vectors. A separately run prefix [2,5] should reproduce the first two vectors because tokenwise normalization and feed-forward maps do not use future rows, and causal attention masks the remaining key positions. Replacing only the final two tokens with [8,9] tests the same dependency claim from another direction. A test must rerun the entire forward pass; slicing a full computation cannot expose an upstream leak.</p>
+<p>The full input [2, 5, 7, 3] produces four vocabulary-score vectors. A separately run prefix [2, 5] should reproduce the first two vectors because tokenwise normalization and feed-forward maps do not use future rows, and causal attention masks the remaining key positions. Replacing only the final two tokens with [8, 9] tests the same dependency claim from another direction. A test must rerun the entire forward pass; slicing a full computation cannot expose an upstream leak.</p>
 <p>Call model.eval() for inference parity checks, but remember that eval does not disable autograd. This particular model has no dropout or batch normalization, so changing its mode does not introduce stochastic masks or running-statistic updates. Using torch.no_grad around parity probes avoids building an unnecessary training graph. The separate cache-inspection task intentionally runs with gradient recording so it can show that logits remain connected while the returned cache is detached.</p>
 <h3 id="what-the-returned-cache-does-and-does-not-mean">What the returned cache does and does not mean<a class="heading-anchor" href="#what-the-returned-cache-does-and-does-not-mean" aria-label="Link to this section">#</a></h3>
-<p>After four tokens, each K or V cache has shape [1,2,4,16], or 128 float32 entries. Both together occupy 1,024 data bytes under this dtype, excluding Python/tensor-object overhead. At the maximum 32-token context, the same arithmetic gives 8,192 data bytes. Cache size depends on batch, heads, time, head width, layer count and element size; it is separate from the 10,464 learned parameters.</p>
+<p>After four tokens, each K or V cache has shape [1, 2, 4, 16], or 128 float32 entries. Both together occupy 1,024 data bytes under this dtype, excluding Python/tensor-object overhead. At the maximum 32-token context, the same arithmetic gives 8,192 data bytes. Cache size depends on batch, heads, time, head width, layer count and element size; it is separate from the 10,464 learned parameters.</p>
 <p>The helper returns detached keys and values for later incremental-inference lessons. Training in this chapter always uses cache=None. Reusing detached past state while expecting full-sequence backpropagation would truncate gradient paths and change the training computation. Incremental inference must also preserve position offsets: a new token after four cached tokens uses position 4, not position 0. Later cache lessons test full-sequence versus incremental equivalence and request isolation explicitly.</p>
 <p>The <a href="../../../docs/learning/inside-a-transformer.md.html">connected decoder walkthrough</a> supplies a separate inspectable numerical example. <a href="llm-043.md.html">Architecture families</a>, <a href="llm-044.md.html">positions</a>, <a href="llm-045.md.html">normalization and gated blocks</a>, and <a href="llm-046.md.html">grouped heads and cache dimensions</a> extend the mechanisms without replacing the small model&#x27;s evidence boundary.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
@@ -498,27 +498,28 @@ ids <span class="syntax-operator">=</span> torch<span class="syntax-operator">.<
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
 <p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: Parameter count&lt;50000, logits shape=(batch,time,vocabulary), and prefix outputs agree in eval mode within 1e-6. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<p>Exercises 1 and 2 repeat the worked examples as guided reconstructions; exercises 3-6 change the fixture or expose a failure.</p>
 <ol>
-<li><strong>Build a bounded decoder.</strong> Set seed 7, build the default decoder, count every trainable scalar and compare with the component ledger. <strong>Expected:</strong> Exactly 10,464 trainable scalars, below the 50,000 teaching bound. <strong>Verify:</strong> Save the assertion results for exercise 1, including Exactly 10,464 trainable scalars, below the 50,000 teaching bound.</li>
+<li><strong>Build a bounded decoder.</strong> Set seed 7, build the default decoder, count every trainable scalar and compare with the component ledger. <strong>Expected:</strong> Exactly 10,464 trainable scalars, below the 50,000 teaching bound. <strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>count == 10464</code> and <code>count &lt; 50000</code>.</li>
 </ol>
 <ol start="2">
-<li><strong>Trace output axes.</strong> Run the integer IDs [[2,5,7,3]] and trace the output shape and dtype. <strong>Expected:</strong> Finite float32 logits with shape [1,4,16]. <strong>Verify:</strong> Save the assertion results for exercise 2, including Finite float32 logits with shape [1,4,16].</li>
+<li><strong>Trace output axes.</strong> Run the integer IDs [[2,5,7,3]] and trace the output shape and dtype. <strong>Expected:</strong> Finite float32 logits with shape [1,4,16]. <strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>tuple(logits.shape) == (1, 4, 16)</code>; <code>logits.dtype == torch.float32</code> and <code>torch.isfinite(logits).all()</code>.</li>
 </ol>
 <ol start="3">
-<li><strong>Recompute prefixes.</strong> Recompute prefixes of lengths 1 through 4 independently with the same initialized weights. <strong>Expected:</strong> Every prefix matches the corresponding full-sequence early logits within 1e-6. <strong>Verify:</strong> Save the assertion results for exercise 3, including Every prefix matches the corresponding full-sequence early logits within 1e-6.</li>
+<li><strong>Recompute prefixes.</strong> Recompute prefixes of lengths 1 through 4 independently with the same initialized weights. <strong>Expected:</strong> Every prefix matches the corresponding full-sequence early logits within 1e-6. <strong>Verify:</strong> In a fresh process, the exercise checks confirm for every <code>length</code> in <code>range(1, 5)</code>, <code>prefix</code> matches <code>full[:, :length]</code> within 1e-6.</li>
 </ol>
 <ol start="4">
-<li><strong>Perturb only future tokens.</strong> Replace only positions 2 and 3 with IDs 8 and 9 and compare the first two logits. <strong>Expected:</strong> The first two score vectors remain unchanged within 1e-6. <strong>Verify:</strong> Save the assertion results for exercise 4, including The first two score vectors remain unchanged within 1e-6.</li>
+<li><strong>Perturb only future tokens.</strong> Replace only positions 2 and 3 with IDs 8 and 9 and compare the first two logits. <strong>Expected:</strong> The first two score vectors remain unchanged within 1e-6. <strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>perturbed[:, :2]</code> matches <code>original[:, :2]</code> within 1e-6 and <code>not torch.equal(ids, changed)</code>.</li>
 </ol>
 <ol start="5">
-<li><strong>Inspect head shapes.</strong> Run without disabling autograd and inspect the returned K/V cache shapes, detachment and data-byte count. <strong>Expected:</strong> Logits remain connected; each cache is detached float32 [1,2,4,16]; combined cache data occupies 1,024 bytes. <strong>Verify:</strong> Save the assertion results for exercise 5, including Logits remain connected; each cache is detached float32 [1,2,4,16]; combined cache data occupies 1,024 bytes.</li>
+<li><strong>Inspect head shapes.</strong> Run without disabling autograd and inspect the returned K/V cache shapes, detachment and data-byte count. <strong>Expected:</strong> Logits remain connected; each cache is detached float32 [1,2,4,16]; combined cache data occupies 1,024 bytes. <strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>logits.requires_grad</code>; for every <code>tensor</code> in <code>cache.values()</code>, <code>tuple(tensor.shape) == (1, 2, 4, 16)</code>; for every <code>tensor</code> in <code>cache.values()</code>, <code>tensor.dtype == torch.float32</code>; for every <code>tensor</code> in <code>cache.values()</code>, <code>not tensor.requires_grad</code> and 1 further check.</li>
 </ol>
 <ol start="6">
-<li><strong>Reject invalid token IDs.</strong> Reject out-of-range IDs, wrong dtype, empty/excessive context and invalid head/width configurations. <strong>Expected:</strong> Every invalid contract raises ValueError before a misleading reshape or embedding computation. <strong>Verify:</strong> Save the assertion results for exercise 6, including Every invalid contract raises ValueError before a misleading reshape or embedding computation.</li>
+<li><strong>Reject invalid token IDs.</strong> Reject out-of-range IDs, wrong dtype, empty/excessive context and invalid head/width configurations. <strong>Expected:</strong> Every invalid contract raises ValueError before a misleading reshape or embedding computation. <strong>Verify:</strong> In a fresh process, the exercise checks confirm for every <code>invalid</code> in <code>invalid_inputs</code>, <code>model(invalid)</code> raises <code>ValueError</code> and for every <code>options</code> in <code>[dict(width=5, heads=2), dict(heads=0), dict(context=0)]</code>, <code>TinyDecoder(**options)</code> raises <code>ValueError</code>.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>If construction fails, check positive dimensions and model-width divisibility by the head count before examining tensor reshapes. If an input fails, distinguish dtype from value range: embedding indices must be integer IDs, and valid IDs are 0 through 15. A float tensor containing 2.0 is not the declared ID representation. An empty time axis has no prediction position and is rejected.</p>
-<p>If output shape is wrong, walk the table one transformation at a time. A [batch,heads,time,width] tensor is not interchangeable with [batch,time,heads,width], even when every dimension has the same element count. Inspect the softmax axis and confirm that its sums correspond to allowed keys for each query. A transposed causal mask can preserve square shape while exposing future information.</p>
+<p>If output shape is wrong, walk the table one transformation at a time. A [batch, heads, time, width] tensor is not interchangeable with [batch, time, heads, width], even when every dimension has the same element count. Inspect the softmax axis and confirm that its sums correspond to allowed keys for each query. A transposed causal mask can preserve square shape while exposing future information.</p>
 <p>If prefix parity fails, inspect position offsets, mask direction, normalization axes and any mode-dependent component. Compare a deterministic evaluation pass before diagnosing optimization. If logits require gradients during evaluation, that is normal unless no_grad or inference_mode was used; eval controls module behavior, not gradient recording. If an incremental cache is detached, do not infer that earlier-token training gradients remain connected.</p>
 <p>If the parameter count differs from 10,464, inspect bias settings, normalization gain/bias, vocabulary size and position-table length. If the count matches but values are wrong, the count has not validated the forward computation. These are complementary checks. Finally, random logits can satisfy every structural invariant while remaining useless for language tasks. Training and held-out evidence are required before making a capability claim.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>

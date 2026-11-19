@@ -206,7 +206,7 @@ namespace=lesson-a
 namespace_uid=ns-101
 expires_at=2026-10-22T12:30:00Z
 inspection_time=2026-10-22T12:20:00Z</code></pre>
-<p><strong>Expected:</strong> The illustrative times have10 minutes remaining, subject to identity checks.</p>
+<p><strong>Expected:</strong> The illustrative times have 10 minutes remaining, subject to identity checks.</p>
 <h4 id="worked-example-2-detect-a-replaced-namespace">Worked example 2: Detect a replaced namespace<a class="heading-anchor" href="#worked-example-2-detect-a-replaced-namespace" aria-label="Link to this section">#</a></h4>
 <p>Deleting and recreating a namespace can reuse its name. A cleanup request for an old UID must not affect the replacement.</p>
 <pre class="highlighted-code"><code class="language-text">receipt namespace_uid=ns-101
@@ -238,8 +238,8 @@ observed namespace_uid=ns-202</code></pre>
 </ol>
 <h4 id="exercise-3-reject-expiry">Exercise 3: Reject expiry<a class="heading-anchor" href="#exercise-3-reject-expiry" aria-label="Link to this section">#</a></h4>
 <p>Inspect the same lease after its deadline.</p>
-<p><strong>Inputs/evidence:</strong> For k8s-001 Exercise 3, expires12:30Z; inspection12:31Z on the same date.</p>
-<p><strong>Expected result/shape:</strong> For k8s-001 Exercise 3, expired by1 minute; no mutation proceeds.</p>
+<p><strong>Inputs/evidence:</strong> For k8s-001 Exercise 3, expires 12:30Z; inspection 12:31Z on the same date.</p>
+<p><strong>Expected result/shape:</strong> For k8s-001 Exercise 3, expired by 1 minute; no mutation proceeds.</p>
 <p><strong>Verify:</strong> For k8s-001 Exercise 3, perform the explicit timestamp comparison and retain the refusal reason.</p>
 <p><strong>Progressive hints:</strong></p>
 <ol>

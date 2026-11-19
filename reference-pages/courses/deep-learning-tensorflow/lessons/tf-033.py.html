@@ -200,19 +200,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 1: Predict a valid batch</span></span>
-<span class="source-line"><span class="syntax-comment"># Predict for float32 rows[1,2],[3,4].</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: outputs0,2 with shape(2,).</span></span>
+<span class="source-line"><span class="syntax-comment"># Predict for float32 rows [1, 2], [3, 4].</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: outputs 0, 2 with shape (2,).</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 2: Compare batch independence</span></span>
 <span class="source-line"><span class="syntax-comment"># Predict each row independently and compare concatenated outputs with the batch result.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: exact equality for this fixed linear fixture.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Reject empty and oversized batches</span></span>
-<span class="source-line"><span class="syntax-comment"># Pass shapes(0,2) and(5,2).</span></span>
+<span class="source-line"><span class="syntax-comment"># Pass shapes (0, 2) and (5, 2).</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: ValueError with batch in the message.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Reject wrong feature structure</span></span>
-<span class="source-line"><span class="syntax-comment"># Pass a vector[1,2] and a matrix with three columns.</span></span>
+<span class="source-line"><span class="syntax-comment"># Pass a vector [1, 2] and a matrix with three columns.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: ValueError with shape in the message.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Reject nonfinite values and wrong dtype</span></span>

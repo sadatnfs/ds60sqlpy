@@ -194,17 +194,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/scala-spark/guides/spark-015.md</code></p>
     </header>
     <article class="document"><h2 id="spark-015-sql-and-dataframe-expressions-with-ansi-boundaries">spark-015: SQL and DataFrame expressions with ANSI boundaries<a class="heading-anchor" href="#spark-015-sql-and-dataframe-expressions-with-ansi-boundaries" aria-label="Link to this section">#</a></h2>
-<p>Authored paired Scala/PySpark teaching content. The default fixtures are tiny,local and deterministic. Runtime acceptance,logical correctness and learner understanding remain separate evidence.</p>
+<p>Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
-<p>Intermediate; approximately 120 minutes. Direct design prerequisites: <code>spark-014</code>. The prepared baseline is Spark 4.0.1,Scala binary2.13,JDK 17 and Python 3.12. Read the <a href="../execution-baseline.md.html">execution baseline</a>; a proposed future tuple is not a runtime receipt.</p>
+<p>Intermediate; approximately 90 minutes. Direct prerequisites: <code>spark-014</code>. The prepared baseline is Spark 4.0.1, Scala binary 2.13, JDK 17 and Python 3.12. Read the <a href="../execution-baseline.md.html">execution baseline</a>.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open <code>spark-015</code> in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed <code>spark-local-scala</code> or <code>spark-local-python</code> profile,save your pad and run the complete source. Scala stages as <code>Main.scala</code> with <code>object Main</code>; Python stages as <code>main.py</code> with a main guard. Each program creates its own local[2] session,disables the UI,binds the driver to loopback and stops the session in finally. No external dataset,package download,JDBC connection or cloud service is requested.</p>
+<p>Open <code>spark-015</code> in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed <code>spark-local-scala</code> or <code>spark-local-python</code> profile, save your pad and run the complete source. Scala stages as <code>Main.scala</code> with <code>object Main</code>; Python stages as <code>main.py</code> with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.</p>
 <p>The <a href="../lessons/spark-015.scala.html">Scala learner</a> and <a href="../lessons/spark-015.py.html">PySpark learner</a> run two complete demonstrations and retain six explicit task stubs. Use the <a href="../solutions/spark-015_solutions.md.html">explained solutions</a> only after an attempt or an explicit worked comparison; the <a href="../solutions/spark-015_solution.scala.html">Scala reference</a> and <a href="../solutions/spark-015_solution.py.html">PySpark reference</a> contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
 <ul>
 <li>Express the same relational result with SQL and Columns and make casting/error policy explicit.</li>
-<li>State the input and output grain,schema,NULL policy and ordering before executing a transformation.</li>
-<li>Compare each language implementation with independent literal expectations,not only with the other implementation.</li>
+<li>State the input and output grain, schema, NULL policy and ordering before executing a transformation.</li>
+<li>Compare each language implementation with independent literal expectations, not only with the other implementation.</li>
 </ul>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <ul>
@@ -330,7 +330,7 @@ println<span class="syntax-punctuation">(</span><span class="syntax-string">&quo
 <p><strong>Progressive hint:</strong> Test original missingness before testing parsed missingness.</p>
 <h4 id="exercise-3-project-the-six-parse-accepted-events">Exercise 3: Project the six parse-accepted events<a class="heading-anchor" href="#exercise-3-project-the-six-parse-accepted-events" aria-label="Link to this section">#</a></h4>
 <p>Retain valid and missing statuses, then return event_id and parsed_amount aliased as amount_cents. Reject only malformed/overflowing nonnull tokens at this stage.</p>
-<p><strong>Expected result/shape:</strong> IDs[1,2,3,4,7,8] remain with amounts[100,0,25, NULL,-5,50]. There are 6 rows,5 known values and total 170.</p>
+<p><strong>Expected result/shape:</strong> IDs [1, 2, 3, 4, 7, 8] remain with amounts [100,0,25, NULL,-5,50]. There are 6 rows,5 known values and total 170.</p>
 <p><strong>Verify:</strong> Assert the exact rows and independent count/known/sum metrics.</p>
 <p><strong>Progressive hint:</strong> Filter parse_status!=rejected before projecting the renamed numeric field.</p>
 <h4 id="exercise-4-express-the-same-parse-contract-in-sql">Exercise 4: Express the same parse contract in SQL<a class="heading-anchor" href="#exercise-4-express-the-same-parse-contract-in-sql" aria-label="Link to this section">#</a></h4>
@@ -345,15 +345,15 @@ println<span class="syntax-punctuation">(</span><span class="syntax-string">&quo
 <p><strong>Progressive hint:</strong> Constructing the cast plan is not the same as evaluating it; the negative test needs an action.</p>
 <h4 id="exercise-6-apply-a-separate-nonnegative-domain-policy">Exercise 6: Apply a separate nonnegative domain policy<a class="heading-anchor" href="#exercise-6-apply-a-separate-nonnegative-domain-policy" aria-label="Link to this section">#</a></h4>
 <p>From parse-accepted rows, retain unknown amounts and known nonnegative amounts. Return event_id, amount_cents and report the separate negative-domain rejection at ID 7 in the checks.</p>
-<p><strong>Expected result/shape:</strong> Final IDs[1,2,3,4,8] have 5 rows,4 known values, total 175. The full source reconciles as 5 final accepted+2 parse rejected+1 negative-domain rejected.</p>
+<p><strong>Expected result/shape:</strong> Final IDs [1, 2, 3, 4, 8] have 5 rows,4 known values, total 175. The full source reconciles as 5 final accepted+2 parse rejected+1 negative-domain rejected.</p>
 <p><strong>Verify:</strong> Assert final rows/metrics, negative ID 7 and the 8-row conservation equation.</p>
 <p><strong>Progressive hint:</strong> Use amount is NULL OR amount&gt;=0 on the parsed relation; do not rewrite parsing status.</p>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
 <p>If try_cast produces NULL, inspect the original token before deciding whether the row was missing or malformed. If strict casting unexpectedly succeeds on bad text, read back ANSI mode instead of assuming the default. If a negative value survives conversion, remember that BIGINT permits signed values and add the intended domain predicate. If SQL and DataFrames agree on the wrong population, compare each against literal IDs and counts. Expected cast errors must be identified by their diagnostic, not swallowed as any exception.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
-<p>Explain the contract of <code>withParsed</code> / <code>with_parsed</code> without reading its solution. Trace the specified boundary case,then explain the final exercise&#x27;s evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.</p>
+<p>Explain the contract of <code>withParsed</code> / <code>with_parsed</code> without reading its solution. Trace the specified boundary case, then explain the final exercise&#x27;s evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
-<p>Use the <a href="../README.md.html">course route</a> to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. Keep runtime/profile receipts separate from any cluster-performance or production-recovery claim.</p>
+<p>Use the <a href="../README.md.html">course route</a> to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.</p>
 <h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://spark.apache.org/docs/4.0.1/sql-ref-ansi-compliance.html">Spark 4.0.1 ANSI and tolerant cast behavior</a>.</li>
@@ -363,9 +363,9 @@ println<span class="syntax-punctuation">(</span><span class="syntax-string">&quo
 </ul>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to coach me through spark-015: SQL and DataFrame expressions with ANSI boundaries.
-Read courses/scala-spark/guides/spark-015.md and courses/scala-spark/lessons/spark-015.scala;the paired sources are courses/scala-spark/lessons/spark-015.scala and courses/scala-spark/lessons/spark-015.py.
-Direct prerequisites: spark-014. Explain the schema,row grain and new Scala/Python/Spark syntax,ask me to predict a concrete result,then inspect my attempt. Give one hint at a time,review exact result and boundary evidence,and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
-Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies,start a remote service,reset existing checkpoints or alter unrelated learner work.
+Read courses/scala-spark/guides/spark-015.md and courses/scala-spark/lessons/spark-015.scala; the paired sources are courses/scala-spark/lessons/spark-015.scala and courses/scala-spark/lessons/spark-015.py.
+Direct prerequisites: spark-014. Explain the schema, row grain and new Scala/Python/Spark syntax, ask me to predict a concrete result, then inspect my attempt. Give one hint at a time, review exact result and boundary evidence, and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
+Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies, start a remote service, reset existing checkpoints or alter unrelated learner work.
 Done when all six contracts have inspected evidence and I can explain the stated assumptions and a meaningful failure case.</code></pre></article>
   </main>
 </body>

@@ -198,21 +198,23 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism-and-assumptions">Mechanism and assumptions<a class="heading-anchor" href="#mechanism-and-assumptions" aria-label="Link to this section">#</a></h3>
 <p>Scope determines where a name is visible; lifetime determines when its object exists. They are related but different. An automatic local object usually lasts until its block ends. A static-storage object exists for the program duration even when its name is visible only inside one function. Allocated storage has a lifetime controlled by allocation and release, taught next. A pointer does not extend any of these lifetimes automatically. Returning an automatic local address is invalid after return, while returning a static object address can be valid but introduces shared mutable state and reentrancy concerns.</p>
 <p>A block can shadow an outer variable with the same name. static inside a function preserves one object across calls and zero-initializes it before execution. A file-scope static declaration also restricts linkage to the translation unit. These are different uses of the same keyword. Keep automatic variables explicitly initialized before reading them. Do not use the value of a pointer after its target lifetime has ended.</p>
-<h3 id="exercise-1-trace-block-shadowing">Exercise 1: Trace block shadowing<a class="heading-anchor" href="#exercise-1-trace-block-shadowing" aria-label="Link to this section">#</a></h3>
-<p>Declare an outer value 3 and a separate inner value 7.</p>
+<h3 id="exercise-1-trace-block-shadowing-change-one-input">Exercise 1: Trace block shadowing: change one input<a class="heading-anchor" href="#exercise-1-trace-block-shadowing-change-one-input" aria-label="Link to this section">#</a></h3>
+<p>Copy worked example 1 into a scratch pad and change <code>int value = 3;</code> to <code>int value = 4;</code>. Before running, predict which CHECK fails and which value it now sees; then run it and restore the original line.</p>
+<p>The unchanged code is worked example 1:</p>
 <pre class="highlighted-code"><code class="language-c"><span class="syntax-keyword">int</span> value <span class="syntax-operator">=</span> <span class="syntax-number">3</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">{</span>
   <span class="syntax-keyword">int</span> value <span class="syntax-operator">=</span> <span class="syntax-number">7</span><span class="syntax-punctuation">;</span>
   CHECK<span class="syntax-punctuation">(</span>value <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">7</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span>
 CHECK<span class="syntax-punctuation">(</span>value <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
-<p><strong>Expected:</strong> After the inner block, the outer remains 3.</p>
+<p><strong>Expected:</strong> The changed run stops with <code>Check failed</code> at the CHECK on <code>value == 3</code>. Restoring the original line brings back the worked observation: after the inner block, the outer remains 3.</p>
 <p>The names are the same but designate distinct objects. Shadowing can be legal while still reducing readability.</p>
-<h3 id="exercise-2-retain-static-state">Exercise 2: Retain static state<a class="heading-anchor" href="#exercise-2-retain-static-state" aria-label="Link to this section">#</a></h3>
-<p>Call a function with one static counter twice.</p>
+<h3 id="exercise-2-retain-static-state-diagnose-an-edited-check">Exercise 2: Retain static state: diagnose an edited check<a class="heading-anchor" href="#exercise-2-retain-static-state-diagnose-an-edited-check" aria-label="Link to this section">#</a></h3>
+<p>A careless edit changed the CHECK in worked example 2 so that it reads <code>CHECK(next_count() != 2);</code>. Run worked example 2 with that line, explain why the edited CHECK now fails for the same program state, and restore it.</p>
+<p>The unchanged code is worked example 2:</p>
 <pre class="highlighted-code"><code class="language-c">CHECK<span class="syntax-punctuation">(</span>next_count<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 CHECK<span class="syntax-punctuation">(</span>next_count<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
-<p><strong>Expected:</strong> It returns 1 and then 2.</p>
+<p><strong>Expected:</strong> Before the repair the run stops with <code>Check failed</code> at the CHECK on <code>next_count() == 2</code>; after it the line reads <code>CHECK(next_count() == 2);</code> again and it returns 1 and then 2.</p>
 <p>The counter is initialized once and survives function returns. This shared state would require synchronization if called concurrently.</p>
 <h3 id="exercise-3-return-a-static-address">Exercise 3: Return a static address<a class="heading-anchor" href="#exercise-3-return-a-static-address" aria-label="Link to this section">#</a></h3>
 <p>Get a pointer to a static read-only value.</p>

@@ -198,24 +198,26 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
 <p>Control flow determines which statements execute. A condition is a boolean expression, not a number used as a truth value. Go&#x27;s for statement covers counting loops, condition-controlled loops and collection iteration. The safest way to reason about a loop is to name an invariant: a statement true before the first iteration and preserved by every iteration. In a prefix sum, the accumulator contains exactly the elements already visited. Empty input is therefore not an exceptional accident; the initial accumulator already represents its result. Short-circuit operators also affect execution, which makes a guard before a potentially unsafe operation meaningful.</p>
 <p>if condition { ... } selects a branch. &amp;&amp; skips the right operand when the left is false. for i := 0; i &lt; len(items); i++ visits a half-open index interval. break leaves the innermost loop; continue skips to its next iteration. switch compares one expression against alternatives and does not fall through by default. A boundary using &lt;= instead of &lt; often attempts one extra iteration.</p>
-<h3 id="1-trace-a-prefix-sum">1. Trace a prefix sum<a class="heading-anchor" href="#1-trace-a-prefix-sum" aria-label="Link to this section">#</a></h3>
-<p>Sum 2, 4 and 6 while checking every visited prefix.</p>
+<h3 id="1-trace-a-prefix-sum-change-one-input">1. Trace a prefix sum: change one input<a class="heading-anchor" href="#1-trace-a-prefix-sum-change-one-input" aria-label="Link to this section">#</a></h3>
+<p>Copy worked example 1 into a scratch pad and change <code>items := []int{2, 4, 6}</code> to <code>items := []int{3, 4, 6}</code>. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</p>
+<p>The unchanged code is worked example 1:</p>
 <pre class="highlighted-code"><code class="language-go">items <span class="syntax-operator">:=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-keyword">int</span><span class="syntax-punctuation">{</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">}</span>
 sum <span class="syntax-operator">:=</span> <span class="syntax-number">0</span>
 <span class="syntax-keyword">for</span> _<span class="syntax-punctuation">,</span> x <span class="syntax-operator">:=</span> <span class="syntax-keyword">range</span> items <span class="syntax-punctuation">{</span>
 	sum <span class="syntax-operator">+=</span> x
 <span class="syntax-punctuation">}</span>
 check<span class="syntax-punctuation">(</span>sum <span class="syntax-operator">==</span> <span class="syntax-number">12</span> <span class="syntax-operator">&amp;&amp;</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>items<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;sum&quot;</span><span class="syntax-punctuation">)</span></code></pre>
-<p><strong>Expected:</strong> The final sum is 12 and three elements were visited.</p>
+<p><strong>Expected:</strong> The changed run panics with <code>sum</code> because <code>sum == 12 &amp;&amp; len(items) == 3</code> no longer holds. Restoring the original line brings back the worked observation: the final sum is 12 and three elements were visited.</p>
 <p>The accumulator starts at the additive identity. Each iteration includes exactly one new value; double addition or a skipped element breaks the independently known total.</p>
-<h3 id="2-handle-empty-data">2. Handle empty data<a class="heading-anchor" href="#2-handle-empty-data" aria-label="Link to this section">#</a></h3>
-<p>Apply the same summation to an empty slice.</p>
+<h3 id="2-handle-empty-data-debug-a-regression">2. Handle empty data: debug a regression<a class="heading-anchor" href="#2-handle-empty-data-debug-a-regression" aria-label="Link to this section">#</a></h3>
+<p>A regression changed one token in worked example 2, so one line now reads <code>sum := 1</code>. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.</p>
+<p>The unchanged code is worked example 2:</p>
 <pre class="highlighted-code"><code class="language-go">sum <span class="syntax-operator">:=</span> <span class="syntax-number">0</span>
 <span class="syntax-keyword">for</span> _<span class="syntax-punctuation">,</span> x <span class="syntax-operator">:=</span> <span class="syntax-keyword">range</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-keyword">int</span><span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span> <span class="syntax-punctuation">{</span>
 	sum <span class="syntax-operator">+=</span> x
 <span class="syntax-punctuation">}</span>
 check<span class="syntax-punctuation">(</span>sum <span class="syntax-operator">==</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;empty sum&quot;</span><span class="syntax-punctuation">)</span></code></pre>
-<p><strong>Expected:</strong> The result is 0 with no special invented element.</p>
+<p><strong>Expected:</strong> Before the repair the program panics with <code>empty sum</code>; after it the line reads <code>sum := 0</code> again and the result is 0 with no special invented element.</p>
 <p>The loop body never runs. A correct initial state makes the empty case follow from the same algorithm rather than a separate patch.</p>
 <h3 id="3-use-a-safe-guard">3. Use a safe guard<a class="heading-anchor" href="#3-use-a-safe-guard" aria-label="Link to this section">#</a></h3>
 <p>Guard access to the first element of an empty slice with a length check.</p>

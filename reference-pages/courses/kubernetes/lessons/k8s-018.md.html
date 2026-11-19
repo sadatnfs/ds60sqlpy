@@ -197,32 +197,26 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Use the guide and synthetic case ledger. A prediction or copied fixture is not a live runtime observation.</p>
 <h3 id="exercise-1-identify-the-serviceaccount">Exercise 1: Identify the ServiceAccount<a class="heading-anchor" href="#exercise-1-identify-the-serviceaccount" aria-label="Link to this section">#</a></h3>
 <p>Separate identity name/namespace from token contents and Role rules.</p>
-<p>Expected: A nonsecret identity record is distinct from credential bytes and permissions.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-2-trace-the-binding-scope">Exercise 2: Trace the binding scope<a class="heading-anchor" href="#exercise-2-trace-the-binding-scope" aria-label="Link to this section">#</a></h3>
 <p>Explain the subject namespace versus the RoleBinding namespace.</p>
-<p>Expected: Subject identifies the ServiceAccount; binding scope determines the namespaced grant.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-3-predict-allowed-and-denied-requests">Exercise 3: Predict allowed and denied requests<a class="heading-anchor" href="#exercise-3-predict-allowed-and-denied-requests" aria-label="Link to this section">#</a></h3>
 <p>Fill the five-action authorization matrix.</p>
-<p>Expected: Only the intended own-namespace Pod reads are allowed; Secrets and privilege changes denied.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-4-protect-workload-credentials">Exercise 4: Protect workload credentials<a class="heading-anchor" href="#exercise-4-protect-workload-credentials" aria-label="Link to this section">#</a></h3>
-<p>Inspect automountServiceAccountToken:false in the application source.</p>
-<p>Expected: The synthetic workload does not receive an automatic API token mount.</p>
+<p>Inspect automountServiceAccountToken: false in the application source.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-5-rehearse-expiry-handling">Exercise 5: Rehearse expiry handling<a class="heading-anchor" href="#exercise-5-rehearse-expiry-handling" aria-label="Link to this section">#</a></h3>
 <p>Explain the sequence when a prepared fifteen-minute lease expires before Run.</p>
-<p>Expected: Guard refuses; exact owned session is released and a fresh session is prepared immediately before use.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p>
 <h3 id="exercise-6-record-live-effective-evidence">Exercise 6: Record live effective evidence<a class="heading-anchor" href="#exercise-6-record-live-effective-evidence" aria-label="Link to this section">#</a></h3>
 <p>With the named host capability, retain positive/negative self-authorization outcomes without credentials.</p>
-<p>Expected: Identity, target, verb/resource, result and time are recorded; token/kubeconfig contents are excluded.</p>
 <p>My prediction:</p>
 <p>My evidence and interpretation:</p></article>
   </main>

@@ -202,29 +202,23 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Identify the cell key for person/visit/value data.</p>
 <p>The key is person plus visit.</p>
-<p><strong>Expected evidence:</strong> The key is person plus visit.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Add a third visit for every person.</p>
 <p>The wide schema gains the declared third-visit value column.</p>
-<p><strong>Expected evidence:</strong> The wide schema gains the declared third-visit value column.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Reverse a complete wide table to long form.</p>
 <p>The unique measurement records are recovered under the stated complete-table contract.</p>
-<p><strong>Expected evidence:</strong> The unique measurement records are recovered under the stated complete-table contract.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose two values for one person/visit.</p>
 <p>Reject duplicates or perform an explicitly justified aggregation first.</p>
-<p><strong>Expected evidence:</strong> Reject duplicates or perform an explicitly justified aggregation first.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Distinguish an absent visit from an observed NA.</p>
 <p>Retain presence metadata when the difference matters.</p>
-<p><strong>Expected evidence:</strong> Retain presence metadata when the difference matters.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Choose a shape for a model or chart.</p>
 <p>Document the chosen observation grain and avoid treating reshaping as an implicit aggregation.</p>
-<p><strong>Expected evidence:</strong> Document the chosen observation grain and avoid treating reshaping as an implicit aggregation.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference contains explicit behavioral assertions for its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The reference makes 4 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>
 </body>
 </html>

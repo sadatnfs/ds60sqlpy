@@ -196,13 +196,21 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-c"><code><span class="source-line"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;stdio.h&gt;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">void</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
-<span class="source-line">  <span class="syntax-comment">/* Exercise 1: Protect a shared count</span></span>
-<span class="source-line"><span class="syntax-comment">     Run four threads doing one hundred locked increments each.</span></span>
-<span class="source-line"><span class="syntax-comment">     Expected: The final count is 400. */</span></span>
+<span class="source-line">  <span class="syntax-comment">/* Exercise 1: Protect a shared count: predict an edited check</span></span>
+<span class="source-line"><span class="syntax-comment">     Copy worked example 1 into a scratch pad and change `CHECK(locked_total(4,</span></span>
+<span class="source-line"><span class="syntax-comment">     100) == 400);` to `CHECK(locked_total(5, 100) == 400);` inside its CHECK.</span></span>
+<span class="source-line"><span class="syntax-comment">     Before running, predict whether the CHECK still holds and explain why; then</span></span>
+<span class="source-line"><span class="syntax-comment">     restore it. Expected: The changed run stops with `Check failed` at the</span></span>
+<span class="source-line"><span class="syntax-comment">     CHECK on `locked_total(4, 100) == 400`. Restoring the original line brings</span></span>
+<span class="source-line"><span class="syntax-comment">     back the worked observation: the final count is 400. */</span></span>
 <span class="source-line"></span>
-<span class="source-line">  <span class="syntax-comment">/* Exercise 2: Handle one worker</span></span>
-<span class="source-line"><span class="syntax-comment">     Run one worker doing seven increments.</span></span>
-<span class="source-line"><span class="syntax-comment">     Expected: The result is 7. */</span></span>
+<span class="source-line">  <span class="syntax-comment">/* Exercise 2: Handle one worker: diagnose an edited check</span></span>
+<span class="source-line"><span class="syntax-comment">     A careless edit changed the CHECK in worked example 2 so that it reads</span></span>
+<span class="source-line"><span class="syntax-comment">     `CHECK(locked_total(2, 7) == 7);`. Run worked example 2 with that line,</span></span>
+<span class="source-line"><span class="syntax-comment">     explain why the edited CHECK now fails for the same program state, and</span></span>
+<span class="source-line"><span class="syntax-comment">     restore it. Expected: Before the repair the run stops with `Check failed`</span></span>
+<span class="source-line"><span class="syntax-comment">     at the CHECK on `locked_total(1, 7) == 7`; after it the line reads</span></span>
+<span class="source-line"><span class="syntax-comment">     `CHECK(locked_total(1, 7) == 7);` again and the result is 7. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 3: Handle zero loop iterations</span></span>
 <span class="source-line"><span class="syntax-comment">     Run two workers whose increment loops are empty.</span></span>

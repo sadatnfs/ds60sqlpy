@@ -199,20 +199,20 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">Copy to .learning before editing. Six independent attempts belong below.</span></span>
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 1: Compare dot and cosine scores</span></span>
-<span class="source-line"><span class="syntax-comment"># Use anchor[1, 0], positive[1, 1], negative[0, 1].</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: dots 1, 0; cosines 1/sqrt 2, 0.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Score a new pair</span></span>
+<span class="source-line"><span class="syntax-comment"># Compute the dot product and cosine similarity of [3, 4] and [4, 3].</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: dot 24; cosine 0.96.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 2: Scale without changing direction</span></span>
-<span class="source-line"><span class="syntax-comment"># Multiply the positive vector by 10 and compare scores.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: dot becomes 10; cosine unchanged.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Predict scores after negation</span></span>
+<span class="source-line"><span class="syntax-comment"># Negate the second vector and recompute both scores.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: dot -24; cosine -0.96.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 3: Calculate a two-candidate loss</span></span>
-<span class="source-line"><span class="syntax-comment"># Use logits[1, 0] with target 0.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: cross entropy log(1+exp(-1)).</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: Compute a three-candidate loss</span></span>
+<span class="source-line"><span class="syntax-comment"># Use logits [2, 0, 0] with target 0.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: cross entropy \(\log(1+2e^{-2})\), about 0.2395, within 1e-12.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Inspect a projection gradient</span></span>
-<span class="source-line"><span class="syntax-comment"># Create a trainable 2 x2identity projection and back propagate the positive-versus-</span></span>
+<span class="source-line"><span class="syntax-comment"># Create a trainable 2-by-2 identity projection and backpropagate the positive-versus-</span></span>
 <span class="source-line"><span class="syntax-comment"># negative objective.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: finite nonzero projection gradient.</span></span>
 <span class="source-line"></span>
@@ -221,7 +221,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-comment"># Expected: identity collision detected.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Separate temperature from ranking</span></span>
-<span class="source-line"><span class="syntax-comment"># Compare softmax[1, 0] at temperatures 1 and.5.</span></span>
+<span class="source-line"><span class="syntax-comment"># Compare the softmax of logits [1, 0] at temperatures 1 and 0.5.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: positive probability increases; argmax remains 0.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>

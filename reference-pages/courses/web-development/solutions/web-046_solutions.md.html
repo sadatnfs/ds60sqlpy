@@ -194,31 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-046_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-046-explanatory-solutions">web-046: explanatory solutions<a class="heading-anchor" href="#web-046-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.</p>
-<h3 id="why-the-mechanism-works">Why the mechanism works<a class="heading-anchor" href="#why-the-mechanism-works" aria-label="Link to this section">#</a></h3>
-<p>HTTP separates a request from its response. A request includes a method, target and headers, and may contain a body. A response includes a status code, headers and body. The method expresses intended semantics: GET should retrieve a representation without requesting a state change, while POST commonly submits data for processing. The server must still enforce its own rules regardless of a client-supplied method or path.</p>
-<p>Routing selects application behavior from the request method and path. Keep routing separate from the domain calculation so logic can be tested without a live server. A 404 means the requested resource or route is not found; a 405 means the resource exists but the method is unsupported. The application should not return 200 for every failure merely because it produced a page.</p>
-<p>The CLI reference receives a synthetic request array and returns a response array. This is a model of an HTTP boundary, not an actual network exchange. A real adapter would read the server-provided environment, validate it, set status and headers before body output, and send the body. Content-Type should describe the response representation, and error bodies should match the declared format.</p>
+<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-046.md</code>.</p>
 <h3 id="exercise-1-identify-status-headers-and-body-in-the-response-model">Exercise 1: Identify status, headers and body in the response model.<a class="heading-anchor" href="#exercise-1-identify-status-headers-and-body-in-the-response-model" aria-label="Link to this section">#</a></h3>
-<p>They are separate fields with different protocol responsibilities.</p>
-<p>Trace the smallest example before editing. Name which values are source and which are observations.</p>
+<p><strong>Expected answer:</strong> They are separate fields with different protocol responsibilities.</p>
+<p><strong>Why:</strong> The status tells the client what happened, headers describe the representation and caching, and the body carries the content.</p>
 <h3 id="exercise-2-add-a-not-found-response-for-an-unknown-path">Exercise 2: Add a not-found response for an unknown path.<a class="heading-anchor" href="#exercise-2-add-a-not-found-response-for-an-unknown-path" aria-label="Link to this section">#</a></h3>
-<p>The unknown route returns 404 instead of pretending to be a successful page.</p>
-<p>Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.</p>
+<p><strong>Expected evidence:</strong> The unknown route returns 404 instead of pretending to be a successful page.</p>
+<p><strong>Why:</strong> A 404 tells clients that the resource does not exist, while a 200 page saying not found misleads caches and tools.</p>
 <h3 id="exercise-3-build-a-pure-router-for-health-and-lesson-summary-requests">Exercise 3: Build a pure router for health and lesson-summary requests.<a class="heading-anchor" href="#exercise-3-build-a-pure-router-for-health-and-lesson-summary-requests" aria-label="Link to this section">#</a></h3>
-<p>Known GET routes return their declared representations and unsupported requests are rejected.</p>
-<p>Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.</p>
+<p><strong>Expected evidence:</strong> Known GET routes return their declared representations and unsupported requests are rejected.</p>
+<p><strong>Why:</strong> A pure router is easy to test because each request array maps to exactly one response array.</p>
 <h3 id="exercise-4-diagnose-headers-sent-after-body-output-in-a-real-adapter">Exercise 4: Diagnose headers sent after body output in a real adapter.<a class="heading-anchor" href="#exercise-4-diagnose-headers-sent-after-body-output-in-a-real-adapter" aria-label="Link to this section">#</a></h3>
-<p>Response metadata must be established before output begins, subject to the runtime&#x27;s buffering behavior.</p>
-<p>Keep the failing input. Identify the first layer where the observed result differs from the intended contract.</p>
+<p><strong>Expected answer:</strong> Response metadata must be established before output begins, subject to the runtime&#x27;s buffering behavior.</p>
+<p><strong>Why:</strong> Once body output is flushed, PHP can no longer send headers, unless output buffering delays the flush.</p>
 <h3 id="exercise-5-test-a-known-path-with-the-wrong-method">Exercise 5: Test a known path with the wrong method.<a class="heading-anchor" href="#exercise-5-test-a-known-path-with-the-wrong-method" aria-label="Link to this section">#</a></h3>
-<p>The route returns 405 and identifies allowed methods where appropriate.</p>
-<p>Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.</p>
+<p><strong>Expected evidence:</strong> The route returns 405 with Allow: GET, HEAD, while HEAD itself succeeds with an empty body.</p>
+<p><strong>Why:</strong> RFC 9110 requires general-purpose servers to support GET and HEAD; other methods get 405 with an Allow header listing what is supported.</p>
 <h3 id="exercise-6-explain-what-a-cli-response-model-does-not-prove">Exercise 6: Explain what a CLI response model does not prove.<a class="heading-anchor" href="#exercise-6-explain-what-a-cli-response-model-does-not-prove" aria-label="Link to this section">#</a></h3>
-<p>It does not qualify actual networking, server configuration, cookie handling or browser behavior.</p>
-<p>Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.</p>
-<h3 id="reference-comparison-and-limits">Reference comparison and limits<a class="heading-anchor" href="#reference-comparison-and-limits" aria-label="Link to this section">#</a></h3>
-<p>Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.</p></article>
+<p><strong>Expected answer:</strong> It does not qualify actual networking, server configuration, cookie handling or browser behavior.</p>
+<p><strong>Why:</strong> Sockets, TLS, server configuration, cookies and browser behavior are absent, so the model proves only routing logic.</p>
+<h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
+<p>Open <code>courses/web-development/solutions/web-046_solution.php</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.</p></article>
   </main>
 </body>
 </html>

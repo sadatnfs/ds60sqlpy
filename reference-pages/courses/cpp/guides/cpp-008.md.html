@@ -214,7 +214,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the C++ module, save this lesson&#x27;s learner pad, then use Run. The worker stages the pad as <code>main.cpp</code> and compiles one translation unit. Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for exact local commands, flags, exit statuses, paths and Docker guidance. Tests involving multiple files, CMake, tool flags or shared libraries are explicitly host-project exercises.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
-<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs:each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
+<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs: each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p><a href="../examples/cpp-008-example-1.cpp.html">Complete program 1</a></p>
 <pre class="highlighted-code"><code class="language-cpp"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;cassert&gt;</span>
@@ -233,11 +233,12 @@ std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>v
   std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpp-008 example 1 checks passed</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
   <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
-<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<p><strong>Expected:</strong> With assertions enabled, the program exits with status 0 and prints:</p>
 <pre class="highlighted-code"><code class="language-text">cpp-008 example 1 checks passed</code></pre>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p><a href="../examples/cpp-008-example-2.cpp.html">Complete program 2</a></p>
-<pre class="highlighted-code"><code class="language-cpp"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;iostream&gt;</span>
+<pre class="highlighted-code"><code class="language-cpp"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;cassert&gt;</span>
+<span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;iostream&gt;</span>
 <span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;vector&gt;</span>
 
 std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>vector<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span> doubled<span class="syntax-punctuation">(</span><span class="syntax-keyword">const</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>vector<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span> <span class="syntax-operator">&amp;</span>xs<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
@@ -250,41 +251,43 @@ std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>v
   <span class="syntax-keyword">const</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>vector<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span> xs<span class="syntax-punctuation">{</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
   <span class="syntax-keyword">auto</span> ys <span class="syntax-operator">=</span> xs<span class="syntax-punctuation">;</span>
   ys<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-number">99</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>xs <span class="syntax-operator">=</span><span class="syntax-operator">=</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>vector<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span><span class="syntax-punctuation">{</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  assert<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>ys <span class="syntax-operator">=</span><span class="syntax-operator">=</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>vector<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span><span class="syntax-punctuation">{</span><span class="syntax-number">99</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
   std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpp-008 example 2 checks passed</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
   <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
-<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<p><strong>Expected:</strong> With assertions enabled, the program exits with status 0 and prints:</p>
 <pre class="highlighted-code"><code class="language-text">cpp-008 example 2 checks passed</code></pre>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-draw-owners">Exercise 1: Draw owners<a class="heading-anchor" href="#exercise-1-draw-owners" aria-label="Link to this section">#</a></h4>
 <p>Draw input, copied output and borrowed parameter.</p>
 <p><strong>Expected result/shape:</strong> Two owners and one temporary borrow, no extra owner for the reference.</p>
-<p><strong>Verify:</strong> Two owners and one temporary borrow, no extra owner for the reference.</p>
+<p><strong>Verify:</strong> Check the drawing against Worked example 1: the temporary <code>{2, 4}</code> and <code>out</code> are the two owners, and <code>xs</code> inside <code>doubled</code> is only another name for the temporary.</p>
 <p><strong>Progressive hints:</strong> References alias; vectors own storage.</p>
 <h4 id="exercise-2-predict-mutation">Exercise 2: Predict mutation<a class="heading-anchor" href="#exercise-2-predict-mutation" aria-label="Link to this section">#</a></h4>
 <p>Change output[0] to 99 after doubled([2, 4]).</p>
 <p><strong>Expected result/shape:</strong> Input first value 2; output first value 99.</p>
-<p><strong>Verify:</strong> Input first value 2; output first value 99.</p>
+<p><strong>Verify:</strong> Keep the input in a named vector, then assert <code>input[0] == 2 &amp;&amp; output[0] == 99</code> after the write, as Worked example 2 does for <code>xs</code> and <code>ys</code>.</p>
 <p><strong>Progressive hints:</strong> The result owns independent elements.</p>
 <h4 id="exercise-3-write-a-const-observer">Exercise 3: Write a const observer<a class="heading-anchor" href="#exercise-3-write-a-const-observer" aria-label="Link to this section">#</a></h4>
 <p>Write size_of(const vector&lt;int&gt;&amp;) without mutation.</p>
 <p><strong>Expected result/shape:</strong> [2, 4] gives 2; empty gives 0.</p>
-<p><strong>Verify:</strong> [2, 4] gives 2; empty gives 0.</p>
+<p><strong>Verify:</strong> Assert <code>size_of({2, 4}) == 2</code> and <code>size_of({}) == 0</code>, and confirm the function also accepts a <code>const std::vector&lt;int&gt;</code> variable.</p>
 <p><strong>Progressive hints:</strong> A read-only observer does not need a value copy.</p>
 <h4 id="exercise-4-diagnose-const-assignment">Exercise 4: Diagnose const assignment<a class="heading-anchor" href="#exercise-4-diagnose-const-assignment" aria-label="Link to this section">#</a></h4>
 <p>Attempt xs[0]=9 through const vector&lt;int&gt;&amp; in a scratch file.</p>
 <p><strong>Expected result/shape:</strong> Compilation fails; remove mutation to repair.</p>
-<p><strong>Verify:</strong> Compilation fails; remove mutation to repair.</p>
+<p><strong>Verify:</strong> Compile the scratch file with the lesson flags and keep the error that points at the <code>xs[0] = 9</code> line; after deleting that write the file must compile without warnings.</p>
 <p><strong>Progressive hints:</strong> The const access path forbids writing an element.</p>
 <h4 id="exercise-5-identify-a-lifetime-bug">Exercise 5: Identify a lifetime bug<a class="heading-anchor" href="#exercise-5-identify-a-lifetime-bug" aria-label="Link to this section">#</a></h4>
 <p>Review a function returning const vector&lt;int&gt;&amp; to its local result.</p>
 <p><strong>Expected result/shape:</strong> Reject the reference return; return vector&lt;int&gt; by value.</p>
-<p><strong>Verify:</strong> Reject the reference return; return vector&lt;int&gt; by value.</p>
+<p><strong>Verify:</strong> Trace where the local result is destroyed and confirm the reviewed return type is <code>const std::vector&lt;int&gt;&amp;</code>; the repaired signature returns <code>std::vector&lt;int&gt;</code> and compiles without warnings.</p>
 <p><strong>Progressive hints:</strong> The local owner dies at return, regardless of const.</p>
 <h4 id="exercise-6-transfer-a-safe-result">Exercise 6: Transfer a safe result<a class="heading-anchor" href="#exercise-6-transfer-a-safe-result" aria-label="Link to this section">#</a></h4>
 <p>Call doubled with temporary [5] and retain the result.</p>
 <p><strong>Expected result/shape:</strong> Stored result remains [10] after the full expression.</p>
-<p><strong>Verify:</strong> Stored result remains [10] after the full expression.</p>
+<p><strong>Verify:</strong> Store <code>auto kept = doubled(std::vector&lt;int&gt;{5});</code> and assert <code>kept == std::vector&lt;int&gt;{10}</code> on a later line, after the temporary argument is gone.</p>
 <p><strong>Progressive hints:</strong> Owning the returned value extends the useful lifetime safely.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain why this observation follows from the mechanism: An owned result [4, 8] survives the temporary argument. Then explain the changed condition in example 2 without opening the answer.</p>

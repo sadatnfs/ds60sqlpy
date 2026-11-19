@@ -210,6 +210,41 @@ kubectl --kubeconfig <span class="syntax-string">&quot;</span>$OWNED_KUBECONFIG<
 <p>The intended answers are yes for the driver&#x27;s required creation and no for executor secret reads. Impersonation itself may be forbidden to the inspecting user, so a failed <code>--as</code> review is not evidence of the ServiceAccount&#x27;s effective permissions. Use an authorized access review or an actual bound identity rather than adding broad privileges just to make a diagnostic work.</p>
 <h3 id="worked-case-b-a-policy-that-blocks-the-api-as-well-as-the-internet">Worked case B: a policy that blocks the API as well as the internet<a class="heading-anchor" href="#worked-case-b-a-policy-that-blocks-the-api-as-well-as-the-internet" aria-label="Link to this section">#</a></h3>
 <p>The supplied NetworkPolicy template permits labeled peers and a common DNS deployment only. It intentionally does not guess a cluster&#x27;s API-server or object-storage egress addresses. Applying it unchanged to a driver may block executor creation even when RBAC is correct.</p>
+<p>The template allows traffic between pods carrying the workshop label and DNS lookups to <code>kube-dns</code>, and nothing else:</p>
+<p>From <a href="../projects/cluster-lab/kubernetes/network-policy.yaml.html"><code>projects/cluster-lab/kubernetes/network-policy.yaml</code></a>:</p>
+<pre class="highlighted-code"><code class="language-yaml"><span class="syntax-tag">apiVersion</span><span class="syntax-punctuation">:</span> networking.k8s.io/v1
+<span class="syntax-tag">kind</span><span class="syntax-punctuation">:</span> NetworkPolicy
+<span class="syntax-tag">metadata</span><span class="syntax-punctuation">:</span>
+  <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> spark-namespace-boundary
+  <span class="syntax-tag">namespace</span><span class="syntax-punctuation">:</span> NAMESPACE
+<span class="syntax-tag">spec</span><span class="syntax-punctuation">:</span>
+  <span class="syntax-tag">podSelector</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-tag">matchLabels</span><span class="syntax-punctuation">:</span>
+      <span class="syntax-tag">ds60-workshop</span><span class="syntax-punctuation">:</span> spark-deployment
+  <span class="syntax-tag">policyTypes</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>Ingress<span class="syntax-punctuation">,</span> Egress<span class="syntax-punctuation">]</span>
+  <span class="syntax-tag">ingress</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-punctuation">-</span> <span class="syntax-tag">from</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-punctuation">-</span> <span class="syntax-tag">podSelector</span><span class="syntax-punctuation">:</span>
+            <span class="syntax-tag">matchLabels</span><span class="syntax-punctuation">:</span>
+              <span class="syntax-tag">ds60-workshop</span><span class="syntax-punctuation">:</span> spark-deployment
+  <span class="syntax-tag">egress</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-punctuation">-</span> <span class="syntax-tag">to</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-punctuation">-</span> <span class="syntax-tag">podSelector</span><span class="syntax-punctuation">:</span>
+            <span class="syntax-tag">matchLabels</span><span class="syntax-punctuation">:</span>
+              <span class="syntax-tag">ds60-workshop</span><span class="syntax-punctuation">:</span> spark-deployment
+    <span class="syntax-punctuation">-</span> <span class="syntax-tag">to</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-punctuation">-</span> <span class="syntax-tag">namespaceSelector</span><span class="syntax-punctuation">:</span>
+            <span class="syntax-tag">matchLabels</span><span class="syntax-punctuation">:</span>
+              <span class="syntax-tag">kubernetes.io/metadata.name</span><span class="syntax-punctuation">:</span> kube-system
+          <span class="syntax-tag">podSelector</span><span class="syntax-punctuation">:</span>
+            <span class="syntax-tag">matchLabels</span><span class="syntax-punctuation">:</span>
+              <span class="syntax-tag">k8s-app</span><span class="syntax-punctuation">:</span> kube-dns
+      <span class="syntax-tag">ports</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-punctuation">-</span> <span class="syntax-tag">protocol</span><span class="syntax-punctuation">:</span> UDP
+          <span class="syntax-tag">port</span><span class="syntax-punctuation">:</span> 53
+        <span class="syntax-punctuation">-</span> <span class="syntax-tag">protocol</span><span class="syntax-punctuation">:</span> TCP
+          <span class="syntax-tag">port</span><span class="syntax-punctuation">:</span> 53</code></pre>
+<p>Because <code>policyTypes</code> lists <code>Egress</code> and no rule names the API server, a driver under this policy cannot ask the API server to create executor pods.</p>
 <pre class="highlighted-code"><code class="language-text">DNS works -&gt; API TCP times out -&gt; inspect egress policy/routing
 API returns 403 -&gt; inspect authenticated identity and RBAC
 API succeeds -&gt; registry pull fails -&gt; inspect node/registry identity separately</code></pre>

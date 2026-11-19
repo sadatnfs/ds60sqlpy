@@ -205,22 +205,33 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism-and-field-by-field-reasoning">Mechanism and field-by-field reasoning<a class="heading-anchor" href="#mechanism-and-field-by-field-reasoning" aria-label="Link to this section">#</a></h3>
 <p>The containerPort field documents a container’s intended port and can supply a name used elsewhere. It does not start a listener. Two containers in one Pod cannot both bind the same address/port combination independently. Their filesystem namespaces can still differ even though networking is shared.</p>
 <p>An emptyDir volume is one way to share files within a Pod, but it is not implied by shared networking and does not survive Pod replacement. Keep the network and storage contracts distinct when explaining a sidecar design.</p>
+<p>Since Kubernetes 1.33, native sidecar containers are stable. Declare the helper under <code>initContainers</code> with <code>restartPolicy: Always</code>. The kubelet starts it in init-container order before the application containers and moves on once it has started, or once its startupProbe succeeds when one is defined. It keeps running for the life of the Pod, is restarted if it exits, is stopped only after the application containers during Pod termination, and does not keep a Job&#x27;s Pod from completing. A helper listed under <code>containers</code> has none of these ordering guarantees, which is why older sidecar designs needed startup polling and shutdown workarounds.</p>
 <h3 id="trace-the-request-or-control-path">Trace the request or control path<a class="heading-anchor" href="#trace-the-request-or-control-path" aria-label="Link to this section">#</a></h3>
-<pre class="highlighted-code"><code class="language-text">app container127.0.0.1:8080 &lt;-&gt; sidecar in same Pod namespace
+<pre class="highlighted-code"><code class="language-text">app container 127.0.0.1:8080 &lt;-&gt; sidecar in same Pod namespace
 other Pod -&gt; Pod IP:8080 -&gt; requires listener on reachable interface</code></pre>
 <p>Read this diagram as a sequence of responsibilities. A controller can successfully create desired state while a later traffic or application step still fails. Identify the component that makes each decision and the concrete observation that would prove it. The addresses in these lessons are synthetic examples, never instructions to contact a shared or public system.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-compare-two-localhost-callers">Worked example 1: Compare two localhost callers<a class="heading-anchor" href="#worked-example-1-compare-two-localhost-callers" aria-label="Link to this section">#</a></h4>
 <p>The same string names different destinations in different Pods.</p>
-<pre class="highlighted-code"><code class="language-text">sidecar in PodA -&gt;127.0.0.1:8080 -&gt; app in PodA
-client in PodB -&gt;127.0.0.1:8080 -&gt; PodB itself</code></pre>
+<pre class="highlighted-code"><code class="language-text">sidecar in PodA -&gt; 127.0.0.1:8080 -&gt; app in PodA
+client in PodB -&gt; 127.0.0.1:8080 -&gt; PodB itself</code></pre>
 <p><strong>Expected observation:</strong> Only the same-Pod sidecar reaches PodA through loopback.</p>
-<h4 id="worked-example-2-read-a-declared-port">Worked example 2: Read a declared port<a class="heading-anchor" href="#worked-example-2-read-a-declared-port" aria-label="Link to this section">#</a></h4>
-<p>This is metadata in a Pod container specification.</p>
-<pre class="highlighted-code"><code class="language-yaml"><span class="syntax-tag">ports</span><span class="syntax-punctuation">:</span>
-  <span class="syntax-punctuation">-</span> <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> http
-    <span class="syntax-tag">containerPort</span><span class="syntax-punctuation">:</span> 8080</code></pre>
-<p><strong>Expected observation:</strong> The field does not cause any process to bind 8080.</p>
+<h4 id="worked-example-2-declare-a-native-sidecar-beside-the-application">Worked example 2: Declare a native sidecar beside the application<a class="heading-anchor" href="#worked-example-2-declare-a-native-sidecar-beside-the-application" aria-label="Link to this section">#</a></h4>
+<p>This Pod spec excerpt declares a log-forwarding sidecar and an application in one network namespace. The image names are placeholders.</p>
+<pre class="highlighted-code"><code class="language-yaml"><span class="syntax-tag">initContainers</span><span class="syntax-punctuation">:</span>
+  <span class="syntax-punctuation">-</span> <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> log-forwarder
+    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> registry.example.test/log-forwarder:1.0
+    <span class="syntax-tag">restartPolicy</span><span class="syntax-punctuation">:</span> Always
+    <span class="syntax-tag">ports</span><span class="syntax-punctuation">:</span>
+      <span class="syntax-punctuation">-</span> <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> metrics
+        <span class="syntax-tag">containerPort</span><span class="syntax-punctuation">:</span> 9090
+<span class="syntax-tag">containers</span><span class="syntax-punctuation">:</span>
+  <span class="syntax-punctuation">-</span> <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> app
+    <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> registry.example.test/app:1.0
+    <span class="syntax-tag">ports</span><span class="syntax-punctuation">:</span>
+      <span class="syntax-punctuation">-</span> <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> http
+        <span class="syntax-tag">containerPort</span><span class="syntax-punctuation">:</span> 8080</code></pre>
+<p><strong>Expected observation:</strong> The sidecar starts before app and keeps running beside it. Neither containerPort field starts a listener; the two ports must differ because both processes share one Pod port space.</p>
 <h3 id="run-boundary-and-the-owned-host-lab">Run boundary and the owned host lab<a class="heading-anchor" href="#run-boundary-and-the-owned-host-lab" aria-label="Link to this section">#</a></h3>
 <p>The classroom saves a reading worksheet for this lesson. It does not provide the full advanced networking or controller operation in the ordinary Run adapter. The original admitted Kubernetes reference cases keep their existing contracts. A manifest being valid YAML does not mean it is admitted by that adapter, supported by your cluster, or successfully routed at runtime.</p>
 <p>Start with the original synthetic topology and manifests in <a href="../fixtures/networking/README.md.html">the networking fixture</a>. Its static checker makes no API calls. It checks internal consistency of the teaching inputs and cannot establish a live CNI, DNS, load balancer, controller or NetworkPolicy result. The fixture inventory names the extra capability required for each optional live observation.</p>
@@ -250,7 +261,7 @@ kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<sp
 <p><strong>Expected evidence:</strong> Consider shared lifecycle, scaling, networking and failure requirements.</p>
 <p><strong>Progressive hint:</strong> Name the caller and the first layer that can distinguish the possible causes. Compare the relevant object fields before changing a route, policy or workload.</p>
 <h3 id="diagnosis-failure-boundaries-and-common-mistakes">Diagnosis, failure boundaries and common mistakes<a class="heading-anchor" href="#diagnosis-failure-boundaries-and-common-mistakes" aria-label="Link to this section">#</a></h3>
-<p>The controlled failure in this chapter is: Diagnose two containers binding 0.0.0.0:8080. Its distinguishing result is They compete for the same socket within one Pod namespace. Keep that observation separate from guesses about adjacent layers. A DNS answer is not proof of a listening process. A Ready Pod is not proof of an externally reachable listener. A load-balancer address is not proof of TLS identity, path routing or a correct application response.</p>
+<p>Exercise 4 is this chapter&#x27;s controlled failure: Diagnose two containers binding 0.0.0.0:8080. The distinguishing result: They compete for the same socket within one Pod namespace. Keep that observation separate from guesses about adjacent layers. A DNS answer is not proof of a listening process. A Ready Pod is not proof of an externally reachable listener. A load-balancer address is not proof of TLS identity, path routing or a correct application response.</p>
 <p>Use bounded observations from the actual caller&#x27;s network namespace. Preserve timestamps, object UIDs, generation or resource versions where relevant, and the intended image identity. A stale healthy result from another namespace or an earlier revision cannot qualify the current path. Avoid broad packet captures, all-namespace dumps and secret output when a smaller field-level observation answers the question.</p>
 <p>Do not repair a failed example by disabling NetworkPolicy, making a workload privileged, publishing every port or selecting another cluster. Those changes alter the contract rather than explain the failure. An unavailable capability is a valid boundary to report. Rehearse its mechanism with the synthetic fixture until the owned target is deliberately provisioned.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
@@ -258,8 +269,8 @@ kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<sp
 <p>Complete the six evidence records before advancing. For optional live work, review the owned resource ledger and UID-aware cleanup result. Keep source validation, API acceptance, controller status, actual traffic, application output and cleanup as distinct evidence. No local exercise establishes every cloud provider, CNI implementation, Kubernetes version or public production deployment.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
-<li><a href="https://kubernetes.io/docs/concepts/workloads/pods/">Official reference 1</a></li>
-<li><a href="https://kubernetes.io/docs/concepts/workloads/pods/sidecar-containers/">Official reference 2</a></li>
+<li><a href="https://kubernetes.io/docs/concepts/workloads/pods/">Kubernetes documentation: Pods</a></li>
+<li><a href="https://kubernetes.io/docs/concepts/workloads/pods/sidecar-containers/">Kubernetes documentation: Sidecar containers</a></li>
 </ul>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for k8s-045: Pod network namespaces, sidecars and localhost.

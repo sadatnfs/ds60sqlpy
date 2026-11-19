@@ -199,17 +199,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">Copy to .learning before editing. Six independent attempts belong below.</span></span>
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 1: Align predictions by ID</span></span>
-<span class="source-line"><span class="syntax-comment"># Use truth a0, b1, c2 with A0, 2, 2 and B 1, 2, 3 in different dictionary order.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: paired squared-loss differences-1, 0, -1.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Align a new pair of models</span></span>
+<span class="source-line"><span class="syntax-comment"># Use truth x=1, y=2 with model A predictions x=1, y=4 and model B predictions y=2, x=0 in</span></span>
+<span class="source-line"><span class="syntax-comment"># different dictionary order.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: paired squared-loss differences A minus B: [-1, 4].</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 2: Interpret the average contrast</span></span>
-<span class="source-line"><span class="syntax-comment"># Average the three paired differences.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: mean-2/3, favoring A on this loss fixture.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Interpret the new mean contrast</span></span>
+<span class="source-line"><span class="syntax-comment"># Average the two paired differences and state which model the fixture favors.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: mean 1.5, favoring model B on this loss.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 3: Resample pairs reproducibly</span></span>
-<span class="source-line"><span class="syntax-comment"># Draw 1000 three-index bootstrap samples with local Generator seed 7.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: 1000finite estimates within-1..0.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: Bound the new bootstrap means</span></span>
+<span class="source-line"><span class="syntax-comment"># Draw 500 two-index bootstrap samples with Generator seed 11 and inspect the possible</span></span>
+<span class="source-line"><span class="syntax-comment"># means.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: every mean is -1, 1.5 or 4.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Replay the local random stream</span></span>
 <span class="source-line"><span class="syntax-comment"># Create a new Generator with seed 7 and compare the index matrix.</span></span>

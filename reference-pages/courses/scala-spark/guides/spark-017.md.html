@@ -194,17 +194,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/scala-spark/guides/spark-017.md</code></p>
     </header>
     <article class="document"><h2 id="spark-017-nested-records-json-and-explode-row-accounting">spark-017: Nested records, JSON and explode row accounting<a class="heading-anchor" href="#spark-017-nested-records-json-and-explode-row-accounting" aria-label="Link to this section">#</a></h2>
-<p>Authored paired Scala/PySpark teaching content. The default fixtures are tiny,local and deterministic. Runtime acceptance,logical correctness and learner understanding remain separate evidence.</p>
+<p>Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
-<p>Intermediate; approximately 120 minutes. Direct design prerequisites: <code>spark-016</code>. The prepared baseline is Spark 4.0.1,Scala binary2.13,JDK 17 and Python 3.12. Read the <a href="../execution-baseline.md.html">execution baseline</a>; a proposed future tuple is not a runtime receipt.</p>
+<p>Intermediate; approximately 90 minutes. Direct prerequisites: <code>spark-016</code>. The prepared baseline is Spark 4.0.1, Scala binary 2.13, JDK 17 and Python 3.12. Read the <a href="../execution-baseline.md.html">execution baseline</a>.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open <code>spark-017</code> in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed <code>spark-local-scala</code> or <code>spark-local-python</code> profile,save your pad and run the complete source. Scala stages as <code>Main.scala</code> with <code>object Main</code>; Python stages as <code>main.py</code> with a main guard. Each program creates its own local[2] session,disables the UI,binds the driver to loopback and stops the session in finally. No external dataset,package download,JDBC connection or cloud service is requested.</p>
+<p>Open <code>spark-017</code> in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed <code>spark-local-scala</code> or <code>spark-local-python</code> profile, save your pad and run the complete source. Scala stages as <code>Main.scala</code> with <code>object Main</code>; Python stages as <code>main.py</code> with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.</p>
 <p>The <a href="../lessons/spark-017.scala.html">Scala learner</a> and <a href="../lessons/spark-017.py.html">PySpark learner</a> run two complete demonstrations and retain six explicit task stubs. Use the <a href="../solutions/spark-017_solutions.md.html">explained solutions</a> only after an attempt or an explicit worked comparison; the <a href="../solutions/spark-017_solution.scala.html">Scala reference</a> and <a href="../solutions/spark-017_solution.py.html">PySpark reference</a> contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
 <ul>
 <li>Flatten nested data while preserving parent identity and accounting for empty or missing arrays.</li>
-<li>State the input and output grain,schema,NULL policy and ordering before executing a transformation.</li>
-<li>Compare each language implementation with independent literal expectations,not only with the other implementation.</li>
+<li>State the input and output grain, schema, NULL policy and ordering before executing a transformation.</li>
+<li>Compare each language implementation with independent literal expectations, not only with the other implementation.</li>
 </ul>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <ul>
@@ -333,16 +333,16 @@ println<span class="syntax-punctuation">(</span><span class="syntax-string">&quo
 <p><strong>Verify:</strong> Assert each parent count tuple and that summed child_count is 3 while known_qty_count is 2.</p>
 <p><strong>Progressive hint:</strong> COUNT(*) would count placeholders; COUNT(qty) answers a different completeness question from child count.</p>
 <h4 id="exercise-6-choose-cartesian-or-positional-array-semantics">Exercise 6: Choose Cartesian or positional array semantics<a class="heading-anchor" href="#exercise-6-choose-cartesian-or-positional-array-semantics" aria-label="Link to this section">#</a></h4>
-<p>For one parent with SKUs[a, b] and channels[web, shop, api], return both independent exploded pairs and arrays_zip positional rows. Explain the relationship required for each interpretation.</p>
-<p><strong>Expected result/shape:</strong> Independent generators produce 6 pairs; zip produces(a, web),(b, shop),(NULL, api), three rows.</p>
+<p>For one parent with SKUs [a, b] and channels [web, shop, api], return both independent exploded pairs and arrays_zip positional rows. Explain the relationship required for each interpretation.</p>
+<p><strong>Expected result/shape:</strong> Independent generators produce 6 pairs; zip produces(a, web), (b, shop),(NULL, api), three rows.</p>
 <p><strong>Verify:</strong> Assert the complete Cartesian pair set and all three ordered zipped rows including the paddedNULL.</p>
 <p><strong>Progressive hint:</strong> Consecutive explodes multiply occurrence counts; arrays_zip aligns by position and pads the shorter side.</p>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
 <p>Do not use inferred JSON schema as a substitute for an explicit producer contract. Do not classify every null field as malformed input. Do not drop source identity at parsing, collapse repeated child occurrences with DISTINCT, or count an outer placeholder as an observed child. Preserve array state before flattening. If a null element is allowed inside an otherwise populated array, its nonnull generated position still identifies a real occurrence even when every nested field is null. Larger arrays can produce large outputs despite a small parent count; inspect length distributions before applying the same operation at scale.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
-<p>Explain the contract of <code>parseRecords</code> / <code>parse_records</code> without reading its solution. Trace the specified boundary case,then explain the final exercise&#x27;s evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.</p>
+<p>Explain the contract of <code>parseRecords</code> / <code>parse_records</code> without reading its solution. Trace the specified boundary case, then explain the final exercise&#x27;s evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
-<p>Use the <a href="../README.md.html">course route</a> to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. Keep runtime/profile receipts separate from any cluster-performance or production-recovery claim.</p>
+<p>Use the <a href="../README.md.html">course route</a> to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.</p>
 <h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://spark.apache.org/docs/4.0.1/api/python/reference/pyspark.sql/api/pyspark.sql.functions.from_json.html">Apache Spark 4.0.1 from_json</a></li>
@@ -355,9 +355,9 @@ println<span class="syntax-punctuation">(</span><span class="syntax-string">&quo
 </ul>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to coach me through spark-017: Nested records, JSON and explode row accounting.
-Read courses/scala-spark/guides/spark-017.md and courses/scala-spark/lessons/spark-017.py;the paired sources are courses/scala-spark/lessons/spark-017.scala and courses/scala-spark/lessons/spark-017.py.
-Direct prerequisites: spark-016. Explain the schema,row grain and new Scala/Python/Spark syntax,ask me to predict a concrete result,then inspect my attempt. Give one hint at a time,review exact result and boundary evidence,and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
-Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies,start a remote service,reset existing checkpoints or alter unrelated learner work.
+Read courses/scala-spark/guides/spark-017.md and courses/scala-spark/lessons/spark-017.py; the paired sources are courses/scala-spark/lessons/spark-017.scala and courses/scala-spark/lessons/spark-017.py.
+Direct prerequisites: spark-016. Explain the schema, row grain and new Scala/Python/Spark syntax, ask me to predict a concrete result, then inspect my attempt. Give one hint at a time, review exact result and boundary evidence, and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
+Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies, start a remote service, reset existing checkpoints or alter unrelated learner work.
 Done when all six contracts have inspected evidence and I can explain the stated assumptions and a meaningful failure case.</code></pre></article>
   </main>
 </body>

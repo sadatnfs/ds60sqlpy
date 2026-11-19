@@ -248,32 +248,32 @@ packet <span class="syntax-operator">=</span> <span class="syntax-punctuation">{
 <h4 id="exercise-1-audit-family-separation">Exercise 1: Audit family separation<a class="heading-anchor" href="#exercise-1-audit-family-separation" aria-label="Link to this section">#</a></h4>
 <p>Compare training and held-out family inventories before fitting.</p>
 <p><strong>Expected:</strong> No shared families; two held-out labels match the stated network/billing probes.</p>
-<p><strong>Verify:</strong> No shared families; two held-out labels match the stated network/billing probes. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Verify:</strong> Assert the training and held-out family sets are disjoint and that the two held-out labels match the network and billing probes.</p>
 <p><strong>Hints:</strong> Use family IDs for evaluation bookkeeping, not model features.</p>
 <h4 id="exercise-2-implement-exact-identifier-extraction">Exercise 2: Implement exact identifier extraction<a class="heading-anchor" href="#exercise-2-implement-exact-identifier-extraction" aria-label="Link to this section">#</a></h4>
 <p>Accept one TKT-301 and reject missing,multiple or four-digit variants.</p>
 <p><strong>Expected:</strong> Canonical TKT-301; three malformed/ambiguous cases raise ValueError.</p>
-<p><strong>Verify:</strong> Canonical TKT-301; three malformed/ambiguous cases raise ValueError. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Verify:</strong> Assert TKT-301 is returned canonically and that the missing, multiple and four-digit variants each raise ValueError.</p>
 <p><strong>Hints:</strong> Use a trailing digit boundary so a longer ID is not accepted as a prefix.</p>
 <h4 id="exercise-3-fit-the-real-classifier-and-expose-oov">Exercise 3: Fit the real classifier and expose OOV<a class="heading-anchor" href="#exercise-3-fit-the-real-classifier-and-expose-oov" aria-label="Link to this section">#</a></h4>
 <p>Train the pipeline and test the two held-out probes plus botanical specimen.</p>
 <p><strong>Expected:</strong> Expected labels for represented probes; unsupported-vocabulary for the all-OOV message.</p>
-<p><strong>Verify:</strong> Expected labels for represented probes; unsupported-vocabulary for the all-OOV message. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Verify:</strong> Assert the represented probes receive their expected labels and the botanical specimen message is reported as unsupported vocabulary.</p>
 <p><strong>Hints:</strong> Inspect the transformed sparse row before calling predict.</p>
 <h4 id="exercise-4-retrieve-current-permitted-evidence">Exercise 4: Retrieve current permitted evidence<a class="heading-anchor" href="#exercise-4-retrieve-current-permitted-evidence" aria-label="Link to this section">#</a></h4>
 <p>Run the supported network case for ops at time10.</p>
 <p><strong>Expected:</strong> Exactly network version 2 and the unchanged approval-rule quote; old version absent.</p>
-<p><strong>Verify:</strong> Exactly network version 2 and the unchanged approval-rule quote; old version absent. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Verify:</strong> Assert exactly one record, network version 2, is returned for ops at time 10 with the approval-rule quote unchanged and the old version absent.</p>
 <p><strong>Hints:</strong> Filter role/time before computing lexical overlap.</p>
 <h4 id="exercise-5-exercise-failure-paths">Exercise 5: Exercise failure paths<a class="heading-anchor" href="#exercise-5-exercise-failure-paths" aria-label="Link to this section">#</a></h4>
 <p>Repeat under billing role,time30 and malformed-ID inputs.</p>
 <p><strong>Expected:</strong> Insufficient-evidence for role/time changes; explicit parser failures; no unauthorized or stale quote.</p>
-<p><strong>Verify:</strong> Insufficient-evidence for role/time changes; explicit parser failures; no unauthorized or stale quote. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Verify:</strong> Assert the billing role and time 30 both return insufficient evidence and malformed IDs raise parser errors, with no stale or unauthorized quote.</p>
 <p><strong>Hints:</strong> Change one input condition at a time and inspect the returned packet.</p>
 <h4 id="exercise-6-deliver-a-reviewable-analytics-packet">Exercise 6: Deliver a reviewable analytics packet<a class="heading-anchor" href="#exercise-6-deliver-a-reviewable-analytics-packet" aria-label="Link to this section">#</a></h4>
 <p>Record normal and failure results with evidence hash,component identities and limitations.</p>
 <p><strong>Expected:</strong> A reviewer can reproduce parsing,prediction,source eligibility and quote provenance; no claim of generative or production-quality coverage from the toy corpus.</p>
-<p><strong>Verify:</strong> A reviewer can reproduce parsing,prediction,source eligibility and quote provenance; no claim of generative or production-quality coverage from the toy corpus. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Verify:</strong> Check that the packet&#x27;s evidence hash and component identities let a reviewer reproduce parsing, prediction, source eligibility and quote provenance.</p>
 <p><strong>Hints:</strong> Separate model estimates,source facts and actual actions in the report.</p>
 <h3 id="interview-reasoning">Interview reasoning<a class="heading-anchor" href="#interview-reasoning" aria-label="Link to this section">#</a></h3>
 <p><strong>Interview: Why does the capstone stop at an evidence packet?</strong> It establishes a clear, testable contract for extraction, classification and authorized current retrieval. Generation can be added later with separate grounding and usefulness evaluation.</p>

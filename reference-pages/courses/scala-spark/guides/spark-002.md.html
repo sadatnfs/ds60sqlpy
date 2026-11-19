@@ -194,9 +194,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/scala-spark/guides/spark-002.md</code></p>
     </header>
     <article class="document"><h2 id="spark-002-scala-values-types-expressions-and-the-repl">spark-002: Scala values, types, expressions, and the REPL<a class="heading-anchor" href="#spark-002-scala-values-types-expressions-and-the-repl" aria-label="Link to this section">#</a></h2>
-<p>Authored classroom lesson. Content availability and runtime readiness are separate checks. Read the current capability notice before running. No opening or saving this lesson installs tools, starts a cluster or proves mastery.</p>
+<p>Authored classroom lesson. Content availability and runtime readiness are separate checks. Read the current capability notice before running. Opening or saving this lesson does not install tools, start a cluster or prove mastery.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
-<p>Beginner; 60 minutes. Direct design prerequisites: <code>spark-001</code>. Use the subject browser to open prerequisite lessons or review their concepts. Runtime readiness is checked separately before execution.</p>
+<p>Beginner; 60 minutes. Direct prerequisites: <code>spark-001</code>. Use the subject browser to open prerequisite lessons or review their concepts. Runtime readiness is checked separately before execution.</p>
 <p>Learner artifact: <a href="../lessons/spark-002.scala.html">spark-002.scala</a>. Keep <a href="../solutions/spark-002_solutions.md.html">solutions</a> closed until an attempt or explicit reveal.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
 <ul>
@@ -206,12 +206,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p>Scala evaluates expressions to values. <code>val total: Long = ...</code> binds a name to one value; it does not create a spreadsheet cell that continually recalculates. A val cannot be reassigned. <code>var</code> permits reassignment but is unnecessary for this basket. The type follows a colon; the literal suffix L makes an integer a Long. <code>if</code> is an expression, so its branches can produce the String assigned to message.</p>
 <p>The worker entry point is <code>object Main</code> with <code>def main(args: Array[String]): Unit</code>. Read it as a named singleton containing the program start function. Array[String] holds optional launch arguments, which this lesson ignores; Unit means the start function returns no useful value. Braces group statements. println writes one output line. The <a href="https://docs.scala-lang.org/tour/basics.html">Scala basics tour</a> distinguishes immutable values, variables, blocks and functions.</p>
+<p>The REPL in this lesson&#x27;s title is Scala&#x27;s read-eval-print loop: an interactive prompt that reads one expression, evaluates it, prints the result and waits for the next one. The <a href="https://docs.scala-lang.org/overviews/repl/overview.html">Scala REPL overview</a> explains that each input line is compiled separately and earlier results stay in scope. This classroom does not open a REPL. It compiles the whole lesson file and runs <code>main</code>, so <code>println</code> is how you see a value. If you install <a href="https://scala-cli.virtuslab.org/docs/commands/repl">Scala CLI</a> on your own machine, <code>scala-cli repl -S 2.13.18</code> opens a Scala 2.13 prompt where typing <code>120L + 30L</code> shows the <code>Long</code> result 150. Use it to try one expression, then move that expression into the lesson file.</p>
 <ul>
 <li><strong>val:</strong> an immutable name binding</li>
-<li><strong>Long:</strong> a signed64-bit integral value; use L on these small literal examples</li>
+<li><strong>Long:</strong> a signed 64-bit integral value; use L on these small literal examples</li>
 <li><strong>String:</strong> text inside double quotes</li>
 <li><strong>expression:</strong> code that produces a value</li>
 <li><strong>interpolation:</strong> s&quot;total=$total&quot; inserts a named value into text</li>
+<li><strong>REPL:</strong> an interactive read-eval-print loop that evaluates one expression at a time; this classroom compiles a file instead</li>
 </ul>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-name-an-exact-subtotal">Worked example 1: Name an exact subtotal<a class="heading-anchor" href="#worked-example-1-name-an-exact-subtotal" aria-label="Link to this section">#</a></h4>
@@ -230,8 +232,8 @@ println<span class="syntax-punctuation">(</span>label<span class="syntax-punctua
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-compute-the-basket">Exercise 1: Compute the basket<a class="heading-anchor" href="#exercise-1-compute-the-basket" aria-label="Link to this section">#</a></h4>
 <p>Keep three named prices and calculate their total.</p>
-<p><strong>Inputs/evidence:</strong> For spark-002 Exercise 1, 125L,200L,75L.</p>
-<p><strong>Expected result/shape:</strong> For spark-002 Exercise 1, total is400L.</p>
+<p><strong>Inputs/evidence:</strong> For spark-002 Exercise 1, 125L, 200L, 75L.</p>
+<p><strong>Expected result/shape:</strong> For spark-002 Exercise 1, total is 400L.</p>
 <p><strong>Verify:</strong> For spark-002 Exercise 1, assert total==400L and print the named value.</p>
 <p><strong>Progressive hints:</strong></p>
 <ol>
@@ -242,7 +244,7 @@ println<span class="syntax-punctuation">(</span>label<span class="syntax-punctua
 <h4 id="exercise-2-preserve-the-type-boundary">Exercise 2: Preserve the type boundary<a class="heading-anchor" href="#exercise-2-preserve-the-type-boundary" aria-label="Link to this section">#</a></h4>
 <p>Compare Int and Long at a documented boundary.</p>
 <p><strong>Inputs/evidence:</strong> For spark-002 Exercise 2, 2147483647L+1L and an intentionally reviewed Int-only variant.</p>
-<p><strong>Expected result/shape:</strong> For spark-002 Exercise 2, Long result2147483648L; reject relying on the overflowing Int value as money.</p>
+<p><strong>Expected result/shape:</strong> For spark-002 Exercise 2, Long result 2147483648L; reject relying on the overflowing Int value as money.</p>
 <p><strong>Verify:</strong> For spark-002 Exercise 2, run the Long assertion; explain why the narrower arithmetic is a different contract.</p>
 <p><strong>Progressive hints:</strong></p>
 <ol>
@@ -252,18 +254,18 @@ println<span class="syntax-punctuation">(</span>label<span class="syntax-punctua
 </ol>
 <h4 id="exercise-3-calculate-remaining-budget">Exercise 3: Calculate remaining budget<a class="heading-anchor" href="#exercise-3-calculate-remaining-budget" aria-label="Link to this section">#</a></h4>
 <p>Bind a450L budget and compute remaining cents.</p>
-<p><strong>Inputs/evidence:</strong> For spark-002 Exercise 3, budget450L,total400L.</p>
-<p><strong>Expected result/shape:</strong> For spark-002 Exercise 3, remaining50L.</p>
+<p><strong>Inputs/evidence:</strong> For spark-002 Exercise 3, budget 450L, total 400L.</p>
+<p><strong>Expected result/shape:</strong> For spark-002 Exercise 3, remaining 50L.</p>
 <p><strong>Verify:</strong> For spark-002 Exercise 3, assert the difference, not merely the total.</p>
 <p><strong>Progressive hints:</strong></p>
 <ol>
 <li>Which amount is available first?</li>
 <li>Remaining means budget minus spending.</li>
-<li>450L-400L is50L.</li>
+<li>450L-400L is 50L.</li>
 </ol>
 <h4 id="exercise-4-return-a-branch-value">Exercise 4: Return a branch value<a class="heading-anchor" href="#exercise-4-return-a-branch-value" aria-label="Link to this section">#</a></h4>
 <p>Use an if expression for the budget label.</p>
-<p><strong>Inputs/evidence:</strong> For spark-002 Exercise 4, remaining50L, threshold0L.</p>
+<p><strong>Inputs/evidence:</strong> For spark-002 Exercise 4, remaining 50L, threshold 0L.</p>
 <p><strong>Expected result/shape:</strong> For spark-002 Exercise 4, String message is within budget.</p>
 <p><strong>Verify:</strong> For spark-002 Exercise 4, assert the exact String and its nonnegative condition.</p>
 <p><strong>Progressive hints:</strong></p>
@@ -275,7 +277,7 @@ println<span class="syntax-punctuation">(</span>label<span class="syntax-punctua
 <h4 id="exercise-5-diagnose-reassignment">Exercise 5: Diagnose reassignment<a class="heading-anchor" href="#exercise-5-diagnose-reassignment" aria-label="Link to this section">#</a></h4>
 <p>Review <code>val budget=450L; budget=350L</code> and repair without mutation.</p>
 <p><strong>Inputs/evidence:</strong> For spark-002 Exercise 5, one immutable binding and a proposed reassignment.</p>
-<p><strong>Expected result/shape:</strong> For spark-002 Exercise 5, compile-time rejection; repaired code uses a new name revisedBudget with350L.</p>
+<p><strong>Expected result/shape:</strong> For spark-002 Exercise 5, compile-time rejection; repaired code uses a new name revisedBudget with 350L.</p>
 <p><strong>Verify:</strong> For spark-002 Exercise 5, retain the compiler error category and show the new-name repair; do not include broken code in the final reference.</p>
 <p><strong>Progressive hints:</strong></p>
 <ol>
@@ -284,10 +286,10 @@ println<span class="syntax-punctuation">(</span>label<span class="syntax-punctua
 <li>Use val revisedBudget: Long=350L.</li>
 </ol>
 <h4 id="exercise-6-transfer-the-budget">Exercise 6: Transfer the budget<a class="heading-anchor" href="#exercise-6-transfer-the-budget" aria-label="Link to this section">#</a></h4>
-<p>Repeat the calculation with350L and predict the sign.</p>
-<p><strong>Inputs/evidence:</strong> For spark-002 Exercise 6, same400L basket,new350L budget.</p>
+<p>Repeat the calculation with 350L and predict the sign.</p>
+<p><strong>Inputs/evidence:</strong> For spark-002 Exercise 6, same 400L basket, new 350L budget.</p>
 <p><strong>Expected result/shape:</strong> For spark-002 Exercise 6, remaining-50L and over budget label.</p>
-<p><strong>Verify:</strong> For spark-002 Exercise 6, assert both changed outputs while the original total stays400L.</p>
+<p><strong>Verify:</strong> For spark-002 Exercise 6, assert both changed outputs while the original total stays 400L.</p>
 <p><strong>Progressive hints:</strong></p>
 <ol>
 <li>Keep the three prices.</li>
@@ -308,7 +310,7 @@ println<span class="syntax-punctuation">(</span>label<span class="syntax-punctua
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to coach spark-002.
 Read courses/scala-spark/guides/spark-002.md and courses/scala-spark/lessons/spark-002.scala.
-Direct design prerequisites: `spark-001`. This lesson is authored; check its current runtime readiness and direct prerequisites.
+Direct prerequisites: `spark-001`. This lesson is authored; check its current runtime readiness and direct prerequisites.
 Explain one mechanism, ask me to predict, let me attempt one exercise, then give one hint at a time.
 Do not read courses/scala-spark/solutions/ until I make an honest attempt or explicitly ask for a reveal.
 Review my exact values, diagnostics or written evidence; distinguish source inspection, process success and verified understanding.

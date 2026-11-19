@@ -200,15 +200,48 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">    <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">meta</span> <span class="syntax-attribute">name</span><span class="syntax-operator">=</span><span class="syntax-string">&quot;viewport&quot;</span> <span class="syntax-attribute">content</span><span class="syntax-operator">=</span><span class="syntax-string">&quot;width=device-width, initial-scale=1&quot;</span> <span class="syntax-punctuation">/</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">title</span><span class="syntax-punctuation">&gt;</span>Responsive layouts and content-driven breakpoints: my attempt<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">title</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">style</span><span class="syntax-punctuation">&gt;</span></span>
-<span class="source-line">      <span class="syntax-comment">/* Implement the lesson-specific CSS. Keep keyboard focus visible. */</span></span>
+<span class="source-line">      <span class="syntax-comment">/*</span></span>
+<span class="source-line"><span class="syntax-comment">        Worked example 1: A small-space baseline</span></span>
+<span class="source-line"><span class="syntax-comment">        .layout {</span></span>
+<span class="source-line"><span class="syntax-comment">          display: grid;</span></span>
+<span class="source-line"><span class="syntax-comment">          gap: 1rem;</span></span>
+<span class="source-line"><span class="syntax-comment">        }</span></span>
+<span class="source-line"><span class="syntax-comment">      */</span></span>
+<span class="source-line"></span>
+<span class="source-line">      <span class="syntax-comment">/*</span></span>
+<span class="source-line"><span class="syntax-comment">        Worked example 2: An evidence-based enhancement</span></span>
+<span class="source-line"><span class="syntax-comment">        @media (min-width: 48rem) {</span></span>
+<span class="source-line"><span class="syntax-comment">          .layout {</span></span>
+<span class="source-line"><span class="syntax-comment">            grid-template-columns: 15rem minmax(0, 1fr);</span></span>
+<span class="source-line"><span class="syntax-comment">          }</span></span>
+<span class="source-line"><span class="syntax-comment">        }</span></span>
+<span class="source-line"><span class="syntax-comment">      */</span></span>
+<span class="source-line"></span>
+<span class="source-line">      <span class="syntax-comment">/* Write the CSS for the exercises here. Keep keyboard focus visible. */</span></span>
 <span class="source-line">    <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">style</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line">  <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">head</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line">  <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">body</span><span class="syntax-punctuation">&gt;</span></span>
-<span class="source-line">    <span class="syntax-comment">&lt;!-- web-017: Build a responsive course outline with a readable article. --&gt;</span></span>
-<span class="source-line">    <span class="syntax-comment">&lt;!-- Save your prediction, then implement the six exercises from the guide. --&gt;</span></span>
+<span class="source-line">    <span class="syntax-comment">&lt;!--</span></span>
+<span class="source-line"><span class="syntax-comment">      web-017 exercises. Hints are in the guide; answers are in the solutions folder.</span></span>
+<span class="source-line"><span class="syntax-comment">      1. Predict the base layout below the breakpoint.</span></span>
+<span class="source-line"><span class="syntax-comment">      2. Choose a breakpoint by resizing actual content.</span></span>
+<span class="source-line"><span class="syntax-comment">      3. Build a responsive course outline with a readable article.</span></span>
+<span class="source-line"><span class="syntax-comment">      4. Diagnose a mobile page rendered as a tiny desktop screenshot.</span></span>
+<span class="source-line"><span class="syntax-comment">      5. Test narrow width together with enlarged text.</span></span>
+<span class="source-line"><span class="syntax-comment">      6. Explain why responsive design is more than media queries.</span></span>
+<span class="source-line"><span class="syntax-comment">    --&gt;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">main</span><span class="syntax-punctuation">&gt;</span></span>
-<span class="source-line">      <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">h1</span><span class="syntax-punctuation">&gt;</span>Responsive layouts and content-driven breakpoints<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">h1</span><span class="syntax-punctuation">&gt;</span></span>
-<span class="source-line">      <span class="syntax-comment">&lt;!-- Build your own document here. The reference is separate. --&gt;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">h1</span><span class="syntax-punctuation">&gt;</span>A responsive lesson<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">h1</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">div</span> <span class="syntax-attribute">class</span><span class="syntax-operator">=</span><span class="syntax-string">&quot;layout&quot;</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">nav</span> <span class="syntax-attribute">aria-label</span><span class="syntax-operator">=</span><span class="syntax-string">&quot;Lesson outline&quot;</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-tag">a</span> <span class="syntax-attribute">href</span><span class="syntax-operator">=</span><span class="syntax-string">&quot;#content&quot;</span><span class="syntax-punctuation">&gt;</span>Read the article<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">a</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">nav</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">article</span> <span class="syntax-attribute">id</span><span class="syntax-operator">=</span><span class="syntax-string">&quot;content&quot;</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">          <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">h2</span><span class="syntax-punctuation">&gt;</span>Content first<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">h2</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">          <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">p</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">            This article remains readable when the navigation stacks above it. The breakpoint</span>
+<span class="source-line">            responds to available space rather than a named device.</span>
+<span class="source-line">          <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">p</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">article</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">div</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">main</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line">  <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">body</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line"><span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">html</span><span class="syntax-punctuation">&gt;</span></span>

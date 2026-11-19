@@ -211,9 +211,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Compiler&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Entrypoint&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Model boxes containing packets containing items. Explain each intermediate value and check the final product.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Build and run Program.cs and check a computed result instead of trusting printed text.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Write a program calculating the number of seats in four rows of six seats. Check 24 explicitly.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Hello, C# appears before the lesson marker. The total is 12, while adding the two inputs gives 7.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The program computes 24 seats and the check passes silently.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;csharp-002&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -229,9 +229,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Conversion&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Try pattern&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Design an input boundary for a percentage and document its accepted textual and numeric ranges.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Choose numeric types deliberately, convert explicitly and parse text with TryParse instead of exceptions.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Write a TryParse-based validator accepting only nonnegative whole-number quantities.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The integer result is 3 and the floating result is 3.5. 42 parses successfully; words fail without an exception.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;42 is accepted; -1, 4.5 and empty text are rejected without an exception.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;csharp-003&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -247,9 +247,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Decimal&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Rounding policy&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Design a quantity and currency contract that states overflow, rounding and invalid-input behavior.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Detect integer overflow with checked arithmetic and calculate money with decimal and a named rounding rule.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Calculate a decimal subtotal and tax, rounding only the final payable amount.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The maximum int plus one is rejected; 100 plus 20 is accepted. Two valid midpoint policies produce 2.34 and 2.35.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Subtotal 25.35, unrounded tax 2.091375 and payable 27.44.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;csharp-004&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -265,9 +265,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Unicode scalar&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Encoding&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Design a text-field limit and explain whether its contract measures bytes, scalars or user-visible graphemes.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Compare, transform and measure strings with explicit culture and Unicode policies.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Implement case-insensitive machine-key comparison with an explicit policy.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The original remains data while the result is DATA. One scalar occupies two UTF-16 units and four UTF-8 bytes.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Keys that differ only by ASCII case match; a different separator does not.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;csharp-005&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -283,9 +283,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Short circuit&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Boundary&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Choose a routing policy with three mutually exclusive outcomes and explain how invalid values are represented.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Write complete, non-overlapping decisions with if statements and switch expressions, including boundary values.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Write a classifier for negative, zero and positive temperatures.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The missing value is handled without dereferencing null. 59 retries, 60 passes, and 101 is rejected.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;-5, 0 and 12 are classified as below zero, zero and above zero.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;csharp-006&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -301,9 +301,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Accumulator&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Termination&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Design a bounded retry loop and explain both its invariant and its stopping argument.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Write loops with a stated invariant and termination condition, including empty and not-found cases.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Implement a first-match search returning a separate not-found representation.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The sum is 12 and the empty sum is zero. The first 8 is at index 1; 9 is absent.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The first 7 is at index 1; a missing target and an empty array both return false.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;csharp-007&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -319,9 +319,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Argument&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Pure function&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Extract one computation from a larger program and state its input, output, mutation and failure contract.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Write methods with validated parameters and explicit return contracts that reject invalid input.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Write a method computing an area from validated nonnegative dimensions.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The result is 14 and the caller still holds 7. 12 divided by 3 returns 4; the exact-integer contract rejects 7 divided by 2.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;3 by 4 gives 12, a zero side gives 0, and a negative side throws.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;csharp-008&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -337,9 +337,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Alias&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Shape&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Choose rectangular or jagged storage for variable-length sensor histories and justify the choice.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Tell array aliases from copies and traverse rectangular arrays with bounds taken from the data.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Compute each row sum of the two-by-three grid.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The alias changes source; the copied integer array retains 2. The shape is two by three and the sum is 21.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The row sums are 6 and 15.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;csharp-009&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -355,9 +355,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Capacity&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Snapshot&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Choose mutation or a new sequence for an undoable editor operation and explain who observes the change.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Filter and mutate lists safely, telling capacity from count and copies from in-place changes.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Produce a filtered list while preserving the original.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Reserving ten slots leaves Count at zero; two appends produce Count two. Two entries are removed while the earlier integer snapshot keeps four values.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The new list holds 2 and 4 while the original still has four items.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;csharp-010&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -373,9 +373,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Hashing&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Membership&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Design stable identity for records and explain which fields may change without invalidating lookup.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Count and deduplicate with dictionaries and sets under an explicit comparer, keeping a present zero distinct from absence.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Build a frequency dictionary from a list of tags.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;OAK finds a present zero; Pine is absent. RED is a duplicate under the selected comparer.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;red counts 2 and blue counts 1.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;csharp-011&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -391,9 +391,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Flow analysis&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Fallback&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Design an import field whose missing value has different meaning from an explicit zero or empty value.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Represent missing information with nullable types and keep missing, zero and present values distinct.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Write a formatter preserving missing, zero and positive measurements.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The optional length is absent, not zero. A measured zero and an unknown measurement produce distinct descriptions.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;null, 0 and 5 are formatted as missing, zero and 5 units.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;csharp-012&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -409,9 +409,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Reference semantics&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Ownership&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Design a data boundary that prevents callers from mutating an internal collection.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Predict copying and sharing for structs and classes and choose the right kind for a value or shared state.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Choose a representation for a coordinate and for a shared session, explaining the difference.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Changing the copied point leaves the original X at 2. Both references observe the same counter increment.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Changing the copied coordinate leaves the original at 1, while both session variables see 3.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;csharp-013&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -427,8 +427,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Encapsulation&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Failure atomicity&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Explain whether a shared wallet needs synchronization when several tasks may spend concurrently.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Implement a bounded inventory whose reservations never make stock negative.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Encapsulate state in a class whose constructor and methods keep its invariants on every path.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Reproduce Example A (Preserve a nonnegative balance) and Example B (Reject malformed operations) and explain each check.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Spending 4 succeeds; spending 7 afterward fails without changing 6. Negative spending is rejected and zero is an accepted no-op.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
@@ -445,8 +445,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;With expression&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Shallow copy&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Choose identity-based or data-based equality for an order and explain how updates affect collection membership.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Design an immutable coordinate using a readonly record struct.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use records and structs for value equality and explain what a shallow with-copy shares.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Reproduce Example A (Equal data with distinct identities) and Example B (Notice nested shared state) and explain each check.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Equal records can be distinct objects; with preserves the previous age. Both records see the appended list item.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
@@ -463,8 +463,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Guard&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;State model&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Replace several loosely related flags in a program with explicit states and justify which impossible combinations disappear.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Model a loading, ready and failed operation with separate payloads.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Model explicit states with records and pattern matching so each state carries only its own data.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Reproduce Example A (Narrow before using a value) and Example B (Represent results without impossible combinations) and explain each check.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The same method distinguishes type, value range and string shape. Success carries a count; failure carries a reason.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
@@ -481,9 +481,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Rejection&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Aggregation&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Design a reusable import result that retains per-line rejection reasons without exposing sensitive raw input.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Build a validated inventory importer that reports accepted totals and rejected lines deterministically.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Build a sorted text report from the accepted dictionary and the rejection count.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Pear totals 6 and apple totals 3. Three rejected lines do not alter the valid pear total.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The report lists apple: 3, pear: 3 and rejected: 1 in that order.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;csharp-017&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -499,8 +499,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Substitution&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Dependency injection&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Choose one dependency worth injecting in the inventory importer and explain the testing benefit.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Define a small interface for a deterministic label formatter.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Program against an interface so different policies can be substituted without changing the consumer.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Reproduce Example A (Use a declared contract) and Example B (Change policy without changing the consumer) and explain each check.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Four units cost 12 and zero units cost zero. The same consumer applies a capped or uncapped policy.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
@@ -517,8 +517,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Constraint&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Type safety&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Design a generic helper with the smallest useful capability constraint.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Create a generic immutable three-element container.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Write generic types and methods whose constraints state exactly the capabilities they need.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Reproduce Example A (Retain the element type) and Example B (Preserve a generic relationship) and explain each check.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The same method returns an int or a string without object casts. Swap preserves the element type, and a tie remains a valid value.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
@@ -535,9 +535,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Closure&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Subscription&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Design ownership for subscriptions in a screen or service that can be disposed.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use delegates, closures and events, including what a closure captures and how to unsubscribe.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Write a transformation method accepting Func&lt;int,int&gt;.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Changing factor changes later calls through the closure. Only the first emission reaches the removed handler.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Applying value * 10 gives 10, 20 and 30 and leaves the input unchanged.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;csharp-020&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -553,9 +553,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Projection&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Materialization&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Choose streaming or materialization for a large import and explain memory and repeatability tradeoffs.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Write LINQ queries and predict when deferred execution observes later source changes.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Build a deterministic report selecting, transforming and ordering records.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The deferred query sees the subsequently appended 3. The earlier snapshot contains only 2 while a new projection sees three values.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The report is apple=5 then pear=2; fig with quantity 0 is filtered out.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;csharp-021&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -571,9 +571,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Cardinality&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Join key&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Design checks that distinguish one-to-one, one-to-many and many-to-many joins before aggregation.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Group and join data at an explicit grain without duplicating or dropping records.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Build a report joining unique item metadata to item totals.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Three event rows become two category totals. One left row becomes two joined rows.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Each item appears once with its total: pear=5 and apple=4.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;csharp-022&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -589,9 +589,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Enumeration&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Laziness&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Choose a sequence API for a large file and document repeated-enumeration and resource-lifetime behavior.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Write lazy iterators with yield return and validate their arguments at the call boundary.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Implement a lazy sequence of cumulative totals.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The consumer receives 5 and 6 and can stop before the full range. Negative count is rejected immediately, without enumeration.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;1, 2, 3 produces 1, 3, 6; an empty input produces nothing.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;csharp-023&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -607,9 +607,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Stack trace&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Translation&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Decide which layer owns user-facing error translation and which details should remain private diagnostics.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Throw and catch exceptions that keep invalid input, environment failures and their causes distinct.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Define an import API with distinct invalid-input and storage-failure outcomes.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Malformed numeric text is caught as a format error. The outer domain failure still contains the I/O cause.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Valid input returns 3; bad text and unavailable storage end in different exception types.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;csharp-024&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -625,9 +625,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;IDisposable&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Scope&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Document ownership and leave-open behavior for a parser that wraps a stream reader.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Release disposable resources deterministically with using, including when an exception occurs.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Write a helper that reads from a caller-owned stream without closing it.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The resource is open inside and closed afterward. The controlled exception still triggers cleanup.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The helper returns data and the caller&#x27;s stream is still readable afterward.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;csharp-025&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -643,9 +643,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Encoding&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Owned temporary directory&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Explain what must change to make a persistent report update crash-recoverable.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Read and write files with explicit encodings inside an owned temporary folder that is always cleaned up.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Build a temporary-file round trip for a small inventory report.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The Unicode text round-trips and the owned directory is removed. A simple leaf name and a nested path are recognized as different shapes.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The report reads back unchanged and the temporary folder is gone afterward.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;csharp-026&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -661,9 +661,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Schema&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Migration&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Design a migration from a renamed quantity field while retaining old saved records.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Serialize JSON contracts and validate decoded data before trusting it.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Write a decoder returning explicit validation errors for missing name and negative quantity.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The restored name and quantity match the original record. Valid JSON can decode into a rejected domain value.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;A valid item gives no errors; a missing name with quantity -1 gives two errors.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;csharp-027&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -679,9 +679,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Offset&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Duration&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Design storage and display policies for appointments in a named time zone.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Represent instants and durations with DateTimeOffset and format them independently of culture.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Build a duration report using fixed UTC timestamps.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The values denote the same instant despite different offsets. The elapsed duration is 90 minutes and the timestamp round-trips.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;22:30 to 01:15 UTC is reported as 165 minutes.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;csharp-028&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -697,9 +697,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Regression case&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Boundary test&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Separate unit and integration evidence for a JSON file importer.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Write table-driven tests with boundary cases that a plausible wrong implementation fails.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Write table-driven checks for your inventory quantity validator.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Negative, zero and positive cases preserve their intended categories. The zero case catches the incorrect default, and clamping twice changes nothing further.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;All four rows pass, including both edges of the 0 to 1000 range.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;csharp-029&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -715,9 +715,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Await&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Composition&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Explain when CPU work might need scheduling separately from an asynchronous I/O API.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Write async methods that await results, propagate failures and keep input order with Task.WhenAll.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Write an async method returning a validated total.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Await yields 7 and confirms successful completion. WhenAll retains input order and await exposes the task exception.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Parts 2 and 5 produce the validated total 7.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;csharp-030&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -733,9 +733,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Wait cancellation&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Unknown result&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Design an operation receipt distinguishing cancelled waiting, confirmed cancellation and unknown outcome.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Cancel work cooperatively with CancellationToken while keeping already committed results.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Write an operation that stops cooperatively and preserves already committed work.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The token check acknowledges cancellation. The wait cancels, then the original task later completes with 9.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Processing stops before item 3, and items 1 and 2 remain committed.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;csharp-031&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -751,9 +751,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Admission&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Drain&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Choose wait, reject or drop behavior for a workload and explain what evidence the producer receives.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Connect producers and consumers through bounded channels with explicit completion.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Build a bounded producer-consumer pipeline with explicit writer completion.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The first item is accepted and the second immediate write is refused. Both admitted items are read after completion, and later writes fail.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The consumer receives five items, 1 to 5, and the sum is 15.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;csharp-032&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -769,9 +769,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Domain validation&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Service result&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Design an adapter boundary for a file or HTTP source without putting I/O inside the pure aggregation.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Build a deterministic, cancellable import service that keeps per-item results and rejection counts.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Build a per-item result while preserving the rejected count.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The service returns total 2 and one rejected record. A cancelled request and a successful empty import have different outcomes.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;pear has 2 accepted units and one rejected record is counted.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;csharp-033&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -787,9 +787,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Mutual exclusion&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Deadlock&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Choose immutable snapshots or a lock for a shared report cache and justify the ownership model.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Protect compound invariants with a lock so concurrent updates never expose a half-finished change.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Implement a locked transfer preserving the sum of two balances.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Four tasks produce exactly 400 increments. The reader uses the same gate as mutation.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;After ten concurrent transfers of 5 the balances are 50 and 50, still summing to 100.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;csharp-034&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -805,9 +805,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Thread-safe operation&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Factory purity&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Explain why atomically updating two separate balances does not preserve a transfer invariant.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use Interlocked and concurrent collections with pure update functions for correct concurrent counts.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Build a concurrent frequency counter using pure update functions.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The atomic count is exactly 400. Twenty admitted updates produce 20.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;a is counted 3 times and b once.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;csharp-035&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -823,9 +823,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Slice&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Lifetime&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Choose Span or Memory for a synchronous parser and an asynchronous buffer owner.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use Span and ReadOnlySpan to slice data without copying while respecting their lifetime rules.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Write a synchronous span helper counting separators.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Only the middle element changes. The digit total is 6 and empty input totals zero.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;a,b,c has two separators and an empty span has none.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;csharp-036&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -841,9 +841,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Pool&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Logical length&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Decide whether pooling is justified using allocation measurements and a stated lifetime contract.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Rent and return pooled buffers with finally and reason about retained memory.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Write a pooled-buffer helper with finally-based return.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Only three initialized elements contribute to the total. Clearing removes the application references without promising collection timing.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Summing the first four slots gives 10.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;csharp-037&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -859,9 +859,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Cost model&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Benchmark&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Write a benchmark plan specifying workload, correctness checks, warmup and allocation measurements.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Compare an algorithm&#x27;s work with and without an index while keeping the same equality policy.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Compare repeated list scans with one built index while preserving equality policy.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Finding the last element needs four comparisons. The index answers membership while storing four identities.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Both approaches find 2 of the 3 queries.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;csharp-038&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -877,9 +877,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Semantic validation&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;ReDoS&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Choose a parser or regex for a nested format and justify complexity and error reporting.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Validate bounded input with non-backtracking regular expressions and separate domain rules.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Validate a structured identifier and then check its domain-specific reserved words.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The identifier begins with a lowercase letter and uses only admitted characters. The plus sign is matched literally.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;report_2 is accepted; admin and 2report are rejected for different reasons.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;csharp-039&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -895,9 +895,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Status code&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Test double&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Design a retry policy that distinguishes safe reads from writes with unknown outcomes.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Call HTTP services through an injected HttpClient and test status and content contracts offline.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Write a client method accepting a supplied HttpClient and CancellationToken.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The handler supplies count 3 without network access. 503 remains an observable failure rather than a default successful count.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The method returns 4 from the fixture handler without any network access.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;csharp-040&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -913,9 +913,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Adapter&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Dependency direction&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Draw dependency direction for a command-line adapter, HTTP adapter and shared domain library.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Separate a domain core from its adapters so validation and time are testable without infrastructure.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Extract the inventory aggregation into a transport-independent core.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The result uses the supplied instant. A different clock does not bypass identity validation.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Quantities 2, -1 and 3 aggregate to total 5 with one rejection.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;csharp-041&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -931,8 +931,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Status mapping&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Idempotency&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Design idempotent update behavior and explain how duplicate creation differs.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Run the separately prepared ApiLab project and inspect GET and POST responses.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Design an HTTP API contract and run it in the prepared ASP.NET project with real responses.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Reproduce Example A (Map a valid request) and Example B (Reject before claiming success) and explain each check.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Valid input maps to the created outcome. Invalid requests produce 400 decisions.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
@@ -949,9 +949,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Authorization&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Default deny&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Describe authorization checks for a resource owned by another user and the evidence each check needs.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Apply allowlists and redaction at trust boundaries so errors stay useful without leaking secrets.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Design an allowlist of fields safe to include in an import error.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Read is allowed and delete is denied. The token is replaced while a status remains visible.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The visible error keeps line, field and reason and drops the token.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;csharp-043&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -967,9 +967,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Restore&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Publish&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Design a dependency update review including lock changes, license checks and runtime evidence.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Move a pure domain type into the supplied class-library project and run its executable checks.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The running framework generation is compatible with the declared classroom target. The example preserves the intended target and nullable policy.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Explain restore, build, run and publish, and check the target framework a build actually produced.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Reproduce Example A (Expose environment facts without overclaiming) and Example B (Read the compiled target framework) and explain each check.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The running framework generation is compatible with the declared classroom target. The compiled program reports .NETCoreApp,Version=v10.0, the framework its project targeted, and runs on a .NET 10 runtime.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;csharp-044&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -985,9 +985,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Correlation identity&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Metric&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Design a latency report that includes percentiles, sample count and measurement boundaries.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Emit structured events and counts that account for every submitted record.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Instrument your import project with submitted, accepted and rejected counts.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The serialized event contains an explicit rejected outcome. Five submitted records are fully accounted for and rejection rate is 0.4.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;5 submitted records split into 3 accepted and 2 rejected.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;csharp-045&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -1003,9 +1003,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;AOT&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;ABI&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Plan an external Native AOT experiment stating target architecture, native prerequisites and runtime checks.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Weigh reflection against typed access and explain what trimming and AOT require.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Replace string-based access in a small report with a typed projection.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The known property is an int and the missing property is absent. The fixed projection needs no string-based member lookup.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The typed projection sums the counts to 7.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;csharp-046&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -1021,9 +1021,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Target typing&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Primary constructor&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Review a proposed new feature and justify adopting it using readability, compatibility and tooling evidence.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Refactor one simple class to a primary constructor without changing behavior.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The target types select array and list representations. The supplied factor is used by the instance operation.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Use C# 12 to 14 features such as collection expressions, primary constructors and null-conditional assignment where they make code clearer.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Reproduce Example A (Use a target-typed collection) and Example B (Keep constructor policy visible) and explain each check.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The target types select array and list representations. The supplied factor is used by the instance operation, nameof(List&lt;&gt;) is List, missing?.Capacity = 32 leaves the null builder alone, and \\e is the escape character.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;csharp-047&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -1039,15 +1039,15 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Transient failure&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Reconciliation&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Design durable atomic storage for an effect and its receipt and state remaining failure modes.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Make retried operations idempotent by storing receipts and rejecting conflicting reuse of an identifier.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Implement a result lookup that does not execute the command again.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The repeated identity returns its prior result without increasing the total. A new identity applies separately, while a changed payload under an old key is rejected.&quot;</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Both calls return receipt 30, and the command ran only once.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">},</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;csharp-048&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;title&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Capstone: a reviewable .NET data application&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;level&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;advanced&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">120</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;minutes&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">180</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;prerequisites&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;csharp-047&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
@@ -1057,8 +1057,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-string">&quot;Evidence boundary&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">        <span class="syntax-string">&quot;Maintainability&quot;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">],</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Deliver a project README with build commands, architecture, failure policies, tests, operational limits and a proposed next extension.&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Build the external DomainLab and expose the domain contract through the ApiLab adapter.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;outcome&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Build, test and review a complete .NET data application across a domain library and an API adapter.&quot;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-tag">&quot;lab&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Reproduce Example A (Build a stable valid report) and Example B (Preserve rejected data accounting) and explain each check.&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;verification&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;The sorted report is a=3;b=6. A valid zero remains in the report while two invalid rows are counted.&quot;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">}</span></span>
 <span class="source-line">  <span class="syntax-punctuation">]</span></span>

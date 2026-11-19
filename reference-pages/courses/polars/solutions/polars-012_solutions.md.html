@@ -207,6 +207,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Expected:</strong> The cast accepts the new label under the revised contract.</p>
 <h3 id="4-reject-an-unknown-category">4. Reject an unknown category<a class="heading-anchor" href="#4-reject-an-unknown-category" aria-label="Link to this section">#</a></h3>
 <p>Use a separate quarantine reason or deliberately evolve the vocabulary. Silently mapping it to shipped would create a false business state.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> polars <span class="syntax-keyword">as</span> pl
+
+status <span class="syntax-operator">=</span> pl<span class="syntax-operator">.</span>Enum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">new</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">paid</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">shipped</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
+    pl<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">new</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cancelled</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>cast<span class="syntax-punctuation">(</span>status<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">except</span> pl<span class="syntax-operator">.</span>exceptions<span class="syntax-operator">.</span>InvalidOperationError<span class="syntax-punctuation">:</span>
+    rejected <span class="syntax-operator">=</span> <span class="syntax-keyword">True</span>
+<span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
+    rejected <span class="syntax-operator">=</span> <span class="syntax-keyword">False</span>
+<span class="syntax-keyword">assert</span> rejected</code></pre>
 <p><strong>Expected:</strong> Strict conversion rejects it.</p>
 <h3 id="5-compare-sort-policies">5. Compare sort policies<a class="heading-anchor" href="#5-compare-sort-policies" aria-label="Link to this section">#</a></h3>
 <p>The correct order depends on the question. Keep ordered state semantics explicit instead of relying on hidden physical category codes.</p>
@@ -257,7 +267,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
     main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="interpretation">Interpretation<a class="heading-anchor" href="#interpretation" aria-label="Link to this section">#</a></h3>
-<p>Move a typed table across an Arrow boundary while preserving its logical contract. Document which properties were checked and which memory claims were not measured. Use explicit category vocabularies when business order matters, and test unknown-value handling as part of schema evolution.</p></article>
+<p>Document which properties were checked and which memory claims were not measured. Use explicit category vocabularies when business order matters, and test unknown-value handling as part of schema evolution.</p></article>
   </main>
 </body>
 </html>

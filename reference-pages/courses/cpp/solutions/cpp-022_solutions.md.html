@@ -217,32 +217,32 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Document v1, 7, 125 field order and units.</p>
 <p><strong>Expected:</strong> Version v1, ID 7, cents 125, three fields.</p>
 <p><strong>Reasoning:</strong> Representation should be interpretable without the original struct.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Check your document against <code>encode(7, 125) == &quot;v1,7,125&quot;</code>: the version comes first, the ID second and the cents third, and the unit is named.</p>
 <h3 id="exercise-2-check-zero-values">Exercise 2: Check zero values<a class="heading-anchor" href="#exercise-2-check-zero-values" aria-label="Link to this section">#</a></h3>
 <p>Encode ID 0 and cents 0.</p>
 <p><strong>Expected:</strong> v1, 0, 0.</p>
 <p><strong>Reasoning:</strong> Zero must survive round-trip as data.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Assert <code>encode(0, 0) == &quot;v1,0,0&quot;</code>; zero values must still produce all three fields.</p>
 <h3 id="exercise-3-build-a-strict-decoder">Exercise 3: Build a strict decoder<a class="heading-anchor" href="#exercise-3-build-a-strict-decoder" aria-label="Link to this section">#</a></h3>
 <p>Require v1 and exactly three comma-separated fields.</p>
 <p><strong>Expected:</strong> v2, 7, 125 and v1, 7, 125, junk rejected.</p>
 <p><strong>Reasoning:</strong> Version and full-field-count checks prevent ambiguity.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Assert your decoder rejects <code>&quot;v2,7,125&quot;</code> and <code>&quot;v1,7,125,junk&quot;</code> but accepts <code>&quot;v1,7,125&quot;</code> as ID 7 and 125 cents.</p>
 <h3 id="exercise-4-reject-raw-layout">Exercise 4: Reject raw layout<a class="heading-anchor" href="#exercise-4-reject-raw-layout" aria-label="Link to this section">#</a></h3>
 <p>Explain why writing sizeof(record) is not a portable format.</p>
 <p><strong>Expected:</strong> Padding, type width and byte order named.</p>
 <p><strong>Reasoning:</strong> A memory representation is not a schema.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Check that your explanation ties each hazard to a concrete case, for example <code>sizeof(long)</code> being 4 on 64-bit Windows but 8 on 64-bit Linux.</p>
 <h3 id="exercise-5-resolve-a-path">Exercise 5: Resolve a path<a class="heading-anchor" href="#exercise-5-resolve-a-path" aria-label="Link to this section">#</a></h3>
 <p>Print current_path and records/batch.csv absolute resolution in an owned directory.</p>
 <p><strong>Expected:</strong> Both anchor and resolved file documented.</p>
 <p><strong>Reasoning:</strong> Relative locations depend on the working directory.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Print <code>std::filesystem::current_path()</code> and <code>std::filesystem::absolute(&quot;records/batch.csv&quot;)</code>, and confirm the second path starts with the first.</p>
 <h3 id="exercise-6-transfer-versioning">Exercise 6: Transfer versioning<a class="heading-anchor" href="#exercise-6-transfer-versioning" aria-label="Link to this section">#</a></h3>
 <p>Design v2 with a fourth status field.</p>
 <p><strong>Expected:</strong> Explicit v2 reader or rejection, never v1 silent truncation.</p>
 <p><strong>Reasoning:</strong> Schema changes need compatibility decisions.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p></article>
+<p><strong>Verify:</strong> Feed <code>&quot;v2,7,125,paid&quot;</code> to the v1 reader and confirm it is rejected rather than decoded as ID 7 and 125 cents; only the v2 reader may accept it.</p></article>
   </main>
 </body>
 </html>

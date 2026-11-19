@@ -194,37 +194,42 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/csharp/solutions/csharp-009_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="csharp-009-explanation-and-comparison">csharp-009: explanation and comparison<a class="heading-anchor" href="#csharp-009-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="csharp-009_solution.cs.html">csharp-009_solution.cs</a>. Its assertions are always active under the prepared classroom compile settings.</p>
+<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="csharp-009_solution.cs.html">csharp-009_solution.cs</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Separate count from reserved storage:</strong> Capacity is an implementation resource, not a promise that ten logical entries exist. Reserving ten slots leaves Count at zero; two appends produce Count two.</p>
 <p><strong>Remove under one mutation policy:</strong> A bulk operation owns traversal and mutation, avoiding an invalidated external enumerator. Two entries are removed while the earlier integer snapshot keeps four values.</p>
-<h3 id="reason-through-the-six-tasks">Reason through the six tasks<a class="heading-anchor" href="#reason-through-the-six-tasks" aria-label="Link to this section">#</a></h3>
-<ol>
-<li><strong>Predict and explain.</strong> Predict Count and Capacity before and after appends.</li>
-</ol>
-<ol start="2">
-<li><strong>Guided modification.</strong> Replace one existing entry and explain why Count stays constant.</li>
-</ol>
-<ol start="3">
-<li><strong>Independent construction.</strong> Produce a filtered list while preserving the original.</li>
-</ol>
-<ol start="4">
-<li><strong>Diagnose a defect.</strong> Diagnose removing an entry inside foreach.</li>
-</ol>
-<ol start="5">
-<li><strong>Boundary evidence.</strong> Test no removals, all removals and an empty list.</li>
-</ol>
-<ol start="6">
-<li><strong>Transfer and justify.</strong> Choose mutation or a new sequence for an undoable editor operation and explain who observes the change.</li>
-</ol>
-<p>For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.</p>
+<h3 id="task-answers">Task answers<a class="heading-anchor" href="#task-answers" aria-label="Link to this section">#</a></h3>
+<h4 id="task-1-predict-and-explain">Task 1: Predict and explain<a class="heading-anchor" href="#task-1-predict-and-explain" aria-label="Link to this section">#</a></h4>
+<p>Predict Count and Capacity before and after appends.</p>
+<p>No separate reference answer has been written for this task. Example A is the evidence to compare with: Capacity is an implementation resource, not a promise that ten logical entries exist. Reserving ten slots leaves Count at zero; two appends produce Count two.</p>
+<h4 id="task-2-guided-modification">Task 2: Guided modification<a class="heading-anchor" href="#task-2-guided-modification" aria-label="Link to this section">#</a></h4>
+<p>Replace one existing entry and explain why Count stays constant.</p>
+<p>No separate reference answer has been written for this task. Start from Example B: A bulk operation owns traversal and mutation, avoiding an invalidated external enumerator. Two entries are removed while the earlier integer snapshot keeps four values.</p>
+<h4 id="task-3-independent-construction">Task 3: Independent construction<a class="heading-anchor" href="#task-3-independent-construction" aria-label="Link to this section">#</a></h4>
+<p>Produce a filtered list while preserving the original.</p>
+<p><strong>Reference answer.</strong> It runs as the <code>Task 3</code> block of the reference program.</p>
+<pre class="highlighted-code"><code class="language-csharp"><span class="syntax-keyword">var</span> original <span class="syntax-operator">=</span> <span class="syntax-keyword">new</span> List<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span> <span class="syntax-punctuation">{</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+List<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span> positives <span class="syntax-operator">=</span> original<span class="syntax-punctuation">.</span>Where<span class="syntax-punctuation">(</span><span class="syntax-keyword">value</span> <span class="syntax-operator">=&gt;</span> <span class="syntax-keyword">value</span> <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>ToList<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+Check<span class="syntax-punctuation">(</span>positives<span class="syntax-punctuation">.</span>SequenceEqual<span class="syntax-punctuation">(</span><span class="syntax-keyword">new</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span> <span class="syntax-punctuation">{</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;filtered copy&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+Check<span class="syntax-punctuation">(</span>original<span class="syntax-punctuation">.</span>Count <span class="syntax-operator">==</span> <span class="syntax-number">4</span> <span class="syntax-operator">&amp;&amp;</span> original<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;original unchanged&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Observe:</strong> The new list holds 2 and 4 while the original still has four items.</p>
+<p>Where reads the source and ToList builds a separate list, so no element of the original is removed.</p>
+<h4 id="task-4-diagnose-a-defect">Task 4: Diagnose a defect<a class="heading-anchor" href="#task-4-diagnose-a-defect" aria-label="Link to this section">#</a></h4>
+<p>Diagnose removing an entry inside foreach.</p>
+<p>No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson&#x27;s pitfalls: Capacity is not an index boundary. A snapshot of objects still shares those objects. Repeated front insertion can turn an apparently simple loop into quadratic work.</p>
+<h4 id="task-5-boundary-evidence">Task 5: Boundary evidence<a class="heading-anchor" href="#task-5-boundary-evidence" aria-label="Link to this section">#</a></h4>
+<p>Test no removals, all removals and an empty list.</p>
+<p>No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Separate count from reserved storage) and Example B (Remove under one mutation policy).</p>
+<h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
+<p>Choose mutation or a new sequence for an undoable editor operation and explain who observes the change.</p>
+<p>No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry <strong>Count</strong>, and state one limitation of your choice.</p>
 <h3 id="mechanism-and-diagnostic-reasoning">Mechanism and diagnostic reasoning<a class="heading-anchor" href="#mechanism-and-diagnostic-reasoning" aria-label="Link to this section">#</a></h3>
 <p>A List stores a resizable indexed sequence. Count is the number of elements logically present; capacity is storage reserved to reduce reallocations. Increasing capacity does not create valid elements. Append is often efficient, but inserting at the front shifts existing entries. The interface makes these operations equally easy to write while their costs differ.</p>
 <p>Enumeration assumes a stable collection structure. Removing items during foreach invalidates that assumption. Choose a bulk removal operation, construct a new result, or use a deliberate index strategy. The right choice depends on whether other parts of the program should observe mutation of the original list.</p>
 <p><code>new List&lt;int&gt; { ... }</code> uses a collection initializer. <code>Add</code> changes Count; an indexer replaces an existing element. <code>RemoveAll(predicate)</code> expresses structural removal as one owned operation. <code>ToArray</code> creates a snapshot of the element references or values.</p>
 <p>Capacity is not an index boundary. A snapshot of objects still shares those objects. Repeated front insertion can turn an apparently simple loop into quadratic work.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.</p></article>
+<p>Run the reference and confirm that it prints <code>csharp-009: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
   </main>
 </body>
 </html>

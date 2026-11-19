@@ -197,22 +197,22 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Read the guide, record a prediction, then answer the six cases without opening solutions.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
-<li><strong>Read group denominators.</strong> GroupA has0 failures in10 cases;groupB has0 in1. Compare what is established. <strong>Expected:</strong> both observed zero;B has much less evidence. <strong>Verify:</strong> Save the reasoning table for exercise 1, including both observed zero;B has much less evidence.</li>
+<li><strong>Compare uneven denominators.</strong> Group D has 1 failure in 50 cases; group E has 0 failures in 5. Compare the observed rates and what each establishes. <strong>Expected:</strong> D observed 1/50 = 0.02; E observed 0/5; five cases do not show that E is safer than D. <strong>Verify:</strong> Check that 1/50 is written as 0.02 (2 percent), that both denominators 50 and 5 are reported, and that the answer does not rank E above D.</li>
 </ol>
 <ol start="2">
-<li><strong>Expose a severe failure.</strong> Nine minor cases pass and one severe case fails. Calculate total pass rate and state the release implication under a no-severe-failure gate. <strong>Expected:</strong> 90percent passes;gate fails. <strong>Verify:</strong> Save the reasoning table for exercise 2, including 90percent passes;gate fails.</li>
+<li><strong>Recompute a gate with two severe failures.</strong> Eighteen minor cases pass and two severe cases fail. Calculate the pass rate and the gate result. <strong>Expected:</strong> 18/20 = 90 percent passes; 2 severe failures; the gate fails. <strong>Verify:</strong> Check that the pass rate is 18/20 = 0.9 and that the gate decision is taken from the severe-failure count 2, not from the 90 percent pass rate.</li>
 </ol>
 <ol start="3">
-<li><strong>Analyze a counterfactual pair.</strong> Two fictional applicants have identical task-relevant qualifications; only a neutral name token differs, and the system gives opposite eligibility outcomes. <strong>Expected:</strong> inconsistency requires investigation under this fixture rubric. <strong>Verify:</strong> Save the reasoning table for exercise 3, including inconsistency requires investigation under this fixture rubric.</li>
+<li><strong>Analyze a counterfactual pair.</strong> Two fictional applicants have identical task-relevant qualifications; only a neutral name token differs, and the system gives opposite eligibility outcomes. <strong>Expected:</strong> inconsistency requires investigation under this fixture rubric. <strong>Verify:</strong> Check that the record holds qualifications identical, names the single changed field and contrasts the expected equal eligibility with the observed opposite outcomes.</li>
 </ol>
 <ol start="4">
-<li><strong>Handle an untested group.</strong> GroupC hascount0. Decide what rate and claim to report. <strong>Expected:</strong> rate unknown;group untested. <strong>Verify:</strong> Save the reasoning table for exercise 4, including rate unknown;group untested.</li>
+<li><strong>Handle an untested group.</strong> Group C has count 0. Decide what rate and claim to report. <strong>Expected:</strong> rate unknown; group untested. <strong>Verify:</strong> Check that group C reports count 0 with an undefined rate, not 0 percent or a pass, and that the claim says no evaluation evidence exists for the group.</li>
 </ol>
 <ol start="5">
-<li><strong>Separate families from paraphrases.</strong> Twenty prompts are paraphrases of one attack family. State the independent coverage count under family-based evaluation. <strong>Expected:</strong> one tested family,twenty variants. <strong>Verify:</strong> Save the reasoning table for exercise 5, including one tested family,twenty variants.</li>
+<li><strong>Separate families from paraphrases.</strong> Twenty prompts are paraphrases of one attack family. State the independent coverage count under family-based evaluation. <strong>Expected:</strong> one tested family, twenty variants. <strong>Verify:</strong> Check that the report carries both counts, 20 variants and 1 independent family, and never presents the variants as 20 threat classes.</li>
 </ol>
 <ol start="6">
-<li><strong>Write a finite claim.</strong> Draft a conclusion for the cases above including the severe failure and untested group. <strong>Expected:</strong> conclusion rejects a universal safety guarantee. <strong>Verify:</strong> Save the reasoning table for exercise 6, including conclusion rejects a universal safety guarantee.</li>
+<li><strong>Write a finite claim.</strong> Draft a conclusion for the cases above including the severe failure and untested group. <strong>Expected:</strong> conclusion rejects a universal safety guarantee. <strong>Verify:</strong> Check that the conclusion mentions the one severe failure, the untested group C and the no-go decision, and that it limits the claim to this finite suite.</li>
 </ol></article>
   </main>
 </body>

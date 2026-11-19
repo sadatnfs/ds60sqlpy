@@ -194,31 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-001_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-001-explanatory-solutions">web-001: explanatory solutions<a class="heading-anchor" href="#web-001-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.</p>
-<h3 id="why-the-mechanism-works">Why the mechanism works<a class="heading-anchor" href="#why-the-mechanism-works" aria-label="Link to this section">#</a></h3>
-<p>HTML is a markup language: it names the structure and meaning of a document. CSS is a style language that controls how that structure is presented. JavaScript is a programming language executed by the browser or another host. PHP is a programming language commonly executed by a server. A visitor receives the server&#x27;s response, not the PHP source that generated it. These layers can cooperate without becoming interchangeable.</p>
-<p>A browser parses HTML into a document tree, applies style rules and paints pixels. A server accepts a request and returns a response. Opening a local preview exercises the browser portion; it does not demonstrate a network request, authentication or a server database. Our first document is deliberately small enough to inspect every character and every visible element.</p>
-<p>An element such as <code>&lt;p&gt;Hello&lt;/p&gt;</code> has an opening tag, content and a closing tag. The tag names the kind of content. A document begins with <code>&lt;!doctype html&gt;</code> to request standards rendering, then an <code>html</code> root containing <code>head</code> metadata and <code>body</code> visible content. The <code>title</code> labels the browser document, while an <code>h1</code> labels the visible topic. Whitespace in ordinary text is generally collapsed, so source indentation helps humans without creating layout.</p>
+<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-001.md</code>.</p>
 <h3 id="exercise-1-predict-which-text-from-the-first-example-is-visible">Exercise 1: Predict which text from the first example is visible.<a class="heading-anchor" href="#exercise-1-predict-which-text-from-the-first-example-is-visible" aria-label="Link to this section">#</a></h3>
-<p>Only Hello, web. appears as paragraph text.</p>
-<p>Trace the smallest example before editing. Name which values are source and which are observations.</p>
+<p><strong>Expected answer:</strong> Only Hello, web. appears as paragraph text.</p>
+<p><strong>Why:</strong> Tags are instructions to the parser, not visible text, and the title is metadata shown in the tab; only character data inside body elements is painted.</p>
 <h3 id="exercise-2-change-a-paragraph-without-changing-the-document-title">Exercise 2: Change a paragraph without changing the document title.<a class="heading-anchor" href="#exercise-2-change-a-paragraph-without-changing-the-document-title" aria-label="Link to this section">#</a></h3>
-<p>The visible body changes while the browser document title remains the same.</p>
-<p>Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.</p>
+<p><strong>Expected evidence:</strong> The visible body changes while the browser document title remains the same.</p>
+<p><strong>Why:</strong> The title element and the body content are independent parts of the document tree, so editing a paragraph cannot change the tab text.</p>
 <h3 id="exercise-3-build-a-complete-document-with-a-title-one-heading-and-two-paragraphs">Exercise 3: Build a complete document with a title, one heading and two paragraphs.<a class="heading-anchor" href="#exercise-3-build-a-complete-document-with-a-title-one-heading-and-two-paragraphs" aria-label="Link to this section">#</a></h3>
-<p>The preview contains one main heading and two paragraphs in a main region.</p>
-<p>Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.</p>
+<p><strong>Expected evidence:</strong> The preview contains one main heading and two paragraphs inside the body.</p>
+<p><strong>Why:</strong> A complete document gives the parser an explicit standards mode, language, encoding and title, so the browser does not have to recover from missing structure.</p>
 <h3 id="exercise-4-explain-why-php-source-pasted-into-an-html-page-does-not-execute-on-a-php-server">Exercise 4: Explain why PHP source pasted into an HTML page does not execute on a PHP server.<a class="heading-anchor" href="#exercise-4-explain-why-php-source-pasted-into-an-html-page-does-not-execute-on-a-php-server" aria-label="Link to this section">#</a></h3>
-<p>A browser preview parses HTML; no PHP interpreter or server request was involved.</p>
-<p>Keep the failing input. Identify the first layer where the observed result differs from the intended contract.</p>
+<p><strong>Expected answer:</strong> A browser preview parses HTML; no PHP interpreter or server request was involved.</p>
+<p><strong>Why:</strong> PHP runs only when a PHP interpreter processes the file, normally through a server. The HTML parser treats <code>&lt;?php ... ?&gt;</code> as a bogus comment, so nothing executes and the code is not even displayed.</p>
 <h3 id="exercise-5-remove-the-styling-and-inspect-what-remains-useful">Exercise 5: Remove the styling and inspect what remains useful.<a class="heading-anchor" href="#exercise-5-remove-the-styling-and-inspect-what-remains-useful" aria-label="Link to this section">#</a></h3>
-<p>Document structure and readable text remain; meaning does not depend on CSS.</p>
-<p>Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.</p>
+<p><strong>Expected evidence:</strong> Document structure and readable text remain; meaning does not depend on CSS.</p>
+<p><strong>Why:</strong> HTML elements carry meaning and order independently of CSS, so headings, paragraphs and links stay understandable when presentation is removed.</p>
 <h3 id="exercise-6-trace-a-requested-page-from-source-to-visible-output">Exercise 6: Trace a requested page from source to visible output.<a class="heading-anchor" href="#exercise-6-trace-a-requested-page-from-source-to-visible-output" aria-label="Link to this section">#</a></h3>
-<p>Distinguish server response bytes, parsed document tree, applied style and painted output.</p>
-<p>Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.</p>
-<h3 id="reference-comparison-and-limits">Reference comparison and limits<a class="heading-anchor" href="#reference-comparison-and-limits" aria-label="Link to this section">#</a></h3>
-<p>Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.</p></article>
+<p><strong>Expected answer:</strong> Distinguish server response bytes, parsed document tree, applied style and painted output.</p>
+<p><strong>Why:</strong> Each stage can fail on its own: the server can send the wrong bytes, the parser can repair broken markup, CSS can hide content and painting can clip it, so naming the stage tells you where to look.</p>
+<h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
+<p>Open <code>courses/web-development/solutions/web-001_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
   </main>
 </body>
 </html>

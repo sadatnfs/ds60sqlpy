@@ -194,31 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-048_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-048-explanatory-solutions">web-048: explanatory solutions<a class="heading-anchor" href="#web-048-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.</p>
-<h3 id="why-the-mechanism-works">Why the mechanism works<a class="heading-anchor" href="#why-the-mechanism-works" aria-label="Link to this section">#</a></h3>
-<p>A cookie is a small value the browser stores and sends according to its scope and attributes. A common session design stores an unpredictable session identifier in a cookie and keeps application state on the server. The identifier is a bearer credential: possession may allow the server to associate a request with that session. Do not put sensitive application state into an unsigned client value and treat it as trusted.</p>
-<p>Session lifetime involves creation, authentication transitions, inactivity, absolute expiry and logout. Regenerating the identifier after privilege changes helps address fixation, but safe concurrency and invalidation policies still matter. HttpOnly limits script access to a cookie, Secure restricts transport to HTTPS, and SameSite controls some cross-site sending behavior. These attributes support different defenses and do not replace authorization.</p>
-<p>Configure session behavior before session_start and before output. Prefer cookie-only identifiers and strict session handling. Real session storage can lock during a request, so write-close when the required state update is complete in applications that support concurrent requests. The CLI reference uses a pure state transition to demonstrate expiry; it does not claim to create or test a browser session.</p>
+<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-048.md</code>.</p>
 <h3 id="exercise-1-explain-which-data-is-in-the-browser-and-which-is-on-the-server">Exercise 1: Explain which data is in the browser and which is on the server.<a class="heading-anchor" href="#exercise-1-explain-which-data-is-in-the-browser-and-which-is-on-the-server" aria-label="Link to this section">#</a></h3>
-<p>The browser normally holds an identifier while server storage holds the associated session state.</p>
-<p>Trace the smallest example before editing. Name which values are source and which are observations.</p>
+<p><strong>Expected answer:</strong> The browser normally holds an identifier while server storage holds the associated session state.</p>
+<p><strong>Why:</strong> The cookie normally holds only a random session identifier, while the session data stays on the server.</p>
 <h3 id="exercise-2-add-a-fixed-clock-inactivity-check">Exercise 2: Add a fixed-clock inactivity check.<a class="heading-anchor" href="#exercise-2-add-a-fixed-clock-inactivity-check" aria-label="Link to this section">#</a></h3>
-<p>The test can inspect the exact expiry boundary reproducibly.</p>
-<p>Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.</p>
+<p><strong>Expected evidence:</strong> The test can inspect the exact expiry boundary reproducibly.</p>
+<p><strong>Why:</strong> An injected clock lets a test place last activity exactly at the boundary.</p>
 <h3 id="exercise-3-model-session-activity-and-expiry-with-explicit-state-transitions">Exercise 3: Model session activity and expiry with explicit state transitions.<a class="heading-anchor" href="#exercise-3-model-session-activity-and-expiry-with-explicit-state-transitions" aria-label="Link to this section">#</a></h3>
-<p>An expired session is rejected and a valid activity update preserves the declared identity.</p>
-<p>Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.</p>
+<p><strong>Expected evidence:</strong> An expired session is rejected and a valid activity update preserves the declared identity.</p>
+<p><strong>Why:</strong> Explicit transitions make expiry and activity updates testable without a real server.</p>
 <h3 id="exercise-4-explain-why-a-client-supplied-user-id-is-not-a-trusted-session">Exercise 4: Explain why a client-supplied user id is not a trusted session.<a class="heading-anchor" href="#exercise-4-explain-why-a-client-supplied-user-id-is-not-a-trusted-session" aria-label="Link to this section">#</a></h3>
-<p>A caller can choose that value unless a server-verified credential establishes the identity.</p>
-<p>Keep the failing input. Identify the first layer where the observed result differs from the intended contract.</p>
+<p><strong>Expected answer:</strong> A caller can choose that value unless a server-verified credential establishes the identity.</p>
+<p><strong>Why:</strong> The caller controls every submitted field, so identity must come from a server-verified session.</p>
 <h3 id="exercise-5-test-activity-exactly-at-and-beyond-the-timeout-boundary">Exercise 5: Test activity exactly at and beyond the timeout boundary.<a class="heading-anchor" href="#exercise-5-test-activity-exactly-at-and-beyond-the-timeout-boundary" aria-label="Link to this section">#</a></h3>
-<p>The implementation follows its documented inclusive or exclusive timeout rule.</p>
-<p>Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.</p>
+<p><strong>Expected evidence:</strong> The implementation follows its documented inclusive or exclusive timeout rule.</p>
+<p><strong>Why:</strong> The example uses &gt;, so 1800 seconds is still active and 1801 has expired; the boundary must match the documented rule.</p>
 <h3 id="exercise-6-describe-a-real-http-session-acceptance-test">Exercise 6: Describe a real HTTP session acceptance test.<a class="heading-anchor" href="#exercise-6-describe-a-real-http-session-acceptance-test" aria-label="Link to this section">#</a></h3>
-<p>Observe Set-Cookie, a subsequent Cookie request, identifier rotation, logout and expiry through an owned server.</p>
-<p>Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.</p>
-<h3 id="reference-comparison-and-limits">Reference comparison and limits<a class="heading-anchor" href="#reference-comparison-and-limits" aria-label="Link to this section">#</a></h3>
-<p>Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.</p></article>
+<p><strong>Expected answer:</strong> Observe Set-Cookie, a subsequent Cookie request, identifier rotation, logout and expiry through an owned server.</p>
+<p><strong>Why:</strong> A real test watches Set-Cookie, the next request&#x27;s Cookie header, identifier rotation after login, logout and expiry.</p>
+<h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
+<p>Open <code>courses/web-development/solutions/web-048_solution.php</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.</p></article>
   </main>
 </body>
 </html>

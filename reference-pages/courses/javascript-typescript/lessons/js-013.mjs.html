@@ -194,13 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/javascript-typescript/lessons/js-013.mjs</code></p>
     </header>
     <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-javascript"><code><span class="source-line"><span class="syntax-comment">// Answer-free learner source. Save your own copy before editing.</span></span>
-<span class="source-line"><span class="syntax-comment">// Exercise 1: Cancel a pending timer</span></span>
-<span class="source-line"><span class="syntax-comment">// Start a timer with a signal, abort it, and inspect the rejection.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: AbortError with the original reason as cause.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 1: Cancel a pending timer: predict an edited check</span></span>
+<span class="source-line"><span class="syntax-comment">// Copy Example A into a scratch `main.mjs` and change `await assert.rejects(pending, error</span></span>
+<span class="source-line"><span class="syntax-comment">// =&gt; error.name === &#x27;AbortError&#x27; &amp;&amp; error.cause === reason);` to `await</span></span>
+<span class="source-line"><span class="syntax-comment">// assert.rejects(pending, error =&gt; error.name === &#x27;AbortError!&#x27; &amp;&amp; error.cause === reason);`</span></span>
+<span class="source-line"><span class="syntax-comment">// inside its check. Before running it, predict whether the check still passes and explain</span></span>
+<span class="source-line"><span class="syntax-comment">// why; then restore it.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` at the check</span></span>
+<span class="source-line"><span class="syntax-comment">// `assert.rejects(pending, (error) =&gt; error.name === &#x27;AbortError&#x27; &amp;&amp; error.cause ===</span></span>
+<span class="source-line"><span class="syntax-comment">// reason)`. Restoring the original line brings back the worked observation: abortError with</span></span>
+<span class="source-line"><span class="syntax-comment">// the original reason as cause.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment">// Exercise 2: Reject an already aborted request before work</span></span>
-<span class="source-line"><span class="syntax-comment">// Abort before calling the custom operation.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: the exact reason is rejected; no timer starts.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 2: Reject an already aborted request before work: diagnose an edited check</span></span>
+<span class="source-line"><span class="syntax-comment">// A careless edit changed a check in Example B so that it reads `await</span></span>
+<span class="source-line"><span class="syntax-comment">// assert.rejects(cancellableValue(7, controller.signal, trace), error =&gt; error !==</span></span>
+<span class="source-line"><span class="syntax-comment">// reason);`. Run Example B with that line, explain why the edited check now fails for the</span></span>
+<span class="source-line"><span class="syntax-comment">// same program state, and restore it.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at the check</span></span>
+<span class="source-line"><span class="syntax-comment">// `assert.rejects(cancellableValue(7, controller.signal, trace), (error) =&gt; error ===</span></span>
+<span class="source-line"><span class="syntax-comment">// reason)`; after it the line reads `await assert.rejects(cancellableValue(7,</span></span>
+<span class="source-line"><span class="syntax-comment">// controller.signal, trace), error =&gt; error === reason);` again and the exact reason is</span></span>
+<span class="source-line"><span class="syntax-comment">// rejected; no timer starts.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 3: Complete normally and clean up once</span></span>
 <span class="source-line"><span class="syntax-comment">// Run the custom operation without aborting, then abort its signal after completion.</span></span>
@@ -215,8 +229,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-comment">// Expected: the first reason remains authoritative.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 6: Combine caller and deadline signals</span></span>
-<span class="source-line"><span class="syntax-comment">// Combine two controllers and abort the deadline controller.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: combined signal is aborted with deadline reason.</span></span>
+<span class="source-line"><span class="syntax-comment">// Combine a caller signal with a disposable one-second deadline, abort the caller first,</span></span>
+<span class="source-line"><span class="syntax-comment">// then leave the block that owns the deadline.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: combined signal carries the caller reason; the deadline stays unaborted and its</span></span>
+<span class="source-line"><span class="syntax-comment">// timer is cleared once when the block ends.</span></span>
 <span class="source-line"></span>
 <span class="source-line">console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Implement the six exercises in your saved copy.&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span></code></pre></article>

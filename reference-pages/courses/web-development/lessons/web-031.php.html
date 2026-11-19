@@ -197,11 +197,33 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">declare</span><span class="syntax-punctuation">(</span>strict_types<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">);</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment">// web-031: Write a PHP program that prints a study topic and computed duration.</span></span>
-<span class="source-line"><span class="syntax-comment">// Implement the task with local synthetic values. Do not use real credentials.</span></span>
-<span class="source-line"><span class="syntax-comment">// Keep separate checks for the normal case and the boundary in Exercise 5.</span></span>
+<span class="source-line"><span class="syntax-comment">// web-031: PHP begins: interpreter, CLI and server execution</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercises. Hints are in the guide; answers are in the solutions folder.</span></span>
+<span class="source-line"><span class="syntax-comment">// 1. Predict which characters in the greeting source appear in output.</span></span>
+<span class="source-line"><span class="syntax-comment">// 2. Change the planned minutes while preserving the label.</span></span>
+<span class="source-line"><span class="syntax-comment">// 3. Write a PHP program that prints a study topic and computed duration.</span></span>
+<span class="source-line"><span class="syntax-comment">// 4. Diagnose a missing semicolon as a parse error.</span></span>
+<span class="source-line"><span class="syntax-comment">// 5. Print literal angle brackets and explain the output surface.</span></span>
+<span class="source-line"><span class="syntax-comment">// 6. Compare the CLI lifecycle with a server request lifecycle.</span></span>
+<span class="source-line"><span class="syntax-comment">//</span></span>
+<span class="source-line"><span class="syntax-comment">// Worked example 1: First output</span></span>
+<span class="source-line"><span class="syntax-comment">// &lt;?php</span></span>
+<span class="source-line"><span class="syntax-comment">// echo &quot;Hello, classroom.\n&quot;;</span></span>
+<span class="source-line"><span class="syntax-comment">//</span></span>
+<span class="source-line"><span class="syntax-comment">// Worked example 2: A named value</span></span>
+<span class="source-line"><span class="syntax-comment">// $minutes = 30;</span></span>
+<span class="source-line"><span class="syntax-comment">// echo &quot;Planned minutes: &quot; . $minutes . &quot;\n&quot;;</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-keyword">echo</span> <span class="syntax-string">&quot;</span><span class="syntax-string">My implementation goes here.</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">function</span> <span class="syntax-function">check</span><span class="syntax-punctuation">(</span>bool $condition<span class="syntax-punctuation">,</span> string $message<span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> void</span>
+<span class="source-line"><span class="syntax-punctuation">{</span></span>
+<span class="source-line">  <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>$condition<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> RuntimeException<span class="syntax-punctuation">(</span>$message<span class="syntax-punctuation">);</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">// Write your implementation here and add one check() call for each case you test.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">echo</span> <span class="syntax-string">&quot;</span><span class="syntax-string">web-031 attempt finished without a failed check</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span></code></pre></article>
   </main>
 </body>

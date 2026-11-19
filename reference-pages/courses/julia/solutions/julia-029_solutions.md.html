@@ -200,7 +200,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Expected observation:</strong> The next put! waits until space is available.</p>
 <h3 id="2-preserve-output-meaning">2. Preserve output meaning<a class="heading-anchor" href="#2-preserve-output-meaning" aria-label="Link to this section">#</a></h3>
 <p>Squares are emitted into the result in channel-consumption order; broader parallel pipelines need explicit ordering.</p>
-<p><strong>Expected observation:</strong> The result is[4,0,9].</p>
+<p><strong>Expected observation:</strong> The result is <code>[4, 0, 9]</code>.</p>
 <h3 id="3-inject-a-failure">3. Inject a failure<a class="heading-anchor" href="#3-inject-a-failure" aria-label="Link to this section">#</a></h3>
 <p>No shortened result is mislabeled success; joining propagates the producer failure.</p>
 <p><strong>Expected observation:</strong> A CompositeException reaches the caller.</p>

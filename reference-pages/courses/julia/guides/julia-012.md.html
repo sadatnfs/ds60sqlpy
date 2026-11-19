@@ -198,7 +198,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Intermediate; approximately 150 minutes. Direct prerequisites: <code>julia-011</code>.</p>
 <p>Express useful type relationships without confusing subtype relations, storage representation or a method signature.</p>
 <h3 id="classroom-execution">Classroom execution<a class="heading-anchor" href="#classroom-execution" aria-label="Link to this section">#</a></h3>
-<p>Choose <strong>Julia language and scientific computing</strong> in <code>/classroom</code>, open this unit, and select its prepared <code>julia</code> runtime. The worker starts a fresh <code>main.jl</code> process with two Julia threads, a fixed package environment, no startup file and offline package settings. Both worked examples are complete under that environment. Save your current pad before replacing it. No package, model or dataset is fetched by a lesson.</p>
+<p>Open <code>julia-012</code> in <code>/classroom</code> with its prepared <code>julia</code> runtime. Worked case A (preserve the element representation) and worked case B (distinguish invariance from a method family) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing <code>julia-012: all reference checks passed</code>. The <a href="../README.md.html">course overview</a> describes the shared runtime: a fresh offline <code>main.jl</code> process with two threads and a fixed package environment.</p>
 <h3 id="a-type-parameter-records-a-relationship">A type parameter records a relationship<a class="heading-anchor" href="#a-type-parameter-records-a-relationship" aria-label="Link to this section">#</a></h3>
 <p>A parametric type can represent the same structure with different element types. A record containing <code>Vector{T}</code> retains a relationship between its parameter and its stored elements. A parametric method can use that relationship to construct compatible accumulators or outputs.</p>
 <p>A type bound such as <code>T&lt;:Real</code> restricts the domain to real-number types. It should reflect the intended mathematical operation, not be added as decoration. A generic numerical algorithm often needs fewer restrictions than a beginner expects. Excessively narrow signatures can prevent rational, arbitrary-precision or automatic-differentiation values from using otherwise compatible arithmetic.</p>
@@ -274,9 +274,9 @@ worked_b<span class="syntax-punctuation">(</span><span class="syntax-punctuation
 <p><strong>Expected:</strong> The result is exactly 1//1.</p>
 <p><strong>Hint:</strong> Use a compatible zero and arithmetic.</p>
 <h4 id="2-handle-an-empty-concrete-vector">2. Handle an empty concrete vector<a class="heading-anchor" href="#2-handle-an-empty-concrete-vector" aria-label="Link to this section">#</a></h4>
-<p>Sum Int[].</p>
+<p>Sum <code>Int[]</code>.</p>
 <p><strong>Expected:</strong> The explicit additive identity is 0.</p>
-<p><strong>Hint:</strong> The element type supplies zero(T).</p>
+<p><strong>Hint:</strong> The element type supplies <code>zero(T)</code>.</p>
 <h4 id="3-inspect-invariance">3. Inspect invariance<a class="heading-anchor" href="#3-inspect-invariance" aria-label="Link to this section">#</a></h4>
 <p>Test whether Vector{Float64} is a subtype of Vector{Real}.</p>
 <p><strong>Expected:</strong> It is not.</p>
@@ -299,7 +299,7 @@ worked_b<span class="syntax-punctuation">(</span><span class="syntax-punctuation
 <li><a href="https://docs.julialang.org/en/v1/manual/methods/">Julia parametric methods</a></li>
 </ul>
 <h3 id="study-companion">Study companion<a class="heading-anchor" href="#study-companion" aria-label="Link to this section">#</a></h3>
-<p>Use the repository learning-companion skill with this lesson ID, your prediction and your actual source/output. Ask for a diagnosis of the first incorrect type, shape, state transition or assumption. Keep observed execution distinct from a timing claim, inferred mathematical result or external deployment.</p></article>
+<p>A repository-aware assistant with the learning-companion skill can review <code>julia-012</code> with you. Give it your prediction for one investigation, your source and the actual output, and ask it to find the first incorrect assumption about parametric type, where, invariance, AbstractVector or type stability.</p></article>
   </main>
 </body>
 </html>

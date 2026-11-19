@@ -200,16 +200,41 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">    <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">meta</span> <span class="syntax-attribute">name</span><span class="syntax-operator">=</span><span class="syntax-string">&quot;viewport&quot;</span> <span class="syntax-attribute">content</span><span class="syntax-operator">=</span><span class="syntax-string">&quot;width=device-width, initial-scale=1&quot;</span> <span class="syntax-punctuation">/</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">title</span><span class="syntax-punctuation">&gt;</span>Connect HTML to JavaScript: DOM, events and safe text: my attempt<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">title</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">style</span><span class="syntax-punctuation">&gt;</span></span>
-<span class="source-line">      <span class="syntax-comment">/* Implement the lesson-specific CSS. Keep keyboard focus visible. */</span></span>
+<span class="source-line">      <span class="syntax-comment">/* Write the CSS for the exercises here. Keep keyboard focus visible. */</span></span>
 <span class="source-line">    <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">style</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line">  <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">head</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line">  <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">body</span><span class="syntax-punctuation">&gt;</span></span>
-<span class="source-line">    <span class="syntax-comment">&lt;!-- web-025: Build a native-button counter with a reset action and output. --&gt;</span></span>
-<span class="source-line">    <span class="syntax-comment">&lt;!-- Save your prediction, then implement the six exercises from the guide. --&gt;</span></span>
+<span class="source-line">    <span class="syntax-comment">&lt;!--</span></span>
+<span class="source-line"><span class="syntax-comment">      web-025 exercises. Hints are in the guide; answers are in the solutions folder.</span></span>
+<span class="source-line"><span class="syntax-comment">      1. Predict when the registered callback executes.</span></span>
+<span class="source-line"><span class="syntax-comment">      2. Change the display label without changing numeric state.</span></span>
+<span class="source-line"><span class="syntax-comment">      3. Build a native-button counter with a reset action and output.</span></span>
+<span class="source-line"><span class="syntax-comment">      4. Diagnose a null selection caused by a missing id.</span></span>
+<span class="source-line"><span class="syntax-comment">      5. Insert text containing angle brackets without creating markup.</span></span>
+<span class="source-line"><span class="syntax-comment">      6. Explain why reading state back from formatted text is fragile.</span></span>
+<span class="source-line"><span class="syntax-comment">    --&gt;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">main</span><span class="syntax-punctuation">&gt;</span></span>
-<span class="source-line">      <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">h1</span><span class="syntax-punctuation">&gt;</span>Connect HTML to JavaScript: DOM, events and safe text<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">h1</span><span class="syntax-punctuation">&gt;</span></span>
-<span class="source-line">      <span class="syntax-comment">&lt;!-- Build your own document here. The reference is separate. --&gt;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">h1</span><span class="syntax-punctuation">&gt;</span>Practice counter<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">h1</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">button</span> <span class="syntax-attribute">id</span><span class="syntax-operator">=</span><span class="syntax-string">&quot;add&quot;</span> <span class="syntax-attribute">type</span><span class="syntax-operator">=</span><span class="syntax-string">&quot;button&quot;</span><span class="syntax-punctuation">&gt;</span>Add one practice step<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">button</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">p</span><span class="syntax-punctuation">&gt;</span>Steps: <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">output</span> <span class="syntax-attribute">id</span><span class="syntax-operator">=</span><span class="syntax-string">&quot;count&quot;</span> <span class="syntax-attribute">aria-live</span><span class="syntax-operator">=</span><span class="syntax-string">&quot;polite&quot;</span><span class="syntax-punctuation">&gt;</span>0<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">output</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">p</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">p</span> <span class="syntax-attribute">id</span><span class="syntax-operator">=</span><span class="syntax-string">&quot;label&quot;</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">p</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">main</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">script</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">      <span class="syntax-string">&quot;use strict&quot;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line">      <span class="syntax-comment">// Worked example 1: Update text safely</span></span>
+<span class="source-line">      <span class="syntax-comment">// const label = document.querySelector(&#x27;#label&#x27;);</span></span>
+<span class="source-line">      <span class="syntax-comment">// label.textContent = &#x27;&lt;new learner&gt;&#x27;;</span></span>
+<span class="source-line"></span>
+<span class="source-line">      <span class="syntax-comment">// Worked example 2: A small state transition</span></span>
+<span class="source-line">      <span class="syntax-comment">// let count = 0;</span></span>
+<span class="source-line">      <span class="syntax-comment">// button.addEventListener(&#x27;click&#x27;, () =&gt; {</span></span>
+<span class="source-line">      <span class="syntax-comment">//   count += 1;</span></span>
+<span class="source-line">      <span class="syntax-comment">//   output.textContent = String(count);</span></span>
+<span class="source-line">      <span class="syntax-comment">// });</span></span>
+<span class="source-line"></span>
+<span class="source-line">      <span class="syntax-comment">// Write the JavaScript for the exercises here.</span></span>
+<span class="source-line">    <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">script</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line">  <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">body</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line"><span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">html</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line"></span></code></pre></article>

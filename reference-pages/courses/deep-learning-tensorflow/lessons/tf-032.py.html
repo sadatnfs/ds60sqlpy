@@ -200,12 +200,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 1: Create a fixed inference model</span></span>
-<span class="source-line"><span class="syntax-comment"># Set a bias-free Dense weight to2 and predict on1,3.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: predictions2,6.</span></span>
+<span class="source-line"><span class="syntax-comment"># Set a bias-free Dense weight to 2 and predict on 1, 3.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: predictions 2, 6.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 2: Round-trip .keras</span></span>
 <span class="source-line"><span class="syntax-comment"># Save and reload the model in a temporary directory.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: reloaded predictions match within1e-6.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: reloaded predictions match within 1e-6.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Export an inference endpoint</span></span>
 <span class="source-line"><span class="syntax-comment"># Call model.export into a different temporary subdirectory and load SavedModel.</span></span>
@@ -214,11 +214,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Check both in a fresh process</span></span>
 <span class="source-line"><span class="syntax-comment"># Load the .keras model and exported endpoint in a child interpreter and compare their</span></span>
 <span class="source-line"><span class="syntax-comment"># outputs.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: both child outputs[[2],[6]].</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: both child outputs [[2], [6]].</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Check a new batch length</span></span>
 <span class="source-line"><span class="syntax-comment"># Use three valid rows instead of two with the restored model.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: output shape(3,1), predictions0,4,8.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: output shape (3, 1), predictions 0, 4, 8.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Remove only owned artifacts</span></span>
 <span class="source-line"><span class="syntax-comment"># Clean the temporary directory and check both artifacts are absent.</span></span>

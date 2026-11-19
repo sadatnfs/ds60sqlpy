@@ -196,7 +196,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="actual-controlled-event-time-windows">Actual controlled event-time windows<a class="heading-anchor" href="#actual-controlled-event-time-windows" aria-label="Link to this section">#</a></h2>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh event-time
 bash run.sh readback</code></pre>
-<p>Read the fixed timeline: three events before watermark2000, one older event after it, then a second-window event before watermark4000. The checker reconciles exact key/window/count/amount tuples and the separate late-record identity. No wall-clock sleep is used as evidence that a particular event became late.</p>
+<p>Read the fixed timeline: three events before watermark 2000, one older event after it, then a second-window event before watermark 4000. The checker reconciles exact key/window/count/amount tuples and the separate late-record identity. No wall-clock sleep is used as evidence that a particular event became late.</p>
 <p>The source timestamp and watermark code is in the maintained Java project. These commands run in the copied owned Docker workshop, not in a classroom pad.</p></article>
   </main>
 </body>

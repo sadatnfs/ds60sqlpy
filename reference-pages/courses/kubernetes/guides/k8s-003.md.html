@@ -199,7 +199,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="fixture-contract-update">Fixture contract update<a class="heading-anchor" href="#fixture-contract-update" aria-label="Link to this section">#</a></h3>
 <p>The checked-in source now uses fixture image <code>ds60sqlpy-k8s-fixture:0.2.0</code>. The legacy <code>/ready</code> and <code>/version</code> response behavior is preserved, while ConfigMap/task/probe capabilities are added. Earlier historical receipts described below used the previous image. Configured environment/file paths, finite tasks, startup probes, negative cases and cleanup need explicit runtime evidence. See <a href="../../../docs/validation.md.html">validation</a> and CI artifacts for the exact revision and platform to identify which checks actually ran; a historical run does not qualify changed source or a new cluster. Prepare a fresh owned lease immediately before Run; the credential lasts fifteen minutes. An old saved learner pad is preserved and receives an actionable version refusal until its owner deliberately reviews and updates the image field.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
-<p>Beginner; 90 minutes. Direct design prerequisites: <code>k8s-002</code>. All 42 planned guides now have authored bodies. Follow the direct prerequisites and each lesson&#x27;s explicit runtime or host-lab boundary.</p>
+<p>Beginner; 90 minutes. Direct design prerequisites: <code>k8s-002</code>. All 66 lessons in this subject are authored. Follow the direct prerequisites and each lesson&#x27;s explicit runtime or host-lab boundary.</p>
 <p>Learner artifact: <a href="../lessons/k8s-003.yaml.html">k8s-003.yaml</a>. Keep <a href="../solutions/k8s-003_solutions.md.html">solutions</a> closed until an attempt or explicit reveal.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
 <ul>
@@ -250,7 +250,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-2-validate-a-numeric-field">Exercise 2: Validate a numeric field<a class="heading-anchor" href="#exercise-2-validate-a-numeric-field" aria-label="Link to this section">#</a></h4>
 <p>Compare replicas:1 with replicas:&quot;two&quot; in a scratch copy.</p>
 <p><strong>Inputs/evidence:</strong> For k8s-003 Exercise 2, one valid number and one invalid string.</p>
-<p><strong>Expected result/shape:</strong> For k8s-003 Exercise 2, numeric1 is the intended request; the string is rejected by schema validation.</p>
+<p><strong>Expected result/shape:</strong> For k8s-003 Exercise 2, numeric 1 is the intended request; the string is rejected by schema validation.</p>
 <p><strong>Verify:</strong> For k8s-003 Exercise 2, retain the validation phase/result and do not claim a rejected object has a new UID.</p>
 <p><strong>Progressive hints:</strong></p>
 <ol>
@@ -260,8 +260,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ol>
 <h4 id="exercise-3-trace-selector-and-template-labels">Exercise 3: Trace selector and template labels<a class="heading-anchor" href="#exercise-3-trace-selector-and-template-labels" aria-label="Link to this section">#</a></h4>
 <p>Check the Deployment controller match.</p>
-<p><strong>Inputs/evidence:</strong> For k8s-003 Exercise 3, selector app:hello and template label app:hello.</p>
-<p><strong>Expected result/shape:</strong> For k8s-003 Exercise 3, the key/value pairs agree; app:wrong would violate the intended controller/template relation.</p>
+<p><strong>Inputs/evidence:</strong> For k8s-003 Exercise 3, selector app: hello and template label app: hello.</p>
+<p><strong>Expected result/shape:</strong> For k8s-003 Exercise 3, the key/value pairs agree; app: wrong would violate the intended controller/template relation.</p>
 <p><strong>Verify:</strong> For k8s-003 Exercise 3, compare the exact pair on both sides.</p>
 <p><strong>Progressive hints:</strong></p>
 <ol>
@@ -282,7 +282,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ol>
 <h4 id="exercise-5-separate-intent-from-observation">Exercise 5: Separate intent from observation<a class="heading-anchor" href="#exercise-5-separate-intent-from-observation" aria-label="Link to this section">#</a></h4>
 <p>Compare spec.replicas 1 with a returned status.readyReplicas0.</p>
-<p><strong>Inputs/evidence:</strong> For k8s-003 Exercise 5, desired1, observed ready0.</p>
+<p><strong>Inputs/evidence:</strong> For k8s-003 Exercise 5, desired 1, observed ready 0.</p>
 <p><strong>Expected result/shape:</strong> For k8s-003 Exercise 5, the request can be accepted while readiness is not established.</p>
 <p><strong>Verify:</strong> For k8s-003 Exercise 5, record generation/observedGeneration and readiness after bounded reconciliation; do not edit status into the source.</p>
 <p><strong>Progressive hints:</strong></p>

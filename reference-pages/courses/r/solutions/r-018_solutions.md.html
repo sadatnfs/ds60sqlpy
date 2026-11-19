@@ -202,29 +202,23 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict the date after 2024-02-28.</p>
 <p>It is 2024-02-29.</p>
-<p><strong>Expected evidence:</strong> It is 2024-02-29.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Add two hours to a declared UTC instant.</p>
 <p>The instant advances 7200 seconds.</p>
-<p><strong>Expected evidence:</strong> The instant advances 7200 seconds.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Parse an explicit ISO calendar date.</p>
 <p>as.Date(&quot;2025-01-15&quot;) retains the calendar date.</p>
-<p><strong>Expected evidence:</strong> as.Date(&quot;2025-01-15&quot;) retains the calendar date.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose a local timestamp with no zone near a daylight-saving change.</p>
 <p>Require the source zone and a defined resolution/rejection policy.</p>
-<p><strong>Expected evidence:</strong> Require the source zone and a defined resolution/rejection policy.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Detect invalid date text.</p>
 <p>A failed parse is missing and should be counted or rejected.</p>
-<p><strong>Expected evidence:</strong> A failed parse is missing and should be counted or rejected.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Separate business-date grouping from event ordering.</p>
 <p>Keep both representations with their meanings stated.</p>
-<p><strong>Expected evidence:</strong> Keep both representations with their meanings stated.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference contains explicit behavioral assertions for its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The reference makes 6 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>
 </body>
 </html>

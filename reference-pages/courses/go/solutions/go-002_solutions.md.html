@@ -198,19 +198,21 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
 <p>A type determines which values and operations are valid. int has an implementation-dependent width, while int64 and uint32 declare particular widths. A conversion changes representation; it is not a proof that the original value fits. Untyped numeric constants can retain exact values until context chooses a concrete type. Variables already have concrete types, so mixing integer and floating arithmetic requires an explicit decision. Integer division truncates toward zero. Floating-point values represent a finite set of approximations, and repeated calculations need a tolerance chosen from the domain. Never repair a numerical test with a tolerance large enough to hide a fundamentally wrong algorithm.</p>
 <p>var n int64 fixes the variable&#x27;s type. float64(n) converts the value; converting after integer division cannot restore a lost fraction. uint8 wraps values during nonconstant conversion modulo its range. A constant that cannot fit its target type is rejected by the compiler. math.Abs gives an absolute difference, and strconv.ParseInt returns both a value and an error when decoding external text.</p>
-<h3 id="1-compare-two-divisions">1. Compare two divisions<a class="heading-anchor" href="#1-compare-two-divisions" aria-label="Link to this section">#</a></h3>
-<p>Compute 7/2 and float64(7)/2.</p>
+<h3 id="1-compare-two-divisions-change-one-input">1. Compare two divisions: change one input<a class="heading-anchor" href="#1-compare-two-divisions-change-one-input" aria-label="Link to this section">#</a></h3>
+<p>Copy worked example 1 into a scratch pad and change <code>a := 7 / 2</code> to <code>a := 8 / 2</code>. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</p>
+<p>The unchanged code is worked example 1:</p>
 <pre class="highlighted-code"><code class="language-go">a <span class="syntax-operator">:=</span> <span class="syntax-number">7</span> <span class="syntax-operator">/</span> <span class="syntax-number">2</span>
 b <span class="syntax-operator">:=</span> <span class="syntax-builtin">float64</span><span class="syntax-punctuation">(</span><span class="syntax-number">7</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-number">2</span>
 check<span class="syntax-punctuation">(</span>a <span class="syntax-operator">==</span> <span class="syntax-number">3</span> <span class="syntax-operator">&amp;&amp;</span> b <span class="syntax-operator">==</span> <span class="syntax-number">3.5</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;division&quot;</span><span class="syntax-punctuation">)</span></code></pre>
-<p><strong>Expected:</strong> The results are 3 and 3.5.</p>
+<p><strong>Expected:</strong> The changed run panics with <code>division</code> because <code>a == 3 &amp;&amp; b == 3.5</code> no longer holds. Restoring the original line brings back the worked observation: the results are 3 and 3.5.</p>
 <p>Converting before division selects floating arithmetic. float64(7/2) would instead be 3.0 because integer division has already occurred.</p>
-<h3 id="2-expose-narrowing">2. Expose narrowing<a class="heading-anchor" href="#2-expose-narrowing" aria-label="Link to this section">#</a></h3>
-<p>Convert a variable holding 260 to uint8.</p>
+<h3 id="2-expose-narrowing-debug-a-regression">2. Expose narrowing: debug a regression<a class="heading-anchor" href="#2-expose-narrowing-debug-a-regression" aria-label="Link to this section">#</a></h3>
+<p>A regression changed one token in worked example 2, so one line now reads <code>n := 261</code>. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.</p>
+<p>The unchanged code is worked example 2:</p>
 <pre class="highlighted-code"><code class="language-go">n <span class="syntax-operator">:=</span> <span class="syntax-number">260</span>
 small <span class="syntax-operator">:=</span> <span class="syntax-builtin">uint8</span><span class="syntax-punctuation">(</span>n<span class="syntax-punctuation">)</span>
 check<span class="syntax-punctuation">(</span>small <span class="syntax-operator">==</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;narrowing&quot;</span><span class="syntax-punctuation">)</span></code></pre>
-<p><strong>Expected:</strong> The narrowed value is 4.</p>
+<p><strong>Expected:</strong> Before the repair the program panics with <code>narrowing</code>; after it the line reads <code>n := 260</code> again and the narrowed value is 4.</p>
 <p>The eight-bit unsigned result retains the value modulo 256. A direct constant assignment of 260 to uint8 would be rejected instead of silently accepted.</p>
 <h3 id="3-preserve-a-wide-product">3. Preserve a wide product<a class="heading-anchor" href="#3-preserve-a-wide-product" aria-label="Link to this section">#</a></h3>
 <p>Multiply two explicitly int64 values of 50000.</p>

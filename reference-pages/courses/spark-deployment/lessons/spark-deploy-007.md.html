@@ -199,6 +199,26 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="diagnose-the-callback-path-from-the-executor-s-location">Diagnose the callback path from the executor&#x27;s location<a class="heading-anchor" href="#diagnose-the-callback-path-from-the-executor-s-location" aria-label="Link to this section">#</a></h3>
 <p><code>spark.driver.bindAddress</code> selects the driver&#x27;s listening interfaces. <code>spark.driver.host</code> is the address advertised to other processes. The master URL is a third address. A correct master URL can allocate executors while an incorrect driver address makes the application fail afterward.</p>
 <p>Compose supplies service-name DNS within its network. Use <code>driver</code> or <code>notebook</code> there. A host-published port is for a connection originating outside that network. The workshop never publishes master RPC or worker data ports to the host. A multi-host deployment needs actual routes and firewall rules for its advertised addresses, not a larger set of random public port mappings.</p>
+<p>In this project the name <code>driver</code> comes from the Compose service&#x27;s <code>hostname</code>. Its <code>SPARK_LOCAL_IP</code> sets the default bind address for Spark processes in that container; the submit call&#x27;s <code>spark.driver.bindAddress=0.0.0.0</code> overrides it for the driver&#x27;s listening sockets, as the Spark configuration reference states:</p>
+<p>From <a href="../projects/cluster-lab/compose.yaml.html"><code>projects/cluster-lab/compose.yaml</code></a>:</p>
+<pre class="highlighted-code"><code class="language-yaml"><span class="syntax-tag">driver</span><span class="syntax-punctuation">:</span>
+  <span class="syntax-tag">&lt;&lt;</span><span class="syntax-punctuation">:</span> *runtime
+  <span class="syntax-tag">hostname</span><span class="syntax-punctuation">:</span> driver
+  <span class="syntax-tag">environment</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-tag">&lt;&lt;</span><span class="syntax-punctuation">:</span> *spark-environment
+    <span class="syntax-tag">SPARK_LOCAL_IP</span><span class="syntax-punctuation">:</span> driver
+  <span class="syntax-tag">command</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>idle<span class="syntax-punctuation">]</span>
+  <span class="syntax-tag">mem_limit</span><span class="syntax-punctuation">:</span> 1536m
+  <span class="syntax-tag">cpus</span><span class="syntax-punctuation">:</span> 1
+  <span class="syntax-tag">pids_limit</span><span class="syntax-punctuation">:</span> 512
+  <span class="syntax-tag">volumes</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-punctuation">-</span> ./entrypoint.py:/lab/entrypoint.py:ro
+    <span class="syntax-punctuation">-</span> ./jupyter_config.py:/lab/jupyter_config.py:ro
+    <span class="syntax-punctuation">-</span> ./app:/lab/app:ro
+    <span class="syntax-punctuation">-</span> ./conf:/lab/conf:ro
+    <span class="syntax-punctuation">-</span> ${DS60_SPARK_STATE:?Missing workshop state}/events:/events
+    <span class="syntax-punctuation">-</span> ${DS60_SPARK_STATE}/results:/results
+  <span class="syntax-tag">depends_on</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>master<span class="syntax-punctuation">,</span> worker-a<span class="syntax-punctuation">,</span> worker-b<span class="syntax-punctuation">]</span></code></pre>
 <h3 id="worked-case-a-trace-the-working-two-way-path">Worked case A: trace the working two-way path<a class="heading-anchor" href="#worked-case-a-trace-the-working-two-way-path" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">driver resolves master -&gt; connects to master:7077
 worker launches executor -&gt; executor resolves driver

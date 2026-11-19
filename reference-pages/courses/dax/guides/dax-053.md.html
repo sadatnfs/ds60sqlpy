@@ -214,6 +214,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
                     Date (one)
                        | inactive ShipDate
                        +------&gt; Sales</code></pre>
+<p>A case builds a query-local <code>DATATABLE</code>. That table exists only inside its query and has no relationship to any model table.</p>
 <p>All amounts in ordinary Sales are USD after the line discount, before tax and returns. The Date fixture is complete for 2024 and 2025; a short result table is a selected slice, not the whole calendar. JSON <code>null</code> in the worked-results sidecar means DAX BLANK, not the text &quot;null&quot;.</p>
 <h3 id="worked-cases">Worked cases<a class="heading-anchor" href="#worked-cases" aria-label="Link to this section">#</a></h3>
 <h4 id="case-a-cold-and-warm-are-different-conditions">Case A: Cold and warm are different conditions<a class="heading-anchor" href="#case-a-cold-and-warm-are-different-conditions" aria-label="Link to this section">#</a></h4>
@@ -273,7 +274,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Three invented trials cannot estimate production tail latency. The point is to inspect the full evidence and design an adequate real measurement procedure.</p>
 <p>Synthetic scenario summary only; these values are not DS60 runtime performance receipts.</p>
 <h3 id="practice-prediction-construction-and-diagnosis">Practice: prediction, construction and diagnosis<a class="heading-anchor" href="#practice-prediction-construction-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>Retain your formula or written reasoning, the stated context, contributing rows or values, and a conclusion with its unit. This is a manual learning record, not an execution receipt.</p>
+<p>Retain your formula or written reasoning, the stated context, contributing rows or values, and a conclusion with its unit. These notes are your own study record; they do not show that a formula ran.</p>
 <h4 id="exercise-1-predict">Exercise 1: Predict<a class="heading-anchor" href="#exercise-1-predict" aria-label="Link to this section">#</a></h4>
 <p>Predict the mean if the warm 25 ms value is replaced by 40 ms.</p>
 <h4 id="exercise-2-change-one-condition">Exercise 2: Change one condition<a class="heading-anchor" href="#exercise-2-change-one-condition" aria-label="Link to this section">#</a></h4>
@@ -300,8 +301,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Continue to <a href="dax-054.md.html">dax-054</a> when its prerequisites make sense, or revisit this stage from the <a href="../README.md.html">course map</a>.</p>
 <h3 id="official-references-and-evidence-limits">Official references and evidence limits<a class="heading-anchor" href="#official-references-and-evidence-limits" aria-label="Link to this section">#</a></h3>
 <ul>
-<li><a href="https://learn.microsoft.com/en-us/power-bi/create-reports/desktop-performance-analyzer">Official documentation 1</a></li>
-<li><a href="https://daxstudio.org/docs/features/traces/server-timings-options/">Official documentation 2</a></li>
+<li><a href="https://learn.microsoft.com/en-us/power-bi/create-reports/desktop-performance-analyzer">Power BI: Performance Analyzer</a></li>
+<li><a href="https://daxstudio.org/docs/features/traces/server-timings-options/">DAX Studio: server timings</a></li>
 </ul>
 <p>Documentation was reviewed for this original course on 2026-10-25. Version-sensitive features have explicit notes. Source/model checks and independent fixture arithmetic are not a DAX parser, compiler, semantic engine, real RLS test or performance measurement.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>

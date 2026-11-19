@@ -219,32 +219,32 @@ ys<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><
 <p>Draw input, copied output and borrowed parameter.</p>
 <p><strong>Expected:</strong> Two owners and one temporary borrow, no extra owner for the reference.</p>
 <p><strong>Reasoning:</strong> References alias; vectors own storage.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Check the drawing against Worked example 1: the temporary <code>{2, 4}</code> and <code>out</code> are the two owners, and <code>xs</code> inside <code>doubled</code> is only another name for the temporary.</p>
 <h3 id="exercise-2-predict-mutation">Exercise 2: Predict mutation<a class="heading-anchor" href="#exercise-2-predict-mutation" aria-label="Link to this section">#</a></h3>
 <p>Change output[0] to 99 after doubled([2, 4]).</p>
 <p><strong>Expected:</strong> Input first value 2; output first value 99.</p>
 <p><strong>Reasoning:</strong> The result owns independent elements.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Keep the input in a named vector, then assert <code>input[0] == 2 &amp;&amp; output[0] == 99</code> after the write, as Worked example 2 does for <code>xs</code> and <code>ys</code>.</p>
 <h3 id="exercise-3-write-a-const-observer">Exercise 3: Write a const observer<a class="heading-anchor" href="#exercise-3-write-a-const-observer" aria-label="Link to this section">#</a></h3>
 <p>Write size_of(const vector&lt;int&gt;&amp;) without mutation.</p>
 <p><strong>Expected:</strong> [2, 4] gives 2; empty gives 0.</p>
 <p><strong>Reasoning:</strong> A read-only observer does not need a value copy.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Assert <code>size_of({2, 4}) == 2</code> and <code>size_of({}) == 0</code>, and confirm the function also accepts a <code>const std::vector&lt;int&gt;</code> variable.</p>
 <h3 id="exercise-4-diagnose-const-assignment">Exercise 4: Diagnose const assignment<a class="heading-anchor" href="#exercise-4-diagnose-const-assignment" aria-label="Link to this section">#</a></h3>
 <p>Attempt xs[0]=9 through const vector&lt;int&gt;&amp; in a scratch file.</p>
 <p><strong>Expected:</strong> Compilation fails; remove mutation to repair.</p>
 <p><strong>Reasoning:</strong> The const access path forbids writing an element.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Compile the scratch file with the lesson flags and keep the error that points at the <code>xs[0] = 9</code> line; after deleting that write the file must compile without warnings.</p>
 <h3 id="exercise-5-identify-a-lifetime-bug">Exercise 5: Identify a lifetime bug<a class="heading-anchor" href="#exercise-5-identify-a-lifetime-bug" aria-label="Link to this section">#</a></h3>
 <p>Review a function returning const vector&lt;int&gt;&amp; to its local result.</p>
 <p><strong>Expected:</strong> Reject the reference return; return vector&lt;int&gt; by value.</p>
 <p><strong>Reasoning:</strong> The local owner dies at return, regardless of const.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Trace where the local result is destroyed and confirm the reviewed return type is <code>const std::vector&lt;int&gt;&amp;</code>; the repaired signature returns <code>std::vector&lt;int&gt;</code> and compiles without warnings.</p>
 <h3 id="exercise-6-transfer-a-safe-result">Exercise 6: Transfer a safe result<a class="heading-anchor" href="#exercise-6-transfer-a-safe-result" aria-label="Link to this section">#</a></h3>
 <p>Call doubled with temporary [5] and retain the result.</p>
 <p><strong>Expected:</strong> Stored result remains [10] after the full expression.</p>
 <p><strong>Reasoning:</strong> Owning the returned value extends the useful lifetime safely.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p></article>
+<p><strong>Verify:</strong> Store <code>auto kept = doubled(std::vector&lt;int&gt;{5});</code> and assert <code>kept == std::vector&lt;int&gt;{10}</code> on a later line, after the temporary argument is gone.</p></article>
   </main>
 </body>
 </html>

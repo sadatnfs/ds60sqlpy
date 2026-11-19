@@ -203,29 +203,23 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict c(2,4,6) * 3.</p>
 <p>The values are 6,12,18.</p>
-<p><strong>Expected evidence:</strong> The values are 6,12,18.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Use fees c(1,2,3) for three amounts.</p>
 <p>Adding to 10,20,30 gives 11,22,33.</p>
-<p><strong>Expected evidence:</strong> Adding to 10,20,30 gives 11,22,33.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Write a guard allowing one fee or one fee per amount.</p>
 <p>length(fee) must be one or length(amount).</p>
-<p><strong>Expected evidence:</strong> length(fee) must be one or length(amount).</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose two fees applied to four unrelated records.</p>
 <p>Silent recycling can assign the wrong per-record fee.</p>
-<p><strong>Expected evidence:</strong> Silent recycling can assign the wrong per-record fee.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Inspect numeric(0) + 2.</p>
 <p>It remains a numeric vector of length zero.</p>
-<p><strong>Expected evidence:</strong> It remains a numeric vector of length zero.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Keep an ID and a numeric measurement without coercing the measurement.</p>
 <p>Use separate vectors or a list/data frame with explicit column types.</p>
-<p><strong>Expected evidence:</strong> Use separate vectors or a list/data frame with explicit column types.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference contains explicit behavioral assertions for its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The reference makes 6 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>
 </body>
 </html>

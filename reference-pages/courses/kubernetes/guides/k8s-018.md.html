@@ -209,7 +209,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="handle-credentials-and-tokenrequest-lifetimes">Handle credentials and TokenRequest lifetimes<a class="heading-anchor" href="#handle-credentials-and-tokenrequest-lifetimes" aria-label="Link to this section">#</a></h3>
 <p>A TokenRequest can issue a bounded service-account token for a specified audience and expiration. The course preparation checks the returned expiration and stores the scoped kubeconfig privately. Token bytes, client keys and full kubeconfig contents do not belong in progress, examples or screenshots.</p>
 <p>Prepare the owned session immediately before running the lab, after images and tools are ready. Its credential lasts fifteen minutes in the current course setup. An expired lease or one lacking work-plus-cleanup reserve should be refused. Release only the exact recorded owned session and prepare a fresh one through the host workflow; do not extend access by falling back to ambient credentials.</p>
-<p>A mounted workload token would increase what the application can attempt. Keeping automountServiceAccountToken:false removes an unnecessary default credential path for this fixture. It does not replace application authentication or network controls.</p>
+<p>A mounted workload token would increase what the application can attempt. Keeping automountServiceAccountToken: false removes an unnecessary default credential path for this fixture. It does not replace application authentication or network controls.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-read-a-binding-relationship">Worked example 1: Read a binding relationship<a class="heading-anchor" href="#worked-example-1-read-a-binding-relationship" aria-label="Link to this section">#</a></h4>
 <pre class="highlighted-code"><code class="language-yaml"><span class="syntax-tag">apiVersion</span><span class="syntax-punctuation">:</span> rbac.authorization.k8s.io/v1
@@ -226,19 +226,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> lesson-pod-reader</code></pre>
 <p><strong>Expected:</strong> The named ServiceAccount subject receives the referenced Role only through the binding&#x27;s actual namespace scope.</p>
 <h4 id="worked-example-2-compare-intended-effective-actions">Worked example 2: Compare intended effective actions<a class="heading-anchor" href="#worked-example-2-compare-intended-effective-actions" aria-label="Link to this section">#</a></h4>
-<p>Synthetic matrix:own-namespace get Pod=yes; other-namespace get Pod=no; get Secret=no; create Role=no; create ClusterRole=no. No token value is included.</p>
+<p>Synthetic matrix: own-namespace get Pod=yes; other-namespace get Pod=no; get Secret=no; create Role=no; create ClusterRole=no. No token value is included.</p>
 <p><strong>Expected:</strong> The matrix expresses least-privilege expectations to verify with the actual owned identity.</p>
 <h3 id="inspect-the-specific-owned-object">Inspect the specific owned object<a class="heading-anchor" href="#inspect-the-specific-owned-object" aria-label="Link to this section">#</a></h3>
 <p>Only after the chapter&#x27;s host capability is provisioned and its resources remain present, use the explicit receipt fields described in <a href="../host-labs.md.html">host-labs.md</a>. A completed one-shot browser Run has already cleaned its objects. The following read does not provision the missing capability and does not justify changing credentials after a Forbidden result.</p>
-<p>POSIX:</p>
+<p>Bash on Linux, macOS or Ubuntu under WSL 2:</p>
 <pre class="highlighted-code"><code class="language-bash">: <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_KUBECONFIG<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt path</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 : <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_CONTEXT<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt context</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 : <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_NAMESPACE<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt namespace</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<span class="syntax-string">&quot;</span> --context <span class="syntax-string">&quot;</span>$LAB_CONTEXT<span class="syntax-string">&quot;</span> --namespace <span class="syntax-string">&quot;</span>$LAB_NAMESPACE<span class="syntax-string">&quot;</span> get rolebinding lesson-pod-reader -o json</code></pre>
-<p>PowerShell:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">-not</span> $env:LAB_KUBECONFIG <span class="syntax-operator">-or</span> <span class="syntax-operator">-not</span> $env:LAB_CONTEXT <span class="syntax-operator">-or</span> <span class="syntax-operator">-not</span> $env:LAB_NAMESPACE<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;Owned receipt fields are required.&#x27;</span> <span class="syntax-punctuation">}</span>
-<span class="syntax-punctuation">&amp;</span> kubectl <span class="syntax-punctuation">-</span>-kubeconfig $env:LAB_KUBECONFIG <span class="syntax-punctuation">-</span>-context $env:LAB_CONTEXT <span class="syntax-punctuation">-</span>-namespace $env:LAB_NAMESPACE get rolebinding lesson-pod-reader -o json
-<span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>$LASTEXITCODE <span class="syntax-operator">-ne</span> 0<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;The scoped observation failed.&#x27;</span> <span class="syntax-punctuation">}</span></code></pre>
+<p>Windows uses the same Bash commands inside WSL 2. The lab adapter refuses native Windows credential handling, so do not run kubectl against the receipt from PowerShell. From PowerShell, only open your WSL 2 distribution (the name reported by <code>wsl.exe --list --verbose</code>), change to your checkout with its Linux path, then run the Bash block above unchanged:</p>
+<pre class="highlighted-code"><code class="language-powershell">wsl<span class="syntax-punctuation">.</span>exe <span class="syntax-punctuation">-</span>-distribution Ubuntu</code></pre>
 <p>Retain only the fields needed by this chapter&#x27;s prediction. A NotFound result may be expected after one-shot cleanup; a Forbidden result may identify a deliberately absent advanced capability. Neither result authorizes an ambient-context fallback.</p>
 <h3 id="run-and-bounded-evidence">Run and bounded evidence<a class="heading-anchor" href="#run-and-bounded-evidence" aria-label="Link to this section">#</a></h3>
 <p>The app artifact is a reading worksheet, <code>courses/kubernetes/lessons/k8s-018.md</code>. The current browser adapter does not provide the full <strong>scoped ServiceAccount authorization observation</strong> operation. Use the synthetic fixture and offline check first. Live work follows <a href="../host-labs.md.html">the scoped host-lab guide</a> only when the named capability and owned target have been provisioned. A worksheet or static check is never a cluster execution receipt.</p>
@@ -247,32 +245,32 @@ kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<sp
 <h4 id="exercise-1-identify-the-serviceaccount">Exercise 1: Identify the ServiceAccount<a class="heading-anchor" href="#exercise-1-identify-the-serviceaccount" aria-label="Link to this section">#</a></h4>
 <p>Separate identity name/namespace from token contents and Role rules.</p>
 <p><strong>Expected result/shape:</strong> A nonsecret identity record is distinct from credential bytes and permissions.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: A nonsecret identity record is distinct from credential bytes and permissions.</p>
+<p><strong>Verify:</strong> Write the identity as <code>system:serviceaccount:&lt;namespace&gt;:&lt;name&gt;</code> and confirm that your record contains no token text.</p>
 <p><strong>Progressive hints:</strong> Authentication and authorization answer different questions.</p>
 <h4 id="exercise-2-trace-the-binding-scope">Exercise 2: Trace the binding scope<a class="heading-anchor" href="#exercise-2-trace-the-binding-scope" aria-label="Link to this section">#</a></h4>
 <p>Explain the subject namespace versus the RoleBinding namespace.</p>
 <p><strong>Expected result/shape:</strong> Subject identifies the ServiceAccount; binding scope determines the namespaced grant.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Subject identifies the ServiceAccount; binding scope determines the namespaced grant.</p>
+<p><strong>Verify:</strong> Read the RoleBinding&#x27;s <code>metadata.namespace</code> and each <code>subjects[].namespace</code> separately, and state which one limits the grant.</p>
 <p><strong>Progressive hints:</strong> Draw both sides of roleRef and subjects.</p>
 <h4 id="exercise-3-predict-allowed-and-denied-requests">Exercise 3: Predict allowed and denied requests<a class="heading-anchor" href="#exercise-3-predict-allowed-and-denied-requests" aria-label="Link to this section">#</a></h4>
 <p>Fill the five-action authorization matrix.</p>
 <p><strong>Expected result/shape:</strong> Only the intended own-namespace Pod reads are allowed; Secrets and privilege changes denied.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Only the intended own-namespace Pod reads are allowed; Secrets and privilege changes denied.</p>
+<p><strong>Verify:</strong> For each row, find one Role rule that matches the verb, resource and namespace; a row without a matching rule is a denial.</p>
 <p><strong>Progressive hints:</strong> Read resource, verb and namespace for every row.</p>
 <h4 id="exercise-4-protect-workload-credentials">Exercise 4: Protect workload credentials<a class="heading-anchor" href="#exercise-4-protect-workload-credentials" aria-label="Link to this section">#</a></h4>
-<p>Inspect automountServiceAccountToken:false in the application source.</p>
+<p>Inspect automountServiceAccountToken: false in the application source.</p>
 <p><strong>Expected result/shape:</strong> The synthetic workload does not receive an automatic API token mount.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: The synthetic workload does not receive an automatic API token mount.</p>
+<p><strong>Verify:</strong> In a host readback of the Pod, confirm that <code>automountServiceAccountToken</code> is false and that no <code>kube-api-access</code> projected volume was added.</p>
 <p><strong>Progressive hints:</strong> The worker and the application are different identities/process boundaries.</p>
 <h4 id="exercise-5-rehearse-expiry-handling">Exercise 5: Rehearse expiry handling<a class="heading-anchor" href="#exercise-5-rehearse-expiry-handling" aria-label="Link to this section">#</a></h4>
 <p>Explain the sequence when a prepared fifteen-minute lease expires before Run.</p>
 <p><strong>Expected result/shape:</strong> Guard refuses; exact owned session is released and a fresh session is prepared immediately before use.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Guard refuses; exact owned session is released and a fresh session is prepared immediately before use.</p>
+<p><strong>Verify:</strong> Order your steps and check that no step reuses the expired lease or falls back to an ambient context.</p>
 <p><strong>Progressive hints:</strong> Build/download before preparing the short-lived lease.</p>
 <h4 id="exercise-6-record-live-effective-evidence">Exercise 6: Record live effective evidence<a class="heading-anchor" href="#exercise-6-record-live-effective-evidence" aria-label="Link to this section">#</a></h4>
 <p>With the named host capability, retain positive/negative self-authorization outcomes without credentials.</p>
 <p><strong>Expected result/shape:</strong> Identity, target, verb/resource, result and time are recorded; token/kubeconfig contents are excluded.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Identity, target, verb/resource, result and time are recorded; token/kubeconfig contents are excluded.</p>
+<p><strong>Verify:</strong> Confirm that every row came from <code>kubectl auth can-i</code> or a server response under the owned receipt, with its time, and that no credential text appears.</p>
 <p><strong>Progressive hints:</strong> A static Role prediction and a server answer are different artifacts.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain the mechanism behind the first example, then distinguish it from this boundary case: The matrix expresses least-privilege expectations to verify with the actual owned identity. State which observations are synthetic and which, if any, were read from your owned runtime.</p>
@@ -280,7 +278,7 @@ kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<sp
 <p>A yes/no self-authorization result describes a requested action for an identity at a point in time. It does not prove that a later API request will pass every admission or object-state check. Conversely, a denied Secret read is expected in this lab and should not trigger a broader Role.</p>
 <p>Use nonsecret request tuples and results in the worksheet. Do not impersonate a more privileged user, print tokens or copy a real Secret to demonstrate that access is absent. The offline matrix is a model of the intended policy, not a live control-plane response.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
-<p>Close the answer and reconstruct the reasoning for Exercise6, Record live effective evidence. Name the exact source and observed identity you would require before claiming the changed case succeeded.</p>
+<p>Close the answer and reconstruct the reasoning for Exercise 6 (Record live effective evidence). Name the exact source and observed identity you would require before claiming the changed case succeeded.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue to <code>k8s-019</code> after preserving the six evidence records.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>

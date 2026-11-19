@@ -201,10 +201,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p>An ordinary init container completes before the application containers start. It can prepare a synthetic file or validate a prerequisite. An emptyDir volume belongs to the Pod lifetime and can be shared by its containers. Restarting an application container normally preserves that volume, while replacing the Pod creates a different emptyDir.</p>
 <p>The supplied real Pod manifest is an explicit host-lab example. The browser adapter does not admit initContainers, emptyDir or arbitrary command bodies. A teacher must review the exact fixed commands and provide the owned capability before live use. The finite example writes the Pod UID into a marker, then deliberately makes the reader fail once and succeed on its next container attempt.</p>
-<p>The marker makes lifetime observable:it matches the same Pod UID across the application restart and changes when a new Pod is created. A constant hello marker alone would be weaker evidence because a new init container could recreate identical bytes after replacement.</p>
+<p>The marker makes lifetime observable: it matches the same Pod UID across the application restart and changes when a new Pod is created. A constant hello marker alone would be weaker evidence because a new init container could recreate identical bytes after replacement.</p>
 <h3 id="trace-initialization-and-shared-volume-ownership">Trace initialization and shared-volume ownership<a class="heading-anchor" href="#trace-initialization-and-shared-volume-ownership" aria-label="Link to this section">#</a></h3>
-<p>The init container prepare mounts work at /work and writes marker using the downward-API POD_UID value. The application read mounts the same Pod volume. fsGroup65532 gives the nonroot process the intended volume access in the scoped fixture; readOnlyRootFilesystem still protects the image filesystem but does not make every mounted volume read-only.</p>
-<p>restartPolicy OnFailure allows the deliberately failing application container to restart. The first attempt writes an attempt flag and exits2; the next sees that flag and exits0. The completed ordinary init container is not rerun merely because that application container restarts. The Pod active deadline60 bounds the host experiment.</p>
+<p>The init container prepare mounts work at /work and writes marker using the downward-API POD_UID value. The application read mounts the same Pod volume. fsGroup 65532 gives the nonroot process the intended volume access in the scoped fixture; readOnlyRootFilesystem still protects the image filesystem but does not make every mounted volume read-only.</p>
+<p>restartPolicy OnFailure allows the deliberately failing application container to restart. The first attempt writes an attempt flag and exits 2; the next sees that flag and exits 0. The completed ordinary init container is not rerun merely because that application container restarts. The Pod active deadline 60 bounds the host experiment.</p>
 <p>Do not confuse this ordinary init sequence with a restartable sidecar-style init container, which has different lifecycle semantics. The manifest intentionally uses a finite ordinary init command and no external network or real data.</p>
 <h3 id="observe-container-restart-versus-pod-replacement">Observe container restart versus Pod replacement<a class="heading-anchor" href="#observe-container-restart-versus-pod-replacement" aria-label="Link to this section">#</a></h3>
 <p>Record Pod UID, init termination state, application restart count and the marker printed by each attempt. Within one Pod, the marker should remain that Pod UID and the attempt flag should survive. A new Pod has a new UID and a fresh volume; its init step creates a new marker and its application begins the finite sequence again.</p>
@@ -212,22 +212,20 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The host must delete only the exact recorded Pod UID and observe completion/cleanup within its deadline. No broad hostPath or personal directory is mounted. The example&#x27;s write access is confined to a small synthetic emptyDir.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-read-a-finite-init-app-sequence">Worked example 1: Read a finite init/app sequence<a class="heading-anchor" href="#worked-example-1-read-a-finite-init-app-sequence" aria-label="Link to this section">#</a></h4>
-<p>The JSON example uses an init writer and an application reader sharing /work. The writer stores metadata.uid; the reader records one attempt flag, exits2 once and then exits0.</p>
+<p>The JSON example uses an init writer and an application reader sharing /work. The writer stores metadata.uid; the reader records one attempt flag, exits 2 once and then exits 0.</p>
 <p><strong>Expected:</strong> Application start follows successful initialization; the marker and attempt flag are confined to the Pod volume.</p>
 <h4 id="worked-example-2-compare-lifetime-traces">Worked example 2: Compare lifetime traces<a class="heading-anchor" href="#worked-example-2-compare-lifetime-traces" aria-label="Link to this section">#</a></h4>
 <p>Synthetic Pod UID pod-a prints marker pod-a before and after one application restart. Replacement Pod UID pod-b prints marker pod-b and begins with a fresh attempt flag.</p>
 <p><strong>Expected:</strong> Container restart preserves the same Pod volume; Pod replacement creates a different volume lifetime.</p>
 <h3 id="inspect-the-specific-owned-object">Inspect the specific owned object<a class="heading-anchor" href="#inspect-the-specific-owned-object" aria-label="Link to this section">#</a></h3>
 <p>Only after the chapter&#x27;s host capability is provisioned and its resources remain present, use the explicit receipt fields described in <a href="../host-labs.md.html">host-labs.md</a>. A completed one-shot browser Run has already cleaned its objects. The following read does not provision the missing capability and does not justify changing credentials after a Forbidden result.</p>
-<p>POSIX:</p>
+<p>Bash on Linux, macOS or Ubuntu under WSL 2:</p>
 <pre class="highlighted-code"><code class="language-bash">: <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_KUBECONFIG<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt path</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 : <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_CONTEXT<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt context</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 : <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_NAMESPACE<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt namespace</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<span class="syntax-string">&quot;</span> --context <span class="syntax-string">&quot;</span>$LAB_CONTEXT<span class="syntax-string">&quot;</span> --namespace <span class="syntax-string">&quot;</span>$LAB_NAMESPACE<span class="syntax-string">&quot;</span> get pod init-demo -o json</code></pre>
-<p>PowerShell:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">-not</span> $env:LAB_KUBECONFIG <span class="syntax-operator">-or</span> <span class="syntax-operator">-not</span> $env:LAB_CONTEXT <span class="syntax-operator">-or</span> <span class="syntax-operator">-not</span> $env:LAB_NAMESPACE<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;Owned receipt fields are required.&#x27;</span> <span class="syntax-punctuation">}</span>
-<span class="syntax-punctuation">&amp;</span> kubectl <span class="syntax-punctuation">-</span>-kubeconfig $env:LAB_KUBECONFIG <span class="syntax-punctuation">-</span>-context $env:LAB_CONTEXT <span class="syntax-punctuation">-</span>-namespace $env:LAB_NAMESPACE get pod init-demo -o json
-<span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>$LASTEXITCODE <span class="syntax-operator">-ne</span> 0<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;The scoped observation failed.&#x27;</span> <span class="syntax-punctuation">}</span></code></pre>
+<p>Windows uses the same Bash commands inside WSL 2. The lab adapter refuses native Windows credential handling, so do not run kubectl against the receipt from PowerShell. From PowerShell, only open your WSL 2 distribution (the name reported by <code>wsl.exe --list --verbose</code>), change to your checkout with its Linux path, then run the Bash block above unchanged:</p>
+<pre class="highlighted-code"><code class="language-powershell">wsl<span class="syntax-punctuation">.</span>exe <span class="syntax-punctuation">-</span>-distribution Ubuntu</code></pre>
 <p>Retain only the fields needed by this chapter&#x27;s prediction. A NotFound result may be expected after one-shot cleanup; a Forbidden result may identify a deliberately absent advanced capability. Neither result authorizes an ambient-context fallback.</p>
 <h3 id="run-and-bounded-evidence">Run and bounded evidence<a class="heading-anchor" href="#run-and-bounded-evidence" aria-label="Link to this section">#</a></h3>
 <p>The app artifact is a reading worksheet, <code>courses/kubernetes/lessons/k8s-016.md</code>. The current browser adapter does not provide the full <strong>reviewed finite init/emptyDir Pod host lab</strong> operation. Use the synthetic fixture and offline check first. Live work follows <a href="../host-labs.md.html">the scoped host-lab guide</a> only when the named capability and owned target have been provisioned. A worksheet or static check is never a cluster execution receipt.</p>
@@ -236,32 +234,32 @@ kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<sp
 <h4 id="exercise-1-draw-container-order">Exercise 1: Draw container order<a class="heading-anchor" href="#exercise-1-draw-container-order" aria-label="Link to this section">#</a></h4>
 <p>Identify init completion as a prerequisite for the application reader.</p>
 <p><strong>Expected result/shape:</strong> prepare completes before read starts.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: prepare completes before read starts.</p>
+<p><strong>Verify:</strong> Read <code>status.initContainerStatuses</code> before <code>status.containerStatuses</code>; the application container cannot start before the init container finishes.</p>
 <p><strong>Progressive hints:</strong> Inspect initContainerStatuses separately from application statuses.</p>
 <h4 id="exercise-2-trace-the-shared-volume">Exercise 2: Trace the shared volume<a class="heading-anchor" href="#exercise-2-trace-the-shared-volume" aria-label="Link to this section">#</a></h4>
 <p>Match volume name work across Pod, init and application mounts.</p>
 <p><strong>Expected result/shape:</strong> Both containers access the same /work emptyDir within one Pod.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Both containers access the same /work emptyDir within one Pod.</p>
+<p><strong>Verify:</strong> Match the name in <code>spec.volumes</code> with every <code>volumeMounts</code> entry; all mounts of the same name share one emptyDir.</p>
 <p><strong>Progressive hints:</strong> Volume identity is separate from container filesystem identity.</p>
 <h4 id="exercise-3-observe-one-application-restart">Exercise 3: Observe one application restart<a class="heading-anchor" href="#exercise-3-observe-one-application-restart" aria-label="Link to this section">#</a></h4>
 <p>Use the exact teacher-provided finite fixture and retain UID, marker and restart count.</p>
 <p><strong>Expected result/shape:</strong> Same Pod UID/marker across the failed first and successful next application attempt.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Same Pod UID/marker across the failed first and successful next application attempt.</p>
+<p><strong>Verify:</strong> Compare Pod UID, marker and restartCount across the two attempts; only restartCount may change.</p>
 <p><strong>Progressive hints:</strong> The attempt flag is evidence that the volume survived the container restart.</p>
 <h4 id="exercise-4-compare-a-new-pod">Exercise 4: Compare a new Pod<a class="heading-anchor" href="#exercise-4-compare-a-new-pod" aria-label="Link to this section">#</a></h4>
 <p>Replace only the recorded owned Pod under the host capability.</p>
 <p><strong>Expected result/shape:</strong> New Pod UID, new marker and fresh attempt sequence.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: New Pod UID, new marker and fresh attempt sequence.</p>
+<p><strong>Verify:</strong> Confirm that the new record has a different Pod UID and a different marker, and that the old marker is absent.</p>
 <p><strong>Progressive hints:</strong> A reused name does not preserve emptyDir.</p>
 <h4 id="exercise-5-diagnose-an-init-failure">Exercise 5: Diagnose an init failure<a class="heading-anchor" href="#exercise-5-diagnose-an-init-failure" aria-label="Link to this section">#</a></h4>
 <p>Review a missing mount or denied write in prepare.</p>
 <p><strong>Expected result/shape:</strong> Application absence is explained by init failure; the smallest mount/permission repair is identified.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Application absence is explained by init failure; the smallest mount/permission repair is identified.</p>
+<p><strong>Verify:</strong> Inspect the init container&#x27;s state and reason first; the missing application container is a consequence, not a second fault.</p>
 <p><strong>Progressive hints:</strong> Do not begin with application readiness or loosen all privileges.</p>
 <h4 id="exercise-6-state-the-storage-limit">Exercise 6: State the storage limit<a class="heading-anchor" href="#exercise-6-state-the-storage-limit" aria-label="Link to this section">#</a></h4>
 <p>Explain why this marker is neither persistent storage nor a backup.</p>
 <p><strong>Expected result/shape:</strong> emptyDir lifetime is tied to the Pod; durability and independent recovery require later storage/backup contracts.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: emptyDir lifetime is tied to the Pod; durability and independent recovery require later storage/backup contracts.</p>
+<p><strong>Verify:</strong> Name the event that deletes the data and one storage mechanism from a later lesson that would survive it.</p>
 <p><strong>Progressive hints:</strong> Ask what happens when the Pod object is replaced.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain the mechanism behind the first example, then distinguish it from this boundary case: Container restart preserves the same Pod volume; Pod replacement creates a different volume lifetime. State which observations are synthetic and which, if any, were read from your owned runtime.</p>
@@ -269,7 +267,7 @@ kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<sp
 <p>If the init container fails, the application may never start; inspect initContainerStatuses rather than expecting application logs. If the marker cannot be written, inspect the volume mount and nonroot permissions before relaxing the security context globally. A missing file in the application can indicate a different mount name or path.</p>
 <p>The offline script checks a lifetime model only. A live claim needs the actual UID and restart/log evidence. Neither a persisted marker in emptyDir nor a successful Pod restart is a backup or proof of PVC behavior.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
-<p>Close the answer and reconstruct the reasoning for Exercise6, State the storage limit. Name the exact source and observed identity you would require before claiming the changed case succeeded.</p>
+<p>Close the answer and reconstruct the reasoning for Exercise 6 (State the storage limit). Name the exact source and observed identity you would require before claiming the changed case succeeded.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue to <code>k8s-017</code> after preserving the six evidence records.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>

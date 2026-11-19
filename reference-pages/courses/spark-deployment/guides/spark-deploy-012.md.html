@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/spark-deployment/guides/spark-deploy-012.md</code></p>
     </header>
     <article class="document"><h2 id="spark-deploy-012-budget-memory-cores-pids-and-results">spark-deploy-012: Budget memory, cores, PIDs and results<a class="heading-anchor" href="#spark-deploy-012-budget-memory-cores-pids-and-results" aria-label="Link to this section">#</a></h2>
-<p>Tutorial mode. Stage: intermediate. Direct prerequisites: <code>spark-deploy-004</code>, <code>spark-039</code>.</p>
+<p>Tutorial mode. Stage: advanced. Direct prerequisites: <code>spark-deploy-004</code>, <code>spark-039</code>.</p>
 <p>Read this tutorial in the classroom. Its commands run only in the separately prepared <a href="../projects/cluster-lab/README.md.html">owned workshop</a>; there is no pad Run action. Examples describe expected observations. Check the workshop qualification ledger for actual execution evidence.</p>
 <h3 id="budget-the-complete-process-tree">Budget the complete process tree<a class="heading-anchor" href="#budget-the-complete-process-tree" aria-label="Link to this section">#</a></h3>
 <p>Executor heap is only one consumer. Java metaspace, direct buffers, Python workers, native libraries, thread stacks and filesystem cache also consume resources. A container memory limit below their combined requirement can kill an executor even when its configured heap appears modest. A notebook adds a kernel and server beside the driver.</p>
@@ -204,6 +204,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 worker-b: one advertised core -&gt; at most one one-core executor task at once
 input: eight partitions
 idealized minimum scheduling waves: eight / two = four</code></pre>
+<p>The application side of the budget is set in <code>conf/spark-defaults.conf</code>:</p>
+<p>From <a href="../projects/cluster-lab/conf/spark-defaults.conf.html"><code>projects/cluster-lab/conf/spark-defaults.conf</code></a>:</p>
+<pre class="highlighted-code"><code class="language-properties"><span class="syntax-attribute">spark.driver.memory</span>                  <span class="syntax-string">1g</span>
+<span class="syntax-attribute">spark.driver.maxResultSize</span>           <span class="syntax-string">1m</span>
+<span class="syntax-attribute">spark.executor.memory</span>                <span class="syntax-string">512m</span>
+<span class="syntax-attribute">spark.executor.cores</span>                 <span class="syntax-string">1</span>
+<span class="syntax-attribute">spark.cores.max</span>                      <span class="syntax-string">2</span></code></pre>
+<p><code>spark.cores.max 2</code> caps the application at two cores across the cluster, and <code>spark.driver.maxResultSize 1m</code> makes an oversized collect fail instead of exhausting driver memory. The container limits in <code>compose.yaml</code> are a separate, outer bound.</p>
 <p>This arithmetic models available task slots, not measured timing. Empty partitions, scheduler delay, Python startup, skew and retries alter elapsed time. Increasing partitions can improve balance but also increases overhead and the number of returned summaries. Increasing executor cores changes concurrency, memory and native thread pressure together.</p>
 <p>The live UI distinguishes executor tasks and scheduler stages. Compare the model with observed active tasks and recorded task durations. A CPU percentage alone cannot explain whether the job is computing, spilling, serializing or waiting for another process.</p>
 <h3 id="worked-case-b-diagnose-three-different-failures">Worked case B: diagnose three different failures<a class="heading-anchor" href="#worked-case-b-diagnose-three-different-failures" aria-label="Link to this section">#</a></h3>

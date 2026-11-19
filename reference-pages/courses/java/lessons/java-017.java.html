@@ -197,28 +197,37 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-keyword">public</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Main</span> <span class="syntax-punctuation">{</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span></span>
-<span class="source-line">    <span class="syntax-comment">// Exercise 1: Represent a missing lookup</span></span>
-<span class="source-line">    <span class="syntax-comment">// Look up known a and unknown b in a fixed map through Optional.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: a present with 7; b empty.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Exercise 1: Represent a missing lookup: change one input</span></span>
+<span class="source-line">    <span class="syntax-comment">// Copy Example A into a scratch `Main.java` and change `Map&lt;String, Integer&gt; data =</span></span>
+<span class="source-line">    <span class="syntax-comment">// Map.of(&quot;a&quot;, 7);` to `Map&lt;String, Integer&gt; data = Map.of(&quot;a&quot;, 8);`. Before running it with</span></span>
+<span class="source-line">    <span class="syntax-comment">// `java -ea Main`, predict which assertion fails and which value it now sees; then run it</span></span>
+<span class="source-line">    <span class="syntax-comment">// and restore the original line.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` from the assertion on</span></span>
+<span class="source-line">    <span class="syntax-comment">// `known.orElseThrow() == 7 &amp;&amp; missing.isEmpty()`. Restoring the original line brings back</span></span>
+<span class="source-line">    <span class="syntax-comment">// the worked observation: a present with 7; b empty.</span></span>
 <span class="source-line"></span>
-<span class="source-line">    <span class="syntax-comment">// Exercise 2: Transform only present values</span></span>
-<span class="source-line">    <span class="syntax-comment">// Map the known value to double and apply the same mapping to empty.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: 14 and empty.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Exercise 2: Transform only present values: diagnose an edited check</span></span>
+<span class="source-line">    <span class="syntax-comment">// A careless edit changed the assertion that Example B adds after Example A so that it reads</span></span>
+<span class="source-line">    <span class="syntax-comment">// `assert known.map(value -&gt; value + 2).orElseThrow() == 14;`. Run Example B with that line,</span></span>
+<span class="source-line">    <span class="syntax-comment">// explain why the edited assertion now fails for the same program state, and restore it.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` from the assertion on</span></span>
+<span class="source-line">    <span class="syntax-comment">// `known.map(value -&gt; value * 2).orElseThrow() == 14`; after it the line reads `assert</span></span>
+<span class="source-line">    <span class="syntax-comment">// known.map(value -&gt; value * 2).orElseThrow() == 14;` again and 14 and empty.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 3: Compare eager and lazy fallback</span></span>
-<span class="source-line">    <span class="syntax-comment">// Use a counter-producing fallback withorElse andorElseGet on a present value.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: orElse increments;orElseGet does not.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Use a counter-producing fallback with orElse and orElseGet on a present value.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: orElse increments; orElseGet does not.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 4: Reject malformed lookup input</span></span>
 <span class="source-line">    <span class="syntax-comment">// Validate an empty identifier before consulting the map.</span></span>
 <span class="source-line">    <span class="syntax-comment">// Expected: IllegalArgumentException rather than empty.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 5: Flatten a nullable transformation</span></span>
-<span class="source-line">    <span class="syntax-comment">// Parse an optional numeric string through a helper returningOptional&lt;Integer&gt;.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: valid12 present;badtext empty under this declared parser policy.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Parse an optional numeric string through a helper returning Optional&lt;Integer&gt;.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: valid 12 present; bad text empty under this declared parser policy.</span></span>
 <span class="source-line"></span>
-<span class="source-line">    <span class="syntax-comment">// Exercise 6: Expose unsafeget</span></span>
-<span class="source-line">    <span class="syntax-comment">// Callget on empty and catchNoSuchElementException.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Exercise 6: Expose unsafe get</span></span>
+<span class="source-line">    <span class="syntax-comment">// Call get on empty and catchNoSuchElementException.</span></span>
 <span class="source-line">    <span class="syntax-comment">// Expected: specific absence failure.</span></span>
 <span class="source-line">    System<span class="syntax-punctuation">.</span><span class="syntax-attribute">out</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">println</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement and check the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line">  <span class="syntax-punctuation">}</span></span>

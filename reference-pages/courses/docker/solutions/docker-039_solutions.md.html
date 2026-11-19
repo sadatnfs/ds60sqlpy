@@ -194,33 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-039_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-039-explanatory-solutions">docker-039: explanatory solutions<a class="heading-anchor" href="#docker-039-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These are explanations of the supplied teaching fixtures, not fabricated engine results.</p>
-<h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
-<p>A namespace changes which operating-system objects a process can see. Linux provides namespaces for areas including processes, mounts, networking and users. A cgroup groups processes for accounting and resource controls. Visibility isolation and resource limits are different mechanisms, even though both contribute to a container environment.</p>
-<p>The Open Container Initiative, or OCI, defines specifications for image and runtime interoperability. Docker tooling can use components such as containerd and an OCI runtime to manage execution. These layers explain why an image format, an engine API and a running process are related but not identical products.</p>
-<p>The shared Linux kernel remains an important trust boundary. A container is not a separate guest kernel by default. Kernel vulnerabilities, privileged configuration and host mounts can affect isolation. Rootless mode and least privilege reduce specific risks but do not turn every process into a harmless mathematical function.</p>
-<p>Trace a launch as client request, engine configuration, runtime setup of namespaces and cgroups, filesystem mounts, then the application process. A process still makes ordinary system calls. Its view and allowed operations depend on the setup around it.</p>
-<p>Use read-only observations in the fixture. <code>/proc/self/status</code> can show process information, while cgroup details vary by host and cgroup version. Do not modify kernel settings or mount host control filesystems to make the lesson output match a screenshot.</p>
+<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-039.md</code>.</p>
 <h3 id="exercise-1-distinguish-namespace-and-cgroup">Exercise 1: Distinguish namespace and cgroup.<a class="heading-anchor" href="#exercise-1-distinguish-namespace-and-cgroup" aria-label="Link to this section">#</a></h3>
-<p>Both influence container behavior but solve different problems. A memory limit does not define which network interfaces a process can see.</p>
-<p><strong>Expected:</strong> Object visibility versus grouping and resource controls.</p>
+<p><strong>Expected answer:</strong> Object visibility versus grouping and resource controls.</p>
+<p><strong>Why:</strong> Both influence container behavior but solve different problems. A memory limit does not define which network interfaces a process can see.</p>
 <h3 id="exercise-2-predict-whether-the-container-has-its-own-kernel">Exercise 2: Predict whether the container has its own kernel.<a class="heading-anchor" href="#exercise-2-predict-whether-the-container-has-its-own-kernel" aria-label="Link to this section">#</a></h3>
-<p>On a desktop host that kernel may live in a Linux VM. The container boundary still does not create another guest kernel for each app.</p>
-<p><strong>Expected:</strong> Ordinary Linux containers share the engine environment kernel.</p>
+<p><strong>Expected answer:</strong> Ordinary Linux containers share the engine environment kernel.</p>
+<p><strong>Why:</strong> On a desktop host that kernel may live in a Linux VM. The container boundary still does not create another guest kernel for each app.</p>
 <h3 id="exercise-3-draw-the-client-to-process-runtime-chain">Exercise 3: Draw the client-to-process runtime chain.<a class="heading-anchor" href="#exercise-3-draw-the-client-to-process-runtime-chain" aria-label="Link to this section">#</a></h3>
-<p>The chain helps place errors such as daemon connection failure, image unpacking failure and application exceptions at different layers.</p>
-<p><strong>Expected:</strong> Client, engine, runtime setup, mounts and application process.</p>
+<p><strong>Expected answer:</strong> Client, engine, runtime setup, mounts and application process.</p>
+<p><strong>Why:</strong> The chain helps place errors such as daemon connection failure, image unpacking failure and application exceptions at different layers.</p>
 <h3 id="exercise-4-diagnose-a-missing-cgroup-path-from-an-example">Exercise 4: Diagnose a missing cgroup path from an example.<a class="heading-anchor" href="#exercise-4-diagnose-a-missing-cgroup-path-from-an-example" aria-label="Link to this section">#</a></h3>
-<p>Implementation details vary. Preserve the conceptual mechanism and record the observed platform instead of forcing one machine layout.</p>
-<p><strong>Expected:</strong> Inspect host and cgroup-version differences without changing kernel settings.</p>
+<p><strong>Expected answer:</strong> Inspect host and cgroup-version differences without changing kernel settings.</p>
+<p><strong>Why:</strong> Implementation details vary. Preserve the conceptual mechanism and record the observed platform instead of forcing one machine layout.</p>
 <h3 id="exercise-5-explain-oci-interoperability-limits">Exercise 5: Explain OCI interoperability limits.<a class="heading-anchor" href="#exercise-5-explain-oci-interoperability-limits" aria-label="Link to this section">#</a></h3>
-<p>Image architecture, runtime capabilities and host configuration still matter. Test the actual supported engine path.</p>
-<p><strong>Expected:</strong> A shared specification does not guarantee every platform or feature is identical.</p>
+<p><strong>Expected answer:</strong> A shared specification does not guarantee every platform or feature is identical.</p>
+<p><strong>Why:</strong> Image architecture, runtime capabilities and host configuration still matter. Test the actual supported engine path.</p>
 <h3 id="exercise-6-describe-the-shared-kernel-security-implication">Exercise 6: Describe the shared-kernel security implication.<a class="heading-anchor" href="#exercise-6-describe-the-shared-kernel-security-implication" aria-label="Link to this section">#</a></h3>
-<p>Isolation reduces visibility and authority but depends on kernel enforcement. Do not describe a container as a universal hostile-code sandbox.</p>
-<p><strong>Expected:</strong> Least privilege and patching remain necessary parts of the trust model.</p>
+<p><strong>Expected answer:</strong> Least privilege and patching remain necessary parts of the trust model.</p>
+<p><strong>Why:</strong> Isolation reduces visibility and authority but depends on kernel enforcement. Do not describe a container as a universal hostile-code sandbox.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful solution identifies the exact object, the phase when a setting takes effect, the expected normal result and an observation that disproves it. Repeating a command until it succeeds hides the mechanism. Change one variable, keep a failure record, and test the intended behavior again. Source examples here are small enough to inspect; a production system additionally needs ownership, lifecycle, data recovery and operational review. The host exercises are optional and must stay within the learner-created project.</p></article>
+<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>
 </body>
 </html>

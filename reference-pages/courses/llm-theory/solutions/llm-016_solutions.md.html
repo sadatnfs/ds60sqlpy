@@ -226,7 +226,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </tr>
 <tr>
 <td>Two LayerNorm modules</td>
-<td>two sets of gain32 plus bias32</td>
+<td>two sets of gain 32 plus bias 32</td>
 <td>128</td>
 </tr>
 <tr>
@@ -241,12 +241,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </tr>
 <tr>
 <td>Feed-forward first affine map</td>
-<td>64 by 32 plus bias64</td>
+<td>64 by 32 plus bias 64</td>
 <td>2,112</td>
 </tr>
 <tr>
 <td>Feed-forward second affine map</td>
-<td>32 by 64 plus bias32</td>
+<td>32 by 64 plus bias 32</td>
 <td>2,080</td>
 </tr>
 <tr>
@@ -260,7 +260,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <td>10,464</td>
 </tr>
 </tbody></table></div>
-<p>PyTorch Linear stores [out_features,in_features] and applies the transposed weight to a row-oriented input. That is why the QKV weight is [96,32], while a mathematical row-vector projection may be written as multiplication by a [32,96] matrix. Biases are omitted in the attention and vocabulary projections but present in both feed-forward Linear modules. Forgetting these 96 bias entries changes the parameter ledger.</p>
+<p>PyTorch Linear stores [out_features, in_features] and applies the transposed weight to a row-oriented input. That is why the QKV weight is [96, 32], while a mathematical row-vector projection may be written as multiplication by a [32, 96] matrix. Biases are omitted in the attention and vocabulary projections but present in both feed-forward Linear modules. Forgetting these 96 bias entries changes the parameter ledger.</p>
 <h4 id="trace-batch-1-time-4-through-the-forward-pass">Trace batch 1, time 4 through the forward pass<a class="heading-anchor" href="#trace-batch-1-time-4-through-the-forward-pass" aria-label="Link to this section">#</a></h4>
 <div class="table-wrap"><table><thead><tr>
 <th>Stage</th>
@@ -269,62 +269,62 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </tr></thead><tbody>
 <tr>
 <td>Input IDs</td>
-<td>[1,4], int64</td>
+<td>[1, 4], int64</td>
 <td>four discrete token identities</td>
 </tr>
 <tr>
 <td>Token plus position vectors</td>
-<td>[1,4,32], float32</td>
+<td>[1, 4, 32], float32</td>
 <td>32 features for each position</td>
 </tr>
 <tr>
 <td>First LayerNorm</td>
-<td>[1,4,32]</td>
+<td>[1, 4, 32]</td>
 <td>feature statistics within each token</td>
 </tr>
 <tr>
 <td>Combined QKV projection</td>
-<td>[1,4,96]</td>
+<td>[1, 4, 96]</td>
 <td>three width-32 projected vectors</td>
 </tr>
 <tr>
 <td>Each split Q, K or V</td>
-<td>[1,2,4,16]</td>
+<td>[1, 2, 4, 16]</td>
 <td>head, token, head feature</td>
 </tr>
 <tr>
 <td>Scores and weights</td>
-<td>[1,2,4,4]</td>
+<td>[1, 2, 4, 4]</td>
 <td>query position, key position</td>
 </tr>
 <tr>
 <td>Weighted values</td>
-<td>[1,2,4,16]</td>
+<td>[1, 2, 4, 16]</td>
 <td>one mixture per head and query</td>
 </tr>
 <tr>
 <td>Rejoined heads and output projection</td>
-<td>[1,4,32]</td>
+<td>[1, 4, 32]</td>
 <td>model-width contextual branch</td>
 </tr>
 <tr>
 <td>First residual</td>
-<td>[1,4,32]</td>
+<td>[1, 4, 32]</td>
 <td>input plus contextual branch</td>
 </tr>
 <tr>
 <td>Feed-forward hidden activation</td>
-<td>[1,4,64]</td>
+<td>[1, 4, 64]</td>
 <td>expanded tokenwise feature space</td>
 </tr>
 <tr>
 <td>Second residual</td>
-<td>[1,4,32]</td>
+<td>[1, 4, 32]</td>
 <td>transformed contextual representation</td>
 </tr>
 <tr>
 <td>Vocabulary logits</td>
-<td>[1,4,16]</td>
+<td>[1, 4, 16]</td>
 <td>one score per vocabulary ID</td>
 </tr>
 </tbody></table></div>
@@ -339,8 +339,8 @@ c5.3,-9.3,12,-14,20,-14
 H400000v40H845.2724
 s-225.272,467,-225.272,467s-235,486,-235,486c-2.7,4.7,-9,7,-19,7
 c-6,0,-10,-1,-12,-3s-194,-422,-194,-422s-65,47,-65,47z
-M834 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.1328em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">4</span></span></span></span>. The Boolean triangle [4,4] broadcasts across batch and heads. Softmax reduces the final key axis, not the query axis or the vocabulary axis. The diagonal is allowed because the representation at input position t predicts the following token when training uses correctly shifted targets. The current input is therefore legal information under that objective.</p>
-<p>After attention, transpose restores [batch,time,head,head_width]. contiguous makes the requested layout explicit before reshape combines the last two axes into model width. A reshape with the correct number of elements can still scramble token/head membership if the transpose order is wrong. The exact shape ledger and prefix checks are complementary; neither substitutes for the other.</p>
+M834 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.1328em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">4</span></span></span></span>. The Boolean triangle [4, 4] broadcasts across batch and heads. Softmax reduces the final key axis, not the query axis or the vocabulary axis. The diagonal is allowed because the representation at input position t predicts the following token when training uses correctly shifted targets. The current input is therefore legal information under that objective.</p>
+<p>After attention, transpose restores [batch, time, head, head_width]. contiguous makes the requested layout explicit before reshape combines the last two axes into model width. A reshape with the correct number of elements can still scramble token/head membership if the transpose order is wrong. The exact shape ledger and prefix checks are complementary; neither substitutes for the other.</p>
 <h3 id="exercise-1-build-a-bounded-decoder">Exercise 1: Build a bounded decoder<a class="heading-anchor" href="#exercise-1-build-a-bounded-decoder" aria-label="Link to this section">#</a></h3>
 <p>The question is: Set seed 7, build the default decoder, count every trainable scalar and compare with the component ledger.</p>
 <p>The exact count follows the embedding, projection and feed-forward shapes. A small parameter count bounds the fixture but says little about capability on unseen tasks.</p>
@@ -350,7 +350,7 @@ count <span class="syntax-operator">=</span> <span class="syntax-builtin">sum</s
 <span class="syntax-keyword">assert</span> count <span class="syntax-operator">==</span> <span class="syntax-number">10464</span>
 <span class="syntax-keyword">assert</span> count <span class="syntax-operator">&lt;</span> <span class="syntax-number">50000</span></code></pre>
 <p><strong>Expected:</strong> Exactly 10,464 trainable scalars, below the 50,000 teaching bound.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with Exactly 10,464 trainable scalars, below the 50,000 teaching bound.</p>
+<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>count == 10464</code> and <code>count &lt; 50000</code>.</p>
 <h3 id="exercise-2-trace-output-axes">Exercise 2: Trace output axes<a class="heading-anchor" href="#exercise-2-trace-output-axes" aria-label="Link to this section">#</a></h3>
 <p>The question is: Run the integer IDs [[2,5,7,3]] and trace the output shape and dtype.</p>
 <p>Every input position produces a distribution over the same sixteen-token vocabulary. The time axis is not a class axis and must not be reduced accidentally.</p>
@@ -363,7 +363,7 @@ ids <span class="syntax-operator">=</span> torch<span class="syntax-operator">.<
 <span class="syntax-keyword">assert</span> logits<span class="syntax-operator">.</span>dtype <span class="syntax-operator">==</span> torch<span class="syntax-operator">.</span>float32
 <span class="syntax-keyword">assert</span> torch<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>logits<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> Finite float32 logits with shape [1,4,16].</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with Finite float32 logits with shape [1,4,16].</p>
+<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>tuple(logits.shape) == (1, 4, 16)</code>; <code>logits.dtype == torch.float32</code> and <code>torch.isfinite(logits).all()</code>.</p>
 <h3 id="exercise-3-recompute-prefixes">Exercise 3: Recompute prefixes<a class="heading-anchor" href="#exercise-3-recompute-prefixes" aria-label="Link to this section">#</a></h3>
 <p>The question is: Recompute prefixes of lengths 1 through 4 independently with the same initialized weights.</p>
 <p>The check covers the whole block, including normalization and positions, rather than only the attention mask. Dropout is absent in this teaching decoder.</p>
@@ -376,7 +376,7 @@ ids <span class="syntax-operator">=</span> torch<span class="syntax-operator">.<
         prefix<span class="syntax-punctuation">,</span> _ <span class="syntax-operator">=</span> model<span class="syntax-punctuation">(</span>ids<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">:</span>length<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
         torch<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_close<span class="syntax-punctuation">(</span>prefix<span class="syntax-punctuation">,</span> full<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">:</span>length<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-6</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> Every prefix matches the corresponding full-sequence early logits within 1e-6.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with Every prefix matches the corresponding full-sequence early logits within 1e-6.</p>
+<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm for every <code>length</code> in <code>range(1, 5)</code>, <code>prefix</code> matches <code>full[:, :length]</code> within 1e-6.</p>
 <h3 id="exercise-4-perturb-only-future-tokens">Exercise 4: Perturb only future tokens<a class="heading-anchor" href="#exercise-4-perturb-only-future-tokens" aria-label="Link to this section">#</a></h3>
 <p>The question is: Replace only positions 2 and 3 with IDs 8 and 9 and compare the first two logits.</p>
 <p>A future-only perturbation is a direct causal test. It can expose a leaking normalization or incorrect mask even when the model has never been trained.</p>
@@ -391,10 +391,10 @@ changed<span class="syntax-punctuation">[</span><span class="syntax-punctuation"
 torch<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_close<span class="syntax-punctuation">(</span>perturbed<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">:</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> original<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">:</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-6</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> torch<span class="syntax-operator">.</span>equal<span class="syntax-punctuation">(</span>ids<span class="syntax-punctuation">,</span> changed<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> The first two score vectors remain unchanged within 1e-6.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with The first two score vectors remain unchanged within 1e-6.</p>
+<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>perturbed[:, :2]</code> matches <code>original[:, :2]</code> within 1e-6 and <code>not torch.equal(ids, changed)</code>.</p>
 <h3 id="exercise-5-inspect-head-shapes">Exercise 5: Inspect head shapes<a class="heading-anchor" href="#exercise-5-inspect-head-shapes" aria-label="Link to this section">#</a></h3>
 <p>The question is: Run without disabling autograd and inspect the returned K/V cache shapes, detachment and data-byte count.</p>
-<p>Width32 is split into two sixteen-dimensional heads. The cached time dimension grows with processed tokens, while the feature width remains fixed.</p>
+<p>Width 32 is split into two sixteen-dimensional heads. The cached time dimension grows with processed tokens, while the feature width remains fixed.</p>
 <pre class="highlighted-code"><code class="language-python">torch<span class="syntax-operator">.</span>manual_seed<span class="syntax-punctuation">(</span><span class="syntax-number">7</span><span class="syntax-punctuation">)</span>
 model <span class="syntax-operator">=</span> TinyDecoder<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>eval<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 ids <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>long<span class="syntax-punctuation">)</span>
@@ -406,7 +406,7 @@ logits<span class="syntax-punctuation">,</span> cache <span class="syntax-operat
     <span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> tensor<span class="syntax-operator">.</span>requires_grad
 <span class="syntax-keyword">assert</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>tensor<span class="syntax-operator">.</span>numel<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> tensor<span class="syntax-operator">.</span>element_size<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> tensor <span class="syntax-operator">in</span> cache<span class="syntax-operator">.</span>values<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">1024</span></code></pre>
 <p><strong>Expected:</strong> Logits remain connected; each cache is detached float32 [1,2,4,16]; combined cache data occupies 1,024 bytes.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with Logits remain connected; each cache is detached float32 [1,2,4,16]; combined cache data occupies 1,024 bytes.</p>
+<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>logits.requires_grad</code>; for every <code>tensor</code> in <code>cache.values()</code>, <code>tuple(tensor.shape) == (1, 2, 4, 16)</code>; for every <code>tensor</code> in <code>cache.values()</code>, <code>tensor.dtype == torch.float32</code>; for every <code>tensor</code> in <code>cache.values()</code>, <code>not tensor.requires_grad</code> and 1 further check.</p>
 <h3 id="exercise-6-reject-invalid-token-ids">Exercise 6: Reject invalid token IDs<a class="heading-anchor" href="#exercise-6-reject-invalid-token-ids" aria-label="Link to this section">#</a></h3>
 <p>The question is: Reject out-of-range IDs, wrong dtype, empty/excessive context and invalid head/width configurations.</p>
 <p>A fixed vocabulary and position table impose real bounds. Rejecting invalid requests makes the failure understandable before embedding indexing or an excessive context reaches deeper operations.</p>
@@ -433,7 +433,7 @@ invalid_inputs <span class="syntax-operator">=</span> <span class="syntax-punctu
     <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
         <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">invalid model dimensions were accepted</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> Every invalid contract raises ValueError before a misleading reshape or embedding computation.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with Every invalid contract raises ValueError before a misleading reshape or embedding computation.</p>
+<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm for every <code>invalid</code> in <code>invalid_inputs</code>, <code>model(invalid)</code> raises <code>ValueError</code> and for every <code>options</code> in <code>[dict(width=5, heads=2), dict(heads=0), dict(context=0)]</code>, <code>TinyDecoder(**options)</code> raises <code>ValueError</code>.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
 <p>Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.</p></article>
   </main>

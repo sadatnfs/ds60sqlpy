@@ -196,7 +196,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="k8s-002-processes-containers-images-and-ports">k8s-002: Processes, containers, images and ports<a class="heading-anchor" href="#k8s-002-processes-containers-images-and-ports" aria-label="Link to this section">#</a></h2>
 <p>Authored classroom lesson. Content availability and runtime readiness are separate checks. Read the current capability notice before running. No opening or saving this lesson installs tools, starts a cluster or proves mastery.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
-<p>Beginner; 90 minutes. Direct design prerequisites: <code>k8s-001</code>. All 42 planned guides now have authored bodies. Follow the direct prerequisites and each lesson&#x27;s explicit runtime or host-lab boundary.</p>
+<p>Beginner; 90 minutes. Direct design prerequisites: <code>k8s-001</code>. All 66 lessons in this subject are authored. Follow the direct prerequisites and each lesson&#x27;s explicit runtime or host-lab boundary.</p>
 <p>Learner artifact: <a href="../lessons/k8s-002.md.html">k8s-002.md</a>. Keep <a href="../solutions/k8s-002_solutions.md.html">solutions</a> closed until an attempt or explicit reveal.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
 <ul>
@@ -205,7 +205,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ul>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p>An image is a packaged filesystem/configuration template. A container is an instance created from image content; it normally runs one main application process and can exit or restart. Two container instances can use the same image. A tag is a mutable human-readable reference, while a digest identifies content. The course will preload one exact fixture image and record its digest; reading a tag in YAML is not proof of cached content.</p>
-<p>A port is an endpoint number within a network namespace. A container listening on8080 is different from a host forwarding127.0.0.1:8765 to it. Inside another container, 127.0.0.1 refers to that container itself. Inside a Kubernetes namespace, a Service name selects a cluster routing path. Declaring containerPort does not create a listening server or a host port. This lesson traces supplied evidence and performs no engine or network action.</p>
+<p>A port is an endpoint number within a network namespace. A container listening on 8080 is different from a host forwarding 127.0.0.1:8765 to it. Inside another container, 127.0.0.1 refers to that container itself. Inside a Kubernetes namespace, a Service name selects a cluster routing path. Declaring containerPort does not create a listening server or a host port. This lesson traces supplied evidence and performs no engine or network action.</p>
 <ul>
 <li><strong>image:</strong> the packaged content used to create containers</li>
 <li><strong>container:</strong> a running or stopped instance, separate from its image</li>
@@ -223,15 +223,15 @@ container C1 from I1: running
 container C2 from I1: exited</code></pre>
 <p><strong>Expected:</strong> One image identity and two separate instance states.</p>
 <h4 id="worked-example-2-trace-a-host-to-container-mapping">Worked example 2: Trace a host-to-container mapping<a class="heading-anchor" href="#worked-example-2-trace-a-host-to-container-mapping" aria-label="Link to this section">#</a></h4>
-<p>The mapping is an explicit host arrangement. Writing containerPort8080 into YAML alone does not establish it.</p>
+<p>The mapping is an explicit host arrangement. Writing containerPort 8080 into YAML alone does not establish it.</p>
 <pre class="highlighted-code"><code class="language-text">browser -&gt; 127.0.0.1:8765 on host
 forwarding rule -&gt; container app:8080
 process listens on8080</code></pre>
-<p><strong>Expected:</strong> The browser uses8765; the process listens on8080.</p>
+<p><strong>Expected:</strong> The browser uses 8765; the process listens on 8080.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-count-images-and-containers">Exercise 1: Count images and containers<a class="heading-anchor" href="#exercise-1-count-images-and-containers" aria-label="Link to this section">#</a></h4>
 <p>Classify the two-instance fixture.</p>
-<p><strong>Inputs/evidence:</strong> For k8s-002 Exercise 1, C1 and C2 both useI1.</p>
+<p><strong>Inputs/evidence:</strong> For k8s-002 Exercise 1, C1 and C2 both use I1.</p>
 <p><strong>Expected result/shape:</strong> For k8s-002 Exercise 1, 1 image, 2 containers, independent running/exited states.</p>
 <p><strong>Verify:</strong> For k8s-002 Exercise 1, count image identities and instance identities separately.</p>
 <p><strong>Progressive hints:</strong></p>
@@ -243,17 +243,17 @@ process listens on8080</code></pre>
 <h4 id="exercise-2-resolve-the-browser-endpoint">Exercise 2: Resolve the browser endpoint<a class="heading-anchor" href="#exercise-2-resolve-the-browser-endpoint" aria-label="Link to this section">#</a></h4>
 <p>Choose the URL endpoint for the stated host mapping.</p>
 <p><strong>Inputs/evidence:</strong> For k8s-002 Exercise 2, host 127.0.0.1:8765 forwards to app:8080.</p>
-<p><strong>Expected result/shape:</strong> For k8s-002 Exercise 2, the host browser connects to127.0.0.1:8765.</p>
+<p><strong>Expected result/shape:</strong> For k8s-002 Exercise 2, the host browser connects to 127.0.0.1:8765.</p>
 <p><strong>Verify:</strong> For k8s-002 Exercise 2, trace both sides without changing the application listening port.</p>
 <p><strong>Progressive hints:</strong></p>
 <ol>
 <li>Start at the browser network namespace.</li>
 <li>Find the published host port.</li>
-<li>Use8765 at the host boundary.</li>
+<li>Use 8765 at the host boundary.</li>
 </ol>
 <h4 id="exercise-3-separate-declaration-and-listener">Exercise 3: Separate declaration and listener<a class="heading-anchor" href="#exercise-3-separate-declaration-and-listener" aria-label="Link to this section">#</a></h4>
-<p>Review YAML declaring containerPort8080 with a process that exited.</p>
-<p><strong>Inputs/evidence:</strong> For k8s-002 Exercise 3, declared8080; process not running.</p>
+<p>Review YAML declaring containerPort 8080 with a process that exited.</p>
+<p><strong>Inputs/evidence:</strong> For k8s-002 Exercise 3, declared 8080; process not running.</p>
 <p><strong>Expected result/shape:</strong> For k8s-002 Exercise 3, no working listener established by the declaration.</p>
 <p><strong>Verify:</strong> For k8s-002 Exercise 3, name the missing running application evidence.</p>
 <p><strong>Progressive hints:</strong></p>
@@ -264,8 +264,8 @@ process listens on8080</code></pre>
 </ol>
 <h4 id="exercise-4-interpret-replacement">Exercise 4: Interpret replacement<a class="heading-anchor" href="#exercise-4-interpret-replacement" aria-label="Link to this section">#</a></h4>
 <p>Replace C1 with C3 from the same prepared image.</p>
-<p><strong>Inputs/evidence:</strong> For k8s-002 Exercise 4, oldC1, newC3, contentI1.</p>
-<p><strong>Expected result/shape:</strong> For k8s-002 Exercise 4, container identity changes; image identity staysI1.</p>
+<p><strong>Inputs/evidence:</strong> For k8s-002 Exercise 4, old C1, new C3, content I1.</p>
+<p><strong>Expected result/shape:</strong> For k8s-002 Exercise 4, container identity changes; image identity stays I1.</p>
 <p><strong>Verify:</strong> For k8s-002 Exercise 4, record both instance IDs and the same digest receipt.</p>
 <p><strong>Progressive hints:</strong></p>
 <ol>
@@ -286,7 +286,7 @@ process listens on8080</code></pre>
 </ol>
 <h4 id="exercise-6-transfer-the-client-path">Exercise 6: Transfer the client path<a class="heading-anchor" href="#exercise-6-transfer-the-client-path" aria-label="Link to this section">#</a></h4>
 <p>Choose the endpoint from a client Job inside the owned namespace.</p>
-<p><strong>Inputs/evidence:</strong> For k8s-002 Exercise 6, Service hello on8080; client has its own loopback.</p>
+<p><strong>Inputs/evidence:</strong> For k8s-002 Exercise 6, Service hello on 8080; client has its own loopback.</p>
 <p><strong>Expected result/shape:</strong> For k8s-002 Exercise 6, http://hello:8080/version, not host 127.0.0.1:8765.</p>
 <p><strong>Verify:</strong> For k8s-002 Exercise 6, explain both network namespaces and the Service DNS name.</p>
 <p><strong>Progressive hints:</strong></p>

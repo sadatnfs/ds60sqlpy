@@ -201,7 +201,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The browser does not run Kustomize or arbitrary apply commands. A reviewed rendered Deployment can fit the fixed manifest contract, while live field-manager conflict experiments need a stateful host capability with explicit ownership and target identity.</p>
 <h3 id="exercise-1-locate-the-source-of-intent">Exercise 1: Locate the source of intent<a class="heading-anchor" href="#exercise-1-locate-the-source-of-intent" aria-label="Link to this section">#</a></h3>
 <p>The overlay expresses the intended environment difference. Local paths and a small resource set make review tractable and avoid a hidden network dependency.</p>
-<p><strong>Expected:</strong> One local Deployment base plus explicit dev1/test2 overrides.</p>
+<p><strong>Expected:</strong> One local Deployment base plus explicit dev (1 replica) and test (2 replicas) overrides.</p>
 <h3 id="exercise-2-render-with-prepared-tooling">Exercise 2: Render with prepared tooling<a class="heading-anchor" href="#exercise-2-render-with-prepared-tooling" aria-label="Link to this section">#</a></h3>
 <p>The checked-in expected output is an independent target, not a fabricated execution transcript. A real render receipt should include tool identity and source hashes, especially when versions can change transformations.</p>
 <p><strong>Expected:</strong> Actual output is compared with expected JSON; missing tool is recorded as unavailable.</p>

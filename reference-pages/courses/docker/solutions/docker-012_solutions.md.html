@@ -194,33 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-012_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-012-explanatory-solutions">docker-012: explanatory solutions<a class="heading-anchor" href="#docker-012-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These are explanations of the supplied teaching fixtures, not fabricated engine results.</p>
-<h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
-<p>Readiness means the application can perform the work a dependent component needs. Process existence is weaker evidence. A server can be running while it initializes files, connects to a database or rejects requests. A health check periodically executes a small observation and classifies container health according to timing and failure rules.</p>
-<p>Compose can wait for a dependency to become healthy before starting a dependent service. This improves startup ordering, but it is not a permanent dependency availability guarantee. The dependency can fail later. Applications still need bounded timeouts, useful error handling and appropriate reconnect behavior.</p>
-<p>A useful health endpoint checks enough to represent readiness without performing expensive or destructive work. It should not mutate learner data or require a public internet service to declare a local classroom ready. Its failure should point to the missing capability, not trigger an unbounded retry loop.</p>
-<p>The fixture’s health command uses Python’s standard-library HTTP client to request its own loopback <code>/healthz</code> endpoint with a timeout. <code>interval</code>, <code>timeout</code>, <code>retries</code> and <code>start_period</code> control repeated observations. The health command runs inside the container, so its loopback is the app’s loopback.</p>
-<p>A dependent service may specify <code>depends_on: app: condition: service_healthy</code>. That describes an initial ordering condition. A check that only tests whether a PID exists is usually too weak for a web dependency; a check that queries an unrelated remote service may be unnecessarily strong and fragile.</p>
+<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-012.md</code>.</p>
 <h3 id="exercise-1-compare-running-and-healthy">Exercise 1: Compare running and healthy.<a class="heading-anchor" href="#exercise-1-compare-running-and-healthy" aria-label="Link to this section">#</a></h3>
-<p>A running process may not be ready. A healthy classification is only as meaningful as its check, so review what the command actually observes.</p>
-<p><strong>Expected:</strong> A lifecycle state versus a defined repeated behavioral check.</p>
+<p><strong>Expected answer:</strong> A lifecycle state versus a defined repeated behavioral check.</p>
+<p><strong>Why:</strong> A running process may not be ready. A healthy classification is only as meaningful as its check, so review what the command actually observes.</p>
 <h3 id="exercise-2-predict-which-loopback-the-health-command-uses">Exercise 2: Predict which loopback the health command uses.<a class="heading-anchor" href="#exercise-2-predict-which-loopback-the-health-command-uses" aria-label="Link to this section">#</a></h3>
-<p>The command runs inside that container. It does not traverse the published host port, so host-browser acceptance remains a separate observation.</p>
-<p><strong>Expected:</strong> The app container network namespace.</p>
+<p><strong>Expected answer:</strong> The app container network namespace.</p>
+<p><strong>Why:</strong> The command runs inside that container. It does not traverse the published host port, so host-browser acceptance remains a separate observation.</p>
 <h3 id="exercise-3-design-a-readiness-endpoint-for-a-file-backed-teaching-app">Exercise 3: Design a readiness endpoint for a file-backed teaching app.<a class="heading-anchor" href="#exercise-3-design-a-readiness-endpoint-for-a-file-backed-teaching-app" aria-label="Link to this section">#</a></h3>
-<p>Readiness should verify that the app can serve its intended role without creating records or depending on unrelated internet availability.</p>
-<p><strong>Expected:</strong> A bounded non-destructive test of required local capability.</p>
+<p><strong>Expected evidence:</strong> A bounded non-destructive test of required local capability.</p>
+<p><strong>Why:</strong> Readiness should verify that the app can serve its intended role without creating records or depending on unrelated internet availability.</p>
 <h3 id="exercise-4-diagnose-a-healthy-app-with-a-broken-host-mapping">Exercise 4: Diagnose a healthy app with a broken host mapping.<a class="heading-anchor" href="#exercise-4-diagnose-a-healthy-app-with-a-broken-host-mapping" aria-label="Link to this section">#</a></h3>
-<p>The checks traverse different paths. Inspect the host port mapping and request destination rather than weakening a valid internal readiness check.</p>
-<p><strong>Expected:</strong> The internal readiness check can pass while browser access fails.</p>
+<p><strong>Expected answer:</strong> The internal readiness check can pass while browser access fails.</p>
+<p><strong>Why:</strong> The checks traverse different paths. Inspect the host port mapping and request destination rather than weakening a valid internal readiness check.</p>
 <h3 id="exercise-5-explain-a-dependency-crash-after-startup">Exercise 5: Explain a dependency crash after startup.<a class="heading-anchor" href="#exercise-5-explain-a-dependency-crash-after-startup" aria-label="Link to this section">#</a></h3>
-<p>An initial condition can become false later. Clients need timeouts and failure handling that match whether retrying the specific operation is safe.</p>
-<p><strong>Expected:</strong> depends_on does not replace runtime recovery logic.</p>
+<p><strong>Expected answer:</strong> depends_on does not replace runtime recovery logic.</p>
+<p><strong>Why:</strong> An initial condition can become false later. Clients need timeouts and failure handling that match whether retrying the specific operation is safe.</p>
 <h3 id="exercise-6-write-separate-health-and-acceptance-assertions">Exercise 6: Write separate health and acceptance assertions.<a class="heading-anchor" href="#exercise-6-write-separate-health-and-acceptance-assertions" aria-label="Link to this section">#</a></h3>
-<p>The cheap periodic check should remain small. A fuller acceptance check proves features such as content, authentication or saved-state behavior that health may intentionally omit.</p>
-<p><strong>Expected:</strong> Health endpoint succeeds; user-facing response and persistence also satisfy their contracts.</p>
+<p><strong>Expected evidence:</strong> Health endpoint succeeds; user-facing response and persistence also satisfy their contracts.</p>
+<p><strong>Why:</strong> The cheap periodic check should remain small. A fuller acceptance check proves features such as content, authentication or saved-state behavior that health may intentionally omit.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful solution identifies the exact object, the phase when a setting takes effect, the expected normal result and an observation that disproves it. Repeating a command until it succeeds hides the mechanism. Change one variable, keep a failure record, and test the intended behavior again. Source examples here are small enough to inspect; a production system additionally needs ownership, lifecycle, data recovery and operational review. The host exercises are optional and must stay within the learner-created project.</p></article>
+<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>
 </body>
 </html>

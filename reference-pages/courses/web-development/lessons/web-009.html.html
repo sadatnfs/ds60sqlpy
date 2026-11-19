@@ -200,15 +200,35 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">    <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">meta</span> <span class="syntax-attribute">name</span><span class="syntax-operator">=</span><span class="syntax-string">&quot;viewport&quot;</span> <span class="syntax-attribute">content</span><span class="syntax-operator">=</span><span class="syntax-string">&quot;width=device-width, initial-scale=1&quot;</span> <span class="syntax-punctuation">/</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">title</span><span class="syntax-punctuation">&gt;</span>Form constraints, errors and helpful recovery: my attempt<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">title</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">style</span><span class="syntax-punctuation">&gt;</span></span>
-<span class="source-line">      <span class="syntax-comment">/* Implement the lesson-specific CSS. Keep keyboard focus visible. */</span></span>
+<span class="source-line">      <span class="syntax-comment">/* Write the CSS for the exercises here. Keep keyboard focus visible. */</span></span>
 <span class="source-line">    <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">style</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line">  <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">head</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line">  <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">body</span><span class="syntax-punctuation">&gt;</span></span>
-<span class="source-line">    <span class="syntax-comment">&lt;!-- web-009: Build a bounded study-time form with linked help. --&gt;</span></span>
-<span class="source-line">    <span class="syntax-comment">&lt;!-- Save your prediction, then implement the six exercises from the guide. --&gt;</span></span>
+<span class="source-line">    <span class="syntax-comment">&lt;!--</span></span>
+<span class="source-line"><span class="syntax-comment">      web-009 exercises. Hints are in the guide; answers are in the solutions folder.</span></span>
+<span class="source-line"><span class="syntax-comment">      1. Predict required, minimum and maximum outcomes for empty, 4, 30 and 121.</span></span>
+<span class="source-line"><span class="syntax-comment">      2. Add a clear unit and range to a control&#x27;s label.</span></span>
+<span class="source-line"><span class="syntax-comment">      3. Build a bounded study-time form with linked help.</span></span>
+<span class="source-line"><span class="syntax-comment">      4. Explain why type=email does not prove mailbox ownership.</span></span>
+<span class="source-line"><span class="syntax-comment">      5. Test validation with keyboard and an empty field.</span></span>
+<span class="source-line"><span class="syntax-comment">      6. Separate client feedback from server-side acceptance.</span></span>
+<span class="source-line"><span class="syntax-comment">    --&gt;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">main</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line">      <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">h1</span><span class="syntax-punctuation">&gt;</span>Form constraints, errors and helpful recovery<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">h1</span><span class="syntax-punctuation">&gt;</span></span>
-<span class="source-line">      <span class="syntax-comment">&lt;!-- Build your own document here. The reference is separate. --&gt;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">form</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">label</span> <span class="syntax-attribute">for</span><span class="syntax-operator">=</span><span class="syntax-string">&quot;minutes&quot;</span><span class="syntax-punctuation">&gt;</span>Time<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">label</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">        <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">input</span> <span class="syntax-attribute">id</span><span class="syntax-operator">=</span><span class="syntax-string">&quot;minutes&quot;</span> <span class="syntax-attribute">name</span><span class="syntax-operator">=</span><span class="syntax-string">&quot;minutes&quot;</span> <span class="syntax-attribute">type</span><span class="syntax-operator">=</span><span class="syntax-string">&quot;number&quot;</span> <span class="syntax-attribute">min</span><span class="syntax-operator">=</span><span class="syntax-string">&quot;5&quot;</span> <span class="syntax-attribute">max</span><span class="syntax-operator">=</span><span class="syntax-string">&quot;120&quot;</span> <span class="syntax-attribute">required</span> <span class="syntax-punctuation">/</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">      <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">form</span><span class="syntax-punctuation">&gt;</span></span>
+<span class="source-line">      <span class="syntax-comment">&lt;!--</span></span>
+<span class="source-line"><span class="syntax-comment">        Worked example 1: A bounded value</span></span>
+<span class="source-line"><span class="syntax-comment">        &lt;label for=&quot;minutes&quot;&gt;Minutes, 5 to 120&lt;/label&gt;</span></span>
+<span class="source-line"><span class="syntax-comment">        &lt;input id=&quot;minutes&quot; name=&quot;minutes&quot; type=&quot;number&quot; min=&quot;5&quot; max=&quot;120&quot; required /&gt;</span></span>
+<span class="source-line"><span class="syntax-comment">      --&gt;</span></span>
+<span class="source-line">      <span class="syntax-comment">&lt;!--</span></span>
+<span class="source-line"><span class="syntax-comment">        Worked example 2: Connected help</span></span>
+<span class="source-line"><span class="syntax-comment">        &lt;input id=&quot;alias&quot; aria-describedby=&quot;alias-help&quot; minlength=&quot;3&quot; /&gt;</span></span>
+<span class="source-line"><span class="syntax-comment">        &lt;p id=&quot;alias-help&quot;&gt;Use at least three characters.&lt;/p&gt;</span></span>
+<span class="source-line"><span class="syntax-comment">      --&gt;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">main</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line">  <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">body</span><span class="syntax-punctuation">&gt;</span></span>
 <span class="source-line"><span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">html</span><span class="syntax-punctuation">&gt;</span></span>

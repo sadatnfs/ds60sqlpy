@@ -206,7 +206,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Exception unwinding destroys fully constructed local owners. If a later operation throws, a unique_ptr already in scope still releases its pointee. By contrast, a raw new followed by a throwing operation before a matching delete can leak. The correct fix is to establish ownership immediately, not to add a delete to one guessed error branch. For non-memory resources, the same structure can use an appropriate custom deleter.</p>
 <p>Exclusive ownership is not appropriate for every graph. shared_ptr introduces shared lifetime responsibility and additional costs, while raw pointers can express non-owning access. Choose based on who must keep the object alive, not on which pointer syntax seems easiest. The examples deliberately avoid shared ownership so the transfer and destruction points are inspectable.</p>
 <h3 id="debugging-the-contract">Debugging the contract<a class="heading-anchor" href="#debugging-the-contract" aria-label="Link to this section">#</a></h3>
-<p>If live remains1 after the scope, inspect whether ownership escaped or was released without cleanup. If a moved-from unique_ptr is dereferenced, test its empty state and use the new owner instead. Do not construct two unique_ptr objects from the same raw pointer: that creates two deletion responsibilities for one allocation. A destructor counter proves the fixture lifecycle, not the safety of every borrowed pointer elsewhere in the program.</p>
+<p>If live remains 1 after the scope, inspect whether ownership escaped or was released without cleanup. If a moved-from unique_ptr is dereferenced, test its empty state and use the new owner instead. Do not construct two unique_ptr objects from the same raw pointer: that creates two deletion responsibilities for one allocation. A destructor counter proves the fixture lifecycle, not the safety of every borrowed pointer elsewhere in the program.</p>
 <h3 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-cpp"><span class="syntax-keyword">auto</span> p <span class="syntax-operator">=</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>make_unique<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span><span class="syntax-punctuation">(</span><span class="syntax-number">7</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 <span class="syntax-keyword">auto</span> q <span class="syntax-operator">=</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>move<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
@@ -220,32 +220,32 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Draw p and q before and after moving unique_ptr&lt;int&gt;(7).</p>
 <p><strong>Expected:</strong> One live allocation; exactly one owner at each point.</p>
 <p><strong>Reasoning:</strong> Moving transfers the pointer ownership.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Check the drawing against Worked example 1&#x27;s assertion <code>!p &amp;&amp; q &amp;&amp; *q == 7</code>: after the move <code>p</code> is null, <code>q</code> owns the single int 7, and no second allocation appears.</p>
 <h3 id="exercise-2-check-normal-cleanup">Exercise 2: Check normal cleanup<a class="heading-anchor" href="#exercise-2-check-normal-cleanup" aria-label="Link to this section">#</a></h3>
 <p>Run the Tracked scoped case.</p>
 <p><strong>Expected:</strong> live=1 inside and 0 afterward.</p>
 <p><strong>Reasoning:</strong> Destructor cleanup is tied to scope.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Print <code>live</code> inside the inner scope and after it closes, and confirm the two lines show 1 and 0, matching Worked example 2&#x27;s assertions.</p>
 <h3 id="exercise-3-check-exceptional-cleanup">Exercise 3: Check exceptional cleanup<a class="heading-anchor" href="#exercise-3-check-exceptional-cleanup" aria-label="Link to this section">#</a></h3>
 <p>Throw after constructing Tracked and catch outside.</p>
 <p><strong>Expected:</strong> live=0 after catch.</p>
 <p><strong>Reasoning:</strong> Stack unwinding destroys the owner.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Create a <code>std::unique_ptr&lt;Tracked&gt;</code> inside <code>try</code>, throw <code>std::runtime_error</code>, and assert <code>live == 0</code> in the <code>catch</code> block, which shows the destructor ran during unwinding.</p>
 <h3 id="exercise-4-reject-accidental-copy">Exercise 4: Reject accidental copy<a class="heading-anchor" href="#exercise-4-reject-accidental-copy" aria-label="Link to this section">#</a></h3>
 <p>Try auto q=p with unique_ptr.</p>
 <p><strong>Expected:</strong> Compile failure; move only when ownership should change.</p>
 <p><strong>Reasoning:</strong> unique_ptr disables copying by design.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Compile the scratch line and keep the error about the deleted copy constructor of <code>std::unique_ptr</code>; <code>auto q = std::move(p);</code> must compile instead.</p>
 <h3 id="exercise-5-handle-empty-owner">Exercise 5: Handle empty owner<a class="heading-anchor" href="#exercise-5-handle-empty-owner" aria-label="Link to this section">#</a></h3>
 <p>Default-construct unique_ptr&lt;int&gt; and inspect Boolean state.</p>
 <p><strong>Expected:</strong> false, with no dereference.</p>
 <p><strong>Reasoning:</strong> An empty owner has nothing to destroy.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Assert <code>!std::unique_ptr&lt;int&gt;{}</code> and confirm the program never applies <code>*</code> to the empty pointer.</p>
 <h3 id="exercise-6-transfer-to-a-collection">Exercise 6: Transfer to a collection<a class="heading-anchor" href="#exercise-6-transfer-to-a-collection" aria-label="Link to this section">#</a></h3>
 <p>Own three unique_ptr&lt;int&gt; values in a vector then leave scope.</p>
 <p><strong>Expected:</strong> All three allocations released; no manual delete loop.</p>
 <p><strong>Reasoning:</strong> Composed RAII owners clean up recursively.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p></article>
+<p><strong>Verify:</strong> Put three <code>std::unique_ptr&lt;Tracked&gt;</code> values in a vector inside a scope and assert <code>live == 3</code> inside and <code>live == 0</code> afterward; the code must contain no <code>delete</code>.</p></article>
   </main>
 </body>
 </html>

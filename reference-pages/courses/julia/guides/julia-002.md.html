@@ -198,7 +198,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Beginner; approximately 90 minutes. Direct prerequisites: <code>julia-001</code>.</p>
 <p>Choose and validate numeric representations while distinguishing exact arithmetic, overflow and floating-point approximation.</p>
 <h3 id="classroom-execution">Classroom execution<a class="heading-anchor" href="#classroom-execution" aria-label="Link to this section">#</a></h3>
-<p>Choose <strong>Julia language and scientific computing</strong> in <code>/classroom</code>, open this unit, and select its prepared <code>julia</code> runtime. The worker starts a fresh <code>main.jl</code> process with two Julia threads, a fixed package environment, no startup file and offline package settings. Both worked examples are complete under that environment. Save your current pad before replacing it. No package, model or dataset is fetched by a lesson.</p>
+<p>Open <code>julia-002</code> in <code>/classroom</code> with its prepared <code>julia</code> runtime. Worked case A (checked and arbitrary-precision integers) and worked case B (approximate and exact decimal-looking values) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing <code>julia-002: all reference checks passed</code>. The <a href="../README.md.html">course overview</a> describes the shared runtime: a fresh offline <code>main.jl</code> process with two threads and a fixed package environment.</p>
 <h3 id="representation-is-part-of-the-calculation">Representation is part of the calculation<a class="heading-anchor" href="#representation-is-part-of-the-calculation" aria-label="Link to this section">#</a></h3>
 <p>The written number, its stored representation and the scientific quantity are related but different. Julia&#x27;s ordinary integer literals use a machine integer type in this environment. Floating-point literals such as <code>0.1</code> use a binary approximation. A rational literal such as <code>1//10</code> represents an exact ratio of integers when its numerator and denominator remain representable.</p>
 <p>Arithmetic can promote inputs to a common representation. That convenience does not make every conversion lossless. Dividing two integers with <code>/</code> produces a floating-point result, while <code>div</code> performs integer division. A rational uses <code>//</code>. Select the operation that matches the intended question instead of inferring meaning from the appearance of the result.</p>
@@ -255,7 +255,7 @@ worked_b<span class="syntax-punctuation">(</span><span class="syntax-punctuation
 <p><strong>Expected:</strong> Their types are Float32 and Float64.</p>
 <p><strong>Hint:</strong> Literal syntax is part of the contract.</p>
 <h4 id="5-check-a-large-integer">5. Check a large integer<a class="heading-anchor" href="#5-check-a-large-integer" aria-label="Link to this section">#</a></h4>
-<p>Compute BigInt(2)^100.</p>
+<p>Compute <code>BigInt(2)^100</code>.</p>
 <p><strong>Expected:</strong> The mathematical integer is retained beyond the machine Int range.</p>
 <p><strong>Hint:</strong> Promote before exponentiation.</p>
 <h4 id="6-explain-a-tolerance">6. Explain a tolerance<a class="heading-anchor" href="#6-explain-a-tolerance" aria-label="Link to this section">#</a></h4>
@@ -268,7 +268,7 @@ worked_b<span class="syntax-punctuation">(</span><span class="syntax-punctuation
 <li><a href="https://docs.julialang.org/en/v1/manual/complex-and-rational-numbers/">Complex and rational arithmetic</a></li>
 </ul>
 <h3 id="study-companion">Study companion<a class="heading-anchor" href="#study-companion" aria-label="Link to this section">#</a></h3>
-<p>Use the repository learning-companion skill with this lesson ID, your prediction and your actual source/output. Ask for a diagnosis of the first incorrect type, shape, state transition or assumption. Keep observed execution distinct from a timing claim, inferred mathematical result or external deployment.</p></article>
+<p>A repository-aware assistant with the learning-companion skill can review <code>julia-002</code> with you. Give it your prediction for one investigation, your source and the actual output, and ask it to find the first incorrect assumption about integer overflow, Float64, Rational, BigInt or promotion.</p></article>
   </main>
 </body>
 </html>

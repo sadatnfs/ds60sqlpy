@@ -208,14 +208,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="designing-and-consuming-a-reusable-parser-library">Designing and consuming a reusable parser library<a class="heading-anchor" href="#designing-and-consuming-a-reusable-parser-library" aria-label="Link to this section">#</a></h3>
 <p>A reusable library separates its public contract from implementation and from the application&#x27;s I/O policy. The record parser accepts one string_view and returns an owning Record or rejection. The caller decides where raw text came from and whether a rejected row aborts a batch. This separation lets the parser be tested without a terminal, file or cluster and keeps its lifetime reasoning small.</p>
 <p>The public Record owns integer id and cents values. It does not retain a view into the input, so a successful result survives after the caller&#x27;s raw string is destroyed. The parser still borrows the input while reading it. A library that returned views into a temporary normalization buffer would violate that lifetime contract even if its ordinary example happened to print correct values.</p>
-<p>The grammar is exactly two comma-separated nonnegative integer fields. The parser checks delimiter count, both conversion results, full consumption and domain ranges. The suffix fixture 7, 125x rejects a plausible permissive parser that accepts a numeric prefix. Valid0, 0 prevents the opposite bug of treating zero as absence. These cases are independent of packaging and should pass before the library is exported.</p>
+<p>The grammar is exactly two comma-separated nonnegative integer fields. The parser checks delimiter count, both conversion results, full consumption and domain ranges. The suffix fixture 7, 125x rejects a plausible permissive parser that accepts a numeric prefix. Valid 0, 0 prevents the opposite bug of treating zero as absence. These cases are independent of packaging and should pass before the library is exported.</p>
 <p>The real record-library fixture contains a public header, implementation, independent consumer and CMake target. Building the consumer against that target tests whether the header declares everything it needs and whether the implementation is actually linked. A combined single-file source cannot expose a missing exported include path or omitted library object in the same way.</p>
 <p>Installation/export is another boundary. A local install tree should let a fresh consumer find the documented package/target without relying on the original source directory. The host exercise records configure, build, install and consumer results separately. The browser&#x27;s one-main.cpp run is still useful for parser behavior, but it does not execute that packaging workflow.</p>
 <p>A library release also needs a stability policy. Changing the accepted grammar, error representation or ownership behavior can break callers even when the function name stays the same. Document format/version changes and keep an independent consumer test. A package that compiles but silently accepts malformed suffixes is not a successful release under this contract.</p>
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the C++ module, save this lesson&#x27;s learner pad, then use Run. The worker stages the pad as <code>main.cpp</code> and compiles one translation unit. Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for exact local commands, flags, exit statuses, paths and Docker guidance. Tests involving multiple files, CMake, tool flags or shared libraries are explicitly host-project exercises.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
-<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs:each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
+<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs: each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p><a href="../examples/cpp-028-example-1.cpp.html">Complete program 1</a></p>
 <pre class="highlighted-code"><code class="language-cpp"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;cassert&gt;</span>
@@ -249,7 +249,7 @@ std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>o
   std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpp-028 example 1 checks passed</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
   <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
-<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<p><strong>Expected:</strong> With assertions enabled, the program exits with status 0 and prints:</p>
 <pre class="highlighted-code"><code class="language-text">cpp-028 example 1 checks passed</code></pre>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p><a href="../examples/cpp-028-example-2.cpp.html">Complete program 2</a></p>
@@ -283,7 +283,7 @@ std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>o
   std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpp-028 example 2 checks passed</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
   <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
-<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<p><strong>Expected:</strong> With assertions enabled, the program exits with status 0 and prints:</p>
 <pre class="highlighted-code"><code class="language-text">cpp-028 example 2 checks passed</code></pre>
 <h4 id="complete-host-library-project">Complete host library project<a class="heading-anchor" href="#complete-host-library-project" aria-label="Link to this section">#</a></h4>
 <p>Use the <a href="../fixtures/record-library/README.md.html">record-library fixture</a> for the capstone&#x27;s real public-header, implementation, consumer, CMake and local install/export boundary. Its independent consumer checks two accepted and two rejected records and catches permissive suffix parsing. The single-file browser reference tests value semantics; only actual host commands establish the separate-library and packaging checks.</p>
@@ -291,37 +291,37 @@ std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>o
 <h4 id="exercise-1-write-public-contracts">Exercise 1: Write public contracts<a class="heading-anchor" href="#exercise-1-write-public-contracts" aria-label="Link to this section">#</a></h4>
 <p>Document parse_record input grammar and result ownership.</p>
 <p><strong>Expected result/shape:</strong> Two nonnegative integer fields, full consumption, owned success.</p>
-<p><strong>Verify:</strong> Two nonnegative integer fields, full consumption, owned success.</p>
+<p><strong>Verify:</strong> Check your grammar against <code>parse_record(&quot;7,125&quot;)</code> succeeding and <code>parse_record(&quot;7,125x&quot;)</code> failing, and state that the returned <code>Record</code> holds copied ints, not views into the input.</p>
 <p><strong>Progressive hints:</strong> Consumers need semantic rules beyond signatures.</p>
 <h4 id="exercise-2-build-independent-fixture">Exercise 2: Build independent fixture<a class="heading-anchor" href="#exercise-2-build-independent-fixture" aria-label="Link to this section">#</a></h4>
 <p>Use [7, 125; 0, 0; 7, 125x; 7, -1] as four records.</p>
 <p><strong>Expected result/shape:</strong> Two accepted and two rejected.</p>
-<p><strong>Verify:</strong> Two accepted and two rejected.</p>
+<p><strong>Verify:</strong> Assert <code>parse_record</code> succeeds for <code>&quot;7,125&quot;</code> and <code>&quot;0,0&quot;</code> and returns an empty optional for <code>&quot;7,125x&quot;</code> and <code>&quot;7,-1&quot;</code>.</p>
 <p><strong>Progressive hints:</strong> Expected results are hand-written independently.</p>
 <h4 id="exercise-3-package-a-consumer">Exercise 3: Package a consumer<a class="heading-anchor" href="#exercise-3-package-a-consumer" aria-label="Link to this section">#</a></h4>
 <p>Split header, implementation and CLI into the host project.</p>
 <p><strong>Expected result/shape:</strong> Separate library and executable targets build and link.</p>
-<p><strong>Verify:</strong> Separate library and executable targets build and link.</p>
+<p><strong>Verify:</strong> Confirm <code>CMakeLists.txt</code> declares a library target for the parser and an executable target that links it, then build both and run the executable.</p>
 <p><strong>Progressive hints:</strong> A single-file worker cannot establish packaging.</p>
 <h4 id="exercise-4-inject-a-regression">Exercise 4: Inject a regression<a class="heading-anchor" href="#exercise-4-inject-a-regression" aria-label="Link to this section">#</a></h4>
 <p>Remove the full-consumption check in a scratch implementation.</p>
 <p><strong>Expected result/shape:</strong> 7, 125x must fail the golden test.</p>
-<p><strong>Verify:</strong> 7, 125x must fail the golden test.</p>
+<p><strong>Verify:</strong> Run Worked example 2&#x27;s <code>assert(!parse_record(&quot;7,125x&quot;))</code> against the scratch version and confirm it aborts; restoring the full-consumption check makes it pass.</p>
 <p><strong>Progressive hints:</strong> A plausible parsing shortcut is the negative control.</p>
 <h4 id="exercise-5-check-boundary-ownership">Exercise 5: Check boundary ownership<a class="heading-anchor" href="#exercise-5-check-boundary-ownership" aria-label="Link to this section">#</a></h4>
 <p>Return a parsed record after input string goes out of scope.</p>
 <p><strong>Expected result/shape:</strong> Record fields remain valid copied integers.</p>
-<p><strong>Verify:</strong> Record fields remain valid copied integers.</p>
+<p><strong>Verify:</strong> Parse from a <code>std::string</code> declared in an inner scope, keep only the <code>std::optional&lt;Record&gt;</code>, and assert <code>id == 7</code> and <code>cents == 125</code> after the scope ends.</p>
 <p><strong>Progressive hints:</strong> No borrowed string_view survives in the result.</p>
 <h4 id="exercise-6-deliver-compatibility-evidence">Exercise 6: Deliver compatibility evidence<a class="heading-anchor" href="#exercise-6-deliver-compatibility-evidence" aria-label="Link to this section">#</a></h4>
 <p>Run a consumer against current public header and library.</p>
 <p><strong>Expected result/shape:</strong> Compiler/platform identity, test output and source inventory retained.</p>
-<p><strong>Verify:</strong> Compiler/platform identity, test output and source inventory retained.</p>
+<p><strong>Verify:</strong> Build a separate consumer that includes only the public header and links the built library, and keep its test output beside the compiler version and architecture.</p>
 <p><strong>Progressive hints:</strong> A reviewer must reproduce the consumer boundary.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain why this observation follows from the mechanism: The library produces an owned record with exact fields. Then explain the changed condition in example 2 without opening the answer.</p>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
-<p>If a consumer compiles only inside the library source tree, inspect public includes and exported target properties. If it links without the intended library, check whether a header accidentally contains a duplicate implementation. If parsing passes normal rows but accepts125x, inspect full consumption. If a returned record changes when raw input is edited, look for borrowed fields where the public contract promised owning values.</p>
+<p>If a consumer compiles only inside the library source tree, inspect public includes and exported target properties. If it links without the intended library, check whether a header accidentally contains a duplicate implementation. If parsing passes normal rows but accepts 125x, inspect full consumption. If a returned record changes when raw input is edited, look for borrowed fields where the public contract promised owning values.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
 <p>Close the source. Reconstruct the reasoning for Exercise 6: Deliver compatibility evidence. Explain which assumptions would fail on a larger input or another runtime.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>

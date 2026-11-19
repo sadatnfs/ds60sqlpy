@@ -194,31 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-004_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-004-explanatory-solutions">web-004: explanatory solutions<a class="heading-anchor" href="#web-004-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.</p>
-<h3 id="why-the-mechanism-works">Why the mechanism works<a class="heading-anchor" href="#why-the-mechanism-works" aria-label="Link to this section">#</a></h3>
-<p>A URL identifies a resource and can contain a scheme, host, path, query and fragment. A relative path is resolved against a base URL; it is not resolved against the author&#x27;s mental picture of a folder. A fragment such as #methods identifies a location within the current document and does not require another document to exist. An anchor with href provides navigation semantics and keyboard behavior automatically.</p>
-<p>Good link text tells a reader the destination or action. A page full of links named click here loses meaning when links are read as a list. A link navigates; a button changes application state or submits an action. Styling a paragraph blue does not create link behavior, and adding a click listener does not automatically provide keyboard support.</p>
-<p>Use <code>href=&quot;#details&quot;</code> with a unique <code>id=&quot;details&quot;</code> for this offline lesson. A leading slash means a path from the origin root, while <code>../</code> moves one directory upward relative to the base path. Production external links may need a new-window notice and suitable rel values; do not open new tabs by default merely to keep a user on your site.</p>
+<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-004.md</code>.</p>
 <h3 id="exercise-1-resolve-images-plot-svg-from-notes-week1-page-html">Exercise 1: Resolve ../images/plot.svg from /notes/week1/page.html.<a class="heading-anchor" href="#exercise-1-resolve-images-plot-svg-from-notes-week1-page-html" aria-label="Link to this section">#</a></h3>
-<p>The resolved path is /notes/images/plot.svg on the same origin.</p>
-<p>Trace the smallest example before editing. Name which values are source and which are observations.</p>
+<p><strong>Expected answer:</strong> The resolved path is /notes/images/plot.svg on the same origin.</p>
+<p><strong>Why:</strong> The base directory is /notes/week1/; .. moves up to /notes/, then images/plot.svg is appended, and the scheme and host stay the same.</p>
 <h3 id="exercise-2-replace-vague-link-text-with-destination-specific-wording">Exercise 2: Replace vague link text with destination-specific wording.<a class="heading-anchor" href="#exercise-2-replace-vague-link-text-with-destination-specific-wording" aria-label="Link to this section">#</a></h3>
-<p>The link makes sense outside its surrounding sentence.</p>
-<p>Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.</p>
+<p><strong>Expected evidence:</strong> The link makes sense outside its surrounding sentence.</p>
+<p><strong>Why:</strong> People often navigate by a list of links, where text such as click here gives no destination.</p>
 <h3 id="exercise-3-build-a-contents-list-that-navigates-to-three-local-sections">Exercise 3: Build a contents list that navigates to three local sections.<a class="heading-anchor" href="#exercise-3-build-a-contents-list-that-navigates-to-three-local-sections" aria-label="Link to this section">#</a></h3>
-<p>Every fragment matches one unique section id and works with keyboard activation.</p>
-<p>Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.</p>
+<p><strong>Expected evidence:</strong> Every fragment matches one unique section id and works with keyboard activation.</p>
+<p><strong>Why:</strong> A fragment link scrolls to the element whose id matches; a duplicate or missing id makes the target ambiguous or absent.</p>
 <h3 id="exercise-4-diagnose-a-link-whose-fragment-has-no-matching-id">Exercise 4: Diagnose a link whose fragment has no matching id.<a class="heading-anchor" href="#exercise-4-diagnose-a-link-whose-fragment-has-no-matching-id" aria-label="Link to this section">#</a></h3>
-<p>The link has no intended target even if its visual style looks correct.</p>
-<p>Keep the failing input. Identify the first layer where the observed result differs from the intended contract.</p>
+<p><strong>Expected answer:</strong> The link has no intended target even if its visual style looks correct.</p>
+<p><strong>Why:</strong> Fragment matching is exact and case-sensitive, so a link can look correct and still have no target.</p>
 <h3 id="exercise-5-distinguish-a-disabled-action-from-an-unavailable-destination">Exercise 5: Distinguish a disabled action from an unavailable destination.<a class="heading-anchor" href="#exercise-5-distinguish-a-disabled-action-from-an-unavailable-destination" aria-label="Link to this section">#</a></h3>
-<p>A button can be disabled; a meaningful alternative explanation should replace a dead link.</p>
-<p>Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.</p>
+<p><strong>Expected answer:</strong> A button can be disabled; a meaningful alternative explanation should replace a dead link.</p>
+<p><strong>Why:</strong> Buttons have a disabled state that blocks activation, while links do not; an unavailable destination should be explained in text instead of left as a dead link.</p>
 <h3 id="exercise-6-explain-the-difference-between-absolute-root-relative-and-document-relative-paths">Exercise 6: Explain the difference between absolute, root-relative and document-relative paths.<a class="heading-anchor" href="#exercise-6-explain-the-difference-between-absolute-root-relative-and-document-relative-paths" aria-label="Link to this section">#</a></h3>
-<p>Each has a distinct base and can resolve differently when the document moves.</p>
-<p>Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.</p>
-<h3 id="reference-comparison-and-limits">Reference comparison and limits<a class="heading-anchor" href="#reference-comparison-and-limits" aria-label="Link to this section">#</a></h3>
-<p>Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.</p></article>
+<p><strong>Expected answer:</strong> Each has a distinct base and can resolve differently when the document moves.</p>
+<p><strong>Why:</strong> An absolute URL includes scheme and host, a root-relative path starts at the site root and a document-relative path depends on the current document&#x27;s directory, so only the last one changes when the page moves.</p>
+<h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
+<p>Open <code>courses/web-development/solutions/web-004_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
   </main>
 </body>
 </html>

@@ -194,37 +194,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/csharp/solutions/csharp-003_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="csharp-003-explanation-and-comparison">csharp-003: explanation and comparison<a class="heading-anchor" href="#csharp-003-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="csharp-003_solution.cs.html">csharp-003_solution.cs</a>. Its assertions are always active under the prepared classroom compile settings.</p>
+<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="csharp-003_solution.cs.html">csharp-003_solution.cs</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Reject overflowing counts:</strong> The normal and failure paths separate an exceptional boundary from ordinary arithmetic. The maximum int plus one is rejected; 100 plus 20 is accepted.</p>
 <p><strong>Preserve decimal intent:</strong> A rounding difference can be a policy disagreement rather than a compiler defect. Write the expected rule before the implementation. Two valid midpoint policies produce 2.34 and 2.35.</p>
-<h3 id="reason-through-the-six-tasks">Reason through the six tasks<a class="heading-anchor" href="#reason-through-the-six-tasks" aria-label="Link to this section">#</a></h3>
-<ol>
-<li><strong>Predict and explain.</strong> Predict which arithmetic operation throws and explain the representation boundary.</li>
-</ol>
-<ol start="2">
-<li><strong>Guided modification.</strong> Replace maximum plus one with minimum minus one and check the failure.</li>
-</ol>
-<ol start="3">
-<li><strong>Independent construction.</strong> Calculate a decimal subtotal and tax, rounding only the final payable amount.</li>
-</ol>
-<ol start="4">
-<li><strong>Diagnose a defect.</strong> Diagnose a price parsed as double and later converted to decimal. Explain where approximation entered.</li>
-</ol>
-<ol start="5">
-<li><strong>Boundary evidence.</strong> Compare midpoint values immediately below, at and above the rounding boundary.</li>
-</ol>
-<ol start="6">
-<li><strong>Transfer and justify.</strong> Design a quantity and currency contract that states overflow, rounding and invalid-input behavior.</li>
-</ol>
-<p>For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.</p>
+<h3 id="task-answers">Task answers<a class="heading-anchor" href="#task-answers" aria-label="Link to this section">#</a></h3>
+<h4 id="task-1-predict-and-explain">Task 1: Predict and explain<a class="heading-anchor" href="#task-1-predict-and-explain" aria-label="Link to this section">#</a></h4>
+<p>Predict which arithmetic operation throws and explain the representation boundary.</p>
+<p>No separate reference answer has been written for this task. Example A is the evidence to compare with: The normal and failure paths separate an exceptional boundary from ordinary arithmetic. The maximum int plus one is rejected; 100 plus 20 is accepted.</p>
+<h4 id="task-2-guided-modification">Task 2: Guided modification<a class="heading-anchor" href="#task-2-guided-modification" aria-label="Link to this section">#</a></h4>
+<p>Replace maximum plus one with minimum minus one and check the failure.</p>
+<p>No separate reference answer has been written for this task. Start from Example B: A rounding difference can be a policy disagreement rather than a compiler defect. Write the expected rule before the implementation. Two valid midpoint policies produce 2.34 and 2.35.</p>
+<h4 id="task-3-independent-construction">Task 3: Independent construction<a class="heading-anchor" href="#task-3-independent-construction" aria-label="Link to this section">#</a></h4>
+<p>Calculate a decimal subtotal and tax, rounding only the final payable amount.</p>
+<p><strong>Reference answer.</strong> It runs as the <code>Task 3</code> block of the reference program.</p>
+<pre class="highlighted-code"><code class="language-csharp"><span class="syntax-keyword">decimal</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span> prices <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span> <span class="syntax-number">19.99m</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5.01m</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.35m</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">decimal</span> subtotal <span class="syntax-operator">=</span> prices<span class="syntax-punctuation">.</span>Sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">decimal</span> tax <span class="syntax-operator">=</span> subtotal <span class="syntax-operator">*</span> <span class="syntax-number">0.0825m</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">decimal</span> payable <span class="syntax-operator">=</span> Math<span class="syntax-punctuation">.</span>Round<span class="syntax-punctuation">(</span>subtotal <span class="syntax-operator">+</span> tax<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> MidpointRounding<span class="syntax-punctuation">.</span>ToEven<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+Check<span class="syntax-punctuation">(</span>subtotal <span class="syntax-operator">==</span> <span class="syntax-number">25.35m</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;exact decimal subtotal&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+Check<span class="syntax-punctuation">(</span>tax <span class="syntax-operator">==</span> <span class="syntax-number">2.091375m</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;unrounded tax&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+Check<span class="syntax-punctuation">(</span>payable <span class="syntax-operator">==</span> <span class="syntax-number">27.44m</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;rounded only at the end&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Observe:</strong> Subtotal 25.35, unrounded tax 2.091375 and payable 27.44.</p>
+<p>decimal keeps the cents exact, the tax keeps its full precision, and only the final payable amount is rounded once with a named midpoint rule.</p>
+<h4 id="task-4-diagnose-a-defect">Task 4: Diagnose a defect<a class="heading-anchor" href="#task-4-diagnose-a-defect" aria-label="Link to this section">#</a></h4>
+<p>Diagnose a price parsed as double and later converted to decimal. Explain where approximation entered.</p>
+<p>No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson&#x27;s pitfalls: <code>checked</code> does not turn floating-point arithmetic into exact decimal arithmetic. Rounding before aggregation can produce a different total than rounding afterward. Never use an unexplained tolerance to hide a unit mismatch.</p>
+<h4 id="task-5-boundary-evidence">Task 5: Boundary evidence<a class="heading-anchor" href="#task-5-boundary-evidence" aria-label="Link to this section">#</a></h4>
+<p>Compare midpoint values immediately below, at and above the rounding boundary.</p>
+<p>No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Reject overflowing counts) and Example B (Preserve decimal intent).</p>
+<h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
+<p>Design a quantity and currency contract that states overflow, rounding and invalid-input behavior.</p>
+<p>No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry <strong>Overflow</strong>, and state one limitation of your choice.</p>
 <h3 id="mechanism-and-diagnostic-reasoning">Mechanism and diagnostic reasoning<a class="heading-anchor" href="#mechanism-and-diagnostic-reasoning" aria-label="Link to this section">#</a></h3>
 <p>Arithmetic has representation limits. An <code>int</code> has a finite range, so mathematically valid addition may overflow. C# supports checked contexts that reject integral overflow and unchecked contexts that wrap. Neither behavior should be chosen accidentally for business quantities. Floating-point arithmetic instead approximates most decimal fractions, so equality of independently calculated doubles often needs a scale-aware tolerance.</p>
 <p>Use <code>decimal</code> when a decimal representation matches the domain, such as many monetary calculations. Decimal arithmetic still has finite precision and range. Specify rounding at a business boundary, including its midpoint rule, rather than rounding every intermediate operation. Keep currency and units explicit: a bare number does not identify what it measures.</p>
 <p><code>checked(expression)</code> asks for integral overflow detection in that expression. The <code>m</code> suffix selects decimal, while <code>0.1</code> defaults to double. <code>Math.Round(amount, 2, MidpointRounding.ToEven)</code> records both precision and tie policy.</p>
 <p><code>checked</code> does not turn floating-point arithmetic into exact decimal arithmetic. Rounding before aggregation can produce a different total than rounding afterward. Never use an unexplained tolerance to hide a unit mismatch.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.</p></article>
+<p>Run the reference and confirm that it prints <code>csharp-003: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
   </main>
 </body>
 </html>

@@ -194,17 +194,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/scala-spark/guides/spark-031.md</code></p>
     </header>
     <article class="document"><h2 id="spark-031-structured-streaming-with-finite-microbatches">spark-031: Structured Streaming with finite microbatches<a class="heading-anchor" href="#spark-031-structured-streaming-with-finite-microbatches" aria-label="Link to this section">#</a></h2>
-<p>Authored paired Scala/PySpark teaching content. The default fixtures are tiny,local and deterministic. Runtime acceptance,logical correctness and learner understanding remain separate evidence.</p>
+<p>Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
-<p>Advanced; approximately 120 minutes. Direct design prerequisites: <code>spark-030</code>. The prepared baseline is Spark 4.0.1,Scala binary2.13,JDK 17 and Python 3.12. Read the <a href="../execution-baseline.md.html">execution baseline</a>; a proposed future tuple is not a runtime receipt.</p>
+<p>Advanced; approximately 105 minutes. Direct prerequisites: <code>spark-030</code>. The prepared baseline is Spark 4.0.1, Scala binary 2.13, JDK 17 and Python 3.12. Read the <a href="../execution-baseline.md.html">execution baseline</a>.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open <code>spark-031</code> in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed <code>spark-local-scala</code> or <code>spark-local-python</code> profile,save your pad and run the complete source. Scala stages as <code>Main.scala</code> with <code>object Main</code>; Python stages as <code>main.py</code> with a main guard. Each program creates its own local[2] session,disables the UI,binds the driver to loopback and stops the session in finally. No external dataset,package download,JDBC connection or cloud service is requested.</p>
+<p>Open <code>spark-031</code> in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed <code>spark-local-scala</code> or <code>spark-local-python</code> profile, save your pad and run the complete source. Scala stages as <code>Main.scala</code> with <code>object Main</code>; Python stages as <code>main.py</code> with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.</p>
 <p>The <a href="../lessons/spark-031.scala.html">Scala learner</a> and <a href="../lessons/spark-031.py.html">PySpark learner</a> run two complete demonstrations and retain six explicit task stubs. Use the <a href="../solutions/spark-031_solutions.md.html">explained solutions</a> only after an attempt or an explicit worked comparison; the <a href="../solutions/spark-031_solution.scala.html">Scala reference</a> and <a href="../solutions/spark-031_solution.py.html">PySpark reference</a> contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
 <ul>
 <li>Model an unbounded relation while running a finite, reproducible local streaming exercise.</li>
-<li>State the input and output grain,schema,NULL policy and ordering before executing a transformation.</li>
-<li>Compare each language implementation with independent literal expectations,not only with the other implementation.</li>
+<li>State the input and output grain, schema, NULL policy and ordering before executing a transformation.</li>
+<li>Compare each language implementation with independent literal expectations, not only with the other implementation.</li>
 </ul>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <ul>
@@ -225,7 +225,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ul>
 <li><strong>Atomic file arrival:</strong> Making a complete new file visible to a file source in one publication step instead of exposing a file while it is still being written.</li>
 </ul>
-<p>A streaming relation models arrivals that could continue indefinitely, but a learning run can still be finite and reproducible. This lesson provides exactly three files with three records each and usesAvailableNow. The source can divide that available data into microbatches because maxFilesPerTrigger is one. After processing the finite available files, the query terminates. It does not keep a socket open or depend on a wall-clock producer.</p>
+<p>A streaming relation models arrivals that could continue indefinitely, but a learning run can still be finite and reproducible. This lesson provides exactly three files with three records each and uses AvailableNow. The source can divide that available data into microbatches because maxFilesPerTrigger is one. After processing the finite available files, the query terminates. It does not keep a socket open or depend on a wall-clock producer.</p>
 <p>The files are written completely in a sibling staging directory under a fresh owned root, then moved atomically into input. Every destination filename is new. The file source expects arrivals to be complete and does not treat editing an already processed file as a safe update protocol. This local same-filesystem move is a controlled fixture mechanism; remote storage systems require their own supported publication semantics.</p>
 <p>The input schema is declared before readStream.json. IDs and amounts are longs, team is a string, and the schema permits unknown amounts. File parsing does not establish identity or domain correctness by itself; the exact fixture is reviewed separately. There are nine records, seven known amounts and a known-amount total of 80. An ordinary batch read of the same input directory provides a comparison path, while the final three-group literal oracle is independent of both implementations.</p>
 <p>The aggregate keeps one state row per team with record count, known-amount count and sum. Team A has four records, three known amounts and total 15. Team B has three records, two known amounts and total 35. Team C has two records, two known amounts and total 30. Unknown amounts remain unknown inputs; COUNT(amount) reports completeness separately from COUNT(*). Zero amounts are observed values and remain part of the known count.</p>
@@ -335,17 +335,17 @@ known <span class="syntax-operator">=</span> <span class="syntax-punctuation">[<
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-publish-complete-input-files-atomically">Exercise 1: Publish complete input files atomically<a class="heading-anchor" href="#exercise-1-publish-complete-input-files-atomically" aria-label="Link to this section">#</a></h4>
 <p>Write each declared file in the owned staging directory, then atomically move it into input under a new batch-N.json name. Reject invalid names or an existing destination.</p>
-<p><strong>Expected result/shape:</strong> Three input files, each with 3 completeJSON records; no staging temporary file remains. Reusing batch-0.json is rejected.</p>
+<p><strong>Expected result/shape:</strong> Three input files, each with 3 complete JSON records; no staging temporary file remains. Reusing batch-0.json is rejected.</p>
 <p><strong>Verify:</strong> Assert the file count and explicit existing-name rejection before starting any query.</p>
 <p><strong>Progressive hint:</strong> The watched input directory must not expose partially written files.</p>
 <h4 id="exercise-2-construct-an-explicit-streaming-relation-without-starting-it">Exercise 2: Construct an explicit streaming relation without starting it<a class="heading-anchor" href="#exercise-2-construct-an-explicit-streaming-relation-without-starting-it" aria-label="Link to this section">#</a></h4>
-<p>Read the owned JSON input through readStream with the declared schema and maxFilesPerTrigger 1. Return the streamingDataFrame; do not call an ordinary batch collect on it.</p>
+<p>Read the owned JSON input through readStream with the declared schema and maxFilesPerTrigger 1. Return the streaming DataFrame; do not call an ordinary batch collect on it.</p>
 <p><strong>Expected result/shape:</strong> isStreaming is true, columns are id, team, amount and their types are bigint, string, bigint. No query is started by construction alone.</p>
 <p><strong>Verify:</strong> Assert streaming status and exact type mapping while the active query list remains empty.</p>
 <p><strong>Progressive hint:</strong> A streaming plan needs a sink and trigger before it becomes a running query.</p>
 <h4 id="exercise-3-define-a-cumulative-aggregate-with-separate-completeness-counts">Exercise 3: Define a cumulative aggregate with separate completeness counts<a class="heading-anchor" href="#exercise-3-define-a-cumulative-aggregate-with-separate-completeness-counts" aria-label="Link to this section">#</a></h4>
 <p>Group by team and compute row_count, known_amounts and total_amount. Use the same expression for streaming and batch relations without filling unknown amounts.</p>
-<p><strong>Expected result/shape:</strong> The streaming result remains streaming and has one state/result row per team. Its eventual literal result isA(4,3,15), B(3,2,35), C(2,2,30).</p>
+<p><strong>Expected result/shape:</strong> The streaming result remains streaming and has one state/result row per team. Its eventual literal result is A(4,3,15), B(3,2,35), C(2,2,30).</p>
 <p><strong>Verify:</strong> Assert output columns and streaming status now; verify the exact final tuples after bounded execution.</p>
 <p><strong>Progressive hint:</strong> COUNT(*) and COUNT(amount) differ because two amounts are unknown.</p>
 <h4 id="exercise-4-run-availablenow-with-a-deadline-and-owned-cleanup">Exercise 4: Run AvailableNow with a deadline and owned cleanup<a class="heading-anchor" href="#exercise-4-run-availablenow-with-a-deadline-and-owned-cleanup" aria-label="Link to this section">#</a></h4>
@@ -359,28 +359,28 @@ known <span class="syntax-operator">=</span> <span class="syntax-punctuation">[<
 <p><strong>Verify:</strong> Assert total 9, three positive batches of 3 and unique recorded batch IDs; print the actual ledger.</p>
 <p><strong>Progressive hint:</strong> Complete-mode output rows are snapshots, so summing their sizes does not count source records.</p>
 <h4 id="exercise-6-compare-final-streaming-output-with-batch-and-literal-oracles">Exercise 6: Compare final streaming output with batch and literal oracles<a class="heading-anchor" href="#exercise-6-compare-final-streaming-output-with-batch-and-literal-oracles" aria-label="Link to this section">#</a></h4>
-<p>Read the final memory table, compare its ordered summary tuples with a batch read of the same nine source records, and compare both with the literalA/B/C oracle.</p>
-<p><strong>Expected result/shape:</strong> ExactlyA(4,3,15), B(3,2,35), C(2,2,30), whose record counts sum 9, known counts 7 and amounts 80.</p>
+<p>Read the final memory table, compare its ordered summary tuples with a batch read of the same nine source records, and compare both with the literal A/B/C oracle.</p>
+<p><strong>Expected result/shape:</strong> Exactly A(4,3,15), B(3,2,35), C(2,2,30), whose record counts sum 9, known counts 7 and amounts 80.</p>
 <p><strong>Verify:</strong> Assert both path comparisons and the independent literal tuple list; confirm no active query remains before cleanup.</p>
 <p><strong>Progressive hint:</strong> Agreement between two paths is insufficient if both share the same incorrect expression.</p>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
 <p>Do not write partially completed files into the watched input directory or reuse processed filenames. Do not call readStream construction a running query. Do not sum complete-mode snapshots as if each were new input. A memory sink is not a durable production sink, and AvailableNow termination does not prove indefinite state is bounded. Always await and stop owned queries before session cleanup, and preserve scratch if a query is still active rather than deleting its checkpoint underneath it.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
-<p>Explain the contract of <code>publishFile</code> / <code>publish_file</code> without reading its solution. Trace the specified boundary case,then explain the final exercise&#x27;s evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.</p>
+<p>Explain the contract of <code>publishFile</code> / <code>publish_file</code> without reading its solution. Trace the specified boundary case, then explain the final exercise&#x27;s evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
-<p>Use the <a href="../README.md.html">course route</a> to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. Keep runtime/profile receipts separate from any cluster-performance or production-recovery claim.</p>
+<p>Use the <a href="../README.md.html">course route</a> to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.</p>
 <h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>
 <ul>
-<li><a href="https://spark.apache.org/docs/4.0.1/streaming/apis-on-dataframes-and-datasets.html">Spark 4.0.1 file sources,triggers,output modes and query lifecycle</a></li>
+<li><a href="https://spark.apache.org/docs/4.0.1/streaming/apis-on-dataframes-and-datasets.html">Spark 4.0.1 file sources, triggers, output modes and query lifecycle</a></li>
 </ul>
 <ul>
 <li><a href="https://spark.apache.org/docs/4.0.1/streaming/additional-information.html">Spark 4.0.1 checkpoint configuration limits</a></li>
 </ul>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to coach me through spark-031: Structured Streaming with finite microbatches.
-Read courses/scala-spark/guides/spark-031.md and courses/scala-spark/lessons/spark-031.scala;the paired sources are courses/scala-spark/lessons/spark-031.scala and courses/scala-spark/lessons/spark-031.py.
-Direct prerequisites: spark-030. Explain the schema,row grain and new Scala/Python/Spark syntax,ask me to predict a concrete result,then inspect my attempt. Give one hint at a time,review exact result and boundary evidence,and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
-Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies,start a remote service,reset existing checkpoints or alter unrelated learner work.
+Read courses/scala-spark/guides/spark-031.md and courses/scala-spark/lessons/spark-031.scala; the paired sources are courses/scala-spark/lessons/spark-031.scala and courses/scala-spark/lessons/spark-031.py.
+Direct prerequisites: spark-030. Explain the schema, row grain and new Scala/Python/Spark syntax, ask me to predict a concrete result, then inspect my attempt. Give one hint at a time, review exact result and boundary evidence, and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
+Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies, start a remote service, reset existing checkpoints or alter unrelated learner work.
 Done when all six contracts have inspected evidence and I can explain the stated assumptions and a meaningful failure case.</code></pre></article>
   </main>
 </body>

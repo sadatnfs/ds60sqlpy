@@ -202,29 +202,23 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Trace the two retained rows in the first example.</p>
 <p>L1 has 8 and L3 has 9; L2 has an unknown amount.</p>
-<p><strong>Expected evidence:</strong> L1 has 8 and L3 has 9; L2 has an unknown amount.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Raise the threshold from eight to nine.</p>
 <p>L3 remains with net 9.</p>
-<p><strong>Expected evidence:</strong> L3 remains with net 9.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Return an exclusion count alongside the selected table.</p>
 <p>Report input 3, retained 2, excluded 1 under the original policy.</p>
-<p><strong>Expected evidence:</strong> Report input 3, retained 2, excluded 1 under the original policy.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose sorting only prices before multiplication.</p>
 <p>Permute complete rows or join by a validated key.</p>
-<p><strong>Expected evidence:</strong> Permute complete rows or join by a validated key.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Handle an input with no qualifying rows.</p>
 <p>Return a zero-row id/net data frame with declared types.</p>
-<p><strong>Expected evidence:</strong> Return a zero-row id/net data frame with declared types.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Transfer the pipeline to a lagged feature.</p>
 <p>Sort by entity, time and a deterministic tie-breaker before computing lags.</p>
-<p><strong>Expected evidence:</strong> Sort by entity, time and a deterministic tie-breaker before computing lags.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference contains explicit behavioral assertions for its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The reference makes 5 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>
 </body>
 </html>

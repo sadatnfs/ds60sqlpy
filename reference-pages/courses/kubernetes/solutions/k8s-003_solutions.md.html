@@ -232,12 +232,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>These fields identify what API object is requested. They do not establish current replica health or authorize a target cluster.</p>
 <h4 id="exercise-2-validate-a-numeric-field">Exercise 2: Validate a numeric field<a class="heading-anchor" href="#exercise-2-validate-a-numeric-field" aria-label="Link to this section">#</a></h4>
 <p><strong>Inputs/evidence:</strong> For k8s-003 Exercise 2, one valid number and one invalid string.</p>
-<p><strong>Expected result/shape:</strong> For k8s-003 Exercise 2, numeric1 is the intended request; the string is rejected by schema validation.</p>
+<p><strong>Expected result/shape:</strong> For k8s-003 Exercise 2, numeric 1 is the intended request; the string is rejected by schema validation.</p>
 <p><strong>Verify:</strong> For k8s-003 Exercise 2, retain the validation phase/result and do not claim a rejected object has a new UID.</p>
 <p>A generic YAML parser can accept both scalar values. Kubernetes schema validation adds the typed field requirement, which is why parse success alone is insufficient.</p>
 <h4 id="exercise-3-trace-selector-and-template-labels">Exercise 3: Trace selector and template labels<a class="heading-anchor" href="#exercise-3-trace-selector-and-template-labels" aria-label="Link to this section">#</a></h4>
-<p><strong>Inputs/evidence:</strong> For k8s-003 Exercise 3, selector app:hello and template label app:hello.</p>
-<p><strong>Expected result/shape:</strong> For k8s-003 Exercise 3, the key/value pairs agree; app:wrong would violate the intended controller/template relation.</p>
+<p><strong>Inputs/evidence:</strong> For k8s-003 Exercise 3, selector app: hello and template label app: hello.</p>
+<p><strong>Expected result/shape:</strong> For k8s-003 Exercise 3, the key/value pairs agree; app: wrong would violate the intended controller/template relation.</p>
 <p><strong>Verify:</strong> For k8s-003 Exercise 3, compare the exact pair on both sides.</p>
 <p>Selectors express membership; matching only the key while changing the value is not enough. This controller relation is separate from a later Service selector.</p>
 <h4 id="exercise-4-bind-only-the-owned-namespace">Exercise 4: Bind only the owned namespace<a class="heading-anchor" href="#exercise-4-bind-only-the-owned-namespace" aria-label="Link to this section">#</a></h4>
@@ -246,7 +246,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Verify:</strong> For k8s-003 Exercise 4, inspect the bound request and receipt; refuse when the lease is absent.</p>
 <p>Omission is deliberate in this workflow. It delegates target binding to the typed operation, not to a kubectl default namespace or an arbitrary browser field.</p>
 <h4 id="exercise-5-separate-intent-from-observation">Exercise 5: Separate intent from observation<a class="heading-anchor" href="#exercise-5-separate-intent-from-observation" aria-label="Link to this section">#</a></h4>
-<p><strong>Inputs/evidence:</strong> For k8s-003 Exercise 5, desired1, observed ready0.</p>
+<p><strong>Inputs/evidence:</strong> For k8s-003 Exercise 5, desired 1, observed ready 0.</p>
 <p><strong>Expected result/shape:</strong> For k8s-003 Exercise 5, the request can be accepted while readiness is not established.</p>
 <p><strong>Verify:</strong> For k8s-003 Exercise 5, record generation/observedGeneration and readiness after bounded reconciliation; do not edit status into the source.</p>
 <p>A controller observes and acts after the request. API acceptance and application readiness answer different questions, so preserve both rather than declaring success early.</p>

@@ -204,7 +204,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ul>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p>The type of an expression controls its arithmetic before assignment. <code>7/2</code> divides integers and discards the fractional part, so assigning that result to double later cannot restore the lost half. Converting an operand before division changes the operation. <code>static_cast&lt;double&gt;(7)/2</code> therefore differs from <code>static_cast&lt;double&gt;(7/2)</code>.</p>
-<p><code>int</code> is a signed integer type with implementation-dependent width; do not assume it always has32 bits. <code>long long</code> has at least64 bits. <code>std::int64_t</code> names an exact64-bit signed type when provided. <code>std::size_t</code> is an unsigned size/index type. A cast requests a conversion; it does not validate the original value. First reject a negative external count, then validate the target range where necessary, then convert. Use small fixtures and explicit bounds before reasoning about larger products.</p>
+<p><code>int</code> is a signed integer type with implementation-dependent width; do not assume it always has 32 bits. <code>long long</code> has at least 64 bits. <code>std::int64_t</code> names an exact 64-bit signed type when provided. <code>std::size_t</code> is an unsigned size/index type. A cast requests a conversion; it does not validate the original value. First reject a negative external count, then validate the target range where necessary, then convert. Use small fixtures and explicit bounds before reasoning about larger products.</p>
 <ul>
 <li><strong>integer division:</strong> division of integral operands with discarded fractional part</li>
 <li><strong>conversion:</strong> changing the representation/type of a value</li>
@@ -248,7 +248,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-2-place-the-conversion-correctly">Exercise 2: Place the conversion correctly<a class="heading-anchor" href="#exercise-2-place-the-conversion-correctly" aria-label="Link to this section">#</a></h4>
 <p>Compare early and late conversion.</p>
 <p><strong>Inputs/evidence:</strong> For cpp-003 Exercise 2, static_cast&lt;double&gt;(7)/2 versus static_cast&lt;double&gt;(7/2).</p>
-<p><strong>Expected result/shape:</strong> For cpp-003 Exercise 2, 3.5 versus3.0.</p>
+<p><strong>Expected result/shape:</strong> For cpp-003 Exercise 2, 3.5 versus 3.0.</p>
 <p><strong>Verify:</strong> For cpp-003 Exercise 2, assert both results and identify the inner expression evaluated first.</p>
 <p><strong>Progressive hints:</strong></p>
 <ol>
@@ -260,7 +260,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Reject an external-1 before using a size type.</p>
 <p><strong>Inputs/evidence:</strong> For cpp-003 Exercise 3, long long external=-1.</p>
 <p><strong>Expected result/shape:</strong> For cpp-003 Exercise 3, rejected; no unsigned index or allocation follows.</p>
-<p><strong>Verify:</strong> For cpp-003 Exercise 3, inspect the guard-before-cast order and a nonnegative control case3.</p>
+<p><strong>Verify:</strong> For cpp-003 Exercise 3, inspect the guard-before-cast order and a nonnegative control case 3.</p>
 <p><strong>Progressive hints:</strong></p>
 <ol>
 <li>Negative is outside the domain.</li>
@@ -270,19 +270,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-4-widen-operands-before-multiplication">Exercise 4: Widen operands before multiplication<a class="heading-anchor" href="#exercise-4-widen-operands-before-multiplication" aria-label="Link to this section">#</a></h4>
 <p>Compute a bounded large product.</p>
 <p><strong>Inputs/evidence:</strong> For cpp-003 Exercise 4, 1000000LL*10000LL.</p>
-<p><strong>Expected result/shape:</strong> For cpp-003 Exercise 4, 10000000000 in a64-bit-capable type.</p>
+<p><strong>Expected result/shape:</strong> For cpp-003 Exercise 4, 10000000000 in a 64-bit-capable type.</p>
 <p><strong>Verify:</strong> For cpp-003 Exercise 4, assert the exact number; explain why casting an overflowing int product afterward is too late.</p>
 <p><strong>Progressive hints:</strong></p>
 <ol>
 <li>Look at operand literal types.</li>
-<li>The product is larger than a32-bit positive range.</li>
+<li>The product is larger than a 32-bit positive range.</li>
 <li>Use wide operands before multiplying.</li>
 </ol>
 <h4 id="exercise-5-use-exact-cents-for-this-fixture">Exercise 5: Use exact cents for this fixture<a class="heading-anchor" href="#exercise-5-use-exact-cents-for-this-fixture" aria-label="Link to this section">#</a></h4>
 <p>Add two whole-cent prices without floating money.</p>
 <p><strong>Inputs/evidence:</strong> For cpp-003 Exercise 5, 125 cents and 75 cents.</p>
 <p><strong>Expected result/shape:</strong> For cpp-003 Exercise 5, 200 cents.</p>
-<p><strong>Verify:</strong> For cpp-003 Exercise 5, assert integral result200 and label its unit explicitly.</p>
+<p><strong>Verify:</strong> For cpp-003 Exercise 5, assert integral result 200 and label its unit explicitly.</p>
 <p><strong>Progressive hints:</strong></p>
 <ol>
 <li>State the unit.</li>
@@ -292,7 +292,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-6-transfer-a-valid-small-size">Exercise 6: Transfer a valid small size<a class="heading-anchor" href="#exercise-6-transfer-a-valid-small-size" aria-label="Link to this section">#</a></h4>
 <p>Convert an already validated small positive count.</p>
 <p><strong>Inputs/evidence:</strong> For cpp-003 Exercise 6, positive=3, known representable by size_t.</p>
-<p><strong>Expected result/shape:</strong> For cpp-003 Exercise 6, count 3; zero would also be valid, while-1 is not.</p>
+<p><strong>Expected result/shape:</strong> For cpp-003 Exercise 6, count 3; zero would also be valid, while -1 is not.</p>
 <p><strong>Verify:</strong> For cpp-003 Exercise 6, test 3 and 0 after validation and explain that arbitrary huge values still need a range check.</p>
 <p><strong>Progressive hints:</strong></p>
 <ol>

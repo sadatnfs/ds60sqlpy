@@ -194,37 +194,52 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/rust/solutions/rust-010_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="rust-010-explanation-and-comparison">rust-010: explanation and comparison<a class="heading-anchor" href="#rust-010-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="rust-010_solution.rs.html">rust-010_solution.rs</a>. Its assertions are always active under the prepared classroom compile settings.</p>
+<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="rust-010_solution.rs.html">rust-010_solution.rs</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Mutate through one explicit borrower:</strong> The function receives mutation capability for the duration of the call. The caller retains ownership and observes the deliberate mutation.</p>
 <p><strong>Mutate two proven-disjoint regions:</strong> The standard library API establishes disjointness instead of relying on two potentially overlapping index borrows. The two slices mutate separate halves safely.</p>
-<h3 id="reason-through-the-six-tasks">Reason through the six tasks<a class="heading-anchor" href="#reason-through-the-six-tasks" aria-label="Link to this section">#</a></h3>
-<ol>
-<li><strong>Predict and explain.</strong> Trace who may access text during the mutable call.</li>
-</ol>
-<ol start="2">
-<li><strong>Guided modification.</strong> Add a second mutation after the first borrow ends.</li>
-</ol>
-<ol start="3">
-<li><strong>Independent construction.</strong> Write a function swapping the ends of a mutable slice safely.</li>
-</ol>
-<ol start="4">
-<li><strong>Diagnose a defect.</strong> Create conflicting mutable borrows and explain the compiler diagnostic.</li>
-</ol>
-<ol start="5">
-<li><strong>Boundary evidence.</strong> Test an empty slice and a split at either endpoint.</li>
-</ol>
-<ol start="6">
-<li><strong>Transfer and justify.</strong> Design an API that exposes only the smallest mutable region needed by a transformation.</li>
-</ol>
-<p>For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.</p>
+<h3 id="task-answers">Task answers<a class="heading-anchor" href="#task-answers" aria-label="Link to this section">#</a></h3>
+<h4 id="task-1-predict-and-explain">Task 1: Predict and explain<a class="heading-anchor" href="#task-1-predict-and-explain" aria-label="Link to this section">#</a></h4>
+<p>Trace who may access text during the mutable call.</p>
+<p>No separate reference answer has been written for this task. Example A is the evidence to compare with: The function receives mutation capability for the duration of the call. The caller retains ownership and observes the deliberate mutation.</p>
+<h4 id="task-2-guided-modification">Task 2: Guided modification<a class="heading-anchor" href="#task-2-guided-modification" aria-label="Link to this section">#</a></h4>
+<p>Add a second mutation after the first borrow ends.</p>
+<p>No separate reference answer has been written for this task. Start from Example B: The standard library API establishes disjointness instead of relying on two potentially overlapping index borrows. The two slices mutate separate halves safely.</p>
+<h4 id="task-3-independent-construction">Task 3: Independent construction<a class="heading-anchor" href="#task-3-independent-construction" aria-label="Link to this section">#</a></h4>
+<p>Write a function swapping the ends of a mutable slice safely.</p>
+<p><strong>Reference answer.</strong> The same statements run as the <code>Task 3</code> block of the reference program; here they are wrapped in <code>main</code> as a complete file.</p>
+<pre class="highlighted-code"><code class="language-rust"><span class="syntax-keyword">fn</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">-&gt;</span> <span class="syntax-builtin">Result</span><span class="syntax-operator">&lt;</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">Box</span><span class="syntax-operator">&lt;</span><span class="syntax-keyword">dyn</span> std<span class="syntax-punctuation">::</span>error<span class="syntax-punctuation">::</span>Error<span class="syntax-operator">&gt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">fn</span> <span class="syntax-function">swap_ends</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> <span class="syntax-keyword">&amp;</span><span class="syntax-class">mut</span> <span class="syntax-punctuation">[</span><span class="syntax-keyword">i32</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+        <span class="syntax-keyword">if</span> <span class="syntax-keyword">let</span> <span class="syntax-builtin">Some</span><span class="syntax-punctuation">(</span>last<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> values<span class="syntax-punctuation">.</span>len<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>checked_sub<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+            values<span class="syntax-punctuation">.</span>swap<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> last<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+        <span class="syntax-punctuation">}</span>
+    <span class="syntax-punctuation">}</span>
+    <span class="syntax-keyword">let</span> <span class="syntax-keyword">mut</span> values <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span>
+    swap_ends<span class="syntax-punctuation">(</span><span class="syntax-operator">&amp;</span><span class="syntax-keyword">mut</span> values<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-function">assert_eq!</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">let</span> <span class="syntax-keyword">mut</span> empty<span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-keyword">i32</span><span class="syntax-punctuation">;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span>
+    swap_ends<span class="syntax-punctuation">(</span><span class="syntax-operator">&amp;</span><span class="syntax-keyword">mut</span> empty<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-function">assert!</span><span class="syntax-punctuation">(</span>empty<span class="syntax-punctuation">.</span>is_empty<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-builtin">Ok</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<p><strong>Observe:</strong> [1, 2, 3] becomes [3, 2, 1], and an empty slice is left alone.</p>
+<p>checked_sub avoids underflow for an empty slice, and swap performs both writes through the one exclusive borrow.</p>
+<h4 id="task-4-diagnose-a-defect">Task 4: Diagnose a defect<a class="heading-anchor" href="#task-4-diagnose-a-defect" aria-label="Link to this section">#</a></h4>
+<p>Create conflicting mutable borrows and explain the compiler diagnostic.</p>
+<p>No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson&#x27;s pitfalls: An exclusive borrow is not a thread lock. More mut annotations do not solve aliasing conflicts. Prefer safe disjointness APIs to manually asserting pointer safety.</p>
+<h4 id="task-5-boundary-evidence">Task 5: Boundary evidence<a class="heading-anchor" href="#task-5-boundary-evidence" aria-label="Link to this section">#</a></h4>
+<p>Test an empty slice and a split at either endpoint.</p>
+<p>No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Mutate through one explicit borrower) and Example B (Mutate two proven-disjoint regions).</p>
+<h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
+<p>Design an API that exposes only the smallest mutable region needed by a transformation.</p>
+<p>No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry <strong>Exclusive borrow</strong>, and state one limitation of your choice.</p>
 <h3 id="mechanism-and-diagnostic-reasoning">Mechanism and diagnostic reasoning<a class="heading-anchor" href="#mechanism-and-diagnostic-reasoning" aria-label="Link to this section">#</a></h3>
 <p>An exclusive reference grants mutation while preventing conflicting access to the same storage. The common rule is either shared readers or one exclusive borrower at a time. This is a capability rule about access, not a claim that the operating system has locked memory.</p>
 <p>Small scopes make mutation ownership easier to see. After an exclusive borrow&#x27;s last use, the owner can be used again. APIs such as split_at_mut safely produce disjoint mutable regions because they establish that the regions do not overlap. Do not reach for unsafe code merely because the compiler cannot infer a relationship you have not expressed.</p>
 <p><code>&amp;mut value</code> creates exclusive access and the original binding must permit mutation. A function taking &amp;mut T may update the borrowed value but does not own its eventual destruction. split_at_mut proves disjoint slices.</p>
 <p>An exclusive borrow is not a thread lock. More mut annotations do not solve aliasing conflicts. Prefer safe disjointness APIs to manually asserting pointer safety.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.</p></article>
+<p>Run the reference and confirm that it prints <code>rust-010: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
   </main>
 </body>
 </html>

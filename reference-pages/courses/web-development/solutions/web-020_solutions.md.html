@@ -194,31 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-020_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-020-explanatory-solutions">web-020: explanatory solutions<a class="heading-anchor" href="#web-020-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.</p>
-<h3 id="why-the-mechanism-works">Why the mechanism works<a class="heading-anchor" href="#why-the-mechanism-works" aria-label="Link to this section">#</a></h3>
-<p>Motion can explain a change, but it can also distract, delay a task or cause discomfort. A transition interpolates between property values when state changes. An animation uses named keyframes over time. Neither should be required to understand essential content. Begin with the static usable state and add restrained motion only when it improves orientation.</p>
-<p>Animating layout-affecting properties can trigger repeated layout work, while transform and opacity often allow more efficient compositing. This is not a guarantee of smooth performance because element size, painting and the device still matter. Measure actual behavior rather than assuming that a property name proves efficiency. Continuous decorative motion rarely helps a reading task.</p>
-<p>Specify the properties to transition instead of transition:all, which can animate unrelated future changes. The prefers-reduced-motion media query lets a page respond to a user&#x27;s preference. A reduced-motion rule can remove movement while retaining a color or outline change. Do not use a tiny but nonzero duration as a universal accessibility strategy; understand the interaction&#x27;s required events and states.</p>
+<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-020.md</code>.</p>
 <h3 id="exercise-1-identify-the-difference-between-a-transition-and-keyframe-animation">Exercise 1: Identify the difference between a transition and keyframe animation.<a class="heading-anchor" href="#exercise-1-identify-the-difference-between-a-transition-and-keyframe-animation" aria-label="Link to this section">#</a></h3>
-<p>A transition follows a property change; an animation follows a named timeline.</p>
-<p>Trace the smallest example before editing. Name which values are source and which are observations.</p>
+<p><strong>Expected answer:</strong> A transition follows a property change; an animation follows a named timeline.</p>
+<p><strong>Why:</strong> A transition interpolates between two values when a property changes, while @keyframes define a timeline that runs on its own.</p>
 <h3 id="exercise-2-limit-a-transition-to-one-intentional-property">Exercise 2: Limit a transition to one intentional property.<a class="heading-anchor" href="#exercise-2-limit-a-transition-to-one-intentional-property" aria-label="Link to this section">#</a></h3>
-<p>Unrelated style changes no longer animate automatically.</p>
-<p>Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.</p>
+<p><strong>Expected evidence:</strong> Unrelated style changes no longer animate automatically.</p>
+<p><strong>Why:</strong> transition: all animates every later property change, including ones you did not intend; listing one property keeps the effect deliberate.</p>
 <h3 id="exercise-3-build-a-card-interaction-with-a-static-reduced-motion-alternative">Exercise 3: Build a card interaction with a static reduced-motion alternative.<a class="heading-anchor" href="#exercise-3-build-a-card-interaction-with-a-static-reduced-motion-alternative" aria-label="Link to this section">#</a></h3>
-<p>The card remains understandable and usable without movement.</p>
-<p>Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.</p>
+<p><strong>Expected evidence:</strong> The card remains understandable and usable without movement.</p>
+<p><strong>Why:</strong> The reduced-motion query lets people who are sensitive to motion get a fully usable static interaction.</p>
 <h3 id="exercise-4-diagnose-an-animation-that-hides-information-until-it-finishes">Exercise 4: Diagnose an animation that hides information until it finishes.<a class="heading-anchor" href="#exercise-4-diagnose-an-animation-that-hides-information-until-it-finishes" aria-label="Link to this section">#</a></h3>
-<p>Make the essential content available without waiting for motion.</p>
-<p>Keep the failing input. Identify the first layer where the observed result differs from the intended contract.</p>
+<p><strong>Expected answer:</strong> Make the essential content available without waiting for motion.</p>
+<p><strong>Why:</strong> Information that appears only at the end of an animation delays or hides it for everyone and fails when motion is disabled.</p>
 <h3 id="exercise-5-test-with-reduced-motion-enabled-and-with-keyboard-focus">Exercise 5: Test with reduced motion enabled and with keyboard focus.<a class="heading-anchor" href="#exercise-5-test-with-reduced-motion-enabled-and-with-keyboard-focus" aria-label="Link to this section">#</a></h3>
-<p>Motion is reduced and the focus indicator still communicates interaction.</p>
-<p>Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.</p>
+<p><strong>Expected evidence:</strong> Motion is reduced and the focus indicator still communicates interaction.</p>
+<p><strong>Why:</strong> Disabling motion must not remove the focus indicator, which communicates state rather than decoration.</p>
 <h3 id="exercise-6-explain-why-transform-does-not-guarantee-a-fast-page">Exercise 6: Explain why transform does not guarantee a fast page.<a class="heading-anchor" href="#exercise-6-explain-why-transform-does-not-guarantee-a-fast-page" aria-label="Link to this section">#</a></h3>
-<p>The full rendering workload, content size and device determine performance.</p>
-<p>Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.</p>
-<h3 id="reference-comparison-and-limits">Reference comparison and limits<a class="heading-anchor" href="#reference-comparison-and-limits" aria-label="Link to this section">#</a></h3>
-<p>Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.</p></article>
+<p><strong>Expected answer:</strong> The full rendering workload, content size and device determine performance.</p>
+<p><strong>Why:</strong> transform avoids layout but still costs painting and compositing, so total workload and device speed decide performance.</p>
+<h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
+<p>Open <code>courses/web-development/solutions/web-020_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
   </main>
 </body>
 </html>

@@ -198,7 +198,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Advanced; approximately 150 minutes. Direct prerequisites: <code>julia-012</code>, <code>julia-019</code>.</p>
 <p>Differentiate supported numerical functions and validate derivatives while preserving the numeric representation carried by dual numbers.</p>
 <h3 id="classroom-execution">Classroom execution<a class="heading-anchor" href="#classroom-execution" aria-label="Link to this section">#</a></h3>
-<p>Choose <strong>Julia language and scientific computing</strong> in <code>/classroom</code>, open this unit, and select its prepared <code>julia</code> runtime. The worker starts a fresh <code>main.jl</code> process with two Julia threads, a fixed package environment, no startup file and offline package settings. Both worked examples are complete under that environment. Save your current pad before replacing it. No package, model or dataset is fetched by a lesson.</p>
+<p>Open <code>julia-022</code> in <code>/classroom</code> with its prepared <code>julia</code> runtime. Worked case A (independent analytic derivatives) and worked case B (a storage mistake blocks differentiation) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing <code>julia-022: all reference checks passed</code>. The <a href="../README.md.html">course overview</a> describes the shared runtime: a fresh offline <code>main.jl</code> process with two threads and a fixed package environment.</p>
 <h3 id="automatic-differentiation-follows-the-implemented-computation">Automatic differentiation follows the implemented computation<a class="heading-anchor" href="#automatic-differentiation-follows-the-implemented-computation" aria-label="Link to this section">#</a></h3>
 <p>Forward-mode automatic differentiation propagates derivative information through supported numerical operations. A dual number carries a value and partial information. Arithmetic combines both components according to differentiation rules. This is different from estimating a derivative by subtracting nearby function values or manipulating a symbolic formula.</p>
 <p>ForwardDiff supplies derivative, gradient, Jacobian and Hessian operations for suitable Julia functions. Their input/output shapes matter. A gradient belongs to a scalar-valued function of a vector; a Jacobian describes a vector-valued function; a Hessian describes second derivatives of a scalar function. A correct shape does not establish that the chosen function is the right scientific objective.</p>
@@ -276,20 +276,20 @@ worked_b<span class="syntax-punctuation">(</span><span class="syntax-punctuation
 <p>The reference uses small CPU functions with prepared ForwardDiff. It does not qualify GPU differentiation, every external library operation or a large model&#x27;s optimization behavior. Later optimization uses these derivatives as one component while still checking convergence, objective values and independent scientific assumptions.</p>
 <h3 id="six-investigations">Six investigations<a class="heading-anchor" href="#six-investigations" aria-label="Link to this section">#</a></h3>
 <h4 id="1-differentiate-analytically">1. Differentiate analytically<a class="heading-anchor" href="#1-differentiate-analytically" aria-label="Link to this section">#</a></h4>
-<p>Compute the gradient of x1 squared plus 3x2 squared at[2,3].</p>
-<p><strong>Expected:</strong> The result is[4,18].</p>
+<p>Compute the gradient of x1 squared plus 3x2 squared at <code>[2, 3]</code>.</p>
+<p><strong>Expected:</strong> The result is <code>[4, 18]</code>.</p>
 <p><strong>Hint:</strong> Differentiate each coordinate separately.</p>
 <h4 id="2-check-jacobian-axes">2. Check Jacobian axes<a class="heading-anchor" href="#2-check-jacobian-axes" aria-label="Link to this section">#</a></h4>
 <p>Differentiate the vector-valued function.</p>
 <p><strong>Expected:</strong> Rows correspond to outputs and columns to inputs.</p>
 <p><strong>Hint:</strong> Inspect the stated function shapes.</p>
 <h4 id="3-preserve-numeric-types">3. Preserve numeric types<a class="heading-anchor" href="#3-preserve-numeric-types" aria-label="Link to this section">#</a></h4>
-<p>Replace a hardcoded Float64 buffer with similar(x).</p>
+<p>Replace a hardcoded Float64 buffer with <code>similar(x)</code>.</p>
 <p><strong>Expected:</strong> The dual-number path can retain derivative information.</p>
 <p><strong>Hint:</strong> Use the input representation when the contract is generic.</p>
 <h4 id="4-compare-reductions">4. Compare reductions<a class="heading-anchor" href="#4-compare-reductions" aria-label="Link to this section">#</a></h4>
 <p>Differentiate a sum and a mean of two inputs.</p>
-<p><strong>Expected:</strong> Gradients are[1,1] and[0.5,0.5].</p>
+<p><strong>Expected:</strong> Gradients are <code>[1, 1]</code> and <code>[0.5, 0.5]</code>.</p>
 <p><strong>Hint:</strong> The denominator is part of the objective.</p>
 <h4 id="5-inspect-a-branch-boundary">5. Inspect a branch boundary<a class="heading-anchor" href="#5-inspect-a-branch-boundary" aria-label="Link to this section">#</a></h4>
 <p>Evaluate a nonsmooth function near its kink.</p>
@@ -305,7 +305,7 @@ worked_b<span class="syntax-punctuation">(</span><span class="syntax-punctuation
 <li><a href="https://juliadiff.org/ForwardDiff.jl/stable/user/limitations/">ForwardDiff limitations</a></li>
 </ul>
 <h3 id="study-companion">Study companion<a class="heading-anchor" href="#study-companion" aria-label="Link to this section">#</a></h3>
-<p>Use the repository learning-companion skill with this lesson ID, your prediction and your actual source/output. Ask for a diagnosis of the first incorrect type, shape, state transition or assumption. Keep observed execution distinct from a timing claim, inferred mathematical result or external deployment.</p></article>
+<p>A repository-aware assistant with the learning-companion skill can review <code>julia-022</code> with you. Give it your prediction for one investigation, your source and the actual output, and ask it to find the first incorrect assumption about ForwardDiff, dual number, gradient, Jacobian or generic storage.</p></article>
   </main>
 </body>
 </html>

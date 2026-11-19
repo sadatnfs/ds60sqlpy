@@ -194,33 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-035_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-035-explanatory-solutions">docker-035: explanatory solutions<a class="heading-anchor" href="#docker-035-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These are explanations of the supplied teaching fixtures, not fabricated engine results.</p>
-<h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
-<p>Image size affects transfer and storage, while startup latency depends on pulling, unpacking, container creation and application initialization. These costs overlap but are not identical. A smaller image can still start slowly if it performs expensive runtime work or waits for an unavailable dependency.</p>
-<p>Layer sharing changes the amount of new data an engine needs. The displayed total image size is not always the incremental download for an engine that already has the base layers. Compression, cache state and platform also affect measured behavior.</p>
-<p>Optimization should preserve correctness and maintainability. Removing a certificate bundle to save space may break HTTPS. Moving dependency installation to startup makes the image look smaller while making every run slower and less reproducible. Measure the user-visible path you actually want to improve.</p>
-<p>Compare cold and warm conditions explicitly. A cold engine or missing-image test includes transfer cost; a warm local restart does not. The course’s local workflow shows build logs so learners can see which layers are reused. Keep at least several observations and record input identity before drawing conclusions.</p>
-<p>For a small fixture, inspect image size and measure a bounded short process or readiness interval. Do not remove shared base images or prune the user’s engine merely to manufacture a cold-cache experiment. A disposable engine or CI job is the appropriate environment for that test.</p>
+<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-035.md</code>.</p>
 <h3 id="exercise-1-compare-total-image-size-and-incremental-transfer">Exercise 1: Compare total image size and incremental transfer.<a class="heading-anchor" href="#exercise-1-compare-total-image-size-and-incremental-transfer" aria-label="Link to this section">#</a></h3>
-<p>A displayed size is not a complete network-cost estimate. Record cache state and the actual transfer path.</p>
-<p><strong>Expected:</strong> Shared cached layers can reduce new transferred bytes.</p>
+<p><strong>Expected answer:</strong> Shared cached layers can reduce new transferred bytes.</p>
+<p><strong>Why:</strong> A displayed size is not a complete network-cost estimate. Record cache state and the actual transfer path.</p>
 <h3 id="exercise-2-predict-why-runtime-package-installation-hurts-startup">Exercise 2: Predict why runtime package installation hurts startup.<a class="heading-anchor" href="#exercise-2-predict-why-runtime-package-installation-hurts-startup" aria-label="Link to this section">#</a></h3>
-<p>It also makes behavior depend on current repositories. Prepare declared dependencies in the image and keep startup focused on application initialization.</p>
-<p><strong>Expected:</strong> It adds network and dependency work to every run.</p>
+<p><strong>Expected answer:</strong> It adds network and dependency work to every run.</p>
+<p><strong>Why:</strong> It also makes behavior depend on current repositories. Prepare declared dependencies in the image and keep startup focused on application initialization.</p>
 <h3 id="exercise-3-design-a-readiness-latency-measurement">Exercise 3: Design a readiness latency measurement.<a class="heading-anchor" href="#exercise-3-design-a-readiness-latency-measurement" aria-label="Link to this section">#</a></h3>
-<p>Measure the same event each time. Process creation alone is weaker than useful app readiness.</p>
-<p><strong>Expected:</strong> Fixed image, known cache condition and repeated bounded readiness timing.</p>
+<p><strong>Expected evidence:</strong> Fixed image, known cache condition and repeated bounded readiness timing.</p>
+<p><strong>Why:</strong> Measure the same event each time. Process creation alone is weaker than useful app readiness.</p>
 <h3 id="exercise-4-diagnose-a-size-optimization-that-breaks-https">Exercise 4: Diagnose a size optimization that breaks HTTPS.<a class="heading-anchor" href="#exercise-4-diagnose-a-size-optimization-that-breaks-https" aria-label="Link to this section">#</a></h3>
-<p>Correctness comes first. Restore the dependency and identify safer size reductions with final-image acceptance.</p>
-<p><strong>Expected:</strong> A required runtime asset may have been removed.</p>
+<p><strong>Expected answer:</strong> A required runtime asset may have been removed.</p>
+<p><strong>Why:</strong> Correctness comes first. Restore the dependency and identify safer size reductions with final-image acceptance.</p>
 <h3 id="exercise-5-explain-why-broad-pruning-is-not-an-acceptable-benchmark-setup">Exercise 5: Explain why broad pruning is not an acceptable benchmark setup.<a class="heading-anchor" href="#exercise-5-explain-why-broad-pruning-is-not-an-acceptable-benchmark-setup" aria-label="Link to this section">#</a></h3>
-<p>Use a disposable environment when cold-cache behavior matters. A performance experiment should not damage a user’s engine state.</p>
-<p><strong>Expected:</strong> It destroys shared caches and may affect unrelated work.</p>
+<p><strong>Expected answer:</strong> It destroys shared caches and may affect unrelated work.</p>
+<p><strong>Why:</strong> Use a disposable environment when cold-cache behavior matters. A performance experiment should not damage a user’s engine state.</p>
 <h3 id="exercise-6-write-an-optimization-recommendation-with-evidence">Exercise 6: Write an optimization recommendation with evidence.<a class="heading-anchor" href="#exercise-6-write-an-optimization-recommendation-with-evidence" aria-label="Link to this section">#</a></h3>
-<p>A useful recommendation ties the change to the intended user experience. Avoid equating smaller bytes with universally better runtime behavior.</p>
-<p><strong>Expected:</strong> Measured bottleneck, bounded change, correctness recheck and actual improvement.</p>
+<p><strong>Expected evidence:</strong> Measured bottleneck, bounded change, correctness recheck and actual improvement.</p>
+<p><strong>Why:</strong> A useful recommendation ties the change to the intended user experience. Avoid equating smaller bytes with universally better runtime behavior.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful solution identifies the exact object, the phase when a setting takes effect, the expected normal result and an observation that disproves it. Repeating a command until it succeeds hides the mechanism. Change one variable, keep a failure record, and test the intended behavior again. Source examples here are small enough to inspect; a production system additionally needs ownership, lifecycle, data recovery and operational review. The host exercises are optional and must stay within the learner-created project.</p></article>
+<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>
 </body>
 </html>

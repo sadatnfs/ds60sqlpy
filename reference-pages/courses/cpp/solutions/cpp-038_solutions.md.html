@@ -202,7 +202,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="integer-overflow-and-floating-point-error-are-different">Integer overflow and floating-point error are different<a class="heading-anchor" href="#integer-overflow-and-floating-point-error-are-different" aria-label="Link to this section">#</a></h3>
 <p>Integer arithmetic and floating-point arithmetic have different contracts. Signed integer overflow is not a defined wraparound policy in C++. A checked-add function must establish that the result is representable before evaluating the dangerous addition. Checking whether the sum became negative after overflow is too late because the invalid operation already occurred.</p>
 <p>For nonnegative a and b, the guard a&gt;max-b detects whether a+b would exceed the maximum. max-b is safe under the stated nonnegative supported range. Only after that guard passes should the addition be evaluated. If negative operands are allowed, the guard logic must cover underflow and other sign combinations separately. A formula valid for one restricted domain is not automatically a general checked-add implementation.</p>
-<p>Floating-point values represent a finite set of numbers with rounding. Decimal0.1 and 0.2 do not generally have exact finite binary representations, so their sum can differ slightly from the stored approximation of 0.3. The complete example uses a small tolerance for this specific comparison. That does not justify one universal tolerance for every scale or unit.</p>
+<p>Floating-point values represent a finite set of numbers with rounding. Decimal 0.1 and 0.2 do not generally have exact finite binary representations, so their sum can differ slightly from the stored approximation of 0.3. The complete example uses a small tolerance for this specific comparison. That does not justify one universal tolerance for every scale or unit.</p>
 <p>Addition order can matter because intermediate rounding occurs. Summing [1e16, 1, -1e16] in one order can lose the small contribution, while another grouping can preserve it. Parallel reduction can change grouping, so exact bitwise equality may require a stronger reproducibility design. For integer cents within a checked range, exact comparison remains appropriate; do not introduce approximate tolerances to hide a wrong integer result.</p>
 <p>Choose numeric representation from the domain. Money may use checked integer minor units or a deliberate decimal representation. Measurements may need floating-point with error bounds, scale-aware comparison and stable algorithms. More precision can reduce some error but cannot substitute for an explicit contract or eliminate every conditioning problem.</p>
 <h3 id="debugging-the-contract">Debugging the contract<a class="heading-anchor" href="#debugging-the-contract" aria-label="Link to this section">#</a></h3>
@@ -217,32 +217,32 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Add 100 and 25 integer cents.</p>
 <p><strong>Expected:</strong> Exactly 125 cents.</p>
 <p><strong>Reasoning:</strong> No approximate representation is needed.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Assert <code>safe_add(100, 25) == 125</code> with <code>int</code> values and no <code>double</code> anywhere in the calculation.</p>
 <h3 id="exercise-2-reject-overflow">Exercise 2: Reject overflow<a class="heading-anchor" href="#exercise-2-reject-overflow" aria-label="Link to this section">#</a></h3>
 <p>Try INT_MAX plus 1.</p>
 <p><strong>Expected:</strong> Absent result without evaluating overflow.</p>
 <p><strong>Reasoning:</strong> A check after overflow is too late.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Assert <code>!safe_add(std::numeric_limits&lt;int&gt;::max(), 1)</code>, as Worked example 1 does, and confirm the guard compares before adding.</p>
 <h3 id="exercise-3-inspect-rounding">Exercise 3: Inspect rounding<a class="heading-anchor" href="#exercise-3-inspect-rounding" aria-label="Link to this section">#</a></h3>
 <p>Print 0.1+0.2 with sufficient precision.</p>
 <p><strong>Expected:</strong> Possible difference from 0.3 is recorded with a suitable tolerance.</p>
 <p><strong>Reasoning:</strong> Decimal fractions may lack finite binary representations.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Print with <code>std::setprecision(17)</code> and record <code>0.30000000000000004</code>, then assert <code>std::abs((0.1 + 0.2) - 0.3) &lt; 1e-12</code>, as Worked example 2 does.</p>
 <h3 id="exercise-4-repair-one-size-tolerance">Exercise 4: Repair one-size tolerance<a class="heading-anchor" href="#exercise-4-repair-one-size-tolerance" aria-label="Link to this section">#</a></h3>
 <p>Explain why epsilon=0.1 is poor for both tiny and huge measurements.</p>
 <p><strong>Expected:</strong> A scale-aware absolute/relative policy stated.</p>
 <p><strong>Reasoning:</strong> Tolerance depends on units and error budget.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Test your policy on 1e-9 versus 2e-9, which an absolute 0.1 calls equal, and on 1e20 versus 1e20 + 1e5, which it calls different although they differ by about 1e-15 relatively.</p>
 <h3 id="exercise-5-check-zero-boundary">Exercise 5: Check zero boundary<a class="heading-anchor" href="#exercise-5-check-zero-boundary" aria-label="Link to this section">#</a></h3>
 <p>Run safe_add(0, 0) and safe_add(-1, 2).</p>
 <p><strong>Expected:</strong> Present 0 and rejected negative input.</p>
 <p><strong>Reasoning:</strong> The subtraction-based guard assumes nonnegative inputs.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Assert <code>safe_add(0, 0) == 0</code> and <code>!safe_add(-1, 2)</code>; the second call is rejected by the <code>a &lt; 0</code> check even though the true sum, 1, fits.</p>
 <h3 id="exercise-6-transfer-stability">Exercise 6: Transfer stability<a class="heading-anchor" href="#exercise-6-transfer-stability" aria-label="Link to this section">#</a></h3>
 <p>Compare sums [1e16, 1, -1e16] under different groupings.</p>
 <p><strong>Expected:</strong> Floating sums can differ; exact expected mathematical total is 1.</p>
 <p><strong>Reasoning:</strong> Associativity is not guaranteed by floating arithmetic.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p></article>
+<p><strong>Verify:</strong> Assert <code>(1e16 + -1e16) + 1 == 1</code>, and print <code>(1e16 + 1) + -1e16</code>, which gives 0 because <code>1e16 + 1</code> rounds back to 1e16.</p></article>
   </main>
 </body>
 </html>

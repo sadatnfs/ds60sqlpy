@@ -194,33 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-009_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-009-explanatory-solutions">docker-009: explanatory solutions<a class="heading-anchor" href="#docker-009-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These are explanations of the supplied teaching fixtures, not fabricated engine results.</p>
-<h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
-<p>An IP address identifies a network interface or virtual destination within a network. A port identifies a transport endpoint at that address. A server listens on an address and port inside its own network namespace. Publishing maps a host endpoint to a container endpoint; it does not change the application’s listening configuration.</p>
-<p>Loopback refers to the local network namespace. <code>127.0.0.1</code> inside a container points back to that container, not to your laptop and not to another service. A server bound only to container loopback is normally unreachable through a mapping to its container network interface. The fixture listens on <code>0.0.0.0:8080</code> inside the container and publishes only <code>127.0.0.1:18080</code> on the host.</p>
-<p>The wildcard address <code>0.0.0.0</code> is a listening choice, not a browser destination. Binding a published port to host loopback reduces accidental exposure to other machines. The real boundary also depends on the engine, host firewall and platform networking, so do not describe a port mapping as an authentication system.</p>
-<p>Read <code>127.0.0.1:18080:8080</code> as host address, host port and container port. A browser on the host requests <code>http://127.0.0.1:18080/</code>. A peer container on the same Compose network requests <code>http://app:8080/</code> using service discovery. They reach the same application through different paths.</p>
-<p>Troubleshoot in layers: application listen address, process state, container port, published mapping, host port conflict, then HTTP path and payload. A connection refused response is different from HTTP 404; the latter means an HTTP server responded but did not serve the requested path.</p>
+<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-009.md</code>.</p>
 <h3 id="exercise-1-label-every-component-of-the-mapping">Exercise 1: Label every component of the mapping.<a class="heading-anchor" href="#exercise-1-label-every-component-of-the-mapping" aria-label="Link to this section">#</a></h3>
-<p>The three values occupy different positions. Reversing the ports can create a listening mapping that still points at the wrong internal endpoint.</p>
-<p><strong>Expected:</strong> Host loopback, host port 18080 and container port 8080.</p>
+<p><strong>Expected evidence:</strong> Host loopback, host port 18080 and container port 8080.</p>
+<p><strong>Why:</strong> The three values occupy different positions. Reversing the ports can create a listening mapping that still points at the wrong internal endpoint.</p>
 <h3 id="exercise-2-predict-whether-localhost-18080-inside-app-reaches-the-host-browser-endpoint">Exercise 2: Predict whether localhost:18080 inside app reaches the host browser endpoint.<a class="heading-anchor" href="#exercise-2-predict-whether-localhost-18080-inside-app-reaches-the-host-browser-endpoint" aria-label="Link to this section">#</a></h3>
-<p>Loopback is relative to the caller namespace. A hostname that works in the browser does not automatically name the same machine from a container.</p>
-<p><strong>Expected:</strong> It refers to app container loopback and normally fails.</p>
+<p><strong>Expected answer:</strong> It refers to app container loopback and normally fails.</p>
+<p><strong>Why:</strong> Loopback is relative to the caller namespace. A hostname that works in the browser does not automatically name the same machine from a container.</p>
 <h3 id="exercise-3-draw-a-host-browser-request-path">Exercise 3: Draw a host browser request path.<a class="heading-anchor" href="#exercise-3-draw-a-host-browser-request-path" aria-label="Link to this section">#</a></h3>
-<p>Each hop has a separate observable condition. The drawing should show where port translation happens and which process actually handles the request.</p>
-<p><strong>Expected:</strong> Browser, host socket mapping, container interface and app listener.</p>
+<p><strong>Expected answer:</strong> Browser, host socket mapping, container interface and app listener.</p>
+<p><strong>Why:</strong> Each hop has a separate observable condition. The drawing should show where port translation happens and which process actually handles the request.</p>
 <h3 id="exercise-4-diagnose-a-server-bound-to-container-127-0-0-1-only">Exercise 4: Diagnose a server bound to container 127.0.0.1 only.<a class="heading-anchor" href="#exercise-4-diagnose-a-server-bound-to-container-127-0-0-1-only" aria-label="Link to this section">#</a></h3>
-<p>The mapping targets the container’s reachable interface. Changing the host port cannot fix an application that does not listen on that interface.</p>
-<p><strong>Expected:</strong> It may answer locally but not through the published mapping.</p>
+<p><strong>Expected answer:</strong> It may answer locally but not through the published mapping.</p>
+<p><strong>Why:</strong> The mapping targets the container’s reachable interface. Changing the host port cannot fix an application that does not listen on that interface.</p>
 <h3 id="exercise-5-distinguish-connection-refused-from-http-404">Exercise 5: Distinguish connection refused from HTTP 404.<a class="heading-anchor" href="#exercise-5-distinguish-connection-refused-from-http-404" aria-label="Link to this section">#</a></h3>
-<p>A 404 establishes that an HTTP exchange happened. A refused connection occurs earlier, so inspect listeners and mappings before changing application URL handlers.</p>
-<p><strong>Expected:</strong> Transport failure versus application routing result.</p>
+<p><strong>Expected answer:</strong> Transport failure versus application routing result.</p>
+<p><strong>Why:</strong> A 404 establishes that an HTTP exchange happened. A refused connection occurs earlier, so inspect listeners and mappings before changing application URL handlers.</p>
 <h3 id="exercise-6-choose-public-and-internal-endpoints-for-a-two-service-app">Exercise 6: Choose public and internal endpoints for a two-service app.<a class="heading-anchor" href="#exercise-6-choose-public-and-internal-endpoints-for-a-two-service-app" aria-label="Link to this section">#</a></h3>
-<p>Internal services can use Compose DNS without host publication. Avoiding unnecessary published ports simplifies the network and reduces accidental exposure.</p>
-<p><strong>Expected:</strong> Only the user-facing service gets a deliberate published port.</p>
+<p><strong>Expected answer:</strong> Only the user-facing service gets a deliberate published port.</p>
+<p><strong>Why:</strong> Internal services can use Compose DNS without host publication. Avoiding unnecessary published ports simplifies the network and reduces accidental exposure.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful solution identifies the exact object, the phase when a setting takes effect, the expected normal result and an observation that disproves it. Repeating a command until it succeeds hides the mechanism. Change one variable, keep a failure record, and test the intended behavior again. Source examples here are small enough to inspect; a production system additionally needs ownership, lifecycle, data recovery and operational review. The host exercises are optional and must stay within the learner-created project.</p></article>
+<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>
 </body>
 </html>

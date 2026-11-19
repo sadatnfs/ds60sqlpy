@@ -9,7 +9,7 @@
     content="default-src 'none'; style-src 'self' file: 'unsafe-inline'; font-src data:; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
   >
   <link rel="stylesheet" href="../src/ds60sqlpy/assets/vendor/textbook/fonts.css">
-  <title>python-36 · Dimensionality Reduction PCA · DS60</title>
+  <title>python-36 · PCA and Feature Selection · DS60</title>
   <style>
     :root {
       --paper: #f6f2e8;
@@ -312,7 +312,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <div class="shell">
       <section class="hero">
         <p class="eyebrow">python · lesson python-36</p>
-        <h1>Dimensionality Reduction PCA</h1>
+        <h1>PCA and Feature Selection</h1>
         <p class="hero-copy">Statistics and machine learning</p>
         <div class="meta">
           <span class="tag">intermediate</span>
@@ -381,7 +381,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--day-36-dimensionality-reduction-with-pca">Day 36: Dimensionality Reduction with PCA<a class="heading-anchor" href="#guide--day-36-dimensionality-reduction-with-pca" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--day-36-pca-and-feature-selection">Day 36: PCA and Feature Selection<a class="heading-anchor" href="#guide--day-36-pca-and-feature-selection" aria-label="Link to this section">#</a></h3>
 <p><strong>Lesson ID:</strong> <code>python-36</code> · <strong>Level:</strong> intermediate · <strong>Dependencies:</strong> <code>data</code> · <strong>Network:</strong> offline</p>
 <p>Principal component analysis (PCA) rotates numeric data into orthogonal directions ordered by variance. It can compress correlated features, visualize a dataset, or denoise measurements, but it does not know the target or preserve the original feature meanings.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -451,7 +451,7 @@ components_for_95 <span class="syntax-operator">=</span> <span class="syntax-bui
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>cumulative<span class="syntax-punctuation">,</span> components_for_95<span class="syntax-punctuation">)</span></code></pre>
 <p>The scaler and PCA must be fitted inside each training fold when measuring model performance. Fitting them once on the full dataset gives validation folds information about global means, variances, and component directions.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
-<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python and data science</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
 <p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <ol>
 <li>Open the Day 36 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
@@ -459,11 +459,8 @@ components_for_95 <span class="syntax-operator">=</span> <span class="syntax-bui
 <li>Keep experiments in new scratch cells. Do not edit the official solution while attempting the numbered practice.</li>
 <li>Restart the kernel and run from the first cell before calling the lesson complete. A clean run catches hidden state and stale variables.</li>
 </ol>
-<p>Windows PowerShell:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m jupyter lab</code></pre>
-<p>macOS/Linux:</p>
+<p>Linux, macOS, or Ubuntu in Windows WSL 2:</p>
 <pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
-<p>If the Windows environment uses the documented conda-prefix fallback, use <code>.\.venv\python.exe</code> in place of <code>.\.venv\Scripts\python.exe</code>.</p>
 <h4 id="guide--concept-deep-dive-pca-geometry-scaling-variance-and-reconstruction">Concept deep dive: PCA geometry, scaling, variance, and reconstruction<a class="heading-anchor" href="#guide--concept-deep-dive-pca-geometry-scaling-variance-and-reconstruction" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
 <p>Principal component analysis (PCA) rotates centered feature space to new orthogonal axes ordered by captured variance. A component is a direction; a score is an observation projected onto that direction; a loading describes how original features contribute. PCA does not know the target and does not discover causal factors.</p>
@@ -474,7 +471,6 @@ components_for_95 <span class="syntax-operator">=</span> <span class="syntax-bui
 <li><strong><code>PCA(n_components=...).fit(X_train)</code>:</strong> learns training-only means, axes, and explained variance.</li>
 <li><strong><code>.transform()</code> / <code>.inverse_transform()</code>:</strong> moves between feature and component spaces, enabling reconstruction-error checks.</li>
 </ul>
-<p>Read an API call from the inside out: identify the data entering the operation, the state learned (if any), the value returned, and the evidence that would make the result trustworthy. A method returning without an exception proves only that the syntax and immediate runtime path worked.</p>
 <h5 id="guide--focused-example-a-observe-how-units-change-the-first-component">Focused example A: observe how units change the first component<a class="heading-anchor" href="#guide--focused-example-a-observe-how-units-change-the-first-component" aria-label="Link to this section">#</a></h5>
 <p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
@@ -496,7 +492,6 @@ scaled <span class="syntax-operator">=</span> PCA<span class="syntax-punctuation
 <p><strong>Expected observation:</strong> Raw PCA points almost entirely along the large-unit feature; scaling changes the geometry and loadings.</p>
 <p><strong>Assumption to name:</strong> Equal standard-deviation weighting is scientifically appropriate; scaling is not automatically correct.</p>
 <h5 id="guide--focused-example-b-connect-retained-components-to-reconstruction-error">Focused example B: connect retained components to reconstruction error<a class="heading-anchor" href="#guide--focused-example-b-connect-retained-components-to-reconstruction-error" aria-label="Link to this section">#</a></h5>
-<p>This second example changes one important condition. Compare it with Example A instead of reading it as unrelated syntax.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 <span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> load_iris
 <span class="syntax-keyword">from</span> sklearn.decomposition <span class="syntax-keyword">import</span> PCA
@@ -552,15 +547,15 @@ errors <span class="syntax-operator">=</span> <span class="syntax-punctuation">{
 <ol>
 <li>Plot cumulative explained variance and choose a component count.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 1; PCA geometry, scaling, variance, and reconstruction; fit PCA on training data only, print cumulative explained variance by component, and choose the smallest count reaching a declared threshold such as 95%; assert transformed train/test column counts match that choice.</p>
+<p><strong>Verify:</strong> Fit PCA on training data only, print cumulative explained variance by component, and choose the smallest count reaching a declared threshold such as 95%; assert transformed train/test column counts match that choice.</p>
 <ol start="2">
 <li>Compare PCA before and after feature standardization.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 2; PCA geometry, scaling, variance, and reconstruction; on one frozen split, report feature scales and PCA explained-variance ratios before and after StandardScaler; verify each scaler/PCA pair is fitted on training rows only.</p>
+<p><strong>Verify:</strong> On one frozen split, report feature scales and PCA explained-variance ratios before and after StandardScaler; verify each scaler/PCA pair is fitted on training rows only.</p>
 <ol start="3">
 <li>Try <code>SelectKBest</code> on a classification dataset and compare its validated performance with PCA.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 3; PCA geometry, scaling, variance, and reconstruction; evaluate SelectKBest and scaled PCA with identical folds, component/feature counts, estimator, and metric; print every fold score plus mean/std and keep the final test labels unopened.</p>
+<p><strong>Verify:</strong> Evaluate SelectKBest and scaled PCA with identical folds, component/feature counts, estimator, and metric; print every fold score plus mean/std and keep the final test labels unopened.</p>
 <h5 id="guide--progressive-hints">Progressive hints<a class="heading-anchor" href="#guide--progressive-hints" aria-label="Link to this section">#</a></h5>
 <ol>
 <li>Fit all possible components first, then use <code>np.cumsum</code>. Declare a threshold such as 95% before looking for the first component count that crosses it.</li>
@@ -632,7 +627,7 @@ errors <span class="syntax-operator">=</span> <span class="syntax-punctuation">{
 </ul>
 <h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into the AI tutor while the repository root is open:</p>
-<pre class="highlighted-code"><code class="language-text">Tutor me through `python-36` — Day 36 — Dimensionality Reduction with PCA.
+<pre class="highlighted-code"><code class="language-text">Tutor me through `python-36` (Day 36: Dimensionality Reduction with PCA).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize PCA geometry, scaling, variance, and reconstruction. Use exactly these maintained learner materials:
@@ -685,7 +680,7 @@ merely ran is not evidence of mastery.</code></pre></div>
         </header>
 
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-36-feature-selection-pca">Day 36 — Feature selection &amp; PCA<a class="heading-anchor" href="#learner--cell-1--day-36-feature-selection-pca" aria-label="Link to this section">#</a></h3>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-36-pca-and-feature-selection">Day 36: PCA and Feature Selection<a class="heading-anchor" href="#learner--cell-1--day-36-pca-and-feature-selection" aria-label="Link to this section">#</a></h3>
 <p>Objectives:</p>
 <ul>
 <li>PCA intuition and variance explained.</li>
@@ -706,7 +701,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-3--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-3--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
 <p>Select the <code>Python (ds60sqlpy)</code> kernel, start at the first cell, and write each prediction before execution. Keep attempts in the provided scratch cell or new cells. Restart the kernel and run from the top before calling the work reproducible.</p>
-<h4 id="learner--cell-3--concept-lab-pca-geometry-scaling-variance-and-reconstruction">Concept lab — PCA geometry, scaling, variance, and reconstruction<a class="heading-anchor" href="#learner--cell-3--concept-lab-pca-geometry-scaling-variance-and-reconstruction" aria-label="Link to this section">#</a></h4>
+<h4 id="learner--cell-3--concept-lab-pca-geometry-scaling-variance-and-reconstruction">Concept lab: PCA geometry, scaling, variance, and reconstruction<a class="heading-anchor" href="#learner--cell-3--concept-lab-pca-geometry-scaling-variance-and-reconstruction" aria-label="Link to this section">#</a></h4>
 <h5 id="learner--cell-3--mental-model">Mental model<a class="heading-anchor" href="#learner--cell-3--mental-model" aria-label="Link to this section">#</a></h5>
 <p>Principal component analysis (PCA) rotates centered feature space to new orthogonal axes ordered by captured variance. A component is a direction; a score is an observation projected onto that direction; a loading describes how original features contribute. PCA does not know the target and does not discover causal factors.</p>
 <p>Variance is measured in squared feature units. If one feature is measured on a much larger numeric scale, unscaled PCA may devote its first component to that unit rather than to the structure you care about. Component count is therefore a modeling choice connected to scaling, reconstruction, and downstream performance.</p>
@@ -717,7 +712,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <li><strong><code>.transform()</code> / <code>.inverse_transform()</code>:</strong> moves between feature and component spaces, enabling reconstruction-error checks.</li>
 </ul>
 <p>For every call, identify input data, learned state, returned value, and a check that can fail. That habit prevents a successful cell from being mistaken for a correct analysis.</p></article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h5 id="learner--cell-4--focused-example-a-observe-how-units-change-the-first-component">Focused example A — observe how units change the first component<a class="heading-anchor" href="#learner--cell-4--focused-example-a-observe-how-units-change-the-first-component" aria-label="Link to this section">#</a></h5>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h5 id="learner--cell-4--focused-example-a-observe-how-units-change-the-first-component">Focused example A: observe how units change the first component<a class="heading-anchor" href="#learner--cell-4--focused-example-a-observe-how-units-change-the-first-component" aria-label="Link to this section">#</a></h5>
 <p><strong>Predict first:</strong> write down the expected shape, type, ordering, or direction of the result. Then run the next cell.</p>
 <p><strong>Assumption:</strong> Equal standard-deviation weighting is scientifically appropriate; scaling is not automatically correct.</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
@@ -739,7 +734,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><p><strong>Expected observation:</strong> Raw PCA points almost entirely along the large-unit feature; scaling changes the geometry and loadings.</p>
 <p>Do not force exact equality for estimates based on samples. Record the seed, sample size, tolerance, and metric where they matter.</p></article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><h5 id="learner--cell-7--focused-example-b-connect-retained-components-to-reconstruction-error">Focused example B — connect retained components to reconstruction error<a class="heading-anchor" href="#learner--cell-7--focused-example-b-connect-retained-components-to-reconstruction-error" aria-label="Link to this section">#</a></h5>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><h5 id="learner--cell-7--focused-example-b-connect-retained-components-to-reconstruction-error">Focused example B: connect retained components to reconstruction error<a class="heading-anchor" href="#learner--cell-7--focused-example-b-connect-retained-components-to-reconstruction-error" aria-label="Link to this section">#</a></h5>
 <p>This example changes one important condition. Predict how and why the result should differ from Example A.</p>
 <p><strong>Assumption:</strong> Squared reconstruction error is a useful measure of the information relevant to this task.</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
@@ -797,15 +792,15 @@ merely ran is not evidence of mastery.</code></pre></div>
 <ol>
 <li>Plot cumulative explained variance and choose a component count.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 1 — PCA geometry, scaling, variance, and reconstruction — fit PCA on training data only, print cumulative explained variance by component, and choose the smallest count reaching a declared threshold such as 95%; assert transformed train/test column counts match that choice.</p>
+<p><strong>Verify:</strong> Fit PCA on training data only, print cumulative explained variance by component, and choose the smallest count reaching a declared threshold such as 95%; assert transformed train/test column counts match that choice.</p>
 <ol start="2">
 <li>Compare PCA before and after feature standardization.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 2 — PCA geometry, scaling, variance, and reconstruction — on one frozen split, report feature scales and PCA explained-variance ratios before and after StandardScaler; verify each scaler/PCA pair is fitted on training rows only.</p>
+<p><strong>Verify:</strong> On one frozen split, report feature scales and PCA explained-variance ratios before and after StandardScaler; verify each scaler/PCA pair is fitted on training rows only.</p>
 <ol start="3">
 <li>Try <code>SelectKBest</code> on a classification dataset and compare its validated performance with PCA.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 3 — PCA geometry, scaling, variance, and reconstruction — evaluate SelectKBest and scaled PCA with identical folds, component/feature counts, estimator, and metric; print every fold score plus mean/std and keep the final test labels unopened.</p>
+<p><strong>Verify:</strong> Evaluate SelectKBest and scaled PCA with identical folds, component/feature counts, estimator, and metric; print every fold score plus mean/std and keep the final test labels unopened.</p>
 <h5 id="learner--cell-10--progressive-hints">Progressive hints<a class="heading-anchor" href="#learner--cell-10--progressive-hints" aria-label="Link to this section">#</a></h5>
 <ol>
 <li>Fit all possible components first, then use <code>np.cumsum</code>. Declare a threshold such as 95% before looking for the first component count that crosses it.</li>
@@ -818,28 +813,28 @@ merely ran is not evidence of mastery.</code></pre></div>
 <ol start="4">
 <li><strong>Reconstruction analysis:</strong> Fit scaled PCA with several component counts, inverse-transform the representations, and plot mean squared reconstruction error versus retained components. <strong>Progressive hint:</strong> Call transform then inverse_transform on the same fitted PCA and compare in scaled space. Error should not increase as components are added.</li>
 </ol>
-<p><strong>Verify:</strong> Reconstruction analysis — for each retained-component count, print reconstruction MSE and save the labeled curve; assert inverse-transformed shape equals the scaled input shape and MSE is non-increasing up to floating-point tolerance.</p>
+<p><strong>Verify:</strong> Reconstruction analysis: for each retained-component count, print reconstruction MSE and save the labeled curve; assert inverse-transformed shape equals the scaled input shape and MSE is non-increasing up to floating-point tolerance.</p>
 <ol start="5">
 <li><strong>Interpretation edge case:</strong> Fit PCA twice to equivalent data and explain why a component and all of its loadings may appear with the opposite sign while the projection remains equivalent. <strong>Progressive hint:</strong> Eigenvectors are direction axes: v and -v describe the same axis. Compare subspaces or absolute loading patterns, not raw signs alone.</li>
 </ol>
-<p><strong>Verify:</strong> Interpretation edge case — fit the equivalent PCA inputs, align component signs by dot product, and assert transformed coordinates/loadings match after sign alignment within 1e-10 while explained-variance ratios are unchanged.</p>
+<p><strong>Verify:</strong> Interpretation edge case: fit the equivalent PCA inputs, align component signs by dot product, and assert transformed coordinates/loadings match after sign alignment within 1e-10 while explained-variance ratios are unchanged.</p>
 <ol start="6">
 <li><strong>Leakage debugging:</strong> Create a dataset with many noise features, run SelectKBest once before cross-validation, and then correctly inside a Pipeline. Explain the expected score difference. <strong>Progressive hint:</strong> Selection performed globally can choose noise features that happen to correlate with all labels, including validation labels.</li>
 </ol>
-<p><strong>Verify:</strong> Leakage debugging — print fold scores for SelectKBest fitted globally and inside Pipeline on the same seeded noise dataset; assert the pipeline owns fit within each fold and retain the observed optimism gap without promising its exact size.</p>
+<p><strong>Verify:</strong> Leakage debugging: print fold scores for SelectKBest fitted globally and inside Pipeline on the same seeded noise dataset; assert the pipeline owns fit within each fold and retain the observed optimism gap without promising its exact size.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Expanded mastery lab scratch space</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
 <span class="source-line"><span class="syntax-comment"># Keep the official solution closed until you have attempted each task.</span></span>
 <span class="source-line"><span class="syntax-comment"># Add small assertions, shape checks, or metric comparisons as evidence.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Practice 4 — Reconstruction analysis</span></span>
+<span class="source-line"><span class="syntax-comment"># Practice 4: Reconstruction analysis</span></span>
 <span class="source-line"></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Practice 5 — Interpretation edge case</span></span>
+<span class="source-line"><span class="syntax-comment"># Practice 5: Interpretation edge case</span></span>
 <span class="source-line"></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Practice 6 — Leakage debugging</span></span>
+<span class="source-line"><span class="syntax-comment"># Practice 6: Leakage debugging</span></span>
 <span class="source-line"></span></code></pre>
 </article></div>
       </section>
@@ -867,7 +862,7 @@ merely ran is not evidence of mastery.</code></pre></div>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-36-solutions-dimensionality-reduction-with-pca">Day 36: Solutions: Dimensionality Reduction with PCA<a class="heading-anchor" href="#solution-1--day-36-solutions-dimensionality-reduction-with-pca" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-36-solutions-pca-and-feature-selection">Day 36 Solutions: PCA and Feature Selection<a class="heading-anchor" href="#solution-1--day-36-solutions-pca-and-feature-selection" aria-label="Link to this section">#</a></h3>
 <p>We standardize features, fit PCA, and choose the number of components via cumulative explained variance. We also compare PCA before/after scaling and briefly try SelectKBest.</p>
 <p>Contents</p>
 <ul>
@@ -883,7 +878,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np<span class="syntax-operator">,</span> matplotlib.pyplot <span class="syntax-keyword">as</span> plt
 
 X<span class="syntax-punctuation">,</span> y <span class="syntax-operator">=</span> load_iris<span class="syntax-punctuation">(</span>return_X_y<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></code></pre>
-<p>Worked reference for Exercise 1; Cumulative explained variance (scree)</p>
+<p>Worked reference for Exercise 1: Cumulative explained variance (scree)</p>
 <pre class="highlighted-code"><code class="language-python">sc <span class="syntax-operator">=</span> StandardScaler<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 Xz <span class="syntax-operator">=</span> sc<span class="syntax-operator">.</span>fit_transform<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">)</span>
 
@@ -907,7 +902,7 @@ k95 <span class="syntax-operator">=</span> <span class="syntax-builtin">int</spa
 <li>PCA().fit gets variance ratios; cumulative sum guides K selection</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 2; PCA before vs after scaling</p>
+<p>Worked reference for Exercise 2: PCA before vs after scaling</p>
 <pre class="highlighted-code"><code class="language-python">pca_raw <span class="syntax-operator">=</span> PCA<span class="syntax-punctuation">(</span>n_components<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">)</span>
 X2_raw <span class="syntax-operator">=</span> pca_raw<span class="syntax-operator">.</span>transform<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">)</span>
 
@@ -926,7 +921,7 @@ plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(<
 <li>Without scaling, high-variance features dominate components; scaling often yields more balanced PCs</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 3; SelectKBest vs PCA</p>
+<p>Worked reference for Exercise 3: SelectKBest vs PCA</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> sklearn.feature_selection <span class="syntax-keyword">import</span> SelectKBest<span class="syntax-punctuation">,</span> f_classif
 <span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> cross_val_score
 <span class="syntax-keyword">from</span> sklearn.pipeline <span class="syntax-keyword">import</span> Pipeline
@@ -976,17 +971,17 @@ clf_kbest <span class="syntax-operator">=</span> Pipeline<span class="syntax-pun
 <p><strong>Prompt:</strong> Plot cumulative explained variance and choose a component count.</p>
 <p><strong>How to reason about it:</strong> Fit the maximum useful component count first, compute cumulative explained variance, and choose a threshold before reading the answer. Variance retained is not the same as predictive signal retained.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 1; PCA geometry, scaling, variance, and reconstruction; fit PCA on training data only, print cumulative explained variance by component, and choose the smallest count reaching a declared threshold such as 95%; assert transformed train/test column counts match that choice.</p>
+<p><strong>Verify:</strong> Fit PCA on training data only, print cumulative explained variance by component, and choose the smallest count reaching a declared threshold such as 95%; assert transformed train/test column counts match that choice.</p>
 <h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Compare PCA before and after feature standardization.</p>
 <p><strong>How to reason about it:</strong> PCA is driven by variance, so features with larger units can dominate without scaling. Compare both variance ratios and downstream validation using pipelines; never scale from the full dataset before the split.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 2; PCA geometry, scaling, variance, and reconstruction; on one frozen split, report feature scales and PCA explained-variance ratios before and after StandardScaler; verify each scaler/PCA pair is fitted on training rows only.</p>
+<p><strong>Verify:</strong> On one frozen split, report feature scales and PCA explained-variance ratios before and after StandardScaler; verify each scaler/PCA pair is fitted on training rows only.</p>
 <h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Try <code>SelectKBest</code> on a classification dataset and compare its validated performance with PCA.</p>
 <p><strong>How to reason about it:</strong> SelectKBest sees the target while PCA does not. Both must be fitted inside each training fold, and the comparison should include stability and interpretability rather than only the largest score.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 3; PCA geometry, scaling, variance, and reconstruction; evaluate SelectKBest and scaled PCA with identical folds, component/feature counts, estimator, and metric; print every fold score plus mean/std and keep the final test labels unopened.</p>
+<p><strong>Verify:</strong> Evaluate SelectKBest and scaled PCA with identical folds, component/feature counts, estimator, and metric; print every fold score plus mean/std and keep the final test labels unopened.</p>
 <h5 id="solution-1--exercise-4-reconstruction-analysis">Exercise 4: Reconstruction analysis<a class="heading-anchor" href="#solution-1--exercise-4-reconstruction-analysis" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Fit scaled PCA with several component counts, inverse-transform the representations, and plot mean squared reconstruction error versus retained components.</p>
 <p><strong>Reasoning before implementation:</strong> Call transform then inverse_transform on the same fitted PCA and compare in scaled space. Error should not increase as components are added.</p>
@@ -1057,7 +1052,7 @@ pipeline <span class="syntax-operator">=</span> Pipeline<span class="syntax-punc
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="solution-2--cell-1--day-36-solutions-dimensionality-reduction-with-pca">Day 36 — Solutions: Dimensionality Reduction with PCA<a class="heading-anchor" href="#solution-2--cell-1--day-36-solutions-dimensionality-reduction-with-pca" aria-label="Link to this section">#</a></h3>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="solution-2--cell-1--day-36-solutions-pca-and-feature-selection">Day 36 Solutions: PCA and Feature Selection<a class="heading-anchor" href="#solution-2--cell-1--day-36-solutions-pca-and-feature-selection" aria-label="Link to this section">#</a></h3>
 <p>Cumulative explained variance, scaling comparison, and SelectKBest.</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> sklearn.decomposition <span class="syntax-keyword">import</span> PCA</span>
 <span class="source-line"><span class="syntax-keyword">from</span> sklearn.preprocessing <span class="syntax-keyword">import</span> StandardScaler</span>
@@ -1066,7 +1061,7 @@ pipeline <span class="syntax-operator">=</span> Pipeline<span class="syntax-punc
 <span class="source-line"></span>
 <span class="source-line">X<span class="syntax-punctuation">,</span> y <span class="syntax-operator">=</span> load_iris<span class="syntax-punctuation">(</span>return_X_y<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="solution-2--cell-3--exercise-1-cumulative-explained-variance">Exercise 1 — Cumulative explained variance<a class="heading-anchor" href="#solution-2--cell-3--exercise-1-cumulative-explained-variance" aria-label="Link to this section">#</a></h4></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="solution-2--cell-3--exercise-1-cumulative-explained-variance">Exercise 1: Cumulative explained variance<a class="heading-anchor" href="#solution-2--cell-3--exercise-1-cumulative-explained-variance" aria-label="Link to this section">#</a></h4></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line">Xz <span class="syntax-operator">=</span> StandardScaler<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit_transform<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">)</span></span>
 <span class="source-line">pca <span class="syntax-operator">=</span> PCA<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>Xz<span class="syntax-punctuation">)</span></span>
 <span class="source-line">cum <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>cumsum<span class="syntax-punctuation">(</span>pca<span class="syntax-operator">.</span>explained_variance_ratio_<span class="syntax-punctuation">)</span></span>
@@ -1079,7 +1074,7 @@ pipeline <span class="syntax-operator">=</span> Pipeline<span class="syntax-punc
 <span class="source-line">plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>argmax<span class="syntax-punctuation">(</span>cum <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0.95</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> cum</span></code></pre>
 </article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h4 id="solution-2--cell-5--exercise-2-pca-before-vs-after-scaling">Exercise 2 — PCA before vs after scaling<a class="heading-anchor" href="#solution-2--cell-5--exercise-2-pca-before-vs-after-scaling" aria-label="Link to this section">#</a></h4></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h4 id="solution-2--cell-5--exercise-2-pca-before-vs-after-scaling">Exercise 2: PCA before vs after scaling<a class="heading-anchor" href="#solution-2--cell-5--exercise-2-pca-before-vs-after-scaling" aria-label="Link to this section">#</a></h4></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line">pca_raw <span class="syntax-operator">=</span> PCA<span class="syntax-punctuation">(</span>n_components<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">)</span></span>
 <span class="source-line">X2_raw <span class="syntax-operator">=</span> pca_raw<span class="syntax-operator">.</span>transform<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">)</span></span>
 <span class="source-line">pca_z <span class="syntax-operator">=</span> PCA<span class="syntax-punctuation">(</span>n_components<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>Xz<span class="syntax-punctuation">)</span></span>
@@ -1092,7 +1087,7 @@ pipeline <span class="syntax-operator">=</span> Pipeline<span class="syntax-punc
 <span class="source-line">plt<span class="syntax-operator">.</span>tight_layout<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line">plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><h4 id="solution-2--cell-7--exercise-3-selectkbest-vs-pca">Exercise 3 — SelectKBest vs PCA<a class="heading-anchor" href="#solution-2--cell-7--exercise-3-selectkbest-vs-pca" aria-label="Link to this section">#</a></h4></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><h4 id="solution-2--cell-7--exercise-3-selectkbest-vs-pca">Exercise 3: SelectKBest vs PCA<a class="heading-anchor" href="#solution-2--cell-7--exercise-3-selectkbest-vs-pca" aria-label="Link to this section">#</a></h4></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> sklearn.feature_selection <span class="syntax-keyword">import</span> SelectKBest<span class="syntax-punctuation">,</span> f_classif</span>
 <span class="source-line"><span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> cross_val_score</span>
 <span class="source-line"><span class="syntax-keyword">from</span> sklearn.pipeline <span class="syntax-keyword">import</span> Pipeline</span>
@@ -1117,19 +1112,19 @@ pipeline <span class="syntax-operator">=</span> Pipeline<span class="syntax-punc
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><hr>
 <h4 id="solution-2--cell-9--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-2--cell-9--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
-<h5 id="solution-2--cell-9--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-9--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-2--cell-9--exercise-1-original-lesson-practice">Exercise 1: Original lesson practice<a class="heading-anchor" href="#solution-2--cell-9--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Plot cumulative explained variance and choose a component count.</p>
 <p><strong>How to reason about it:</strong> Fit the maximum useful component count first, compute cumulative explained variance, and choose a threshold before reading the answer. Variance retained is not the same as predictive signal retained.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<h5 id="solution-2--cell-9--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-9--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-2--cell-9--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-2--cell-9--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Compare PCA before and after feature standardization.</p>
 <p><strong>How to reason about it:</strong> PCA is driven by variance, so features with larger units can dominate without scaling. Compare both variance ratios and downstream validation using pipelines; never scale from the full dataset before the split.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<h5 id="solution-2--cell-9--exercise-3-original-lesson-practice">Exercise 3 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-9--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-2--cell-9--exercise-3-original-lesson-practice">Exercise 3: Original lesson practice<a class="heading-anchor" href="#solution-2--cell-9--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Try <code>SelectKBest</code> on a classification dataset and compare its validated performance with PCA.</p>
 <p><strong>How to reason about it:</strong> SelectKBest sees the target while PCA does not. Both must be fitted inside each training fold, and the comparison should include stability and interpretability rather than only the largest score.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<h5 id="solution-2--cell-9--exercise-4-reconstruction-analysis">Exercise 4 — Reconstruction analysis<a class="heading-anchor" href="#solution-2--cell-9--exercise-4-reconstruction-analysis" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-2--cell-9--exercise-4-reconstruction-analysis">Exercise 4: Reconstruction analysis<a class="heading-anchor" href="#solution-2--cell-9--exercise-4-reconstruction-analysis" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Fit scaled PCA with several component counts, inverse-transform the representations, and plot mean squared reconstruction error versus retained components.</p>
 <p><strong>Reasoning before implementation:</strong> Call transform then inverse_transform on the same fitted PCA and compare in scaled space. Error should not increase as components are added.</p>
 <p>Reconstruction error measures information discarded in the coordinate system PCA optimized. It should be non-increasing as components are added, apart from tiny floating-point noise.</p></article>
@@ -1149,13 +1144,13 @@ pipeline <span class="syntax-operator">=</span> Pipeline<span class="syntax-punc
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p>Low reconstruction error does not guarantee good class separation. Evaluate the reduced representation against the actual downstream objective.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<h5 id="solution-2--cell-11--exercise-5-interpretation-edge-case">Exercise 5 — Interpretation edge case<a class="heading-anchor" href="#solution-2--cell-11--exercise-5-interpretation-edge-case" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-2--cell-11--exercise-5-interpretation-edge-case">Exercise 5: Interpretation edge case<a class="heading-anchor" href="#solution-2--cell-11--exercise-5-interpretation-edge-case" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Fit PCA twice to equivalent data and explain why a component and all of its loadings may appear with the opposite sign while the projection remains equivalent.</p>
 <p><strong>Reasoning before implementation:</strong> Eigenvectors are direction axes: v and -v describe the same axis. Compare subspaces or absolute loading patterns, not raw signs alone.</p>
 <p>PCA&#x27;s sign is not identifiable. If a component vector is multiplied by -1, its projected scores are also multiplied by -1, so reconstruction and explained variance are unchanged. Libraries may choose different signs across versions or equivalent fits.</p>
 <p>When monitoring a pipeline, align component signs before comparing loadings or compare invariant quantities such as absolute cosine similarity and projection matrices. Do not interpret a sign flip as learned behavioral drift.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<h5 id="solution-2--cell-11--exercise-6-leakage-debugging">Exercise 6 — Leakage debugging<a class="heading-anchor" href="#solution-2--cell-11--exercise-6-leakage-debugging" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-2--cell-11--exercise-6-leakage-debugging">Exercise 6: Leakage debugging<a class="heading-anchor" href="#solution-2--cell-11--exercise-6-leakage-debugging" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Create a dataset with many noise features, run SelectKBest once before cross-validation, and then correctly inside a Pipeline. Explain the expected score difference.</p>
 <p><strong>Reasoning before implementation:</strong> Selection performed globally can choose noise features that happen to correlate with all labels, including validation labels.</p>
 <p>The globally selected feature set has already inspected every target, so the fold score is contaminated even if the classifier itself is refit. The correct object is:</p></article>
@@ -1186,7 +1181,7 @@ pipeline <span class="syntax-operator">=</span> Pipeline<span class="syntax-punc
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through `python-36` — Day 36 — Dimensionality Reduction with PCA.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through `python-36` (Day 36: Dimensionality Reduction with PCA).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize PCA geometry, scaling, variance, and reconstruction. Use exactly these maintained learner materials:
@@ -1220,8 +1215,8 @@ merely ran is not evidence of mastery.</textarea>
       </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
-        <a class="nav-card" href="python-35.html"><small>Previous lesson</small><strong>python-35</strong><span>Model Evaluation CV</span></a>
-        <a class="nav-card next" href="python-37.html"><small>Next lesson</small><strong>python-37</strong><span>Regularization Linear Models</span></a>
+        <a class="nav-card" href="python-35.html"><small>Previous lesson</small><strong>python-35</strong><span>Model Evaluation and Cross-Validation</span></a>
+        <a class="nav-card next" href="python-37.html"><small>Next lesson</small><strong>python-37</strong><span>Regularized Linear Models</span></a>
       </nav>
     </div>
   </main>

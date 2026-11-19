@@ -198,11 +198,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-keyword">import</span> <span class="syntax-string">&quot;fmt&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">func</span> main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 1: Read a successful response: Use a fake transport returning status 200 and body ready.</span></span>
-<span class="source-line">	<span class="syntax-comment">// Expected: The client helper returns ready without error.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 1: Read a successful response: change one input: Copy worked example 1 into a scratch pad and change `v, err := fetch(context.Background(), 200, &quot;ready&quot;, 8)` to `v, err := fetch(context.Background(), 201, &quot;ready&quot;, 8)`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Expected: The changed run panics with `client success` because `err == nil &amp;&amp; v == &quot;ready&quot;` no longer holds. Restoring the original line brings back the worked observation: the client helper returns ready without error.</span></span>
 <span class="source-line"></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 2: Reject an HTTP failure status: Return status 404 with a body.</span></span>
-<span class="source-line">	<span class="syntax-comment">// Expected: The helper returns an error despite transport success.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 2: Reject an HTTP failure status: diagnose an edited check: A careless edit changed the check in worked example 2 so that it reads `check(err == nil, &quot;HTTP status&quot;)`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Expected: Before the repair the program panics with `HTTP status`; after it the line reads `check(err != nil, &quot;HTTP status&quot;)` again and the helper returns an error despite transport success.</span></span>
 <span class="source-line"></span>
 <span class="source-line">	<span class="syntax-comment">// Exercise 3: Detect an oversized body: Return five bytes with a maximum of four.</span></span>
 <span class="source-line">	<span class="syntax-comment">// Expected: The helper rejects the response.</span></span>

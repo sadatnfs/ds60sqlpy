@@ -199,17 +199,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">Copy to .learning before editing. Six independent attempts belong below.</span></span>
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 1: Compute the fixed spatial filter</span></span>
-<span class="source-line"><span class="syntax-comment"># Apply kernel 1, 0; 0, -1 to image 1..9 in 3 x3NCHW layout.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: output shape 1, 1, 2, 2; all values-4.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Apply a summing kernel</span></span>
+<span class="source-line"><span class="syntax-comment"># Apply the 2-by-2 kernel of ones to the 3-by-3 image with values 1..9 in NCHW layout.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: outputs [[12, 16], [24, 28]] in shape (1, 1, 2, 2).</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 2: Rotate the kernel explicitly</span></span>
-<span class="source-line"><span class="syntax-comment"># Flip both kernel spatial axes and repeat.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: all outputs+4.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Predict the shape with padding</span></span>
+<span class="source-line"><span class="syntax-comment"># Repeat the summing kernel with padding=1 and predict the output shape and its top-left</span></span>
+<span class="source-line"><span class="syntax-comment"># value.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: shape (1, 1, 4, 4); top-left value 1.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 3: Translate image layout</span></span>
-<span class="source-line"><span class="syntax-comment"># Convert NCHW to NHWC with permute and back.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: exact round trip; NHWC shape 1, 3, 3, 1.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: Permute a two-channel image</span></span>
+<span class="source-line"><span class="syntax-comment"># Stack the image and its negative as two channels, convert NCHW to NHWC and read the</span></span>
+<span class="source-line"><span class="syntax-comment"># channel pair at row 0, column 2.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: NHWC shape (1, 3, 3, 2); the pair is [3, -3].</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Inspect stride output size</span></span>
 <span class="source-line"><span class="syntax-comment"># Repeat with stride 2 and padding 0.</span></span>
@@ -220,8 +222,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-comment"># Expected: only top-left output increases 10.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Count shared parameters</span></span>
-<span class="source-line"><span class="syntax-comment"># Build a1-input-channel, 2-output-channel, 2x2bias-free Conv2d.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: 8trainable scalars.</span></span>
+<span class="source-line"><span class="syntax-comment"># Build a bias-free Conv2d with 1 input channel, 2 output channels and a 2-by-2 kernel.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: 8 trainable scalars.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Read the guide and implement the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>

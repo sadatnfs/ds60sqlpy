@@ -194,37 +194,47 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/swift/solutions/swift-006_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="swift-006-explanation-and-comparison">swift-006: explanation and comparison<a class="heading-anchor" href="#swift-006-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="swift-006_solution.swift.html">swift-006_solution.swift</a>. Its assertions are always active under the prepared classroom compile settings.</p>
+<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="swift-006_solution.swift.html">swift-006_solution.swift</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Classify thresholds:</strong> The ranges express the inclusive boundary and keep out-of-domain values separate. 59 retries, 60 passes and 101 is invalid.</p>
 <p><strong>Use a guard for a required value:</strong> The unwrapped binding is available after the guard because every failing path has returned. The early exit excludes missing and empty values before the valid path.</p>
-<h3 id="reason-through-the-six-tasks">Reason through the six tasks<a class="heading-anchor" href="#reason-through-the-six-tasks" aria-label="Link to this section">#</a></h3>
-<ol>
-<li><strong>Predict and explain.</strong> Predict each threshold case before running.</li>
-</ol>
-<ol start="2">
-<li><strong>Guided modification.</strong> Move the pass boundary to 70 and update adjacent tests.</li>
-</ol>
-<ol start="3">
-<li><strong>Independent construction.</strong> Write a three-way classifier for negative, zero and positive quantities.</li>
-</ol>
-<ol start="4">
-<li><strong>Diagnose a defect.</strong> Diagnose a closed range used where an exclusive upper bound was intended.</li>
-</ol>
-<ol start="5">
-<li><strong>Boundary evidence.</strong> Test both ends of the valid domain and one value beyond each.</li>
-</ol>
-<ol start="6">
-<li><strong>Transfer and justify.</strong> Replace a broad default in an enum switch with explicit cases and explain the maintenance benefit.</li>
-</ol>
-<p>For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.</p>
+<h3 id="task-answers">Task answers<a class="heading-anchor" href="#task-answers" aria-label="Link to this section">#</a></h3>
+<h4 id="task-1-predict-and-explain">Task 1: Predict and explain<a class="heading-anchor" href="#task-1-predict-and-explain" aria-label="Link to this section">#</a></h4>
+<p>Predict each threshold case before running.</p>
+<p>No separate reference answer has been written for this task. Example A is the evidence to compare with: The ranges express the inclusive boundary and keep out-of-domain values separate. 59 retries, 60 passes and 101 is invalid.</p>
+<h4 id="task-2-guided-modification">Task 2: Guided modification<a class="heading-anchor" href="#task-2-guided-modification" aria-label="Link to this section">#</a></h4>
+<p>Move the pass boundary to 70 and update adjacent tests.</p>
+<p>No separate reference answer has been written for this task. Start from Example B: The unwrapped binding is available after the guard because every failing path has returned. The early exit excludes missing and empty values before the valid path.</p>
+<h4 id="task-3-independent-construction">Task 3: Independent construction<a class="heading-anchor" href="#task-3-independent-construction" aria-label="Link to this section">#</a></h4>
+<p>Write a three-way classifier for negative, zero and positive quantities.</p>
+<p><strong>Reference answer.</strong> It runs as the <code>Task 3</code> block of the reference program.</p>
+<pre class="highlighted-code"><code class="language-swift"><span class="syntax-keyword">func</span> <span class="syntax-function">sign</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">_</span> quantity<span class="syntax-punctuation">:</span> <span class="syntax-builtin">Int</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">-&gt;</span> <span class="syntax-builtin">String</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">switch</span> quantity <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">case</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">.</span><span class="syntax-punctuation">&lt;</span><span class="syntax-number">0</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">negative</span><span class="syntax-string">&quot;</span>
+  <span class="syntax-keyword">case</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">zero</span><span class="syntax-string">&quot;</span>
+  <span class="syntax-keyword">default</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">positive</span><span class="syntax-string">&quot;</span>
+  <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>sign<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">negative</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">&amp;&amp;</span> sign<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">zero</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>sign<span class="syntax-punctuation">(</span><span class="syntax-number">7</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">positive</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Observe:</strong> -2, 0 and 7 are classified as negative, zero and positive.</p>
+<p>After the two explicit cases, only positive integers remain, so the default case is exactly the positive branch.</p>
+<h4 id="task-4-diagnose-a-defect">Task 4: Diagnose a defect<a class="heading-anchor" href="#task-4-diagnose-a-defect" aria-label="Link to this section">#</a></h4>
+<p>Diagnose a closed range used where an exclusive upper bound was intended.</p>
+<p>No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson&#x27;s pitfalls: A default can hide future cases. Guard must actually exit on failure. Avoid treating every invalid value as the normal else category without a stated policy.</p>
+<h4 id="task-5-boundary-evidence">Task 5: Boundary evidence<a class="heading-anchor" href="#task-5-boundary-evidence" aria-label="Link to this section">#</a></h4>
+<p>Test both ends of the valid domain and one value beyond each.</p>
+<p>No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Classify thresholds) and Example B (Use a guard for a required value).</p>
+<h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
+<p>Replace a broad default in an enum switch with explicit cases and explain the maintenance benefit.</p>
+<p>No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry <strong>Exhaustiveness</strong>, and state one limitation of your choice.</p>
 <h3 id="mechanism-and-diagnostic-reasoning">Mechanism and diagnostic reasoning<a class="heading-anchor" href="#mechanism-and-diagnostic-reasoning" aria-label="Link to this section">#</a></h3>
 <p>Control flow selects which operations execute. A branch should correspond to a domain distinction that can be explained before reading the code. Swift switch does not implicitly fall through to the next case, and the compiler requires coverage of possible inputs. This helps make state handling deliberate.</p>
 <p>Range boundaries remain a source of mistakes. A closed range includes both ends; a half-open range excludes its upper end. Use fixtures exactly at transitions and outside the valid domain. A broad default can satisfy exhaustiveness while still hiding a new state, so prefer explicit enum cases when the domain is finite.</p>
 <p><code>if</code> requires a Bool. <code>switch</code> matches cases without implicit fallthrough. <code>0..&lt;10</code> excludes ten; <code>0...10</code> includes it. A where clause narrows a matched case.</p>
 <p>A default can hide future cases. Guard must actually exit on failure. Avoid treating every invalid value as the normal else category without a stated policy.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.</p></article>
+<p>Run the reference and confirm that it prints <code>swift-006: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
   </main>
 </body>
 </html>

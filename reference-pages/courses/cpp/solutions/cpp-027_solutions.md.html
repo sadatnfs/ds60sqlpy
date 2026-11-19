@@ -217,32 +217,32 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>List compiler, C++ level, dependency source and build generator.</p>
 <p><strong>Expected:</strong> Four concrete identities, including dependency content hash.</p>
 <p><strong>Reasoning:</strong> A package name without a version is not a reproducible input.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Check that each of the four entries is a value you can re-read later, such as the <code>g++ --version</code> output, <code>-std=c++20</code>, a <code>sha256sum</code> of the dependency archive and Ninja.</p>
 <h3 id="exercise-2-build-offline">Exercise 2: Build offline<a class="heading-anchor" href="#exercise-2-build-offline" aria-label="Link to this section">#</a></h3>
 <p>Build the supplied local target in a fresh owned directory without network.</p>
 <p><strong>Expected:</strong> Configure/build/test complete without downloads.</p>
 <p><strong>Reasoning:</strong> Every required dependency must already be present.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Run configure, build and ctest with networking disabled, for example inside <code>docker run --network none</code>, and confirm all three steps succeed.</p>
 <h3 id="exercise-3-expose-target-requirements">Exercise 3: Expose target requirements<a class="heading-anchor" href="#exercise-3-expose-target-requirements" aria-label="Link to this section">#</a></h3>
 <p>Create a CMake interface target with cxx_std_20.</p>
 <p><strong>Expected:</strong> Consumer inherits the required language feature.</p>
 <p><strong>Reasoning:</strong> Target properties propagate intentional usage requirements.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Link a consumer target to the interface target without setting its own standard, then confirm its compile command, shown by <code>ninja -v</code>, contains <code>-std=c++20</code> or <code>-std=gnu++20</code>.</p>
 <h3 id="exercise-4-repair-hidden-fetch">Exercise 4: Repair hidden fetch<a class="heading-anchor" href="#exercise-4-repair-hidden-fetch" aria-label="Link to this section">#</a></h3>
 <p>Review a configure script that downloads latest.zip.</p>
 <p><strong>Expected:</strong> Replace with checked local source and pinned reviewed identity.</p>
 <p><strong>Reasoning:</strong> Latest changes over time and violates offline default.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Confirm the repaired script uses a local archive or directory and checks a recorded hash, and that configure still succeeds with networking disabled.</p>
 <h3 id="exercise-5-check-licensing">Exercise 5: Check licensing<a class="heading-anchor" href="#exercise-5-check-licensing" aria-label="Link to this section">#</a></h3>
 <p>Package the dependency license with the source inventory.</p>
 <p><strong>Expected:</strong> License path present in the delivery tree.</p>
 <p><strong>Reasoning:</strong> Technical reproducibility does not erase distribution obligations.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> List the delivery tree and confirm the license file exists at exactly the path your inventory names.</p>
 <h3 id="exercise-6-transfer-another-platform">Exercise 6: Transfer another platform<a class="heading-anchor" href="#exercise-6-transfer-another-platform" aria-label="Link to this section">#</a></h3>
 <p>Record an untested architecture as unqualified.</p>
 <p><strong>Expected:</strong> Separate built platform from planned platforms.</p>
 <p><strong>Reasoning:</strong> Configuration files are not execution evidence.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p></article>
+<p><strong>Verify:</strong> Check that your record lists the architecture you actually built and ran, from <code>uname -m</code>, separately from planned ones marked unqualified until executed.</p></article>
   </main>
 </body>
 </html>

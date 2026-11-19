@@ -198,7 +198,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Intermediate; approximately 150 minutes. Direct prerequisites: <code>julia-013</code>, <code>julia-014</code>.</p>
 <p>Transform a typed table and compute grouped summaries while preserving names, missingness and row counts.</p>
 <h3 id="classroom-execution">Classroom execution<a class="heading-anchor" href="#classroom-execution" aria-label="Link to this section">#</a></h3>
-<p>Choose <strong>Julia language and scientific computing</strong> in <code>/classroom</code>, open this unit, and select its prepared <code>julia</code> runtime. The worker starts a fresh <code>main.jl</code> process with two Julia threads, a fixed package environment, no startup file and offline package settings. Both worked examples are complete under that environment. Save your current pad before replacing it. No package, model or dataset is fetched by a lesson.</p>
+<p>Open <code>julia-015</code> in <code>/classroom</code> with its prepared <code>julia</code> runtime. Worked case A (select and transform named columns) and worked case B (summarize with missingness counts) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing <code>julia-015: all reference checks passed</code>. The <a href="../README.md.html">course overview</a> describes the shared runtime: a fresh offline <code>main.jl</code> process with two threads and a fixed package environment.</p>
 <h3 id="a-table-needs-a-schema-and-a-grain">A table needs a schema and a grain<a class="heading-anchor" href="#a-table-needs-a-schema-and-a-grain" aria-label="Link to this section">#</a></h3>
 <p>A DataFrame organizes named columns into rows. Its grain states what one row represents. Column names and element types are useful schema information, but a table also needs semantic contracts such as unique request IDs, units and missingness rules. DataFrames does not infer those scientific meanings automatically.</p>
 <p>Selection chooses columns or creates derived ones. A row-wise transformation applies a function to corresponding values from each row, while a column transformation receives a whole column. <code>ByRow</code> makes that distinction explicit. Grouping creates subsets for an aggregation rule; it does not itself decide whether groups should receive equal weights in a later scientific summary.</p>
@@ -267,10 +267,10 @@ worked_b<span class="syntax-punctuation">(</span><span class="syntax-punctuation
 <h3 id="six-investigations">Six investigations<a class="heading-anchor" href="#six-investigations" aria-label="Link to this section">#</a></h3>
 <h4 id="1-name-the-derived-field">1. Name the derived field<a class="heading-anchor" href="#1-name-the-derived-field" aria-label="Link to this section">#</a></h4>
 <p>Scale the score column by 10 using ByRow.</p>
-<p><strong>Expected:</strong> The output column contains 1,2,3 under the explicit name scaled.</p>
+<p><strong>Expected:</strong> The output column contains 1, 2 and 3 under the explicit name <code>scaled</code>.</p>
 <p><strong>Hint:</strong> Choose row-wise application deliberately.</p>
 <h4 id="2-observe-a-shared-column">2. Observe a shared column<a class="heading-anchor" href="#2-observe-a-shared-column" aria-label="Link to this section">#</a></h4>
-<p>Mutate input[!, :score].</p>
+<p>Mutate <code>input[!, :score]</code>.</p>
 <p><strong>Expected:</strong> The source DataFrame changes.</p>
 <p><strong>Hint:</strong> The indexing operation can return the stored column.</p>
 <h4 id="3-retain-a-column-snapshot">3. Retain a column snapshot<a class="heading-anchor" href="#3-retain-a-column-snapshot" aria-label="Link to this section">#</a></h4>
@@ -279,7 +279,7 @@ worked_b<span class="syntax-punctuation">(</span><span class="syntax-punctuation
 <p><strong>Hint:</strong> Check identity and content separately.</p>
 <h4 id="4-report-group-coverage">4. Report group coverage<a class="heading-anchor" href="#4-report-group-coverage" aria-label="Link to this section">#</a></h4>
 <p>Summarize the group containing one missing score.</p>
-<p><strong>Expected:</strong> It reports 2 rows,1 observed score and mean 1.</p>
+<p><strong>Expected:</strong> It reports 2 rows, 1 observed score and mean 1.</p>
 <p><strong>Hint:</strong> A mean alone hides the denominator.</p>
 <h4 id="5-handle-an-all-missing-group">5. Handle an all-missing group<a class="heading-anchor" href="#5-handle-an-all-missing-group" aria-label="Link to this section">#</a></h4>
 <p>Apply observed_mean to only missing values.</p>
@@ -295,7 +295,7 @@ worked_b<span class="syntax-punctuation">(</span><span class="syntax-punctuation
 <li><a href="https://dataframes.juliadata.org/stable/lib/indexing/">DataFrames indexing</a></li>
 </ul>
 <h3 id="study-companion">Study companion<a class="heading-anchor" href="#study-companion" aria-label="Link to this section">#</a></h3>
-<p>Use the repository learning-companion skill with this lesson ID, your prediction and your actual source/output. Ask for a diagnosis of the first incorrect type, shape, state transition or assumption. Keep observed execution distinct from a timing claim, inferred mathematical result or external deployment.</p></article>
+<p>A repository-aware assistant with the learning-companion skill can review <code>julia-015</code> with you. Give it your prediction for one investigation, your source and the actual output, and ask it to find the first incorrect assumption about DataFrames, column selection, ByRow, groupby or row accounting.</p></article>
   </main>
 </body>
 </html>

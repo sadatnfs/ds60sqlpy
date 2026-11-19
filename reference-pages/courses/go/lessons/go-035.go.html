@@ -198,22 +198,22 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-keyword">import</span> <span class="syntax-string">&quot;fmt&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">func</span> main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 1: Decode desired and observed replicas: Decode a fixture requesting 3 replicas with 2 ready.</span></span>
-<span class="source-line">	<span class="syntax-comment">// Expected: Desired is 3 while ready is 2.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 1: Decode desired and observed replicas: change one input: Copy worked example 1 into a scratch pad and change `&quot;replicas&quot;:3` to `&quot;replicas&quot;:4`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Expected: The changed run panics with `spec status` because `err == nil &amp;&amp; d.Spec.Replicas != nil &amp;&amp; *d.Spec.Replicas == 3 &amp;&amp; d.Status.Ready == 2` no longer holds. Restoring the original line brings back the worked observation: desired is 3 while ready is 2.</span></span>
 <span class="source-line"></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 2: Distinguish omitted from explicit zero: Decode one absent replicas field and one replicas zero.</span></span>
-<span class="source-line">	<span class="syntax-comment">// Expected: Only the explicit zero has a non-nil pointer.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 2: Distinguish omitted from explicit zero: diagnose an edited check: A careless edit changed the check in worked example 2 so that it reads ``check(json.Unmarshal([]byte(`{&quot;spec&quot;:{&quot;replicas&quot;:1}}`), &amp;b) == nil, &quot;decode&quot;)``. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Expected: Before the repair the program panics with `presence`; after it the line reads ``check(json.Unmarshal([]byte(`{&quot;spec&quot;:{&quot;replicas&quot;:0}}`), &amp;b) == nil, &quot;decode&quot;)`` again and only the explicit zero has a non-nil pointer.</span></span>
 <span class="source-line"></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 3: Separate name and incarnation: Construct two objects sharing name but having different UIDs.</span></span>
-<span class="source-line">	<span class="syntax-comment">// Expected: Their names match but identities differ.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 3: Separate name and incarnation: Decode two objects that share namespace and name but carry different UIDs.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Expected: Their names match but their identities differ.</span></span>
 <span class="source-line"></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 4: Keep namespaces in a key: Build keys for the same name in two namespaces.</span></span>
-<span class="source-line">	<span class="syntax-comment">// Expected: The keys are different.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 4: Keep namespaces in a key: Build keys with one function for the same name in two namespaces.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Expected: The key is alpha/demo for the first object and differs from the second object&#x27;s key.</span></span>
 <span class="source-line"></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 5: Treat versions as opaque: Store a nonnumeric resourceVersion token and compare it for equality.</span></span>
-<span class="source-line">	<span class="syntax-comment">// Expected: The exact token is retained.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 5: Treat versions as opaque: Decode resourceVersion tokens 10 and 9 and compare them as the strings they are.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Expected: Both tokens are retained exactly; they differ, and string order even places 10 before 9, so only equality is meaningful.</span></span>
 <span class="source-line"></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 6: Transfer readiness reasoning: Compare desired 3 with ready 3 and then ready 2.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 6: Transfer readiness reasoning: Apply one readiness predicate to desired 3 with ready 3 and then ready 2.</span></span>
 <span class="source-line">	<span class="syntax-comment">// Expected: Only the equal complete state satisfies this simplified predicate.</span></span>
 <span class="source-line"></span>
 <span class="source-line">	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Implement the six investigations in your saved pad.&quot;</span><span class="syntax-punctuation">)</span></span>

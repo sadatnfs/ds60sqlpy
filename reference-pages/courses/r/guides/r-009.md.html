@@ -196,9 +196,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="r-009-lists-and-nested-records-without-accidental-flattening">r-009: Lists and nested records without accidental flattening<a class="heading-anchor" href="#r-009-lists-and-nested-records-without-accidental-flattening" aria-label="Link to this section">#</a></h2>
 <p><strong>Level:</strong> beginner. <strong>Direct prerequisites:</strong> <code>r-005</code>, <code>r-006</code>, <code>r-007</code></p>
 <h3 id="run-and-retain-your-work">Run and retain your work<a class="heading-anchor" href="#run-and-retain-your-work" aria-label="Link to this section">#</a></h3>
-<p>Use the classroom&#x27;s R language pad and prepared r-statistics profile. Each run evaluates one main.R script in a fresh offline R process. Define every required input in the script; earlier runs do not leave live variables behind. Save source and notes separately from run receipts. No package installation or data download is needed for these examples.</p>
-<p>Base plot calls are captured as PNG figures. Explicitly print ggplot2 and Plotly objects in scripts: print(chart). The classroom retains at most two figures per run; Plotly figures use the prepared interactive browser renderer. A temporary file created inside a run is not automatically a persistent download. Keep the supplied examples self-contained and use the saved source, notes and supported figure/result views for retained work.</p>
-<p>Open the <a href="../lessons/r-009.R.html">starter</a>. The <a href="../solutions/r-009_reference.R.html">complete reference</a> and <a href="../solutions/r-009_solutions.md.html">explained answers</a> are available for deliberate comparison.</p>
+<p>Open <code>r-009</code> in <code>/classroom</code> and use the prepared <code>r-statistics</code> profile. Each Run evaluates one <code>main.R</code> script in a fresh offline R process, so define every input in the script; an earlier Run leaves no variables behind. Work in the <a href="../lessons/r-009.R.html">starter</a>. The <a href="../solutions/r-009_reference.R.html">complete reference</a> ends by printing <code>r-009 reference checks passed</code>, and the <a href="../solutions/r-009_solutions.md.html">explained answers</a> are there for deliberate comparison after your own attempt. This chapter prints values only; when a chapter draws figures, the classroom keeps at most two figures per run. The <a href="../README.md.html">course overview</a> describes saved work, figure capture and the prepared package versions.</p>
 <h3 id="outcome-and-mechanism">Outcome and mechanism<a class="heading-anchor" href="#outcome-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Read and update nested records while preserving heterogeneous fields and validating required components.</p>
 <p>A list can contain a character ID, a numeric vector and another list without coercing them into one atomic type. It is therefore useful for structured records, model outputs and configuration. The structure itself is not a validated schema: fields can be absent, misspelled, duplicated or contain an unexpected object. Validate the pieces a function actually requires.</p>
@@ -247,7 +245,6 @@ record<span class="syntax-operator">$</span>note <span class="syntax-operator">&
 <p><strong>Expected observation:</strong> Only id remains after deletion.</p>
 <p>Single-bracket replacement retains the field with a NULL value; dollar replacement by NULL deletes the field.</p>
 <h3 id="practice-with-evidence">Practice with evidence<a class="heading-anchor" href="#practice-with-evidence" aria-label="Link to this section">#</a></h3>
-<p>Retain the submitted source, the specific input or changed condition, and the observed result or expected failure. A successful exit checks only the properties the program actually asserts; it does not establish general correctness or mastery.</p>
 <h4 id="exercise-1-predict">Exercise 1: Predict<a class="heading-anchor" href="#exercise-1-predict" aria-label="Link to this section">#</a></h4>
 <p>Predict is.list(x[1]) for a list x.</p>
 <h4 id="exercise-2-modify">Exercise 2: Modify<a class="heading-anchor" href="#exercise-2-modify" aria-label="Link to this section">#</a></h4>
@@ -270,23 +267,22 @@ record<span class="syntax-operator">$</span>note <span class="syntax-operator">&
 <li>One atomic output needs a common type.</li>
 </ol>
 <h3 id="reference-review">Reference review<a class="heading-anchor" href="#reference-review" aria-label="Link to this section">#</a></h3>
-<p>The one-element list and the numeric measurement vector are different objects. Exact nested names retain the unit contract.</p>
-<p>Single-bracket replacement retains the field with a NULL value; dollar replacement by NULL deletes the field.</p>
-<p>Compare your implementation with the reference only after retaining your own attempt. Different readable implementations can satisfy the same behavioral contract. Inspect type, shape, missingness and boundary behavior alongside printed numbers.</p>
+<p>The reference applies the reasoning explained under the worked examples above; the <a href="../solutions/r-009_solutions.md.html">explained answers</a> add an answer for each exercise.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/list.html">R lists</a></li>
 <li><a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/Extract.html">R extraction</a></li>
 </ul>
-<p>The prepared environment uses R 4.6.1, R6 2.6.1, S7 0.2.2, ggplot2 4.0.3 and Plotly 4.12.1. These original examples use the checked-in dependency contract; external package changes require a fresh compatibility check.</p>
 <h3 id="continue">Continue<a class="heading-anchor" href="#continue" aria-label="Link to this section">#</a></h3>
-<p>Use the <a href="../README.md.html">course map</a> to choose the next chapter by its prerequisites. For broader model assumptions, study the statistics tutorial alongside the executable R examples.</p>
+<p>Chapters that list <code>r-009</code> as a direct prerequisite: <a href="r-010.md.html"><code>r-010</code></a>, <a href="r-014.md.html"><code>r-014</code></a>.</p>
 <h3 id="ask-an-ai-tutor">Ask an AI tutor<a class="heading-anchor" href="#ask-an-ai-tutor" aria-label="Link to this section">#</a></h3>
-<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for r-009. Read the guide and my saved attempt.
-Explain the relevant R mechanism, type and data-shape contract. Give one
-progressive hint before revealing the complete reference unless I request it.
-Distinguish my observed output from an expected result and from unrun code.
-Do not claim mastery from a successful process exit or a matching source string.</code></pre></article>
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for r-009 (Lists and nested records without accidental flattening).
+Read the guide and my saved attempt. Explain the relevant R mechanism,
+type and data-shape contract, focusing on: List, Single-bracket extraction, Double-bracket extraction, Schema.
+Give one progressive hint before revealing the complete reference unless
+I request it. Distinguish my observed output from an expected result and
+from unrun code. Do not claim mastery from a successful process exit or a
+matching source string.</code></pre></article>
   </main>
 </body>
 </html>

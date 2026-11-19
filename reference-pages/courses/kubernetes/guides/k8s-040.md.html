@@ -207,7 +207,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Record observation time separately from event time when logs arrive late. Keep the request path, timeout and relevant object generation/version so that two readers can compare the same operation. Avoid copying tokens or unbounded logs. A small exact field extract often explains the failure better than a large undifferentiated dump.</p>
 <p>A good baseline includes a successful application response and the expected selection graph before the fault. Without that control, an after-fault timeout could be an old defect. The experiment should have one declared fault so the causal story is interpretable; if another failure appears, stop and report the confounding condition.</p>
 <h3 id="test-hypotheses-with-minimal-observations">Test hypotheses with minimal observations<a class="heading-anchor" href="#test-hypotheses-with-minimal-observations" aria-label="Link to this section">#</a></h3>
-<p>Hypothesis1: the application crashed. Inspect Ready state, termination/restart evidence and the fixed application observation path. Hypothesis2: the Service selects no intended Pods. Compare its selector with Pod labels and observed EndpointSlices. Hypothesis3: the selected backend port is wrong. Compare Service port/targetPort with the container named port. These are distinct checks, not a generic restart ritual.</p>
+<p>Hypothesis 1: the application crashed. Inspect Ready state, termination/restart evidence and the fixed application observation path. Hypothesis 2: the Service selects no intended Pods. Compare its selector with Pod labels and observed EndpointSlices. Hypothesis 3: the selected backend port is wrong. Compare Service port/targetPort with the container named port. These are distinct checks, not a generic restart ritual.</p>
 <p>In the supplied trace, the selector became missing and endpoints fell to zero while Pod readiness remained healthy. Restoring the last verified selector is the minimal repair consistent with the evidence. Use the recorded UID and a current conditional update to avoid overwriting another actor&#x27;s changes or mutating a replacement object.</p>
 <p>After repair, observe endpoints and the ordinary Service response again. A successful API update only says the desired change was accepted. The end-to-end observation closes the incident, while the timeline supports the causal explanation. If the response remains wrong, preserve that result and continue from evidence instead of declaring victory from an update exit code.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
@@ -219,15 +219,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Expected:</strong> The same owned route recovers. Identity replacement is a stop condition, not permission to apply the old repair blindly.</p>
 <h3 id="inspect-the-specific-owned-object">Inspect the specific owned object<a class="heading-anchor" href="#inspect-the-specific-owned-object" aria-label="Link to this section">#</a></h3>
 <p>Only after the chapter&#x27;s host capability is provisioned and its resources remain present, use the explicit receipt fields described in <a href="../host-labs.md.html">host-labs.md</a>. A completed one-shot browser Run has already cleaned its objects. The following read does not provision the missing capability and does not justify changing credentials after a Forbidden result.</p>
-<p>POSIX:</p>
+<p>Bash on Linux, macOS or Ubuntu under WSL 2:</p>
 <pre class="highlighted-code"><code class="language-bash">: <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_KUBECONFIG<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt path</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 : <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_CONTEXT<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt context</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 : <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_NAMESPACE<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt namespace</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<span class="syntax-string">&quot;</span> --context <span class="syntax-string">&quot;</span>$LAB_CONTEXT<span class="syntax-string">&quot;</span> --namespace <span class="syntax-string">&quot;</span>$LAB_NAMESPACE<span class="syntax-string">&quot;</span> get endpointslices -l kubernetes.io/service-name<span class="syntax-operator">=</span>hello -o json</code></pre>
-<p>PowerShell:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">-not</span> $env:LAB_KUBECONFIG <span class="syntax-operator">-or</span> <span class="syntax-operator">-not</span> $env:LAB_CONTEXT <span class="syntax-operator">-or</span> <span class="syntax-operator">-not</span> $env:LAB_NAMESPACE<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;Owned receipt fields are required.&#x27;</span> <span class="syntax-punctuation">}</span>
-<span class="syntax-punctuation">&amp;</span> kubectl <span class="syntax-punctuation">-</span>-kubeconfig $env:LAB_KUBECONFIG <span class="syntax-punctuation">-</span>-context $env:LAB_CONTEXT <span class="syntax-punctuation">-</span>-namespace $env:LAB_NAMESPACE get endpointslices -l kubernetes<span class="syntax-punctuation">.</span>io<span class="syntax-punctuation">/</span>service-name<span class="syntax-punctuation">=</span>hello -o json
-<span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>$LASTEXITCODE <span class="syntax-operator">-ne</span> 0<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;The scoped observation failed.&#x27;</span> <span class="syntax-punctuation">}</span></code></pre>
+<p>Windows uses the same Bash commands inside WSL 2. The lab adapter refuses native Windows credential handling, so do not run kubectl against the receipt from PowerShell. From PowerShell, only open your WSL 2 distribution (the name reported by <code>wsl.exe --list --verbose</code>), change to your checkout with its Linux path, then run the Bash block above unchanged:</p>
+<pre class="highlighted-code"><code class="language-powershell">wsl<span class="syntax-punctuation">.</span>exe <span class="syntax-punctuation">-</span>-distribution Ubuntu</code></pre>
 <p>Retain only the fields needed by this chapter&#x27;s prediction. A NotFound result may be expected after one-shot cleanup; a Forbidden result may identify a deliberately absent advanced capability. Neither result authorizes an ambient-context fallback.</p>
 <h3 id="run-and-bounded-evidence">Run and bounded evidence<a class="heading-anchor" href="#run-and-bounded-evidence" aria-label="Link to this section">#</a></h3>
 <p>The app artifact is a reading worksheet, <code>courses/kubernetes/lessons/k8s-040.md</code>. The current browser adapter does not provide the full <strong>one fixed host fault with UID-bound restoration and timestamped application evidence</strong> operation. Use the synthetic fixture and offline check first. Live work follows <a href="../host-labs.md.html">the scoped host-lab guide</a> only when the named capability and owned target have been provisioned. A worksheet or static check is never a cluster execution receipt.</p>
@@ -236,32 +234,32 @@ kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<sp
 <h4 id="exercise-1-record-the-baseline">Exercise 1: Record the baseline<a class="heading-anchor" href="#exercise-1-record-the-baseline" aria-label="Link to this section">#</a></h4>
 <p>Capture selector, Pod label, endpoint count and fixed response before the fault.</p>
 <p><strong>Expected result/shape:</strong> A connected selection graph and successful application control.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: A connected selection graph and successful application control.</p>
+<p><strong>Verify:</strong> Confirm that the baseline contains a successful request and the endpoint count captured before any change.</p>
 <p><strong>Progressive hints:</strong> A later failure needs a known earlier working path.</p>
 <h4 id="exercise-2-form-competing-hypotheses">Exercise 2: Form competing hypotheses<a class="heading-anchor" href="#exercise-2-form-competing-hypotheses" aria-label="Link to this section">#</a></h4>
 <p>List crash, selector mismatch and target-port mismatch with a distinguishing observation for each.</p>
 <p><strong>Expected result/shape:</strong> Three specific evidence checks rather than a generic restart.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Three specific evidence checks rather than a generic restart.</p>
+<p><strong>Verify:</strong> For each hypothesis, name the observation that would differ if it were true.</p>
 <p><strong>Progressive hints:</strong> Ask what would be different if each cause were true.</p>
 <h4 id="exercise-3-interpret-the-supplied-timeline">Exercise 3: Interpret the supplied timeline<a class="heading-anchor" href="#exercise-3-interpret-the-supplied-timeline" aria-label="Link to this section">#</a></h4>
 <p>Find the field change and the earliest observation supporting its effect.</p>
-<p><strong>Expected result/shape:</strong> Selector changes at 10; zero endpoints observed at 15 while readiness remains1.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Selector changes at 10; zero endpoints observed at 15 while readiness remains1.</p>
+<p><strong>Expected result/shape:</strong> Selector changes at 10; zero endpoints observed at 15 while readiness remains 1.</p>
+<p><strong>Verify:</strong> Locate the change time and the first supporting observation time separately in the timeline.</p>
 <p><strong>Progressive hints:</strong> Separate event time from observation time.</p>
 <h4 id="exercise-4-apply-the-minimal-bounded-repair">Exercise 4: Apply the minimal bounded repair<a class="heading-anchor" href="#exercise-4-apply-the-minimal-bounded-repair" aria-label="Link to this section">#</a></h4>
 <p>Restore the verified selector only if the Service UID and current update precondition match.</p>
 <p><strong>Expected result/shape:</strong> Owned svc-1 repaired; replacement UID causes refusal.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Owned svc-1 repaired; replacement UID causes refusal.</p>
+<p><strong>Verify:</strong> Read the Service UID and resourceVersion before writing; the repair must fail against a replaced object.</p>
 <p><strong>Progressive hints:</strong> Read current state before writing.</p>
 <h4 id="exercise-5-verify-application-recovery">Exercise 5: Verify application recovery<a class="heading-anchor" href="#exercise-5-verify-application-recovery" aria-label="Link to this section">#</a></h4>
 <p>Read endpoint selection and the ordinary Service response after the repair.</p>
 <p><strong>Expected result/shape:</strong> One endpoint and expected payload, with actual timestamps if live.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: One endpoint and expected payload, with actual timestamps if live.</p>
+<p><strong>Verify:</strong> Confirm the endpoint list and the Service response after the repair, each with a timestamp.</p>
 <p><strong>Progressive hints:</strong> API success is not the serving result.</p>
 <h4 id="exercise-6-write-the-review-and-stop-conditions">Exercise 6: Write the review and stop conditions<a class="heading-anchor" href="#exercise-6-write-the-review-and-stop-conditions" aria-label="Link to this section">#</a></h4>
 <p>Summarize cause, evidence, repair, unrelated-state preservation and remaining uncertainty.</p>
 <p><strong>Expected result/shape:</strong> A timestamped bounded incident packet with no unsupported broad resilience claim.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: A timestamped bounded incident packet with no unsupported broad resilience claim.</p>
+<p><strong>Verify:</strong> Check that the packet contains cause, evidence, repair, preserved state and remaining uncertainty.</p>
 <p><strong>Progressive hints:</strong> Include cancellation and restoration behavior.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain the mechanism behind the first example, then distinguish it from this boundary case: The same owned route recovers. Identity replacement is a stop condition, not permission to apply the old repair blindly. State which observations are synthetic and which, if any, were read from your owned runtime.</p>
@@ -269,7 +267,7 @@ kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<sp
 <p>The host operation must know how to restore its own change, including on cancellation or deadline. It should stop if the target UID changes or unrelated state would be affected. Do not broaden the fault into a node outage, policy deletion or credential change to make the lesson more dramatic.</p>
 <p>The post-incident review explains contributing conditions and detection gaps without inventing a root cause unsupported by the trace. A finite recovery can validate this selector-repair path; it does not prove resilience to every outage or that the failure will never recur.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
-<p>Close the answer and reconstruct the reasoning for Exercise6, Write the review and stop conditions. Name the exact source and observed identity you would require before claiming the changed case succeeded.</p>
+<p>Close the answer and reconstruct the reasoning for Exercise 6 (Write the review and stop conditions). Name the exact source and observed identity you would require before claiming the changed case succeeded.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue to <code>k8s-041</code> after preserving the six evidence records.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>

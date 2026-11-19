@@ -198,7 +198,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
 <p>An ordinary init container completes before the application containers start. It can prepare a synthetic file or validate a prerequisite. An emptyDir volume belongs to the Pod lifetime and can be shared by its containers. Restarting an application container normally preserves that volume, while replacing the Pod creates a different emptyDir.</p>
 <p>The supplied real Pod manifest is an explicit host-lab example. The browser adapter does not admit initContainers, emptyDir or arbitrary command bodies. A teacher must review the exact fixed commands and provide the owned capability before live use. The finite example writes the Pod UID into a marker, then deliberately makes the reader fail once and succeed on its next container attempt.</p>
-<p>The marker makes lifetime observable:it matches the same Pod UID across the application restart and changes when a new Pod is created. A constant hello marker alone would be weaker evidence because a new init container could recreate identical bytes after replacement.</p>
+<p>The marker makes lifetime observable: it matches the same Pod UID across the application restart and changes when a new Pod is created. A constant hello marker alone would be weaker evidence because a new init container could recreate identical bytes after replacement.</p>
 <h3 id="exercise-1-draw-container-order">Exercise 1: Draw container order<a class="heading-anchor" href="#exercise-1-draw-container-order" aria-label="Link to this section">#</a></h3>
 <p>The init container supplies the file dependency. If it never completes successfully, the application cannot demonstrate the read path. The ordering is a Kubernetes lifecycle contract, not a sleep inserted into application code.</p>
 <p><strong>Expected:</strong> prepare completes before read starts.</p>
@@ -206,7 +206,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The mount links the containers to one Pod-owned volume. Read-only root filesystems do not prohibit a separately admitted writable volume. The scope is still synthetic and bounded, with no host personal path.</p>
 <p><strong>Expected:</strong> Both containers access the same /work emptyDir within one Pod.</p>
 <h3 id="exercise-3-observe-one-application-restart">Exercise 3: Observe one application restart<a class="heading-anchor" href="#exercise-3-observe-one-application-restart" aria-label="Link to this section">#</a></h3>
-<p>The first application exit2 triggers OnFailure restart. Its marker and flag remain in the Pod volume, so the next attempt can distinguish itself. Actual timing and status must be observed rather than copied from this trace.</p>
+<p>The first application exit 2 triggers OnFailure restart. Its marker and flag remain in the Pod volume, so the next attempt can distinguish itself. Actual timing and status must be observed rather than copied from this trace.</p>
 <p><strong>Expected:</strong> Same Pod UID/marker across the failed first and successful next application attempt.</p>
 <h3 id="exercise-4-compare-a-new-pod">Exercise 4: Compare a new Pod<a class="heading-anchor" href="#exercise-4-compare-a-new-pod" aria-label="Link to this section">#</a></h3>
 <p>The init step writes the new UID, which differentiates recreated bytes from persistent storage. This avoids falsely claiming that a constant marker survived when it was merely generated again.</p>

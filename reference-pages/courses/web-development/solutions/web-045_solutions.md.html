@@ -194,31 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-045_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-045-explanatory-solutions">web-045: explanatory solutions<a class="heading-anchor" href="#web-045-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.</p>
-<h3 id="why-the-mechanism-works">Why the mechanism works<a class="heading-anchor" href="#why-the-mechanism-works" aria-label="Link to this section">#</a></h3>
-<p>A template combines trusted structure with data. If a visitor&#x27;s text is inserted directly into HTML, the browser may interpret it as elements or script-capable attributes. Output escaping represents the data so it remains data in a particular destination context. It is not a one-time cleanup that makes a value safe everywhere. Keep the original validated value and encode it when crossing the output boundary.</p>
-<p>For HTML text and ordinary quoted attribute values, htmlspecialchars with explicit flags and UTF-8 is a useful primitive. It is not a JavaScript-string encoder, a CSS sanitizer or a URL policy. A URL in an href needs a separate scheme and destination decision before attribute escaping. Avoid dynamic inline scripts and styles when a simpler data boundary is available.</p>
-<p>Define a small e function that calls htmlspecialchars with ENT_QUOTES, ENT_SUBSTITUTE and UTF-8. Use it only for the contexts described by its contract. The CLI reference prints an HTML string as text so you can inspect the escaped bytes; it does not execute that string in a browser. A server template later uses the same contextual boundary before returning a response.</p>
+<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-045.md</code>.</p>
 <h3 id="exercise-1-predict-the-escaped-form-of-a-name-containing-and">Exercise 1: Predict the escaped form of a name containing &lt; and &amp;.<a class="heading-anchor" href="#exercise-1-predict-the-escaped-form-of-a-name-containing-and" aria-label="Link to this section">#</a></h3>
-<p>The special syntax characters become HTML character references.</p>
-<p>Trace the smallest example before editing. Name which values are source and which are observations.</p>
+<p><strong>Expected answer:</strong> The special syntax characters become HTML character references.</p>
+<p><strong>Why:</strong> &lt; becomes &amp;lt; and &amp; becomes &amp;amp;, and with ENT_QUOTES both quote characters are converted as well.</p>
 <h3 id="exercise-2-add-an-escaping-helper-with-an-explicit-utf-8-contract">Exercise 2: Add an escaping helper with an explicit UTF-8 contract.<a class="heading-anchor" href="#exercise-2-add-an-escaping-helper-with-an-explicit-utf-8-contract" aria-label="Link to this section">#</a></h3>
-<p>The helper names its HTML context and handles quotes as well as angle brackets.</p>
-<p>Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.</p>
+<p><strong>Expected evidence:</strong> The helper names its HTML context and handles quotes as well as angle brackets.</p>
+<p><strong>Why:</strong> Fixing the flags and encoding in one helper prevents call sites from forgetting them.</p>
 <h3 id="exercise-3-render-a-study-card-template-from-synthetic-untrusted-labels">Exercise 3: Render a study-card template from synthetic untrusted labels.<a class="heading-anchor" href="#exercise-3-render-a-study-card-template-from-synthetic-untrusted-labels" aria-label="Link to this section">#</a></h3>
-<p>The structure stays fixed while labels are escaped at output.</p>
-<p>Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.</p>
+<p><strong>Expected evidence:</strong> The structure stays fixed while labels are escaped at output.</p>
+<p><strong>Why:</strong> Escaping at output protects the HTML context no matter where the label came from.</p>
 <h3 id="exercise-4-explain-why-the-same-helper-is-insufficient-for-a-javascript-string">Exercise 4: Explain why the same helper is insufficient for a JavaScript string.<a class="heading-anchor" href="#exercise-4-explain-why-the-same-helper-is-insufficient-for-a-javascript-string" aria-label="Link to this section">#</a></h3>
-<p>JavaScript has a different parser and escaping rules; use a dedicated serialization boundary.</p>
-<p>Keep the failing input. Identify the first layer where the observed result differs from the intended contract.</p>
+<p><strong>Expected answer:</strong> JavaScript has a different parser and escaping rules; use a dedicated serialization boundary.</p>
+<p><strong>Why:</strong> JavaScript strings need different escaping, so data for scripts should be serialized with json_encode and safe flags.</p>
 <h3 id="exercise-5-test-quotes-ampersands-and-an-attack-shaped-tag-string">Exercise 5: Test quotes, ampersands and an attack-shaped tag string.<a class="heading-anchor" href="#exercise-5-test-quotes-ampersands-and-an-attack-shaped-tag-string" aria-label="Link to this section">#</a></h3>
-<p>The resulting HTML string contains escaped data rather than an additional live element.</p>
-<p>Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.</p>
+<p><strong>Expected evidence:</strong> The resulting HTML string contains escaped data rather than an additional live element.</p>
+<p><strong>Why:</strong> Escaped output contains character references, so the browser shows the text and creates no new element.</p>
 <h3 id="exercise-6-explain-why-validated-text-still-needs-output-escaping">Exercise 6: Explain why validated text still needs output escaping.<a class="heading-anchor" href="#exercise-6-explain-why-validated-text-still-needs-output-escaping" aria-label="Link to this section">#</a></h3>
-<p>A valid name can contain syntax characters that are meaningful in the destination context.</p>
-<p>Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.</p>
-<h3 id="reference-comparison-and-limits">Reference comparison and limits<a class="heading-anchor" href="#reference-comparison-and-limits" aria-label="Link to this section">#</a></h3>
-<p>Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.</p></article>
+<p><strong>Expected answer:</strong> A valid name can contain syntax characters that are meaningful in the destination context.</p>
+<p><strong>Why:</strong> Validation can allow syntax characters such as &amp; in a company name, so output escaping is still required.</p>
+<h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
+<p>Open <code>courses/web-development/solutions/web-045_solution.php</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.</p></article>
   </main>
 </body>
 </html>

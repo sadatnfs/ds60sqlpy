@@ -197,9 +197,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The executable reference is <code>julia-028_reference.jl</code>. Its checks cover the stated authored inputs; they are not a claim of general scientific validity or mastery.</p>
 <h3 id="1-derive-an-oracle">1. Derive an oracle<a class="heading-anchor" href="#1-derive-an-oracle" aria-label="Link to this section">#</a></h3>
 <p>The hand-derived asymmetric case prevents a uniform-output bug from passing.</p>
-<p><strong>Expected observation:</strong> The result is[0.2,0.5,0.3].</p>
+<p><strong>Expected observation:</strong> The result is <code>[0.2, 0.5, 0.3]</code>.</p>
 <h3 id="2-diagnose-overflow">2. Diagnose overflow<a class="heading-anchor" href="#2-diagnose-overflow" aria-label="Link to this section">#</a></h3>
-<p>Scaling by the maximum gives[1,1], then divides by 2 without overflowing.</p>
+<p>Scaling by the maximum gives <code>[1, 1]</code>, then divides by 2 without overflowing.</p>
 <p><strong>Expected observation:</strong> The sum exceeds Float64 range.</p>
 <h3 id="3-test-a-permutation">3. Test a permutation<a class="heading-anchor" href="#3-test-a-permutation" aria-label="Link to this section">#</a></h3>
 <p>Equivariance checks alignment and catches accidental sorting.</p>

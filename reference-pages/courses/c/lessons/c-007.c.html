@@ -196,13 +196,21 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-c"><code><span class="source-line"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;stdio.h&gt;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">void</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
-<span class="source-line">  <span class="syntax-comment">/* Exercise 1: Compare length and storage</span></span>
-<span class="source-line"><span class="syntax-comment">     Create the writable string cat.</span></span>
-<span class="source-line"><span class="syntax-comment">     Expected: strlen is 3 while array size is 4. */</span></span>
+<span class="source-line">  <span class="syntax-comment">/* Exercise 1: Compare length and storage: change one input</span></span>
+<span class="source-line"><span class="syntax-comment">     Copy worked example 1 into a scratch pad and change `char word[] = &quot;cat&quot;;`</span></span>
+<span class="source-line"><span class="syntax-comment">     to `char word[] = &quot;cat!&quot;;`. Before running, predict which CHECK fails and</span></span>
+<span class="source-line"><span class="syntax-comment">     which value it now sees; then run it and restore the original line.</span></span>
+<span class="source-line"><span class="syntax-comment">     Expected: The changed run stops with `Check failed` at the CHECK on</span></span>
+<span class="source-line"><span class="syntax-comment">     `strlen(word) == 3 &amp;&amp; sizeof word == 4`. Restoring the original line brings</span></span>
+<span class="source-line"><span class="syntax-comment">     back the worked observation: strlen is 3 while array size is 4. */</span></span>
 <span class="source-line"></span>
-<span class="source-line">  <span class="syntax-comment">/* Exercise 2: Modify owned text</span></span>
-<span class="source-line"><span class="syntax-comment">     Change the first character of a writable cat array.</span></span>
-<span class="source-line"><span class="syntax-comment">     Expected: The result is bat. */</span></span>
+<span class="source-line">  <span class="syntax-comment">/* Exercise 2: Modify owned text: debug a regression</span></span>
+<span class="source-line"><span class="syntax-comment">     A regression changed one token in worked example 2, so one line now reads</span></span>
+<span class="source-line"><span class="syntax-comment">     `word[1] = &#x27;b&#x27;;`. Run worked example 2 with that line, use the failing</span></span>
+<span class="source-line"><span class="syntax-comment">     CHECK to locate the defect and repair it without changing the CHECK.</span></span>
+<span class="source-line"><span class="syntax-comment">     Expected: Before the repair the run stops with `Check failed` at the CHECK</span></span>
+<span class="source-line"><span class="syntax-comment">     on `strcmp(word, &quot;bat&quot;) == 0`; after it the line reads `word[0] = &#x27;b&#x27;;`</span></span>
+<span class="source-line"><span class="syntax-comment">     again and the result is bat. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 3: Detect bounded truncation</span></span>
 <span class="source-line"><span class="syntax-comment">     Format hello into a four-character buffer.</span></span>

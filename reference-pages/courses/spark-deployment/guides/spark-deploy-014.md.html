@@ -201,6 +201,49 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Use an explicitly owned namespace, an explicit kubeconfig and context, and a prepared image digest. The project&#x27;s <code>kubernetes/submit.py</code> prints a concrete plan by default. It makes no Kubernetes request until <code>--execute</code> is supplied. The workshop does not provision a cloud cluster or choose an ambient account.</p>
 <h3 id="worked-case-a-review-a-bounded-submission-plan">Worked case A: review a bounded submission plan<a class="heading-anchor" href="#worked-case-a-review-a-bounded-submission-plan" aria-label="Link to this section">#</a></h3>
 <p>Prepare <code>Dockerfile.cluster</code> from a reviewed Spark 4.0.1 Python base that retains the supported Kubernetes entrypoint. Deliberately publish or load that image through your authorized environment. Then:</p>
+<p>The submission helper assembles a <code>spark-submit</code> command whose Kubernetes settings are explicit rather than inherited:</p>
+<p>From <a href="../projects/cluster-lab/kubernetes/submit.py.html"><code>projects/cluster-lab/kubernetes/submit.py</code></a>:</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">return</span> <span class="syntax-punctuation">[</span>
+    args<span class="syntax-operator">.</span>spark_submit<span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">--master</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    args<span class="syntax-operator">.</span>master<span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">--deploy-mode</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">cluster</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">--name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">ds60-kubernetes-partition-proof</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">--conf</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">spark.kubernetes.context=</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">+</span> args<span class="syntax-operator">.</span>context<span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">--conf</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">spark.kubernetes.namespace=</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">+</span> args<span class="syntax-operator">.</span>namespace<span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">--conf</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">spark.kubernetes.container.image=</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">+</span> args<span class="syntax-operator">.</span>image<span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">--conf</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">spark.kubernetes.authenticate.driver.serviceAccountName=spark-driver</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">--conf</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">spark.kubernetes.authenticate.executor.serviceAccountName=spark-executor</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">--conf</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">spark.kubernetes.driver.label.ds60-workshop=spark-deployment</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">--conf</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">spark.kubernetes.executor.label.ds60-workshop=spark-deployment</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">--conf</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">spark.executor.instances=2</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">--conf</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">spark.executor.cores=1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">--conf</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">spark.executor.memory=512m</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">--conf</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">spark.driver.memory=1g</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">--conf</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">spark.driver.maxResultSize=1m</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">--conf</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">spark.kubernetes.driver.limit.cores=1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">--conf</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">spark.kubernetes.executor.limit.cores=1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">--conf</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">spark.kubernetes.submission.waitAppCompletion=true</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">local:///opt/spark/work-dir/kubernetes_job.py</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">]</span></code></pre>
+<p><code>--deploy-mode cluster</code> starts the driver as a pod; the two service-account settings give the driver and the executors different identities; the labels let the network policy in chapter 16 select these pods; and <code>waitAppCompletion=true</code> makes the submitting process wait for the application&#x27;s final state.</p>
 <pre class="highlighted-code"><code class="language-bash">python3 kubernetes/submit.py <span class="syntax-string">\</span>
   --kubeconfig <span class="syntax-string">&quot;</span>$OWNED_KUBECONFIG<span class="syntax-string">&quot;</span> <span class="syntax-string">\</span>
   --context <span class="syntax-string">&quot;</span>$OWNED_CONTEXT<span class="syntax-string">&quot;</span> <span class="syntax-string">\</span>

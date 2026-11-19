@@ -194,37 +194,52 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/csharp/solutions/csharp-006_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="csharp-006-explanation-and-comparison">csharp-006: explanation and comparison<a class="heading-anchor" href="#csharp-006-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="csharp-006_solution.cs.html">csharp-006_solution.cs</a>. Its assertions are always active under the prepared classroom compile settings.</p>
+<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="csharp-006_solution.cs.html">csharp-006_solution.cs</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Sum with a maintained invariant:</strong> Before each iteration, sum equals the sum of values already visited. Zero is the identity that makes the invariant true initially. The sum is 12 and the empty sum is zero.</p>
 <p><strong>Locate the first match:</strong> Stopping at the first match is part of the contract. Without break, the same loop could return the last match. The first 8 is at index 1; 9 is absent.</p>
-<h3 id="reason-through-the-six-tasks">Reason through the six tasks<a class="heading-anchor" href="#reason-through-the-six-tasks" aria-label="Link to this section">#</a></h3>
-<ol>
-<li><strong>Predict and explain.</strong> Write the accumulator value before and after every iteration in Example A.</li>
-</ol>
-<ol start="2">
-<li><strong>Guided modification.</strong> Skip negative values while preserving the sum invariant.</li>
-</ol>
-<ol start="3">
-<li><strong>Independent construction.</strong> Implement a first-match search returning a separate not-found representation.</li>
-</ol>
-<ol start="4">
-<li><strong>Diagnose a defect.</strong> Diagnose the condition i &lt;= values.Length using a one-element array.</li>
-</ol>
-<ol start="5">
-<li><strong>Boundary evidence.</strong> Check empty, singleton, no-match and repeated-match inputs.</li>
-</ol>
-<ol start="6">
-<li><strong>Transfer and justify.</strong> Design a bounded retry loop and explain both its invariant and its stopping argument.</li>
-</ol>
-<p>For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.</p>
+<h3 id="task-answers">Task answers<a class="heading-anchor" href="#task-answers" aria-label="Link to this section">#</a></h3>
+<h4 id="task-1-predict-and-explain">Task 1: Predict and explain<a class="heading-anchor" href="#task-1-predict-and-explain" aria-label="Link to this section">#</a></h4>
+<p>Write the accumulator value before and after every iteration in Example A.</p>
+<p>No separate reference answer has been written for this task. Example A is the evidence to compare with: Before each iteration, sum equals the sum of values already visited. Zero is the identity that makes the invariant true initially. The sum is 12 and the empty sum is zero.</p>
+<h4 id="task-2-guided-modification">Task 2: Guided modification<a class="heading-anchor" href="#task-2-guided-modification" aria-label="Link to this section">#</a></h4>
+<p>Skip negative values while preserving the sum invariant.</p>
+<p>No separate reference answer has been written for this task. Start from Example B: Stopping at the first match is part of the contract. Without break, the same loop could return the last match. The first 8 is at index 1; 9 is absent.</p>
+<h4 id="task-3-independent-construction">Task 3: Independent construction<a class="heading-anchor" href="#task-3-independent-construction" aria-label="Link to this section">#</a></h4>
+<p>Implement a first-match search returning a separate not-found representation.</p>
+<p><strong>Reference answer.</strong> It runs as the <code>Task 3</code> block of the reference program.</p>
+<pre class="highlighted-code"><code class="language-csharp"><span class="syntax-keyword">bool</span> <span class="syntax-function">TryFirstIndex</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span> items<span class="syntax-punctuation">,</span> <span class="syntax-keyword">int</span> target<span class="syntax-punctuation">,</span> <span class="syntax-keyword">out</span> <span class="syntax-keyword">int</span> index<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">for</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span> i <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span> i <span class="syntax-operator">&lt;</span> items<span class="syntax-punctuation">.</span>Length<span class="syntax-punctuation">;</span> i<span class="syntax-operator">++</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>items<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> target<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+      index <span class="syntax-operator">=</span> i<span class="syntax-punctuation">;</span>
+      <span class="syntax-keyword">return</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-punctuation">}</span>
+  <span class="syntax-punctuation">}</span>
+  index <span class="syntax-operator">=</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">return</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">var</span> values <span class="syntax-operator">=</span> <span class="syntax-keyword">new</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span> <span class="syntax-punctuation">{</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-number">7</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+Check<span class="syntax-punctuation">(</span>TryFirstIndex<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">out</span> <span class="syntax-keyword">int</span> at<span class="syntax-punctuation">)</span> <span class="syntax-operator">&amp;&amp;</span> at <span class="syntax-operator">==</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;first match&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+Check<span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>TryFirstIndex<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">out</span> _<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;not found&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+Check<span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>TryFirstIndex<span class="syntax-punctuation">(</span>Array<span class="syntax-punctuation">.</span>Empty<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">out</span> _<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;empty input&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Observe:</strong> The first 7 is at index 1; a missing target and an empty array both return false.</p>
+<p>The loop stops at the first match, and the Try pattern reports not-found through its bool result, so a caller checks that result before using the index instead of mistaking a sentinel such as -1 for a position.</p>
+<h4 id="task-4-diagnose-a-defect">Task 4: Diagnose a defect<a class="heading-anchor" href="#task-4-diagnose-a-defect" aria-label="Link to this section">#</a></h4>
+<p>Diagnose the condition i &lt;= values.Length using a one-element array.</p>
+<p>No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson&#x27;s pitfalls: Loop indices count from zero while lengths count elements. A sentinel such as -1 must be checked before indexing. Mutating a collection during enumeration can invalidate the traversal contract.</p>
+<h4 id="task-5-boundary-evidence">Task 5: Boundary evidence<a class="heading-anchor" href="#task-5-boundary-evidence" aria-label="Link to this section">#</a></h4>
+<p>Check empty, singleton, no-match and repeated-match inputs.</p>
+<p>No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Sum with a maintained invariant) and Example B (Locate the first match).</p>
+<h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
+<p>Design a bounded retry loop and explain both its invariant and its stopping argument.</p>
+<p>No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry <strong>Invariant</strong>, and state one limitation of your choice.</p>
 <h3 id="mechanism-and-diagnostic-reasoning">Mechanism and diagnostic reasoning<a class="heading-anchor" href="#mechanism-and-diagnostic-reasoning" aria-label="Link to this section">#</a></h3>
 <p>A loop repeats a state transition. To understand it, state what is true before the first iteration and what remains true after each iteration. This repeated truth is an invariant. A second argument explains termination: some bounded quantity moves toward a stopping condition. A correct-looking body can still fail because its boundary executes once too often or never stops.</p>
 <p><code>foreach</code> expresses traversal of an existing sequence and usually avoids manual index bookkeeping. Use an index when the position itself matters, but relate the valid index range to the collection length. Empty inputs are especially revealing because the initial state becomes the final result without any iteration.</p>
 <p><code>for (initial; condition; update)</code> initializes once, checks before each body, and updates after each body. For an array of Length n, valid indices are zero through n minus one. <code>break</code> exits the loop; <code>continue</code> skips the remainder of one iteration.</p>
 <p>Loop indices count from zero while lengths count elements. A sentinel such as -1 must be checked before indexing. Mutating a collection during enumeration can invalidate the traversal contract.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.</p></article>
+<p>Run the reference and confirm that it prints <code>csharp-006: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
   </main>
 </body>
 </html>

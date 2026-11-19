@@ -199,31 +199,33 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">Copy to .learning before editing. Six independent attempts belong below.</span></span>
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 1: Evaluate equal margins</span></span>
-<span class="source-line"><span class="syntax-comment"># Set both policy and reference chosen-minus-rejected differences to1 withbeta.1.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: margin0 and losslog2.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Compute a margin from log probabilities</span></span>
+<span class="source-line"><span class="syntax-comment"># Use policy log probabilities -1 (chosen) and -4 (rejected), reference -2 and -3, and</span></span>
+<span class="source-line"><span class="syntax-comment"># beta 0.25.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: margin 0.5; loss \(\log(1+e^{-0.5})\approx 0.474\), below \(\log 2\).</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 2: Favor the chosen response</span></span>
-<span class="source-line"><span class="syntax-comment"># Use policy difference2,reference difference0,beta.5.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: margin1;losslog(1+exp(-1)).</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Predict the effect of beta</span></span>
+<span class="source-line"><span class="syntax-comment"># Keep the same log probabilities and raise beta to 1. Predict the margin and whether the</span></span>
+<span class="source-line"><span class="syntax-comment"># loss rises or falls.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: margin 2; loss \(\log(1+e^{-2})\approx 0.127\), smaller than at beta 0.25.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Reverse the labels</span></span>
 <span class="source-line"><span class="syntax-comment"># Swap chosen and rejected while keeping their scores attached to the same response</span></span>
 <span class="source-line"><span class="syntax-comment"># identities.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: margin-1 and larger loss.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: margin -1 and larger loss.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Check numeric stability</span></span>
-<span class="source-line"><span class="syntax-comment"># Evaluate margins1000 and-1000 withlogaddexp.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: finite losses approximately0 and1000.</span></span>
+<span class="source-line"><span class="syntax-comment"># Evaluate margins 1000 and -1000 with logaddexp.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: finite losses approximately 0 and 1000.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Track pair identity</span></span>
-<span class="source-line"><span class="syntax-comment"># Store response IDsr1,r2 and a preference label; reverse the label while retaining both</span></span>
+<span class="source-line"><span class="syntax-comment"># Store response IDs r1, r2 and a preference label; reverse the label while retaining both</span></span>
 <span class="source-line"><span class="syntax-comment"># identities.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: chosen identity changes tor2; scores remain keyed by ID.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: chosen identity changes to r2; scores remain keyed by ID.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Limit the claim</span></span>
 <span class="source-line"><span class="syntax-comment"># Record that a preferred response may still contain a false factual statement.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: preference agreementTrue,factuality_verifiedFalse.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: preference agreement True, factuality_verified False.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Read the guide and implement the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>

@@ -207,6 +207,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-function">assert_eq!</span><span class="syntax-punctuation">(</span>seats<span class="syntax-punctuation">,</span> <span class="syntax-number">24</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line">        <span class="syntax-function">assert_ne!</span><span class="syntax-punctuation">(</span>seats<span class="syntax-punctuation">,</span> rows <span class="syntax-operator">+</span> seats_per_row<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-punctuation">{</span></span>
+<span class="source-line">        <span class="syntax-comment">// Task 3: Independent construction</span></span>
+<span class="source-line">        <span class="syntax-keyword">let</span> shelves <span class="syntax-operator">=</span> <span class="syntax-number">3</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">        <span class="syntax-keyword">let</span> books_per_shelf <span class="syntax-operator">=</span> <span class="syntax-number">8</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">        <span class="syntax-keyword">let</span> capacity <span class="syntax-operator">=</span> shelves <span class="syntax-operator">*</span> books_per_shelf<span class="syntax-punctuation">;</span></span>
+<span class="source-line">        <span class="syntax-function">assert_eq!</span><span class="syntax-punctuation">(</span>capacity<span class="syntax-punctuation">,</span> <span class="syntax-number">24</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
 <span class="source-line">    <span class="syntax-function">println!</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">rust-001: passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line">    <span class="syntax-builtin">Ok</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-punctuation">}</span></span>

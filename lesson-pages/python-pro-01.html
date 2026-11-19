@@ -9,7 +9,7 @@
     content="default-src 'none'; style-src 'self' file: 'unsafe-inline'; font-src data:; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
   >
   <link rel="stylesheet" href="../src/ds60sqlpy/assets/vendor/textbook/fonts.css">
-  <title>python-pro-01 · Package Engineering and Local Release Workflow · DS60</title>
+  <title>python-pro-01 · Package Engineering and a Local Release Workflow · DS60</title>
   <style>
     :root {
       --paper: #f6f2e8;
@@ -312,7 +312,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <div class="shell">
       <section class="hero">
         <p class="eyebrow">python · lesson python-pro-01</p>
-        <h1>Package Engineering and Local Release Workflow</h1>
+        <h1>Package Engineering and a Local Release Workflow</h1>
         <p class="hero-copy">Professional Python engineering</p>
         <div class="meta">
           <span class="tag">intermediate</span>
@@ -384,11 +384,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
         <div class="artifact-content"><h3 id="guide--package-engineering-and-a-local-release-workflow">Package engineering and a local release workflow<a class="heading-anchor" href="#guide--package-engineering-and-a-local-release-workflow" aria-label="Link to this section">#</a></h3>
 <p><strong>Stable ID:</strong> <code>python-pro-01</code></p>
 <p><strong>Level:</strong> intermediate</p>
-<p><strong>Estimated time:</strong> 120–180 minutes</p>
+<p><strong>Estimated time:</strong> 120-180 minutes</p>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Catalog prerequisite:</strong> <code>python-15</code></li>
-<li>Python Days 1–15, especially modules, testing, tooling, and the CLI project</li>
+<li>Python Days 1-15, especially modules, testing, tooling, and the CLI project</li>
 <li>The repository environment created during connected setup</li>
 <li>Comfort running a Python file from the repository root</li>
 </ul>
@@ -443,7 +443,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Do not assume that successfully importing from the checkout proves either artifact works.</li>
 </ul>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
-<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python and data science</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
 <p><strong>Optional contributor route:</strong> use the prepared environment in <a href="../reference-pages/CONTRIBUTING.md.html">CONTRIBUTING</a> on Linux, macOS or Windows through WSL 2. The commands below assume its packages are already installed. They are not prerequisites for opening this lesson in the Docker classroom. Local <code>.learning/</code> files and CLI progress belong to this checkout; they do not read or update the Docker classroom&#x27;s named learning volume.</p>
 <p>Work from the repository root. First run the answer-free learner module named in this guide&#x27;s original walkthrough. Read each TODO as a contract: record the input, returned value, raised exception, and side effect before implementing it. Then run the focused test command in <strong>Self-check</strong>. Keep exploratory changes in a copy or a new test; the checked-in solution remains a comparison artifact.</p>
 <p>Prepared POSIX/WSL contributor terminal:</p>
@@ -573,7 +573,7 @@ find <span class="syntax-string">&quot;</span>$work_dir<span class="syntax-strin
 <li><strong>The build tries to access the internet:</strong> build isolation was left on, or the backend is absent locally. Re-run with <code>--no-isolation</code> after connected bootstrap.</li>
 <li><strong>An import works before installation:</strong> the current directory or <code>PYTHONPATH</code> points at <code>src</code>. Change to a disposable directory and inspect <code>module.__file__</code>.</li>
 <li><strong>The distribution cannot be found:</strong> distribution names use metadata lookup; import names use Python identifiers. Use <code>distribution(&quot;ds60-tiny-greeter&quot;)</code> but <code>import ds60_tiny_greeter</code>.</li>
-<li><strong>PowerShell treats a path as a command:</strong> invoke the interpreter explicitly with <code>.\.venv\Scripts\python.exe</code>.</li>
+<li><strong>The shell runs the wrong <code>python</code>:</strong> invoke the prepared interpreter explicitly, for example <code>.venv/bin/python -m build</code>, and print <code>sys.executable</code> when in doubt.</li>
 <li><strong>A dependency group appears at runtime:</strong> it was incorrectly copied into <code>[project.dependencies]</code>. Development tools should not burden users.</li>
 <li><strong>Generated <code>dist/</code>, <code>build/</code>, or <code>*.egg-info</code> appears in Git:</strong> the build target was the source tree. Move the experiment to a temporary directory and remove only those confirmed generated files.</li>
 </ul>
@@ -585,7 +585,7 @@ find <span class="syntax-string">&quot;</span>$work_dir<span class="syntax-strin
 </ul>
 <h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into the AI tutor while the repository root is open:</p>
-<pre class="highlighted-code"><code class="language-text">Tutor me through `python-pro-01` — Package engineering and a local release workflow.
+<pre class="highlighted-code"><code class="language-text">Tutor me through `python-pro-01`: Package engineering and a local release workflow.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize src-layout packaging, build artifacts, metadata, and clean installation. Use exactly these maintained learner materials:
@@ -1355,7 +1355,7 @@ import_name <span class="syntax-operator">=</span> <span class="syntax-string">&
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through `python-pro-01` — Package engineering and a local release workflow.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through `python-pro-01`: Package engineering and a local release workflow.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize src-layout packaging, build artifacts, metadata, and clean installation. Use exactly these maintained learner materials:
@@ -1389,8 +1389,8 @@ merely ran is not evidence of mastery.</textarea>
       </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
-        <a class="nav-card" href="python-60.html"><small>Previous lesson</small><strong>python-60</strong><span>Capstone Completion Presentation</span></a>
-        <a class="nav-card next" href="python-svc-01.html"><small>Next lesson</small><strong>python-svc-01</strong><span>Reliable HTTP Clients and External-Service Boundaries</span></a>
+        <a class="nav-card" href="python-60.html"><small>Previous lesson</small><strong>python-60</strong><span>Capstone Completion and Presentation</span></a>
+        <a class="nav-card next" href="python-svc-01.html"><small>Next lesson</small><strong>python-svc-01</strong><span>Reliable HTTP Clients for External Services</span></a>
       </nav>
     </div>
   </main>

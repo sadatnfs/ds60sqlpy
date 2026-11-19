@@ -198,18 +198,20 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
 <p>A method associates behavior with a named type. An interface describes a set of methods, and a concrete type satisfies it implicitly by providing that set. This encourages small interfaces defined by the consumer instead of deep inheritance hierarchies. A value receiver receives a copy; a pointer receiver can mutate its target and has a different method set. An interface value contains both dynamic type information and a dynamic value. It is nil only when both are absent. Therefore an interface holding a typed nil pointer is not a nil interface. This matters especially when returning errors or optional implementations across package boundaries.</p>
 <p>func (c Counter) Value() int declares a value receiver. func (c *Counter) Add(n int) uses a pointer receiver. type Valuer interface { Value() int } declares required behavior. A type assertion value, ok := item.(Concrete) checks a dynamic type safely. Prefer the comma-ok form when failure is expected, rather than a panic-producing assertion.</p>
-<h3 id="1-dispatch-through-behavior">1. Dispatch through behavior<a class="heading-anchor" href="#1-dispatch-through-behavior" aria-label="Link to this section">#</a></h3>
-<p>Store Counter with value 3 in a Valuer interface.</p>
+<h3 id="1-dispatch-through-behavior-change-one-input">1. Dispatch through behavior: change one input<a class="heading-anchor" href="#1-dispatch-through-behavior-change-one-input" aria-label="Link to this section">#</a></h3>
+<p>Copy worked example 1 into a scratch pad and change <code>var v Valuer = Counter{N: 3}</code> to <code>var v Valuer = Counter{N: 4}</code>. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</p>
+<p>The unchanged code is worked example 1:</p>
 <pre class="highlighted-code"><code class="language-go"><span class="syntax-keyword">var</span> v Valuer <span class="syntax-punctuation">=</span> Counter<span class="syntax-punctuation">{</span>N<span class="syntax-punctuation">:</span> <span class="syntax-number">3</span><span class="syntax-punctuation">}</span>
 check<span class="syntax-punctuation">(</span>v<span class="syntax-punctuation">.</span>Value<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;interface dispatch&quot;</span><span class="syntax-punctuation">)</span></code></pre>
-<p><strong>Expected:</strong> Calling Value returns 3.</p>
+<p><strong>Expected:</strong> The changed run panics with <code>interface dispatch</code> because <code>v.Value() == 3</code> no longer holds. Restoring the original line brings back the worked observation: calling Value returns 3.</p>
 <p>The concrete type satisfies the interface without declaring that relationship. The caller depends only on the method contract.</p>
-<h3 id="2-mutate-through-a-method">2. Mutate through a method<a class="heading-anchor" href="#2-mutate-through-a-method" aria-label="Link to this section">#</a></h3>
-<p>Call Add on a pointer to Counter starting at 3.</p>
+<h3 id="2-mutate-through-a-method-debug-a-regression">2. Mutate through a method: debug a regression<a class="heading-anchor" href="#2-mutate-through-a-method-debug-a-regression" aria-label="Link to this section">#</a></h3>
+<p>A regression changed one token in worked example 2, so one line now reads <code>c := Counter{N: 4}</code>. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.</p>
+<p>The unchanged code is worked example 2:</p>
 <pre class="highlighted-code"><code class="language-go">c <span class="syntax-operator">:=</span> Counter<span class="syntax-punctuation">{</span>N<span class="syntax-punctuation">:</span> <span class="syntax-number">3</span><span class="syntax-punctuation">}</span>
 c<span class="syntax-punctuation">.</span>Add<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
 check<span class="syntax-punctuation">(</span>c<span class="syntax-punctuation">.</span>N <span class="syntax-operator">==</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;pointer receiver&quot;</span><span class="syntax-punctuation">)</span></code></pre>
-<p><strong>Expected:</strong> Its value becomes 5.</p>
+<p><strong>Expected:</strong> Before the repair the program panics with <code>pointer receiver</code>; after it the line reads <code>c := Counter{N: 3}</code> again and its value becomes 5.</p>
 <p>The language can take the address of this addressable variable for the method call. The pointer receiver makes the mutation effective on the original value.</p>
 <h3 id="3-trace-a-value-receiver">3. Trace a value receiver<a class="heading-anchor" href="#3-trace-a-value-receiver" aria-label="Link to this section">#</a></h3>
 <p>Call a value-receiver helper that increments only its receiver copy.</p>

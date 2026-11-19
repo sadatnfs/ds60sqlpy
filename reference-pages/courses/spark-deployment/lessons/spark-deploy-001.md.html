@@ -197,9 +197,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Tutorial mode. Stage: beginner. Direct prerequisites: <code>spark-030</code>.</p>
 <p>Read this tutorial in the classroom. Its commands run only in the separately prepared <a href="../projects/cluster-lab/README.md.html">owned workshop</a>; there is no pad Run action. Examples describe expected observations. Check the workshop qualification ledger for actual execution evidence.</p>
 <h3 id="separate-the-process-from-the-machine">Separate the process from the machine<a class="heading-anchor" href="#separate-the-process-from-the-machine" aria-label="Link to this section">#</a></h3>
+<p>The beginner stage here refers to deployment experience. The chapter assumes the driver, executor and cluster-manager vocabulary from the advanced <code>spark-030</code> architecture lesson, and it starts from that vocabulary rather than teaching Spark itself.</p>
 <p>A Spark application has one driver, which creates its session and schedules work, and executors, which run tasks. A cluster manager allocates those executors. In Standalone, the master knows available workers; a worker launches executor processes. A worker is therefore not an executor and a container is not a physical machine. Two worker containers on this laptop share its CPU, memory, storage and failure domain.</p>
 <p>The word client describes driver placement. In client deploy mode, the submitting process contains the driver. In cluster deploy mode, the manager starts a driver elsewhere. A separate Docker driver container still uses client mode. A notebook kernel usually contains a client-mode driver. Spark Connect is a different client/server API boundary and is not the execution path in this workshop.</p>
 <p>Read a port as a destination belonging to one process. The master listens on 7077 for Spark traffic and its own UI on 8080. An application driver uses 4040 for its UI by default. Driver RPC and block transfers are separate channels; this project fixes its driver RPC at 39000 and driver block manager at 39001. A browser port does not substitute for either.</p>
+<p>The workshop&#x27;s own submit call in <code>lab.py</code> runs <code>spark-submit</code> inside the driver container through the saved Compose command (<code>cmd</code>) and spells out the master URL, the client deploy mode and both fixed driver ports:</p>
+<p>From <a href="../projects/cluster-lab/lab.py.html"><code>projects/cluster-lab/lab.py</code></a>:</p>
+<pre class="highlighted-code"><code class="language-python">options <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">--hold-seconds</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>args<span class="syntax-operator">.</span>hold_seconds<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">--partition-seconds</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>args<span class="syntax-operator">.</span>partition_seconds<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">if</span> args<span class="syntax-operator">.</span>allow_one_worker<span class="syntax-punctuation">:</span>
+    options<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">--allow-one-worker</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+run<span class="syntax-punctuation">(</span>
+    <span class="syntax-punctuation">[</span>
+        <span class="syntax-operator">*</span>cmd<span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">exec</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">-T</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">driver</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">/opt/spark/bin/spark-submit</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">--master</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">spark://master:7077</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">--deploy-mode</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">client</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">--conf</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">spark.driver.host=driver</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">--conf</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">spark.driver.bindAddress=0.0.0.0</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">--conf</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">spark.driver.port=39000</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">--conf</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">spark.driver.blockManager.port=39001</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-string">&quot;</span><span class="syntax-string">/lab/app/bounded_job.py</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        <span class="syntax-operator">*</span>options<span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+    env<span class="syntax-operator">=</span>env<span class="syntax-punctuation">,</span>
+    timeout<span class="syntax-operator">=</span><span class="syntax-number">360</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">)</span></code></pre>
 <h3 id="worked-case-a-trace-a-separate-driver">Worked case A: trace a separate driver<a class="heading-anchor" href="#worked-case-a-trace-a-separate-driver" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">submit command -&gt; driver container -&gt; master:7077
 worker-a -&gt; executor JVM -&gt; Python task process

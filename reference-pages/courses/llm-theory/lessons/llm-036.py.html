@@ -199,30 +199,31 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">Copy to .learning before editing. Six independent attempts belong below.</span></span>
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 1: Rank a local corpus</span></span>
-<span class="source-line"><span class="syntax-comment"># Query red square against the six-document fixture using token overlap and ID tie-breaks.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: top2 IDsd1,d2.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Rank a different query</span></span>
+<span class="source-line"><span class="syntax-comment"># Query has sides against the same six documents with token overlap and ID tie-breaks;</span></span>
+<span class="source-line"><span class="syntax-comment"># return the top 3.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: top 3 IDs d1, d4, d5: two tied overlaps ordered by ID, then the single overlap.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 2: Measure retrieval recall</span></span>
-<span class="source-line"><span class="syntax-comment"># Use authored relevant IDsd1,d2 and compute recall at1 and2.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: recall.5 and1.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Measure recall with a tie-filled slot</span></span>
+<span class="source-line"><span class="syntax-comment"># Use relevant IDs d3 and d4 for the query round circle and compute recall at 1 and 2.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: ranking d3, d1; recall 0.5 at both 1 and 2.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Handle missing evidence</span></span>
 <span class="source-line"><span class="syntax-comment"># Ask the orbital period of a comet absent from the corpus and require evidence before</span></span>
 <span class="source-line"><span class="syntax-comment"># answering.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: abstain;relevant set empty.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: abstain; relevant set empty.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Treat retrieved instructions as data</span></span>
 <span class="source-line"><span class="syntax-comment"># Retrieve the command-like document for query command and retain it as a string only.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: documentd6 returned;no action executed.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: document d6 returned; no action executed.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Keep deterministic ties</span></span>
 <span class="source-line"><span class="syntax-comment"># Query an absent word so all lexical scores tie, then compare the first three IDs.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: d1,d2,d3 under ID ordering.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: d1, d2, d3 under ID ordering.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Separate retrieval and truth</span></span>
 <span class="source-line"><span class="syntax-comment"># Record a retrieved relevant snippet but an answer with an unsupported extra claim.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: retrieval passTrue;answer supportFalse.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: retrieval pass True; answer support False.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Read the guide and implement the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>

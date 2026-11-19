@@ -214,7 +214,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the C++ module, save this lesson&#x27;s learner pad, then use Run. The worker stages the pad as <code>main.cpp</code> and compiles one translation unit. Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for exact local commands, flags, exit statuses, paths and Docker guidance. Tests involving multiple files, CMake, tool flags or shared libraries are explicitly host-project exercises.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
-<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs:each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
+<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs: each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p><a href="../examples/cpp-019-example-1.cpp.html">Complete program 1</a></p>
 <pre class="highlighted-code"><code class="language-cpp"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;cassert&gt;</span>
@@ -236,7 +236,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpp-019 example 1 checks passed</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
   <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
-<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<p><strong>Expected:</strong> With assertions enabled, the program exits with status 0 and prints:</p>
 <pre class="highlighted-code"><code class="language-text">cpp-019 example 1 checks passed</code></pre>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p><a href="../examples/cpp-019-example-2.cpp.html">Complete program 2</a></p>
@@ -257,38 +257,38 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpp-019 example 2 checks passed</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
   <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
-<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<p><strong>Expected:</strong> With assertions enabled, the program exits with status 0 and prints:</p>
 <pre class="highlighted-code"><code class="language-text">cpp-019 example 2 checks passed</code></pre>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-predict-lazy-output">Exercise 1: Predict lazy output<a class="heading-anchor" href="#exercise-1-predict-lazy-output" aria-label="Link to this section">#</a></h4>
 <p>Filter &gt;=0 then double [-1, 0, 3].</p>
 <p><strong>Expected result/shape:</strong> [0, 6].</p>
-<p><strong>Verify:</strong> [0, 6].</p>
+<p><strong>Verify:</strong> Collect the filtered and doubled view into a vector and assert it equals <code>std::vector&lt;int&gt;{0, 6}</code>.</p>
 <p><strong>Progressive hints:</strong> The predicate runs before transformation.</p>
 <h4 id="exercise-2-change-composition">Exercise 2: Change composition<a class="heading-anchor" href="#exercise-2-change-composition" aria-label="Link to this section">#</a></h4>
 <p>Double first, then filter &gt;0.</p>
 <p><strong>Expected result/shape:</strong> [6]; zero is excluded by the new predicate.</p>
-<p><strong>Verify:</strong> [6]; zero is excluded by the new predicate.</p>
+<p><strong>Verify:</strong> Swap the two adaptors, change the predicate to <code>x &gt; 0</code>, and assert the collected vector is <code>std::vector&lt;int&gt;{6}</code>; -1 doubles to -2 and 0 stays 0, so both drop out.</p>
 <p><strong>Progressive hints:</strong> Changing order or boundary changes the contract.</p>
 <h4 id="exercise-3-materialize-ownership">Exercise 3: Materialize ownership<a class="heading-anchor" href="#exercise-3-materialize-ownership" aria-label="Link to this section">#</a></h4>
 <p>Collect the view into vector&lt;int&gt;.</p>
 <p><strong>Expected result/shape:</strong> Stored [0, 6] remains independent of later source changes.</p>
-<p><strong>Verify:</strong> Stored [0, 6] remains independent of later source changes.</p>
+<p><strong>Verify:</strong> After collecting, set <code>xs[2] = 100</code> and assert the stored vector is still <code>std::vector&lt;int&gt;{0, 6}</code>, while iterating the view again yields 0 and 200.</p>
 <p><strong>Progressive hints:</strong> Materialization gives the result ownership.</p>
 <h4 id="exercise-4-repair-dangling-view">Exercise 4: Repair dangling view<a class="heading-anchor" href="#exercise-4-repair-dangling-view" aria-label="Link to this section">#</a></h4>
 <p>Review a view returned over a local vector.</p>
 <p><strong>Expected result/shape:</strong> Reject; keep the owner outside or return a vector.</p>
-<p><strong>Verify:</strong> Reject; keep the owner outside or return a vector.</p>
+<p><strong>Verify:</strong> Trace where the local vector is destroyed and confirm the reviewed function returns a view over it; the repair returns <code>std::vector&lt;int&gt;</code> or takes the owner by reference from the caller.</p>
 <p><strong>Progressive hints:</strong> A lazy pipeline still borrows the original storage.</p>
 <h4 id="exercise-5-sort-records">Exercise 5: Sort records<a class="heading-anchor" href="#exercise-5-sort-records" aria-label="Link to this section">#</a></h4>
 <p>Sort scores (id1, 9), (id2, 4) by points.</p>
 <p><strong>Expected result/shape:</strong> ID order [2, 1].</p>
-<p><strong>Verify:</strong> ID order [2, 1].</p>
+<p><strong>Verify:</strong> Assert <code>scores[0].id == 2 &amp;&amp; scores[1].id == 1</code> after <code>std::ranges::sort(scores, {}, &amp;Score::points)</code>, as Worked example 2 does.</p>
 <p><strong>Progressive hints:</strong> Projection selects the comparison key, not the output type.</p>
 <h4 id="exercise-6-transfer-stable-ties">Exercise 6: Transfer stable ties<a class="heading-anchor" href="#exercise-6-transfer-stable-ties" aria-label="Link to this section">#</a></h4>
 <p>Add (id3, 4) and define deterministic ordering by points then ID.</p>
 <p><strong>Expected result/shape:</strong> ID order [2, 3, 1].</p>
-<p><strong>Verify:</strong> ID order [2, 3, 1].</p>
+<p><strong>Verify:</strong> Sort with a comparator on <code>std::tie(a.points, a.id) &lt; std::tie(b.points, b.id)</code> and assert the ids are 2, 3, 1; the tie at 4 points is broken by the smaller id.</p>
 <p><strong>Progressive hints:</strong> A tie-breaker makes equal-key order explicit.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain why this observation follows from the mechanism: For [-1, 0, 3], traversal yields 0 and 3. Then explain the changed condition in example 2 without opening the answer.</p>

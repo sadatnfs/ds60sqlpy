@@ -204,7 +204,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>Join events to requests by entity, filter by the complete temporal rule, then group by the stable request identifier. The small candidate join is an inspectable mechanism, not an arbitrary-scale implementation. Reattach selected features to the authoritative request table with a validated left join so absent history does not erase requests.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open this subject in <code>/classroom</code>, then show its code and notes. The prepared <code>data-engineering</code> worker runs <code>main.py</code> in a fresh temporary directory. The examples use installed packages and synthetic local fixtures; no account, cloud service, network request or package download is required. Save source and notes before switching lessons. Temporary databases, project files and tracking artifacts are recreated by each complete program and removed after the job. The classroom retains the submitted source and bounded output, not an indefinitely running external service. The guide distinguishes this local execution from the deployment decisions that need an owned production environment.</p>
+<p>Open <code>mle-003</code> in <code>/classroom</code>. Its starter <code>main.py</code> contains both worked cases, &quot;Calculate eligible historical totals&quot; and &quot;Keep zero separate from unavailable&quot;, and prints the dictionary each case returns. The prepared <code>data-engineering</code> worker runs it in a fresh temporary directory. An <code>AssertionError</code> means that an observation differs from the case&#x27;s stated contract. Cases that use MLflow, Feast or a saved model create the tracking store, feature repository or artifact in a temporary directory and remove it when the case returns. The serving checks call the FastAPI application in process through its test client; no port is opened, and no account, cloud service, network request or package download is involved. Save source and notes before switching lessons.</p>
 <h3 id="worked-case-1-calculate-eligible-historical-totals">Worked case 1: Calculate eligible historical totals<a class="heading-anchor" href="#worked-case-1-calculate-eligible-historical-totals" aria-label="Link to this section">#</a></h3>
 <p>The first fixture includes a late-known event that is excluded for an earlier request but included for a later one. The program checks each request&#x27;s sum and count independently of input display order.</p>
 <p><strong>Expected evidence:</strong> Request totals/counts are 10:2/1,11:15/3 and 12:3/1.</p>
@@ -240,7 +240,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>example_one<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="worked-case-2-keep-zero-separate-from-unavailable">Worked case 2: Keep zero separate from unavailable<a class="heading-anchor" href="#worked-case-2-keep-zero-separate-from-unavailable" aria-label="Link to this section">#</a></h3>
 <p>The second fixture supplies a valid zero, a nonzero value and no selected value for a third request. The joined result preserves all three request identities.</p>
-<p><strong>Expected evidence:</strong> Values are [0,4,null] and coverage is 2/3.</p>
+<p><strong>Expected evidence:</strong> Values are [0, 4, null] and coverage is 2/3.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">example_two</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">import</span> polars <span class="syntax-keyword">as</span> pl
 
@@ -255,7 +255,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
     <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>example_two<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="practice">Practice<a class="heading-anchor" href="#practice" aria-label="Link to this section">#</a></h3>
-<p>Make each requested change in a saved copy. Compare both the expected result and the deliberately changed assumption. The separate reference explains the answers.</p>
+<p>The starter contains both worked cases, so a task can change either one. Make each change in a saved copy, run it, and compare the printed result with the task&#x27;s check before opening the separate explained answers.</p>
 <h4 id="1-include-the-current-event">1. Include the current event<a class="heading-anchor" href="#1-include-the-current-event" aria-label="Link to this section">#</a></h4>
 <p>Change the event boundary deliberately and compare the result.</p>
 <p><strong>Check:</strong> Any changed contribution is explained.</p>
@@ -283,13 +283,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="diagnose-errors-and-misleading-results">Diagnose errors and misleading results<a class="heading-anchor" href="#diagnose-errors-and-misleading-results" aria-label="Link to this section">#</a></h3>
 <p>Unexpectedly high model quality may follow from dropping difficult unmatched requests. Unexpectedly large totals may follow from feature fanout. Inspect request coverage, key multiplicity and temporal eligibility before changing the model.</p>
 <h3 id="transfer-to-independent-work">Transfer to independent work<a class="heading-anchor" href="#transfer-to-independent-work" aria-label="Link to this section">#</a></h3>
-<p>Build features at the decision grain while preserving all requests and missingness categories. Verify the temporal rule with identified rows, then use the same contract to evaluate a real feature-store implementation.</p>
+<p>Verify the temporal rule with identified rows, then use the same contract to evaluate a real feature-store implementation.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
-<li><a href="https://docs.pola.rs/user-guide/transformations/joins/">Polars documentation: Build features without losing the request population</a></li>
+<li><a href="https://docs.pola.rs/user-guide/transformations/joins/">Polars user guide: Joins</a></li>
 </ul>
 <h3 id="tutor-guidance">Tutor guidance<a class="heading-anchor" href="#tutor-guidance" aria-label="Link to this section">#</a></h3>
-<p>Use the repository learning-companion skill for <code>mle-003</code>. Inspect the learner&#x27;s own source and observations, ask for an explanation of the relevant data or state contract, and give a focused hint. Separate an assertion on this fixture from a claim about an external dataset or deployed service.</p></article>
+<p>Use the repository&#x27;s <code>$guide-ds60sqlpy-learning</code> skill (<code>.agents/skills/guide-ds60sqlpy-learning/SKILL.md</code>) for <code>mle-003</code>. Inspect the learner&#x27;s own source and printed output first. Ask for an explanation of feature window, Polars, request key, missingness and coverage in their own words, then give one focused hint at a time. Keep an assertion on this synthetic fixture separate from a claim about an external dataset or deployed service.</p></article>
   </main>
 </body>
 </html>

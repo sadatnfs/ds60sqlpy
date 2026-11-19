@@ -199,30 +199,32 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">Copy to .learning before editing. Six independent attempts belong below.</span></span>
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 1: Align by identity</span></span>
-<span class="source-line"><span class="syntax-comment"># Use trutha0,b1,c2 and two prediction dictionaries with different insertion order.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: paired differences[-1,0,-1].</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Align a fourth record</span></span>
+<span class="source-line"><span class="syntax-comment"># Use truth a=0, b=1, c=2, d=4, model A predictions d 5, a 0, b 2, c 2 and model B</span></span>
+<span class="source-line"><span class="syntax-comment"># predictions b 1, d 4, c 3, a 1. Compute paired squared-error differences by ID.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: paired differences [-1, 1, -1, 1]; mean 0, so neither model has lower MSE on this fixture.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 2: Calculate the mean difference</span></span>
-<span class="source-line"><span class="syntax-comment"># Average the three paired loss differences and interpret its sign.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: mean-2/3; modelA has lower MSE on this fixture.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Expose positional pairing</span></span>
+<span class="source-line"><span class="syntax-comment"># Pair the original truth, model A and model B dictionaries by insertion order instead of</span></span>
+<span class="source-line"><span class="syntax-comment"># ID and compare with the identity-aligned differences.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: positional differences [-9, 1, 0] instead of [-1, 0, -1].</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Resample paired units</span></span>
-<span class="source-line"><span class="syntax-comment"># Draw1000 bootstrap index rows with seed7 and average each selected difference vector.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: 1000 finite estimates within[-1,0].</span></span>
+<span class="source-line"><span class="syntax-comment"># Draw 1000 bootstrap index rows with seed 7 and average each selected difference vector.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: 1000 finite estimates within [-1, 0].</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Reproduce the resampling</span></span>
-<span class="source-line"><span class="syntax-comment"># Repeat with a fresh seed7 generator and compare the entire estimate vector.</span></span>
+<span class="source-line"><span class="syntax-comment"># Repeat with a fresh seed 7 generator and compare the entire estimate vector.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: exact same estimates.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Refuse mismatched IDs</span></span>
-<span class="source-line"><span class="syntax-comment"># Remove predictionc from one model and check alignment before computing differences.</span></span>
+<span class="source-line"><span class="syntax-comment"># Remove prediction c from one model and check alignment before computing differences.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: key-set mismatch detected.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Keep selection and final evaluation separate</span></span>
 <span class="source-line"><span class="syntax-comment"># Record configuration choice on validation and a single frozen-test assessment; reject a</span></span>
 <span class="source-line"><span class="syntax-comment"># later test-driven retune.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: selection partitionvalidation; final-test tuning prohibited.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: selection partition validation; final-test tuning prohibited.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Read the guide and implement the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>

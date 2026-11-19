@@ -196,9 +196,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="r-030-analytical-package-capstone-with-explicit-value-and-data-contracts">r-030: Analytical-package capstone with explicit value and data contracts<a class="heading-anchor" href="#r-030-analytical-package-capstone-with-explicit-value-and-data-contracts" aria-label="Link to this section">#</a></h2>
 <p><strong>Level:</strong> intermediate. <strong>Direct prerequisites:</strong> <code>r-025</code>, <code>r-026</code>, <code>r-029</code></p>
 <h3 id="run-and-retain-your-work">Run and retain your work<a class="heading-anchor" href="#run-and-retain-your-work" aria-label="Link to this section">#</a></h3>
-<p>Use the classroom&#x27;s R language pad and prepared r-statistics profile. Each run evaluates one main.R script in a fresh offline R process. Define every required input in the script; earlier runs do not leave live variables behind. Save source and notes separately from run receipts. No package installation or data download is needed for these examples.</p>
-<p>Base plot calls are captured as PNG figures. Explicitly print ggplot2 and Plotly objects in scripts: print(chart). The classroom retains at most two figures per run; Plotly figures use the prepared interactive browser renderer. A temporary file created inside a run is not automatically a persistent download. Keep the supplied examples self-contained and use the saved source, notes and supported figure/result views for retained work.</p>
-<p>Open the <a href="../lessons/r-030.R.html">starter</a>. The <a href="../solutions/r-030_reference.R.html">complete reference</a> and <a href="../solutions/r-030_solutions.md.html">explained answers</a> are available for deliberate comparison.</p>
+<p>Open <code>r-030</code> in <code>/classroom</code> and use the prepared <code>r-statistics</code> profile. Each Run evaluates one <code>main.R</code> script in a fresh offline R process, so define every input in the script; an earlier Run leaves no variables behind. Work in the <a href="../lessons/r-030.R.html">starter</a>. The <a href="../solutions/r-030_reference.R.html">complete reference</a> ends by printing <code>r-030 reference checks passed</code>, and the <a href="../solutions/r-030_solutions.md.html">explained answers</a> are there for deliberate comparison after your own attempt. This chapter prints values only; when a chapter draws figures, the classroom keeps at most two figures per run. The <a href="../README.md.html">course overview</a> describes saved work, figure capture and the prepared package versions.</p>
 <h3 id="outcome-and-mechanism">Outcome and mechanism<a class="heading-anchor" href="#outcome-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Assemble a tested analytical value object with unique record identity, explicit missingness, compatible aggregation and a documented package continuation.</p>
 <p>A small analytical package should make its scientific data contract visible. This capstone represents a batch of scalar measurements: each row has one unique nonempty identifier, one numeric value and a shared unit. An observed NA is permitted as missing data; NaN and infinities are rejected. The constructor checks equal lengths and stores a value object. These rules prevent accidental recycling, duplicate records and silent changes of measurement scale before a summary is calculated.</p>
@@ -330,7 +328,6 @@ missing <span class="syntax-operator">&lt;-</span> <span class="syntax-function"
 <p><strong>Expected observation:</strong> Both invalid combinations rejected; all-missing mean NA and observed count 0.</p>
 <p>The two failed combinations test different boundaries: duplicate identity and incompatible units. Neither modifies the input. The all-missing case returns missing output deliberately rather than inventing a zero average.</p>
 <h3 id="practice-with-evidence">Practice with evidence<a class="heading-anchor" href="#practice-with-evidence" aria-label="Link to this section">#</a></h3>
-<p>Retain the submitted source, the specific input or changed condition, and the observed result or expected failure. A successful exit checks only the properties the program actually asserts; it does not establish general correctness or mastery.</p>
 <h4 id="exercise-1-predict">Exercise 1: Predict<a class="heading-anchor" href="#exercise-1-predict" aria-label="Link to this section">#</a></h4>
 <p>Predict the summary of values c(2,NA,6) with three unique IDs.</p>
 <h4 id="exercise-2-modify">Exercise 2: Modify<a class="heading-anchor" href="#exercise-2-modify" aria-label="Link to this section">#</a></h4>
@@ -355,22 +352,22 @@ missing <span class="syntax-operator">&lt;-</span> <span class="syntax-function"
 <h3 id="reference-review">Reference review<a class="heading-anchor" href="#reference-review" aria-label="Link to this section">#</a></h3>
 <p>The capstone reference checks independent arithmetic as well as the representation invariant. The equal-length rule prevents recycling; uniqueness prevents a repeated identifier from contributing twice; unit compatibility prevents a silent scale change. Missing observations remain visible in the summary ledger.</p>
 <p>The forged-object test establishes why class labels alone are insufficient. The unchanged-input assertions support the chosen value-object interface, while the proposed NAMESPACE lines identify the optional package boundary. No package has been installed or published by this script, and passing its checks does not make missingness ignorable or supply a causal design.</p>
-<p>Compare your implementation with the reference only after retaining your own attempt. Different readable implementations can satisfy the same behavioral contract. Inspect type, shape, missingness and boundary behavior alongside printed numbers.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/summary.html">R summary generic</a></li>
 <li><a href="https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Package-namespaces">Writing R Extensions: namespaces</a></li>
 <li><a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/NA.html">R missing values</a></li>
 </ul>
-<p>The prepared environment uses R 4.6.1, R6 2.6.1, S7 0.2.2, ggplot2 4.0.3 and Plotly 4.12.1. These original examples use the checked-in dependency contract; external package changes require a fresh compatibility check.</p>
 <h3 id="continue">Continue<a class="heading-anchor" href="#continue" aria-label="Link to this section">#</a></h3>
-<p>Use the <a href="../README.md.html">course map</a> to choose the next chapter by its prerequisites. For broader model assumptions, study the statistics tutorial alongside the executable R examples.</p>
+<p>No later chapter lists <code>r-030</code> as a direct prerequisite; the <a href="../README.md.html">course map</a> lists every chapter with its prerequisites.</p>
 <h3 id="ask-an-ai-tutor">Ask an AI tutor<a class="heading-anchor" href="#ask-an-ai-tutor" aria-label="Link to this section">#</a></h3>
-<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for r-030. Read the guide and my saved attempt.
-Explain the relevant R mechanism, type and data-shape contract. Give one
-progressive hint before revealing the complete reference unless I request it.
-Distinguish my observed output from an expected result and from unrun code.
-Do not claim mastery from a successful process exit or a matching source string.</code></pre></article>
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for r-030 (Analytical-package capstone with explicit value and data contracts).
+Read the guide and my saved attempt. Explain the relevant R mechanism,
+type and data-shape contract, focusing on: data contract, public API, S3 summary, regression test, analytical package.
+Give one progressive hint before revealing the complete reference unless
+I request it. Distinguish my observed output from an expected result and
+from unrun code. Do not claim mastery from a successful process exit or a
+matching source string.</code></pre></article>
   </main>
 </body>
 </html>

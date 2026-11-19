@@ -194,11 +194,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/r/guides/r-048.md</code></p>
     </header>
     <article class="document"><h2 id="r-048-censoring-risk-sets-and-survival-models">r-048: Censoring, risk sets and survival models<a class="heading-anchor" href="#r-048-censoring-risk-sets-and-survival-models" aria-label="Link to this section">#</a></h2>
-<p><strong>Level:</strong> advanced. <strong>Direct prerequisites:</strong> <code>r-047</code></p>
+<p><strong>Level:</strong> advanced. <strong>Direct prerequisites:</strong> <code>r-043</code></p>
 <h3 id="run-and-retain-your-work">Run and retain your work<a class="heading-anchor" href="#run-and-retain-your-work" aria-label="Link to this section">#</a></h3>
-<p>Use the classroom&#x27;s R language pad and prepared r-statistics profile. Each run evaluates one main.R script in a fresh offline R process. Define every required input in the script; earlier runs do not leave live variables behind. Save source and notes separately from run receipts. No package installation or data download is needed for these examples.</p>
-<p>Base plot calls are captured as PNG figures. Explicitly print ggplot2 and Plotly objects in scripts: print(chart). The classroom retains at most two figures per run; Plotly figures use the prepared interactive browser renderer. A temporary file created inside a run is not automatically a persistent download. Keep the supplied examples self-contained and use the saved source, notes and supported figure/result views for retained work.</p>
-<p>Open the <a href="../lessons/r-048.R.html">starter</a>. The <a href="../solutions/r-048_reference.R.html">complete reference</a> and <a href="../solutions/r-048_solutions.md.html">explained answers</a> are available for deliberate comparison.</p>
+<p>Open <code>r-048</code> in <code>/classroom</code> and use the prepared <code>r-statistics</code> profile. Each Run evaluates one <code>main.R</code> script in a fresh offline R process, so define every input in the script; an earlier Run leaves no variables behind. Work in the <a href="../lessons/r-048.R.html">starter</a>. The <a href="../solutions/r-048_reference.R.html">complete reference</a> ends by printing <code>r-048 reference checks passed</code>, and the <a href="../solutions/r-048_solutions.md.html">explained answers</a> are there for deliberate comparison after your own attempt. This chapter prints values only; when a chapter draws figures, the classroom keeps at most two figures per run. The <a href="../README.md.html">course overview</a> describes saved work, figure capture and the prepared package versions.</p>
 <h3 id="outcome-and-mechanism">Outcome and mechanism<a class="heading-anchor" href="#outcome-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Construct survival outcomes and inspect Kaplan-Meier and Cox calculations without treating censored observations as observed event times.</p>
 <p>A right-censored observation tells us that an event had not occurred by the last observation time. It does not say the event happened at that time or that it will never happen. Survival methods retain this partial information through risk sets rather than replacing censored times with ordinary completed durations.</p>
@@ -251,7 +249,6 @@ curves <span class="syntax-operator">&lt;-</span> survival<span class="syntax-op
 <p><strong>Expected observation:</strong> Finite positive hazard ratio and two bounded survival curves.</p>
 <p>The package fits an actual model and produces covariate-specific survival curves. The coefficient is labeled on its log-hazard scale; no causal or clinical interpretation is inferred from this synthetic fit.</p>
 <h3 id="practice-with-evidence">Practice with evidence<a class="heading-anchor" href="#practice-with-evidence" aria-label="Link to this section">#</a></h3>
-<p>Retain the submitted source, the specific input or changed condition, and the observed result or expected failure. A successful exit checks only the properties the program actually asserts; it does not establish general correctness or mastery.</p>
 <h4 id="exercise-1-predict">Exercise 1: Predict<a class="heading-anchor" href="#exercise-1-predict" aria-label="Link to this section">#</a></h4>
 <p>Reconstruct the four-record Kaplan-Meier steps.</p>
 <h4 id="exercise-2-modify">Exercise 2: Modify<a class="heading-anchor" href="#exercise-2-modify" aria-label="Link to this section">#</a></h4>
@@ -276,22 +273,22 @@ curves <span class="syntax-operator">&lt;-</span> survival<span class="syntax-op
 <h3 id="reference-review">Reference review<a class="heading-anchor" href="#reference-review" aria-label="Link to this section">#</a></h3>
 <p>The exact Kaplan-Meier oracle checks event coding and risk-set arithmetic. The changed-status case supplies a meaningful negative comparison: the same times produce a different survival curve when a censor is incorrectly declared an event.</p>
 <p>The Cox fit and its proportional-hazards diagnostic are actual package operations on a synthetic fixture. Their interpretation remains conditional on the event definition, censoring assumptions and model. Finite coefficients and diagnostic output do not turn the example into a validated prediction system.</p>
-<p>Compare your implementation with the reference only after retaining your own attempt. Different readable implementations can satisfy the same behavioral contract. Inspect type, shape, missingness and boundary behavior alongside printed numbers.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://stat.ethz.ch/R-manual/R-devel/library/survival/html/survfit.html">R survival curves</a></li>
 <li><a href="https://stat.ethz.ch/R-manual/R-devel/library/survival/html/Surv.html">R survival outcomes</a></li>
 <li><a href="https://stat.ethz.ch/R-manual/R-devel/library/survival/html/coxph.html">R Cox models</a></li>
 </ul>
-<p>The prepared environment uses R 4.6.1, R6 2.6.1, S7 0.2.2, ggplot2 4.0.3 and Plotly 4.12.1. These original examples use the checked-in dependency contract; external package changes require a fresh compatibility check.</p>
 <h3 id="continue">Continue<a class="heading-anchor" href="#continue" aria-label="Link to this section">#</a></h3>
-<p>Use the <a href="../README.md.html">course map</a> to choose the next chapter by its prerequisites. For broader model assumptions, study the statistics tutorial alongside the executable R examples.</p>
+<p>No later chapter lists <code>r-048</code> as a direct prerequisite; the <a href="../README.md.html">course map</a> lists every chapter with its prerequisites. For the modeling assumptions behind these examples, read the <a href="../../statistics-ml/README.md.html">statistics tutorial</a> alongside the R code.</p>
 <h3 id="ask-an-ai-tutor">Ask an AI tutor<a class="heading-anchor" href="#ask-an-ai-tutor" aria-label="Link to this section">#</a></h3>
-<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for r-048. Read the guide and my saved attempt.
-Explain the relevant R mechanism, type and data-shape contract. Give one
-progressive hint before revealing the complete reference unless I request it.
-Distinguish my observed output from an expected result and from unrun code.
-Do not claim mastery from a successful process exit or a matching source string.</code></pre></article>
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for r-048 (Censoring, risk sets and survival models).
+Read the guide and my saved attempt. Explain the relevant R mechanism,
+type and data-shape contract, focusing on: right censoring, risk set, Kaplan-Meier, hazard ratio, proportional hazards.
+Give one progressive hint before revealing the complete reference unless
+I request it. Distinguish my observed output from an expected result and
+from unrun code. Do not claim mastery from a successful process exit or a
+matching source string.</code></pre></article>
   </main>
 </body>
 </html>

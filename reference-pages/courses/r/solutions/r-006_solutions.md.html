@@ -203,29 +203,23 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict length(c(NULL, NA_real_)).</p>
 <p>The length is one.</p>
-<p><strong>Expected evidence:</strong> The length is one.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Add zero to an all-missing measurement vector.</p>
 <p>The observed count becomes one and its observed mean is zero.</p>
-<p><strong>Expected evidence:</strong> The observed count becomes one and its observed mean is zero.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Construct a finite-only mask for c(2, Inf, NA,4).</p>
 <p>is.finite retains two and four.</p>
-<p><strong>Expected evidence:</strong> is.finite retains two and four.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose calling an all-missing sum a measured zero.</p>
 <p>Report no observations and an explicit missing summary under the stated policy.</p>
-<p><strong>Expected evidence:</strong> Report no observations and an explicit missing summary under the stated policy.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Distinguish NA from NaN.</p>
 <p>is.na is true for both, but is.nan is true only for NaN.</p>
-<p><strong>Expected evidence:</strong> is.na is true for both, but is.nan is true only for NaN.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Document a division-by-zero policy in a data pipeline.</p>
 <p>Validate the denominator and retain a meaningful signal instead of silently replacing every exceptional result with zero.</p>
-<p><strong>Expected evidence:</strong> Validate the denominator and retain a meaningful signal instead of silently replacing every exceptional result with zero.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference contains explicit behavioral assertions for its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The reference makes 5 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>
 </body>
 </html>

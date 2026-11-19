@@ -200,15 +200,15 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 1: Prepare a tiny training batch</span></span>
-<span class="source-line"><span class="syntax-comment"># Use two four-token sequences and shifted labels with vocabulary16.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: inputs shape(2,3);6 active targets.</span></span>
+<span class="source-line"><span class="syntax-comment"># Use two four-token sequences and shifted labels with vocabulary 16.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: inputs shape (2, 3); 6 active targets.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 2: Measure the initial objective</span></span>
 <span class="source-line"><span class="syntax-comment"># Calculate initial cross entropy before any optimizer step.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: finite positive loss.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Perform twelve bounded updates</span></span>
-<span class="source-line"><span class="syntax-comment"># Use Adam(.01), zero gradients each step, log losses and norms, and update exactly12</span></span>
+<span class="source-line"><span class="syntax-comment"># Use Adam(0.01), zero gradients each step, log losses and norms, and update exactly 12</span></span>
 <span class="source-line"><span class="syntax-comment"># times.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: 12 finite losses and norms; at least one positive norm.</span></span>
 <span class="source-line"></span>
@@ -218,10 +218,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Clear accumulated gradients</span></span>
 <span class="source-line"><span class="syntax-comment"># Call zero_grad(set_to_none=True) after the run and inspect every parameter gradient.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: all gradientsNone.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: all gradients None.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Report budget honestly</span></span>
-<span class="source-line"><span class="syntax-comment"># Create a run record with12 completed updates and the declared200 maximum.</span></span>
+<span class="source-line"><span class="syntax-comment"># Create a run record with 12 completed updates and the declared 200 maximum.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: stopped_at12; no convergence claim.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>

@@ -392,18 +392,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ul>
 <p>Never run the live lab against a production, shared, or valuable database.</p>
 <p>Run the answer-free starter from the repository root:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell</span>
-<span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe bridge<span class="syntax-punctuation">\</span>professional<span class="syntax-punctuation">\</span>lessons<span class="syntax-punctuation">\</span>bridge_ops_01_migration_observability<span class="syntax-punctuation">.</span>py</code></pre>
-<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux</span>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># Linux, macOS, or Windows through WSL 2</span>
 .venv/bin/python bridge/professional/lessons/bridge_ops_01_migration_observability.py</code></pre>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python + PostgreSQL engineering</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
 <p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <p>Start at the repository root. The answer-free starter is deliberately safe to run: it prints orientation text and does not call unfinished functions or contact PostgreSQL.</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell</span>
-<span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe bridge<span class="syntax-punctuation">\</span>professional<span class="syntax-punctuation">\</span>lessons<span class="syntax-punctuation">\</span>bridge_ops_01_migration_observability<span class="syntax-punctuation">.</span>py
-<span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m pytest bridge<span class="syntax-punctuation">\</span>professional<span class="syntax-punctuation">\</span>tests -q</code></pre>
-<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux</span>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># Linux, macOS, or Windows through WSL 2</span>
 .venv/bin/python bridge/professional/lessons/bridge_ops_01_migration_observability.py
 .venv/bin/python -m pytest bridge/professional/tests -q</code></pre>
 <p>Read this guide first, implement one boundary at a time in <code>bridge/professional/lessons/bridge_ops_01_migration_observability.py</code>, and use small fakes or recording doubles for the default evidence path. Any PostgreSQL step is optional, explicitly gated, and restricted to <code>DS60_DATABASE_URL</code> plus the disposable <code>advanced_sql_training</code> database. Never place a credential in source, notebook output, test fixtures, or logs.</p>
@@ -549,12 +544,7 @@ migration_duration_seconds{migration_id=&quot;...&quot;}</code></pre>
 </ul>
 <h5 id="guide--7-optional-live-lab">7. Optional live lab<a class="heading-anchor" href="#guide--7-optional-live-lab" aria-label="Link to this section">#</a></h5>
 <p>First reset and verify only the disposable course database using the canonical PostgreSQL setup instructions. Then provide the connection string only to the current process environment.</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell</span>
-$env:DS60_DATABASE_URL <span class="syntax-punctuation">=</span> <span class="syntax-builtin">Read-Host</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Paste the disposable course PostgreSQL URL</span><span class="syntax-string">&quot;</span>
-<span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe <span class="syntax-punctuation">`</span>
-  bridge<span class="syntax-punctuation">\</span>professional<span class="syntax-punctuation">\</span>solutions<span class="syntax-punctuation">\</span>bridge_ops_01_migration_observability_solution<span class="syntax-punctuation">.</span>py <span class="syntax-punctuation">`</span>
-  <span class="syntax-punctuation">-</span>-live <span class="syntax-punctuation">-</span>-request-id learning-bridge-ops<span class="syntax-punctuation">-</span>01</code></pre>
-<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux</span>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># Linux, macOS, or Windows through WSL 2</span>
 <span class="syntax-builtin">read</span> -r -s -p <span class="syntax-string">&quot;Disposable course PostgreSQL URL: &quot;</span> DS60_DATABASE_URL
 <span class="syntax-builtin">export</span> DS60_DATABASE_URL
 <span class="syntax-builtin">printf</span> <span class="syntax-string">&#x27;\n&#x27;</span>
@@ -603,7 +593,7 @@ $env:DS60_DATABASE_URL <span class="syntax-punctuation">=</span> <span class="sy
 </ol>
 <ul>
 <li><strong>Progressive hint:</strong> One attempt must acquire, lock, re-check, apply, verify, record, commit, close, then report.</li>
-<li><strong>Verify:</strong> Record the nine delivery stages, open, bootstrap/lock, re-check, commands, verify, metadata, commit, close, report, and in failure assert rollback and close occur before the sleeper.</li>
+<li><strong>Verify:</strong> Record the nine delivery stages (open, bootstrap/lock, re-check, commands, verify, metadata, commit, close, report) and, in failure, assert rollback and close occur before the sleeper.</li>
 </ul>
 <ol start="6">
 <li><strong>Commit uncertainty:</strong> Simulate an uncertain commit whose retry sees a matching metadata row and prove commands are not applied twice.</li>
@@ -758,12 +748,12 @@ Do not open, quote, summarize, or copy anything under solutions/ until I
 explicitly say I have finished my attempt and ask to compare.
 
 Use these coaching phases in order:
-1. Predict — ask what I expect before I run or change code.
-2. Attempt — let me implement or explain one numbered exercise at a time.
-3. Hint — give the smallest useful conceptual hint, never a finished answer.
-4. Evidence — ask for the exact return value, exception type, recorded calls,
+1. Predict: ask what I expect before I run or change code.
+2. Attempt: let me implement or explain one numbered exercise at a time.
+3. Hint: give the smallest useful conceptual hint, never a finished answer.
+4. Evidence: ask for the exact return value, exception type, recorded calls,
    query plus bound parameters, or written decision required by that exercise.
-5. Retrieval — close with two no-notes questions and one transfer problem.
+5. Retrieval: close with two no-notes questions and one transfer problem.
 
 Keep the default path offline and fake-first. If the lesson has an optional
 PostgreSQL step, require my explicit opt-in, DS60_DATABASE_URL, and the
@@ -1016,9 +1006,9 @@ solve the final transfer problem without opening solutions/.</code></pre>
 <span class="source-line"><span class="syntax-comment">#    happen before injected retry delay.</span></span>
 <span class="source-line"><span class="syntax-comment">#    Hint: One attempt must acquire, lock, re-check, apply, verify, record, commit, close, then</span></span>
 <span class="source-line"><span class="syntax-comment">#    report.</span></span>
-<span class="source-line"><span class="syntax-comment">#    Verify: Record the nine delivery stages—open, bootstrap/lock, re-check, commands, verify,</span></span>
-<span class="source-line"><span class="syntax-comment">#    metadata, commit, close, report—and in failure assert rollback and close occur before the</span></span>
-<span class="source-line"><span class="syntax-comment">#    sleeper.</span></span>
+<span class="source-line"><span class="syntax-comment">#    Verify: Record the nine delivery stages (open, bootstrap/lock, re-check, commands, verify,</span></span>
+<span class="source-line"><span class="syntax-comment">#    metadata, commit, close, report) and, in failure, assert rollback and close occur before</span></span>
+<span class="source-line"><span class="syntax-comment">#    the sleeper.</span></span>
 <span class="source-line"><span class="syntax-comment"># 6. [Commit uncertainty] Simulate an uncertain commit whose retry sees a matching metadata row</span></span>
 <span class="source-line"><span class="syntax-comment">#    and prove commands are not applied twice.</span></span>
 <span class="source-line"><span class="syntax-comment">#    Hint: Re-check immutable metadata under lock before every attempt.</span></span>
@@ -1219,7 +1209,7 @@ safe <span class="syntax-operator">=</span> redact_fields<span class="syntax-pun
 <p><strong>Prompt:</strong> Implement the documented nine-step delivery order and prove rollback/close happen before injected retry delay.</p>
 <p><strong>Approach:</strong> Encode the order directly, classify only retryable failures, roll back and close in the attempt&#x27;s exception path, and let the outer retry call its fake sleeper afterward.</p>
 <p><strong>Why:</strong> One attempt must acquire, lock, re-check, apply, verify, record, commit, close, then report.</p>
-<p><strong>Verification evidence:</strong> Record the nine delivery stages, open, bootstrap/lock, re-check, commands, verify, metadata, commit, close, report, and in failure assert rollback and close occur before the sleeper.</p>
+<p><strong>Verification evidence:</strong> Record the nine delivery stages (open, bootstrap/lock, re-check, commands, verify, metadata, commit, close, report) and, in failure, assert rollback and close occur before the sleeper.</p>
 <h5 id="solution-1--exercise-6-commit-uncertainty">Exercise 6: Commit uncertainty<a class="heading-anchor" href="#solution-1--exercise-6-commit-uncertainty" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Simulate an uncertain commit whose retry sees a matching metadata row and prove commands are not applied twice.</p>
 <p><strong>Approach:</strong> On retry, read the recorded checksum; a match means the first attempt committed, so mark it skipped/applied evidence without re-running commands. Drift must fail closed.</p>
@@ -2011,12 +2001,12 @@ Do not open, quote, summarize, or copy anything under solutions/ until I
 explicitly say I have finished my attempt and ask to compare.
 
 Use these coaching phases in order:
-1. Predict — ask what I expect before I run or change code.
-2. Attempt — let me implement or explain one numbered exercise at a time.
-3. Hint — give the smallest useful conceptual hint, never a finished answer.
-4. Evidence — ask for the exact return value, exception type, recorded calls,
+1. Predict: ask what I expect before I run or change code.
+2. Attempt: let me implement or explain one numbered exercise at a time.
+3. Hint: give the smallest useful conceptual hint, never a finished answer.
+4. Evidence: ask for the exact return value, exception type, recorded calls,
    query plus bound parameters, or written decision required by that exercise.
-5. Retrieval — close with two no-notes questions and one transfer problem.
+5. Retrieval: close with two no-notes questions and one transfer problem.
 
 Keep the default path offline and fake-first. If the lesson has an optional
 PostgreSQL step, require my explicit opt-in, DS60_DATABASE_URL, and the

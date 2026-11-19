@@ -194,37 +194,50 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/swift/solutions/swift-012_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="swift-012-explanation-and-comparison">swift-012: explanation and comparison<a class="heading-anchor" href="#swift-012-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="swift-012_solution.swift.html">swift-012_solution.swift</a>. Its assertions are always active under the prepared classroom compile settings.</p>
+<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="swift-012_solution.swift.html">swift-012_solution.swift</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Keep copied value state independent:</strong> The struct contains value state and its mutation is explicit. Reserving from the copied inventory does not change the original.</p>
 <p><strong>Reject without partial mutation:</strong> Checking every rejection condition before subtraction preserves failure atomicity. Rejected requests retain the previous valid stock.</p>
-<h3 id="reason-through-the-six-tasks">Reason through the six tasks<a class="heading-anchor" href="#reason-through-the-six-tasks" aria-label="Link to this section">#</a></h3>
-<ol>
-<li><strong>Predict and explain.</strong> Trace both inventory copies through reservation.</li>
-</ol>
-<ol start="2">
-<li><strong>Guided modification.</strong> Add a validated restock operation.</li>
-</ol>
-<ol start="3">
-<li><strong>Independent construction.</strong> Build a bounded counter with private mutation.</li>
-</ol>
-<ol start="4">
-<li><strong>Diagnose a defect.</strong> Diagnose subtracting stock before checking the requested amount.</li>
-</ol>
-<ol start="5">
-<li><strong>Boundary evidence.</strong> Test zero, exact-stock and excess reservations.</li>
-</ol>
-<ol start="6">
-<li><strong>Transfer and justify.</strong> Choose a value model for an editable form and explain how cancel can restore an earlier snapshot.</li>
-</ol>
-<p>For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.</p>
+<h3 id="task-answers">Task answers<a class="heading-anchor" href="#task-answers" aria-label="Link to this section">#</a></h3>
+<h4 id="task-1-predict-and-explain">Task 1: Predict and explain<a class="heading-anchor" href="#task-1-predict-and-explain" aria-label="Link to this section">#</a></h4>
+<p>Trace both inventory copies through reservation.</p>
+<p>No separate reference answer has been written for this task. Example A is the evidence to compare with: The struct contains value state and its mutation is explicit. Reserving from the copied inventory does not change the original.</p>
+<h4 id="task-2-guided-modification">Task 2: Guided modification<a class="heading-anchor" href="#task-2-guided-modification" aria-label="Link to this section">#</a></h4>
+<p>Add a validated restock operation.</p>
+<p>No separate reference answer has been written for this task. Start from Example B: Checking every rejection condition before subtraction preserves failure atomicity. Rejected requests retain the previous valid stock.</p>
+<h4 id="task-3-independent-construction">Task 3: Independent construction<a class="heading-anchor" href="#task-3-independent-construction" aria-label="Link to this section">#</a></h4>
+<p>Build a bounded counter with private mutation.</p>
+<p><strong>Reference answer.</strong> It runs as the <code>Task 3</code> block of the reference program.</p>
+<pre class="highlighted-code"><code class="language-swift"><span class="syntax-keyword">struct</span> <span class="syntax-class">BoundedCounter</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">private</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">set</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">var</span> value <span class="syntax-punctuation">=</span> <span class="syntax-number">0</span>
+  <span class="syntax-keyword">let</span> limit<span class="syntax-punctuation">:</span> <span class="syntax-builtin">Int</span>
+  <span class="syntax-keyword">mutating</span> <span class="syntax-keyword">func</span> <span class="syntax-function">increment</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">-&gt;</span> <span class="syntax-builtin">Bool</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">guard</span> value <span class="syntax-operator">&lt;</span> limit <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">return</span> <span class="syntax-keyword">false</span> <span class="syntax-punctuation">}</span>
+    value <span class="syntax-operator">+=</span> <span class="syntax-number">1</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-keyword">true</span>
+  <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">var</span> counter <span class="syntax-punctuation">=</span> BoundedCounter<span class="syntax-punctuation">(</span>limit<span class="syntax-punctuation">:</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>counter<span class="syntax-punctuation">.</span>increment<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&amp;&amp;</span> counter<span class="syntax-punctuation">.</span>increment<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>counter<span class="syntax-punctuation">.</span>increment<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&amp;&amp;</span> counter<span class="syntax-punctuation">.</span>value <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Observe:</strong> Two increments succeed, the third is refused, and the value stays at 2.</p>
+<p>private(set) lets callers read value but change it only through increment, which enforces the limit.</p>
+<h4 id="task-4-diagnose-a-defect">Task 4: Diagnose a defect<a class="heading-anchor" href="#task-4-diagnose-a-defect" aria-label="Link to this section">#</a></h4>
+<p>Diagnose subtracting stock before checking the requested amount.</p>
+<p>No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson&#x27;s pitfalls: A struct can contain shared class references. Private setters are useful only when methods enforce invariants. The public memberwise initializer in a small fixture is not a substitute for validating external state.</p>
+<h4 id="task-5-boundary-evidence">Task 5: Boundary evidence<a class="heading-anchor" href="#task-5-boundary-evidence" aria-label="Link to this section">#</a></h4>
+<p>Test zero, exact-stock and excess reservations.</p>
+<p>No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Keep copied value state independent) and Example B (Reject without partial mutation).</p>
+<h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
+<p>Choose a value model for an editable form and explain how cancel can restore an earlier snapshot.</p>
+<p>No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry <strong>Struct</strong>, and state one limitation of your choice.</p>
 <h3 id="mechanism-and-diagnostic-reasoning">Mechanism and diagnostic reasoning<a class="heading-anchor" href="#mechanism-and-diagnostic-reasoning" aria-label="Link to this section">#</a></h3>
 <p>A struct models a value with named properties and operations. Assignment follows value semantics, making independent state snapshots straightforward when its stored members also have appropriate semantics. A mutating method explicitly changes self or its stored properties. Methods without mutating cannot silently alter a value-type instance.</p>
 <p>Constructors should establish valid state, and operations should preserve it. Do not expose unrestricted writable fields if they allow callers to bypass the rule. A small value type can be a strong domain boundary, but wrapping a primitive without adding meaning or validation is only extra syntax.</p>
 <p><code>struct Inventory</code> defines a value type. <code>private(set)</code> exposes reading but restricts assignment. A <code>mutating func</code> may update stored state. An initializer can reject invalid input with a throwing or failable contract in later chapters.</p>
 <p>A struct can contain shared class references. Private setters are useful only when methods enforce invariants. The public memberwise initializer in a small fixture is not a substitute for validating external state.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.</p></article>
+<p>Run the reference and confirm that it prints <code>swift-012: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
   </main>
 </body>
 </html>

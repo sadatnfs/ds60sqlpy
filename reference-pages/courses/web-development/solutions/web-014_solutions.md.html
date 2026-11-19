@@ -194,31 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-014_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-014-explanatory-solutions">web-014: explanatory solutions<a class="heading-anchor" href="#web-014-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.</p>
-<h3 id="why-the-mechanism-works">Why the mechanism works<a class="heading-anchor" href="#why-the-mechanism-works" aria-label="Link to this section">#</a></h3>
-<p>Normal flow is the browser&#x27;s default arrangement of content. Block boxes generally stack in the block direction and inline content flows within lines. Understanding this default prevents unnecessary positioning. Display changes how an element participates in layout; it does not change its underlying HTML meaning. A paragraph made display:flex remains a paragraph semantically.</p>
-<p>Positioning modifies placement relative to a containing block or scroll container. Relative positioning keeps the element&#x27;s original space while offsetting its painted position. Absolute positioning removes it from ordinary flow and uses a containing block, often the nearest positioned ancestor. Fixed positioning is often tied to the viewport but transformed ancestors can affect that behavior. Sticky positioning depends on a scroll container and an inset threshold.</p>
-<p>Use position:relative on a card only when it intentionally establishes the containing block for an absolute badge. Keep the main article content in flow. A sticky section label needs an inset such as top:0 and sufficient scroll space. Avoid putting every element at exact pixel coordinates; content length and viewport width will change.</p>
+<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-014.md</code>.</p>
 <h3 id="exercise-1-predict-whether-relative-positioning-frees-the-original-space">Exercise 1: Predict whether relative positioning frees the original space.<a class="heading-anchor" href="#exercise-1-predict-whether-relative-positioning-frees-the-original-space" aria-label="Link to this section">#</a></h3>
-<p>It does not; the original layout space remains.</p>
-<p>Trace the smallest example before editing. Name which values are source and which are observations.</p>
+<p><strong>Expected answer:</strong> It does not; the original layout space remains.</p>
+<p><strong>Why:</strong> position: relative offsets the painted box but keeps its original space in normal flow, so neighboring content does not move.</p>
 <h3 id="exercise-2-turn-a-group-of-inline-links-into-a-block-navigation-list">Exercise 2: Turn a group of inline links into a block navigation list.<a class="heading-anchor" href="#exercise-2-turn-a-group-of-inline-links-into-a-block-navigation-list" aria-label="Link to this section">#</a></h3>
-<p>Display changes the arrangement without changing navigation semantics.</p>
-<p>Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.</p>
+<p><strong>Expected evidence:</strong> Display changes the arrangement without changing navigation semantics.</p>
+<p><strong>Why:</strong> display changes only the layout; a list of links inside nav keeps its navigation semantics.</p>
 <h3 id="exercise-3-build-a-card-with-an-intentional-positioned-badge-and-flowing-content">Exercise 3: Build a card with an intentional positioned badge and flowing content.<a class="heading-anchor" href="#exercise-3-build-a-card-with-an-intentional-positioned-badge-and-flowing-content" aria-label="Link to this section">#</a></h3>
-<p>Long body text expands the card while the badge stays in its reserved corner.</p>
-<p>Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.</p>
+<p><strong>Expected evidence:</strong> Long body text expands the card while the badge stays in its reserved corner.</p>
+<p><strong>Why:</strong> The relatively positioned card becomes the containing block for the absolute badge, and the reserved padding keeps text from flowing under it.</p>
 <h3 id="exercise-4-diagnose-an-absolute-label-overlapping-enlarged-text">Exercise 4: Diagnose an absolute label overlapping enlarged text.<a class="heading-anchor" href="#exercise-4-diagnose-an-absolute-label-overlapping-enlarged-text" aria-label="Link to this section">#</a></h3>
-<p>Provide sufficient reserved space or return the label to normal flow.</p>
-<p>Keep the failing input. Identify the first layer where the observed result differs from the intended contract.</p>
+<p><strong>Expected answer:</strong> Provide sufficient reserved space or return the label to normal flow.</p>
+<p><strong>Why:</strong> An absolutely positioned element leaves normal flow, so it cannot push text away; reserve space or return the label to the flow.</p>
 <h3 id="exercise-5-add-a-long-paragraph-and-narrow-the-preview">Exercise 5: Add a long paragraph and narrow the preview.<a class="heading-anchor" href="#exercise-5-add-a-long-paragraph-and-narrow-the-preview" aria-label="Link to this section">#</a></h3>
-<p>Content remains readable and the badge does not obscure it.</p>
-<p>Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.</p>
+<p><strong>Expected evidence:</strong> Content remains readable and the badge does not obscure it.</p>
+<p><strong>Why:</strong> Normal flow rewraps text as the width shrinks, while a positioned element stays put, so overlap appears at narrow widths.</p>
 <h3 id="exercise-6-explain-the-containing-block-used-by-an-absolute-element">Exercise 6: Explain the containing block used by an absolute element.<a class="heading-anchor" href="#exercise-6-explain-the-containing-block-used-by-an-absolute-element" aria-label="Link to this section">#</a></h3>
-<p>Identify the actual ancestor that establishes it, rather than assuming it is always the viewport.</p>
-<p>Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.</p>
-<h3 id="reference-comparison-and-limits">Reference comparison and limits<a class="heading-anchor" href="#reference-comparison-and-limits" aria-label="Link to this section">#</a></h3>
-<p>Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.</p></article>
+<p><strong>Expected answer:</strong> Identify the actual ancestor that establishes it, rather than assuming it is always the viewport.</p>
+<p><strong>Why:</strong> An absolutely positioned element is placed against its nearest positioned ancestor, or against the initial containing block when there is none.</p>
+<h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
+<p>Open <code>courses/web-development/solutions/web-014_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
   </main>
 </body>
 </html>

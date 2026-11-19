@@ -194,11 +194,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/r/guides/r-043.md</code></p>
     </header>
     <article class="document"><h2 id="r-043-linear-models-design-matrices-and-diagnostic-limits">r-043: Linear models, design matrices and diagnostic limits<a class="heading-anchor" href="#r-043-linear-models-design-matrices-and-diagnostic-limits" aria-label="Link to this section">#</a></h2>
-<p><strong>Level:</strong> intermediate. <strong>Direct prerequisites:</strong> <code>r-042</code></p>
+<p><strong>Level:</strong> intermediate. <strong>Direct prerequisites:</strong> <code>r-039</code>, <code>r-042</code></p>
 <h3 id="run-and-retain-your-work">Run and retain your work<a class="heading-anchor" href="#run-and-retain-your-work" aria-label="Link to this section">#</a></h3>
-<p>Use the classroom&#x27;s R language pad and prepared r-statistics profile. Each run evaluates one main.R script in a fresh offline R process. Define every required input in the script; earlier runs do not leave live variables behind. Save source and notes separately from run receipts. No package installation or data download is needed for these examples.</p>
-<p>Base plot calls are captured as PNG figures. Explicitly print ggplot2 and Plotly objects in scripts: print(chart). The classroom retains at most two figures per run; Plotly figures use the prepared interactive browser renderer. A temporary file created inside a run is not automatically a persistent download. Keep the supplied examples self-contained and use the saved source, notes and supported figure/result views for retained work.</p>
-<p>Open the <a href="../lessons/r-043.R.html">starter</a>. The <a href="../solutions/r-043_reference.R.html">complete reference</a> and <a href="../solutions/r-043_solutions.md.html">explained answers</a> are available for deliberate comparison.</p>
+<p>Open <code>r-043</code> in <code>/classroom</code> and use the prepared <code>r-statistics</code> profile. Each Run evaluates one <code>main.R</code> script in a fresh offline R process, so define every input in the script; an earlier Run leaves no variables behind. Work in the <a href="../lessons/r-043.R.html">starter</a>. The <a href="../solutions/r-043_reference.R.html">complete reference</a> ends by printing <code>r-043 reference checks passed</code>, and the <a href="../solutions/r-043_solutions.md.html">explained answers</a> are there for deliberate comparison after your own attempt. This chapter prints values only; when a chapter draws figures, the classroom keeps at most two figures per run. The <a href="../README.md.html">course overview</a> describes saved work, figure capture and the prepared package versions.</p>
 <h3 id="outcome-and-mechanism">Outcome and mechanism<a class="heading-anchor" href="#outcome-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Connect an R model formula to its numerical design matrix, fitted coefficients and diagnostic assumptions.</p>
 <p>An R formula specifies a model representation, not a causal identification strategy. lm turns that formula and data into a model frame and a numerical design matrix, then fits coefficients. Inspecting model.matrix makes intercepts, factor coding and interactions visible rather than treating formula notation as a black box.</p>
@@ -240,7 +238,7 @@ X <span class="syntax-operator">&lt;-</span> <span class="syntax-function">model
 <span class="syntax-function">stopifnot</span><span class="syntax-punctuation">(</span><span class="syntax-function">abs</span><span class="syntax-punctuation">(</span><span class="syntax-function">sum</span><span class="syntax-punctuation">(</span><span class="syntax-function">residuals</span><span class="syntax-punctuation">(</span>fit<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> <span class="syntax-number">1e-10</span><span class="syntax-punctuation">)</span>
 <span class="syntax-function">stopifnot</span><span class="syntax-punctuation">(</span><span class="syntax-function">isTRUE</span><span class="syntax-punctuation">(</span><span class="syntax-function">all.equal</span><span class="syntax-punctuation">(</span><span class="syntax-function">sum</span><span class="syntax-punctuation">(</span><span class="syntax-function">residuals</span><span class="syntax-punctuation">(</span>fit<span class="syntax-punctuation">)</span><span class="syntax-operator">^</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.8</span><span class="syntax-punctuation">,</span> tolerance <span class="syntax-operator">=</span> <span class="syntax-number">1e-10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
 <span class="syntax-function">print</span><span class="syntax-punctuation">(</span><span class="syntax-function">coef</span><span class="syntax-punctuation">(</span>fit<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
-<p><strong>Expected observation:</strong> Intercept 1, slope 1.8, residual sum near0, RSS 0.8.</p>
+<p><strong>Expected observation:</strong> Intercept 1, slope 1.8, residual sum near 0, RSS 0.8.</p>
 <p>The coefficient and residual-sum oracles come from the small literal data. Orthogonality verifies the fitted least-squares calculation, not all distributional assumptions.</p>
 <h4 id="example-2-two-interval-targets">Example 2: Two interval targets<a class="heading-anchor" href="#example-2-two-interval-targets" aria-label="Link to this section">#</a></h4>
 <pre class="highlighted-code"><code class="language-r">d <span class="syntax-operator">&lt;-</span> <span class="syntax-function">data.frame</span><span class="syntax-punctuation">(</span>x <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-operator">:</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> y <span class="syntax-operator">=</span> <span class="syntax-function">c</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
@@ -255,7 +253,6 @@ prediction <span class="syntax-operator">&lt;-</span> <span class="syntax-functi
 <p><strong>Expected observation:</strong> Same fitted mean; wider future-observation interval.</p>
 <p>The point estimate is shared, while the prediction interval includes additional outcome variation. The comparison relies on the same fitted model and new predictor value.</p>
 <h3 id="practice-with-evidence">Practice with evidence<a class="heading-anchor" href="#practice-with-evidence" aria-label="Link to this section">#</a></h3>
-<p>Retain the submitted source, the specific input or changed condition, and the observed result or expected failure. A successful exit checks only the properties the program actually asserts; it does not establish general correctness or mastery.</p>
 <h4 id="exercise-1-predict">Exercise 1: Predict<a class="heading-anchor" href="#exercise-1-predict" aria-label="Link to this section">#</a></h4>
 <p>Recover the design matrix for y~x on the five-row fixture.</p>
 <h4 id="exercise-2-modify">Exercise 2: Modify<a class="heading-anchor" href="#exercise-2-modify" aria-label="Link to this section">#</a></h4>
@@ -280,22 +277,22 @@ prediction <span class="syntax-operator">&lt;-</span> <span class="syntax-functi
 <h3 id="reference-review">Reference review<a class="heading-anchor" href="#reference-review" aria-label="Link to this section">#</a></h3>
 <p>The design-matrix reconstruction connects formula notation to the actual numerical fit. The interaction example fixes the factor reference level so the coefficient names have a defined interpretation; the two group-specific slopes remain the substantive quantities.</p>
 <p>The alias example intentionally separates identifiable fitted values from nonunique parameter coordinates. Residual orthogonality is an algebraic least-squares property, while uncertainty intervals rely on further assumptions. The reference reports extrapolation and interval targets explicitly rather than treating predict as a scientific interpretation engine.</p>
-<p>Compare your implementation with the reference only after retaining your own attempt. Different readable implementations can satisfy the same behavioral contract. Inspect type, shape, missingness and boundary behavior alongside printed numbers.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/lm.html">R lm</a></li>
 <li><a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/model.matrix.html">R model.matrix</a></li>
 <li><a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/predict.lm.html">R predict.lm</a></li>
 </ul>
-<p>The prepared environment uses R 4.6.1, R6 2.6.1, S7 0.2.2, ggplot2 4.0.3 and Plotly 4.12.1. These original examples use the checked-in dependency contract; external package changes require a fresh compatibility check.</p>
 <h3 id="continue">Continue<a class="heading-anchor" href="#continue" aria-label="Link to this section">#</a></h3>
-<p>Use the <a href="../README.md.html">course map</a> to choose the next chapter by its prerequisites. For broader model assumptions, study the statistics tutorial alongside the executable R examples.</p>
+<p>Chapters that list <code>r-043</code> as a direct prerequisite: <a href="r-044.md.html"><code>r-044</code></a>, <a href="r-048.md.html"><code>r-048</code></a>, <a href="r-056.md.html"><code>r-056</code></a>. For the modeling assumptions behind these examples, read the <a href="../../statistics-ml/README.md.html">statistics tutorial</a> alongside the R code.</p>
 <h3 id="ask-an-ai-tutor">Ask an AI tutor<a class="heading-anchor" href="#ask-an-ai-tutor" aria-label="Link to this section">#</a></h3>
-<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for r-043. Read the guide and my saved attempt.
-Explain the relevant R mechanism, type and data-shape contract. Give one
-progressive hint before revealing the complete reference unless I request it.
-Distinguish my observed output from an expected result and from unrun code.
-Do not claim mastery from a successful process exit or a matching source string.</code></pre></article>
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for r-043 (Linear models, design matrices and diagnostic limits).
+Read the guide and my saved attempt. Explain the relevant R mechanism,
+type and data-shape contract, focusing on: formula, design matrix, residual, rank, prediction interval.
+Give one progressive hint before revealing the complete reference unless
+I request it. Distinguish my observed output from an expected result and
+from unrun code. Do not claim mastery from a successful process exit or a
+matching source string.</code></pre></article>
   </main>
 </body>
 </html>

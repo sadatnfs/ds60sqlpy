@@ -193,7 +193,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <h1>K8S 005</h1>
       <p class="source-path">Generated from <code>courses/kubernetes/lessons/k8s-005.yaml</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-yaml"><code><span class="source-line"><span class="syntax-tag">apiVersion</span><span class="syntax-punctuation">:</span> apps/v1</span>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-yaml"><code><span class="source-line"><span class="syntax-comment"># k8s-005 starter. The learner starter deliberately requests readiness from /missing; Exercise 2 asks you to observe that failure and restore /ready. Compare with the separate reference in courses/kubernetes/solutions/ only after your attempt.</span></span>
+<span class="source-line"><span class="syntax-tag">apiVersion</span><span class="syntax-punctuation">:</span> apps/v1</span>
 <span class="source-line"><span class="syntax-tag">kind</span><span class="syntax-punctuation">:</span> Deployment</span>
 <span class="source-line"><span class="syntax-tag">metadata</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">  <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> hello</span>
@@ -228,7 +229,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">              <span class="syntax-tag">containerPort</span><span class="syntax-punctuation">:</span> 8080</span>
 <span class="source-line">          <span class="syntax-tag">readinessProbe</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">            <span class="syntax-tag">httpGet</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">              <span class="syntax-tag">path</span><span class="syntax-punctuation">:</span> /ready</span>
+<span class="source-line">              <span class="syntax-tag">path</span><span class="syntax-punctuation">:</span> /missing</span>
 <span class="source-line">              <span class="syntax-tag">port</span><span class="syntax-punctuation">:</span> http</span>
 <span class="source-line">            <span class="syntax-tag">periodSeconds</span><span class="syntax-punctuation">:</span> 2</span>
 <span class="source-line">            <span class="syntax-tag">failureThreshold</span><span class="syntax-punctuation">:</span> 2</span>
@@ -245,12 +246,18 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">            <span class="syntax-tag">capabilities</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">              <span class="syntax-tag">drop</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">                <span class="syntax-punctuation">-</span> ALL</span>
-<span class="source-line"><span class="syntax-comment"># Exercise 1: Identify image and process contract. Read the source image,pull policy,command and named port. Expected: Image0.2.0,Never,fixed fixture server,port8080 named http.</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 2: Trace broad and precise state. Classify the synthetic Running/Ready=False record. Expected: Process running,readiness unproved,no ready-routing claim.</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 3: Diagnose the image boundary. Compare unapproved-image broker rejection with ErrImageNeverPull from a scoped host fixture. Expected: Two different failure phases are named; neither is described as an application crash.</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 4: Read logs with identity. Record a bounded synthetic log excerpt with Pod UID,container name and restart count. Expected: An evidence record ties the line to the exact observed process instance.</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 5: Distinguish restart from replacement. Compare same Pod UID with restartCount1 against a new Pod UID with restartCount0. Expected: First is a container restart; second is a different Pod instance.</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 6: Prove the bounded baseline. Run the allowed source under a qualified lease and state what its result does and does not observe. Expected: Controller/Ready Pod identities and owned cleanup are observed; Deployment-only run has no Service-client proof.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Identify image and process contract. Read the source image, pull policy, command and named port.</span></span>
+<span class="source-line"><span class="syntax-comment"># My prediction and evidence:</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Trace broad and precise state. Run the starter unchanged: its readinessProbe requests /missing. Classify the resulting state, then restore /ready and Run again.</span></span>
+<span class="source-line"><span class="syntax-comment"># My prediction and evidence:</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: Diagnose the image boundary. Compare unapproved-image broker rejection with ErrImageNeverPull from a scoped host fixture.</span></span>
+<span class="source-line"><span class="syntax-comment"># My prediction and evidence:</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4: Read logs with identity. Record a bounded synthetic log excerpt with Pod UID, container name and restart count.</span></span>
+<span class="source-line"><span class="syntax-comment"># My prediction and evidence:</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5: Distinguish restart from replacement. Compare same Pod UID with restartCount 1 against a new Pod UID with restartCount 0.</span></span>
+<span class="source-line"><span class="syntax-comment"># My prediction and evidence:</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6: Prove the bounded baseline. Run the allowed source under a qualified lease and state what its result does and does not observe.</span></span>
+<span class="source-line"><span class="syntax-comment"># My prediction and evidence:</span></span>
 <span class="source-line"></span></code></pre></article>
   </main>
 </body>

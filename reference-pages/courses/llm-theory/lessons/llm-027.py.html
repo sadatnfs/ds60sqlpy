@@ -199,28 +199,28 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">Copy to .learning before editing. Six independent attempts belong below.</span></span>
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 1: Weight token losses</span></span>
-<span class="source-line"><span class="syntax-comment"># Combine document mean losses1 and3 with token counts1 and3.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: token mean2.5; document mean2.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Weight three documents</span></span>
+<span class="source-line"><span class="syntax-comment"># Combine document mean losses 2, 4 and 1 with token counts 2, 1 and 5.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: token-weighted mean 13/8 = 1.625; document mean 7/3, about 2.333.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 2: Build a calibration bin</span></span>
-<span class="source-line"><span class="syntax-comment"># Use confidences.6,.8,.8,1 with correctness1,1,0,1 in a single bin.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: count4,mean confidence.8,accuracy.75.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Summarize a second calibration bin</span></span>
+<span class="source-line"><span class="syntax-comment"># Use confidences 0.9, 0.9, 0.7, 0.9, 0.6 with correctness 1, 0, 1, 1, 0 in a single bin.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: count 5, mean confidence 0.8, accuracy 0.6: overconfident by 0.2.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Represent an empty bin</span></span>
-<span class="source-line"><span class="syntax-comment"># Select confidence values below.5 and summarize without fabricating a rate.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: count0 and accuracyNone.</span></span>
+<span class="source-line"><span class="syntax-comment"># Select confidence values below 0.5 and summarize without fabricating a rate.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: count 0 and accuracy None.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Check boundary membership</span></span>
-<span class="source-line"><span class="syntax-comment"># Use bins[.5,.8) and[.8,1] on the fixture.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: counts1 and3, total4.</span></span>
+<span class="source-line"><span class="syntax-comment"># Use bins [0.5, 0.8) and [0.8, 1] on the fixture.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: counts 1 and 3, total 4.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Align paired errors</span></span>
-<span class="source-line"><span class="syntax-comment"># Compare dictionariesA q1=0,q2=1 andB q2=0,q1=1 by IDs.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: differences[-1,1], mean0.</span></span>
+<span class="source-line"><span class="syntax-comment"># Compare dictionaries A q1=0, q2=1 and B q2=0, q1=1 by IDs.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: differences [-1, 1], mean 0.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Reject incompatible tokenizer scores</span></span>
-<span class="source-line"><span class="syntax-comment"># Compare evaluation metadata with tokenizer hashv1 versusv2.</span></span>
+<span class="source-line"><span class="syntax-comment"># Compare evaluation metadata with tokenizer hash v1 versus v2.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: direct token-loss comparison marked incompatible.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>

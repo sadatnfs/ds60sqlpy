@@ -212,56 +212,54 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Recovery evidence includes a fresh ownership graph, two Ready Pod UIDs and relevant generation/count fields. It does not establish an availability guarantee during the replacement, which would require client observations over the interval.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-read-desired-and-observed-counts">Worked example 1: Read desired and observed counts<a class="heading-anchor" href="#worked-example-1-read-desired-and-observed-counts" aria-label="Link to this section">#</a></h4>
-<p>Synthetic desired replicas 2, metadata.generation 4, status.observedGeneration 3, readyReplicas2. The count looks healthy, but the controller has not yet observed the latest desired generation.</p>
+<p>Synthetic desired replicas 2, metadata.generation 4, status.observedGeneration 3, readyReplicas 2. The count looks healthy, but the controller has not yet observed the latest desired generation.</p>
 <p><strong>Expected:</strong> The latest change is not proved converged despite two ready replicas.</p>
 <h4 id="worked-example-2-track-a-replacement-graph">Worked example 2: Track a replacement graph<a class="heading-anchor" href="#worked-example-2-track-a-replacement-graph" aria-label="Link to this section">#</a></h4>
-<p>Before: dep-a -&gt; rs-a -&gt; {pod-1, pod-2}. After an owned delete: dep-a -&gt; rs-a -&gt; {pod-2, pod-3}. Desired replicas remain2 and the Deployment generation is unchanged.</p>
+<p>Before: dep-a -&gt; rs-a -&gt; {pod-1, pod-2}. After an owned delete: dep-a -&gt; rs-a -&gt; {pod-2, pod-3}. Desired replicas remain 2 and the Deployment generation is unchanged.</p>
 <p><strong>Expected:</strong> One new Pod UID appears, one old UID disappears, and the controller identity remains dep-a.</p>
 <h3 id="inspect-the-specific-owned-object">Inspect the specific owned object<a class="heading-anchor" href="#inspect-the-specific-owned-object" aria-label="Link to this section">#</a></h3>
 <p>Only after the chapter&#x27;s host capability is provisioned and its resources remain present, use the explicit receipt fields described in <a href="../host-labs.md.html">host-labs.md</a>. A completed one-shot browser Run has already cleaned its objects. The following read does not provision the missing capability and does not justify changing credentials after a Forbidden result.</p>
-<p>POSIX:</p>
+<p>Bash on Linux, macOS or Ubuntu under WSL 2:</p>
 <pre class="highlighted-code"><code class="language-bash">: <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_KUBECONFIG<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt path</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 : <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_CONTEXT<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt context</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 : <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_NAMESPACE<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt namespace</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<span class="syntax-string">&quot;</span> --context <span class="syntax-string">&quot;</span>$LAB_CONTEXT<span class="syntax-string">&quot;</span> --namespace <span class="syntax-string">&quot;</span>$LAB_NAMESPACE<span class="syntax-string">&quot;</span> get deployment hello -o json</code></pre>
-<p>PowerShell:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">-not</span> $env:LAB_KUBECONFIG <span class="syntax-operator">-or</span> <span class="syntax-operator">-not</span> $env:LAB_CONTEXT <span class="syntax-operator">-or</span> <span class="syntax-operator">-not</span> $env:LAB_NAMESPACE<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;Owned receipt fields are required.&#x27;</span> <span class="syntax-punctuation">}</span>
-<span class="syntax-punctuation">&amp;</span> kubectl <span class="syntax-punctuation">-</span>-kubeconfig $env:LAB_KUBECONFIG <span class="syntax-punctuation">-</span>-context $env:LAB_CONTEXT <span class="syntax-punctuation">-</span>-namespace $env:LAB_NAMESPACE get deployment hello -o json
-<span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>$LASTEXITCODE <span class="syntax-operator">-ne</span> 0<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;The scoped observation failed.&#x27;</span> <span class="syntax-punctuation">}</span></code></pre>
+<p>Windows uses the same Bash commands inside WSL 2. The lab adapter refuses native Windows credential handling, so do not run kubectl against the receipt from PowerShell. From PowerShell, only open your WSL 2 distribution (the name reported by <code>wsl.exe --list --verbose</code>), change to your checkout with its Linux path, then run the Bash block above unchanged:</p>
+<pre class="highlighted-code"><code class="language-powershell">wsl<span class="syntax-punctuation">.</span>exe <span class="syntax-punctuation">-</span>-distribution Ubuntu</code></pre>
 <p>Retain only the fields needed by this chapter&#x27;s prediction. A NotFound result may be expected after one-shot cleanup; a Forbidden result may identify a deliberately absent advanced capability. Neither result authorizes an ambient-context fallback.</p>
 <h3 id="run-and-bounded-evidence">Run and bounded evidence<a class="heading-anchor" href="#run-and-bounded-evidence" aria-label="Link to this section">#</a></h3>
-<p>This lesson supplies an allowlisted <code>k8s-kind</code> source. Use <code>courses/kubernetes/lessons/k8s-006.yaml</code> in the prepared module pad and inspect the current fixture-0.2 qualification receipt before Run. The app binds the owned namespace, creates fixed resources, observes its bounded checks and performs UID-aware cleanup. A one-shot Run does not execute the separate stateful host exercises or automatically grade explanations. <a href="../host-labs.md.html">The run/host-lab guide</a> explains the precise boundary and POSIX/PowerShell targeting.</p>
+<p>This lesson supplies an allowlisted <code>k8s-kind</code> source. Use <code>courses/kubernetes/lessons/k8s-006.yaml</code> in the prepared module pad and inspect the current fixture-0.2 qualification receipt before Run. The learner starter declares one replica; Exercise 3 asks you to change it to two. The app binds the owned namespace, creates fixed resources, observes its bounded checks and performs UID-aware cleanup. A one-shot Run does not execute the separate stateful host exercises or automatically grade explanations. <a href="../host-labs.md.html">The run/host-lab guide</a> explains the precise boundary and explicit targeting with Bash on Linux, macOS or WSL 2.</p>
 <p>The <a href="../solutions/k8s-006_solution.yaml.html">manifest example</a> is separate from the learner artifact. The <a href="../solutions/k8s-006_checks.py.html">offline reference check</a> evaluates explicitly synthetic facts and makes no API calls. Run it locally with <code>python courses/kubernetes/solutions/k8s-006_checks.py</code> after comparing your attempt. The <a href="../fixtures/k8s-006-cases.json.html">case ledger</a> is immutable teaching input.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-draw-ownership">Exercise 1: Draw ownership<a class="heading-anchor" href="#exercise-1-draw-ownership" aria-label="Link to this section">#</a></h4>
 <p>Trace Deployment, ReplicaSet and Pod controller references for the baseline.</p>
 <p><strong>Expected result/shape:</strong> A UID-linked graph connects exactly two owned Pods to the intended Deployment.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: A UID-linked graph connects exactly two owned Pods to the intended Deployment.</p>
+<p><strong>Verify:</strong> Follow each <code>metadata.ownerReferences</code> entry with <code>controller: true</code> from Pod to ReplicaSet to Deployment; every arrow in your graph must cite a UID.</p>
 <p><strong>Progressive hints:</strong> Follow controller=true owner references rather than labels alone.</p>
 <h4 id="exercise-2-compare-generation-evidence">Exercise 2: Compare generation evidence<a class="heading-anchor" href="#exercise-2-compare-generation-evidence" aria-label="Link to this section">#</a></h4>
-<p>Interpret generation 4 with observedGeneration 3 and readyReplicas2.</p>
+<p>Interpret generation 4 with observedGeneration 3 and readyReplicas 2.</p>
 <p><strong>Expected result/shape:</strong> Latest desired state not yet confirmed observed.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Latest desired state not yet confirmed observed.</p>
+<p><strong>Verify:</strong> Compare <code>metadata.generation</code> with <code>status.observedGeneration</code> before reading any replica count, and state which comparison your conclusion depends on.</p>
 <p><strong>Progressive hints:</strong> Ready count and generation answer different questions.</p>
 <h4 id="exercise-3-establish-a-fresh-baseline">Exercise 3: Establish a fresh baseline<a class="heading-anchor" href="#exercise-3-establish-a-fresh-baseline" aria-label="Link to this section">#</a></h4>
-<p>Use the allowed two-replica source in a qualified browser operation.</p>
+<p>The starter declares replicas: 1. Change it to 2, then Run the source in a qualified browser operation.</p>
 <p><strong>Expected result/shape:</strong> Two Ready owned Pod UIDs and cleanup evidence, with a new Run identity.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Two Ready owned Pod UIDs and cleanup evidence, with a new Run identity.</p>
+<p><strong>Verify:</strong> Confirm that the Run result lists two distinct Pod UIDs, both Ready, and a cleanup result carrying this Run&#x27;s identity rather than an earlier one.</p>
 <p><strong>Progressive hints:</strong> Record the actual result rather than reusing the synthetic UID names.</p>
 <h4 id="exercise-4-rehearse-scoped-pod-replacement">Exercise 4: Rehearse scoped Pod replacement<a class="heading-anchor" href="#exercise-4-rehearse-scoped-pod-replacement" aria-label="Link to this section">#</a></h4>
 <p>With a stateful owned host capability, delete only the recorded Pod UID and wait for replacement.</p>
-<p><strong>Expected result/shape:</strong> Pod set changes from{pod-1, pod-2} to{pod-2, pod-3} in the synthetic trace; live names/UIDs are recorded separately.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Pod set changes from{pod-1, pod-2} to{pod-2, pod-3} in the synthetic trace; live names/UIDs are recorded separately.</p>
+<p><strong>Expected result/shape:</strong> Pod set changes from {pod-1, pod-2} to {pod-2, pod-3} in the synthetic trace; live names/UIDs are recorded separately.</p>
+<p><strong>Verify:</strong> Your before/after packet must show the Deployment UID and generation unchanged, exactly one Pod UID removed and exactly one new Pod UID added.</p>
 <p><strong>Progressive hints:</strong> Keep Deployment UID and generation in the before/after packet.</p>
 <h4 id="exercise-5-reject-a-count-only-shortcut">Exercise 5: Reject a count-only shortcut<a class="heading-anchor" href="#exercise-5-reject-a-count-only-shortcut" aria-label="Link to this section">#</a></h4>
 <p>Add a foreign-controller Pod to a synthetic list while removing one owned Pod.</p>
 <p><strong>Expected result/shape:</strong> Raw count 2 but owned Ready count 1, so acceptance fails.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Raw count 2 but owned Ready count 1, so acceptance fails.</p>
+<p><strong>Verify:</strong> Recount using only Pods whose controller ownerReference resolves to the intended ReplicaSet UID, then compare that count with the raw list length.</p>
 <p><strong>Progressive hints:</strong> Filter by the verified ownership chain before counting.</p>
 <h4 id="exercise-6-separate-recovery-from-availability">Exercise 6: Separate recovery from availability<a class="heading-anchor" href="#exercise-6-separate-recovery-from-availability" aria-label="Link to this section">#</a></h4>
 <p>Explain which additional observations would show whether clients remained served during replacement.</p>
 <p><strong>Expected result/shape:</strong> A bounded client timeline and error counts are required beyond final Ready replicas.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: A bounded client timeline and error counts are required beyond final Ready replicas.</p>
+<p><strong>Verify:</strong> Name a client-side measurement taken during replacement (request times, results and error counts) that no final Deployment status field can provide.</p>
 <p><strong>Progressive hints:</strong> Final state does not describe every intermediate request.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain the mechanism behind the first example, then distinguish it from this boundary case: One new Pod UID appears, one old UID disappears, and the controller identity remains dep-a. State which observations are synthetic and which, if any, were read from your owned runtime.</p>
@@ -269,7 +267,7 @@ kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<sp
 <p>Two Running Pods can both be unready, and a matching label can belong to a different controller. A stale status count can describe an older generation. Inspect ownerReferences and UIDs before interpreting counts, and preserve a negative fixture with a foreign Pod UID so a count-only checker is visibly inadequate.</p>
 <p>A one-shot Run&#x27;s final cleanup is separate from the deliberate replacement exercise. Do not claim that a Pod observed in a later Run is the replacement of a Pod from an already cleaned-up earlier Run; the Deployment itself may also be a new object.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
-<p>Close the answer and reconstruct the reasoning for Exercise6, Separate recovery from availability. Name the exact source and observed identity you would require before claiming the changed case succeeded.</p>
+<p>Close the answer and reconstruct the reasoning for Exercise 6 (Separate recovery from availability). Name the exact source and observed identity you would require before claiming the changed case succeeded.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue to <code>k8s-007</code> after preserving the six evidence records.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>

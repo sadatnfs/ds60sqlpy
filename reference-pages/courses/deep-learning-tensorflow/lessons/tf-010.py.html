@@ -199,30 +199,32 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">Copy to .learning before editing. Six independent attempts belong below.</span></span>
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 1: Partition accounts</span></span>
-<span class="source-line"><span class="syntax-comment"># Use account IDs A,A,B,B,C,C,D,D with values1,3,5,7,20,22,30,32; train on A,B.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: train mean4 and validation IDs C,D.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Partition a second account fixture</span></span>
+<span class="source-line"><span class="syntax-comment"># Use groups E, E, F, F, G, G, H, H with values 2, 4, 6, 8, 10, 12, 40, 44; train on E, F</span></span>
+<span class="source-line"><span class="syntax-comment"># and G, then center the held-out rows with the training mean.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: train mean 7; validation group H; centered values 33 and 37.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 2: Expose global fitting</span></span>
-<span class="source-line"><span class="syntax-comment"># Change the last validation value to3200 and compare train-only and global means.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: training mean stays4; global mean changes.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Predict the effect of a training outlier</span></span>
+<span class="source-line"><span class="syntax-comment"># Change the first training value from 2 to 200. Predict the new training mean and the</span></span>
+<span class="source-line"><span class="syntax-comment"># centered validation values before running the check.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: training mean 40; centered H values 0 and 4.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Find crossing groups</span></span>
 <span class="source-line"><span class="syntax-comment"># Assign alternating rows to train and validation and inspect intersections.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: A,B,C,D all cross the split.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: A, B, C, D all cross the split.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Apply frozen centering</span></span>
-<span class="source-line"><span class="syntax-comment"># Center both partitions with training mean4 and compare validation centered values.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: validation values16,18,26,28.</span></span>
+<span class="source-line"><span class="syntax-comment"># Center both partitions with training mean 4 and compare validation centered values.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: validation values 16, 18, 26, 28.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Freeze selection identity</span></span>
 <span class="source-line"><span class="syntax-comment"># Hash sorted training IDs before and after calculating validation errors.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: The selection hash is unchanged.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Transfer to unseen accounts</span></span>
-<span class="source-line"><span class="syntax-comment"># Add account E with value1000 only to evaluation; specify whether its normalization can</span></span>
+<span class="source-line"><span class="syntax-comment"># Add account E with value 1000 only to evaluation; specify whether its normalization can</span></span>
 <span class="source-line"><span class="syntax-comment"># update the training mean.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: transformed value996; fitted mean remains4.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: transformed value 996; fitted mean remains 4.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Read the guide and implement the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>

@@ -194,33 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-027_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-027-explanatory-solutions">docker-027: explanatory solutions<a class="heading-anchor" href="#docker-027-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These are explanations of the supplied teaching fixtures, not fabricated engine results.</p>
-<h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
-<p>This capstone adds peer discovery, constrained execution and a recovery test to the first app. The system still fits on one page: app serves JSON and owns its counter volume; client observes app through service DNS; the browser observes the loopback-published endpoint. Keeping these paths small makes failures explainable.</p>
-<p>A recoverable system is more than a system that restarts. It has an identified durable state, a consistency boundary, a backup, an independent restore target and a bounded procedure to regain useful behavior. A second-tier client must also handle a dependency being temporarily unavailable without replaying unsafe writes.</p>
-<p>Your deliverable is a short operator guide plus evidence, not a collection of screenshots. A future reader should know which project the commands affect, which volume contains state, how to inspect a failure, and what they can remove without losing the retained counter.</p>
-<p>Work only in the copied fixture. Verify host and peer requests, record the non-root user and read-only configuration, export the stopped app’s counter, restore into a distinct target and compare. A deliberately wrong service port in a scratch client should fail with a bounded transport error.</p>
-<p>Do not broaden the project into a real database cluster for this exercise. The purpose is to integrate mechanisms already learned, then clearly state the limitations that a database, public endpoint or multi-host deployment would add.</p>
+<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-027.md</code>.</p>
 <h3 id="exercise-1-predict-which-resources-are-durable">Exercise 1: Predict which resources are durable.<a class="heading-anchor" href="#exercise-1-predict-which-resources-are-durable" aria-label="Link to this section">#</a></h3>
-<p>Containers, peer client instances and project networks are replaceable. Do not accidentally rely on writable-layer state when describing recovery.</p>
-<p><strong>Expected:</strong> Only the intended named volume and explicit backup files.</p>
+<p><strong>Expected answer:</strong> Only the intended named volume and explicit backup files.</p>
+<p><strong>Why:</strong> Containers, peer client instances and project networks are replaceable. Do not accidentally rely on writable-layer state when describing recovery.</p>
 <h3 id="exercise-2-change-only-the-peer-target-port-in-a-scratch-copy">Exercise 2: Change only the peer target port in a scratch copy.<a class="heading-anchor" href="#exercise-2-change-only-the-peer-target-port-in-a-scratch-copy" aria-label="Link to this section">#</a></h3>
-<p>The controlled fault separates internal routing from application readiness. Preserve the error rather than changing multiple network settings at once.</p>
-<p><strong>Expected:</strong> The request fails within its timeout while app remains healthy.</p>
+<p><strong>Expected evidence:</strong> The request fails within its timeout while app remains healthy.</p>
+<p><strong>Why:</strong> The controlled fault separates internal routing from application readiness. Preserve the error rather than changing multiple network settings at once.</p>
 <h3 id="exercise-3-build-an-independent-restore-demonstration">Exercise 3: Build an independent restore demonstration.<a class="heading-anchor" href="#exercise-3-build-an-independent-restore-demonstration" aria-label="Link to this section">#</a></h3>
-<p>Recovery evidence requires use of the restored data. A copied file existing at a path is not enough without parsing and an application-level check.</p>
-<p><strong>Expected:</strong> New target state equals the exported counter while source remains intact.</p>
+<p><strong>Expected evidence:</strong> New target state equals the exported counter while source remains intact.</p>
+<p><strong>Why:</strong> Recovery evidence requires use of the restored data. A copied file existing at a path is not enough without parsing and an application-level check.</p>
 <h3 id="exercise-4-diagnose-a-passing-host-request-with-failing-peer-request">Exercise 4: Diagnose a passing host request with failing peer request.<a class="heading-anchor" href="#exercise-4-diagnose-a-passing-host-request-with-failing-peer-request" aria-label="Link to this section">#</a></h3>
-<p>The two paths share an application but have different discovery and routing. Their disagreement localizes the fault.</p>
-<p><strong>Expected:</strong> Inspect service DNS, network attachment and internal target port.</p>
+<p><strong>Expected answer:</strong> Inspect service DNS, network attachment and internal target port.</p>
+<p><strong>Why:</strong> The two paths share an application but have different discovery and routing. Their disagreement localizes the fault.</p>
 <h3 id="exercise-5-explain-the-limits-of-this-single-engine-design">Exercise 5: Explain the limits of this single-engine design.<a class="heading-anchor" href="#exercise-5-explain-the-limits-of-this-single-engine-design" aria-label="Link to this section">#</a></h3>
-<p>A small lab teaches the mechanisms honestly. Production requirements need additional architecture and qualification rather than a larger marketing claim.</p>
-<p><strong>Expected:</strong> No multi-host failover or database consistency guarantee is claimed.</p>
+<p><strong>Expected answer:</strong> No multi-host failover or database consistency guarantee is claimed.</p>
+<p><strong>Why:</strong> A small lab teaches the mechanisms honestly. Production requirements need additional architecture and qualification rather than a larger marketing claim.</p>
 <h3 id="exercise-6-write-a-beginner-operator-handoff">Exercise 6: Write a beginner operator handoff.<a class="heading-anchor" href="#exercise-6-write-a-beginner-operator-handoff" aria-label="Link to this section">#</a></h3>
-<p>A good handoff is executable by a reader with the documented prerequisites. It names state retention explicitly and avoids ambient context assumptions.</p>
-<p><strong>Expected:</strong> Setup, evidence, failure diagnosis, backup/restore and scoped cleanup.</p>
+<p><strong>Expected evidence:</strong> Setup, evidence, failure diagnosis, backup/restore and scoped cleanup.</p>
+<p><strong>Why:</strong> A good handoff is executable by a reader with the documented prerequisites. It names state retention explicitly and avoids ambient context assumptions.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful solution identifies the exact object, the phase when a setting takes effect, the expected normal result and an observation that disproves it. Repeating a command until it succeeds hides the mechanism. Change one variable, keep a failure record, and test the intended behavior again. Source examples here are small enough to inspect; a production system additionally needs ownership, lifecycle, data recovery and operational review. The host exercises are optional and must stay within the learner-created project.</p></article>
+<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>
 </body>
 </html>

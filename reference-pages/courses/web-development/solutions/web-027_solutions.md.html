@@ -194,31 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-027_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-027-explanatory-solutions">web-027: explanatory solutions<a class="heading-anchor" href="#web-027-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.</p>
-<h3 id="why-the-mechanism-works">Why the mechanism works<a class="heading-anchor" href="#why-the-mechanism-works" aria-label="Link to this section">#</a></h3>
-<p>Validation becomes easier to test when a pure function receives data and returns errors without touching the document. The browser layer then displays those errors and moves focus only when it helps recovery. This separation lets the same input contract be tested with normal, missing and boundary values before considering visual presentation. It does not remove the need for backend validation.</p>
-<p>An error summary gives a user an overview after an attempted action. Field-level messages explain how to repair specific values. Connect those messages to controls and preserve entered values. Avoid announcing a long stream of errors on every keystroke. The timing of feedback is a product decision that should reduce confusion rather than punish incomplete typing.</p>
-<p>The reference uses a button to validate local values without submitting a form. Convert the input string carefully, reject empty strings before Number conversion and check Number.isFinite. Return an error list, then render it with textContent. Set aria-invalid only after a failed check. A valid result is a local observation, not a stored request.</p>
+<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-027.md</code>.</p>
 <h3 id="exercise-1-predict-number-and-explain-the-validation-hazard">Exercise 1: Predict Number(&#x27;&#x27;) and explain the validation hazard.<a class="heading-anchor" href="#exercise-1-predict-number-and-explain-the-validation-hazard" aria-label="Link to this section">#</a></h3>
-<p>It produces zero, so an explicit empty-input check prevents misleading acceptance or errors.</p>
-<p>Trace the smallest example before editing. Name which values are source and which are observations.</p>
+<p><strong>Expected answer:</strong> It produces zero, so an explicit empty-input check prevents misleading acceptance or errors.</p>
+<p><strong>Why:</strong> Number(&#x27;&#x27;) returns 0, a finite number, so without an explicit empty check a blank field reaches the range check and gets the wrong message.</p>
 <h3 id="exercise-2-add-the-upper-bound-case-to-a-validation-table">Exercise 2: Add the upper-bound case to a validation table.<a class="heading-anchor" href="#exercise-2-add-the-upper-bound-case-to-a-validation-table" aria-label="Link to this section">#</a></h3>
-<p>120 is accepted and 121 is rejected under the declared inclusive bounds.</p>
-<p>Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.</p>
+<p><strong>Expected evidence:</strong> 120 is accepted and 121 is rejected under the declared inclusive bounds.</p>
+<p><strong>Why:</strong> Inclusive bounds accept the boundary value, so 120 passes and 121 fails; testing both sides catches off-by-one errors.</p>
 <h3 id="exercise-3-build-a-local-form-with-preserved-input-and-linked-validation-feedback">Exercise 3: Build a local form with preserved input and linked validation feedback.<a class="heading-anchor" href="#exercise-3-build-a-local-form-with-preserved-input-and-linked-validation-feedback" aria-label="Link to this section">#</a></h3>
-<p>A failed attempt identifies the problem without clearing the user&#x27;s value.</p>
-<p>Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.</p>
+<p><strong>Expected evidence:</strong> A failed attempt identifies the problem without clearing the user&#x27;s value.</p>
+<p><strong>Why:</strong> Keeping the value lets the user correct the mistake, and a linked message explains what to change.</p>
 <h3 id="exercise-4-diagnose-a-message-shown-visually-but-not-associated-with-its-control">Exercise 4: Diagnose a message shown visually but not associated with its control.<a class="heading-anchor" href="#exercise-4-diagnose-a-message-shown-visually-but-not-associated-with-its-control" aria-label="Link to this section">#</a></h3>
-<p>Use a stable message id and aria-describedby on the input.</p>
-<p>Keep the failing input. Identify the first layer where the observed result differs from the intended contract.</p>
-<h3 id="exercise-5-test-empty-whitespace-negative-nonnumeric-and-valid-values">Exercise 5: Test empty, whitespace, negative, nonnumeric and valid values.<a class="heading-anchor" href="#exercise-5-test-empty-whitespace-negative-nonnumeric-and-valid-values" aria-label="Link to this section">#</a></h3>
-<p>Each produces the declared result with no uncaught exception.</p>
-<p>Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.</p>
+<p><strong>Expected answer:</strong> Use a stable message id and aria-describedby on the input.</p>
+<p><strong>Why:</strong> aria-describedby makes the message part of the input&#x27;s accessible description, so it is announced with the field.</p>
+<h3 id="exercise-5-test-empty-whitespace-negative-nonnumeric-hexadecimal-0x1e-exponent-1e2-fractional-7-5-and-valid-values">Exercise 5: Test empty, whitespace, negative, nonnumeric, hexadecimal (0x1e), exponent (1e2), fractional (7.5) and valid values.<a class="heading-anchor" href="#exercise-5-test-empty-whitespace-negative-nonnumeric-hexadecimal-0x1e-exponent-1e2-fractional-7-5-and-valid-values" aria-label="Link to this section">#</a></h3>
+<p><strong>Expected evidence:</strong> Each produces the declared result with no uncaught exception.</p>
+<p><strong>Why:</strong> Number accepts 0x1e, 1e2 and 7.5, so only the digits-only check rejects them; a loop shows that every case returns a message instead of throwing.</p>
 <h3 id="exercise-6-explain-which-validation-logic-must-be-repeated-on-the-server">Exercise 6: Explain which validation logic must be repeated on the server.<a class="heading-anchor" href="#exercise-6-explain-which-validation-logic-must-be-repeated-on-the-server" aria-label="Link to this section">#</a></h3>
-<p>All acceptance and authorization rules must be enforced independently of client behavior.</p>
-<p>Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.</p>
-<h3 id="reference-comparison-and-limits">Reference comparison and limits<a class="heading-anchor" href="#reference-comparison-and-limits" aria-label="Link to this section">#</a></h3>
-<p>Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.</p></article>
+<p><strong>Expected answer:</strong> All acceptance and authorization rules must be enforced independently of client behavior.</p>
+<p><strong>Why:</strong> Any client can send data without running this script, so the server must repeat every acceptance and authorization rule.</p>
+<h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
+<p>Open <code>courses/web-development/solutions/web-027_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
   </main>
 </body>
 </html>

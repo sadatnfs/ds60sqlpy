@@ -204,10 +204,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>cast(pl.Int64, strict=False) changes the parsed column while retaining failed conversions as null. Combine is_not_null on the raw field with is_null on the parsed field to identify invalid tokens. pl.Decimal(precision=12, scale=2) declares twelve decimal digits with two fractional positions. Choose its range from the data contract, and inspect the result of any arithmetic or cast that changes precision.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open this subject in <code>/classroom</code>, then show its code and notes. The prepared <code>data-engineering</code> worker runs <code>main.py</code> in a fresh temporary directory. The examples use installed packages and synthetic local fixtures; no account, cloud service, network request or package download is required. Save source and notes before switching lessons. Temporary databases, project files and tracking artifacts are recreated by each complete program and removed after the job. The classroom retains the submitted source and bounded output, not an indefinitely running external service. The guide distinguishes this local execution from the deployment decisions that need an owned production environment.</p>
+<p>Open <code>polars-003</code> in <code>/classroom</code>. Its starter <code>main.py</code> contains both worked cases, &quot;Separate missing input from invalid input&quot; and &quot;Decimal arithmetic and narrowing bounds&quot;, and prints the dictionary each case returns. The prepared <code>data-engineering</code> worker runs it in a fresh temporary directory. An <code>AssertionError</code> means that an observation differs from the case&#x27;s stated contract. The inputs are small literal tables. Cases that demonstrate Parquet scans write their files into a temporary directory that is removed when the case returns. No account, network request or package download is involved. Save source and notes before switching lessons.</p>
 <h3 id="worked-case-1-separate-missing-input-from-invalid-input">Worked case 1: Separate missing input from invalid input<a class="heading-anchor" href="#worked-case-1-separate-missing-input-from-invalid-input" aria-label="Link to this section">#</a></h3>
 <p>The first program keeps id and units_text, derives units, and creates separate invalid and missing subsets. It also executes the strict path to prove that the invalid token is rejected. This demonstrates a policy choice with observable consequences rather than silently using a permissive conversion.</p>
-<p><strong>Expected evidence:</strong> Record 2 is malformed, record 3 is missing, and parsed units are[2,null,null,4].</p>
+<p><strong>Expected evidence:</strong> Record 2 is malformed, record 3 is missing, and parsed units are [2, null, null, 4].</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> polars <span class="syntax-keyword">as</span> pl
 
 
@@ -232,7 +232,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>example_one<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="worked-case-2-decimal-arithmetic-and-narrowing-bounds">Worked case 2: Decimal arithmetic and narrowing bounds<a class="heading-anchor" href="#worked-case-2-decimal-arithmetic-and-narrowing-bounds" aria-label="Link to this section">#</a></h3>
 <p>The second program constructs decimal values from strings, so binary approximation is not introduced before the Decimal object exists. It contrasts exact decimal addition with a narrowing integer conversion whose second value is outside the target range.</p>
-<p><strong>Expected evidence:</strong> Decimal total is 0.30; the Int8 conversion gives[127,null].</p>
+<p><strong>Expected evidence:</strong> Decimal total is 0.30; the Int8 conversion gives [127, null].</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> decimal <span class="syntax-keyword">import</span> Decimal
 
 <span class="syntax-keyword">import</span> polars <span class="syntax-keyword">as</span> pl
@@ -253,7 +253,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
     <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>example_two<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="practice">Practice<a class="heading-anchor" href="#practice" aria-label="Link to this section">#</a></h3>
-<p>Make each requested change in a saved copy. Compare both the expected result and the deliberately changed assumption. The separate reference explains the answers.</p>
+<p>The starter contains both worked cases, so a task can change either one. Make each change in a saved copy, run it, and compare the printed result with the task&#x27;s check before opening the separate explained answers.</p>
 <h4 id="1-introduce-a-whitespace-token">1. Introduce a whitespace token<a class="heading-anchor" href="#1-introduce-a-whitespace-token" aria-label="Link to this section">#</a></h4>
 <p>Replace bad with a whitespace-only string and define its category.</p>
 <p><strong>Check:</strong> Your policy explicitly classifies it before numeric conversion.</p>
@@ -267,8 +267,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Check:</strong> The original fixture raises a deliberate validation error.</p>
 <p><strong>Hint:</strong> Count invalid rows before returning clean data.</p>
 <h4 id="4-investigate-a-bound">4. Investigate a bound<a class="heading-anchor" href="#4-investigate-a-bound" aria-label="Link to this section">#</a></h4>
-<p>Try values-129,-128,127,128 as Int8.</p>
-<p><strong>Check:</strong> Only-128 and 127 are representable.</p>
+<p>Try the values -129, -128, 127 and 128 as Int8.</p>
+<p><strong>Check:</strong> Only -128 and 127 are representable.</p>
 <p><strong>Hint:</strong> Signed 8-bit values have 256 states.</p>
 <h4 id="5-avoid-early-float-conversion">5. Avoid early float conversion<a class="heading-anchor" href="#5-avoid-early-float-conversion" aria-label="Link to this section">#</a></h4>
 <p>Construct Decimal values using strings rather than floats.</p>
@@ -281,14 +281,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="diagnose-errors-and-misleading-results">Diagnose errors and misleading results<a class="heading-anchor" href="#diagnose-errors-and-misleading-results" aria-label="Link to this section">#</a></h3>
 <p>A permissive cast that increases null counts is not automatically data loss: it may be correct rejection of bad text. It becomes an analysis defect when the original token, count or reason disappears. Check integer bounds before narrowing and retain exact input strings for decimal parsing. Locale-specific separators, percent signs and mixed units need explicit parsing rules; stripping every nondigit can manufacture plausible but incorrect numbers.</p>
 <h3 id="transfer-to-independent-work">Transfer to independent work<a class="heading-anchor" href="#transfer-to-independent-work" aria-label="Link to this section">#</a></h3>
-<p>Implement a parsing policy that preserves rejected evidence. Extend the fixture with one malformed token, one missing token and one out-of-range value, and reconcile every original identifier into exactly one outcome. For scientific measurements, also state approximation tolerance; for exact decimal quantities, state scale and rounding independently of display formatting.</p>
+<p>Extend the fixture with one malformed token, one missing token and one out-of-range value, and reconcile every original identifier into exactly one outcome. For scientific measurements, also state approximation tolerance; for exact decimal quantities, state scale and rounding independently of display formatting.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
-<li><a href="https://docs.pola.rs/user-guide/expressions/casting/">Polars documentation: Types, parsing failures and exact numeric values</a></li>
+<li><a href="https://docs.pola.rs/user-guide/expressions/casting/">Polars user guide: Casting</a></li>
 <li><a href="https://docs.pola.rs/api/python/stable/reference/index.html">Polars Python API reference</a></li>
 </ul>
 <h3 id="tutor-guidance">Tutor guidance<a class="heading-anchor" href="#tutor-guidance" aria-label="Link to this section">#</a></h3>
-<p>Use the repository learning-companion skill for <code>polars-003</code>. Inspect the learner&#x27;s own source and observations, ask for an explanation of the relevant data or state contract, and give a focused hint. Separate an assertion on this fixture from a claim about an external dataset or deployed service.</p></article>
+<p>Use the repository&#x27;s <code>$guide-ds60sqlpy-learning</code> skill (<code>.agents/skills/guide-ds60sqlpy-learning/SKILL.md</code>) for <code>polars-003</code>. Inspect the learner&#x27;s own source and printed output first. Ask for an explanation of strict casts, quarantine, integer bounds, Decimal and missingness in their own words, then give one focused hint at a time. Keep an assertion on this synthetic fixture separate from a claim about an external dataset or deployed service.</p></article>
   </main>
 </body>
 </html>

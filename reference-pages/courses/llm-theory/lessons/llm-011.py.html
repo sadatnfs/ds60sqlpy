@@ -202,7 +202,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-comment"># Exercise 1: Split and rejoin</span></span>
 <span class="source-line"><span class="syntax-comment"># Split X=[[0,1,2,3],[4,5,6,7]] into two heads, inspect membership, then invert the</span></span>
 <span class="source-line"><span class="syntax-comment"># layout.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: head zero is [[0,1],[4,5]], head one is [[2,3],[6,7]], and rejoining restores X exactly.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: head zero is [[0, 1], [4, 5]], head one is [[2, 3], [6, 7]], and rejoining restores X exactly.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 2: Calculate a residual</span></span>
 <span class="source-line"><span class="syntax-comment"># Add branch 2X to X, then compare with zero and cancelling branches.</span></span>
@@ -211,7 +211,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Use a tokenwise nonlinear block</span></span>
 <span class="source-line"><span class="syntax-comment"># Apply the explicit identity-weight, bias-minus-two feed-forward branch to two token</span></span>
 <span class="source-line"><span class="syntax-comment"># rows.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: first output [0,0,0,1]; changing the second token does not change the first output.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: first output [0, 0, 0, 1]; changing the second token does not change the first output.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Test actual head mixtures and causal prefixes</span></span>
 <span class="source-line"><span class="syntax-comment"># Run the three-token four-feature fixture through two causal heads and compare</span></span>
@@ -226,7 +226,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Detect a wrong rejoin</span></span>
 <span class="source-line"><span class="syntax-comment"># Flatten the head-major tensor directly and compare values with the correctly inverted</span></span>
 <span class="source-line"><span class="syntax-comment"># transpose.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: the wrong [2,4] result differs despite matching shape; the inverse operation restores X.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: the wrong [2, 4] result differs despite matching shape; the inverse operation restores X.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Read the guide and implement the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>

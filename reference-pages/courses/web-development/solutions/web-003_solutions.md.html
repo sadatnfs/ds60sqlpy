@@ -194,31 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-003_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-003-explanatory-solutions">web-003: explanatory solutions<a class="heading-anchor" href="#web-003-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.</p>
-<h3 id="why-the-mechanism-works">Why the mechanism works<a class="heading-anchor" href="#why-the-mechanism-works" aria-label="Link to this section">#</a></h3>
-<p>Semantic markup tells the browser and reader what a piece of content is. A main region contains the page&#x27;s primary content. Navigation groups major navigation links; a header introduces a page or section; a footer provides related closing information. These elements are not a promise of any particular position on screen. A header can appear inside an article and need not be a fixed top bar.</p>
-<p>Headings provide a hierarchy that a screen reader and a visual reader can use to scan. Use the main topic as h1 and its major subdivisions as h2, with h3 for nested detail. Choose levels for structure, not because the browser&#x27;s default font size looks attractive. A section normally benefits from a heading; a generic div is appropriate when there is no additional semantic meaning.</p>
-<p>Draw the content outline before assigning tags. Use one visible main region for the primary task. Give repeated navigation regions distinct accessible labels such as <code>aria-label=&quot;Course&quot;</code>. A skip link points to the main region&#x27;s id and lets a keyboard user bypass repeated controls. Native HTML supplies roles automatically; redundant roles rarely add value.</p>
+<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-003.md</code>.</p>
 <h3 id="exercise-1-draw-the-heading-outline-of-the-first-example">Exercise 1: Draw the heading outline of the first example.<a class="heading-anchor" href="#exercise-1-draw-the-heading-outline-of-the-first-example" aria-label="Link to this section">#</a></h3>
-<p>Study notes contains HTML as one second-level section.</p>
-<p>Trace the smallest example before editing. Name which values are source and which are observations.</p>
+<p><strong>Expected answer:</strong> Study notes contains HTML as one second-level section.</p>
+<p><strong>Why:</strong> Heading levels express nesting: an h2 inside the h1 topic is a subsection, so the outline follows the numbers, not the font sizes.</p>
 <h3 id="exercise-2-add-a-sibling-css-section-at-the-correct-level">Exercise 2: Add a sibling CSS section at the correct level.<a class="heading-anchor" href="#exercise-2-add-a-sibling-css-section-at-the-correct-level" aria-label="Link to this section">#</a></h3>
-<p>CSS and HTML both use h2 because they have the same parent topic.</p>
-<p>Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.</p>
+<p><strong>Expected evidence:</strong> CSS and HTML both use h2 because they have the same parent topic.</p>
+<p><strong>Why:</strong> Topics that share a parent share a heading level; an h3 would make CSS a subsection of HTML.</p>
 <h3 id="exercise-3-build-a-study-page-with-landmarks-and-a-working-skip-link">Exercise 3: Build a study page with landmarks and a working skip link.<a class="heading-anchor" href="#exercise-3-build-a-study-page-with-landmarks-and-a-working-skip-link" aria-label="Link to this section">#</a></h3>
-<p>Header, labeled navigation, one main and footer have meaningful content; the skip target exists.</p>
-<p>Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.</p>
+<p><strong>Expected evidence:</strong> Header, labeled navigation, one main and footer have meaningful content; the skip target exists.</p>
+<p><strong>Why:</strong> Landmarks let assistive technology jump between regions, and the skip link lets keyboard users bypass repeated navigation; both depend on the target id existing exactly once.</p>
 <h3 id="exercise-4-replace-a-heading-used-only-for-large-text-with-an-appropriate-element">Exercise 4: Replace a heading used only for large text with an appropriate element.<a class="heading-anchor" href="#exercise-4-replace-a-heading-used-only-for-large-text-with-an-appropriate-element" aria-label="Link to this section">#</a></h3>
-<p>A visual callout uses CSS without corrupting the document outline.</p>
-<p>Keep the failing input. Identify the first layer where the observed result differs from the intended contract.</p>
+<p><strong>Expected evidence:</strong> A visual callout uses CSS without corrupting the document outline.</p>
+<p><strong>Why:</strong> Headings build the document outline that screen-reader users navigate, so a decorative heading inserts a false section.</p>
 <h3 id="exercise-5-check-the-document-with-css-disabled-or-unavailable">Exercise 5: Check the document with CSS disabled or unavailable.<a class="heading-anchor" href="#exercise-5-check-the-document-with-css-disabled-or-unavailable" aria-label="Link to this section">#</a></h3>
-<p>The reading order and heading relationships remain coherent.</p>
-<p>Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.</p>
+<p><strong>Expected evidence:</strong> The reading order and heading relationships remain coherent.</p>
+<p><strong>Why:</strong> Source order is the reading and focus order for most users, so a page that only makes sense visually hides a structural problem.</p>
 <h3 id="exercise-6-explain-when-a-div-is-more-appropriate-than-section">Exercise 6: Explain when a div is more appropriate than section.<a class="heading-anchor" href="#exercise-6-explain-when-a-div-is-more-appropriate-than-section" aria-label="Link to this section">#</a></h3>
-<p>Use a generic container when grouping does not introduce a meaningful headed section.</p>
-<p>Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.</p>
-<h3 id="reference-comparison-and-limits">Reference comparison and limits<a class="heading-anchor" href="#reference-comparison-and-limits" aria-label="Link to this section">#</a></h3>
-<p>Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.</p></article>
+<p><strong>Expected answer:</strong> Use a generic container when grouping does not introduce a meaningful headed section.</p>
+<p><strong>Why:</strong> section represents a thematic group that normally has a heading; div carries no meaning and is right for grouping that exists only for styling.</p>
+<h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
+<p>Open <code>courses/web-development/solutions/web-003_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
   </main>
 </body>
 </html>

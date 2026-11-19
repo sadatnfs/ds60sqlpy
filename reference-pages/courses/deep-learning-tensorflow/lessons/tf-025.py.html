@@ -200,24 +200,24 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 1: Compare similarity measures</span></span>
-<span class="source-line"><span class="syntax-comment"># Use anchor[1,0],positive[1,1],negative[0,1]; compute dots and cosines.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: dots1,0; cosines1/sqrt2,0.</span></span>
+<span class="source-line"><span class="syntax-comment"># Use anchor [1, 0], positive [1, 1], negative [0, 1]; compute dots and cosines.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: dots 1, 0; cosines \(1/\sqrt{2}\), 0.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 2: Scale a candidate</span></span>
-<span class="source-line"><span class="syntax-comment"># Multiply the positive vector by10 and compare dot product and cosine.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: dot10; cosine unchanged.</span></span>
+<span class="source-line"><span class="syntax-comment"># Multiply the positive vector by 10 and compare dot product and cosine.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: dot 10; cosine unchanged.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Calculate a contrastive loss</span></span>
-<span class="source-line"><span class="syntax-comment"># Use logits[1,0] with the positive at index0.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: losslog(1+exp(-1)).</span></span>
+<span class="source-line"><span class="syntax-comment"># Use logits [1, 0] with the positive at index 0.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: loss \(\log(1+e^{-1})\).</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Detect a false negative</span></span>
 <span class="source-line"><span class="syntax-comment"># Replace the negative vector and identity with the positive identity.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: duplicate positive/negative identity is flagged.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Observe temperature</span></span>
-<span class="source-line"><span class="syntax-comment"># Compare softmax[1,0] at temperatures1 and.5.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: positive probability increases at.5; ranking stays0 first.</span></span>
+<span class="source-line"><span class="syntax-comment"># Compare softmax[1, 0] at temperatures 1 and 0.5.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: positive probability increases at 0.5; ranking stays 0 first.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Reject undefined cosine</span></span>
 <span class="source-line"><span class="syntax-comment"># Implement cosine with finite and nonzero-norm checks; pass a zero anchor.</span></span>

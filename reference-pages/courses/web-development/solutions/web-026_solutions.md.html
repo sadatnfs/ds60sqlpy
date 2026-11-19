@@ -194,31 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-026_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-026-explanatory-solutions">web-026: explanatory solutions<a class="heading-anchor" href="#web-026-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.</p>
-<h3 id="why-the-mechanism-works">Why the mechanism works<a class="heading-anchor" href="#why-the-mechanism-works" aria-label="Link to this section">#</a></h3>
-<p>A disclosure reveals content in the current document, while a dialog creates a focused interaction context. These are different patterns and should not be chosen only for visual style. Native details and summary elements provide a useful disclosure without JavaScript. A modal dialog changes which content can be interacted with and needs a clear way to close, an accessible name and sensible focus restoration.</p>
-<p>Focus is part of the interaction&#x27;s state. When a dialog opens, the user should land in a meaningful place. When it closes, focus usually returns to the control that opened it if that control still exists. Keyboard users must not become trapped in an accidental custom implementation. Native dialog behavior supplies important mechanics, but authors still own labeling, content order and testing.</p>
-<p>Use details with summary for optional explanation. Use a dialog element and showModal when a true modal task is justified. A form with method=dialog can close the dialog; this local behavior is distinct from a network form submission. The offline preview may restrict submission APIs, so this reference closes explicitly through the dialog API and keeps all state local.</p>
+<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-026.md</code>.</p>
 <h3 id="exercise-1-choose-a-disclosure-or-dialog-for-an-optional-explanation">Exercise 1: Choose a disclosure or dialog for an optional explanation.<a class="heading-anchor" href="#exercise-1-choose-a-disclosure-or-dialog-for-an-optional-explanation" aria-label="Link to this section">#</a></h3>
-<p>A disclosure usually fits because it preserves the surrounding reading context.</p>
-<p>Trace the smallest example before editing. Name which values are source and which are observations.</p>
+<p><strong>Expected answer:</strong> A disclosure usually fits because it preserves the surrounding reading context.</p>
+<p><strong>Why:</strong> A disclosure keeps the explanation in place and does not interrupt the task, while a modal dialog blocks the rest of the page.</p>
 <h3 id="exercise-2-give-a-dialog-a-visible-heading-and-accessible-name">Exercise 2: Give a dialog a visible heading and accessible name.<a class="heading-anchor" href="#exercise-2-give-a-dialog-a-visible-heading-and-accessible-name" aria-label="Link to this section">#</a></h3>
-<p>aria-labelledby connects it to the heading&#x27;s unique id.</p>
-<p>Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.</p>
+<p><strong>Expected evidence:</strong> aria-labelledby connects it to the heading&#x27;s unique id.</p>
+<p><strong>Why:</strong> aria-labelledby makes the visible heading the dialog&#x27;s accessible name, so it is announced when the dialog opens.</p>
 <h3 id="exercise-3-build-a-disclosure-and-a-deliberately-opened-local-dialog">Exercise 3: Build a disclosure and a deliberately opened local dialog.<a class="heading-anchor" href="#exercise-3-build-a-disclosure-and-a-deliberately-opened-local-dialog" aria-label="Link to this section">#</a></h3>
-<p>Both are labeled, keyboard operable and can be closed without losing the task.</p>
-<p>Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.</p>
+<p><strong>Expected evidence:</strong> Both are labeled, keyboard operable and can be closed without losing the task.</p>
+<p><strong>Why:</strong> Native details and dialog elements provide keyboard support, Escape handling and the top layer without custom focus code.</p>
 <h3 id="exercise-4-diagnose-focus-returning-to-an-unrelated-control-after-closure">Exercise 4: Diagnose focus returning to an unrelated control after closure.<a class="heading-anchor" href="#exercise-4-diagnose-focus-returning-to-an-unrelated-control-after-closure" aria-label="Link to this section">#</a></h3>
-<p>Track the opener and restore focus when appropriate.</p>
-<p>Keep the failing input. Identify the first layer where the observed result differs from the intended contract.</p>
+<p><strong>Expected answer:</strong> Track the opener and restore focus when appropriate.</p>
+<p><strong>Why:</strong> Returning focus to the opener keeps keyboard users at the same place in the task.</p>
 <h3 id="exercise-5-test-escape-close-button-activation-and-repeated-opening">Exercise 5: Test Escape, close-button activation and repeated opening.<a class="heading-anchor" href="#exercise-5-test-escape-close-button-activation-and-repeated-opening" aria-label="Link to this section">#</a></h3>
-<p>The interaction remains consistent across repeated cycles and does not trap focus.</p>
-<p>Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.</p>
+<p><strong>Expected evidence:</strong> The interaction remains consistent across repeated cycles and does not trap focus.</p>
+<p><strong>Why:</strong> Repeated cycles reveal leaks such as duplicate listeners or focus moving to the page start.</p>
 <h3 id="exercise-6-explain-why-a-modal-is-inappropriate-for-every-small-message">Exercise 6: Explain why a modal is inappropriate for every small message.<a class="heading-anchor" href="#exercise-6-explain-why-a-modal-is-inappropriate-for-every-small-message" aria-label="Link to this section">#</a></h3>
-<p>It interrupts context and imposes focus management costs that a simple inline message avoids.</p>
-<p>Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.</p>
-<h3 id="reference-comparison-and-limits">Reference comparison and limits<a class="heading-anchor" href="#reference-comparison-and-limits" aria-label="Link to this section">#</a></h3>
-<p>Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.</p></article>
+<p><strong>Expected answer:</strong> It interrupts context and imposes focus management costs that a simple inline message avoids.</p>
+<p><strong>Why:</strong> A modal blocks the page and requires focus management, which a short inline message does not need.</p>
+<h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
+<p>Open <code>courses/web-development/solutions/web-026_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
   </main>
 </body>
 </html>

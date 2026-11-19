@@ -197,7 +197,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Intermediate. Allow about 120 minutes, then revisit the transfer case later. Prerequisites: go-020</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
-<p>By the end, explain precedence, flag set, validation boundary; implement the six investigations below; and defend the expected result of a changed input before running it. A passing reference is evidence about that program, not a certification of your independent understanding.</p>
+<p>Implement a command-line interface with flag that applies explicit precedence and rejects unknown or invalid options. Along the way, explain precedence, flag set, validation boundary; implement the six investigations below; and defend the expected result of a changed input before running it.</p>
 <h3 id="why-this-mechanism-matters">Why this mechanism matters<a class="heading-anchor" href="#why-this-mechanism-matters" aria-label="Link to this section">#</a></h3>
 <p>A command-line interface translates external strings into validated application configuration. Defaults, flags, environment and configuration files need an explicit precedence order; silently mixing them creates surprising deployments. Parse configuration once at the boundary and pass a typed value to the program. The browser pad has no arbitrary argument channel, so this lesson uses an isolated flag.FlagSet with synthetic argument slices. This exercises the real parser without changing the process global flags. A production CLI also needs clear help, stable exit codes, redacted diagnostics and a documented distinction between malformed input and runtime failure.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
@@ -208,7 +208,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ul>
 <h3 id="syntax-anatomy-and-reasoning">Syntax anatomy and reasoning<a class="heading-anchor" href="#syntax-anatomy-and-reasoning" aria-label="Link to this section">#</a></h3>
 <p>flag.NewFlagSet with ContinueOnError returns parse failures instead of exiting the process. IntVar binds a flag to storage, Parse accepts a []string and Args returns positional leftovers. SetOutput can redirect diagnostics to a buffer for tests. Do not call os.Exit from a library helper, because it prevents its caller from controlling cleanup and testing. Validate ranges after parsing: the parser can accept a negative integer even if the domain forbids it.</p>
-<h3 id="classroom-execution-contract">Classroom execution contract<a class="heading-anchor" href="#classroom-execution-contract" aria-label="Link to this section">#</a></h3>
+<h3 id="run-this-lesson">Run this lesson<a class="heading-anchor" href="#run-this-lesson" aria-label="Link to this section">#</a></h3>
 <p>Choose Go in the unified Docker classroom. Save your own pad before experimenting. The prepared worker stages it as <code>main.go</code>, compiles it, and executes the resulting program with bounded time and output. The pad is one source file. It does not supply interactive input, arbitrary command-line arguments, package installation, Kubernetes credentials or a host Docker socket. Every ordinary reference here uses the standard library, synthetic local data and explicit checks. A failed <code>check</code> panics and produces a nonzero process result; do not remove it to make the run appear successful.</p>
 <p>The explanatory solution snippets belong inside <code>func main()</code> unless they declare a helper. <code>check</code> is a tiny teaching helper that panics when a condition is false. The separate reference supplies required imports and helpers and implements all six cases. Use that complete source only after an attempt or an explicit reveal. For an independently prepared Go project, the equivalent local build is <code>go build -o lesson main.go</code>, followed by <code>./lesson</code>; use Linux or WSL 2 for that optional workflow. Compiling proves syntax and type consistency, while the executed checks establish the stated example contracts.</p>
 <p>Each worked example below is a complete Go file. Copy one whole block into your saved pad and run it. Example 2 includes the first case as well as the second, so its setup is complete. Its supporting declarations may be reused in later investigations. The separate reference implements all six cases.</p>
@@ -304,75 +304,75 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>
 <p>For each example, write the input values, the state that can change, and the expected observation. Explain which result would disprove your current interpretation. For concurrency, predict a guaranteed relationship rather than an arbitrary scheduling order. For an error case, identify whether it is rejected at compilation or returned during execution.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
-<h4 id="exercise-1-apply-an-explicit-flag">Exercise 1: Apply an explicit flag<a class="heading-anchor" href="#exercise-1-apply-an-explicit-flag" aria-label="Link to this section">#</a></h4>
-<p>Parse -count=3 with a default of 1.</p>
-<p><strong>Expected:</strong> The resulting count is 3.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
-<h4 id="exercise-2-retain-a-default">Exercise 2: Retain a default<a class="heading-anchor" href="#exercise-2-retain-a-default" aria-label="Link to this section">#</a></h4>
-<p>Parse no arguments.</p>
-<p><strong>Expected:</strong> The count remains 1.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<h4 id="exercise-1-apply-an-explicit-flag-change-one-input">Exercise 1: Apply an explicit flag: change one input<a class="heading-anchor" href="#exercise-1-apply-an-explicit-flag-change-one-input" aria-label="Link to this section">#</a></h4>
+<p>Copy worked example 1 into a scratch pad and change <code>n, args, err := parseArgs([]string{&quot;-count=3&quot;})</code> to <code>n, args, err := parseArgs([]string{&quot;-count=4&quot;})</code>. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</p>
+<p><strong>Expected:</strong> The changed run panics with <code>flag</code> because <code>err == nil &amp;&amp; n == 3 &amp;&amp; len(args) == 0</code> no longer holds. Restoring the original line brings back the worked observation: the resulting count is 3.</p>
+<p><strong>Verify:</strong> Compare your written prediction with the panic message <code>flag</code> and name the value that made <code>err == nil &amp;&amp; n == 3 &amp;&amp; len(args) == 0</code> false. After restoring the input, the program must print its success line again.</p>
+<h4 id="exercise-2-retain-a-default-diagnose-an-edited-check">Exercise 2: Retain a default: diagnose an edited check<a class="heading-anchor" href="#exercise-2-retain-a-default-diagnose-an-edited-check" aria-label="Link to this section">#</a></h4>
+<p>A careless edit changed the check in worked example 2 so that it reads <code>check(err != nil &amp;&amp; n == 1, &quot;default&quot;)</code>. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.</p>
+<p><strong>Expected:</strong> Before the repair the program panics with <code>default</code>; after it the line reads <code>check(err == nil &amp;&amp; n == 1, &quot;default&quot;)</code> again and the count remains 1.</p>
+<p><strong>Verify:</strong> Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that <code>err == nil &amp;&amp; n == 1</code> accepts.</p>
 <h4 id="exercise-3-reject-an-unknown-option">Exercise 3: Reject an unknown option<a class="heading-anchor" href="#exercise-3-reject-an-unknown-option" aria-label="Link to this section">#</a></h4>
 <p>Parse -mystery=2.</p>
 <p><strong>Expected:</strong> Parsing returns an error.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>err != nil</code>. As a control, change <code>check(err != nil, &quot;unknown option&quot;)</code> to <code>check(err == nil, &quot;unknown option&quot;)</code> inside that check: it must panic with <code>unknown option</code>, which shows the check can fail. Restore it.</p>
 <h4 id="exercise-4-preserve-positional-arguments">Exercise 4: Preserve positional arguments<a class="heading-anchor" href="#exercise-4-preserve-positional-arguments" aria-label="Link to this section">#</a></h4>
 <p>Parse a count flag followed by a filename.</p>
 <p><strong>Expected:</strong> The remaining argument is input.csv.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>err == nil &amp;&amp; len(args) == 1 &amp;&amp; args[0] == &quot;input.csv&quot;</code>. As a control, change <code>_, args, err := parseArgs([]string{&quot;-count=2&quot;, &quot;input.csv&quot;})</code> to <code>_, args, err := parseArgs([]string{&quot;-count=2!&quot;, &quot;input.csv&quot;})</code>: the run must panic with <code>positionals</code>. Restore the line before continuing.</p>
 <h4 id="exercise-5-reject-a-domain-invalid-count">Exercise 5: Reject a domain-invalid count<a class="heading-anchor" href="#exercise-5-reject-a-domain-invalid-count" aria-label="Link to this section">#</a></h4>
 <p>Parse -count=-1 and perform range validation.</p>
 <p><strong>Expected:</strong> The operation returns a domain error.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>err != nil</code>. As a control, change <code>check(err != nil, &quot;range&quot;)</code> to <code>check(err == nil, &quot;range&quot;)</code> inside that check: it must panic with <code>range</code>, which shows the check can fail. Restore it.</p>
 <h4 id="exercise-6-transfer-precedence">Exercise 6: Transfer precedence<a class="heading-anchor" href="#exercise-6-transfer-precedence" aria-label="Link to this section">#</a></h4>
 <p>Apply a flag override of 4 after a default value of 1.</p>
 <p><strong>Expected:</strong> The explicit setting wins.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>err == nil &amp;&amp; n == 4</code>. As a control, change <code>n, _, err := parseArgs([]string{&quot;-count=4&quot;})</code> to <code>n, _, err := parseArgs([]string{&quot;-count=5&quot;})</code>: the run must panic with <code>precedence</code>. Restore the line before continuing.</p>
 <p>Implement these in the answer-free learner source. Keep one independent check per claim. A task can require tracing, construction, a changed input or a deliberate safe failure. Do not run a data race, corrupt memory or contact a shared cluster merely to demonstrate why it would be wrong.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Read a compiler error from the first location in your source, then fix one cause at a time. Unused imports and variables are errors in Go; add an import when its use exists, rather than copying a large unused import list. A panic from <code>check</code> identifies a violated example contract. Compare the actual value with the expected value and inspect the state transition that produced it. A returned <code>error</code> is a value that the caller must handle; an ignored error can make later output look plausible while the original operation failed.</p>
 <p>The lesson-specific explanations in the two examples identify the important counterexamples. Extend that reasoning to every investigation: explain why a plausible alternative would fail, and preserve a tiny input that distinguishes it. Treat empty data, missing values and cancellation as domain cases with explicit policies. In concurrent work, replace sleeps used as synchronization with channels, mutexes or an explicit ownership protocol.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<h4 id="hint-for-investigation-1-apply-an-explicit-flag">Hint for investigation 1: Apply an explicit flag<a class="heading-anchor" href="#hint-for-investigation-1-apply-an-explicit-flag" aria-label="Link to this section">#</a></h4>
+<h4 id="hint-for-investigation-1-apply-an-explicit-flag-change-one-input">Hint for investigation 1: Apply an explicit flag: change one input<a class="heading-anchor" href="#hint-for-investigation-1-apply-an-explicit-flag-change-one-input" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The resulting count is 3.</li>
-<li>Identify the input and the state boundary relevant to apply an explicit flag. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>err == nil &amp;&amp; n == 3 &amp;&amp; len(args) == 0</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Compute the checked value with <code>n, args, err := parseArgs([]string{&quot;-count=4&quot;})</code> in place before running, then compare it with the value <code>err == nil &amp;&amp; n == 3 &amp;&amp; len(args) == 0</code> expects.</li>
 </ol>
-<h4 id="hint-for-investigation-2-retain-a-default">Hint for investigation 2: Retain a default<a class="heading-anchor" href="#hint-for-investigation-2-retain-a-default" aria-label="Link to this section">#</a></h4>
+<h4 id="hint-for-investigation-2-retain-a-default-diagnose-an-edited-check">Hint for investigation 2: Retain a default: diagnose an edited check<a class="heading-anchor" href="#hint-for-investigation-2-retain-a-default-diagnose-an-edited-check" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The count remains 1.</li>
-<li>Identify the input and the state boundary relevant to retain a default. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>err == nil &amp;&amp; n == 1</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Compare <code>check(err != nil &amp;&amp; n == 1, &quot;default&quot;)</code> with the same line in worked example 2 and state the claim each version makes.</li>
 </ol>
 <h4 id="hint-for-investigation-3-reject-an-unknown-option">Hint for investigation 3: Reject an unknown option<a class="heading-anchor" href="#hint-for-investigation-3-reject-an-unknown-option" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Parsing returns an error.</li>
-<li>Identify the input and the state boundary relevant to reject an unknown option. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>err != nil</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Name one input that would make <code>err != nil</code> false. A check that no input can falsify is not evidence.</li>
 </ol>
 <h4 id="hint-for-investigation-4-preserve-positional-arguments">Hint for investigation 4: Preserve positional arguments<a class="heading-anchor" href="#hint-for-investigation-4-preserve-positional-arguments" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The remaining argument is input.csv.</li>
-<li>Identify the input and the state boundary relevant to preserve positional arguments. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>err == nil &amp;&amp; len(args) == 1 &amp;&amp; args[0] == &quot;input.csv&quot;</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Predict the effect of changing <code>_, args, err := parseArgs([]string{&quot;-count=2&quot;, &quot;input.csv&quot;})</code> to <code>_, args, err := parseArgs([]string{&quot;-count=2!&quot;, &quot;input.csv&quot;})</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
 </ol>
 <h4 id="hint-for-investigation-5-reject-a-domain-invalid-count">Hint for investigation 5: Reject a domain-invalid count<a class="heading-anchor" href="#hint-for-investigation-5-reject-a-domain-invalid-count" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The operation returns a domain error.</li>
-<li>Identify the input and the state boundary relevant to reject a domain-invalid count. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>err != nil</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Name one input that would make <code>err != nil</code> false. A check that no input can falsify is not evidence.</li>
 </ol>
 <h4 id="hint-for-investigation-6-transfer-precedence">Hint for investigation 6: Transfer precedence<a class="heading-anchor" href="#hint-for-investigation-6-transfer-precedence" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The explicit setting wins.</li>
-<li>Identify the input and the state boundary relevant to transfer precedence. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>err == nil &amp;&amp; n == 4</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Predict the effect of changing <code>n, _, err := parseArgs([]string{&quot;-count=4&quot;})</code> to <code>n, _, err := parseArgs([]string{&quot;-count=5&quot;})</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
 </ol>
 <h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
 <p>Close the reference. Rebuild one normal case and one boundary case from a blank pad. Explain the role of precedence without using its name in the definition. Then change the domain while keeping the same invariant. Record the new input, your prediction and the observed output. If your program passes only because its input is hard-coded, explain which part would need a reusable function in a larger project.</p>
 <h3 id="next-step-and-sources">Next step and sources<a class="heading-anchor" href="#next-step-and-sources" aria-label="Link to this section">#</a></h3>
-<p><a href="https://pkg.go.dev/flag">Primary language or library documentation</a>, reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. This source supports the API contract; it does not verify the classroom worker. Runtime receipts are recorded separately by the repository validation tools. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.</p>
+<p><a href="https://pkg.go.dev/flag">Primary language or library documentation</a>, reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for go-021: Command-line contracts and configuration precedence.
 Read courses/go/guides/go-021.md and my saved attempt based on courses/go/lessons/go-021.go.

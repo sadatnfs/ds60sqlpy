@@ -194,33 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-018_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-018-explanatory-solutions">docker-018: explanatory solutions<a class="heading-anchor" href="#docker-018-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These are explanations of the supplied teaching fixtures, not fabricated engine results.</p>
-<h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
-<p>A bridge network connects container interfaces on one engine. A user-defined bridge provides scoped service discovery and connectivity for attached containers. Compose normally creates such a network for a project. DNS maps a service name to a current reachable address; the name is a better application dependency than a temporary container IP.</p>
-<p>The app and client in the fixture communicate using <code>app:8080</code>. The client does not need the host’s published port. A container replacement can change its address while the service name remains the intended lookup key. Applications must reconnect and resolve names appropriately rather than retaining a dead connection forever.</p>
-<p>Network attachment and authorization are different concerns. Sharing a network can permit connectivity, but an application still needs authentication when serving sensitive operations. Conversely, a private network is not a reason to publish every internal port on the host.</p>
-<p>The optional client uses Python’s HTTP library and a short timeout. <code>docker compose run --rm client</code> creates a short-lived container attached to the project’s network. It resolves <code>app</code>, connects to 8080 and prints the JSON response. The fixture marks that service with a tools profile so it does not remain as another server during ordinary startup.</p>
-<p>A DNS resolution failure, a refused connection and a valid HTTP error are different observations. Diagnose from the caller’s namespace, because the host may resolve different names and use a different route.</p>
+<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-018.md</code>.</p>
 <h3 id="exercise-1-predict-the-name-a-peer-uses-for-the-app">Exercise 1: Predict the name a peer uses for the app.<a class="heading-anchor" href="#exercise-1-predict-the-name-a-peer-uses-for-the-app" aria-label="Link to this section">#</a></h3>
-<p>The project network’s discovery maps that name to current service endpoints. A hardcoded IP creates unnecessary coupling to a container instance.</p>
-<p><strong>Expected:</strong> The Compose service name app.</p>
+<p><strong>Expected answer:</strong> The Compose service name app.</p>
+<p><strong>Why:</strong> The project network’s discovery maps that name to current service endpoints. A hardcoded IP creates unnecessary coupling to a container instance.</p>
 <h3 id="exercise-2-explain-why-a-peer-should-not-use-host-loopback">Exercise 2: Explain why a peer should not use host loopback.<a class="heading-anchor" href="#exercise-2-explain-why-a-peer-should-not-use-host-loopback" aria-label="Link to this section">#</a></h3>
-<p>Network namespace scope applies consistently. A copied browser URL is not a universal address for every caller.</p>
-<p><strong>Expected:</strong> Its loopback refers to the peer itself.</p>
+<p><strong>Expected answer:</strong> Its loopback refers to the peer itself.</p>
+<p><strong>Why:</strong> Network namespace scope applies consistently. A copied browser URL is not a universal address for every caller.</p>
 <h3 id="exercise-3-draw-the-dns-to-request-sequence">Exercise 3: Draw the DNS-to-request sequence.<a class="heading-anchor" href="#exercise-3-draw-the-dns-to-request-sequence" aria-label="Link to this section">#</a></h3>
-<p>Separate name resolution from transport and application processing so each failure has a minimal next observation.</p>
-<p><strong>Expected:</strong> Resolve app, connect to container port, send HTTP request, inspect body.</p>
+<p><strong>Expected answer:</strong> Resolve app, connect to container port, send HTTP request, inspect body.</p>
+<p><strong>Why:</strong> Separate name resolution from transport and application processing so each failure has a minimal next observation.</p>
 <h3 id="exercise-4-diagnose-dns-success-with-connection-refusal">Exercise 4: Diagnose DNS success with connection refusal.<a class="heading-anchor" href="#exercise-4-diagnose-dns-success-with-connection-refusal" aria-label="Link to this section">#</a></h3>
-<p>Check app state, listen address and target port. Replacing DNS configuration is not justified by a successful resolution.</p>
-<p><strong>Expected:</strong> The destination resolved but no reachable listener accepted that port.</p>
+<p><strong>Expected answer:</strong> The destination resolved but no reachable listener accepted that port.</p>
+<p><strong>Why:</strong> Check app state, listen address and target port. Replacing DNS configuration is not justified by a successful resolution.</p>
 <h3 id="exercise-5-predict-a-reconnect-after-app-recreation">Exercise 5: Predict a reconnect after app recreation.<a class="heading-anchor" href="#exercise-5-predict-a-reconnect-after-app-recreation" aria-label="Link to this section">#</a></h3>
-<p>An established connection can fail when its old backend disappears. Client recovery must match operation safety rather than blindly replay every request.</p>
-<p><strong>Expected:</strong> A fresh lookup and connection can reach the new instance.</p>
+<p><strong>Expected answer:</strong> A fresh lookup and connection can reach the new instance.</p>
+<p><strong>Why:</strong> An established connection can fail when its old backend disappears. Client recovery must match operation safety rather than blindly replay every request.</p>
 <h3 id="exercise-6-design-an-internal-only-database-connection">Exercise 6: Design an internal-only database connection.<a class="heading-anchor" href="#exercise-6-design-an-internal-only-database-connection" aria-label="Link to this section">#</a></h3>
-<p>Internal peers need a network path, not necessarily a host socket. Keep publication limited to intended user entrypoints and use application credentials as needed.</p>
-<p><strong>Expected:</strong> Use service DNS and container port without host publication.</p>
+<p><strong>Expected evidence:</strong> Use service DNS and container port without host publication.</p>
+<p><strong>Why:</strong> Internal peers need a network path, not necessarily a host socket. Keep publication limited to intended user entrypoints and use application credentials as needed.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful solution identifies the exact object, the phase when a setting takes effect, the expected normal result and an observation that disproves it. Repeating a command until it succeeds hides the mechanism. Change one variable, keep a failure record, and test the intended behavior again. Source examples here are small enough to inspect; a production system additionally needs ownership, lifecycle, data recovery and operational review. The host exercises are optional and must stay within the learner-created project.</p></article>
+<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>
 </body>
 </html>

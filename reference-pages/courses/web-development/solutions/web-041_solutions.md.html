@@ -194,31 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-041_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-041-explanatory-solutions">web-041: explanatory solutions<a class="heading-anchor" href="#web-041-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.</p>
-<h3 id="why-the-mechanism-works">Why the mechanism works<a class="heading-anchor" href="#why-the-mechanism-works" aria-label="Link to this section">#</a></h3>
-<p>An interface describes operations a caller can rely on without selecting a specific implementation. Composition builds behavior from collaborating objects. Dependency injection means supplying a dependency rather than constructing an unknown global dependency inside the operation. These techniques help when a real boundary varies, such as storage or time, but unnecessary interfaces can add ceremony to a tiny fixed calculation.</p>
-<p>A test double supplies a controlled implementation for a test. An in-memory repository can verify application behavior without a database, but it does not prove SQL syntax, transactions or connection recovery. Keep unit evidence separate from integration evidence. The same interface can make both tests possible without pretending they are identical.</p>
-<p>Define a repository interface with a narrow operation such as countCompleted. The service receives that interface through its constructor. A memory implementation holds synthetic records for this lesson. The service can then be tested with known data and no network. Later PDO lessons qualify the database boundary separately.</p>
+<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-041.md</code>.</p>
 <h3 id="exercise-1-identify-the-dependency-hidden-by-the-interface">Exercise 1: Identify the dependency hidden by the interface.<a class="heading-anchor" href="#exercise-1-identify-the-dependency-hidden-by-the-interface" aria-label="Link to this section">#</a></h3>
-<p>The application depends on progress-reading behavior, not a specific database implementation.</p>
-<p>Trace the smallest example before editing. Name which values are source and which are observations.</p>
+<p><strong>Expected answer:</strong> The application depends on progress-reading behavior, not a specific database implementation.</p>
+<p><strong>Why:</strong> The service depends only on the ability to count completed lessons, so any implementation of that method can be used.</p>
 <h3 id="exercise-2-supply-an-in-memory-store-with-a-known-count">Exercise 2: Supply an in-memory store with a known count.<a class="heading-anchor" href="#exercise-2-supply-an-in-memory-store-with-a-known-count" aria-label="Link to this section">#</a></h3>
-<p>The service output is deterministic and requires no external connection.</p>
-<p>Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.</p>
+<p><strong>Expected evidence:</strong> The service output is deterministic and requires no external connection.</p>
+<p><strong>Why:</strong> An in-memory implementation makes the output deterministic and needs no database.</p>
 <h3 id="exercise-3-build-a-summary-service-with-an-injected-repository">Exercise 3: Build a summary service with an injected repository.<a class="heading-anchor" href="#exercise-3-build-a-summary-service-with-an-injected-repository" aria-label="Link to this section">#</a></h3>
-<p>The same service works with two controlled implementations that satisfy the interface.</p>
-<p>Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.</p>
+<p><strong>Expected evidence:</strong> The same service works with two controlled implementations that satisfy the interface.</p>
+<p><strong>Why:</strong> Constructor injection lets the same service run against different stores without code changes.</p>
 <h3 id="exercise-4-diagnose-a-test-double-that-returns-impossible-domain-values">Exercise 4: Diagnose a test double that returns impossible domain values.<a class="heading-anchor" href="#exercise-4-diagnose-a-test-double-that-returns-impossible-domain-values" aria-label="Link to this section">#</a></h3>
-<p>The double should preserve the relevant contract instead of making invalid states look normal.</p>
-<p>Keep the failing input. Identify the first layer where the observed result differs from the intended contract.</p>
+<p><strong>Expected answer:</strong> The double should preserve the relevant contract instead of making invalid states look normal.</p>
+<p><strong>Why:</strong> A test double should respect the domain rules; impossible values make tests pass for states that can never occur.</p>
 <h3 id="exercise-5-test-zero-completed-lessons">Exercise 5: Test zero completed lessons.<a class="heading-anchor" href="#exercise-5-test-zero-completed-lessons" aria-label="Link to this section">#</a></h3>
-<p>The summary handles an empty state without a special external dependency.</p>
-<p>Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.</p>
+<p><strong>Expected evidence:</strong> The summary handles an empty state without a special external dependency.</p>
+<p><strong>Why:</strong> The service must handle an empty state, and a controlled double makes that case easy to test.</p>
 <h3 id="exercise-6-explain-what-remains-untested-by-an-in-memory-repository">Exercise 6: Explain what remains untested by an in-memory repository.<a class="heading-anchor" href="#exercise-6-explain-what-remains-untested-by-an-in-memory-repository" aria-label="Link to this section">#</a></h3>
-<p>Database queries, schema constraints, transactions and connection behavior require integration tests.</p>
-<p>Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.</p>
-<h3 id="reference-comparison-and-limits">Reference comparison and limits<a class="heading-anchor" href="#reference-comparison-and-limits" aria-label="Link to this section">#</a></h3>
-<p>Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.</p></article>
+<p><strong>Expected answer:</strong> Database queries, schema constraints, transactions and connection behavior require integration tests.</p>
+<p><strong>Why:</strong> SQL correctness, constraints, transactions and connection failures need integration tests against the real database.</p>
+<h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
+<p>Open <code>courses/web-development/solutions/web-041_solution.php</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.</p></article>
   </main>
 </body>
 </html>

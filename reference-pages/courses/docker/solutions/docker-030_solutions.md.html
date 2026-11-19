@@ -194,33 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-030_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-030-explanatory-solutions">docker-030: explanatory solutions<a class="heading-anchor" href="#docker-030-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These are explanations of the supplied teaching fixtures, not fabricated engine results.</p>
-<h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
-<p>A vulnerability finding connects an affected component version to a published issue under a scanner’s knowledge and matching rules. It is evidence for investigation, not a complete exploitability assessment. False matches, missing packages, runtime exposure and available fixes all influence the response.</p>
-<p>Patching an image generally means rebuilding from updated inputs and replacing containers with the new image. Installing packages interactively inside a running container makes an untracked difference that disappears on recreation. The maintained build recipe and lock inputs must describe the repair.</p>
-<p>A rebuild can introduce regressions as well as fixes. Use a small update scope, preserve the old immutable artifact, run the relevant tests and verify the actual final image. Do not claim that a passing scan proves absence of all vulnerabilities or that an unfixed low-severity finding is automatically harmless.</p>
-<p>Classify findings by component, installed version, fixed version if available, application reachability and required action. Keep the scanner database timestamp and artifact digest. A tag-based report becomes stale when the tag changes.</p>
-<p>For this lesson, use a synthetic finding table and prepare an update plan without downloading a scanner or changing the engine. Actual scanning is an optional explicitly prepared tool workflow. The course does not invent a zero-findings badge for an unscanned image.</p>
+<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-030.md</code>.</p>
 <h3 id="exercise-1-separate-vulnerability-presence-and-exploitability">Exercise 1: Separate vulnerability presence and exploitability.<a class="heading-anchor" href="#exercise-1-separate-vulnerability-presence-and-exploitability" aria-label="Link to this section">#</a></h3>
-<p>Both matter, but neither should be fabricated. A finding needs triage even when immediate exploitability is uncertain.</p>
-<p><strong>Expected:</strong> A matched affected component versus a demonstrated reachable exploit condition.</p>
+<p><strong>Expected evidence:</strong> A matched affected component versus a demonstrated reachable exploit condition.</p>
+<p><strong>Why:</strong> Both matter, but neither should be fabricated. A finding needs triage even when immediate exploitability is uncertain.</p>
 <h3 id="exercise-2-predict-why-an-interactive-patch-disappears">Exercise 2: Predict why an interactive patch disappears.<a class="heading-anchor" href="#exercise-2-predict-why-an-interactive-patch-disappears" aria-label="Link to this section">#</a></h3>
-<p>The writable layer is not the source of truth for a reproducible release. Capture the change in the build recipe and rebuild.</p>
-<p><strong>Expected:</strong> Container recreation returns to the packaged image inputs.</p>
+<p><strong>Expected answer:</strong> Container recreation returns to the packaged image inputs.</p>
+<p><strong>Why:</strong> The writable layer is not the source of truth for a reproducible release. Capture the change in the build recipe and rebuild.</p>
 <h3 id="exercise-3-design-a-minimal-base-image-update">Exercise 3: Design a minimal base-image update.<a class="heading-anchor" href="#exercise-3-design-a-minimal-base-image-update" aria-label="Link to this section">#</a></h3>
-<p>Keep other changes small so failures can be attributed. Record both old and new identities for rollback and comparison.</p>
-<p><strong>Expected:</strong> Change the resolved base deliberately and rerun relevant acceptance.</p>
+<p><strong>Expected evidence:</strong> Change the resolved base deliberately and rerun relevant acceptance.</p>
+<p><strong>Why:</strong> Keep other changes small so failures can be attributed. Record both old and new identities for rollback and comparison.</p>
 <h3 id="exercise-4-diagnose-a-scan-report-attached-only-to-a-mutable-tag">Exercise 4: Diagnose a scan report attached only to a mutable tag.<a class="heading-anchor" href="#exercise-4-diagnose-a-scan-report-attached-only-to-a-mutable-tag" aria-label="Link to this section">#</a></h3>
-<p>The current tag may refer to different bytes. Evidence must be tied to immutable identity and the scanner’s knowledge date.</p>
-<p><strong>Expected:</strong> Resolve the exact scanned artifact before using the result.</p>
+<p><strong>Expected answer:</strong> Resolve the exact scanned artifact before using the result.</p>
+<p><strong>Why:</strong> The current tag may refer to different bytes. Evidence must be tied to immutable identity and the scanner’s knowledge date.</p>
 <h3 id="exercise-5-explain-why-zero-findings-is-not-a-universal-security-proof">Exercise 5: Explain why zero findings is not a universal security proof.<a class="heading-anchor" href="#exercise-5-explain-why-zero-findings-is-not-a-universal-security-proof" aria-label="Link to this section">#</a></h3>
-<p>Application flaws, configuration issues and unknown vulnerabilities may be outside the scanner’s matching rules. State the actual tool result and limits.</p>
-<p><strong>Expected:</strong> Scanners have scope and knowledge limitations.</p>
+<p><strong>Expected answer:</strong> Scanners have scope and knowledge limitations.</p>
+<p><strong>Why:</strong> Application flaws, configuration issues and unknown vulnerabilities may be outside the scanner’s matching rules. State the actual tool result and limits.</p>
 <h3 id="exercise-6-write-a-patch-decision-record">Exercise 6: Write a patch decision record.<a class="heading-anchor" href="#exercise-6-write-a-patch-decision-record" aria-label="Link to this section">#</a></h3>
-<p>The record should make the operational decision reviewable. It should not replace evidence with an unqualified claim that everything is now safe.</p>
-<p><strong>Expected:</strong> Finding, affected artifact, chosen action, tests and residual risk.</p>
+<p><strong>Expected evidence:</strong> Finding, affected artifact, chosen action, tests and residual risk.</p>
+<p><strong>Why:</strong> The record should make the operational decision reviewable. It should not replace evidence with an unqualified claim that everything is now safe.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful solution identifies the exact object, the phase when a setting takes effect, the expected normal result and an observation that disproves it. Repeating a command until it succeeds hides the mechanism. Change one variable, keep a failure record, and test the intended behavior again. Source examples here are small enough to inspect; a production system additionally needs ownership, lifecycle, data recovery and operational review. The host exercises are optional and must stay within the learner-created project.</p></article>
+<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>
 </body>
 </html>

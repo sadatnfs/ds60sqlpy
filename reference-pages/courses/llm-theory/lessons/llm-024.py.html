@@ -200,27 +200,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 1: Compute a full-prefix oracle</span></span>
-<span class="source-line"><span class="syntax-comment"># Initialize seed7 decoder and evaluate IDs2,5,7,3 at once.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: logits shape(1,4,16).</span></span>
+<span class="source-line"><span class="syntax-comment"># Initialize the seed-7 decoder and evaluate IDs 2, 5, 7, 3 at once.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: logits shape (1, 4, 16).</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 2: Run one token at a time</span></span>
 <span class="source-line"><span class="syntax-comment"># Carry returned K/V through four one-token calls and concatenate logits.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: incremental logits match full within1e-6.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: incremental logits match full within 1e-6.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Inspect cache growth</span></span>
 <span class="source-line"><span class="syntax-comment"># Check final cache token count and per-head width.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: cache shape(1,2,4,16).</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: cache shape (1, 2, 4, 16).</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Bind ownership</span></span>
-<span class="source-line"><span class="syntax-comment"># Associate the cache with requestA and modelv1; reject requestB.</span></span>
+<span class="source-line"><span class="syntax-comment"># Associate the cache with request A and model v1; reject request B.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: ValueError for foreign request.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Start a fresh request empty</span></span>
-<span class="source-line"><span class="syntax-comment"># Run token2 with no cache and compare with the first full-prefix position.</span></span>
+<span class="source-line"><span class="syntax-comment"># Run token 2 with no cache and compare with the first full-prefix position.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: logits match the original first position.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Invalidate after a model change</span></span>
-<span class="source-line"><span class="syntax-comment"># Attempt to use the v1-owned cache with versionv2.</span></span>
+<span class="source-line"><span class="syntax-comment"># Attempt to use the v1-owned cache with version v2.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: ValueError for stale version.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>

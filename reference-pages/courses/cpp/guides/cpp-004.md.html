@@ -206,7 +206,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Trace [4, -2, 0, 6] as four transitions. Starting total 0 becomes 4 after the first item, stays 4 for the rejected -2, stays 4 for the accepted zero and becomes 10 for 6. The zero step explains why comparing totals alone cannot detect &gt;0 versus &gt;=0: acceptance counts expose the difference. An index loop should state a half-open interval such as [0, size), so an empty input naturally executes zero iterations.</p>
 <h3 id="state-boundaries-and-loop-progress">State, boundaries and loop progress<a class="heading-anchor" href="#state-boundaries-and-loop-progress" aria-label="Link to this section">#</a></h3>
-<p>A loop has three questions: what state is carried, which element is visited next, and why does the process terminate? In nonnegative_sum, the carried state is total. Immediately before each iteration, total equals the sum of the nonnegative values in the already visited prefix. Initially that prefix is empty, so zero is the correct state. After processing4 the prefix sum is 4; after -2 it stays4; after 0 it stays4; after 6 it becomes10. This is an invariant, not merely a description of one lucky output.</p>
+<p>A loop has three questions: what state is carried, which element is visited next, and why does the process terminate? In nonnegative_sum, the carried state is total. Immediately before each iteration, total equals the sum of the nonnegative values in the already visited prefix. Initially that prefix is empty, so zero is the correct state. After processing 4 the prefix sum is 4; after -2 it stays 4; after 0 it stays 4; after 6 it becomes 10. This is an invariant, not merely a description of one lucky output.</p>
 <p>The range-for declaration <code>int x : xs</code> copies the current integer into x. Changing x would not change the vector element. The body executes once per element and never for an empty vector. No special empty-case index is needed because the traversal contract already handles zero elements. An index loop requires more care: for a vector of size n, valid indices are 0 through n-1, while n is the past-the-end position. Using &lt;=size instead of &lt;size creates an invalid access on the final iteration.</p>
 <p>A boundary bug can be hidden by an aggregate. Replacing &gt;=0 with &gt;0 changes whether zero is retained, but adding zero does not change the total. Therefore a total-only test cannot distinguish those predicates. Track both accepted count and sum when the policy cares about membership. The empty, all-negative and mixed fixtures exercise different paths; none substitutes for the exact zero boundary.</p>
 <p>Loop initialization belongs outside the repeated body when it represents accumulated history. If total is reset to zero at each iteration, the program forgets every prior contribution and may return only the last accepted value. A trace table exposes that defect immediately. The same principle applies to counters, maximum-so-far values and parser state: choose an initial identity and explain the transition before writing the loop.</p>
@@ -214,7 +214,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the C++ module, save this lesson&#x27;s learner pad, then use Run. The worker stages the pad as <code>main.cpp</code> and compiles one translation unit. Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for exact local commands, flags, exit statuses, paths and Docker guidance. Tests involving multiple files, CMake, tool flags or shared libraries are explicitly host-project exercises.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
-<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs:each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
+<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs: each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p><a href="../examples/cpp-004-example-1.cpp.html">Complete program 1</a></p>
 <pre class="highlighted-code"><code class="language-cpp"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;cassert&gt;</span>
@@ -234,7 +234,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpp-004 example 1 checks passed</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
   <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
-<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<p><strong>Expected:</strong> With assertions enabled, the program exits with status 0 and prints:</p>
 <pre class="highlighted-code"><code class="language-text">cpp-004 example 1 checks passed</code></pre>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p><a href="../examples/cpp-004-example-2.cpp.html">Complete program 2</a></p>
@@ -255,38 +255,38 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpp-004 example 2 checks passed</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
   <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
-<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<p><strong>Expected:</strong> With assertions enabled, the program exits with status 0 and prints:</p>
 <pre class="highlighted-code"><code class="language-text">cpp-004 example 2 checks passed</code></pre>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-trace-state">Exercise 1: Trace state<a class="heading-anchor" href="#exercise-1-trace-state" aria-label="Link to this section">#</a></h4>
 <p>Trace [4, -2, 0, 6] with a row for each input.</p>
 <p><strong>Expected result/shape:</strong> Totals [4, 4, 4, 10], four visits.</p>
-<p><strong>Verify:</strong> Totals [4, 4, 4, 10], four visits.</p>
+<p><strong>Verify:</strong> Add a temporary print of <code>x</code> and <code>total</code> inside the loop of Worked example 1: it must print exactly four lines, and the last total must equal the asserted 10.</p>
 <p><strong>Progressive hints:</strong> Only the negative value is excluded.</p>
 <h4 id="exercise-2-change-the-threshold">Exercise 2: Change the threshold<a class="heading-anchor" href="#exercise-2-change-the-threshold" aria-label="Link to this section">#</a></h4>
 <p>Count retained values for &gt;=0 and &gt;0 on [4, -2, 0, 6].</p>
 <p><strong>Expected result/shape:</strong> Counts 3 and 2; both sums 10.</p>
-<p><strong>Verify:</strong> Counts 3 and 2; both sums 10.</p>
+<p><strong>Verify:</strong> Assert both counts (3 and 2) and both sums (10) in one program; only the element 0 changes classification between the two predicates.</p>
 <p><strong>Progressive hints:</strong> A sum can hide a zero-boundary error.</p>
 <h4 id="exercise-3-construct-a-bounded-loop">Exercise 3: Construct a bounded loop<a class="heading-anchor" href="#exercise-3-construct-a-bounded-loop" aria-label="Link to this section">#</a></h4>
 <p>Sum integers 1 through 4 with an index loop.</p>
 <p><strong>Expected result/shape:</strong> 10 from exactly four iterations.</p>
-<p><strong>Verify:</strong> 10 from exactly four iterations.</p>
+<p><strong>Verify:</strong> Keep a separate iteration counter and assert <code>counter == 4 &amp;&amp; sum == 10</code>, then confirm the condition is <code>i &lt;= 4</code> when <code>i</code> starts at 1.</p>
 <p><strong>Progressive hints:</strong> Use i&lt;=4 or an equivalent half-open range.</p>
 <h4 id="exercise-4-repair-a-reset">Exercise 4: Repair a reset<a class="heading-anchor" href="#exercise-4-repair-a-reset" aria-label="Link to this section">#</a></h4>
 <p>Move total=0 into the loop, predict, then repair the scratch copy.</p>
 <p><strong>Expected result/shape:</strong> Broken final total 6; repaired total 10.</p>
-<p><strong>Verify:</strong> Broken final total 6; repaired total 10.</p>
+<p><strong>Verify:</strong> Run the broken scratch copy and confirm it returns 6, the last element alone; after moving <code>total = 0</code> back above the loop, assert the result is 10 again.</p>
 <p><strong>Progressive hints:</strong> Initialization inside the loop forgets earlier state.</p>
 <h4 id="exercise-5-test-the-empty-boundary">Exercise 5: Test the empty boundary<a class="heading-anchor" href="#exercise-5-test-the-empty-boundary" aria-label="Link to this section">#</a></h4>
 <p>Run empty and all-negative vectors.</p>
 <p><strong>Expected result/shape:</strong> Both totals 0; no element access.</p>
-<p><strong>Verify:</strong> Both totals 0; no element access.</p>
+<p><strong>Verify:</strong> Assert <code>nonnegative_sum({}) == 0</code> and <code>nonnegative_sum({-1, -5}) == 0</code> in one program; the empty case must not index the vector.</p>
 <p><strong>Progressive hints:</strong> The invariant starts valid before any iteration.</p>
 <h4 id="exercise-6-transfer-the-predicate">Exercise 6: Transfer the predicate<a class="heading-anchor" href="#exercise-6-transfer-the-predicate" aria-label="Link to this section">#</a></h4>
 <p>Keep readings in [0, 5] from [-1, 0, 4, 5, 6].</p>
 <p><strong>Expected result/shape:</strong> Values [0, 4, 5], total 9.</p>
-<p><strong>Verify:</strong> Values [0, 4, 5], total 9.</p>
+<p><strong>Verify:</strong> Assert the kept values equal <code>std::vector&lt;int&gt;{0, 4, 5}</code> and their total is 9; both boundary values 0 and 5 stay while -1 and 6 are dropped.</p>
 <p><strong>Progressive hints:</strong> Use conjunction with both inclusive boundaries.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain why this observation follows from the mechanism: The running total is 4, 4, 4, 10. Then explain the changed condition in example 2 without opening the answer.</p>

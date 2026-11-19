@@ -197,7 +197,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Beginner. Allow about 90 minutes, then revisit the transfer case later. Prerequisites: go-002</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
-<p>By the end, explain invariant, short circuit, half-open interval; implement the six investigations below; and defend the expected result of a changed input before running it. A passing reference is evidence about that program, not a certification of your independent understanding.</p>
+<p>Write loops with an explicit invariant that handle empty input, exact boundaries and early exit correctly. Along the way, explain invariant, short circuit, half-open interval; implement the six investigations below; and defend the expected result of a changed input before running it.</p>
 <h3 id="why-this-mechanism-matters">Why this mechanism matters<a class="heading-anchor" href="#why-this-mechanism-matters" aria-label="Link to this section">#</a></h3>
 <p>Control flow determines which statements execute. A condition is a boolean expression, not a number used as a truth value. Go&#x27;s for statement covers counting loops, condition-controlled loops and collection iteration. The safest way to reason about a loop is to name an invariant: a statement true before the first iteration and preserved by every iteration. In a prefix sum, the accumulator contains exactly the elements already visited. Empty input is therefore not an exceptional accident; the initial accumulator already represents its result. Short-circuit operators also affect execution, which makes a guard before a potentially unsafe operation meaningful.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
@@ -208,7 +208,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ul>
 <h3 id="syntax-anatomy-and-reasoning">Syntax anatomy and reasoning<a class="heading-anchor" href="#syntax-anatomy-and-reasoning" aria-label="Link to this section">#</a></h3>
 <p>if condition { ... } selects a branch. &amp;&amp; skips the right operand when the left is false. for i := 0; i &lt; len(items); i++ visits a half-open index interval. break leaves the innermost loop; continue skips to its next iteration. switch compares one expression against alternatives and does not fall through by default. A boundary using &lt;= instead of &lt; often attempts one extra iteration.</p>
-<h3 id="classroom-execution-contract">Classroom execution contract<a class="heading-anchor" href="#classroom-execution-contract" aria-label="Link to this section">#</a></h3>
+<h3 id="run-this-lesson">Run this lesson<a class="heading-anchor" href="#run-this-lesson" aria-label="Link to this section">#</a></h3>
 <p>Choose Go in the unified Docker classroom. Save your own pad before experimenting. The prepared worker stages it as <code>main.go</code>, compiles it, and executes the resulting program with bounded time and output. The pad is one source file. It does not supply interactive input, arbitrary command-line arguments, package installation, Kubernetes credentials or a host Docker socket. Every ordinary reference here uses the standard library, synthetic local data and explicit checks. A failed <code>check</code> panics and produces a nonzero process result; do not remove it to make the run appear successful.</p>
 <p>The explanatory solution snippets belong inside <code>func main()</code> unless they declare a helper. <code>check</code> is a tiny teaching helper that panics when a condition is false. The separate reference supplies required imports and helpers and implements all six cases. Use that complete source only after an attempt or an explicit reveal. For an independently prepared Go project, the equivalent local build is <code>go build -o lesson main.go</code>, followed by <code>./lesson</code>; use Linux or WSL 2 for that optional workflow. Compiling proves syntax and type consistency, while the executed checks establish the stated example contracts.</p>
 <p>Each worked example below is a complete Go file. Copy one whole block into your saved pad and run it. Example 2 includes the first case as well as the second, so its setup is complete. Its supporting declarations may be reused in later investigations. The separate reference implements all six cases.</p>
@@ -281,75 +281,75 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>
 <p>For each example, write the input values, the state that can change, and the expected observation. Explain which result would disprove your current interpretation. For concurrency, predict a guaranteed relationship rather than an arbitrary scheduling order. For an error case, identify whether it is rejected at compilation or returned during execution.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
-<h4 id="exercise-1-trace-a-prefix-sum">Exercise 1: Trace a prefix sum<a class="heading-anchor" href="#exercise-1-trace-a-prefix-sum" aria-label="Link to this section">#</a></h4>
-<p>Sum 2, 4 and 6 while checking every visited prefix.</p>
-<p><strong>Expected:</strong> The final sum is 12 and three elements were visited.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
-<h4 id="exercise-2-handle-empty-data">Exercise 2: Handle empty data<a class="heading-anchor" href="#exercise-2-handle-empty-data" aria-label="Link to this section">#</a></h4>
-<p>Apply the same summation to an empty slice.</p>
-<p><strong>Expected:</strong> The result is 0 with no special invented element.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<h4 id="exercise-1-trace-a-prefix-sum-change-one-input">Exercise 1: Trace a prefix sum: change one input<a class="heading-anchor" href="#exercise-1-trace-a-prefix-sum-change-one-input" aria-label="Link to this section">#</a></h4>
+<p>Copy worked example 1 into a scratch pad and change <code>items := []int{2, 4, 6}</code> to <code>items := []int{3, 4, 6}</code>. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</p>
+<p><strong>Expected:</strong> The changed run panics with <code>sum</code> because <code>sum == 12 &amp;&amp; len(items) == 3</code> no longer holds. Restoring the original line brings back the worked observation: the final sum is 12 and three elements were visited.</p>
+<p><strong>Verify:</strong> Compare your written prediction with the panic message <code>sum</code> and name the value that made <code>sum == 12 &amp;&amp; len(items) == 3</code> false. After restoring the input, the program must print its success line again.</p>
+<h4 id="exercise-2-handle-empty-data-debug-a-regression">Exercise 2: Handle empty data: debug a regression<a class="heading-anchor" href="#exercise-2-handle-empty-data-debug-a-regression" aria-label="Link to this section">#</a></h4>
+<p>A regression changed one token in worked example 2, so one line now reads <code>sum := 1</code>. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.</p>
+<p><strong>Expected:</strong> Before the repair the program panics with <code>empty sum</code>; after it the line reads <code>sum := 0</code> again and the result is 0 with no special invented element.</p>
+<p><strong>Verify:</strong> Keep the failing and the repaired runs. Explain why the changed token alters the value tested by <code>sum == 0</code> for this input.</p>
 <h4 id="exercise-3-use-a-safe-guard">Exercise 3: Use a safe guard<a class="heading-anchor" href="#exercise-3-use-a-safe-guard" aria-label="Link to this section">#</a></h4>
 <p>Guard access to the first element of an empty slice with a length check.</p>
 <p><strong>Expected:</strong> The condition is false and no indexing occurs.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>!positive</code>. As a control, change <code>check(!positive, &quot;guard&quot;)</code> to <code>check(positive, &quot;guard&quot;)</code> inside that check: it must panic with <code>guard</code>, which shows the check can fail. Restore it.</p>
 <h4 id="exercise-4-find-the-first-match">Exercise 4: Find the first match<a class="heading-anchor" href="#exercise-4-find-the-first-match" aria-label="Link to this section">#</a></h4>
 <p>Find the first 8 in 3, 8, 8.</p>
 <p><strong>Expected:</strong> Its index is 1.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>found == 1</code>. As a control, change <code>if x == 8 {</code> to <code>if x != 8 {</code>: the run must panic with <code>first match</code>. Restore the line before continuing.</p>
 <h4 id="exercise-5-classify-an-exact-boundary">Exercise 5: Classify an exact boundary<a class="heading-anchor" href="#exercise-5-classify-an-exact-boundary" aria-label="Link to this section">#</a></h4>
 <p>Classify a score of 60 as pass using a threshold of 60.</p>
 <p><strong>Expected:</strong> The boundary belongs to the passing branch.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>label == &quot;pass&quot;</code>. As a control, change <code>if score &gt;= 60 {</code> to <code>if score &gt; 60 {</code>: the run must panic with <code>inclusive boundary</code>. Restore the line before continuing.</p>
 <h4 id="exercise-6-transfer-to-a-filtered-count">Exercise 6: Transfer to a filtered count<a class="heading-anchor" href="#exercise-6-transfer-to-a-filtered-count" aria-label="Link to this section">#</a></h4>
 <p>Count nonnegative values in -2, 0, 4 and -1.</p>
 <p><strong>Expected:</strong> Exactly 2 values satisfy the predicate.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>count == 2</code>. As a control, change <code>if x &lt; 0 {</code> to <code>if x &lt;= 0 {</code>: the run must panic with <code>filtered count</code>. Restore the line before continuing.</p>
 <p>Implement these in the answer-free learner source. Keep one independent check per claim. A task can require tracing, construction, a changed input or a deliberate safe failure. Do not run a data race, corrupt memory or contact a shared cluster merely to demonstrate why it would be wrong.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Read a compiler error from the first location in your source, then fix one cause at a time. Unused imports and variables are errors in Go; add an import when its use exists, rather than copying a large unused import list. A panic from <code>check</code> identifies a violated example contract. Compare the actual value with the expected value and inspect the state transition that produced it. A returned <code>error</code> is a value that the caller must handle; an ignored error can make later output look plausible while the original operation failed.</p>
 <p>The lesson-specific explanations in the two examples identify the important counterexamples. Extend that reasoning to every investigation: explain why a plausible alternative would fail, and preserve a tiny input that distinguishes it. Treat empty data, missing values and cancellation as domain cases with explicit policies. In concurrent work, replace sleeps used as synchronization with channels, mutexes or an explicit ownership protocol.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<h4 id="hint-for-investigation-1-trace-a-prefix-sum">Hint for investigation 1: Trace a prefix sum<a class="heading-anchor" href="#hint-for-investigation-1-trace-a-prefix-sum" aria-label="Link to this section">#</a></h4>
+<h4 id="hint-for-investigation-1-trace-a-prefix-sum-change-one-input">Hint for investigation 1: Trace a prefix sum: change one input<a class="heading-anchor" href="#hint-for-investigation-1-trace-a-prefix-sum-change-one-input" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The final sum is 12 and three elements were visited.</li>
-<li>Identify the input and the state boundary relevant to trace a prefix sum. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>sum == 12 &amp;&amp; len(items) == 3</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Compute the checked value with <code>items := []int{3, 4, 6}</code> in place before running, then compare it with the value <code>sum == 12 &amp;&amp; len(items) == 3</code> expects.</li>
 </ol>
-<h4 id="hint-for-investigation-2-handle-empty-data">Hint for investigation 2: Handle empty data<a class="heading-anchor" href="#hint-for-investigation-2-handle-empty-data" aria-label="Link to this section">#</a></h4>
+<h4 id="hint-for-investigation-2-handle-empty-data-debug-a-regression">Hint for investigation 2: Handle empty data: debug a regression<a class="heading-anchor" href="#hint-for-investigation-2-handle-empty-data-debug-a-regression" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The result is 0 with no special invented element.</li>
-<li>Identify the input and the state boundary relevant to handle empty data. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>sum == 0</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Compare <code>sum := 1</code> with the same line in worked example 2 and state the claim each version makes.</li>
 </ol>
 <h4 id="hint-for-investigation-3-use-a-safe-guard">Hint for investigation 3: Use a safe guard<a class="heading-anchor" href="#hint-for-investigation-3-use-a-safe-guard" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The condition is false and no indexing occurs.</li>
-<li>Identify the input and the state boundary relevant to use a safe guard. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>!positive</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Name one input that would make <code>!positive</code> false. A check that no input can falsify is not evidence.</li>
 </ol>
 <h4 id="hint-for-investigation-4-find-the-first-match">Hint for investigation 4: Find the first match<a class="heading-anchor" href="#hint-for-investigation-4-find-the-first-match" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Its index is 1.</li>
-<li>Identify the input and the state boundary relevant to find the first match. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>found == 1</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Predict the effect of changing <code>if x == 8 {</code> to <code>if x != 8 {</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
 </ol>
 <h4 id="hint-for-investigation-5-classify-an-exact-boundary">Hint for investigation 5: Classify an exact boundary<a class="heading-anchor" href="#hint-for-investigation-5-classify-an-exact-boundary" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The boundary belongs to the passing branch.</li>
-<li>Identify the input and the state boundary relevant to classify an exact boundary. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>label == &quot;pass&quot;</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Predict the effect of changing <code>if score &gt;= 60 {</code> to <code>if score &gt; 60 {</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
 </ol>
 <h4 id="hint-for-investigation-6-transfer-to-a-filtered-count">Hint for investigation 6: Transfer to a filtered count<a class="heading-anchor" href="#hint-for-investigation-6-transfer-to-a-filtered-count" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Exactly 2 values satisfy the predicate.</li>
-<li>Identify the input and the state boundary relevant to transfer to a filtered count. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>count == 2</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Predict the effect of changing <code>if x &lt; 0 {</code> to <code>if x &lt;= 0 {</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
 </ol>
 <h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
 <p>Close the reference. Rebuild one normal case and one boundary case from a blank pad. Explain the role of invariant without using its name in the definition. Then change the domain while keeping the same invariant. Record the new input, your prediction and the observed output. If your program passes only because its input is hard-coded, explain which part would need a reusable function in a larger project.</p>
 <h3 id="next-step-and-sources">Next step and sources<a class="heading-anchor" href="#next-step-and-sources" aria-label="Link to this section">#</a></h3>
-<p><a href="https://go.dev/ref/spec">Primary language or library documentation</a>, reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. This source supports the API contract; it does not verify the classroom worker. Runtime receipts are recorded separately by the repository validation tools. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.</p>
+<p><a href="https://go.dev/ref/spec">Primary language or library documentation</a>, reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for go-003: Decisions, loops and invariants.
 Read courses/go/guides/go-003.md and my saved attempt based on courses/go/lessons/go-003.go.

@@ -194,31 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-011_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-011-explanatory-solutions">web-011: explanatory solutions<a class="heading-anchor" href="#web-011-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.</p>
-<h3 id="why-the-mechanism-works">Why the mechanism works<a class="heading-anchor" href="#why-the-mechanism-works" aria-label="Link to this section">#</a></h3>
-<p>Every rendered box has content, optional padding, a border and an outside margin. With the default content-box sizing, a declared width describes the content, so padding and borders add to the outer width. With border-box sizing, the declared width includes the content, padding and borders. Margins remain outside either calculation. This distinction explains many layouts that unexpectedly exceed a parent.</p>
-<p>Overflow occurs when content needs more room than the available box. Hiding overflow can conceal essential information; scrolling or wrapping may preserve it. Long unbroken strings and images are frequent sources of overflow. A fixed height can clip translated text, enlarged fonts or error messages, so prefer content-driven height unless the interaction truly requires a bounded region.</p>
-<p>For a 200px content-box with 20px left and right padding and 2px borders, outer width is 244px. For a 200px border-box, the content width becomes 156px. Set a consistent box-sizing rule on all elements and pseudo-elements. Use max-inline-size to constrain readable width without assuming the writing direction.</p>
+<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-011.md</code>.</p>
 <h3 id="exercise-1-calculate-outer-widths-for-the-two-examples">Exercise 1: Calculate outer widths for the two examples.<a class="heading-anchor" href="#exercise-1-calculate-outer-widths-for-the-two-examples" aria-label="Link to this section">#</a></h3>
-<p>They are 244px and 200px, before margins.</p>
-<p>Trace the smallest example before editing. Name which values are source and which are observations.</p>
+<p><strong>Expected answer:</strong> They are 244px and 200px, before margins.</p>
+<p><strong>Why:</strong> With content-box, 200px of content plus 2 × 20px padding plus 2 × 2px border gives 244px; with border-box, the padding and border fit inside the declared 200px.</p>
 <h3 id="exercise-2-add-border-box-sizing-to-a-document-and-inspect-one-card">Exercise 2: Add border-box sizing to a document and inspect one card.<a class="heading-anchor" href="#exercise-2-add-border-box-sizing-to-a-document-and-inspect-one-card" aria-label="Link to this section">#</a></h3>
-<p>The declared width matches the border-box width.</p>
-<p>Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.</p>
+<p><strong>Expected evidence:</strong> The declared width matches the border-box width.</p>
+<p><strong>Why:</strong> With border-box, the declared width includes padding and border, so the number you write matches the rendered box.</p>
 <h3 id="exercise-3-build-a-readable-card-that-contains-a-long-identifier">Exercise 3: Build a readable card that contains a long identifier.<a class="heading-anchor" href="#exercise-3-build-a-readable-card-that-contains-a-long-identifier" aria-label="Link to this section">#</a></h3>
-<p>The identifier wraps or scrolls locally without overflowing the page.</p>
-<p>Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.</p>
+<p><strong>Expected evidence:</strong> The identifier wraps or scrolls locally without overflowing the page.</p>
+<p><strong>Why:</strong> overflow-wrap: anywhere or a local overflow area stops an unbreakable string from widening the whole page.</p>
 <h3 id="exercise-4-repair-a-fixed-height-that-clips-a-validation-message">Exercise 4: Repair a fixed height that clips a validation message.<a class="heading-anchor" href="#exercise-4-repair-a-fixed-height-that-clips-a-validation-message" aria-label="Link to this section">#</a></h3>
-<p>Use content-driven height or an explicitly accessible bounded scroll region.</p>
-<p>Keep the failing input. Identify the first layer where the observed result differs from the intended contract.</p>
+<p><strong>Expected evidence:</strong> Use content-driven height or an explicitly accessible bounded scroll region.</p>
+<p><strong>Why:</strong> A content-driven height grows when a message appears, while a fixed height clips or overlaps it.</p>
 <h3 id="exercise-5-increase-text-size-and-inspect-overflow">Exercise 5: Increase text size and inspect overflow.<a class="heading-anchor" href="#exercise-5-increase-text-size-and-inspect-overflow" aria-label="Link to this section">#</a></h3>
-<p>Essential text remains visible and controls remain reachable.</p>
-<p>Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.</p>
+<p><strong>Expected evidence:</strong> Essential text remains visible and controls remain reachable.</p>
+<p><strong>Why:</strong> Fixed heights and widths do not grow with text, so enlarged text exposes clipping that normal size hides.</p>
 <h3 id="exercise-6-explain-which-dimensions-margin-does-and-does-not-affect">Exercise 6: Explain which dimensions margin does and does not affect.<a class="heading-anchor" href="#exercise-6-explain-which-dimensions-margin-does-and-does-not-affect" aria-label="Link to this section">#</a></h3>
-<p>Margins add external separation but are not included in either box-sizing width.</p>
-<p>Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.</p>
-<h3 id="reference-comparison-and-limits">Reference comparison and limits<a class="heading-anchor" href="#reference-comparison-and-limits" aria-label="Link to this section">#</a></h3>
-<p>Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.</p></article>
+<p><strong>Expected answer:</strong> Margins add external separation but are not included in either box-sizing width.</p>
+<p><strong>Why:</strong> Margin lies outside the border, so it changes the space between boxes but never counts toward width under either box-sizing value.</p>
+<h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
+<p>Open <code>courses/web-development/solutions/web-011_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
   </main>
 </body>
 </html>

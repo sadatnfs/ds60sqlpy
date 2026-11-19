@@ -220,32 +220,32 @@ a <span class="syntax-operator">=</span> Batch<span class="syntax-punctuation">{
 <p>Copy a Batch and mutate the copy.</p>
 <p><strong>Expected:</strong> Original values unchanged.</p>
 <p><strong>Reasoning:</strong> The vector member owns its own copied storage.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> After <code>b.values[0] = 9</code>, assert <code>a.values == std::vector&lt;int&gt;{1, 2}</code> and <code>b.values == std::vector&lt;int&gt;{9, 2}</code>, as Worked example 1 does.</p>
 <h3 id="exercise-2-inspect-the-receiver">Exercise 2: Inspect the receiver<a class="heading-anchor" href="#exercise-2-inspect-the-receiver" aria-label="Link to this section">#</a></h3>
 <p>Move Batch([1, 2, 3]) into a new owner.</p>
 <p><strong>Expected:</strong> Receiver values exactly [1, 2, 3].</p>
 <p><strong>Reasoning:</strong> The target has a specified transferred value.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Assert <code>receiver.values == std::vector&lt;int&gt;{1, 2, 3}</code> after <code>std::move</code>, and make no assertion about the source&#x27;s contents.</p>
 <h3 id="exercise-3-reuse-the-source">Exercise 3: Reuse the source<a class="heading-anchor" href="#exercise-3-reuse-the-source" aria-label="Link to this section">#</a></h3>
 <p>Assign Batch([4]) to the moved-from source.</p>
 <p><strong>Expected:</strong> Source is safely usable with value [4].</p>
 <p><strong>Reasoning:</strong> Valid but unspecified permits reassignment.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> After the move, assign <code>a = Batch{{4}, &quot;new&quot;}</code> and assert <code>a.values == std::vector&lt;int&gt;{4}</code>, as Worked example 2 does with <code>a.values[0] == 4</code>.</p>
 <h3 id="exercise-4-repair-an-invalid-assumption">Exercise 4: Repair an invalid assumption<a class="heading-anchor" href="#exercise-4-repair-an-invalid-assumption" aria-label="Link to this section">#</a></h3>
 <p>Remove a test requiring every moved-from vector to be empty.</p>
 <p><strong>Expected:</strong> Test verifies receiver and source validity only.</p>
 <p><strong>Reasoning:</strong> An implementation observation is not a portable postcondition.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Confirm no remaining assertion reads a moved-from vector&#x27;s size or elements; the tests may only check the receiver&#x27;s values and that the source can be assigned or destroyed.</p>
 <h3 id="exercise-5-keep-rule-of-zero">Exercise 5: Keep rule of zero<a class="heading-anchor" href="#exercise-5-keep-rule-of-zero" aria-label="Link to this section">#</a></h3>
 <p>List special members needed for Batch.</p>
 <p><strong>Expected:</strong> No custom destructor/copy/move needed.</p>
 <p><strong>Reasoning:</strong> Standard fields already express ownership.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Check that your list adds no destructor, copy or move member, then confirm Worked examples 1 and 2 still compile and pass with the struct unchanged.</p>
 <h3 id="exercise-6-transfer-to-return-values">Exercise 6: Transfer to return values<a class="heading-anchor" href="#exercise-6-transfer-to-return-values" aria-label="Link to this section">#</a></h3>
 <p>Return Batch from a factory and store it.</p>
 <p><strong>Expected:</strong> Correct owned vector after factory scope ends.</p>
 <p><strong>Reasoning:</strong> Return by value allows elision or moves without a dangling reference.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p></article>
+<p><strong>Verify:</strong> Write a function returning <code>Batch{{5, 6}, &quot;made&quot;}</code>, store the result, and assert its values and label on a later line, after the factory has returned.</p></article>
   </main>
 </body>
 </html>

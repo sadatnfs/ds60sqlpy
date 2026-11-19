@@ -216,7 +216,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="host-project-required">Host project required<a class="heading-anchor" href="#host-project-required" aria-label="Link to this section">#</a></h4>
 <p>The browser only accepts one staged <code>main.cpp</code>; it cannot prove this lesson&#x27;s multiple-file link experiments. Use <a href="../fixtures/multifile/README.md.html">the translation-unit project</a>, whose CMake target declares both sources. The checked-in single-file source demonstrates equivalent function behavior only.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
-<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs:each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
+<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs: each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
 <p><a href="../examples/cpp-012-example-1.cpp.html">Complete program 1</a></p>
 <pre class="highlighted-code"><code class="language-cpp"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;cassert&gt;</span>
@@ -231,7 +231,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpp-012 example 1 checks passed</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
   <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
-<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<p><strong>Expected:</strong> With assertions enabled, the program exits with status 0 and prints:</p>
 <pre class="highlighted-code"><code class="language-text">declaration and definition linked
 cpp-012 example 1 checks passed</code></pre>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
@@ -248,39 +248,39 @@ cpp-012 example 1 checks passed</code></pre>
   std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpp-012 example 2 checks passed</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
   <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
-<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<p><strong>Expected:</strong> With assertions enabled, the program exits with status 0 and prints:</p>
 <pre class="highlighted-code"><code class="language-text">zero inputs link and run too
 cpp-012 example 2 checks passed</code></pre>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-separate-declaration">Exercise 1: Separate declaration<a class="heading-anchor" href="#exercise-1-separate-declaration" aria-label="Link to this section">#</a></h4>
 <p>Split add declaration, definition and caller using the supplied host-project recipe.</p>
 <p><strong>Expected result/shape:</strong> math.hpp, math.cpp and main.cpp build one executable returning 5.</p>
-<p><strong>Verify:</strong> math.hpp, math.cpp and main.cpp build one executable returning 5.</p>
+<p><strong>Verify:</strong> Confirm <code>math.hpp</code> holds only the declaration, <code>math.cpp</code> the single definition and <code>main.cpp</code> the caller, then run the executable and check that <code>add(2, 3)</code> produced 5.</p>
 <p><strong>Progressive hints:</strong> The compiler sees declarations; the linker finds the body.</p>
 <h4 id="exercise-2-compile-one-object">Exercise 2: Compile one object<a class="heading-anchor" href="#exercise-2-compile-one-object" aria-label="Link to this section">#</a></h4>
 <p>Compile main.cpp with -c before linking.</p>
 <p><strong>Expected result/shape:</strong> main.o exists even though the function body is in math.cpp.</p>
-<p><strong>Verify:</strong> main.o exists even though the function body is in math.cpp.</p>
+<p><strong>Verify:</strong> Run <code>g++ -std=c++20 -c main.cpp</code>, then list the directory and confirm <code>main.o</code> exists and no executable has been produced yet.</p>
 <p><strong>Progressive hints:</strong> -c stops before the final link stage.</p>
 <h4 id="exercise-3-link-the-complete-set">Exercise 3: Link the complete set<a class="heading-anchor" href="#exercise-3-link-the-complete-set" aria-label="Link to this section">#</a></h4>
 <p>Link main.o and math.o.</p>
 <p><strong>Expected result/shape:</strong> Executable runs, exit 0 and value 5.</p>
-<p><strong>Verify:</strong> Executable runs, exit 0 and value 5.</p>
+<p><strong>Verify:</strong> Link with <code>g++ main.o math.o -o app</code>, run <code>./app</code>, and check both the printed value 5 and a status of 0 from <code>echo $?</code>.</p>
 <p><strong>Progressive hints:</strong> Both object files contribute definitions/references.</p>
 <h4 id="exercise-4-diagnose-missing-object">Exercise 4: Diagnose missing object<a class="heading-anchor" href="#exercise-4-diagnose-missing-object" aria-label="Link to this section">#</a></h4>
 <p>Omit math.o deliberately.</p>
 <p><strong>Expected result/shape:</strong> Nonzero link status naming an unresolved add symbol.</p>
-<p><strong>Verify:</strong> Nonzero link status naming an unresolved add symbol.</p>
+<p><strong>Verify:</strong> Link <code>main.o</code> alone and keep the undefined reference to <code>add(int, int)</code> message and the nonzero status; no new executable may appear.</p>
 <p><strong>Progressive hints:</strong> Changing an include cannot supply a missing linked definition.</p>
 <h4 id="exercise-5-diagnose-duplicate-definition">Exercise 5: Diagnose duplicate definition<a class="heading-anchor" href="#exercise-5-diagnose-duplicate-definition" aria-label="Link to this section">#</a></h4>
 <p>Put a non-inline add body in a header included by both files.</p>
 <p><strong>Expected result/shape:</strong> A duplicate-definition link failure; restore one source definition.</p>
-<p><strong>Verify:</strong> A duplicate-definition link failure; restore one source definition.</p>
+<p><strong>Verify:</strong> Compile both files and link them; the linker must report a multiple definition of <code>add(int, int)</code>, and the error must disappear once the body moves back to <code>math.cpp</code>.</p>
 <p><strong>Progressive hints:</strong> Include guards operate per translation unit.</p>
 <h4 id="exercise-6-transfer-a-library-boundary">Exercise 6: Transfer a library boundary<a class="heading-anchor" href="#exercise-6-transfer-a-library-boundary" aria-label="Link to this section">#</a></h4>
 <p>Add subtract declaration and definition and a caller test 5-3.</p>
 <p><strong>Expected result/shape:</strong> Result 2 with one definition and matching signature.</p>
-<p><strong>Verify:</strong> Result 2 with one definition and matching signature.</p>
+<p><strong>Verify:</strong> Assert <code>subtract(5, 3) == 2</code> in <code>main.cpp</code>, and check that the declaration in <code>math.hpp</code> and the definition in <code>math.cpp</code> have the same parameter types.</p>
 <p><strong>Progressive hints:</strong> Changing parameter types creates a different overload, not the intended definition.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain why this observation follows from the mechanism: One declaration and one matching definition form a valid single-file demonstration. Then explain the changed condition in example 2 without opening the answer.</p>

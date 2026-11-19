@@ -198,11 +198,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-keyword">import</span> <span class="syntax-string">&quot;fmt&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">func</span> main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 1: Cancel a child: Create a cancelable context and cancel it.</span></span>
-<span class="source-line">	<span class="syntax-comment">// Expected: Err returns context.Canceled.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 1: Cancel a child: predict an edited check: Copy worked example 1 into a scratch pad and change `check(ctx.Err() == context.Canceled, &quot;cancel&quot;)` to `check(ctx.Err() != context.Canceled, &quot;cancel&quot;)` inside its check. Before running, predict whether the check still passes and explain why; then restore it.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Expected: The changed run panics with `cancel` because the edited check no longer holds. Restoring the original line brings back the worked observation: err returns context.Canceled.</span></span>
 <span class="source-line"></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 2: Propagate parent cancellation: Derive a child and cancel its parent.</span></span>
-<span class="source-line">	<span class="syntax-comment">// Expected: Both contexts become canceled.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 2: Propagate parent cancellation: diagnose an edited check: A careless edit changed the check in worked example 2 so that it reads `check(parent.Err() != context.Canceled &amp;&amp; child.Err() == context.Canceled, &quot;tree&quot;)`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Expected: Before the repair the program panics with `tree`; after it the line reads `check(parent.Err() == context.Canceled &amp;&amp; child.Err() == context.Canceled, &quot;tree&quot;)` again and both contexts become canceled.</span></span>
 <span class="source-line"></span>
 <span class="source-line">	<span class="syntax-comment">// Exercise 3: Keep child cancellation local: Cancel a child of a live parent.</span></span>
 <span class="source-line">	<span class="syntax-comment">// Expected: The child is canceled; the parent is unchanged.</span></span>

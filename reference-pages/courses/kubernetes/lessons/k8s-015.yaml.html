@@ -193,7 +193,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <h1>K8S 015</h1>
       <p class="source-path">Generated from <code>courses/kubernetes/lessons/k8s-015.yaml</code></p>
     </header>
-    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-yaml"><code><span class="source-line"><span class="syntax-tag">apiVersion</span><span class="syntax-punctuation">:</span> apps/v1</span>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-yaml"><code><span class="source-line"><span class="syntax-comment"># k8s-015 starter. The learner starter has no startup delay, startup probe or liveness probe; Exercise 2 asks you to add them. Compare with the separate reference in courses/kubernetes/solutions/ only after your attempt.</span></span>
+<span class="source-line"><span class="syntax-tag">apiVersion</span><span class="syntax-punctuation">:</span> apps/v1</span>
 <span class="source-line"><span class="syntax-tag">kind</span><span class="syntax-punctuation">:</span> Deployment</span>
 <span class="source-line"><span class="syntax-tag">metadata</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">  <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> hello</span>
@@ -245,21 +246,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">            <span class="syntax-tag">capabilities</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">              <span class="syntax-tag">drop</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">                <span class="syntax-punctuation">-</span> ALL</span>
-<span class="source-line">          <span class="syntax-tag">env</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">            <span class="syntax-punctuation">-</span> <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> DS60_STARTUP_DELAY_SECONDS</span>
-<span class="source-line">              <span class="syntax-tag">value</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">3</span><span class="syntax-string">&quot;</span></span>
-<span class="source-line">          <span class="syntax-tag">startupProbe</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">            <span class="syntax-tag">httpGet</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">              <span class="syntax-tag">path</span><span class="syntax-punctuation">:</span> /startup</span>
-<span class="source-line">              <span class="syntax-tag">port</span><span class="syntax-punctuation">:</span> http</span>
-<span class="source-line">            <span class="syntax-tag">periodSeconds</span><span class="syntax-punctuation">:</span> 1</span>
-<span class="source-line">            <span class="syntax-tag">failureThreshold</span><span class="syntax-punctuation">:</span> 10</span>
-<span class="source-line">          <span class="syntax-tag">livenessProbe</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">            <span class="syntax-tag">httpGet</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">              <span class="syntax-tag">path</span><span class="syntax-punctuation">:</span> /live</span>
-<span class="source-line">              <span class="syntax-tag">port</span><span class="syntax-punctuation">:</span> http</span>
-<span class="source-line">            <span class="syntax-tag">periodSeconds</span><span class="syntax-punctuation">:</span> 2</span>
-<span class="source-line">            <span class="syntax-tag">failureThreshold</span><span class="syntax-punctuation">:</span> 2</span>
 <span class="source-line">---</span>
 <span class="source-line"><span class="syntax-tag">apiVersion</span><span class="syntax-punctuation">:</span> v1</span>
 <span class="source-line"><span class="syntax-tag">kind</span><span class="syntax-punctuation">:</span> Service</span>
@@ -272,12 +258,18 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">    <span class="syntax-punctuation">-</span> <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> http</span>
 <span class="source-line">      <span class="syntax-tag">port</span><span class="syntax-punctuation">:</span> 8080</span>
 <span class="source-line">      <span class="syntax-tag">targetPort</span><span class="syntax-punctuation">:</span> http</span>
-<span class="source-line"><span class="syntax-comment"># Exercise 1: Name each question. Explain the decision made by startup,readiness and liveness. Expected: Initialization gate,traffic eligibility and restart policy are distinguished.</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 2: Run the healthy delayed fixture. Use the admitted source and record its actual bounded healthy result. Expected: Startup delay is configured3;controller/backend/client checks eventually establish the observed healthy baseline.</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 3: Trace readiness removal. Analyze case A and identify what additional evidence would show recovery. Expected: No direct restart claim;new Ready/endpoint/client observations are required after repair.</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 4: Trace liveness restart. Analyze case B and distinguish restart from replacement. Expected: Same Pod UID with increased container restartCount.</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 5: Predict a wrong fixed path. Compare /startup or /live with /missing in a scratch admitted configuration. Expected: The wrong path returns404;the actual bounded result and cleanup must be recorded rather than inventing a fixed timing.</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 6: Choose a production probe policy. Explain why a downstream outage should not automatically restart every caller. Expected: A concrete design separates process-deadlock detection from traffic readiness and dependency behavior.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Name each question. Explain the decision made by startup, readiness and liveness.</span></span>
+<span class="source-line"><span class="syntax-comment"># My prediction and evidence:</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Run the healthy delayed fixture. Add DS60_STARTUP_DELAY_SECONDS set to 3, a startupProbe on /startup (periodSeconds 1, failureThreshold 10) and a livenessProbe on /live (periodSeconds 2, failureThreshold 2) to the starter, then Run it and record the bounded healthy result.</span></span>
+<span class="source-line"><span class="syntax-comment"># My prediction and evidence:</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: Trace readiness removal. Analyze case A and identify what additional evidence would show recovery.</span></span>
+<span class="source-line"><span class="syntax-comment"># My prediction and evidence:</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4: Trace liveness restart. Analyze case B and distinguish restart from replacement.</span></span>
+<span class="source-line"><span class="syntax-comment"># My prediction and evidence:</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5: Predict a wrong fixed path. Compare /startup or /live with /missing in a scratch admitted configuration.</span></span>
+<span class="source-line"><span class="syntax-comment"># My prediction and evidence:</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6: Choose a production probe policy. Explain why a downstream outage should not automatically restart every caller.</span></span>
+<span class="source-line"><span class="syntax-comment"># My prediction and evidence:</span></span>
 <span class="source-line"></span></code></pre></article>
   </main>
 </body>

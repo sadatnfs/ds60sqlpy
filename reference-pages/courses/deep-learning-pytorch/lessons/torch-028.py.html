@@ -199,18 +199,18 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">Copy to .learning before editing. Six independent attempts belong below.</span></span>
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 1: Create nontrivial training state</span></span>
-<span class="source-line"><span class="syntax-comment"># Take two Adam updates of a zero-weight linear model onx 1, 2 and y 2 x.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: optimizer step 2 and positive weight.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Predict Adam&#x27;s first step</span></span>
+<span class="source-line"><span class="syntax-comment"># From a fresh make_state(), take one step with zero noise and compare the weight with the</span></span>
+<span class="source-line"><span class="syntax-comment"># learning rate 0.05.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: weight 0.05 within 1e-6.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 2: Save the complete local contract</span></span>
-<span class="source-line"><span class="syntax-comment"># Write model, optimizer, RNG and data_position2 into an owned temporary checkpoint.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: file exists and metadata position 2.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Inspect the new optimizer state</span></span>
+<span class="source-line"><span class="syntax-comment"># List the state entries Adam stores for that parameter after one step.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: keys step, exp_avg and exp_avg_sq; step equals 1.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 3: Record uninterrupted continuation</span></span>
-<span class="source-line"><span class="syntax-comment"># Draw three random values, then a small target perturbation, and perform the third</span></span>
-<span class="source-line"><span class="syntax-comment"># update.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: finite weight, step 3, and saved three-value random probe.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: Replay a saved random state</span></span>
+<span class="source-line"><span class="syntax-comment"># Save torch.get_rng_state(), draw three values, restore the state and draw again.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: the two draws are identical.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Restore in a fresh interpreter</span></span>
 <span class="source-line"><span class="syntax-comment"># Recreate model and Adam, restore all state, repeat the same draws and update.</span></span>

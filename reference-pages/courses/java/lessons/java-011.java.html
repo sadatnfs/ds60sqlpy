@@ -197,28 +197,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-keyword">public</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Main</span> <span class="syntax-punctuation">{</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span></span>
-<span class="source-line">    <span class="syntax-comment">// Exercise 1: Use immutable value keys</span></span>
-<span class="source-line">    <span class="syntax-comment">// Create two equal Point records and insert one into a map.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: lookup with the other returns origin; hashes equal.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Exercise 1: Use immutable value keys: change one input</span></span>
+<span class="source-line">    <span class="syntax-comment">// Copy Example A into a scratch `Main.java` and change `Point a = new Point(0, 0),` to</span></span>
+<span class="source-line">    <span class="syntax-comment">// `Point a = new Point(1, 0),`. Before running it with `java -ea Main`, predict which</span></span>
+<span class="source-line">    <span class="syntax-comment">// assertion fails and which value it now sees; then run it and restore the original line.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` from the assertion on</span></span>
+<span class="source-line">    <span class="syntax-comment">// `a.equals(b) &amp;&amp; a.hashCode() == b.hashCode() &amp;&amp; map.get(b).equals(&quot;origin&quot;)`. Restoring</span></span>
+<span class="source-line">    <span class="syntax-comment">// the original line brings back the worked observation: lookup with the other returns</span></span>
+<span class="source-line">    <span class="syntax-comment">// origin; hashes equal.</span></span>
 <span class="source-line"></span>
-<span class="source-line">    <span class="syntax-comment">// Exercise 2: Sort with a tie-breaker</span></span>
-<span class="source-line">    <span class="syntax-comment">// Sort people(age20,idb),(age20,ida),(age18,idc) by age then ID.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: IDs c,a,b.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Exercise 2: Sort with a tie-breaker: debug a regression</span></span>
+<span class="source-line">    <span class="syntax-comment">// A regression changed one token in the code that Example B adds after Example A, so one</span></span>
+<span class="source-line">    <span class="syntax-comment">// line now reads `List.of(new Person(&quot;b&quot;, 20), new Person(&quot;a&quot;, 21), new Person(&quot;c&quot;, 18))`.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Run Example B with that line, use the failing assertion to locate the defect and repair it</span></span>
+<span class="source-line">    <span class="syntax-comment">// without changing the assertion.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` from the assertion on</span></span>
+<span class="source-line">    <span class="syntax-comment">// `people.stream().map(Person::id).toList().equals(List.of(&quot;c&quot;, &quot;a&quot;, &quot;b&quot;))`; after it the</span></span>
+<span class="source-line">    <span class="syntax-comment">// line reads `List.of(new Person(&quot;b&quot;, 20), new Person(&quot;a&quot;, 20), new Person(&quot;c&quot;, 18))` again</span></span>
+<span class="source-line">    <span class="syntax-comment">// and IDs c, a, b.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 3: Expose comparator uniqueness</span></span>
-<span class="source-line">    <span class="syntax-comment">// Insert two different people ofage20 into a TreeSet comparingage only.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: setsize1 despite unequal records.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Insert two different people of age 20 into a TreeSet comparing age only.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: set size 1 despite unequal records.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 4: Demonstrate mutable-key failure</span></span>
-<span class="source-line">    <span class="syntax-comment">// Insert a key withhash1,mutate its hash field to2,and attempt lookup with the same object.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: lookup fails in this fixture while mapsize remains1.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Insert a key with hash 1, mutate its hash field to 2, and attempt lookup with the same</span></span>
+<span class="source-line">    <span class="syntax-comment">// object.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: lookup fails in this fixture while map size remains 1.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 5: Avoid comparator subtraction</span></span>
-<span class="source-line">    <span class="syntax-comment">// CompareInteger.MIN_VALUE and 1 usingInteger.compare.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: negative result;subtraction overflows positive.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Compare Integer.MIN_VALUE and 1 using Integer.compare.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: negative result; subtraction overflows positive.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 6: Keep identity and display separate</span></span>
-<span class="source-line">    <span class="syntax-comment">// Give twoPoints the same formatted label but different coordinates;compare values.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Give two Points the same formatted label but different coordinates; compare values.</span></span>
 <span class="source-line">    <span class="syntax-comment">// Expected: display labels equal; points unequal.</span></span>
 <span class="source-line">    System<span class="syntax-punctuation">.</span><span class="syntax-attribute">out</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">println</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement and check the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line">  <span class="syntax-punctuation">}</span></span>

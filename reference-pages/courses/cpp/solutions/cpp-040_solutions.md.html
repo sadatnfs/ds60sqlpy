@@ -217,32 +217,32 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Specify accepted identifier characters and length.</p>
 <p><strong>Expected:</strong> 1 to 16 lowercase ASCII letters, digits or underscore.</p>
 <p><strong>Reasoning:</strong> A narrow contract is easier to inspect than arbitrary path sanitization.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Check your specification against <code>safe_id</code>: it rejects an empty string, accepts at most 16 characters and allows only <code>a-z</code>, <code>0-9</code> and <code>_</code>, so no uppercase letter, dot or slash.</p>
 <h3 id="exercise-2-test-normal-input">Exercise 2: Test normal input<a class="heading-anchor" href="#exercise-2-test-normal-input" aria-label="Link to this section">#</a></h3>
 <p>Validate batch_7 and 0.</p>
 <p><strong>Expected:</strong> Both accepted.</p>
 <p><strong>Reasoning:</strong> An identifier may be numeric without becoming a path.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Assert <code>safe_id(&quot;batch_7&quot;)</code> and <code>safe_id(&quot;0&quot;)</code>; a single digit is a valid identifier under this grammar.</p>
 <h3 id="exercise-3-reject-traversal-shapes">Exercise 3: Reject traversal shapes<a class="heading-anchor" href="#exercise-3-reject-traversal-shapes" aria-label="Link to this section">#</a></h3>
 <p>Test ../secret, a/b and a backslash-separated path.</p>
 <p><strong>Expected:</strong> All rejected before filesystem access.</p>
 <p><strong>Reasoning:</strong> Separators are outside the grammar.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Assert <code>!safe_id(&quot;../secret&quot;)</code>, <code>!safe_id(&quot;a/b&quot;)</code> and <code>!safe_id(&quot;a\\b&quot;)</code>, and confirm the program makes no <code>std::filesystem</code> call for a rejected name.</p>
 <h3 id="exercise-4-repair-overclaim">Exercise 4: Repair overclaim<a class="heading-anchor" href="#exercise-4-repair-overclaim" aria-label="Link to this section">#</a></h3>
 <p>Explain why this is not a general symlink-safe path sandbox.</p>
 <p><strong>Expected:</strong> No claim of arbitrary path containment; scope remains identifiers.</p>
 <p><strong>Reasoning:</strong> Filesystem races and links require stronger host operations.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Check that your explanation says <code>safe_id</code> only validates a name, and names a case it cannot cover, such as a symbolic link inside the data directory that points elsewhere.</p>
 <h3 id="exercise-5-enforce-size">Exercise 5: Enforce size<a class="heading-anchor" href="#exercise-5-enforce-size" aria-label="Link to this section">#</a></h3>
 <p>Test empty, 16-character and 17-character strings.</p>
 <p><strong>Expected:</strong> Reject, accept, reject.</p>
 <p><strong>Reasoning:</strong> Length is checked before per-character work.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Assert <code>!safe_id(&quot;&quot;)</code>, <code>safe_id(std::string(16, &#x27;a&#x27;))</code> and <code>!safe_id(std::string(17, &#x27;a&#x27;))</code>.</p>
 <h3 id="exercise-6-transfer-row-budgets">Exercise 6: Transfer row budgets<a class="heading-anchor" href="#exercise-6-transfer-row-budgets" aria-label="Link to this section">#</a></h3>
 <p>Set max 100 rows and 256 bytes per row before parsing a file.</p>
 <p><strong>Expected:</strong> Oversized input rejected with counts and no partial publication.</p>
 <p><strong>Reasoning:</strong> Input limits and output publication must form one contract.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p></article>
+<p><strong>Verify:</strong> Feed 101 short rows, then a single 257-byte row, and confirm each run reports the limit and count it hit and writes no output file.</p></article>
   </main>
 </body>
 </html>

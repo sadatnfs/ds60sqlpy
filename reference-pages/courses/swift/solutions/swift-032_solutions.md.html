@@ -194,37 +194,55 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/swift/solutions/swift-032_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="swift-032-explanation-and-comparison">swift-032: explanation and comparison<a class="heading-anchor" href="#swift-032-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="swift-032_solution.swift.html">swift-032_solution.swift</a>. Its assertions are always active under the prepared classroom compile settings.</p>
+<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="swift-032_solution.swift.html">swift-032_solution.swift</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Replay without duplicate effect:</strong> Identity lookup and state change occur under one actor-owned transition. A repeated operation returns its receipt without applying again.</p>
 <p><strong>Reject conflicting identity reuse:</strong> Reconciliation needs payload identity as well as an operation key. A changed payload is rejected and prior state remains intact.</p>
-<h3 id="reason-through-the-six-tasks">Reason through the six tasks<a class="heading-anchor" href="#reason-through-the-six-tasks" aria-label="Link to this section">#</a></h3>
-<ol>
-<li><strong>Predict and explain.</strong> Trace effect and receipt for the first and repeated calls.</li>
-</ol>
-<ol start="2">
-<li><strong>Guided modification.</strong> Apply a second unique identity and predict the total.</li>
-</ol>
-<ol start="3">
-<li><strong>Independent construction.</strong> Add a read-only receipt lookup that never re-executes work.</li>
-</ol>
-<ol start="4">
-<li><strong>Diagnose a defect.</strong> Diagnose applying the effect before checking the operation identity.</li>
-</ol>
-<ol start="5">
-<li><strong>Boundary evidence.</strong> Test negative payloads and concurrent identical requests.</li>
-</ol>
-<ol start="6">
-<li><strong>Transfer and justify.</strong> Design a durable adapter and document what actor isolation alone cannot guarantee.</li>
-</ol>
-<p>For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.</p>
+<h3 id="task-answers">Task answers<a class="heading-anchor" href="#task-answers" aria-label="Link to this section">#</a></h3>
+<h4 id="task-1-predict-and-explain">Task 1: Predict and explain<a class="heading-anchor" href="#task-1-predict-and-explain" aria-label="Link to this section">#</a></h4>
+<p>Trace effect and receipt for the first and repeated calls.</p>
+<p>No separate reference answer has been written for this task. Example A is the evidence to compare with: Identity lookup and state change occur under one actor-owned transition. A repeated operation returns its receipt without applying again.</p>
+<h4 id="task-2-guided-modification">Task 2: Guided modification<a class="heading-anchor" href="#task-2-guided-modification" aria-label="Link to this section">#</a></h4>
+<p>Apply a second unique identity and predict the total.</p>
+<p>No separate reference answer has been written for this task. Start from Example B: Reconciliation needs payload identity as well as an operation key. A changed payload is rejected and prior state remains intact.</p>
+<h4 id="task-3-independent-construction">Task 3: Independent construction<a class="heading-anchor" href="#task-3-independent-construction" aria-label="Link to this section">#</a></h4>
+<p>Add a read-only receipt lookup that never re-executes work.</p>
+<p><strong>Reference answer.</strong> It runs as the <code>Task 3</code> block of the reference program.</p>
+<pre class="highlighted-code"><code class="language-swift"><span class="syntax-keyword">actor</span> ReceiptLedger <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">private</span> <span class="syntax-keyword">var</span> receipts<span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-builtin">String</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">Int</span><span class="syntax-punctuation">]</span> <span class="syntax-punctuation">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span>
+  <span class="syntax-keyword">private</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">set</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">var</span> executions <span class="syntax-punctuation">=</span> <span class="syntax-number">0</span>
+  <span class="syntax-keyword">func</span> <span class="syntax-function">apply</span><span class="syntax-punctuation">(</span>id<span class="syntax-punctuation">:</span> <span class="syntax-builtin">String</span><span class="syntax-punctuation">,</span> amount<span class="syntax-punctuation">:</span> <span class="syntax-builtin">Int</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">-&gt;</span> <span class="syntax-builtin">Int</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-keyword">let</span> receipt <span class="syntax-punctuation">=</span> receipts<span class="syntax-punctuation">[</span>id<span class="syntax-punctuation">]</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">return</span> receipt <span class="syntax-punctuation">}</span>
+    executions <span class="syntax-operator">+=</span> <span class="syntax-number">1</span>
+    receipts<span class="syntax-punctuation">[</span>id<span class="syntax-punctuation">]</span> <span class="syntax-punctuation">=</span> amount
+    <span class="syntax-keyword">return</span> amount
+  <span class="syntax-punctuation">}</span>
+  <span class="syntax-keyword">func</span> <span class="syntax-function">receipt</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">for</span> id<span class="syntax-punctuation">:</span> <span class="syntax-builtin">String</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">-&gt;</span> <span class="syntax-builtin">Int</span><span class="syntax-punctuation">?</span> <span class="syntax-punctuation">{</span> receipts<span class="syntax-punctuation">[</span>id<span class="syntax-punctuation">]</span> <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">let</span> ledger <span class="syntax-punctuation">=</span> ReceiptLedger<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">_</span> <span class="syntax-punctuation">=</span> <span class="syntax-keyword">await</span> ledger<span class="syntax-punctuation">.</span>apply<span class="syntax-punctuation">(</span>id<span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">one</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> amount<span class="syntax-punctuation">:</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">let</span> found <span class="syntax-punctuation">=</span> <span class="syntax-keyword">await</span> ledger<span class="syntax-punctuation">.</span>receipt<span class="syntax-punctuation">(</span><span class="syntax-keyword">for</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">one</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">let</span> missing <span class="syntax-punctuation">=</span> <span class="syntax-keyword">await</span> ledger<span class="syntax-punctuation">.</span>receipt<span class="syntax-punctuation">(</span><span class="syntax-keyword">for</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">two</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">let</span> executions <span class="syntax-punctuation">=</span> <span class="syntax-keyword">await</span> ledger<span class="syntax-punctuation">.</span>executions
+<span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>found <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-number">3</span> <span class="syntax-operator">&amp;&amp;</span> missing <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-keyword">nil</span> <span class="syntax-operator">&amp;&amp;</span> executions <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Observe:</strong> The lookup finds receipt 3 for one, reports nil for two, and the work ran only once.</p>
+<p>receipt(for:) only reads stored results, so asking about an operation can never execute it again.</p>
+<h4 id="task-4-diagnose-a-defect">Task 4: Diagnose a defect<a class="heading-anchor" href="#task-4-diagnose-a-defect" aria-label="Link to this section">#</a></h4>
+<p>Diagnose applying the effect before checking the operation identity.</p>
+<p>No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson&#x27;s pitfalls: An in-memory actor ledger loses its state after restart. Overflow and retention policy remain explicit production requirements. Do not claim exactly-once delivery from a local dictionary.</p>
+<h4 id="task-5-boundary-evidence">Task 5: Boundary evidence<a class="heading-anchor" href="#task-5-boundary-evidence" aria-label="Link to this section">#</a></h4>
+<p>Test negative payloads and concurrent identical requests.</p>
+<p>No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Replay without duplicate effect) and Example B (Reject conflicting identity reuse).</p>
+<h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
+<p>Design a durable adapter and document what actor isolation alone cannot guarantee.</p>
+<p>No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry <strong>Idempotency</strong>, and state one limitation of your choice.</p>
 <h3 id="mechanism-and-diagnostic-reasoning">Mechanism and diagnostic reasoning<a class="heading-anchor" href="#mechanism-and-diagnostic-reasoning" aria-label="Link to this section">#</a></h3>
 <p>The intermediate project gives one actor ownership of operation identities and accumulated totals. Validating a payload and recording its effect together prevents duplicate application within the actor lifetime. A repeated identity with a changed payload is a conflict, not a legitimate retry.</p>
 <p>This is deliberately an in-memory example. Actor isolation proves a concurrency boundary, but it does not provide durable transactions across process restart. A production ledger needs storage that commits the effect and receipt atomically. The distinction between source logic, runtime checks and durable system behavior should remain explicit in the project README.</p>
 <p>An actor dictionary records identity to payload/result. A synchronous actor method validates replay and applies new work without await between its check and update. Errors preserve conflicting requests as failures.</p>
 <p>An in-memory actor ledger loses its state after restart. Overflow and retention policy remain explicit production requirements. Do not claim exactly-once delivery from a local dictionary.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.</p></article>
+<p>Run the reference and confirm that it prints <code>swift-032: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
   </main>
 </body>
 </html>

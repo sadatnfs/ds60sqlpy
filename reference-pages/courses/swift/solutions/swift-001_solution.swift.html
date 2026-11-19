@@ -211,6 +211,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">      <span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>seats <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-number">24</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line">      <span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>seats <span class="syntax-operator">!=</span> rows <span class="syntax-operator">+</span> seatsPerRow<span class="syntax-punctuation">)</span></span>
 <span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">do</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">      <span class="syntax-comment">//</span><span class="syntax-comment"> Task 3: Independent construction</span></span>
+<span class="source-line">      <span class="syntax-keyword">let</span> shelves <span class="syntax-punctuation">=</span> <span class="syntax-number">3</span></span>
+<span class="source-line">      <span class="syntax-keyword">let</span> booksPerShelf <span class="syntax-punctuation">=</span> <span class="syntax-number">8</span></span>
+<span class="source-line">      <span class="syntax-keyword">let</span> capacity <span class="syntax-punctuation">=</span> shelves <span class="syntax-operator">*</span> booksPerShelf</span>
+<span class="source-line">      <span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>capacity <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-number">24</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-punctuation">}</span></span>
 <span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">swift-001: passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line">  <span class="syntax-punctuation">}</span></span>
 <span class="source-line"><span class="syntax-punctuation">}</span></span>

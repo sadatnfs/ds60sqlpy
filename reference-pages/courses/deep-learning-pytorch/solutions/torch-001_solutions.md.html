@@ -248,34 +248,33 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The hand-written rule y=2x has zero error here. That establishes its arithmetic on the visible points. It does not establish that an optimizer learned the rule, that an unknown population follows it, or that another feature pipeline preserves the same units. A training claim additionally needs an initial parameter state, an actual update sequence and an observed resulting state. Later chapters provide those receipts one operation at a time.</p>
 <p>A framework comparison is another controlled experiment. Match record identities, feature order, dtype, parameter initialization, objective denominator, optimizer rule and model mode. Compare forward predictions before loss, loss before gradients, and gradients before updated parameters. If one implementation returns a matching scalar but a different gradient, the comparison has already failed even though the headline loss agrees.</p>
 <p>A defensible card ends with a bounded conclusion and the next evidence needed. For this fixture: arithmetic and procedure can be checked; population reliability remains unestablished. For a later deployment: define the independent unit, intended operating range, error costs and operational acceptance before treating a model score as permission to use it.</p>
-<h3 id="exercise-1-define-a-prediction-unit">Exercise 1: Define a prediction unit<a class="heading-anchor" href="#exercise-1-define-a-prediction-unit" aria-label="Link to this section">#</a></h3>
-<p>The question is: Use three training points(1, 2), (2, 4), (3, 6) and four untouched points(4, 8)..(7, 14); name one row as the prediction unit.</p>
-<p>The unit determines the denominator and split design. If several rows later belong to one person or account, the independence assumption must be revisited.</p>
-<pre class="highlighted-code"><code class="language-text">Training IDs: t1,t2,t3
-Holdout IDs: h4,h5,h6,h7
-Input: scalar x
-Target: scalar y in the same declared target unit
-Prediction unit: one identified row</code></pre>
-<p><strong>Expected:</strong> 3 training rows, 4 holdout rows, one prediction per row.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with 3 training rows, 4 holdout rows, one prediction per row.</p>
-<h3 id="exercise-2-calculate-a-mean-baseline">Exercise 2: Calculate a mean baseline<a class="heading-anchor" href="#exercise-2-calculate-a-mean-baseline" aria-label="Link to this section">#</a></h3>
-<p>The question is: Use training targets 2, 4, 6 to predict the constant training mean on holdout 8, 10, 12, 14.</p>
-<p>The baseline uses no holdout target to fit its constant. A baseline fitted to the holdout mean would contaminate the comparison.</p>
-<pre class="highlighted-code"><code class="language-text">Training mean=(2+4+6)/3=4
-Holdout residuals=4,6,8,10
-Squared errors=16,36,64,100
-MSE=216/4=54</code></pre>
-<p><strong>Expected:</strong> mean 4; holdout squared errors 16, 36, 64, 100; MSE 54.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with mean 4; holdout squared errors 16, 36, 64, 100; MSE 54.</p>
-<h3 id="exercise-3-separate-an-exact-relation-from-learned-evidence">Exercise 3: Separate an exact relation from learned evidence<a class="heading-anchor" href="#exercise-3-separate-an-exact-relation-from-learned-evidence" aria-label="Link to this section">#</a></h3>
-<p>The question is: Compare a hand-specified rule y=2x with a model trained on the three points.</p>
-<p>A correct formula is useful as an oracle. It must not be presented as a trained-model result when no training occurred.</p>
-<pre class="highlighted-code"><code class="language-text">Rule: yhat=2*x
-Holdout predictions:8,10,12,14
-Fixture error:0
-Training execution evidence: absent unless an actual optimizer run is recorded</code></pre>
-<p><strong>Expected:</strong> the hand rule predicts the fixture exactly but was not learned by running an optimizer.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with the hand rule predicts the fixture exactly but was not learned by running an optimizer.</p>
+<h3 id="exercise-1-name-the-unit-for-grouped-rows">Exercise 1: Name the unit for grouped rows<a class="heading-anchor" href="#exercise-1-name-the-unit-for-grouped-rows" aria-label="Link to this section">#</a></h3>
+<p>The question is: A table has six rows from three customers, two rows per customer, and the task predicts next month&#x27;s spend for each customer. Name the prediction unit and the unit that must stay together in a split.</p>
+<p>The row count overstates the evidence when rows share an identity. Grouping the split by customer keeps one customer&#x27;s history from appearing on both sides.</p>
+<pre class="highlighted-code"><code class="language-text">Rows: 6 (c1, c1, c2, c2, c3, c3)
+Prediction unit: one customer-month forecast
+Split unit: customer; both rows of a customer go to the same side
+Independent units available: 3</code></pre>
+<p><strong>Expected:</strong> prediction unit: one customer for the next month; split unit: customer, so 3 independent units rather than 6 rows.</p>
+<p><strong>Verify:</strong> Your worksheet names the customer as both the prediction and split unit and states the count 3; a split that places c1 rows on both sides is marked invalid.</p>
+<h3 id="exercise-2-recompute-a-training-only-baseline">Exercise 2: Recompute a training-only baseline<a class="heading-anchor" href="#exercise-2-recompute-a-training-only-baseline" aria-label="Link to this section">#</a></h3>
+<p>The question is: Use training targets 1, 3, 5 to predict a constant on holdout targets 7 and 9. Report the constant, the holdout residuals and the holdout MSE.</p>
+<p>The constant comes only from training targets. Using the holdout mean 8 would give MSE 1 but would make the holdout part of fitting.</p>
+<pre class="highlighted-code"><code class="language-text">Training mean=(1+3+5)/3=3
+Holdout residuals=7-3, 9-3 = 4, 6
+Squared errors=16, 36
+MSE=52/2=26</code></pre>
+<p><strong>Expected:</strong> constant 3; residuals 4 and 6; squared errors 16 and 36; MSE 26.</p>
+<p><strong>Verify:</strong> Your table shows the mean 3 computed from training targets only and the two squared errors summing to 52 over a denominator of 2; a version that uses the holdout mean 8 is labeled leaked.</p>
+<h3 id="exercise-3-classify-evidence-for-a-generated-fixture">Exercise 3: Classify evidence for a generated fixture<a class="heading-anchor" href="#exercise-3-classify-evidence-for-a-generated-fixture" aria-label="Link to this section">#</a></h3>
+<p>The question is: A notebook reports zero error for the rule y = 3x on points that were generated from y = 3x, and it contains no optimizer log. Classify what the zero error establishes.</p>
+<p>Agreement between a rule and the process that generated its test points is an arithmetic check. A training claim needs a recorded optimizer run, and a population claim needs independent data.</p>
+<pre class="highlighted-code"><code class="language-text">Rule source: written by hand, identical to the generator
+Observed error: 0 on generated points
+Training evidence: absent (no initial state, updates or final state recorded)
+Population evidence: absent (no independent sample)</code></pre>
+<p><strong>Expected:</strong> an analytic oracle consistent with the generator; no training evidence; no evidence about unseen data.</p>
+<p><strong>Verify:</strong> Your answer separates the three evidence types and names the missing optimizer record and missing independent sample as the two absent items.</p>
 <h3 id="exercise-4-audit-selection-leakage">Exercise 4: Audit selection leakage<a class="heading-anchor" href="#exercise-4-audit-selection-leakage" aria-label="Link to this section">#</a></h3>
 <p>The question is: After looking at holdout errors, a researcher changes the learning rate and reports the better result as final.</p>
 <p>The name of a file does not determine whether it remained untouched. The sequence of decisions determines its role.</p>
@@ -283,7 +282,7 @@ Training execution evidence: absent unless an actual optimizer run is recorded</
 Information boundary: crossed
 Repair: treat these observations as validation and reserve new final data</code></pre>
 <p><strong>Expected:</strong> holdout was used for selection; new untouched assessment needed.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with holdout was used for selection; new untouched assessment needed.</p>
+<p><strong>Verify:</strong> Your timeline shows the holdout score influencing the learning-rate change and relabels that data as validation; the report names a new untouched set as the only valid final assessment.</p>
 <h3 id="exercise-5-align-a-framework-comparison">Exercise 5: Align a framework comparison<a class="heading-anchor" href="#exercise-5-align-a-framework-comparison" aria-label="Link to this section">#</a></h3>
 <p>The question is: List the contracts that must match before comparing one PyTorch and one TensorFlow update.</p>
 <p>An equal initial loss can hide a different gradient. The paired route repeatedly uses intermediate-state comparisons to expose such failures.</p>
@@ -291,7 +290,7 @@ Repair: treat these observations as validation and reserve new final data</code>
 Compare separately: forward loss,gradient,new weight,new loss.
 Do not infer equivalence from a matching first scalar alone.</code></pre>
 <p><strong>Expected:</strong> same data pairing, dtype, initial weight, loss reduction, rate and optimizer rule.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with same data pairing, dtype, initial weight, loss reduction, rate and optimizer rule.</p>
+<p><strong>Verify:</strong> Your checklist names all six contracts (pairing, dtype, initial weight, reduction, rate and optimizer rule) and orders the comparisons forward loss, gradient, updated weight and new loss.</p>
 <h3 id="exercise-6-bound-the-conclusion">Exercise 6: Bound the conclusion<a class="heading-anchor" href="#exercise-6-bound-the-conclusion" aria-label="Link to this section">#</a></h3>
 <p>The question is: Write a report for a successful tiny CPU reference that avoids a production-quality claim.</p>
 <p>A bounded conclusion preserves the value of the experiment without making claims it was not designed to support.</p>
@@ -299,7 +298,7 @@ Do not infer equivalence from a matching first scalar alone.</code></pre>
 Not established: unseen-population quality,privacy,fairness,GPU throughput or production safety.
 Next evidence: representative independent units and task-specific acceptance tests.</code></pre>
 <p><strong>Expected:</strong> report says arithmetic/software checked; population reliability unestablished.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with report says arithmetic/software checked; population reliability unestablished.</p>
+<p><strong>Verify:</strong> Your report contains one sentence on what the CPU run checked and one listing unestablished properties, and contains no production-quality claim.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
 <p>Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.</p></article>
   </main>

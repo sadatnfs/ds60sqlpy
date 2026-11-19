@@ -198,7 +198,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="runtime-and-commands">Runtime and commands<a class="heading-anchor" href="#runtime-and-commands" aria-label="Link to this section">#</a></h3>
 <p>Lead learner instructions with the Docker classroom. The host interpreter commands below apply to the prepared contributor environment and optional Jupyter workflows, not a second learner installer. Windows uses WSL 2.</p>
 <ul>
-<li>Target Python 3.11–3.12; use Python 3.12 for canonical examples and CI.</li>
+<li>Target Python 3.11-3.12; use Python 3.12 for canonical examples and CI.</li>
 <li>Run from the repository root using the environment in <a href="../CONTRIBUTING.md.html">CONTRIBUTING</a>.</li>
 <li>Prefer <code>uv run --no-sync python ...</code> or the prepared <code>.venv/bin/python</code>.</li>
 <li>Browser Python runs use a fresh process for each Run; notebook kernels have their own state. Explain the selected route rather than implying equivalence.</li>
@@ -207,7 +207,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ul>
 <li>Keep notebooks valid <code>nbformat</code> documents with the repository kernelspec.</li>
 <li>Prefer small, purposeful cells. Introduce one idea at a time.</li>
-<li>Historical Day 1–60 learner notebooks must contain at least eight purposeful cells, including at least three runnable code cells and enough explanatory Markdown to teach the lesson without an agent. These are minimums, not a reason to split prose or add filler.</li>
+<li>Historical Day 1-60 learner notebooks must contain at least eight purposeful cells, including at least three runnable code cells and enough explanatory Markdown to teach the lesson without an agent. These are minimums, not a reason to split prose or add filler.</li>
 <li>A lesson must contain objectives, a mental model and vocabulary, syntax anatomy, at least two runnable examples with predicted and observed behavior, guided and independent exercises, explicit expected/verify lines, common-error diagnosis, self-checks, and next steps.</li>
 <li>End every companion guide with the copy-ready, lesson-specific <code>## Ask an AI tutor about this lesson</code> contract defined in <code>docs/content-authoring.md</code>. The material before it must remain self-sufficient.</li>
 <li>Each cataloged lesson must meet its immutable <code>curriculum/practice_baseline.json</code> target on the learner notebook, guide, and explanatory solution. Count distinct numbered prompts, not hint or answer-step inflation.</li>

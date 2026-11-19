@@ -201,7 +201,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Physical grouping should follow the access pattern being measured. Summing only values may benefit from keeping those values together, while a routine consuming full records may prefer another layout. The reference proves that both forms still represent the same three values and sum to 60. reserve changes capacity, not size, so writing through index zero after reserve alone is invalid. Populate elements through push_back or resize before accessing them.</p>
 <h3 id="data-layout-follows-the-access-pattern">Data layout follows the access pattern<a class="heading-anchor" href="#data-layout-follows-the-access-pattern" aria-label="Link to this section">#</a></h3>
 <p>An array of structures stores complete records together. A structure-of-arrays layout stores each field in its own sequence. Neither layout is universally faster. The useful question is which fields the operation reads and in what order. Summing only value can benefit from dense values, while operations that need id and value together may favor a record layout.</p>
-<p>The first example stores three Sample records with IDs1, 2, 3 and values 10, 20, 30. It visits each record and adds value. The second stores just the values and uses accumulation. Both must produce60 before any timing comparison is meaningful. Equal totals are a basic correctness check; in a richer transformation, also verify that identity-to-value relationships remain intact.</p>
+<p>The first example stores three Sample records with IDs 1, 2, 3 and values 10, 20, 30. It visits each record and adds value. The second stores just the values and uses accumulation. Both must produce 60 before any timing comparison is meaningful. Equal totals are a basic correctness check; in a richer transformation, also verify that identity-to-value relationships remain intact.</p>
 <p>reserve(rows.size()) can avoid repeated growth allocations while materializing a values vector. It changes capacity, not size. push_back constructs the actual elements. Writing values[0] immediately after reserve on an empty vector would violate the element-access contract. This is a concrete link between performance-oriented allocation control and the ownership rules from cpp-007.</p>
 <p>Data movement has a cost. Creating a separate values sequence may improve repeated scans but require an upfront copy and additional memory. If only one tiny scan is performed, the conversion cost can dominate. A benchmark should state whether layout conversion is included and how many queries reuse the result. Otherwise two timings can describe different amounts of work.</p>
 <p>Hardware cache behavior, alignment, compiler vectorization and input size influence performance. The tiny fixture teaches representation and equality of results, not a cache-speed claim. Measure a representative bounded workload in the intended build configuration, and keep the original data contract visible while changing layout.</p>
@@ -218,32 +218,32 @@ assert<span class="syntax-punctuation">(</span>std<span class="syntax-operator">
 <p>Sketch three records as AoS and as separate ID/value vectors.</p>
 <p><strong>Expected:</strong> Same three logical rows with different physical grouping.</p>
 <p><strong>Reasoning:</strong> Representation must preserve the row relationship.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Check that both sketches contain the pairs (1, 10), (2, 20) and (3, 30), with the first interleaving ID and value and the second storing all IDs, then all values.</p>
 <h3 id="exercise-2-prove-result-equality">Exercise 2: Prove result equality<a class="heading-anchor" href="#exercise-2-prove-result-equality" aria-label="Link to this section">#</a></h3>
 <p>Sum values in both representations.</p>
 <p><strong>Expected:</strong> 60 from each.</p>
 <p><strong>Reasoning:</strong> Correctness is checked before performance.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Assert both sums equal 60, as Worked examples 1 and 2 do, using the same three values in each layout.</p>
 <h3 id="exercise-3-inspect-reserve">Exercise 3: Inspect reserve<a class="heading-anchor" href="#exercise-3-inspect-reserve" aria-label="Link to this section">#</a></h3>
 <p>Reserve 100 on an empty vector, then inspect size.</p>
 <p><strong>Expected:</strong> Size 0; capacity at least 100.</p>
 <p><strong>Reasoning:</strong> Reserved storage is not constructed logical elements.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Assert <code>v.size() == 0</code> and <code>v.capacity() &gt;= 100</code> after <code>v.reserve(100)</code>; do not assert an exact capacity.</p>
 <h3 id="exercise-4-repair-an-unfair-comparison">Exercise 4: Repair an unfair comparison<a class="heading-anchor" href="#exercise-4-repair-an-unfair-comparison" aria-label="Link to this section">#</a></h3>
 <p>One candidate omits the value 30.</p>
 <p><strong>Expected:</strong> Reject timing comparison until both checksums equal 60.</p>
 <p><strong>Reasoning:</strong> Doing less work can falsely look faster.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Print each candidate&#x27;s checksum before timing and assert both equal 60; the candidate without 30 produces 30, which must stop the comparison.</p>
 <h3 id="exercise-5-measure-bounded-work">Exercise 5: Measure bounded work<a class="heading-anchor" href="#exercise-5-measure-bounded-work" aria-label="Link to this section">#</a></h3>
 <p>Repeat one-field summation with a fixed row cap and build mode.</p>
 <p><strong>Expected:</strong> Same checksum, duration units and repetitions recorded.</p>
 <p><strong>Reasoning:</strong> Layout benefits depend on access pattern and hardware.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Record the row cap, build flags, number of repetitions and each duration with its unit, and assert the checksum is identical in every repetition.</p>
 <h3 id="exercise-6-transfer-the-workload">Exercise 6: Transfer the workload<a class="heading-anchor" href="#exercise-6-transfer-the-workload" aria-label="Link to this section">#</a></h3>
 <p>Now request ID and value together for every row.</p>
 <p><strong>Expected:</strong> Reassess the locality hypothesis without assuming SoA always wins.</p>
 <p><strong>Reasoning:</strong> The useful representation follows the query pattern.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p></article>
+<p><strong>Verify:</strong> Measure combined ID and value access in both layouts with the same row cap and repetitions, and state whether your earlier one-field result still holds.</p></article>
   </main>
 </body>
 </html>

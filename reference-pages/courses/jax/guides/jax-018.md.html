@@ -206,8 +206,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="derivation-and-shape-contract">Derivation and shape contract<a class="heading-anchor" href="#derivation-and-shape-contract" aria-label="Link to this section">#</a></h3>
 <p>For positive x, <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><mi>log</mi><mo>⁡</mo><mi>x</mi><mi mathvariant="normal">/</mi><mi>d</mi><mi>x</mi><mo>=</mo><mn>1</mn><mi mathvariant="normal">/</mi><mi>x</mi></mrow><annotation encoding="application/x-tex">d\log x/dx=1/x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">d</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">x</span><span class="mord">/</span><span class="mord mathnormal">d</span><span class="mord mathnormal">x</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1/</span><span class="mord mathnormal">x</span></span></span></span>. If the intended extension returns zero for nonpositive x, define the computational branch so that log is only applied to a valid positive surrogate there. This is an explicit piecewise extension, not a claim that log itself is defined on negative numbers. At the chosen smooth positive points, the derivative must still equal <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mi mathvariant="normal">/</mi><mi>x</mi></mrow><annotation encoding="application/x-tex">1/x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1/</span><span class="mord mathnormal">x</span></span></span></span>. At a boundary, state the selected differentiation convention rather than asserting ordinary smoothness.</p>
 <h3 id="run-this-investigation">Run this investigation<a class="heading-anchor" href="#run-this-investigation" aria-label="Link to this section">#</a></h3>
-<p>Use the <strong>JAX</strong> subject in the shared <code>/classroom</code> interface and its prepared <code>jax-cpu</code> profile. A Run starts a fresh Python process; save source and notes before replacing an attempt. The examples below are each complete programs, including their setup. They use tiny offline fixtures and deliberately enable 64-bit arithmetic before constructing arrays. This is a course precision choice, not the usual JAX default. No packages, models or data are downloaded.</p>
-<p>Learner source: <code>courses/jax/lessons/jax-018.py</code>. Guide: <code>courses/jax/guides/jax-018.md</code>. Predict the value and failure behavior before running. A passing assertion supports that particular contract; it does not establish statistical validity, mastery or accelerator performance.</p>
+<p>Open <code>jax-018</code> under the <strong>JAX</strong> subject in <code>/classroom</code> with its prepared <code>jax-cpu</code> profile. Worked example 1, <em>Repair an undefined intermediate</em>, and worked example 2, <em>Carry a dynamic check</em>, are complete programs that include only the setup they use and each print <code>jax-018: 1 asserted case passed</code>. The learner file <code>courses/jax/lessons/jax-018.py</code> leaves the six exercises, from <em>Expose a host conversion</em> to <em>Retain the positive-domain derivative</em>, for you to implement; the complete reference prints <code>jax-018: 8 asserted cases passed</code>. Every program enables 64-bit arithmetic before creating arrays, a course choice since JAX defaults to 32 bit, and every Run is a fresh Python process, so save source and notes before replacing an attempt. A passing assertion supports its stated contract only, not statistical validity, mastery or accelerator performance.</p>
 <h3 id="worked-investigations">Worked investigations<a class="heading-anchor" href="#worked-investigations" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-repair-an-undefined-intermediate">Worked example 1: Repair an undefined intermediate<a class="heading-anchor" href="#worked-example-1-repair-an-undefined-intermediate" aria-label="Link to this section">#</a></h4>
 <p>Evaluate the piecewise log extension and its summed gradient on [-1,0,2].</p>
@@ -222,7 +221,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-keyword">import</span> jax
 <span class="syntax-keyword">import</span> jax.numpy <span class="syntax-keyword">as</span> jnp
 
-<span class="syntax-keyword">from</span> jax.experimental <span class="syntax-keyword">import</span> checkify
 
 <span class="syntax-comment"># Choose precision before creating arrays; the usual JAX default is 32 bit.</span>
 jax<span class="syntax-operator">.</span>config<span class="syntax-operator">.</span>update<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">jax_enable_x64</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
@@ -246,7 +244,7 @@ jax<span class="syntax-operator">.</span>config<span class="syntax-operator">.</
     close<span class="syntax-punctuation">(</span>g<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
     <span class="syntax-keyword">assert</span> <span class="syntax-builtin">bool</span><span class="syntax-punctuation">(</span>jnp<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>g<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
 
-    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">jax-018</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&quot;</span><span class="syntax-string">: 1 asserted cases passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">jax-018: 1 asserted case passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
@@ -259,7 +257,6 @@ jax<span class="syntax-operator">.</span>config<span class="syntax-operator">.</
 
 <span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
 
-<span class="syntax-keyword">import</span> math
 <span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 <span class="syntax-keyword">import</span> jax
 <span class="syntax-keyword">import</span> jax.numpy <span class="syntax-keyword">as</span> jnp
@@ -272,12 +269,6 @@ jax<span class="syntax-operator">.</span>config<span class="syntax-operator">.</
 
 <span class="syntax-keyword">def</span> <span class="syntax-function">close</span><span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-10</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">1e-10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>asarray<span class="syntax-punctuation">(</span>actual<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span>atol<span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span>rtol<span class="syntax-punctuation">)</span>
-
-
-<span class="syntax-keyword">def</span> <span class="syntax-function">safe_log_extension</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
-    positive <span class="syntax-operator">=</span> values <span class="syntax-operator">&gt;</span> <span class="syntax-number">0.0</span>
-    safe_inputs <span class="syntax-operator">=</span> jnp<span class="syntax-operator">.</span>where<span class="syntax-punctuation">(</span>positive<span class="syntax-punctuation">,</span> values<span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">)</span>
-    <span class="syntax-keyword">return</span> jnp<span class="syntax-operator">.</span>where<span class="syntax-punctuation">(</span>positive<span class="syntax-punctuation">,</span> jnp<span class="syntax-operator">.</span>log<span class="syntax-punctuation">(</span>safe_inputs<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
@@ -293,7 +284,7 @@ jax<span class="syntax-operator">.</span>config<span class="syntax-operator">.</
     <span class="syntax-keyword">assert</span> bad<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> <span class="syntax-keyword">None</span>
     close<span class="syntax-punctuation">(</span>total<span class="syntax-punctuation">,</span> <span class="syntax-number">3.0</span><span class="syntax-punctuation">)</span>
 
-    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">jax-018</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&quot;</span><span class="syntax-string">: 1 asserted cases passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">jax-018: 1 asserted case passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 
 
 <span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
@@ -302,39 +293,39 @@ jax<span class="syntax-operator">.</span>config<span class="syntax-operator">.</
 <h4 id="exercise-1-expose-a-host-conversion">Exercise 1: Expose a host conversion<a class="heading-anchor" href="#exercise-1-expose-a-host-conversion" aria-label="Link to this section">#</a></h4>
 <p>Attempt np.asarray on an argument inside JIT.</p>
 <p><strong>Expected:</strong> TracerArrayConversionError.</p>
-<p><strong>Verify:</strong> Retain the relevant inputs, intermediate calculation and observation. A traced runtime value is not a concrete host array available to NumPy during staging.</p>
+<p><strong>Verify:</strong> A traced runtime value is not a concrete host array available to NumPy during staging.</p>
 <p><strong>Hint 1:</strong> Keep numerical work in JAX or move host conversion outside the transform.</p>
-<p><strong>Hint 2:</strong> Revisit the worked case that changes the same assumption, then close the reference and reconstruct the result from the stated contract.</p>
+<p><strong>Hint 2:</strong> The reference solution calls <code>jax.jit</code> and <code>jnp.ones</code> and treats <code>jax.errors.TracerArrayConversionError</code> as the passing outcome, failing if the call returns.</p>
 <h4 id="exercise-2-expose-a-dynamic-output-length">Exercise 2: Expose a dynamic output length<a class="heading-anchor" href="#exercise-2-expose-a-dynamic-output-length" aria-label="Link to this section">#</a></h4>
 <p>JIT x[x&gt;0] on a mixed-sign vector.</p>
 <p><strong>Expected:</strong> NonConcreteBooleanIndexError.</p>
-<p><strong>Verify:</strong> Retain the relevant inputs, intermediate calculation and observation. The number of retained values depends on runtime data, so this expression does not specify a fixed output shape.</p>
+<p><strong>Verify:</strong> The number of retained values depends on runtime data, so this expression does not specify a fixed output shape.</p>
 <p><strong>Hint 1:</strong> A fixed-size mask can preserve storage while selecting contributions.</p>
-<p><strong>Hint 2:</strong> Revisit the worked case that changes the same assumption, then close the reference and reconstruct the result from the stated contract.</p>
+<p><strong>Hint 2:</strong> The reference solution calls <code>jax.jit</code> and treats <code>jax.errors.NonConcreteBooleanIndexError</code> as the passing outcome, failing if the call returns.</p>
 <h4 id="exercise-3-use-a-fixed-shape-alternative">Exercise 3: Use a fixed-shape alternative<a class="heading-anchor" href="#exercise-3-use-a-fixed-shape-alternative" aria-label="Link to this section">#</a></h4>
 <p>Sum positive values using where and a fixed-shaped vector.</p>
 <p><strong>Expected:</strong> 2 for [-1,2].</p>
-<p><strong>Verify:</strong> Retain the relevant inputs, intermediate calculation and observation. This asks for a sum, so retaining a padded vector is sufficient and does not require a variable-length selection.</p>
+<p><strong>Verify:</strong> This asks for a sum, so retaining a padded vector is sufficient and does not require a variable-length selection.</p>
 <p><strong>Hint 1:</strong> Repair the computation according to its desired output, not merely its syntax.</p>
-<p><strong>Hint 2:</strong> Revisit the worked case that changes the same assumption, then close the reference and reconstruct the result from the stated contract.</p>
+<p><strong>Hint 2:</strong> The reference solution calls <code>jax.jit</code>, <code>.sum</code> and <code>jnp.where</code> and then makes 1 assertion against the expected observation.</p>
 <h4 id="exercise-4-print-a-runtime-diagnostic">Exercise 4: Print a runtime diagnostic<a class="heading-anchor" href="#exercise-4-print-a-runtime-diagnostic" aria-label="Link to this section">#</a></h4>
 <p>Emit a bounded sum through debug.print inside a jitted function.</p>
 <p><strong>Expected:</strong> A diagnostic containing total=3 and unchanged returned total three.</p>
-<p><strong>Verify:</strong> Retain the relevant inputs, intermediate calculation and observation. Runtime diagnostics observe numerical values; they are excluded from later timing claims.</p>
+<p><strong>Verify:</strong> Runtime diagnostics observe numerical values; they are excluded from later timing claims.</p>
 <p><strong>Hint 1:</strong> Use named placeholders and synchronize the returned result.</p>
-<p><strong>Hint 2:</strong> Revisit the worked case that changes the same assumption, then close the reference and reconstruct the result from the stated contract.</p>
+<p><strong>Hint 2:</strong> The reference solution calls <code>.sum</code>, <code>jax.debug.print</code> and <code>jax.jit</code> and then makes 1 assertion against the expected observation.</p>
 <h4 id="exercise-5-compare-with-jit-disabled">Exercise 5: Compare with JIT disabled<a class="heading-anchor" href="#exercise-5-compare-with-jit-disabled" aria-label="Link to this section">#</a></h4>
 <p>Evaluate the same jitted polynomial within and outside disable_jit.</p>
 <p><strong>Expected:</strong> Matching values at [1,2].</p>
-<p><strong>Verify:</strong> Retain the relevant inputs, intermediate calculation and observation. The comparison localizes transformation behavior without treating eager success as the final acceptance criterion.</p>
+<p><strong>Verify:</strong> The comparison localizes transformation behavior without treating eager success as the final acceptance criterion.</p>
 <p><strong>Hint 1:</strong> Keep inputs and dtype fixed.</p>
-<p><strong>Hint 2:</strong> Revisit the worked case that changes the same assumption, then close the reference and reconstruct the result from the stated contract.</p>
+<p><strong>Hint 2:</strong> The reference solution calls <code>jax.jit</code> and <code>jax.disable_jit</code> and then makes 1 assertion against the expected observation.</p>
 <h4 id="exercise-6-retain-the-positive-domain-derivative">Exercise 6: Retain the positive-domain derivative<a class="heading-anchor" href="#exercise-6-retain-the-positive-domain-derivative" aria-label="Link to this section">#</a></h4>
 <p>Differentiate the safe extension at positive values [1,2,4].</p>
 <p><strong>Expected:</strong> [1,0.5,0.25].</p>
-<p><strong>Verify:</strong> Retain the relevant inputs, intermediate calculation and observation. A repair for invalid inputs must not damage the intended formula on its valid domain.</p>
+<p><strong>Verify:</strong> A repair for invalid inputs must not damage the intended formula on its valid domain.</p>
 <p><strong>Hint 1:</strong> Test valid behavior as well as refusal or extension behavior.</p>
-<p><strong>Hint 2:</strong> Revisit the worked case that changes the same assumption, then close the reference and reconstruct the result from the stated contract.</p>
+<p><strong>Hint 2:</strong> The reference solution calls <code>jax.grad</code>, <code>.sum</code> and <code>safe_log_extension</code> and then makes 1 assertion against the expected observation.</p>
 <h3 id="diagnosis-and-boundaries">Diagnosis and boundaries<a class="heading-anchor" href="#diagnosis-and-boundaries" aria-label="Link to this section">#</a></h3>
 <p>Do not catch every exception and report success. Each negative case here names a specific violated contract, while the repaired valid path has its own assertion. Debug printing is observation, not a substitute for a numerical oracle.</p>
 <h3 id="transfer-and-review">Transfer and review<a class="heading-anchor" href="#transfer-and-review" aria-label="Link to this section">#</a></h3>
@@ -345,7 +336,7 @@ jax<span class="syntax-operator">.</span>config<span class="syntax-operator">.</
 <li><a href="https://docs.jax.dev/en/latest/errors.html">Errors</a></li>
 </ul>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Use the checked-in $guide-ds60sqlpy-learning skill for <code>jax-018</code>. Start with my own prediction and source. Ask me to explain one intermediate shape, derivative or state transition, then give a progressive hint for the first incorrect assumption. Distinguish authored examples, my actual receipt and any hardware or population claim requiring additional evidence.</p></article>
+<p>Use the checked-in $guide-ds60sqlpy-learning skill for <code>jax-018</code> (Debug the first broken transformation invariant), focusing on tracer error, debug print, checkify, finite intermediates. Start with my own prediction and source for one exercise, such as <em>Use a fixed-shape alternative</em>. Ask me to explain one intermediate shape, derivative or state transition, then give a progressive hint for the first incorrect assumption. Distinguish authored examples, my actual saved run output and any hardware or population claim requiring additional evidence.</p></article>
   </main>
 </body>
 </html>

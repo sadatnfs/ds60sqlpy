@@ -201,6 +201,20 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><code>lab.py</code> records a random project identity and checks ownership labels before operating on containers. State is a separate host directory containing event logs, bounded results, notebooks and a private login token. Container replacement and state deletion are different actions. The wrapper provides no state-destruction command.</p>
 <h3 id="worked-case-a-bring-up-the-owned-services">Worked case A: bring up the owned services<a class="heading-anchor" href="#worked-case-a-bring-up-the-owned-services" aria-label="Link to this section">#</a></h3>
 <p>After initialization in the preceding chapter:</p>
+<p>The two workers share one YAML anchor and differ only in name, command and limits:</p>
+<p>From <a href="../projects/cluster-lab/compose.yaml.html"><code>projects/cluster-lab/compose.yaml</code></a>:</p>
+<pre class="highlighted-code"><code class="language-yaml"><span class="syntax-tag">worker-a</span><span class="syntax-punctuation">:</span>
+  <span class="syntax-tag">&lt;&lt;</span><span class="syntax-punctuation">:</span> *runtime
+  <span class="syntax-tag">hostname</span><span class="syntax-punctuation">:</span> worker-a
+  <span class="syntax-tag">environment</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-tag">&lt;&lt;</span><span class="syntax-punctuation">:</span> *spark-environment
+    <span class="syntax-tag">SPARK_LOCAL_IP</span><span class="syntax-punctuation">:</span> worker-a
+  <span class="syntax-tag">command</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>worker<span class="syntax-punctuation">,</span> worker-a<span class="syntax-punctuation">]</span>
+  <span class="syntax-tag">mem_limit</span><span class="syntax-punctuation">:</span> 1536m
+  <span class="syntax-tag">cpus</span><span class="syntax-punctuation">:</span> 1
+  <span class="syntax-tag">pids_limit</span><span class="syntax-punctuation">:</span> 512
+  <span class="syntax-tag">depends_on</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>master<span class="syntax-punctuation">]</span></code></pre>
+<p><code>&lt;&lt;: *runtime</code> merges the shared settings: the read-only root filesystem, the dropped capabilities and the private <code>lab</code> network. <code>SPARK_LOCAL_IP</code> is the name the worker advertises, and <code>mem_limit</code>, <code>cpus</code> and <code>pids_limit</code> are the container bounds that chapter 12 turns into a concurrency budget.</p>
 <pre class="highlighted-code"><code class="language-bash">python3 lab.py up
 python3 lab.py status
 python3 lab.py urls</code></pre>

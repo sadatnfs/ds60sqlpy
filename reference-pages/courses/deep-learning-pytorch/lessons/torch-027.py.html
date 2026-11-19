@@ -199,17 +199,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">Copy to .learning before editing. Six independent attempts belong below.</span></span>
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 1: Freeze a known base</span></span>
-<span class="source-line"><span class="syntax-comment"># Create a bias-free 2-to-2identity Linear base and disable its parameter gradients.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: base output equals input; all base parameters frozen.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Freeze a scaling base</span></span>
+<span class="source-line"><span class="syntax-comment"># Create a bias-free 2-to-2 base whose weight is 2 times the identity, freeze it and</span></span>
+<span class="source-line"><span class="syntax-comment"># evaluate the row [1, 2].</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: output [[2, 4]]; the base weight does not require gradients.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 2: Train a new head</span></span>
-<span class="source-line"><span class="syntax-comment"># Attach a zero-initialized 2-to-1head and take one SGD.1step toward targets 1, 2, 3.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: head changes; base remains exact identity.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Predict the head update</span></span>
+<span class="source-line"><span class="syntax-comment"># Attach a zero-initialized bias-free 2-to-1 head, take one SGD step with learning rate</span></span>
+<span class="source-line"><span class="syntax-comment"># 0.1 toward target 1 using mean squared error.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: head weight [0.4, 0.8]; the base receives no gradient.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 3: Inspect absent base gradients</span></span>
-<span class="source-line"><span class="syntax-comment"># Check the frozen base after head backward.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: base gradient None; head gradient present.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: Count trainable parameters</span></span>
+<span class="source-line"><span class="syntax-comment"># Count the scalars that still require gradients across the frozen base and the new head.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: 2 trainable scalars, all in the head.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Expose buffer updates despite freezing</span></span>
 <span class="source-line"><span class="syntax-comment"># Freeze BatchNorm affine parameters but call it in train mode on a nonzero batch.</span></span>

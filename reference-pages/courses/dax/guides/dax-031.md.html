@@ -201,7 +201,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="the-question-and-the-mechanism">The question and the mechanism<a class="heading-anchor" href="#the-question-and-the-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Distinguish calendar coverage, observed facts and data-availability boundaries.</p>
 <p>A Date dimension contains calendar members, including days with no sales. A list of distinct OrderDate values contains only days on which facts were recorded. Using the latter as a calendar confuses the absence of an event with the absence of a date, and can change time-window denominators or break classic time-intelligence assumptions.</p>
-<p>The course Date fixture has one unique, nonblank date for every day of 2024 and 2025. The model contract marks that Date column for classic time intelligence. January 2025 therefore has 31 calendar rows even though sales occur on only January 2,3 and 5. A zero-sales day remains a date that can belong in an average or rolling interval.</p>
+<p>The course Date fixture has one unique, nonblank date for every day of 2024 and 2025. The model contract marks that Date column for classic time intelligence. January 2025 therefore has 31 calendar rows even though sales occur on only January 2, 3 and 5. A zero-sales day remains a date that can belong in an average or rolling interval.</p>
 <p>Calendar extent is not the same as observation completeness. This fixture declares sales observation through 2025-02-28; dates later in the calendar do not imply those periods were observed. A future blank cell should not automatically become zero demand. Track the available-data boundary separately from the maximum date in the dimension.</p>
 <h3 id="vocabulary-and-expression-anatomy">Vocabulary and expression anatomy<a class="heading-anchor" href="#vocabulary-and-expression-anatomy" aria-label="Link to this section">#</a></h3>
 <p>Case A compares calendar dates with distinct fact dates under the same month selection. Case B looks at a known observed date with no sale. The date row exists and the fact result is empty. A complete Date table is a model requirement, not a claim that every day has an event.</p>
@@ -225,7 +225,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Context trace:</strong></p>
 <ol>
 <li>The complete Date table contains January 1 through 31.</li>
-<li>Sales occur on January 2,3 and 5.</li>
+<li>Sales occur on January 2, 3 and 5.</li>
 <li>The calendar count is 31 while observed event-date count is 3.</li>
 </ol>
 <p><strong>Hand-derived worked-reference result:</strong></p>
@@ -264,11 +264,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>If this were beyond observation coverage, the same blank visual appearance would need a different interpretation. Availability metadata prevents that ambiguity.</p>
 <p>Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table.</p>
 <h3 id="practice-prediction-construction-and-diagnosis">Practice: prediction, construction and diagnosis<a class="heading-anchor" href="#practice-prediction-construction-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>Retain your formula or written reasoning, the stated context, contributing rows or values, and a conclusion with its unit. This is a manual learning record, not an execution receipt.</p>
+<p>Retain your formula or written reasoning, the stated context, contributing rows or values, and a conclusion with its unit. These notes are your own study record; they do not show that a formula ran.</p>
 <h4 id="exercise-1-predict">Exercise 1: Predict<a class="heading-anchor" href="#exercise-1-predict" aria-label="Link to this section">#</a></h4>
 <p>Predict the number of Date rows in February 2024.</p>
 <h4 id="exercise-2-change-one-condition">Exercise 2: Change one condition<a class="heading-anchor" href="#exercise-2-change-one-condition" aria-label="Link to this section">#</a></h4>
-<p>Change case B to January 2,2025.</p>
+<p>Change case B to January 2, 2025.</p>
 <h4 id="exercise-3-construct">Exercise 3: Construct<a class="heading-anchor" href="#exercise-3-construct" aria-label="Link to this section">#</a></h4>
 <p>Write a date-table quality checklist.</p>
 <h4 id="exercise-4-diagnose">Exercise 4: Diagnose<a class="heading-anchor" href="#exercise-4-diagnose" aria-label="Link to this section">#</a></h4>
@@ -291,8 +291,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Continue to <a href="dax-032.md.html">dax-032</a> when its prerequisites make sense, or revisit this stage from the <a href="../README.md.html">course map</a>.</p>
 <h3 id="official-references-and-evidence-limits">Official references and evidence limits<a class="heading-anchor" href="#official-references-and-evidence-limits" aria-label="Link to this section">#</a></h3>
 <ul>
-<li><a href="https://learn.microsoft.com/en-us/power-bi/guidance/model-date-tables">Official documentation 1</a></li>
-<li><a href="https://learn.microsoft.com/en-us/dax/datesytd-function-dax">Official documentation 2</a></li>
+<li><a href="https://learn.microsoft.com/en-us/power-bi/guidance/model-date-tables">Power BI guidance: date tables</a></li>
+<li><a href="https://learn.microsoft.com/en-us/dax/datesytd-function-dax">DAX function: DATESYTD</a></li>
 </ul>
 <p>Documentation was reviewed for this original course on 2026-10-25. Version-sensitive features have explicit notes. Source/model checks and independent fixture arithmetic are not a DAX parser, compiler, semantic engine, real RLS test or performance measurement.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>

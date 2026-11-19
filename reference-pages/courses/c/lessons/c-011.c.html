@@ -196,13 +196,21 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-c"><code><span class="source-line"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;stdio.h&gt;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">void</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
-<span class="source-line">  <span class="syntax-comment">/* Exercise 1: Trace block shadowing</span></span>
-<span class="source-line"><span class="syntax-comment">     Declare an outer value 3 and a separate inner value 7.</span></span>
-<span class="source-line"><span class="syntax-comment">     Expected: After the inner block, the outer remains 3. */</span></span>
+<span class="source-line">  <span class="syntax-comment">/* Exercise 1: Trace block shadowing: change one input</span></span>
+<span class="source-line"><span class="syntax-comment">     Copy worked example 1 into a scratch pad and change `int value = 3;` to</span></span>
+<span class="source-line"><span class="syntax-comment">     `int value = 4;`. Before running, predict which CHECK fails and which value</span></span>
+<span class="source-line"><span class="syntax-comment">     it now sees; then run it and restore the original line. Expected: The</span></span>
+<span class="source-line"><span class="syntax-comment">     changed run stops with `Check failed` at the CHECK on `value == 3`.</span></span>
+<span class="source-line"><span class="syntax-comment">     Restoring the original line brings back the worked observation: after the</span></span>
+<span class="source-line"><span class="syntax-comment">     inner block, the outer remains 3. */</span></span>
 <span class="source-line"></span>
-<span class="source-line">  <span class="syntax-comment">/* Exercise 2: Retain static state</span></span>
-<span class="source-line"><span class="syntax-comment">     Call a function with one static counter twice.</span></span>
-<span class="source-line"><span class="syntax-comment">     Expected: It returns 1 and then 2. */</span></span>
+<span class="source-line">  <span class="syntax-comment">/* Exercise 2: Retain static state: diagnose an edited check</span></span>
+<span class="source-line"><span class="syntax-comment">     A careless edit changed the CHECK in worked example 2 so that it reads</span></span>
+<span class="source-line"><span class="syntax-comment">     `CHECK(next_count() != 2);`. Run worked example 2 with that line, explain</span></span>
+<span class="source-line"><span class="syntax-comment">     why the edited CHECK now fails for the same program state, and restore it.</span></span>
+<span class="source-line"><span class="syntax-comment">     Expected: Before the repair the run stops with `Check failed` at the CHECK</span></span>
+<span class="source-line"><span class="syntax-comment">     on `next_count() == 2`; after it the line reads `CHECK(next_count() == 2);`</span></span>
+<span class="source-line"><span class="syntax-comment">     again and it returns 1 and then 2. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 3: Return a static address</span></span>
 <span class="source-line"><span class="syntax-comment">     Get a pointer to a static read-only value.</span></span>

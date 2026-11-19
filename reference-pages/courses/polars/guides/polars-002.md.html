@@ -204,10 +204,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>In pl.col(&quot;x&quot;)+1, x is selected from the current input. alias(&quot;x&quot;) asks the result to use that name, replacing the returned x column. Two calls form two contexts: frame.with_columns(...).with_columns(...). A when/then/otherwise expression constructs conditional values; pl.lit distinguishes a constant from a column reference. Prefer readable intermediate names when a calculation has several stages.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open this subject in <code>/classroom</code>, then show its code and notes. The prepared <code>data-engineering</code> worker runs <code>main.py</code> in a fresh temporary directory. The examples use installed packages and synthetic local fixtures; no account, cloud service, network request or package download is required. Save source and notes before switching lessons. Temporary databases, project files and tracking artifacts are recreated by each complete program and removed after the job. The classroom retains the submitted source and bounded output, not an indefinitely running external service. The guide distinguishes this local execution from the deployment decisions that need an owned production environment.</p>
+<p>Open <code>polars-002</code> in <code>/classroom</code>. Its starter <code>main.py</code> contains both worked cases, &quot;Parallel context versus sequential transformation&quot; and &quot;Condition on a value and diagnose a missing field&quot;, and prints the dictionary each case returns. The prepared <code>data-engineering</code> worker runs it in a fresh temporary directory. An <code>AssertionError</code> means that an observation differs from the case&#x27;s stated contract. The inputs are small literal tables. Cases that demonstrate Parquet scans write their files into a temporary directory that is removed when the case returns. No account, network request or package download is involved. Save source and notes before switching lessons.</p>
 <h3 id="worked-case-1-parallel-context-versus-sequential-transformation">Worked case 1: Parallel context versus sequential transformation<a class="heading-anchor" href="#worked-case-1-parallel-context-versus-sequential-transformation" aria-label="Link to this section">#</a></h3>
 <p>The first case updates x and calculates old_x_times_ten in the same call. The deliberately named output makes its dependency visible. A second pipeline creates another with_columns context, so the multiplication uses the updated x values. This is a minimal example of why argument order is not a substitute for a dependency graph.</p>
-<p><strong>Expected evidence:</strong> The same-call multiplication is[10,20,30]; the staged multiplication is[20,30,40].</p>
+<p><strong>Expected evidence:</strong> The same-call multiplication is [10, 20, 30]; the staged multiplication is [20, 30, 40].</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> polars <span class="syntax-keyword">as</span> pl
 
 
@@ -228,7 +228,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>example_one<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="worked-case-2-condition-on-a-value-and-diagnose-a-missing-field">Worked case 2: Condition on a value and diagnose a missing field<a class="heading-anchor" href="#worked-case-2-condition-on-a-value-and-diagnose-a-missing-field" aria-label="Link to this section">#</a></h3>
 <p>The second case recognizes revenue only for paid rows. The predicate uses a literal string and the else branch returns a numeric zero. It separately demonstrates that naming an absent column raises a real error rather than producing an implicit all-null column.</p>
-<p><strong>Expected evidence:</strong> Recognized amounts are[5,0,11]; selecting a missing column is rejected.</p>
+<p><strong>Expected evidence:</strong> Recognized amounts are [5, 0, 11]; selecting a missing column is rejected.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> polars <span class="syntax-keyword">as</span> pl
 
 
@@ -255,10 +255,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
     <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>example_two<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="practice">Practice<a class="heading-anchor" href="#practice" aria-label="Link to this section">#</a></h3>
-<p>Make each requested change in a saved copy. Compare both the expected result and the deliberately changed assumption. The separate reference explains the answers.</p>
+<p>The starter contains both worked cases, so a task can change either one. Make each change in a saved copy, run it, and compare the printed result with the task&#x27;s check before opening the separate explained answers.</p>
 <h4 id="1-change-the-increment">1. Change the increment<a class="heading-anchor" href="#1-change-the-increment" aria-label="Link to this section">#</a></h4>
 <p>Increment x by 2 before the dependent multiplication.</p>
-<p><strong>Check:</strong> The staged values are[30,40,50].</p>
+<p><strong>Check:</strong> The staged values are [30, 40, 50].</p>
 <p><strong>Hint:</strong> The second context must see the new x.</p>
 <h4 id="2-name-the-old-value">2. Name the old value<a class="heading-anchor" href="#2-name-the-old-value" aria-label="Link to this section">#</a></h4>
 <p>Keep x unchanged and create incremented_x.</p>
@@ -283,14 +283,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="diagnose-errors-and-misleading-results">Diagnose errors and misleading results<a class="heading-anchor" href="#diagnose-errors-and-misleading-results" aria-label="Link to this section">#</a></h3>
 <p>If an expression unexpectedly uses old values, inspect its context before suspecting nondeterministic execution. If a string causes a missing-column error, decide whether it represents a name or a literal. A conditional expression may still evaluate branches as expressions, so do not rely on it to protect an otherwise invalid operation. Make casts and denominator policies valid independently, then select the appropriate result.</p>
 <h3 id="transfer-to-independent-work">Transfer to independent work<a class="heading-anchor" href="#transfer-to-independent-work" aria-label="Link to this section">#</a></h3>
-<p>Build a transformation whose dependency stages are explicit. Apply the same reasoning to feature pipelines: a normalized value should reference the intended cleaned field, and training and serving must agree on that order. Use intermediate schemas and a small hand-calculated fixture to review the pipeline before optimizing it.</p>
+<p>Apply the same reasoning to feature pipelines: a normalized value should reference the intended cleaned field, and training and serving must agree on that order. Use intermediate schemas and a small hand-calculated fixture to review the pipeline before optimizing it.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
-<li><a href="https://docs.pola.rs/user-guide/concepts/expressions-and-contexts/">Polars documentation: Expression contexts and explicit dependencies</a></li>
+<li><a href="https://docs.pola.rs/user-guide/concepts/expressions-and-contexts/">Polars user guide: Expressions and contexts</a></li>
 <li><a href="https://docs.pola.rs/api/python/stable/reference/index.html">Polars Python API reference</a></li>
 </ul>
 <h3 id="tutor-guidance">Tutor guidance<a class="heading-anchor" href="#tutor-guidance" aria-label="Link to this section">#</a></h3>
-<p>Use the repository learning-companion skill for <code>polars-002</code>. Inspect the learner&#x27;s own source and observations, ask for an explanation of the relevant data or state contract, and give a focused hint. Separate an assertion on this fixture from a claim about an external dataset or deployed service.</p></article>
+<p>Use the repository&#x27;s <code>$guide-ds60sqlpy-learning</code> skill (<code>.agents/skills/guide-ds60sqlpy-learning/SKILL.md</code>) for <code>polars-002</code>. Inspect the learner&#x27;s own source and printed output first. Ask for an explanation of select, with_columns, alias, literal and dependency ordering in their own words, then give one focused hint at a time. Keep an assertion on this synthetic fixture separate from a claim about an external dataset or deployed service.</p></article>
   </main>
 </body>
 </html>

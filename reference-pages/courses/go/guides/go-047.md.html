@@ -197,7 +197,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Advanced. Allow about 120 minutes, then revisit the transfer case later. Prerequisites: go-046</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
-<p>By the end, explain fake client, integration evidence, fault injection; implement the six investigations below; and defend the expected result of a changed input before running it. A passing reference is evidence about that program, not a certification of your independent understanding.</p>
+<p>Test controller logic with fakes that count calls and preserve error causes before running against an owned cluster. Along the way, explain fake client, integration evidence, fault injection; implement the six investigations below; and defend the expected result of a changed input before running it.</p>
 <h3 id="why-this-mechanism-matters">Why this mechanism matters<a class="heading-anchor" href="#why-this-mechanism-matters" aria-label="Link to this section">#</a></h3>
 <p>A controller needs several evidence layers. Pure tests check decision rules quickly. Fake-client tests check requested API interactions and local error handling but may omit server defaulting, validation, resourceVersion conflicts and admission behavior. API-server integration tests add those server contracts. An owned disposable cluster adds controllers, scheduling, networking and real cleanup behavior. Passing a fake test is not interchangeable with a successful rollout. Design fault injection around a specific uncertainty: conflict, cancellation, stale cache, forbidden access or unknown outcome. Keep source hashes, exact object identity and cleanup receipts so the evidence can be traced to the program that actually ran.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
@@ -208,7 +208,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ul>
 <h3 id="syntax-anatomy-and-reasoning">Syntax anatomy and reasoning<a class="heading-anchor" href="#syntax-anatomy-and-reasoning" aria-label="Link to this section">#</a></h3>
 <p>Use a narrow interface at the application boundary and inject a fake with explicit outcomes. Assert both the result and which calls were made. A forbidden error should not trigger an endless retry loop; a cancellation should stop new calls. For live tests, create a unique owned namespace, retain UIDs, bound all waits and verify cleanup without deleting resources identified only by a reusable name. Do not use production contexts as convenient fixtures.</p>
-<h3 id="classroom-execution-contract">Classroom execution contract<a class="heading-anchor" href="#classroom-execution-contract" aria-label="Link to this section">#</a></h3>
+<h3 id="run-this-lesson">Run this lesson<a class="heading-anchor" href="#run-this-lesson" aria-label="Link to this section">#</a></h3>
 <p>Choose Go in the unified Docker classroom. Save your own pad before experimenting. The prepared worker stages it as <code>main.go</code>, compiles it, and executes the resulting program with bounded time and output. The pad is one source file. It does not supply interactive input, arbitrary command-line arguments, package installation, Kubernetes credentials or a host Docker socket. Every ordinary reference here uses the standard library, synthetic local data and explicit checks. A failed <code>check</code> panics and produces a nonzero process result; do not remove it to make the run appear successful.</p>
 <p>The explanatory solution snippets belong inside <code>func main()</code> unless they declare a helper. <code>check</code> is a tiny teaching helper that panics when a condition is false. The separate reference supplies required imports and helpers and implements all six cases. Use that complete source only after an attempt or an explicit reveal. For an independently prepared Go project, the equivalent local build is <code>go build -o lesson main.go</code>, followed by <code>./lesson</code>; use Linux or WSL 2 for that optional workflow. Compiling proves syntax and type consistency, while the executed checks establish the stated example contracts.</p>
 <p>Each worked example below is a complete Go file. Copy one whole block into your saved pad and run it. Example 2 includes the first case as well as the second, so its setup is complete. Its supporting declarations may be reused in later investigations. The separate reference implements all six cases.</p>
@@ -325,75 +325,75 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>
 <p>For each example, write the input values, the state that can change, and the expected observation. Explain which result would disprove your current interpretation. For concurrency, predict a guaranteed relationship rather than an arbitrary scheduling order. For an error case, identify whether it is rejected at compilation or returned during execution.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
-<h4 id="exercise-1-verify-one-successful-api-call">Exercise 1: Verify one successful API call<a class="heading-anchor" href="#exercise-1-verify-one-successful-api-call" aria-label="Link to this section">#</a></h4>
-<p>Run a fake client configured to return a value.</p>
-<p><strong>Expected:</strong> The result is retained and exactly one call occurs.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
-<h4 id="exercise-2-preserve-a-forbidden-error">Exercise 2: Preserve a forbidden error<a class="heading-anchor" href="#exercise-2-preserve-a-forbidden-error" aria-label="Link to this section">#</a></h4>
-<p>Make the fake return ErrForbidden.</p>
-<p><strong>Expected:</strong> The exact cause is visible and only one call occurs.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<h4 id="exercise-1-verify-one-successful-api-call-change-one-input">Exercise 1: Verify one successful API call: change one input<a class="heading-anchor" href="#exercise-1-verify-one-successful-api-call-change-one-input" aria-label="Link to this section">#</a></h4>
+<p>Copy worked example 1 into a scratch pad and change <code>f := &amp;FakeReader{Value: 3}</code> to <code>f := &amp;FakeReader{Value: 4}</code>. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</p>
+<p><strong>Expected:</strong> The changed run panics with <code>success</code> because <code>err == nil &amp;&amp; v == 3 &amp;&amp; f.Calls == 1</code> no longer holds. Restoring the original line brings back the worked observation: the result is retained and exactly one call occurs.</p>
+<p><strong>Verify:</strong> Compare your written prediction with the panic message <code>success</code> and name the value that made <code>err == nil &amp;&amp; v == 3 &amp;&amp; f.Calls == 1</code> false. After restoring the input, the program must print its success line again.</p>
+<h4 id="exercise-2-preserve-a-forbidden-error-diagnose-an-edited-check">Exercise 2: Preserve a forbidden error: diagnose an edited check<a class="heading-anchor" href="#exercise-2-preserve-a-forbidden-error-diagnose-an-edited-check" aria-label="Link to this section">#</a></h4>
+<p>A careless edit changed the check in worked example 2 so that it reads <code>check(errors.Is(err, ErrForbidden) &amp;&amp; f.Calls != 1, &quot;forbidden&quot;)</code>. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.</p>
+<p><strong>Expected:</strong> Before the repair the program panics with <code>forbidden</code>; after it the line reads <code>check(errors.Is(err, ErrForbidden) &amp;&amp; f.Calls == 1, &quot;forbidden&quot;)</code> again and the exact cause is visible and only one call occurs.</p>
+<p><strong>Verify:</strong> Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that <code>errors.Is(err, ErrForbidden) &amp;&amp; f.Calls == 1</code> accepts.</p>
 <h4 id="exercise-3-stop-before-a-canceled-call">Exercise 3: Stop before a canceled call<a class="heading-anchor" href="#exercise-3-stop-before-a-canceled-call" aria-label="Link to this section">#</a></h4>
 <p>Cancel context before invoking the adapter.</p>
 <p><strong>Expected:</strong> No API call is made.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>errors.Is(err, context.Canceled) &amp;&amp; f.Calls == 0</code>. As a control, change <code>check(errors.Is(err, context.Canceled) &amp;&amp; f.Calls == 0, &quot;cancel&quot;)</code> to <code>check(errors.Is(err, context.Canceled) &amp;&amp; f.Calls != 0, &quot;cancel&quot;)</code> inside that check: it must panic with <code>cancel</code>, which shows the check can fail. Restore it.</p>
 <h4 id="exercise-4-distinguish-returned-zero-from-failure">Exercise 4: Distinguish returned zero from failure<a class="heading-anchor" href="#exercise-4-distinguish-returned-zero-from-failure" aria-label="Link to this section">#</a></h4>
 <p>Return a successful zero from the fake.</p>
 <p><strong>Expected:</strong> The zero is accepted with nil error.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>err == nil &amp;&amp; v == 0</code>. As a control, change <code>f := &amp;FakeReader{Value: 0}</code> to <code>f := &amp;FakeReader{Value: 1}</code>: the run must panic with <code>zero success</code>. Restore the line before continuing.</p>
 <h4 id="exercise-5-retain-an-unknown-failure">Exercise 5: Retain an unknown failure<a class="heading-anchor" href="#exercise-5-retain-an-unknown-failure" aria-label="Link to this section">#</a></h4>
 <p>Return an unexpected error cause.</p>
 <p><strong>Expected:</strong> The cause remains inspectable.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>errors.Is(err, cause)</code> and confirm the success line. Then name an input that would make it fail and the panic message (<code>unknown cause</code>) you would expect.</p>
 <h4 id="exercise-6-transfer-source-bound-evidence">Exercise 6: Transfer source-bound evidence<a class="heading-anchor" href="#exercise-6-transfer-source-bound-evidence" aria-label="Link to this section">#</a></h4>
-<p>Bind a synthetic receipt to its lesson ID and source digest label.</p>
-<p><strong>Expected:</strong> Both identifiers survive comparison.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p>Bind a synthetic receipt to its lesson ID and the SHA-256 digest of the exact source text, then compare it with a source that has one extra byte.</p>
+<p><strong>Expected:</strong> The receipt matches the exact source and rejects the changed source.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>receipt[&quot;lesson&quot;] == &quot;go-047&quot; &amp;&amp; receipt[&quot;source&quot;] == digest(source) &amp;&amp; receipt[&quot;source&quot;] != digest(source+&quot; &quot;)</code>. As a control, change <code>receipt := map[string]string{&quot;lesson&quot;: &quot;go-047&quot;, &quot;source&quot;: digest(source)}</code> to <code>receipt := map[string]string{&quot;lesson&quot;: &quot;go-48&quot;, &quot;source&quot;: digest(source)}</code>: the run must panic with <code>receipt identity</code>. Restore the line before continuing.</p>
 <p>Implement these in the answer-free learner source. Keep one independent check per claim. A task can require tracing, construction, a changed input or a deliberate safe failure. Do not run a data race, corrupt memory or contact a shared cluster merely to demonstrate why it would be wrong.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Read a compiler error from the first location in your source, then fix one cause at a time. Unused imports and variables are errors in Go; add an import when its use exists, rather than copying a large unused import list. A panic from <code>check</code> identifies a violated example contract. Compare the actual value with the expected value and inspect the state transition that produced it. A returned <code>error</code> is a value that the caller must handle; an ignored error can make later output look plausible while the original operation failed.</p>
 <p>The lesson-specific explanations in the two examples identify the important counterexamples. Extend that reasoning to every investigation: explain why a plausible alternative would fail, and preserve a tiny input that distinguishes it. Treat empty data, missing values and cancellation as domain cases with explicit policies. In concurrent work, replace sleeps used as synchronization with channels, mutexes or an explicit ownership protocol.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<h4 id="hint-for-investigation-1-verify-one-successful-api-call">Hint for investigation 1: Verify one successful API call<a class="heading-anchor" href="#hint-for-investigation-1-verify-one-successful-api-call" aria-label="Link to this section">#</a></h4>
+<h4 id="hint-for-investigation-1-verify-one-successful-api-call-change-one-input">Hint for investigation 1: Verify one successful API call: change one input<a class="heading-anchor" href="#hint-for-investigation-1-verify-one-successful-api-call-change-one-input" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The result is retained and exactly one call occurs.</li>
-<li>Identify the input and the state boundary relevant to verify one successful api call. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>err == nil &amp;&amp; v == 3 &amp;&amp; f.Calls == 1</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Compute the checked value with <code>f := &amp;FakeReader{Value: 4}</code> in place before running, then compare it with the value <code>err == nil &amp;&amp; v == 3 &amp;&amp; f.Calls == 1</code> expects.</li>
 </ol>
-<h4 id="hint-for-investigation-2-preserve-a-forbidden-error">Hint for investigation 2: Preserve a forbidden error<a class="heading-anchor" href="#hint-for-investigation-2-preserve-a-forbidden-error" aria-label="Link to this section">#</a></h4>
+<h4 id="hint-for-investigation-2-preserve-a-forbidden-error-diagnose-an-edited-check">Hint for investigation 2: Preserve a forbidden error: diagnose an edited check<a class="heading-anchor" href="#hint-for-investigation-2-preserve-a-forbidden-error-diagnose-an-edited-check" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The exact cause is visible and only one call occurs.</li>
-<li>Identify the input and the state boundary relevant to preserve a forbidden error. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>errors.Is(err, ErrForbidden) &amp;&amp; f.Calls == 1</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Compare <code>check(errors.Is(err, ErrForbidden) &amp;&amp; f.Calls != 1, &quot;forbidden&quot;)</code> with the same line in worked example 2 and state the claim each version makes.</li>
 </ol>
 <h4 id="hint-for-investigation-3-stop-before-a-canceled-call">Hint for investigation 3: Stop before a canceled call<a class="heading-anchor" href="#hint-for-investigation-3-stop-before-a-canceled-call" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: No API call is made.</li>
-<li>Identify the input and the state boundary relevant to stop before a canceled call. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>errors.Is(err, context.Canceled) &amp;&amp; f.Calls == 0</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Name one input that would make <code>errors.Is(err, context.Canceled) &amp;&amp; f.Calls == 0</code> false. A check that no input can falsify is not evidence.</li>
 </ol>
 <h4 id="hint-for-investigation-4-distinguish-returned-zero-from-failure">Hint for investigation 4: Distinguish returned zero from failure<a class="heading-anchor" href="#hint-for-investigation-4-distinguish-returned-zero-from-failure" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The zero is accepted with nil error.</li>
-<li>Identify the input and the state boundary relevant to distinguish returned zero from failure. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>err == nil &amp;&amp; v == 0</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Predict the effect of changing <code>f := &amp;FakeReader{Value: 0}</code> to <code>f := &amp;FakeReader{Value: 1}</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
 </ol>
 <h4 id="hint-for-investigation-5-retain-an-unknown-failure">Hint for investigation 5: Retain an unknown failure<a class="heading-anchor" href="#hint-for-investigation-5-retain-an-unknown-failure" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The cause remains inspectable.</li>
-<li>Identify the input and the state boundary relevant to retain an unknown failure. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>errors.Is(err, cause)</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Name one input that would make <code>errors.Is(err, cause)</code> false. A check that no input can falsify is not evidence.</li>
 </ol>
 <h4 id="hint-for-investigation-6-transfer-source-bound-evidence">Hint for investigation 6: Transfer source-bound evidence<a class="heading-anchor" href="#hint-for-investigation-6-transfer-source-bound-evidence" aria-label="Link to this section">#</a></h4>
 <ol>
-<li>Restate the expected observation: Both identifiers survive comparison.</li>
-<li>Identify the input and the state boundary relevant to transfer source-bound evidence. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>Restate the expected observation: The receipt matches the exact source and rejects the changed source.</li>
+<li>The check <code>receipt[&quot;lesson&quot;] == &quot;go-047&quot; &amp;&amp; receipt[&quot;source&quot;] == digest(source) &amp;&amp; receipt[&quot;source&quot;] != digest(source+&quot; &quot;)</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Predict the effect of changing <code>receipt := map[string]string{&quot;lesson&quot;: &quot;go-047&quot;, &quot;source&quot;: digest(source)}</code> to <code>receipt := map[string]string{&quot;lesson&quot;: &quot;go-48&quot;, &quot;source&quot;: digest(source)}</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
 </ol>
 <h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
 <p>Close the reference. Rebuild one normal case and one boundary case from a blank pad. Explain the role of fake client without using its name in the definition. Then change the domain while keeping the same invariant. Record the new input, your prediction and the observed output. If your program passes only because its input is hard-coded, explain which part would need a reusable function in a larger project.</p>
 <h3 id="next-step-and-sources">Next step and sources<a class="heading-anchor" href="#next-step-and-sources" aria-label="Link to this section">#</a></h3>
-<p><a href="https://github.com/kubernetes/client-go/tree/master/testing">Primary language or library documentation</a>, reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. This source supports the API contract; it does not verify the classroom worker. Runtime receipts are recorded separately by the repository validation tools. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.</p>
+<p><a href="https://github.com/kubernetes/client-go/tree/master/testing">Primary language or library documentation</a>, reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for go-047: Controller tests from pure functions to owned clusters.
 Read courses/go/guides/go-047.md and my saved attempt based on courses/go/lessons/go-047.go.

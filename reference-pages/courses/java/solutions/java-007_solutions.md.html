@@ -202,24 +202,26 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Invariant:</strong> A property required to hold for every valid object state.</p>
 <h3 id="reading-the-reference">Reading the reference<a class="heading-anchor" href="#reading-the-reference" aria-label="Link to this section">#</a></h3>
 <p>private fields are accessed by methods inside the class. this denotes the current object when needed to distinguish fields and parameters. A method should calculate and validate a candidate state before assigning it. Math.addExact prevents integer overflow from turning a positive deposit into a negative balance. Public accessors can expose a value without exposing a mutable internal collection.</p>
-<h3 id="exercise-1-create-independent-accounts">Exercise 1: Create independent accounts<a class="heading-anchor" href="#exercise-1-create-independent-accounts" aria-label="Link to this section">#</a></h3>
-<p>Task: Construct accounts with 100 and 100 cents,deposit 50 into the first.</p>
-<p>Equal initial values do not mean shared identity. Eachnew expression creates a separate object whose field can evolve independently.</p>
+<h3 id="exercise-1-create-independent-accounts-change-one-input">Exercise 1: Create independent accounts: change one input<a class="heading-anchor" href="#exercise-1-create-independent-accounts-change-one-input" aria-label="Link to this section">#</a></h3>
+<p>Task: Copy Example A into a scratch <code>Main.java</code> and change <code>Account first = new Account(100);</code> to <code>Account first = new Account(101);</code>. Before running it with <code>java -ea Main</code>, predict which assertion fails and which value it now sees; then run it and restore the original line.</p>
+<p>Equal initial values do not mean shared identity. Each new expression creates a separate object whose field can evolve independently.</p>
+<p>The unchanged code is the part that Example A adds:</p>
 <pre class="highlighted-code"><code class="language-java">Account first <span class="syntax-operator">=</span> <span class="syntax-keyword">new</span> Account<span class="syntax-punctuation">(</span><span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 Account second <span class="syntax-operator">=</span> <span class="syntax-keyword">new</span> Account<span class="syntax-punctuation">(</span><span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 first<span class="syntax-punctuation">.</span><span class="syntax-attribute">deposit</span><span class="syntax-punctuation">(</span><span class="syntax-number">50</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 <span class="syntax-keyword">assert</span> first<span class="syntax-punctuation">.</span><span class="syntax-attribute">balance</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">150</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> second<span class="syntax-punctuation">.</span><span class="syntax-attribute">balance</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">100</span><span class="syntax-punctuation">;</span></code></pre>
-<p><strong>Expected:</strong> balances 150 and 100.</p>
-<p><strong>Verify:</strong> Compare the program values or named exception with balances 150 and 100. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
-<h3 id="exercise-2-withdraw-within-the-contract">Exercise 2: Withdraw within the contract<a class="heading-anchor" href="#exercise-2-withdraw-within-the-contract" aria-label="Link to this section">#</a></h3>
-<p>Task: Withdraw40 cents from the first account.</p>
+<p><strong>Expected:</strong> The changed run fails with an <code>AssertionError</code> from the assertion on <code>first.balance() == 150 &amp;&amp; second.balance() == 100</code>. Restoring the original line brings back the worked observation: balances 150 and 100.</p>
+<p><strong>Verify:</strong> Compare your written prediction with the reported <code>AssertionError</code> and its stack-trace line, and name the value that made <code>first.balance() == 150 &amp;&amp; second.balance() == 100</code> false. After restoring the line, the program completes without an <code>AssertionError</code> again.</p>
+<h3 id="exercise-2-withdraw-within-the-contract-debug-a-regression">Exercise 2: Withdraw within the contract: debug a regression<a class="heading-anchor" href="#exercise-2-withdraw-within-the-contract-debug-a-regression" aria-label="Link to this section">#</a></h3>
+<p>Task: A regression changed one token in the code that Example B adds after Example A, so one line now reads <code>first.withdraw(41);</code>. Run Example B with that line, use the failing assertion to locate the defect and repair it without changing the assertion.</p>
 <p>The method validates the amount against current state, then performs one state change. The caller does not calculate and assign a raw field.</p>
+<p>The unchanged code is the part that Example B adds:</p>
 <pre class="highlighted-code"><code class="language-java">first<span class="syntax-punctuation">.</span><span class="syntax-attribute">withdraw</span><span class="syntax-punctuation">(</span><span class="syntax-number">40</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 <span class="syntax-keyword">assert</span> first<span class="syntax-punctuation">.</span><span class="syntax-attribute">balance</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">110</span><span class="syntax-punctuation">;</span></code></pre>
-<p><strong>Expected:</strong> balance110.</p>
-<p><strong>Verify:</strong> Compare the program values or named exception with balance110. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
+<p><strong>Expected:</strong> Before the repair the run fails with an <code>AssertionError</code> from the assertion on <code>first.balance() == 110</code>; after it the line reads <code>first.withdraw(40);</code> again and balance 110.</p>
+<p><strong>Verify:</strong> Keep the failing and the repaired runs. Explain why the changed token alters the value tested by <code>first.balance() == 110</code> for this input.</p>
 <h3 id="exercise-3-reject-overdraft-atomically">Exercise 3: Reject overdraft atomically<a class="heading-anchor" href="#exercise-3-reject-overdraft-atomically" aria-label="Link to this section">#</a></h3>
-<p>Task: Attempt to withdraw111 from balance110.</p>
+<p>Task: Attempt to withdraw 111 from balance 110.</p>
 <p>Validation precedes mutation. Subtracting first and throwing afterward would leave an invalid object behind.</p>
 <pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">boolean</span> overdraft <span class="syntax-operator">=</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">;</span>
 <span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span>
@@ -228,10 +230,10 @@ first<span class="syntax-punctuation">.</span><span class="syntax-attribute">dep
   overdraft <span class="syntax-operator">=</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span>
 <span class="syntax-keyword">assert</span> overdraft <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> first<span class="syntax-punctuation">.</span><span class="syntax-attribute">balance</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">110</span><span class="syntax-punctuation">;</span></code></pre>
-<p><strong>Expected:</strong> IllegalArgumentException;balance still110.</p>
-<p><strong>Verify:</strong> Compare the program values or named exception with IllegalArgumentException;balance still110. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
+<p><strong>Expected:</strong> IllegalArgumentException; balance still 110.</p>
+<p><strong>Verify:</strong> Keep an assertion equivalent to <code>overdraft &amp;&amp; first.balance() == 110</code>. As a control, change <code>overdraft = true;</code> to <code>overdraft = false;</code>: the run must fail with an <code>AssertionError</code> from the assertion on <code>overdraft &amp;&amp; first.balance() == 110</code>. Restore the line before continuing.</p>
 <h3 id="exercise-4-reject-negative-input">Exercise 4: Reject negative input<a class="heading-anchor" href="#exercise-4-reject-negative-input" aria-label="Link to this section">#</a></h3>
-<p>Task: Attempt a deposit of-1.</p>
+<p>Task: Attempt a deposit of -1.</p>
 <p>A negative deposit is not silently interpreted as a withdrawal. Each operation has a clear domain meaning and validation path.</p>
 <pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">boolean</span> negative <span class="syntax-operator">=</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">;</span>
 <span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span>
@@ -240,10 +242,10 @@ first<span class="syntax-punctuation">.</span><span class="syntax-attribute">dep
   negative <span class="syntax-operator">=</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span>
 <span class="syntax-keyword">assert</span> negative <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> first<span class="syntax-punctuation">.</span><span class="syntax-attribute">balance</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">110</span><span class="syntax-punctuation">;</span></code></pre>
-<p><strong>Expected:</strong> IllegalArgumentException;balance unchanged.</p>
-<p><strong>Verify:</strong> Compare the program values or named exception with IllegalArgumentException;balance unchanged. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
+<p><strong>Expected:</strong> IllegalArgumentException; balance unchanged.</p>
+<p><strong>Verify:</strong> Keep an assertion equivalent to <code>negative &amp;&amp; first.balance() == 110</code>. As a control, change <code>negative = true;</code> to <code>negative = false;</code>: the run must fail with an <code>AssertionError</code> from the assertion on <code>negative &amp;&amp; first.balance() == 110</code>. Restore the line before continuing.</p>
 <h3 id="exercise-5-reject-invalid-construction">Exercise 5: Reject invalid construction<a class="heading-anchor" href="#exercise-5-reject-invalid-construction" aria-label="Link to this section">#</a></h3>
-<p>Task: Construct an account with-1 cents.</p>
+<p>Task: Construct an account with -1 cents.</p>
 <p>An invariant should hold from the moment an object becomes available. Requiring a later repair call would expose invalid intermediate state to every user.</p>
 <pre class="highlighted-code"><code class="language-java"><span class="syntax-keyword">boolean</span> invalidStart <span class="syntax-operator">=</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">;</span>
 <span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span>
@@ -252,10 +254,10 @@ first<span class="syntax-punctuation">.</span><span class="syntax-attribute">dep
   invalidStart <span class="syntax-operator">=</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span>
 <span class="syntax-keyword">assert</span> invalidStart<span class="syntax-punctuation">;</span></code></pre>
-<p><strong>Expected:</strong> constructor throwsIllegalArgumentException.</p>
-<p><strong>Verify:</strong> Compare the program values or named exception with constructor throwsIllegalArgumentException. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
+<p><strong>Expected:</strong> constructor throws IllegalArgumentException.</p>
+<p><strong>Verify:</strong> Keep an assertion equivalent to <code>invalidStart</code>. As a control, change <code>invalidStart = true;</code> to <code>invalidStart = false;</code>: the run must fail with an <code>AssertionError</code> from the assertion on <code>invalidStart</code>. Restore the line before continuing.</p>
 <h3 id="exercise-6-protect-against-overflow">Exercise 6: Protect against overflow<a class="heading-anchor" href="#exercise-6-protect-against-overflow" aria-label="Link to this section">#</a></h3>
-<p>Task: Create an account atInteger.MAX_VALUE and deposit1.</p>
+<p>Task: Create an account at Integer.MAX_VALUE and deposit 1.</p>
 <p>The right-hand calculation fails before field assignment, so the prior valid value remains. Overflow is distinct from an ordinary insufficient-funds domain error.</p>
 <pre class="highlighted-code"><code class="language-java">Account full <span class="syntax-operator">=</span> <span class="syntax-keyword">new</span> Account<span class="syntax-punctuation">(</span>Integer<span class="syntax-punctuation">.</span><span class="syntax-attribute">MAX_VALUE</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 <span class="syntax-keyword">boolean</span> overflow <span class="syntax-operator">=</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">;</span>
@@ -265,8 +267,8 @@ first<span class="syntax-punctuation">.</span><span class="syntax-attribute">dep
   overflow <span class="syntax-operator">=</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span>
 <span class="syntax-keyword">assert</span> overflow <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> full<span class="syntax-punctuation">.</span><span class="syntax-attribute">balance</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span><span class="syntax-operator">=</span> Integer<span class="syntax-punctuation">.</span><span class="syntax-attribute">MAX_VALUE</span><span class="syntax-punctuation">;</span></code></pre>
-<p><strong>Expected:</strong> ArithmeticException;original maximum balance preserved.</p>
-<p><strong>Verify:</strong> Compare the program values or named exception with ArithmeticException;original maximum balance preserved. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
+<p><strong>Expected:</strong> ArithmeticException; original maximum balance preserved.</p>
+<p><strong>Verify:</strong> Keep an assertion equivalent to <code>overflow &amp;&amp; full.balance() == Integer.MAX_VALUE</code>. As a control, change <code>overflow = true;</code> to <code>overflow = false;</code>: the run must fail with an <code>AssertionError</code> from the assertion on <code>overflow &amp;&amp; full.balance() == Integer.MAX_VALUE</code>. Restore the line before continuing.</p>
 <h3 id="after-comparing-the-answer">After comparing the answer<a class="heading-anchor" href="#after-comparing-the-answer" aria-label="Link to this section">#</a></h3>
 <p>Run the complete reference with assertions enabled, then return to your own implementation. Recreate one check with different values and explain its expected result before execution. A compiler error, an expected domain exception and an assertion failure represent different stages and should be reported separately. Preserve ownership boundaries when adapting file, network or concurrency examples. The reference never authorizes access to a shared service or deletion of learner state. Use a fresh tiny fixture when you need to distinguish two interpretations of an API contract.</p></article>
   </main>

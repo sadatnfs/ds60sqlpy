@@ -9,7 +9,7 @@
     content="default-src 'none'; style-src 'self' file: 'unsafe-inline'; font-src data:; img-src data:; form-action 'none'"
   >
   <link rel="stylesheet" href="../../../../src/ds60sqlpy/assets/vendor/textbook/fonts.css">
-  <title>viz-007: Reduce rendering work without hiding important data · DS60 reference</title>
+  <title>viz-007: Bounded rendering and representative reduction · DS60 reference</title>
   <style>
     :root {
       --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
@@ -190,10 +190,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <main class="shell">
     <header class="hero">
       <p class="eyebrow">Rendered course document</p>
-      <h1>viz-007: Reduce rendering work without hiding important data</h1>
+      <h1>viz-007: Bounded rendering and representative reduction</h1>
       <p class="source-path">Generated from <code>courses/data-visualization/guides/viz-007.md</code></p>
     </header>
-    <article class="document"><h2 id="viz-007-reduce-rendering-work-without-hiding-important-data">viz-007: Reduce rendering work without hiding important data<a class="heading-anchor" href="#viz-007-reduce-rendering-work-without-hiding-important-data" aria-label="Link to this section">#</a></h2>
+    <article class="document"><h2 id="viz-007-bounded-rendering-and-representative-reduction">viz-007: Bounded rendering and representative reduction<a class="heading-anchor" href="#viz-007-bounded-rendering-and-representative-reduction" aria-label="Link to this section">#</a></h2>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Advanced. Direct prerequisites: <code>viz-004</code>, <code>viz-005</code>, <code>viz-006</code>. This lesson uses bounded SVG traces; it does not require WebGL, a GPU or a remote service.</p>
 <h3 id="separate-analysis-from-display-reduction">Separate analysis from display reduction<a class="heading-anchor" href="#separate-analysis-from-display-reduction" aria-label="Link to this section">#</a></h3>
@@ -208,6 +208,46 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="responsiveness-and-lifecycle">Responsiveness and lifecycle<a class="heading-anchor" href="#responsiveness-and-lifecycle" aria-label="Link to this section">#</a></h3>
 <p>The browser reference asks Plotly to resize responsively and purges its graph when the preview leaves. Measure completed rendering with a timing boundary after the rendering promise, not only the time required to issue <code>newPlot</code>. Compare the same source, trace types, dimensions and device/browser when making performance claims.</p>
 <p>This reference does not assert a speedup from a host timer. It demonstrates bounded display work and a retained-extrema invariant. Real narrow-screen, zoom, interaction and timing observations remain separate qualification evidence.</p>
+<h3 id="expression-anatomy">Expression anatomy<a class="heading-anchor" href="#expression-anatomy" aria-label="Link to this section">#</a></h3>
+<p>Both traces index the same arrays: <code>x[stride]</code> keeps every hundredth sample, while <code>x[keep]</code> keeps the indices returned by <code>envelope_indices</code>, which include each block&#x27;s minimum and maximum. Drawing them as two named traces, with <code>line_dash=&quot;dot&quot;</code> on the stride version, lets a reader see that the stride line misses the spike at sample 2473 while the envelope keeps it. The JavaScript version calls its own <code>envelopeIndices</code> function with the same block size.</p>
+<p>Python, from <code>case_07</code> in the subject&#x27;s durable Plotly source:</p>
+<pre class="highlighted-code"><code class="language-python">fig <span class="syntax-operator">=</span> go<span class="syntax-operator">.</span>Figure<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+fig<span class="syntax-operator">.</span>add_trace<span class="syntax-punctuation">(</span>
+    go<span class="syntax-operator">.</span>Scatter<span class="syntax-punctuation">(</span>
+        x<span class="syntax-operator">=</span>x<span class="syntax-punctuation">[</span>stride<span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        y<span class="syntax-operator">=</span>y<span class="syntax-punctuation">[</span>stride<span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+        mode<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">lines+markers</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        name<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">Regular stride</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+        line_dash<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">dot</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span>
+fig<span class="syntax-operator">.</span>add_trace<span class="syntax-punctuation">(</span>
+    go<span class="syntax-operator">.</span>Scatter<span class="syntax-punctuation">(</span>x<span class="syntax-operator">=</span>x<span class="syntax-punctuation">[</span>keep<span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> y<span class="syntax-operator">=</span>y<span class="syntax-punctuation">[</span>keep<span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> mode<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">lines</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> name<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">Min/max envelope</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span>
+fig<span class="syntax-operator">.</span>update_xaxes<span class="syntax-punctuation">(</span>title<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">Sample index</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+fig<span class="syntax-operator">.</span>update_yaxes<span class="syntax-punctuation">(</span>title<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">Measured amplitude</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
+<p>JavaScript, from browser specification 7, which <code>renderCase</code> passes to <code>Plotly.newPlot</code> with the shared caption and table:</p>
+<pre class="highlighted-code"><code class="language-javascript">data<span class="syntax-operator">:</span> <span class="syntax-punctuation">[</span>
+  <span class="syntax-punctuation">{</span>
+    type<span class="syntax-operator">:</span> <span class="syntax-string">&quot;scatter&quot;</span><span class="syntax-punctuation">,</span>
+    x<span class="syntax-operator">:</span> stride<span class="syntax-punctuation">,</span>
+    y<span class="syntax-operator">:</span> stride<span class="syntax-punctuation">.</span>map<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>i<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> values<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    mode<span class="syntax-operator">:</span> <span class="syntax-string">&quot;lines+markers&quot;</span><span class="syntax-punctuation">,</span>
+    line<span class="syntax-operator">:</span> <span class="syntax-punctuation">{</span> dash<span class="syntax-operator">:</span> <span class="syntax-string">&quot;dot&quot;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+    name<span class="syntax-operator">:</span> <span class="syntax-string">&quot;Regular stride&quot;</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-punctuation">{</span>
+    type<span class="syntax-operator">:</span> <span class="syntax-string">&quot;scatter&quot;</span><span class="syntax-punctuation">,</span>
+    x<span class="syntax-operator">:</span> keep<span class="syntax-punctuation">,</span>
+    y<span class="syntax-operator">:</span> keep<span class="syntax-punctuation">.</span>map<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>i<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> values<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    mode<span class="syntax-operator">:</span> <span class="syntax-string">&quot;lines&quot;</span><span class="syntax-punctuation">,</span>
+    name<span class="syntax-operator">:</span> <span class="syntax-string">&quot;Min/max envelope&quot;</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+layout<span class="syntax-operator">:</span> <span class="syntax-punctuation">{</span>
+  xaxis<span class="syntax-operator">:</span> <span class="syntax-punctuation">{</span> title<span class="syntax-operator">:</span> <span class="syntax-punctuation">{</span> text<span class="syntax-operator">:</span> <span class="syntax-string">&quot;Sample index&quot;</span> <span class="syntax-punctuation">}</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+  yaxis<span class="syntax-operator">:</span> <span class="syntax-punctuation">{</span> title<span class="syntax-operator">:</span> <span class="syntax-punctuation">{</span> text<span class="syntax-operator">:</span> <span class="syntax-string">&quot;Measured amplitude&quot;</span> <span class="syntax-punctuation">}</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span></code></pre>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Find the missed spike.</strong> Determine whether index 2473 appears in every-hundredth sampling. Expected evidence: it does not, and the displayed maximum stays near one.</li>

@@ -194,31 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-007_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-007-explanatory-solutions">web-007: explanatory solutions<a class="heading-anchor" href="#web-007-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.</p>
-<h3 id="why-the-mechanism-works">Why the mechanism works<a class="heading-anchor" href="#why-the-mechanism-works" aria-label="Link to this section">#</a></h3>
-<p>A table represents data whose meaning depends on row and column relationships. It should not be the default layout tool for unrelated page regions. A caption identifies the table&#x27;s topic, units or scope. Header cells identify a column or row so a reading tool can associate values with their context. Visual boldness alone cannot establish that relationship.</p>
-<p>Keep a table simple when possible. A dataset with two independent header axes can use column and row scope. More complex spans may require explicit header associations and careful testing. For a narrow screen, preserve the relationships instead of hiding important columns. A scrollable region can keep the table intact when the data genuinely needs two dimensions.</p>
-<p>Use thead for the header group, tbody for records, th for headers and td for values. <code>scope=&quot;col&quot;</code> identifies a column header and <code>scope=&quot;row&quot;</code> identifies a row header. Numeric alignment is presentation, while the units belong in the content. Tables must remain useful when colors or zebra stripes are unavailable.</p>
+<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-007.md</code>.</p>
 <h3 id="exercise-1-explain-what-a-single-cell-value-means-with-both-headers">Exercise 1: Explain what a single cell value means with both headers.<a class="heading-anchor" href="#exercise-1-explain-what-a-single-cell-value-means-with-both-headers" aria-label="Link to this section">#</a></h3>
-<p>40 means forty minutes of HTML study, not an unlabeled count.</p>
-<p>Trace the smallest example before editing. Name which values are source and which are observations.</p>
+<p><strong>Expected answer:</strong> 40 means forty minutes of HTML study, not an unlabeled count.</p>
+<p><strong>Why:</strong> A data cell&#x27;s meaning comes from its row and column headers, and th with scope makes that relationship explicit to screen readers.</p>
 <h3 id="exercise-2-add-a-caption-that-states-the-reporting-period">Exercise 2: Add a caption that states the reporting period.<a class="heading-anchor" href="#exercise-2-add-a-caption-that-states-the-reporting-period" aria-label="Link to this section">#</a></h3>
-<p>The visible caption explains the table&#x27;s scope.</p>
-<p>Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.</p>
+<p><strong>Expected evidence:</strong> The visible caption explains the table&#x27;s scope.</p>
+<p><strong>Why:</strong> caption names the whole table, so assistive technology announces its scope before any values.</p>
 <h3 id="exercise-3-build-a-three-row-study-table-with-correct-header-relationships">Exercise 3: Build a three-row study table with correct header relationships.<a class="heading-anchor" href="#exercise-3-build-a-three-row-study-table-with-correct-header-relationships" aria-label="Link to this section">#</a></h3>
-<p>The caption, row headers and column headers identify every value.</p>
-<p>Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.</p>
+<p><strong>Expected evidence:</strong> The caption, row headers and column headers identify every value.</p>
+<p><strong>Why:</strong> Scoped headers let assistive technology announce the matching row and column labels for every value.</p>
 <h3 id="exercise-4-replace-a-table-used-to-align-unrelated-navigation-and-article-content">Exercise 4: Replace a table used to align unrelated navigation and article content.<a class="heading-anchor" href="#exercise-4-replace-a-table-used-to-align-unrelated-navigation-and-article-content" aria-label="Link to this section">#</a></h3>
-<p>Use semantic regions plus CSS layout rather than false data relationships.</p>
-<p>Keep the failing input. Identify the first layer where the observed result differs from the intended contract.</p>
+<p><strong>Expected evidence:</strong> Use semantic regions plus CSS layout rather than false data relationships.</p>
+<p><strong>Why:</strong> A layout table announces false row and column relationships; landmarks with CSS Grid or Flexbox create the same arrangement without false semantics.</p>
 <h3 id="exercise-5-inspect-the-table-at-a-narrow-width-without-deleting-data">Exercise 5: Inspect the table at a narrow width without deleting data.<a class="heading-anchor" href="#exercise-5-inspect-the-table-at-a-narrow-width-without-deleting-data" aria-label="Link to this section">#</a></h3>
-<p>A bounded overflow region keeps all columns reachable.</p>
-<p>Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.</p>
+<p><strong>Expected evidence:</strong> A bounded overflow region keeps all columns reachable.</p>
+<p><strong>Why:</strong> A scrolling wrapper, made focusable so keyboard users can scroll it, keeps every column reachable without shrinking text or deleting data.</p>
 <h3 id="exercise-6-explain-when-a-chart-should-keep-a-supporting-table">Exercise 6: Explain when a chart should keep a supporting table.<a class="heading-anchor" href="#exercise-6-explain-when-a-chart-should-keep-a-supporting-table" aria-label="Link to this section">#</a></h3>
-<p>Exact values and nonvisual interpretation often benefit from a tabular equivalent.</p>
-<p>Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.</p>
-<h3 id="reference-comparison-and-limits">Reference comparison and limits<a class="heading-anchor" href="#reference-comparison-and-limits" aria-label="Link to this section">#</a></h3>
-<p>Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.</p></article>
+<p><strong>Expected answer:</strong> Exact values and nonvisual interpretation often benefit from a tabular equivalent.</p>
+<p><strong>Why:</strong> A chart shows a pattern quickly, while a table gives exact numbers and a nonvisual route to the same information.</p>
+<h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
+<p>Open <code>courses/web-development/solutions/web-007_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
   </main>
 </body>
 </html>

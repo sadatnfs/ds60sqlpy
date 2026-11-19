@@ -219,7 +219,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># === EXAMPLE B ===</span></span>
 <span class="source-line"><span class="syntax-keyword">function</span> worked_b<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">    generator <span class="syntax-operator">=</span> MersenneTwister<span class="syntax-punctuation">(</span><span class="syntax-number">140</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    generator <span class="syntax-operator">=</span> Xoshiro<span class="syntax-punctuation">(</span><span class="syntax-number">140</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line">    <span class="syntax-keyword">for</span> count <span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-operator">:</span><span class="syntax-number">20</span></span>
 <span class="source-line">        values <span class="syntax-operator">=</span> rand<span class="syntax-punctuation">(</span>generator<span class="syntax-punctuation">,</span> count<span class="syntax-punctuation">)</span> <span class="syntax-operator">.+</span> <span class="syntax-number">0.01</span></span>
 <span class="source-line">        result <span class="syntax-operator">=</span> probabilities<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span></span>

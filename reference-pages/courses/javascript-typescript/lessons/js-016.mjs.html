@@ -194,13 +194,23 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/javascript-typescript/lessons/js-016.mjs</code></p>
     </header>
     <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-javascript"><code><span class="source-line"><span class="syntax-comment">// Answer-free learner source. Save your own copy before editing.</span></span>
-<span class="source-line"><span class="syntax-comment">// Exercise 1: Read a small UTF-8 file</span></span>
-<span class="source-line"><span class="syntax-comment">// Write one line containing an emoji, then compare text length and byte length.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: text round-trips; UTF-8 byte length exceeds code-unit length.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 1: Read a small UTF-8 file: change one input</span></span>
+<span class="source-line"><span class="syntax-comment">// Copy Example A into a scratch `main.mjs` and change `const text = &#x27;A😀B\n&#x27;;` to `const text</span></span>
+<span class="source-line"><span class="syntax-comment">// = &#x27;A😀B\n!&#x27;;`. Before running it, predict which check fails and which value it now sees;</span></span>
+<span class="source-line"><span class="syntax-comment">// then run it and restore the original line.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` at the check `assert.equal((await</span></span>
+<span class="source-line"><span class="syntax-comment">// handle.readFile()).length, 7)`. Restoring the original line brings back the worked</span></span>
+<span class="source-line"><span class="syntax-comment">// observation: text round-trips; 7 UTF-8 bytes versus 5 code units; the handle reports fd -1</span></span>
+<span class="source-line"><span class="syntax-comment">// after its block.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment">// Exercise 2: Preserve characters and lines across chunks</span></span>
-<span class="source-line"><span class="syntax-comment">// Stream two lines with a two-byte highWaterMark and decode using readline.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: lines are A😀B and second, without a corrupt replacement character.</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercise 2: Preserve characters and lines across chunks: debug a regression</span></span>
+<span class="source-line"><span class="syntax-comment">// A regression changed one token in Example B, so one line now reads `await writeFile(path,</span></span>
+<span class="source-line"><span class="syntax-comment">// &#x27;A😀B\r\nsecond\n!&#x27;, &#x27;utf8&#x27;);`. Run Example B with that line, use the failing check to</span></span>
+<span class="source-line"><span class="syntax-comment">// locate the defect and repair it without changing the check.</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at the check</span></span>
+<span class="source-line"><span class="syntax-comment">// `assert.deepEqual(await readLines(path), [&#x27;A😀B&#x27;, &#x27;second&#x27;])`; after it the line reads</span></span>
+<span class="source-line"><span class="syntax-comment">// `await writeFile(path, &#x27;A😀B\r\nsecond\n&#x27;, &#x27;utf8&#x27;);` again and lines are A😀B and second,</span></span>
+<span class="source-line"><span class="syntax-comment">// without a corrupt replacement character.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 3: Refuse accidental overwrite</span></span>
 <span class="source-line"><span class="syntax-comment">// Create a file exclusively twice and inspect its unchanged content.</span></span>

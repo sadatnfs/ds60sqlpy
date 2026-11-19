@@ -196,13 +196,22 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-c"><code><span class="source-line"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;stdio.h&gt;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">void</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
-<span class="source-line">  <span class="syntax-comment">/* Exercise 1: Group before calculating</span></span>
-<span class="source-line"><span class="syntax-comment">     Compare 2+3*4 with (2+3)*4.</span></span>
-<span class="source-line"><span class="syntax-comment">     Expected: The values are 14 and 20. */</span></span>
+<span class="source-line">  <span class="syntax-comment">/* Exercise 1: Group before calculating: predict an edited check</span></span>
+<span class="source-line"><span class="syntax-comment">     Copy worked example 1 into a scratch pad and change `CHECK((2 + 3) * 4 ==</span></span>
+<span class="source-line"><span class="syntax-comment">     20);` to `CHECK((3 + 3) * 4 == 20);` inside its CHECK. Before running,</span></span>
+<span class="source-line"><span class="syntax-comment">     predict whether the CHECK still holds and explain why; then restore it.</span></span>
+<span class="source-line"><span class="syntax-comment">     Expected: The changed run stops with `Check failed` at the CHECK on `(2 +</span></span>
+<span class="source-line"><span class="syntax-comment">     3) * 4 == 20`. Restoring the original line brings back the worked</span></span>
+<span class="source-line"><span class="syntax-comment">     observation: the values are 14 and 20. */</span></span>
 <span class="source-line"></span>
-<span class="source-line">  <span class="syntax-comment">/* Exercise 2: Use a short-circuit guard</span></span>
-<span class="source-line"><span class="syntax-comment">     Guard an array access with a false length test.</span></span>
-<span class="source-line"><span class="syntax-comment">     Expected: The access is skipped and the condition is false. */</span></span>
+<span class="source-line">  <span class="syntax-comment">/* Exercise 2: Use a short-circuit guard: debug a regression</span></span>
+<span class="source-line"><span class="syntax-comment">     A regression changed one token in worked example 2, so one line now reads</span></span>
+<span class="source-line"><span class="syntax-comment">     `bool found = length &gt;= 0 &amp;&amp; values[0] == 7;`. Run worked example 2 with</span></span>
+<span class="source-line"><span class="syntax-comment">     that line, use the failing CHECK to locate the defect and repair it without</span></span>
+<span class="source-line"><span class="syntax-comment">     changing the CHECK. Expected: Before the repair the run stops with `Check</span></span>
+<span class="source-line"><span class="syntax-comment">     failed` at the CHECK on `!found`; after it the line reads `bool found =</span></span>
+<span class="source-line"><span class="syntax-comment">     length &gt; 0 &amp;&amp; values[0] == 7;` again and the access is skipped and the</span></span>
+<span class="source-line"><span class="syntax-comment">     condition is false. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 3: Sequence updates explicitly</span></span>
 <span class="source-line"><span class="syntax-comment">     Increment x and then calculate twice its updated value.</span></span>
@@ -216,9 +225,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-comment">     Select a valid value while the other branch would divide by zero.</span></span>
 <span class="source-line"><span class="syntax-comment">     Expected: Only the chosen branch is evaluated and result is 7. */</span></span>
 <span class="source-line"></span>
-<span class="source-line">  <span class="syntax-comment">/* Exercise 6: Transfer assignment diagnosis</span></span>
-<span class="source-line"><span class="syntax-comment">     Assign 3 to a variable, then separately compare it with 3.</span></span>
-<span class="source-line"><span class="syntax-comment">     Expected: The assignment changes the variable and equality tests it. */</span></span>
+<span class="source-line">  <span class="syntax-comment">/* Exercise 6: Transfer integer promotion</span></span>
+<span class="source-line"><span class="syntax-comment">     Add two unsigned char values 200 and 100, then store the sum back into an</span></span>
+<span class="source-line"><span class="syntax-comment">     unsigned char. Expected: The promoted int sum is 300; the stored unsigned</span></span>
+<span class="source-line"><span class="syntax-comment">     char is 44. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  puts<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement the six investigations in your saved pad.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line">  <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span></span>

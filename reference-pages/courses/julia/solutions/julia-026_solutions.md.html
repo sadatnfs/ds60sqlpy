@@ -196,11 +196,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="julia-026-explained-reference">julia-026: explained reference<a class="heading-anchor" href="#julia-026-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>The executable reference is <code>julia-026_reference.jl</code>. Its checks cover the stated authored inputs; they are not a claim of general scientific validity or mastery.</p>
 <h3 id="1-trace-a-matrix-step">1. Trace a matrix step<a class="heading-anchor" href="#1-trace-a-matrix-step" aria-label="Link to this section">#</a></h3>
-<p>The products[10,12] plus[1,-1] give[11,11].</p>
-<p><strong>Expected observation:</strong> The final vector is[11,11].</p>
+<p>The products <code>[10, 12]</code> plus <code>[1, -1]</code> give <code>[11, 11]</code>.</p>
+<p><strong>Expected observation:</strong> The final vector is <code>[11, 11]</code>.</p>
 <h3 id="2-repeat-with-new-inputs">2. Repeat with new inputs<a class="heading-anchor" href="#2-repeat-with-new-inputs" aria-label="Link to this section">#</a></h3>
 <p>Multiplication overwrites both entries before adding the bias.</p>
-<p><strong>Expected observation:</strong> The new vector is[5,5].</p>
+<p><strong>Expected observation:</strong> The new vector is <code>[5, 5]</code>.</p>
 <h3 id="3-debug-a-width-mismatch">3. Debug a width mismatch<a class="heading-anchor" href="#3-debug-a-width-mismatch" aria-label="Link to this section">#</a></h3>
 <p>The declared matrix width must equal input length; validation preserves the previous output here.</p>
 <p><strong>Expected observation:</strong> DimensionMismatch occurs before output mutation.</p>

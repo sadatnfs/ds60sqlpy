@@ -198,18 +198,20 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
 <p>A pointer contains the address of a value. Passing a pointer still copies the pointer value, but both copies identify the same target. This is useful when mutation is the intended contract and dangerous when callers expect isolation. Go&#x27;s garbage collector keeps reachable objects alive, so returning a pointer to a local variable is valid; the compiler decides where storage must live. That does not make every pointer safe to use: nil has no target and dereferencing it panics. Ordinary Go pointers do not support arithmetic. Use a value receiver or an independent copy when shared mutation is unnecessary, and make optional pointer semantics explicit.</p>
 <p>&amp;value obtains an address and <em>pointer dereferences it. In a type, </em>Point means a pointer to Point. new(T) returns a pointer to a zero T; it does not initialize maps or channels stored inside T. Selectors automatically follow a pointer to a struct, so p.X is convenient syntax for field access through p. A nil check guards dereference only when no unsynchronized writer can change the state between those operations.</p>
-<h3 id="1-mutate-through-a-pointer">1. Mutate through a pointer<a class="heading-anchor" href="#1-mutate-through-a-pointer" aria-label="Link to this section">#</a></h3>
-<p>Create an integer 4 and increment it through a helper receiving its address.</p>
+<h3 id="1-mutate-through-a-pointer-change-one-input">1. Mutate through a pointer: change one input<a class="heading-anchor" href="#1-mutate-through-a-pointer-change-one-input" aria-label="Link to this section">#</a></h3>
+<p>Copy worked example 1 into a scratch pad and change <code>n := 4</code> to <code>n := 5</code>. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</p>
+<p>The unchanged code is worked example 1:</p>
 <pre class="highlighted-code"><code class="language-go">n <span class="syntax-operator">:=</span> <span class="syntax-number">4</span>
 increment<span class="syntax-punctuation">(</span><span class="syntax-operator">&amp;</span>n<span class="syntax-punctuation">)</span>
 check<span class="syntax-punctuation">(</span>n <span class="syntax-operator">==</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;pointer mutation&quot;</span><span class="syntax-punctuation">)</span></code></pre>
-<p><strong>Expected:</strong> The caller value becomes 5.</p>
+<p><strong>Expected:</strong> The changed run panics with <code>pointer mutation</code> because <code>n == 5</code> no longer holds. Restoring the original line brings back the worked observation: the caller value becomes 5.</p>
 <p>The helper changes the shared target, not the caller variable that stores the pointer. The mutation contract must be visible at the call site.</p>
-<h3 id="2-return-a-live-value">2. Return a live value<a class="heading-anchor" href="#2-return-a-live-value" aria-label="Link to this section">#</a></h3>
-<p>Return a pointer to a local integer initialized to 7.</p>
+<h3 id="2-return-a-live-value-diagnose-an-edited-check">2. Return a live value: diagnose an edited check<a class="heading-anchor" href="#2-return-a-live-value-diagnose-an-edited-check" aria-label="Link to this section">#</a></h3>
+<p>A careless edit changed the check in worked example 2 so that it reads <code>check(*p != 7, &quot;returned pointer&quot;)</code>. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.</p>
+<p>The unchanged code is worked example 2:</p>
 <pre class="highlighted-code"><code class="language-go">p <span class="syntax-operator">:=</span> seven<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 check<span class="syntax-punctuation">(</span><span class="syntax-operator">*</span>p <span class="syntax-operator">==</span> <span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;returned pointer&quot;</span><span class="syntax-punctuation">)</span></code></pre>
-<p><strong>Expected:</strong> The returned pointer remains valid and reads 7.</p>
+<p><strong>Expected:</strong> Before the repair the program panics with <code>returned pointer</code>; after it the line reads <code>check(*p == 7, &quot;returned pointer&quot;)</code> again and the returned pointer remains valid and reads 7.</p>
 <p>Go extends storage lifetime as needed. Stack-versus-heap placement is an implementation decision and should not be guessed from the lexical block alone.</p>
 <h3 id="3-guard-absence">3. Guard absence<a class="heading-anchor" href="#3-guard-absence" aria-label="Link to this section">#</a></h3>
 <p>Represent an optional integer with a nil pointer and inspect it without dereferencing.</p>

@@ -194,37 +194,53 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/swift/solutions/swift-022_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="swift-022-explanation-and-comparison">swift-022: explanation and comparison<a class="heading-anchor" href="#swift-022-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="swift-022_solution.swift.html">swift-022_solution.swift</a>. Its assertions are always active under the prepared classroom compile settings.</p>
+<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="swift-022_solution.swift.html">swift-022_solution.swift</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Observe weak lifetime:</strong> The example observes a controlled ownership boundary without retaining the target accidentally. The weak observer becomes nil after the last strong reference is removed.</p>
 <p><strong>Break a parent-child cycle:</strong> The weak back-reference breaks the ownership cycle while preserving navigation when the parent exists. The child survives independently without retaining its parent.</p>
-<h3 id="reason-through-the-six-tasks">Reason through the six tasks<a class="heading-anchor" href="#reason-through-the-six-tasks" aria-label="Link to this section">#</a></h3>
-<ol>
-<li><strong>Predict and explain.</strong> Draw strong and weak arrows in both examples.</li>
-</ol>
-<ol start="2">
-<li><strong>Guided modification.</strong> Add a temporary second strong owner and predict when the weak observer clears.</li>
-</ol>
-<ol start="3">
-<li><strong>Independent construction.</strong> Design a weak delegate relationship.</li>
-</ol>
-<ol start="4">
-<li><strong>Diagnose a defect.</strong> Diagnose an object retaining a closure that strongly captures the same object.</li>
-</ol>
-<ol start="5">
-<li><strong>Boundary evidence.</strong> Test a callback after its weak owner has disappeared.</li>
-</ol>
-<ol start="6">
-<li><strong>Transfer and justify.</strong> Choose weak or unowned for a relationship and justify the lifetime guarantee required.</li>
-</ol>
-<p>For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.</p>
+<h3 id="task-answers">Task answers<a class="heading-anchor" href="#task-answers" aria-label="Link to this section">#</a></h3>
+<h4 id="task-1-predict-and-explain">Task 1: Predict and explain<a class="heading-anchor" href="#task-1-predict-and-explain" aria-label="Link to this section">#</a></h4>
+<p>Draw strong and weak arrows in both examples.</p>
+<p>No separate reference answer has been written for this task. Example A is the evidence to compare with: The example observes a controlled ownership boundary without retaining the target accidentally. The weak observer becomes nil after the last strong reference is removed.</p>
+<h4 id="task-2-guided-modification">Task 2: Guided modification<a class="heading-anchor" href="#task-2-guided-modification" aria-label="Link to this section">#</a></h4>
+<p>Add a temporary second strong owner and predict when the weak observer clears.</p>
+<p>No separate reference answer has been written for this task. Start from Example B: The weak back-reference breaks the ownership cycle while preserving navigation when the parent exists. The child survives independently without retaining its parent.</p>
+<h4 id="task-3-independent-construction">Task 3: Independent construction<a class="heading-anchor" href="#task-3-independent-construction" aria-label="Link to this section">#</a></h4>
+<p>Design a weak delegate relationship.</p>
+<p><strong>Reference answer.</strong> It runs as the <code>Task 3</code> block of the reference program.</p>
+<pre class="highlighted-code"><code class="language-swift"><span class="syntax-keyword">final</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Listener</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">var</span> events<span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-builtin">String</span><span class="syntax-punctuation">]</span> <span class="syntax-punctuation">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">final</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Downloader</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">weak</span> <span class="syntax-keyword">var</span> delegate<span class="syntax-punctuation">:</span> Listener<span class="syntax-punctuation">?</span>
+  <span class="syntax-keyword">func</span> <span class="syntax-function">finish</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> delegate<span class="syntax-punctuation">?</span><span class="syntax-punctuation">.</span>events<span class="syntax-punctuation">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">finished</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">let</span> downloader <span class="syntax-punctuation">=</span> Downloader<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">var</span> listener<span class="syntax-punctuation">:</span> Listener<span class="syntax-punctuation">?</span> <span class="syntax-punctuation">=</span> Listener<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+downloader<span class="syntax-punctuation">.</span>delegate <span class="syntax-punctuation">=</span> listener
+downloader<span class="syntax-punctuation">.</span>finish<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>listener<span class="syntax-punctuation">?</span><span class="syntax-punctuation">.</span>events <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">finished</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+listener <span class="syntax-punctuation">=</span> <span class="syntax-keyword">nil</span>
+<span class="syntax-builtin">precondition</span><span class="syntax-punctuation">(</span>downloader<span class="syntax-punctuation">.</span>delegate <span class="syntax-punctuation">=</span><span class="syntax-punctuation">=</span> <span class="syntax-keyword">nil</span><span class="syntax-punctuation">)</span>
+downloader<span class="syntax-punctuation">.</span>finish<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Observe:</strong> The listener receives finished; after it is released the weak delegate becomes nil and finish() does nothing.</p>
+<p>The downloader does not own its delegate, so it cannot keep the listener alive or form a retain cycle with it.</p>
+<h4 id="task-4-diagnose-a-defect">Task 4: Diagnose a defect<a class="heading-anchor" href="#task-4-diagnose-a-defect" aria-label="Link to this section">#</a></h4>
+<p>Diagnose an object retaining a closure that strongly captures the same object.</p>
+<p>No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson&#x27;s pitfalls: Weak is not a general replacement for ownership. A local strong binding can extend lifetime during observation. ARC does not cancel asynchronous work or close external resources automatically.</p>
+<h4 id="task-5-boundary-evidence">Task 5: Boundary evidence<a class="heading-anchor" href="#task-5-boundary-evidence" aria-label="Link to this section">#</a></h4>
+<p>Test a callback after its weak owner has disappeared.</p>
+<p>No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Observe weak lifetime) and Example B (Break a parent-child cycle).</p>
+<h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
+<p>Choose weak or unowned for a relationship and justify the lifetime guarantee required.</p>
+<p>No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry <strong>ARC</strong>, and state one limitation of your choice.</p>
 <h3 id="mechanism-and-diagnostic-reasoning">Mechanism and diagnostic reasoning<a class="heading-anchor" href="#mechanism-and-diagnostic-reasoning" aria-label="Link to this section">#</a></h3>
 <p>Automatic Reference Counting tracks strong references to class instances. When the last strong owner releases an instance, its lifetime can end. Value types do not participate as independently reference-counted objects in the same way, although they can contain references. ARC manages memory ownership, not file or task completion.</p>
 <p>A cycle of strong references can keep objects alive even when the application no longer needs them. A weak reference does not retain its target and becomes nil when that target disappears. An unowned reference asserts a stricter lifetime relationship and can trap if that assertion is wrong. Closure capture lists need the same ownership analysis, especially when an object stores a closure that captures itself.</p>
 <p><code>weak var owner: Owner?</code> is optional and non-retaining. <code>[weak self]</code> captures a non-retaining reference for an escaping closure. Identity diagrams make cycles easier to detect than guessing from deinit timing.</p>
 <p>Weak is not a general replacement for ownership. A local strong binding can extend lifetime during observation. ARC does not cancel asynchronous work or close external resources automatically.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.</p></article>
+<p>Run the reference and confirm that it prints <code>swift-022: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
   </main>
 </body>
 </html>

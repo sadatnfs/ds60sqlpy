@@ -194,33 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-006_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-006-explanatory-solutions">docker-006: explanatory solutions<a class="heading-anchor" href="#docker-006-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These are explanations of the supplied teaching fixtures, not fabricated engine results.</p>
-<h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
-<p>The build context is the set of files a builder may use. A <code>.dockerignore</code> file removes matching paths from that input. This reduces transfer size and prevents accidental inclusion of caches, learner data, credentials and repository history. It is a packaging boundary, not a substitute for reviewing the Dockerfile and resulting image.</p>
-<p>A Dockerfile can accidentally copy too much with <code>COPY . .</code>. Even if a later instruction deletes a secret, the earlier image layer may retain it. The safe design is to avoid supplying sensitive data as ordinary layer input at all. Build secrets use a separate mechanism covered later; runtime secrets use another lifecycle again.</p>
-<p>The fixture keeps its context tiny: server source, Dockerfile, Compose definition and ignore rules. Learner notes and progress live outside the source image. Different builders can run remotely, so context minimization also makes it easier to know which files leave your machine when building against a selected endpoint.</p>
-<p>Ignore patterns are evaluated relative to the build context. Negated patterns can include an otherwise ignored path, and ordering can matter. Use a simple allowlist or a short reviewed exclude list for a small teaching project. Do not assume <code>.gitignore</code> automatically controls Docker build inputs.</p>
-<p>Inspect the actual image after a representative build. A source manifest can assert intended exclusions, while an image file listing demonstrates what was packaged. Avoid printing secret content while verifying absence; inspect names or expected safe inventory instead.</p>
+<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-006.md</code>.</p>
 <h3 id="exercise-1-predict-whether-gitignore-protects-docker-context">Exercise 1: Predict whether .gitignore protects Docker context.<a class="heading-anchor" href="#exercise-1-predict-whether-gitignore-protects-docker-context" aria-label="Link to this section">#</a></h3>
-<p>The tools use distinct input rules. A file ignored by Git can still be available to a Docker build unless the Docker context rules or explicit copy list exclude it.</p>
-<p><strong>Expected:</strong> No automatic equivalence exists.</p>
-<h3 id="exercise-2-identify-three-private-paths-to-exclude">Exercise 2: Identify three private paths to exclude.<a class="heading-anchor" href="#exercise-2-identify-three-private-paths-to-exclude" aria-label="Link to this section">#</a></h3>
-<p>These have different reasons for exclusion: secrets, private progress and historical metadata. A source release should make all three decisions explicit.</p>
-<p><strong>Expected:</strong> Environment files, learner data and repository history.</p>
+<p><strong>Expected answer:</strong> No automatic equivalence exists.</p>
+<p><strong>Why:</strong> The tools use distinct input rules. A file ignored by Git can still be available to a Docker build unless the Docker context rules or explicit copy list exclude it.</p>
+<h3 id="exercise-2-predict-whether-the-pattern-pyc-excludes-app-pycache-server-cpython-312-pyc">Exercise 2: Predict whether the pattern <code>*.pyc</code> excludes <code>app/__pycache__/server.cpython-312.pyc</code>.<a class="heading-anchor" href="#exercise-2-predict-whether-the-pattern-pyc-excludes-app-pycache-server-cpython-312-pyc" aria-label="Link to this section">#</a></h3>
+<p><strong>Expected answer:</strong> It does not; <code>*.pyc</code> matches only at the context root, so the nested file needs <code>**/*.pyc</code>.</p>
+<p><strong>Why:</strong> Docker matches each pattern against the path from the context root, and a single <code>*</code> never crosses a directory separator. Only <code>**</code> spans directories, which is why .gitignore habits mislead here: Git matches a slash-free pattern at any depth.</p>
 <h3 id="exercise-3-design-a-context-inventory-for-the-fixture">Exercise 3: Design a context inventory for the fixture.<a class="heading-anchor" href="#exercise-3-design-a-context-inventory-for-the-fixture" aria-label="Link to this section">#</a></h3>
-<p>An inventory is easier to inspect than a large directory copied indiscriminately. It also makes a missing dependency visible rather than relying on a developer machine file.</p>
-<p><strong>Expected:</strong> A short list of necessary public build inputs.</p>
+<p><strong>Expected evidence:</strong> A short list of necessary public build inputs.</p>
+<p><strong>Why:</strong> An inventory is easier to inspect than a large directory copied indiscriminately. It also makes a missing dependency visible rather than relying on a developer machine file.</p>
 <h3 id="exercise-4-explain-why-deleting-a-secret-in-a-later-layer-is-insufficient">Exercise 4: Explain why deleting a secret in a later layer is insufficient.<a class="heading-anchor" href="#exercise-4-explain-why-deleting-a-secret-in-a-later-layer-is-insufficient" aria-label="Link to this section">#</a></h3>
-<p>Layered filesystems record changes; deleting a path from the merged view does not rewrite earlier layers. Prevention is safer than attempting to erase a secret after packaging it.</p>
-<p><strong>Expected:</strong> The earlier layer can retain the copied bytes.</p>
+<p><strong>Expected answer:</strong> The earlier layer can retain the copied bytes.</p>
+<p><strong>Why:</strong> Layered filesystems record changes; deleting a path from the merged view does not rewrite earlier layers. Prevention is safer than attempting to erase a secret after packaging it.</p>
 <h3 id="exercise-5-check-that-an-ignored-required-source-produces-a-useful-failure">Exercise 5: Check that an ignored required source produces a useful failure.<a class="heading-anchor" href="#exercise-5-check-that-an-ignored-required-source-produces-a-useful-failure" aria-label="Link to this section">#</a></h3>
-<p>A deterministic failure makes the missing build input visible. Repair the intended context rules without widening them to unrelated parent directories.</p>
-<p><strong>Expected:</strong> COPY fails instead of silently borrowing a host file.</p>
+<p><strong>Expected evidence:</strong> COPY fails instead of silently borrowing a host file.</p>
+<p><strong>Why:</strong> A deterministic failure makes the missing build input visible. Repair the intended context rules without widening them to unrelated parent directories.</p>
 <h3 id="exercise-6-describe-source-and-image-privacy-acceptance">Exercise 6: Describe source and image privacy acceptance.<a class="heading-anchor" href="#exercise-6-describe-source-and-image-privacy-acceptance" aria-label="Link to this section">#</a></h3>
-<p>No one check covers every route. Input exclusion prevents accidental transfer; explicit copy rules limit layering; final inspection tests the produced artifact against the intended public inventory.</p>
-<p><strong>Expected:</strong> Review inputs, build recipe and safe final file inventory.</p>
+<p><strong>Expected answer:</strong> Review inputs, build recipe and safe final file inventory.</p>
+<p><strong>Why:</strong> No one check covers every route. Input exclusion prevents accidental transfer; explicit copy rules limit layering; final inspection tests the produced artifact against the intended public inventory.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful solution identifies the exact object, the phase when a setting takes effect, the expected normal result and an observation that disproves it. Repeating a command until it succeeds hides the mechanism. Change one variable, keep a failure record, and test the intended behavior again. Source examples here are small enough to inspect; a production system additionally needs ownership, lifecycle, data recovery and operational review. The host exercises are optional and must stay within the learner-created project.</p></article>
+<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>
 </body>
 </html>

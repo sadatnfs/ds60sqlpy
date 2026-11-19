@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/advanced-spark-modeling/guides/asm-008.md</code></p>
     </header>
     <article class="document"><h2 id="asm-008-merge-precision-unequal-partitions-and-one-penalty">asm-008: Merge precision, unequal partitions and one penalty<a class="heading-anchor" href="#asm-008-merge-precision-unequal-partitions-and-one-penalty" aria-label="Link to this section">#</a></h2>
-<p>Tutorial mode. Stage: intermediate. Direct prerequisites: <code>asm-007</code>, <code>clp-013</code>.</p>
+<p>Tutorial mode. Stage: advanced. Direct prerequisites: <code>asm-007</code>, <code>clp-013</code>.</p>
 <h3 id="starting-point-and-result">Starting point and result<a class="heading-anchor" href="#starting-point-and-result" aria-label="Link to this section">#</a></h3>
 <p>Repartitioning should change execution, not the statistical objective. Three common violations are averaging partition means equally, applying a penalty once per partition, and assuming floating-point addition is exact. This program makes all three visible with four values and two deliberately unequal partitions.</p>
 <h3 id="mechanism-count-and-sum-form-the-merge-contract">Mechanism: count and sum form the merge contract<a class="heading-anchor" href="#mechanism-count-and-sum-form-the-merge-contract" aria-label="Link to this section">#</a></h3>

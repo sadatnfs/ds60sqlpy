@@ -194,37 +194,44 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/csharp/solutions/csharp-020_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="csharp-020-explanation-and-comparison">csharp-020: explanation and comparison<a class="heading-anchor" href="#csharp-020-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="csharp-020_solution.cs.html">csharp-020_solution.cs</a>. Its assertions are always active under the prepared classroom compile settings.</p>
+<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="csharp-020_solution.cs.html">csharp-020_solution.cs</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Observe query timing:</strong> Constructing Where does not copy the source values. The deferred query sees the subsequently appended 3.</p>
 <p><strong>Capture a stable result:</strong> Materialization creates a deliberate temporal boundary while preserving the original list separately. The earlier snapshot contains only 2 while a new projection sees three values.</p>
-<h3 id="reason-through-the-six-tasks">Reason through the six tasks<a class="heading-anchor" href="#reason-through-the-six-tasks" aria-label="Link to this section">#</a></h3>
-<ol>
-<li><strong>Predict and explain.</strong> Predict whether adding an item before enumeration affects query and snapshot.</li>
-</ol>
-<ol start="2">
-<li><strong>Guided modification.</strong> Add a projection from integers to labeled strings.</li>
-</ol>
-<ol start="3">
-<li><strong>Independent construction.</strong> Build a deterministic report selecting, transforming and ordering records.</li>
-</ol>
-<ol start="4">
-<li><strong>Diagnose a defect.</strong> Diagnose a query with a side-effect counter enumerated twice.</li>
-</ol>
-<ol start="5">
-<li><strong>Boundary evidence.</strong> Test empty input and a filter matching no rows.</li>
-</ol>
-<ol start="6">
-<li><strong>Transfer and justify.</strong> Choose streaming or materialization for a large import and explain memory and repeatability tradeoffs.</li>
-</ol>
-<p>For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.</p>
+<h3 id="task-answers">Task answers<a class="heading-anchor" href="#task-answers" aria-label="Link to this section">#</a></h3>
+<h4 id="task-1-predict-and-explain">Task 1: Predict and explain<a class="heading-anchor" href="#task-1-predict-and-explain" aria-label="Link to this section">#</a></h4>
+<p>Predict whether adding an item before enumeration affects query and snapshot.</p>
+<p>No separate reference answer has been written for this task. Example A is the evidence to compare with: Constructing Where does not copy the source values. The deferred query sees the subsequently appended 3.</p>
+<h4 id="task-2-guided-modification">Task 2: Guided modification<a class="heading-anchor" href="#task-2-guided-modification" aria-label="Link to this section">#</a></h4>
+<p>Add a projection from integers to labeled strings.</p>
+<p>No separate reference answer has been written for this task. Start from Example B: Materialization creates a deliberate temporal boundary while preserving the original list separately. The earlier snapshot contains only 2 while a new projection sees three values.</p>
+<h4 id="task-3-independent-construction">Task 3: Independent construction<a class="heading-anchor" href="#task-3-independent-construction" aria-label="Link to this section">#</a></h4>
+<p>Build a deterministic report selecting, transforming and ordering records.</p>
+<p><strong>Reference answer.</strong> It runs as the <code>Task 3</code> block of the reference program.</p>
+<pre class="highlighted-code"><code class="language-csharp"><span class="syntax-keyword">var</span> stock <span class="syntax-operator">=</span> <span class="syntax-keyword">new</span> Dictionary<span class="syntax-operator">&lt;</span><span class="syntax-keyword">string</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span> <span class="syntax-punctuation">{</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;pear&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;fig&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-number">0</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+stock<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;apple&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-number">5</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">var</span> kept <span class="syntax-operator">=</span> stock<span class="syntax-punctuation">.</span>Where<span class="syntax-punctuation">(</span>row <span class="syntax-operator">=&gt;</span> row<span class="syntax-punctuation">.</span>Value <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">var</span> ordered <span class="syntax-operator">=</span> kept<span class="syntax-punctuation">.</span>OrderBy<span class="syntax-punctuation">(</span>row <span class="syntax-operator">=&gt;</span> row<span class="syntax-punctuation">.</span>Key<span class="syntax-punctuation">,</span> StringComparer<span class="syntax-punctuation">.</span>Ordinal<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">var</span> report <span class="syntax-operator">=</span> ordered<span class="syntax-punctuation">.</span>Select<span class="syntax-punctuation">(</span>row <span class="syntax-operator">=&gt;</span> <span class="syntax-string">$&quot;{row.Key}={row.Value}&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+Check<span class="syntax-punctuation">(</span>report<span class="syntax-punctuation">.</span>SequenceEqual<span class="syntax-punctuation">(</span><span class="syntax-keyword">new</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span> <span class="syntax-punctuation">{</span> <span class="syntax-string">&quot;apple=5&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;pear=2&quot;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;report&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Observe:</strong> The report is apple=5 then pear=2; fig with quantity 0 is filtered out.</p>
+<p>Filtering, ordering with an explicit comparer and projecting happen in one query, and ToArray materializes the result once.</p>
+<h4 id="task-4-diagnose-a-defect">Task 4: Diagnose a defect<a class="heading-anchor" href="#task-4-diagnose-a-defect" aria-label="Link to this section">#</a></h4>
+<p>Diagnose a query with a side-effect counter enumerated twice.</p>
+<p>No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson&#x27;s pitfalls: LINQ syntax does not imply database execution. IEnumerable and IQueryable have different providers and translation boundaries. A deferred query can also fail later than the line that constructed it.</p>
+<h4 id="task-5-boundary-evidence">Task 5: Boundary evidence<a class="heading-anchor" href="#task-5-boundary-evidence" aria-label="Link to this section">#</a></h4>
+<p>Test empty input and a filter matching no rows.</p>
+<p>No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Observe query timing) and Example B (Capture a stable result).</p>
+<h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
+<p>Choose streaming or materialization for a large import and explain memory and repeatability tradeoffs.</p>
+<p>No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry <strong>Deferred execution</strong>, and state one limitation of your choice.</p>
 <h3 id="mechanism-and-diagnostic-reasoning">Mechanism and diagnostic reasoning<a class="heading-anchor" href="#mechanism-and-diagnostic-reasoning" aria-label="Link to this section">#</a></h3>
 <p>Language Integrated Query expresses sequence transformations such as filtering, projection and ordering. Many LINQ operators produce a recipe rather than immediately executing it. Enumeration runs that recipe. If the source changes before enumeration, the result can change too. This timing is part of the semantics, not an incidental optimization.</p>
 <p>Materialization with ToArray or ToList executes a query and stores its current result. It consumes memory but creates a useful snapshot boundary. Repeatedly enumerating an expensive or stateful source can repeat work or observe different data. Decide whether the consumer needs a live recipe, a one-pass stream or a stable materialized result.</p>
 <p><code>Where</code> keeps matching elements; <code>Select</code> transforms each element. <code>OrderBy</code> chooses ordering. <code>ToArray</code> materializes. Lambdas used by deferred operators run during enumeration, so avoid hidden side effects.</p>
 <p>LINQ syntax does not imply database execution. IEnumerable and IQueryable have different providers and translation boundaries. A deferred query can also fail later than the line that constructed it.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.</p></article>
+<p>Run the reference and confirm that it prints <code>csharp-020: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
   </main>
 </body>
 </html>

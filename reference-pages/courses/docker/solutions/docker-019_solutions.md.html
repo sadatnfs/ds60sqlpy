@@ -194,33 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-019_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-019-explanatory-solutions">docker-019: explanatory solutions<a class="heading-anchor" href="#docker-019-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These are explanations of the supplied teaching fixtures, not fabricated engine results.</p>
-<h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
-<p>A gateway forwards traffic beyond a local network. Docker bridge networking commonly uses routing and address translation for outbound traffic. The exact host rules depend on the engine and platform. Container traffic can reach external destinations unless its configuration and surrounding policy restrict it.</p>
-<p>An internal network reduces external connectivity for its attached network. A service attached to both an external-facing and internal network can intentionally connect two application tiers, but this is not an automatic application firewall. Review the service’s role, listener ports and credentials.</p>
-<p>Network mode none creates a container without ordinary external networking. This is useful for a pure computation that needs no DNS or HTTP. Host networking removes a major layer of network isolation and behaves differently across environments; it is not the beginner default or a repair for a wrong port mapping.</p>
-<p>Compose networks are named model objects. Services explicitly join the networks they require. A database can live only on <code>backend</code>, while an API joins <code>frontend</code> and <code>backend</code>. Marking <code>backend</code> internal should be tested from the actual callers and engine because host connectivity and DNS details are operational facts.</p>
-<p>The fixture uses a single bridge for its first exercises. Sketch multi-tier designs before editing your copy. No chapter asks you to change host firewall rules, install a packet filter or disable existing security software.</p>
+<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-019.md</code>.</p>
 <h3 id="exercise-1-distinguish-attachment-from-published-ports">Exercise 1: Distinguish attachment from published ports.<a class="heading-anchor" href="#exercise-1-distinguish-attachment-from-published-ports" aria-label="Link to this section">#</a></h3>
-<p>A service can communicate with peers without publishing anything. A published port is an additional host-facing path that deserves separate review.</p>
-<p><strong>Expected:</strong> Joining a network and exposing a host socket are different operations.</p>
+<p><strong>Expected answer:</strong> Joining a network and exposing a host socket are different operations.</p>
+<p><strong>Why:</strong> A service can communicate with peers without publishing anything. A published port is an additional host-facing path that deserves separate review.</p>
 <h3 id="exercise-2-predict-a-pure-computation-with-network-none">Exercise 2: Predict a pure computation with network none.<a class="heading-anchor" href="#exercise-2-predict-a-pure-computation-with-network-none" aria-label="Link to this section">#</a></h3>
-<p>Network isolation does not prevent local arithmetic or file reads. It reveals undeclared dependencies when a program unexpectedly tries to download input.</p>
-<p><strong>Expected:</strong> It succeeds if its files and runtime are already present.</p>
+<p><strong>Expected answer:</strong> It succeeds if its files and runtime are already present.</p>
+<p><strong>Why:</strong> Network isolation does not prevent local arithmetic or file reads. It reveals undeclared dependencies when a program unexpectedly tries to download input.</p>
 <h3 id="exercise-3-design-a-frontend-backend-attachment-table">Exercise 3: Design a frontend/backend attachment table.<a class="heading-anchor" href="#exercise-3-design-a-frontend-backend-attachment-table" aria-label="Link to this section">#</a></h3>
-<p>A small explicit table makes unintended paths easier to notice. Avoid putting every component on every network merely for convenience.</p>
-<p><strong>Expected:</strong> Each service joins only the networks needed by its role.</p>
+<p><strong>Expected evidence:</strong> Each service joins only the networks needed by its role.</p>
+<p><strong>Why:</strong> A small explicit table makes unintended paths easier to notice. Avoid putting every component on every network merely for convenience.</p>
 <h3 id="exercise-4-diagnose-host-network-mode-used-to-hide-a-mapping-error">Exercise 4: Diagnose host-network mode used to hide a mapping error.<a class="heading-anchor" href="#exercise-4-diagnose-host-network-mode-used-to-hide-a-mapping-error" aria-label="Link to this section">#</a></h3>
-<p>Changing the network mode can mask the symptom while broadening access. Test the original topology’s contract instead.</p>
-<p><strong>Expected:</strong> Restore the intended isolation and fix the actual address or port.</p>
+<p><strong>Expected answer:</strong> Restore the intended isolation and fix the actual address or port.</p>
+<p><strong>Why:</strong> Changing the network mode can mask the symptom while broadening access. Test the original topology’s contract instead.</p>
 <h3 id="exercise-5-explain-why-network-isolation-is-not-authentication">Exercise 5: Explain why network isolation is not authentication.<a class="heading-anchor" href="#exercise-5-explain-why-network-isolation-is-not-authentication" aria-label="Link to this section">#</a></h3>
-<p>An allowed caller may still be unauthorized for an operation. Sensitive services need appropriate request authentication and authorization in addition to network placement.</p>
-<p><strong>Expected:</strong> Reachability policy and application identity answer different questions.</p>
+<p><strong>Expected answer:</strong> Reachability policy and application identity answer different questions.</p>
+<p><strong>Why:</strong> An allowed caller may still be unauthorized for an operation. Sensitive services need appropriate request authentication and authorization in addition to network placement.</p>
 <h3 id="exercise-6-define-outbound-acceptance-for-an-offline-worker">Exercise 6: Define outbound acceptance for an offline worker.<a class="heading-anchor" href="#exercise-6-define-outbound-acceptance-for-an-offline-worker" aria-label="Link to this section">#</a></h3>
-<p>Offline qualification is about actual inputs and behavior. Merely disconnecting the network does not prove that all future code paths are prepared.</p>
-<p><strong>Expected:</strong> Prepared local computation succeeds and no external fetch is required.</p>
+<p><strong>Expected evidence:</strong> Prepared local computation succeeds and no external fetch is required.</p>
+<p><strong>Why:</strong> Offline qualification is about actual inputs and behavior. Merely disconnecting the network does not prove that all future code paths are prepared.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful solution identifies the exact object, the phase when a setting takes effect, the expected normal result and an observation that disproves it. Repeating a command until it succeeds hides the mechanism. Change one variable, keep a failure record, and test the intended behavior again. Source examples here are small enough to inspect; a production system additionally needs ownership, lifecycle, data recovery and operational review. The host exercises are optional and must stay within the learner-created project.</p></article>
+<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>
 </body>
 </html>

@@ -200,28 +200,28 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 1: Count adapter parameters</span></span>
-<span class="source-line"><span class="syntax-comment"># Use W=I8,A=ones(8,2)/8,B=zeros(2,8).</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: adapter32 parameters versus base64.</span></span>
+<span class="source-line"><span class="syntax-comment"># Use W=I8, A=ones(8, 2)/8, B=zeros(2, 8).</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: adapter 32 parameters versus base64.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 2: Check zero initial delta</span></span>
-<span class="source-line"><span class="syntax-comment"># Compare x@(W+A@B) withx@W before training.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: both equal ones(1,8).</span></span>
+<span class="source-line"><span class="syntax-comment"># Compare x@(W+A@B) with x@W before training.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: both equal ones(1, 8).</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Differentiate the first objective</span></span>
 <span class="source-line"><span class="syntax-comment"># Use mean squared error to a zero target and inspect both adapter gradients.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: A gradient zero;B gradient nonzero.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: A gradient zero; B gradient nonzero.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Update only the adapter</span></span>
-<span class="source-line"><span class="syntax-comment"># Take one SGD(.1) step overA,B.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: B changes;W remains exactly equal.</span></span>
+<span class="source-line"><span class="syntax-comment"># Take one SGD(0.1) step over A, B.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: B changes; W remains exactly equal.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Observe the changed function</span></span>
 <span class="source-line"><span class="syntax-comment"># Recompute the zero-target squared error after the adapter step.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: loss decreases for this fixture.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Bound the update rank</span></span>
-<span class="source-line"><span class="syntax-comment"># Compute the numerical matrix rank ofA@B after the step.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: rank at most2.</span></span>
+<span class="source-line"><span class="syntax-comment"># Compute the numerical matrix rank of A@B after the step.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: rank at most 2.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Read the guide and implement the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>

@@ -200,8 +200,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="detailed-reasoning">Detailed reasoning<a class="heading-anchor" href="#detailed-reasoning" aria-label="Link to this section">#</a></h3>
 <p>Constant evaluation moves computation to a different phase rather than making it free. A static_assert cannot wait for user input, while an ordinary call to a constexpr function can use a runtime variable. consteval deliberately forbids that runtime choice. Large generated tables may increase compilation work and binary size even if runtime lookups become simple. Keep both the mathematical input range and the build resource budget explicit.</p>
 <h3 id="constant-evaluation-is-a-different-computation-phase">Constant evaluation is a different computation phase<a class="heading-anchor" href="#constant-evaluation-is-a-different-computation-phase" aria-label="Link to this section">#</a></h3>
-<p>constexpr permits a function to participate in constant evaluation when the call satisfies the language rules. It does not require every call to run during compilation. A call using an ordinary runtime value can execute normally. consteval is stricter:an immediate function call must produce a constant-evaluated result under its contract.</p>
-<p>The first example uses static_assert(square(4)==16), so a wrong result prevents compilation. No runtime branch is needed to check that statement. The second uses runtime=5 and checks25 during program execution. The same constexpr function supports both uses. This distinction helps explain why compile-time and runtime tests can complement each other.</p>
+<p>constexpr permits a function to participate in constant evaluation when the call satisfies the language rules. It does not require every call to run during compilation. A call using an ordinary runtime value can execute normally. consteval is stricter: an immediate function call must produce a constant-evaluated result under its contract.</p>
+<p>The first example uses static_assert(square(4)==16), so a wrong result prevents compilation. No runtime branch is needed to check that statement. The second uses runtime=5 and checks 25 during program execution. The same constexpr function supports both uses. This distinction helps explain why compile-time and runtime tests can complement each other.</p>
 <p>Constant evaluation moves work into the build; it does not make work free. Large generated tables or complex compile-time recursion can increase compiler time, memory use and binary size. A lookup table may improve runtime behavior for a repeated operation, but the build and storage tradeoffs still need measurement. A tiny square example cannot establish a performance advantage.</p>
 <p>The value domain remains important. A constexpr arithmetic function can have invalid inputs or overflow just like related runtime arithmetic, although constant-expression requirements can reject some cases during compilation. State the supported range rather than assuming the keyword makes every integer safe. Use explicit boundary checks when the public interface needs them.</p>
 <p>Configuration values known at build time can be useful for array sizes or compile-time policy selection. Values read from files, arguments or clocks are runtime inputs and cannot be forced into consteval without changing the product interface. Choose the phase based on when the information genuinely exists, not as a decorative optimization label.</p>
@@ -218,32 +218,32 @@ assert<span class="syntax-punctuation">(</span>square<span class="syntax-punctua
 <p>Classify static_assert(square(4)==16) and square(runtime).</p>
 <p><strong>Expected:</strong> First compile-time requirement; second runtime-capable call.</p>
 <p><strong>Reasoning:</strong> constexpr permits rather than universally forces compile time.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Change 16 to 17 in a scratch copy and confirm the build fails at the <code>static_assert</code>, while <code>square(runtime) == 25</code> is only checked when the program runs.</p>
 <h3 id="exercise-2-add-a-lookup-table">Exercise 2: Add a lookup table<a class="heading-anchor" href="#exercise-2-add-a-lookup-table" aria-label="Link to this section">#</a></h3>
 <p>Build squares for indices 0 through 4 with constexpr data.</p>
 <p><strong>Expected:</strong> [0, 1, 4, 9, 16].</p>
 <p><strong>Reasoning:</strong> Small bounded tables can replace repeated work.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Fill a <code>constexpr std::array&lt;int, 5&gt;</code> with <code>square(i)</code> and add <code>static_assert(table[0] == 0 &amp;&amp; table[4] == 16)</code> so the build itself checks the table.</p>
 <h3 id="exercise-3-force-constant-evaluation">Exercise 3: Force constant evaluation<a class="heading-anchor" href="#exercise-3-force-constant-evaluation" aria-label="Link to this section">#</a></h3>
 <p>Create a consteval limit function and call with constant input.</p>
 <p><strong>Expected:</strong> Build succeeds with a constant result.</p>
 <p><strong>Reasoning:</strong> Immediate functions require compile-time evaluation.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Use your <code>consteval</code> function&#x27;s result with a literal argument inside a <code>static_assert</code> and confirm the build succeeds; the call is evaluated during compilation.</p>
 <h3 id="exercise-4-diagnose-runtime-argument">Exercise 4: Diagnose runtime argument<a class="heading-anchor" href="#exercise-4-diagnose-runtime-argument" aria-label="Link to this section">#</a></h3>
 <p>Pass an input read at runtime to a consteval function.</p>
 <p><strong>Expected:</strong> Compilation fails; use constexpr when runtime calls are needed.</p>
 <p><strong>Reasoning:</strong> The phase requirement is part of the interface.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Compile the scratch call and keep the error saying the argument is not a constant expression; changing <code>consteval</code> to <code>constexpr</code> must let it compile and run.</p>
 <h3 id="exercise-5-check-a-numeric-boundary">Exercise 5: Check a numeric boundary<a class="heading-anchor" href="#exercise-5-check-a-numeric-boundary" aria-label="Link to this section">#</a></h3>
 <p>Limit table inputs so multiplication cannot overflow int.</p>
 <p><strong>Expected:</strong> Declared bound and safe result range documented.</p>
 <p><strong>Reasoning:</strong> Compile-time evaluation still obeys arithmetic rules.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Check that your bound is at most 46340, the largest <code>int</code> whose square fits in 32 bits, and add <code>static_assert(square(bound) &gt; 0)</code>, which fails to compile if the square overflows.</p>
 <h3 id="exercise-6-transfer-build-budget">Exercise 6: Transfer build budget<a class="heading-anchor" href="#exercise-6-transfer-build-budget" aria-label="Link to this section">#</a></h3>
 <p>Compare bounded table sizes 16 and 256 in an owned host build.</p>
 <p><strong>Expected:</strong> Record compile duration and artifact size without asserting a universal ratio.</p>
 <p><strong>Reasoning:</strong> Build-time work is a resource that also needs a budget.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p></article>
+<p><strong>Verify:</strong> Time each build with the same flags, list the two object file sizes, and record both pairs of numbers without claiming they scale the same way elsewhere.</p></article>
   </main>
 </body>
 </html>

@@ -198,17 +198,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-keyword">import</span> <span class="syntax-string">&quot;fmt&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">func</span> main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 1: Use a package boundary: Join logical slash-separated path segments with path.Join.</span></span>
-<span class="source-line">	<span class="syntax-comment">// Expected: The result is reports/daily.json.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 1: Use a package boundary: predict an edited check: Copy worked example 1 into a scratch pad and change `check(path.Join(&quot;reports&quot;, &quot;daily.json&quot;) == &quot;reports/daily.json&quot;, &quot;path package&quot;)` to `check(path.Join(&quot;reports!&quot;, &quot;daily.json&quot;) == &quot;reports/daily.json&quot;, &quot;path package&quot;)` inside its check. Before running, predict whether the check still passes and explain why; then restore it.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Expected: The changed run panics with `path package` because the edited check no longer holds. Restoring the original line brings back the worked observation: the result is reports/daily.json.</span></span>
 <span class="source-line"></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 2: Compose standard-library APIs: Trim and parse the text containing spaces around 12.</span></span>
-<span class="source-line">	<span class="syntax-comment">// Expected: The parsed value is 12.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 2: Compose standard-library APIs: debug a regression: A regression changed one token in worked example 2, so one line now reads `v, err := strconv.Atoi(strings.TrimSpace(&quot; 13 &quot;))`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Expected: Before the repair the program panics with `package composition`; after it the line reads `v, err := strconv.Atoi(strings.TrimSpace(&quot; 12 &quot;))` again and the parsed value is 12.</span></span>
 <span class="source-line"></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 3: Inspect exported spelling: Compare a public API spelling with its lower-case variant as identifiers in a naming check.</span></span>
-<span class="source-line">	<span class="syntax-comment">// Expected: The public spelling begins with an uppercase rune.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 3: Inspect exported spelling: Classify ParseInt, parseInt and an empty name with one rule: a name is exported when its first rune is an uppercase letter.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Expected: Only ParseInt is exported.</span></span>
 <span class="source-line"></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 4: Keep logical imports separate: Clean a logical path containing a parent component.</span></span>
-<span class="source-line">	<span class="syntax-comment">// Expected: reports/tmp/../daily becomes reports/daily.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 4: Read the go and toolchain directives: Extract the module, go and toolchain lines from a small go.mod text.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Expected: The module requires Go 1.27 and suggests toolchain go1.27.3.</span></span>
 <span class="source-line"></span>
 <span class="source-line">	<span class="syntax-comment">// Exercise 5: Reject malformed input at an API boundary: Parse a nonnumeric public input after trimming.</span></span>
 <span class="source-line">	<span class="syntax-comment">// Expected: The numeric error remains non-nil.</span></span>

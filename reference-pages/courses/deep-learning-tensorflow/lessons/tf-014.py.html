@@ -200,29 +200,29 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 1: Uniform class uncertainty</span></span>
-<span class="source-line"><span class="syntax-comment"># Compute sparse cross entropy for target1 and three zero logits.</span></span>
+<span class="source-line"><span class="syntax-comment"># Compute sparse cross entropy for target 1 and three zero logits.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: loss log(3).</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 2: Independent labels</span></span>
-<span class="source-line"><span class="syntax-comment"># Calculate sigmoid probabilities for three zero logits and labels[1,0,1].</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: three probabilities.5 with total1.5.</span></span>
+<span class="source-line"><span class="syntax-comment"># Calculate sigmoid probabilities for three zero logits and labels [1, 0, 1].</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: three probabilities 0.5 with total 1.5.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Contrast target shapes</span></span>
-<span class="source-line"><span class="syntax-comment"># Build sparse targets[2,0] and multilabel targets[[1,0,1],[0,1,0]].</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: shapes(2,) and(2,3).</span></span>
+<span class="source-line"><span class="syntax-comment"># Build sparse targets [2, 0] and multilabel targets [[1, 0, 1], [0, 1, 0]].</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: shapes (2,) and (2, 3).</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Verify softmax mass</span></span>
-<span class="source-line"><span class="syntax-comment"># Apply softmax to[[2,0,-2]] and compare its sum with sigmoid output.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: softmax sum1; sigmoid sum1.5.</span></span>
+<span class="source-line"><span class="syntax-comment"># Apply softmax to [[2, 0, -2]] and compare its sum with sigmoid output.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: softmax sum 1; sigmoid sum 1.5.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Choose the denominator</span></span>
 <span class="source-line"><span class="syntax-comment"># Compute binary cross entropy for two three-label rows of zero logits; compare sum with</span></span>
 <span class="source-line"><span class="syntax-comment"># entry mean.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: sum6log2; meanlog2.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: sum 6 log 2; mean log 2.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Reject an impossible class</span></span>
 <span class="source-line"><span class="syntax-comment"># Validate a sparse class index before lookup in a three-class vocabulary.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: index3 is outside legal indices0,1,2.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: index 3 is outside legal indices 0, 1, 2.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Read the guide and implement the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>

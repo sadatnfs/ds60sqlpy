@@ -224,7 +224,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <pre class="highlighted-code"><code class="language-dax"><span class="syntax-keyword">EVALUATE</span> <span class="syntax-function">ROW</span> <span class="syntax-punctuation">(</span> <span class="syntax-string">&quot;TableFilter&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-function">CALCULATE</span> <span class="syntax-punctuation">(</span> <span class="syntax-attribute">[NetRevenue]</span><span class="syntax-punctuation">,</span> <span class="syntax-function">FILTER</span> <span class="syntax-punctuation">(</span> Sales<span class="syntax-punctuation">,</span> Sales<span class="syntax-attribute">[Quantity]</span> <span class="syntax-operator">&gt;=</span> <span class="syntax-number">2</span> <span class="syntax-punctuation">)</span> <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;ColumnFilter&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-function">CALCULATE</span> <span class="syntax-punctuation">(</span> <span class="syntax-attribute">[NetRevenue]</span><span class="syntax-punctuation">,</span> Sales<span class="syntax-attribute">[Quantity]</span> <span class="syntax-operator">&gt;=</span> <span class="syntax-number">2</span> <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;IntersectingColumn&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-function">CALCULATE</span> <span class="syntax-punctuation">(</span> <span class="syntax-attribute">[NetRevenue]</span><span class="syntax-punctuation">,</span> <span class="syntax-function">KEEPFILTERS</span> <span class="syntax-punctuation">(</span> Sales<span class="syntax-attribute">[Quantity]</span> <span class="syntax-operator">&gt;=</span> <span class="syntax-number">2</span> <span class="syntax-punctuation">)</span> <span class="syntax-punctuation">)</span> <span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Context trace:</strong></p>
 <ol>
-<li>S2 and S 6 have quantity 1 and contribute 4 +20 =24.</li>
+<li>S2 and S6 have quantity 1 and contribute 4 + 20 = 24.</li>
 <li>Removing those lines from 187 leaves 163.</li>
 <li>The three forms agree in this incoming context.</li>
 </ol>
@@ -247,7 +247,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <pre class="highlighted-code"><code class="language-dax"><span class="syntax-keyword">EVALUATE</span> <span class="syntax-function">CALCULATETABLE</span> <span class="syntax-punctuation">(</span> <span class="syntax-function">ROW</span> <span class="syntax-punctuation">(</span> <span class="syntax-string">&quot;TableFilter&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-function">CALCULATE</span> <span class="syntax-punctuation">(</span> <span class="syntax-attribute">[NetRevenue]</span><span class="syntax-punctuation">,</span> <span class="syntax-function">FILTER</span> <span class="syntax-punctuation">(</span> Sales<span class="syntax-punctuation">,</span> Sales<span class="syntax-attribute">[Quantity]</span> <span class="syntax-operator">&gt;=</span> <span class="syntax-number">2</span> <span class="syntax-punctuation">)</span> <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;ColumnFilter&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-function">CALCULATE</span> <span class="syntax-punctuation">(</span> <span class="syntax-attribute">[NetRevenue]</span><span class="syntax-punctuation">,</span> Sales<span class="syntax-attribute">[Quantity]</span> <span class="syntax-operator">&gt;=</span> <span class="syntax-number">2</span> <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;IntersectingColumn&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-function">CALCULATE</span> <span class="syntax-punctuation">(</span> <span class="syntax-attribute">[NetRevenue]</span><span class="syntax-punctuation">,</span> <span class="syntax-function">KEEPFILTERS</span> <span class="syntax-punctuation">(</span> Sales<span class="syntax-attribute">[Quantity]</span> <span class="syntax-operator">&gt;=</span> <span class="syntax-number">2</span> <span class="syntax-punctuation">)</span> <span class="syntax-punctuation">)</span> <span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> Sales<span class="syntax-attribute">[Quantity]</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span> <span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Context trace:</strong></p>
 <ol>
-<li>The incoming visible fact rows are S2 and S 6, both quantity 1.</li>
+<li>The incoming visible fact rows are S2 and S6, both quantity 1.</li>
 <li>FILTER over those rows finds no quantity&gt;=2 line, while the plain Boolean predicate replaces the original selection.</li>
 <li>KEEPFILTERS intersects incompatible quantity conditions and also yields BLANK.</li>
 </ol>
@@ -266,7 +266,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A rewrite that changes BLANK to 163 is not an optimization of the same calculation. It is a change in the question.</p>
 <p>Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table.</p>
 <h3 id="practice-prediction-construction-and-diagnosis">Practice: prediction, construction and diagnosis<a class="heading-anchor" href="#practice-prediction-construction-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>Retain your formula or written reasoning, the stated context, contributing rows or values, and a conclusion with its unit. This is a manual learning record, not an execution receipt.</p>
+<p>Retain your formula or written reasoning, the stated context, contributing rows or values, and a conclusion with its unit. These notes are your own study record; they do not show that a formula ran.</p>
 <h4 id="exercise-1-predict">Exercise 1: Predict<a class="heading-anchor" href="#exercise-1-predict" aria-label="Link to this section">#</a></h4>
 <p>Predict the three results under an incoming Quantity&gt;=2 selection.</p>
 <h4 id="exercise-2-change-one-condition">Exercise 2: Change one condition<a class="heading-anchor" href="#exercise-2-change-one-condition" aria-label="Link to this section">#</a></h4>
@@ -282,7 +282,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>The original population already satisfies the predicate.</li>
-<li>Identify S4 and S 5.</li>
+<li>Identify S4 and S5.</li>
 <li>Include selections that agree, overlap and conflict with the predicate.</li>
 <li>A changed result is not evidence of better performance or correctness.</li>
 <li>Whole-table filters can carry additional columns and expanded-table effects.</li>
@@ -293,9 +293,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Continue to <a href="dax-052.md.html">dax-052</a> when its prerequisites make sense, or revisit this stage from the <a href="../README.md.html">course map</a>.</p>
 <h3 id="official-references-and-evidence-limits">Official references and evidence limits<a class="heading-anchor" href="#official-references-and-evidence-limits" aria-label="Link to this section">#</a></h3>
 <ul>
-<li><a href="https://learn.microsoft.com/en-us/dax/best-practices/dax-avoid-avoid-filter-as-filter-argument">Official documentation 1</a></li>
-<li><a href="https://learn.microsoft.com/en-us/dax/keepfilters-function-dax">Official documentation 2</a></li>
-<li><a href="https://learn.microsoft.com/en-us/dax/calculate-function-dax">Official documentation 3</a></li>
+<li><a href="https://learn.microsoft.com/en-us/dax/best-practices/dax-avoid-avoid-filter-as-filter-argument">DAX best practice: avoid FILTER as a filter argument</a></li>
+<li><a href="https://learn.microsoft.com/en-us/dax/keepfilters-function-dax">DAX function: KEEPFILTERS</a></li>
+<li><a href="https://learn.microsoft.com/en-us/dax/calculate-function-dax">DAX function: CALCULATE</a></li>
 </ul>
 <p>Documentation was reviewed for this original course on 2026-10-25. Version-sensitive features have explicit notes. Source/model checks and independent fixture arithmetic are not a DAX parser, compiler, semantic engine, real RLS test or performance measurement.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>

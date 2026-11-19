@@ -197,7 +197,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Advanced. Allow about 120 minutes, then revisit the transfer case later. Prerequisites: go-034</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
-<p>By the end, explain desired state, observed state, object uid; implement the six investigations below; and defend the expected result of a changed input before running it. A passing reference is evidence about that program, not a certification of your independent understanding.</p>
+<p>Decode Kubernetes object JSON and separate desired spec from observed status, name from UID and equality from version order. Along the way, explain desired state, observed state, object uid; implement the six investigations below; and defend the expected result of a changed input before running it.</p>
 <h3 id="why-this-mechanism-matters">Why this mechanism matters<a class="heading-anchor" href="#why-this-mechanism-matters" aria-label="Link to this section">#</a></h3>
 <p>Kubernetes exposes typed API resources through a declarative control plane. An object has an identity and metadata, desired configuration in spec, and observed information in status. A controller does not assume a successful API write means the requested real-world state already exists. metadata.uid distinguishes an object incarnation from a later object reusing the same name. generation tracks desired-state changes for resources that support that convention, while resourceVersion supports concurrency and watch semantics. Treat resourceVersion as opaque. This lesson decodes synthetic Deployment-shaped JSON to make these distinctions concrete without using credentials or contacting a cluster.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
@@ -208,7 +208,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ul>
 <h3 id="syntax-anatomy-and-reasoning">Syntax anatomy and reasoning<a class="heading-anchor" href="#syntax-anatomy-and-reasoning" aria-label="Link to this section">#</a></h3>
 <p>apiVersion identifies the API group and version; kind identifies an object kind. metadata.namespace plus name locates a namespaced object, while uid identifies its incarnation. Spec and status should have separate Go fields and responsibilities. Pointer fields can distinguish an omitted desired value from an explicit zero. JSON tags bind the Go representation to wire names. A struct here models only the selected fields and is not the full generated Kubernetes API type.</p>
-<h3 id="classroom-execution-contract">Classroom execution contract<a class="heading-anchor" href="#classroom-execution-contract" aria-label="Link to this section">#</a></h3>
+<h3 id="run-this-lesson">Run this lesson<a class="heading-anchor" href="#run-this-lesson" aria-label="Link to this section">#</a></h3>
 <p>Choose Go in the unified Docker classroom. Save your own pad before experimenting. The prepared worker stages it as <code>main.go</code>, compiles it, and executes the resulting program with bounded time and output. The pad is one source file. It does not supply interactive input, arbitrary command-line arguments, package installation, Kubernetes credentials or a host Docker socket. Every ordinary reference here uses the standard library, synthetic local data and explicit checks. A failed <code>check</code> panics and produces a nonzero process result; do not remove it to make the run appear successful.</p>
 <p>The explanatory solution snippets belong inside <code>func main()</code> unless they declare a helper. <code>check</code> is a tiny teaching helper that panics when a condition is false. The separate reference supplies required imports and helpers and implements all six cases. Use that complete source only after an attempt or an explicit reveal. For an independently prepared Go project, the equivalent local build is <code>go build -o lesson main.go</code>, followed by <code>./lesson</code>; use Linux or WSL 2 for that optional workflow. Compiling proves syntax and type consistency, while the executed checks establish the stated example contracts.</p>
 <p>This is an offline wire-format model. It neither imports client-go nor proves cluster behavior. Use the owned Kubernetes classroom for live resources; never point a Go lesson at an ambient kubeconfig.</p>
@@ -313,75 +313,75 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>
 <p>For each example, write the input values, the state that can change, and the expected observation. Explain which result would disprove your current interpretation. For concurrency, predict a guaranteed relationship rather than an arbitrary scheduling order. For an error case, identify whether it is rejected at compilation or returned during execution.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
-<h4 id="exercise-1-decode-desired-and-observed-replicas">Exercise 1: Decode desired and observed replicas<a class="heading-anchor" href="#exercise-1-decode-desired-and-observed-replicas" aria-label="Link to this section">#</a></h4>
-<p>Decode a fixture requesting 3 replicas with 2 ready.</p>
-<p><strong>Expected:</strong> Desired is 3 while ready is 2.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
-<h4 id="exercise-2-distinguish-omitted-from-explicit-zero">Exercise 2: Distinguish omitted from explicit zero<a class="heading-anchor" href="#exercise-2-distinguish-omitted-from-explicit-zero" aria-label="Link to this section">#</a></h4>
-<p>Decode one absent replicas field and one replicas zero.</p>
-<p><strong>Expected:</strong> Only the explicit zero has a non-nil pointer.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<h4 id="exercise-1-decode-desired-and-observed-replicas-change-one-input">Exercise 1: Decode desired and observed replicas: change one input<a class="heading-anchor" href="#exercise-1-decode-desired-and-observed-replicas-change-one-input" aria-label="Link to this section">#</a></h4>
+<p>Copy worked example 1 into a scratch pad and change <code>&quot;replicas&quot;:3</code> to <code>&quot;replicas&quot;:4</code>. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</p>
+<p><strong>Expected:</strong> The changed run panics with <code>spec status</code> because <code>err == nil &amp;&amp; d.Spec.Replicas != nil &amp;&amp; *d.Spec.Replicas == 3 &amp;&amp; d.Status.Ready == 2</code> no longer holds. Restoring the original line brings back the worked observation: desired is 3 while ready is 2.</p>
+<p><strong>Verify:</strong> Compare your written prediction with the panic message <code>spec status</code> and name the value that made <code>err == nil &amp;&amp; d.Spec.Replicas != nil &amp;&amp; *d.Spec.Replicas == 3 &amp;&amp; d.Status.Ready == 2</code> false. After restoring the input, the program must print its success line again.</p>
+<h4 id="exercise-2-distinguish-omitted-from-explicit-zero-diagnose-an-edited-check">Exercise 2: Distinguish omitted from explicit zero: diagnose an edited check<a class="heading-anchor" href="#exercise-2-distinguish-omitted-from-explicit-zero-diagnose-an-edited-check" aria-label="Link to this section">#</a></h4>
+<p>A careless edit changed the check in worked example 2 so that it reads <code>check(json.Unmarshal([]byte(`{&quot;spec&quot;:{&quot;replicas&quot;:1}}`), &amp;b) == nil, &quot;decode&quot;)</code>. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.</p>
+<p><strong>Expected:</strong> Before the repair the program panics with <code>presence</code>; after it the line reads <code>check(json.Unmarshal([]byte(`{&quot;spec&quot;:{&quot;replicas&quot;:0}}`), &amp;b) == nil, &quot;decode&quot;)</code> again and only the explicit zero has a non-nil pointer.</p>
+<p><strong>Verify:</strong> Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that <code>a.Spec.Replicas == nil &amp;&amp; b.Spec.Replicas != nil &amp;&amp; *b.Spec.Replicas == 0</code> accepts.</p>
 <h4 id="exercise-3-separate-name-and-incarnation">Exercise 3: Separate name and incarnation<a class="heading-anchor" href="#exercise-3-separate-name-and-incarnation" aria-label="Link to this section">#</a></h4>
-<p>Construct two objects sharing name but having different UIDs.</p>
-<p><strong>Expected:</strong> Their names match but identities differ.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p>Decode two objects that share namespace and name but carry different UIDs.</p>
+<p><strong>Expected:</strong> Their names match but their identities differ.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>a.Metadata.Name == b.Metadata.Name &amp;&amp; a.Metadata.UID != b.Metadata.UID</code>. As a control, change <code>check(a.Metadata.Name == b.Metadata.Name &amp;&amp; a.Metadata.UID != b.Metadata.UID, &quot;incarnation&quot;)</code> to <code>check(a.Metadata.Name != b.Metadata.Name &amp;&amp; a.Metadata.UID != b.Metadata.UID, &quot;incarnation&quot;)</code> inside that check: it must panic with <code>incarnation</code>, which shows the check can fail. Restore it.</p>
 <h4 id="exercise-4-keep-namespaces-in-a-key">Exercise 4: Keep namespaces in a key<a class="heading-anchor" href="#exercise-4-keep-namespaces-in-a-key" aria-label="Link to this section">#</a></h4>
-<p>Build keys for the same name in two namespaces.</p>
-<p><strong>Expected:</strong> The keys are different.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p>Build keys with one function for the same name in two namespaces.</p>
+<p><strong>Expected:</strong> The key is alpha/demo for the first object and differs from the second object&#x27;s key.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>key(a) == &quot;alpha/demo&quot; &amp;&amp; key(a) != key(b)</code>. As a control, change <code>key := func(m Metadata) string { return m.Namespace + &quot;/&quot; + m.Name }</code> to <code>key := func(m Metadata) string { return m.Namespace + &quot;/!&quot; + m.Name }</code>: the run must panic with <code>namespace key</code>. Restore the line before continuing.</p>
 <h4 id="exercise-5-treat-versions-as-opaque">Exercise 5: Treat versions as opaque<a class="heading-anchor" href="#exercise-5-treat-versions-as-opaque" aria-label="Link to this section">#</a></h4>
-<p>Store a nonnumeric resourceVersion token and compare it for equality.</p>
-<p><strong>Expected:</strong> The exact token is retained.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p>Decode resourceVersion tokens 10 and 9 and compare them as the strings they are.</p>
+<p><strong>Expected:</strong> Both tokens are retained exactly; they differ, and string order even places 10 before 9, so only equality is meaningful.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>a.Version == &quot;10&quot; &amp;&amp; a.Version != b.Version &amp;&amp; a.Version &lt; b.Version</code>. As a control, change <code>errA := json.Unmarshal([]byte(`{&quot;resourceVersion&quot;:&quot;10&quot;}`), &amp;a)</code> to <code>errA := json.Unmarshal([]byte(`{&quot;resourceVersion&quot;:&quot;11&quot;}`), &amp;a)</code>: the run must panic with <code>opaque version</code>. Restore the line before continuing.</p>
 <h4 id="exercise-6-transfer-readiness-reasoning">Exercise 6: Transfer readiness reasoning<a class="heading-anchor" href="#exercise-6-transfer-readiness-reasoning" aria-label="Link to this section">#</a></h4>
-<p>Compare desired 3 with ready 3 and then ready 2.</p>
+<p>Apply one readiness predicate to desired 3 with ready 3 and then ready 2.</p>
 <p><strong>Expected:</strong> Only the equal complete state satisfies this simplified predicate.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>!complete(d)</code>. As a control, change <code>d.Spec.Replicas != nil &amp;&amp; d.Status.Ready == *d.Spec.Replicas</code> to <code>d.Spec.Replicas != nil || d.Status.Ready == *d.Spec.Replicas</code>: the run must panic with <code>not ready</code>. Restore the line before continuing.</p>
 <p>Implement these in the answer-free learner source. Keep one independent check per claim. A task can require tracing, construction, a changed input or a deliberate safe failure. Do not run a data race, corrupt memory or contact a shared cluster merely to demonstrate why it would be wrong.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Read a compiler error from the first location in your source, then fix one cause at a time. Unused imports and variables are errors in Go; add an import when its use exists, rather than copying a large unused import list. A panic from <code>check</code> identifies a violated example contract. Compare the actual value with the expected value and inspect the state transition that produced it. A returned <code>error</code> is a value that the caller must handle; an ignored error can make later output look plausible while the original operation failed.</p>
 <p>The lesson-specific explanations in the two examples identify the important counterexamples. Extend that reasoning to every investigation: explain why a plausible alternative would fail, and preserve a tiny input that distinguishes it. Treat empty data, missing values and cancellation as domain cases with explicit policies. In concurrent work, replace sleeps used as synchronization with channels, mutexes or an explicit ownership protocol.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<h4 id="hint-for-investigation-1-decode-desired-and-observed-replicas">Hint for investigation 1: Decode desired and observed replicas<a class="heading-anchor" href="#hint-for-investigation-1-decode-desired-and-observed-replicas" aria-label="Link to this section">#</a></h4>
+<h4 id="hint-for-investigation-1-decode-desired-and-observed-replicas-change-one-input">Hint for investigation 1: Decode desired and observed replicas: change one input<a class="heading-anchor" href="#hint-for-investigation-1-decode-desired-and-observed-replicas-change-one-input" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Desired is 3 while ready is 2.</li>
-<li>Identify the input and the state boundary relevant to decode desired and observed replicas. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>err == nil &amp;&amp; d.Spec.Replicas != nil &amp;&amp; *d.Spec.Replicas == 3 &amp;&amp; d.Status.Ready == 2</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Compute the checked value with <code>&quot;replicas&quot;:4</code> in place before running, then compare it with the value <code>err == nil &amp;&amp; d.Spec.Replicas != nil &amp;&amp; *d.Spec.Replicas == 3 &amp;&amp; d.Status.Ready == 2</code> expects.</li>
 </ol>
-<h4 id="hint-for-investigation-2-distinguish-omitted-from-explicit-zero">Hint for investigation 2: Distinguish omitted from explicit zero<a class="heading-anchor" href="#hint-for-investigation-2-distinguish-omitted-from-explicit-zero" aria-label="Link to this section">#</a></h4>
+<h4 id="hint-for-investigation-2-distinguish-omitted-from-explicit-zero-diagnose-an-edited-check">Hint for investigation 2: Distinguish omitted from explicit zero: diagnose an edited check<a class="heading-anchor" href="#hint-for-investigation-2-distinguish-omitted-from-explicit-zero-diagnose-an-edited-check" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Only the explicit zero has a non-nil pointer.</li>
-<li>Identify the input and the state boundary relevant to distinguish omitted from explicit zero. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>a.Spec.Replicas == nil &amp;&amp; b.Spec.Replicas != nil &amp;&amp; *b.Spec.Replicas == 0</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Compare <code>check(json.Unmarshal([]byte(`{&quot;spec&quot;:{&quot;replicas&quot;:1}}`), &amp;b) == nil, &quot;decode&quot;)</code> with the same line in worked example 2 and state the claim each version makes.</li>
 </ol>
 <h4 id="hint-for-investigation-3-separate-name-and-incarnation">Hint for investigation 3: Separate name and incarnation<a class="heading-anchor" href="#hint-for-investigation-3-separate-name-and-incarnation" aria-label="Link to this section">#</a></h4>
 <ol>
-<li>Restate the expected observation: Their names match but identities differ.</li>
-<li>Identify the input and the state boundary relevant to separate name and incarnation. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>Restate the expected observation: Their names match but their identities differ.</li>
+<li>The check <code>a.Metadata.Name == b.Metadata.Name &amp;&amp; a.Metadata.UID != b.Metadata.UID</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Name one input that would make <code>a.Metadata.Name == b.Metadata.Name &amp;&amp; a.Metadata.UID != b.Metadata.UID</code> false. A check that no input can falsify is not evidence.</li>
 </ol>
 <h4 id="hint-for-investigation-4-keep-namespaces-in-a-key">Hint for investigation 4: Keep namespaces in a key<a class="heading-anchor" href="#hint-for-investigation-4-keep-namespaces-in-a-key" aria-label="Link to this section">#</a></h4>
 <ol>
-<li>Restate the expected observation: The keys are different.</li>
-<li>Identify the input and the state boundary relevant to keep namespaces in a key. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>Restate the expected observation: The key is alpha/demo for the first object and differs from the second object&#x27;s key.</li>
+<li>The check <code>key(a) == &quot;alpha/demo&quot; &amp;&amp; key(a) != key(b)</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Predict the effect of changing <code>key := func(m Metadata) string { return m.Namespace + &quot;/&quot; + m.Name }</code> to <code>key := func(m Metadata) string { return m.Namespace + &quot;/!&quot; + m.Name }</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
 </ol>
 <h4 id="hint-for-investigation-5-treat-versions-as-opaque">Hint for investigation 5: Treat versions as opaque<a class="heading-anchor" href="#hint-for-investigation-5-treat-versions-as-opaque" aria-label="Link to this section">#</a></h4>
 <ol>
-<li>Restate the expected observation: The exact token is retained.</li>
-<li>Identify the input and the state boundary relevant to treat versions as opaque. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>Restate the expected observation: Both tokens are retained exactly; they differ, and string order even places 10 before 9, so only equality is meaningful.</li>
+<li>The check <code>a.Version == &quot;10&quot; &amp;&amp; a.Version != b.Version &amp;&amp; a.Version &lt; b.Version</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Predict the effect of changing <code>errA := json.Unmarshal([]byte(`{&quot;resourceVersion&quot;:&quot;10&quot;}`), &amp;a)</code> to <code>errA := json.Unmarshal([]byte(`{&quot;resourceVersion&quot;:&quot;11&quot;}`), &amp;a)</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
 </ol>
 <h4 id="hint-for-investigation-6-transfer-readiness-reasoning">Hint for investigation 6: Transfer readiness reasoning<a class="heading-anchor" href="#hint-for-investigation-6-transfer-readiness-reasoning" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Only the equal complete state satisfies this simplified predicate.</li>
-<li>Identify the input and the state boundary relevant to transfer readiness reasoning. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>!complete(d)</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Predict the effect of changing <code>d.Spec.Replicas != nil &amp;&amp; d.Status.Ready == *d.Spec.Replicas</code> to <code>d.Spec.Replicas != nil || d.Status.Ready == *d.Spec.Replicas</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
 </ol>
 <h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
 <p>Close the reference. Rebuild one normal case and one boundary case from a blank pad. Explain the role of desired state without using its name in the definition. Then change the domain while keeping the same invariant. Record the new input, your prediction and the observed output. If your program passes only because its input is hard-coded, explain which part would need a reusable function in a larger project.</p>
 <h3 id="next-step-and-sources">Next step and sources<a class="heading-anchor" href="#next-step-and-sources" aria-label="Link to this section">#</a></h3>
-<p><a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/kubernetes-objects/">Primary language or library documentation</a>, reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. This source supports the API contract; it does not verify the classroom worker. Runtime receipts are recorded separately by the repository validation tools. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.</p>
+<p><a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/kubernetes-objects/">Primary language or library documentation</a>, reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for go-035: Kubernetes objects, metadata, spec and status.
 Read courses/go/guides/go-035.md and my saved attempt based on courses/go/lessons/go-035.go.

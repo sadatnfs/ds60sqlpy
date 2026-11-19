@@ -220,32 +220,32 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Explain index 2 into vector size 2.</p>
 <p><strong>Expected:</strong> Out of bounds; valid indices 0 and 1.</p>
 <p><strong>Reasoning:</strong> A half-open index interval ends before size.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Check your explanation against <code>xs.size() == 2</code>: the last valid index is <code>size() - 1</code>, and <code>checked_at({2, 4}, 1) == 4</code> in Worked example 1 is the boundary that works.</p>
 <h3 id="exercise-2-use-checked-access">Exercise 2: Use checked access<a class="heading-anchor" href="#exercise-2-use-checked-access" aria-label="Link to this section">#</a></h3>
 <p>Compare at(2) with the contract of operator[2].</p>
 <p><strong>Expected:</strong> at throws; unchecked invalid access is undefined behavior.</p>
 <p><strong>Reasoning:</strong> A deterministic exception is not a sanitizer report.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Confirm Worked example 2 catches <code>std::out_of_range</code> from <code>at(2)</code>, and do not run <code>xs[2]</code>; your answer must call it undefined behavior rather than predict its output.</p>
 <h3 id="exercise-3-prepare-instrumented-build">Exercise 3: Prepare instrumented build<a class="heading-anchor" href="#exercise-3-prepare-instrumented-build" aria-label="Link to this section">#</a></h3>
 <p>Compile the safe reference with sanitizer flags on a supported host.</p>
 <p><strong>Expected:</strong> Compile/link/run statuses and compiler version recorded.</p>
 <p><strong>Reasoning:</strong> Instrumentation requires the matching runtime library.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Build with <code>-fsanitize=address,undefined -g</code>, run the program, and record the compiler version plus separate compile, link and run statuses.</p>
 <h3 id="exercise-4-diagnose-a-controlled-failure">Exercise 4: Diagnose a controlled failure<a class="heading-anchor" href="#exercise-4-diagnose-a-controlled-failure" aria-label="Link to this section">#</a></h3>
 <p>In a separate instrumented scratch program introduce one heap out-of-bounds access.</p>
 <p><strong>Expected:</strong> Nonzero sanitizer report naming access and source location; never claim ordinary profile detection.</p>
 <p><strong>Reasoning:</strong> Keep the fault isolated from normal lesson execution.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Confirm the AddressSanitizer report says <code>heap-buffer-overflow</code>, points at your scratch file and line, and that the exit status is nonzero.</p>
 <h3 id="exercise-5-repair-and-rerun">Exercise 5: Repair and rerun<a class="heading-anchor" href="#exercise-5-repair-and-rerun" aria-label="Link to this section">#</a></h3>
 <p>Replace invalid access with a valid index or explicit check.</p>
 <p><strong>Expected:</strong> Sanitizer report disappears on that test path; result is correct.</p>
 <p><strong>Reasoning:</strong> Absence of a report is bounded evidence.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Rebuild the same scratch program with the same sanitizer flags and confirm it exits 0 with no report and asserts the correct value.</p>
 <h3 id="exercise-6-transfer-signed-arithmetic">Exercise 6: Transfer signed arithmetic<a class="heading-anchor" href="#exercise-6-transfer-signed-arithmetic" aria-label="Link to this section">#</a></h3>
 <p>Review INT_MAX+1 and use pre-add range validation.</p>
 <p><strong>Expected:</strong> Input rejected before overflow.</p>
 <p><strong>Reasoning:</strong> Sanitizers diagnose executed undefined operations, not all possible inputs.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p></article>
+<p><strong>Verify:</strong> Check that the guard compares <code>a &gt; std::numeric_limits&lt;int&gt;::max() - b</code> before adding, and assert it rejects <code>INT_MAX</code> plus 1 while accepting <code>INT_MAX - 1</code> plus 1.</p></article>
   </main>
 </body>
 </html>

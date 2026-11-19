@@ -198,7 +198,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The complete <a href="dax-034_reference.dax.html">reference source</a> and <a href="../models/retail/model.json.html">named model</a> belong together. The reference-results sidecar binds both exact files by SHA-256. Those hashes identify bytes; they do not certify DAX execution.</p>
 <h3 id="worked-case-reconciliation">Worked-case reconciliation<a class="heading-anchor" href="#worked-case-reconciliation" aria-label="Link to this section">#</a></h3>
 <h4 id="case-a-a-three-calendar-day-denominator">Case A: A three-calendar-day denominator<a class="heading-anchor" href="#case-a-a-three-calendar-day-denominator" aria-label="Link to this section">#</a></h4>
-<p>AnchorFebruary 3,2025; included calendar days February 1,2,3; all observed.</p>
+<p>Anchor February 3, 2025; included calendar days February 1, 2 and 3; all observed.</p>
 <div class="table-wrap"><table><thead><tr>
 <th>Days</th>
 <th>Revenue</th>
@@ -229,16 +229,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </tbody></table></div>
 <p>Neither name should be shortened to average daily revenue without identifying the denominator. A small blank-handling change can alter the business meaning.</p>
 <ul>
-<li>The unfilled values are BLANK,20,36.</li>
-<li>The blank-excluding average is 56/2 =28.</li>
-<li>The zero-filled observed-calendar values 0,20,36 average 56/3.</li>
+<li>The unfilled values are BLANK, 20, 36.</li>
+<li>The blank-excluding average is 56/2 = 28.</li>
+<li>The zero-filled observed-calendar values 0, 20, 36 average 56/3.</li>
 </ul>
 <h3 id="explained-practice-answers">Explained practice answers<a class="heading-anchor" href="#explained-practice-answers" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict the two-day window ending February 3.</p>
 <p>Revenue is 56 and both dates have sales, so both daily-average definitions give 28.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
-<p>Move the three-day anchor to January 4,2025.</p>
+<p>Move the three-day anchor to January 4, 2025.</p>
 <p>Revenue is 47; the calendar-day average is 47/3, while the sale-day average is 47/2.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Write a complete rolling-window contract.</p>

@@ -194,33 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-008_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-008-explanatory-solutions">docker-008: explanatory solutions<a class="heading-anchor" href="#docker-008-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These are explanations of the supplied teaching fixtures, not fabricated engine results.</p>
-<h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
-<p>Configuration changes behavior without rebuilding application logic. Environment variables are string values supplied to a process. Command arguments are an ordered array of strings. Image defaults, Compose interpolation and the container’s environment are related but distinct mechanisms.</p>
-<p>A Compose <code>.env</code> file commonly supplies values used when Compose renders its model. That does not mean every value is automatically injected into every container. A service’s <code>environment</code> or <code>env_file</code> configuration controls injection. Host-shell interpolation, Compose interpolation and shell expansion inside a container occur at different times.</p>
-<p>Treat configuration as data with validation. A missing value should produce a clear startup error or documented default. A string containing <code>false</code> is still a nonempty string in many languages. Numeric ports and timeouts need parsing and bounds. Secrets should not be casually placed in versioned files or printed by a diagnostic command.</p>
-<p>The fixture reads <code>APP_MESSAGE</code> and serves it in a JSON field. Compose explicitly sets the value. A source-only message edit changes the image; an environment edit changes runtime configuration and usually requires container recreation to take effect. An image environment value is a default which runtime options can override.</p>
-<p>The exec-form command array does not expand <code>$NAME</code> like a shell. If the application needs an environment value, have the application read it or use an intentionally reviewed shell wrapper. <code>docker compose config</code> is valuable for validation but can display interpolated private values; use synthetic data in this lesson.</p>
+<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-008.md</code>.</p>
 <h3 id="exercise-1-distinguish-compose-interpolation-from-container-environment">Exercise 1: Distinguish Compose interpolation from container environment.<a class="heading-anchor" href="#exercise-1-distinguish-compose-interpolation-from-container-environment" aria-label="Link to this section">#</a></h3>
-<p>A value used to choose a host port need not appear inside the container. Conversely, a container environment entry can be literal and independent of a host variable.</p>
-<p><strong>Expected:</strong> Model rendering versus process input.</p>
+<p><strong>Expected answer:</strong> Model rendering versus process input.</p>
+<p><strong>Why:</strong> A value used to choose a host port need not appear inside the container. Conversely, a container environment entry can be literal and independent of a host variable.</p>
 <h3 id="exercise-2-predict-the-type-of-appmessage">Exercise 2: Predict the type of APP_MESSAGE.<a class="heading-anchor" href="#exercise-2-predict-the-type-of-appmessage" aria-label="Link to this section">#</a></h3>
-<p>Environment values do not carry a native integer or Boolean type. The application must parse and validate domain-specific meanings before using them.</p>
-<p><strong>Expected:</strong> A string, even when its contents look numeric.</p>
+<p><strong>Expected answer:</strong> A string, even when its contents look numeric.</p>
+<p><strong>Why:</strong> Environment values do not carry a native integer or Boolean type. The application must parse and validate domain-specific meanings before using them.</p>
 <h3 id="exercise-3-design-defaults-and-validation-for-a-timeout-variable">Exercise 3: Design defaults and validation for a timeout variable.<a class="heading-anchor" href="#exercise-3-design-defaults-and-validation-for-a-timeout-variable" aria-label="Link to this section">#</a></h3>
-<p>Configuration is external input. Rejecting malformed or excessive values at startup gives a clearer failure than a later hang caused by an unintended timeout.</p>
-<p><strong>Expected:</strong> A documented default plus finite positive bounded numeric parsing.</p>
+<p><strong>Expected evidence:</strong> A documented default plus finite positive bounded numeric parsing.</p>
+<p><strong>Why:</strong> Configuration is external input. Rejecting malformed or excessive values at startup gives a clearer failure than a later hang caused by an unintended timeout.</p>
 <h3 id="exercise-4-diagnose-an-exec-array-containing-literal-port">Exercise 4: Diagnose an exec array containing literal $PORT.<a class="heading-anchor" href="#exercise-4-diagnose-an-exec-array-containing-literal-port" aria-label="Link to this section">#</a></h3>
-<p>The runtime passes the characters directly. Add explicit application parsing rather than introducing a shell merely to conceal that the command contract was misunderstood.</p>
-<p><strong>Expected:</strong> No shell expansion occurs in an argument array.</p>
+<p><strong>Expected answer:</strong> No shell expansion occurs in an argument array.</p>
+<p><strong>Why:</strong> The runtime passes the characters directly. Add explicit application parsing rather than introducing a shell merely to conceal that the command contract was misunderstood.</p>
 <h3 id="exercise-5-explain-why-restart-may-not-apply-changed-compose-environment">Exercise 5: Explain why restart may not apply changed Compose environment.<a class="heading-anchor" href="#exercise-5-explain-why-restart-may-not-apply-changed-compose-environment" aria-label="Link to this section">#</a></h3>
-<p>Restart starts the same configured object again. Applying a changed service model may require recreation, so confirm the observed environment and container identity.</p>
-<p><strong>Expected:</strong> Existing container configuration and recreation differ.</p>
+<p><strong>Expected answer:</strong> Existing container configuration and recreation differ.</p>
+<p><strong>Why:</strong> Restart starts the same configured object again. Applying a changed service model may require recreation, so confirm the observed environment and container identity.</p>
 <h3 id="exercise-6-write-a-public-configuration-evidence-record">Exercise 6: Write a public configuration evidence record.<a class="heading-anchor" href="#exercise-6-write-a-public-configuration-evidence-record" aria-label="Link to this section">#</a></h3>
-<p>Evidence should prove the intended precedence without leaking secrets. A response demonstrating the public message connects model rendering to actual application behavior.</p>
-<p><strong>Expected:</strong> Name, safe synthetic value, source of override and observed response.</p>
+<p><strong>Expected evidence:</strong> Name, safe synthetic value, source of override and observed response.</p>
+<p><strong>Why:</strong> Evidence should prove the intended precedence without leaking secrets. A response demonstrating the public message connects model rendering to actual application behavior.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful solution identifies the exact object, the phase when a setting takes effect, the expected normal result and an observation that disproves it. Repeating a command until it succeeds hides the mechanism. Change one variable, keep a failure record, and test the intended behavior again. Source examples here are small enough to inspect; a production system additionally needs ownership, lifecycle, data recovery and operational review. The host exercises are optional and must stay within the learner-created project.</p></article>
+<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>
 </body>
 </html>

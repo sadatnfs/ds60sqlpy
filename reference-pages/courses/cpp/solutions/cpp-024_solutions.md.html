@@ -218,32 +218,32 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Reverse [1, 2, 3] against a literal expected vector.</p>
 <p><strong>Expected:</strong> [3, 2, 1].</p>
 <p><strong>Reasoning:</strong> The expected result is independent of the implementation.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Assert <code>reversed({1, 2, 3}) == std::vector&lt;int&gt;{3, 2, 1}</code>, as Worked example 1 does; the expected vector is typed by hand, not computed with <code>std::reverse</code>.</p>
 <h3 id="exercise-2-enumerate-a-property">Exercise 2: Enumerate a property<a class="heading-anchor" href="#exercise-2-enumerate-a-property" aria-label="Link to this section">#</a></h3>
 <p>Test all pairs from integers -2 through 2.</p>
 <p><strong>Expected:</strong> 25 cases satisfy double reversal.</p>
 <p><strong>Reasoning:</strong> The finite domain gives a known work budget.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Loop over every pair <code>a, b</code> from -2 to 2, count the pairs whose double reversal returns <code>{a, b}</code>, and assert the count is 25.</p>
 <h3 id="exercise-3-add-a-boundary-corpus">Exercise 3: Add a boundary corpus<a class="heading-anchor" href="#exercise-3-add-a-boundary-corpus" aria-label="Link to this section">#</a></h3>
 <p>Include empty, singleton and duplicate vectors.</p>
 <p><strong>Expected:</strong> [], [7], [2, 2] preserved after double reversal.</p>
 <p><strong>Reasoning:</strong> Edges exercise different shapes.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Assert that double reversal returns <code>{}</code>, <code>{7}</code> and <code>{2, 2}</code> unchanged, and also that <code>reversed({7}) == std::vector&lt;int&gt;{7}</code> directly.</p>
 <h3 id="exercise-4-expose-a-weak-property">Exercise 4: Expose a weak property<a class="heading-anchor" href="#exercise-4-expose-a-weak-property" aria-label="Link to this section">#</a></h3>
 <p>Replace reversal with identity in a scratch copy.</p>
 <p><strong>Expected:</strong> Double-reverse property passes but golden reversal fails.</p>
 <p><strong>Reasoning:</strong> A property can be necessary without being sufficient.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Run both tests against the identity version: the double-reversal assertion still passes while the <code>{3, 2, 1}</code> golden assertion fails, so the property alone is too weak.</p>
 <h3 id="exercise-5-save-a-reproduction">Exercise 5: Save a reproduction<a class="heading-anchor" href="#exercise-5-save-a-reproduction" aria-label="Link to this section">#</a></h3>
 <p>Break reversal to drop the first item.</p>
 <p><strong>Expected:</strong> Small failing vector and exact observed output retained.</p>
 <p><strong>Reasoning:</strong> A minimized failing case is easier to diagnose than a seed alone.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Record the smallest input that fails, such as the singleton <code>{7}</code> coming back empty, together with the exact assertion that fired.</p>
 <h3 id="exercise-6-transfer-to-a-parser">Exercise 6: Transfer to a parser<a class="heading-anchor" href="#exercise-6-transfer-to-a-parser" aria-label="Link to this section">#</a></h3>
 <p>Design encode/decode properties and independent malformed inputs.</p>
 <p><strong>Expected:</strong> Round-trip valid records; reject suffix junk and wrong versions.</p>
 <p><strong>Reasoning:</strong> Round-trip tests alone can let matching bugs agree.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p></article>
+<p><strong>Verify:</strong> Assert that decoding an encoded record returns the same ID and cents for several valid pairs, and separately that hand-written <code>&quot;v1,7,125x&quot;</code> and <code>&quot;v2,7,125&quot;</code> are rejected.</p></article>
   </main>
 </body>
 </html>

@@ -199,17 +199,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">Copy to .learning before editing. Six independent attempts belong below.</span></span>
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 1: Establish an eager oracle</span></span>
-<span class="source-line"><span class="syntax-comment"># Evaluatef(x)=x*x+1 at float32[1, 2].</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: output[2, 5].</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Establish a new eager oracle</span></span>
+<span class="source-line"><span class="syntax-comment"># Evaluate g(x)=2x-1 eagerly at the float32 inputs [0, 3].</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: output [-1, 5].</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 2: Capture with a transparent backend</span></span>
-<span class="source-line"><span class="syntax-comment"># Compile using a counting backend that returns graph.forward and compare output.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: captured graph exists; output matches eager.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Capture the new function</span></span>
+<span class="source-line"><span class="syntax-comment"># Compile g with a counting backend that returns graph.forward and compare it with the</span></span>
+<span class="source-line"><span class="syntax-comment"># eager output.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: at least one captured graph; outputs match exactly.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 3: Check signature reuse</span></span>
-<span class="source-line"><span class="syntax-comment"># Call with float32[3, 4], then with float64[1, 2].</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: same signature reuses capture; changed dtype adds a graph.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: Predict recompilation for a new shape</span></span>
+<span class="source-line"><span class="syntax-comment"># Call the compiled function with a three-element input, then with a second three-element</span></span>
+<span class="source-line"><span class="syntax-comment"># input.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: the first three-element call adds a graph; the repeated shape reuses it.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Measure warmed calls honestly</span></span>
 <span class="source-line"><span class="syntax-comment"># Warm the float32 path, then execute 20 calls and record elapsed time.</span></span>
@@ -217,7 +219,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Inspect actual CPU operations</span></span>
 <span class="source-line"><span class="syntax-comment"># Profile one eager call and inspect operation names.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: aten:: mul and aten:: add appear.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: aten::mul and aten::add appear.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: State the backend limitation</span></span>
 <span class="source-line"><span class="syntax-comment"># Record graph capture True, optimizing native backend False and GPU benchmark False.</span></span>

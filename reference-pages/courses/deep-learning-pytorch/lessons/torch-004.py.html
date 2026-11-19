@@ -199,28 +199,30 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">Copy to .learning before editing. Six independent attempts belong below.</span></span>
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 1: Compute residual reductions</span></span>
-<span class="source-line"><span class="syntax-comment"># Use residuals[1, -1, 2] against zero targets.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: squared entries 1, 1, 4; sum 6; mean 2.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Reduce a new residual vector</span></span>
+<span class="source-line"><span class="syntax-comment"># Use residuals [3, 0, -1, 2] against zero targets and compute the sum and mean squared</span></span>
+<span class="source-line"><span class="syntax-comment"># reductions.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: squared entries 9, 0, 1, 4; sum 14; mean 3.5.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 2: Duplicate the batch</span></span>
-<span class="source-line"><span class="syntax-comment"># Repeat every residual twice and compare reductions.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: sum 12; mean 2.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Predict the effect of an appended zero</span></span>
+<span class="source-line"><span class="syntax-comment"># Append one zero residual to the same vector and recompute both reductions before running</span></span>
+<span class="source-line"><span class="syntax-comment"># them.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: sum stays 14; mean falls to 2.8 because the denominator becomes 5.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 3: Compare derivative scale</span></span>
-<span class="source-line"><span class="syntax-comment"># Differentiate sum and mean squared loss for a fresh 3-entry tensor.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: sum gradient equals 3 times mean gradient.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: Compare gradient scale for four entries</span></span>
+<span class="source-line"><span class="syntax-comment"># Differentiate the sum and the mean of squares for a fresh copy of [3, 0, -1, 2].</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: sum gradient [6, 0, -2, 4]; it equals 4 times the mean gradient.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Inspect a feature denominator</span></span>
-<span class="source-line"><span class="syntax-comment"># Use a2x2 residual matrix of ones and mean reduction.</span></span>
+<span class="source-line"><span class="syntax-comment"># Use a 2-by-2 residual matrix of ones and mean reduction.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: loss 1 and 4 participating elements.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Mask numerator and denominator together</span></span>
-<span class="source-line"><span class="syntax-comment"># Use losses[1, 4, 100] with mask True, True, False.</span></span>
+<span class="source-line"><span class="syntax-comment"># Use losses [1, 4, 100] with mask True, True, False.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: valid mean 2.5, not 5/3.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Separate a metric from the objective</span></span>
-<span class="source-line"><span class="syntax-comment"># Compare mean absolute residual and mean squared residual for[1, -1, 2].</span></span>
+<span class="source-line"><span class="syntax-comment"># Compare mean absolute residual and mean squared residual for [1, -1, 2].</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: MAE 4/3; MSE 2.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>

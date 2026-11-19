@@ -202,29 +202,23 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict is.list(x[1]) for a list x.</p>
 <p>It is TRUE.</p>
-<p><strong>Expected evidence:</strong> It is TRUE.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Extract the first number from a values field.</p>
 <p>Use record[[&quot;values&quot;]][[1]].</p>
-<p><strong>Expected evidence:</strong> Use record[[&quot;values&quot;]][[1]].</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Validate required id and values fields.</p>
 <p>Require both names, one character ID and a numeric values vector.</p>
-<p><strong>Expected evidence:</strong> Require both names, one character ID and a numeric values vector.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose an accidental one-element list passed to mean.</p>
 <p>Use [[ to obtain the numeric field.</p>
-<p><strong>Expected evidence:</strong> Use [[ to obtain the numeric field.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Retain an explicitly NULL note field.</p>
 <p>Use record[&quot;note&quot;] &lt;- list(NULL).</p>
-<p><strong>Expected evidence:</strong> Use record[&quot;note&quot;] &lt;- list(NULL).</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Explain a risk of unlist on a mixed record.</p>
 <p>A text ID can coerce numeric measurements to character and erase field structure.</p>
-<p><strong>Expected evidence:</strong> A text ID can coerce numeric measurements to character and erase field structure.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference contains explicit behavioral assertions for its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The reference makes 6 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>
 </body>
 </html>

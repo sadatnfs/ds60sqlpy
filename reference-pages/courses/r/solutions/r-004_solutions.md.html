@@ -202,29 +202,23 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict TRUE &amp; NA and FALSE &amp; NA.</p>
 <p>The first is NA; the second is FALSE.</p>
-<p><strong>Expected evidence:</strong> The first is NA; the second is FALSE.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Change the threshold from ten to fifteen.</p>
 <p>Only the amount twenty remains.</p>
-<p><strong>Expected evidence:</strong> Only the amount twenty remains.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Construct a mask for known amounts from ten through twenty inclusive.</p>
 <p>Use !is.na(x) &amp; x &gt;= 10 &amp; x &lt;= 20.</p>
-<p><strong>Expected evidence:</strong> Use !is.na(x) &amp; x &gt;= 10 &amp; x &lt;= 20.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose x == NA.</p>
 <p>Use is.na(x) to test missingness.</p>
-<p><strong>Expected evidence:</strong> Use is.na(x) to test missingness.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Guard an empty vector before extracting its first element.</p>
 <p>length(x) &gt; 0 &amp;&amp; x[[1]] &gt; 0 safely returns FALSE for an empty vector.</p>
-<p><strong>Expected evidence:</strong> length(x) &gt; 0 &amp;&amp; x[[1]] &gt; 0 safely returns FALSE for an empty vector.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Separate an all-known claim from all(..., na.rm=TRUE).</p>
 <p>Report missingness and state that the reduced claim concerns observed predicates only.</p>
-<p><strong>Expected evidence:</strong> Report missingness and state that the reduced claim concerns observed predicates only.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference contains explicit behavioral assertions for its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The reference makes 6 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>
 </body>
 </html>

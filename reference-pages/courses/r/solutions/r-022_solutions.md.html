@@ -224,7 +224,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A dedicated conversion function checks the original unit, multiplies values by 1000, sets unit ms, and constructs a validated new FormalMeasure. It must reject unknown units.</p>
 <p><strong>Expected evidence:</strong> Two seconds converts to 2000 ms without changing the input.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference contains explicit behavioral assertions for its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The reference makes 3 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>
 </body>
 </html>

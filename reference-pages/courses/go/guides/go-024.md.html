@@ -197,7 +197,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Intermediate. Allow about 120 minutes, then revisit the transfer case later. Prerequisites: go-023</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
-<p>By the end, explain goroutine, join, happens-before; implement the six investigations below; and defend the expected result of a changed input before running it. A passing reference is evidence about that program, not a certification of your independent understanding.</p>
+<p>Start goroutines and prove their completion with a WaitGroup or channel instead of sleeping. Along the way, explain goroutine, join, happens-before; implement the six investigations below; and defend the expected result of a changed input before running it.</p>
 <h3 id="why-this-mechanism-matters">Why this mechanism matters<a class="heading-anchor" href="#why-this-mechanism-matters" aria-label="Link to this section">#</a></h3>
 <p>A goroutine is a concurrently scheduled execution of a function. Starting one does not make the caller wait for it, and returning from main ends the program even if other goroutines still have work. Concurrency introduces partial ordering: some events must happen before others, while unrelated scheduling remains unspecified. Use communication or synchronization to establish the relationships required by the algorithm. A sleep is a delay, not proof that another goroutine has completed. Every started goroutine needs an owner responsible for its completion or cancellation, otherwise blocked tasks can leak resources and make shutdown unpredictable.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
@@ -208,7 +208,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ul>
 <h3 id="syntax-anatomy-and-reasoning">Syntax anatomy and reasoning<a class="heading-anchor" href="#syntax-anatomy-and-reasoning" aria-label="Link to this section">#</a></h3>
 <p>go function() starts a goroutine. A channel send and receive can transfer a result and establish an ordering relationship. sync.WaitGroup tracks a known set of tasks; Add must happen before a concurrent Wait can conclude. Defer Done inside each task. Do not write a shared ordinary variable concurrently merely because a later print appears to observe the expected value.</p>
-<h3 id="classroom-execution-contract">Classroom execution contract<a class="heading-anchor" href="#classroom-execution-contract" aria-label="Link to this section">#</a></h3>
+<h3 id="run-this-lesson">Run this lesson<a class="heading-anchor" href="#run-this-lesson" aria-label="Link to this section">#</a></h3>
 <p>Choose Go in the unified Docker classroom. Save your own pad before experimenting. The prepared worker stages it as <code>main.go</code>, compiles it, and executes the resulting program with bounded time and output. The pad is one source file. It does not supply interactive input, arbitrary command-line arguments, package installation, Kubernetes credentials or a host Docker socket. Every ordinary reference here uses the standard library, synthetic local data and explicit checks. A failed <code>check</code> panics and produces a nonzero process result; do not remove it to make the run appear successful.</p>
 <p>The explanatory solution snippets belong inside <code>func main()</code> unless they declare a helper. <code>check</code> is a tiny teaching helper that panics when a condition is false. The separate reference supplies required imports and helpers and implements all six cases. Use that complete source only after an attempt or an explicit reveal. For an independently prepared Go project, the equivalent local build is <code>go build -o lesson main.go</code>, followed by <code>./lesson</code>; use Linux or WSL 2 for that optional workflow. Compiling proves syntax and type consistency, while the executed checks establish the stated example contracts.</p>
 <p>Each worked example below is a complete Go file. Copy one whole block into your saved pad and run it. Example 2 includes the first case as well as the second, so its setup is complete. Its supporting declarations may be reused in later investigations. The separate reference implements all six cases.</p>
@@ -279,75 +279,75 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>
 <p>For each example, write the input values, the state that can change, and the expected observation. Explain which result would disprove your current interpretation. For concurrency, predict a guaranteed relationship rather than an arbitrary scheduling order. For an error case, identify whether it is rejected at compilation or returned during execution.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
-<h4 id="exercise-1-join-a-produced-result">Exercise 1: Join a produced result<a class="heading-anchor" href="#exercise-1-join-a-produced-result" aria-label="Link to this section">#</a></h4>
-<p>Start a goroutine computing 6 times 7 and receive its result.</p>
-<p><strong>Expected:</strong> The received value is 42.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
-<h4 id="exercise-2-wait-for-several-tasks">Exercise 2: Wait for several tasks<a class="heading-anchor" href="#exercise-2-wait-for-several-tasks" aria-label="Link to this section">#</a></h4>
-<p>Start three tasks that signal a buffered completion channel and wait for all of them.</p>
-<p><strong>Expected:</strong> Exactly three completion markers are received.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<h4 id="exercise-1-join-a-produced-result-change-one-input">Exercise 1: Join a produced result: change one input<a class="heading-anchor" href="#exercise-1-join-a-produced-result-change-one-input" aria-label="Link to this section">#</a></h4>
+<p>Copy worked example 1 into a scratch pad and change <code>go func() { result &lt;- 6 * 7 }()</code> to <code>go func() { result &lt;- 7 * 7 }()</code>. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</p>
+<p><strong>Expected:</strong> The changed run panics with <code>goroutine result</code> because <code>&lt;-result == 42</code> no longer holds. Restoring the original line brings back the worked observation: the received value is 42.</p>
+<p><strong>Verify:</strong> Compare your written prediction with the panic message <code>goroutine result</code> and name the value that made <code>&lt;-result == 42</code> false. After restoring the input, the program must print its success line again.</p>
+<h4 id="exercise-2-wait-for-several-tasks-debug-a-regression">Exercise 2: Wait for several tasks: debug a regression<a class="heading-anchor" href="#exercise-2-wait-for-several-tasks-debug-a-regression" aria-label="Link to this section">#</a></h4>
+<p>A regression changed one token in worked example 2, so one line now reads <code>for i := 1; i &lt; 3; i++ {</code>. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.</p>
+<p><strong>Expected:</strong> Before the repair the program panics with <code>joined tasks</code>; after it the line reads <code>for i := 0; i &lt; 3; i++ {</code> again and exactly three completion markers are received.</p>
+<p><strong>Verify:</strong> Keep the failing and the repaired runs. Explain why the changed token alters the value tested by <code>len(done) == 3</code> for this input.</p>
 <h4 id="exercise-3-keep-state-task-local">Exercise 3: Keep state task-local<a class="heading-anchor" href="#exercise-3-keep-state-task-local" aria-label="Link to this section">#</a></h4>
 <p>Have two goroutines compute from explicit arguments.</p>
 <p><strong>Expected:</strong> The results sum to 13.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>a+b == 13</code>. As a control, change <code>go func(x int) { out &lt;- x * x }(n)</code> to <code>go func(x int) { out &lt;- x + x }(n)</code>: the run must panic with <code>local inputs</code>. Restore the line before continuing.</p>
 <h4 id="exercise-4-establish-a-start-boundary">Exercise 4: Establish a start boundary<a class="heading-anchor" href="#exercise-4-establish-a-start-boundary" aria-label="Link to this section">#</a></h4>
 <p>Block a worker on a start channel, then release it.</p>
 <p><strong>Expected:</strong> The worker returns ready only after release.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>&lt;-out == &quot;ready&quot;</code>. As a control, change <code>go func() { &lt;-start; out &lt;- &quot;ready&quot; }()</code> to <code>go func() { &lt;-start; out &lt;- &quot;ready!&quot; }()</code>: the run must panic with <code>start boundary</code>. Restore the line before continuing.</p>
 <h4 id="exercise-5-reject-premature-completion">Exercise 5: Reject premature completion<a class="heading-anchor" href="#exercise-5-reject-premature-completion" aria-label="Link to this section">#</a></h4>
 <p>Keep a worker blocked behind a start channel and test whether its result is available before release.</p>
 <p><strong>Expected:</strong> The result is unavailable before release and equals 1 afterward.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>&lt;-out == 1</code>. As a control, change <code>go func() { &lt;-start; out &lt;- 1 }()</code> to <code>go func() { &lt;-start; out &lt;- 2 }()</code>: the run must panic with <code>released result</code>. Restore the line before continuing.</p>
 <h4 id="exercise-6-transfer-deterministic-aggregation">Exercise 6: Transfer deterministic aggregation<a class="heading-anchor" href="#exercise-6-transfer-deterministic-aggregation" aria-label="Link to this section">#</a></h4>
 <p>Collect squares from four workers and sum them in the receiving goroutine.</p>
 <p><strong>Expected:</strong> The sum is 30.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>sum == 30</code>. As a control, change <code>go func(x int) { out &lt;- x * x }(n)</code> to <code>go func(x int) { out &lt;- x + x }(n)</code>: the run must panic with <code>aggregation</code>. Restore the line before continuing.</p>
 <p>Implement these in the answer-free learner source. Keep one independent check per claim. A task can require tracing, construction, a changed input or a deliberate safe failure. Do not run a data race, corrupt memory or contact a shared cluster merely to demonstrate why it would be wrong.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Read a compiler error from the first location in your source, then fix one cause at a time. Unused imports and variables are errors in Go; add an import when its use exists, rather than copying a large unused import list. A panic from <code>check</code> identifies a violated example contract. Compare the actual value with the expected value and inspect the state transition that produced it. A returned <code>error</code> is a value that the caller must handle; an ignored error can make later output look plausible while the original operation failed.</p>
 <p>The lesson-specific explanations in the two examples identify the important counterexamples. Extend that reasoning to every investigation: explain why a plausible alternative would fail, and preserve a tiny input that distinguishes it. Treat empty data, missing values and cancellation as domain cases with explicit policies. In concurrent work, replace sleeps used as synchronization with channels, mutexes or an explicit ownership protocol.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<h4 id="hint-for-investigation-1-join-a-produced-result">Hint for investigation 1: Join a produced result<a class="heading-anchor" href="#hint-for-investigation-1-join-a-produced-result" aria-label="Link to this section">#</a></h4>
+<h4 id="hint-for-investigation-1-join-a-produced-result-change-one-input">Hint for investigation 1: Join a produced result: change one input<a class="heading-anchor" href="#hint-for-investigation-1-join-a-produced-result-change-one-input" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The received value is 42.</li>
-<li>Identify the input and the state boundary relevant to join a produced result. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>&lt;-result == 42</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Compute the checked value with <code>go func() { result &lt;- 7 * 7 }()</code> in place before running, then compare it with the value <code>&lt;-result == 42</code> expects.</li>
 </ol>
-<h4 id="hint-for-investigation-2-wait-for-several-tasks">Hint for investigation 2: Wait for several tasks<a class="heading-anchor" href="#hint-for-investigation-2-wait-for-several-tasks" aria-label="Link to this section">#</a></h4>
+<h4 id="hint-for-investigation-2-wait-for-several-tasks-debug-a-regression">Hint for investigation 2: Wait for several tasks: debug a regression<a class="heading-anchor" href="#hint-for-investigation-2-wait-for-several-tasks-debug-a-regression" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Exactly three completion markers are received.</li>
-<li>Identify the input and the state boundary relevant to wait for several tasks. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>len(done) == 3</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Compare <code>for i := 1; i &lt; 3; i++ {</code> with the same line in worked example 2 and state the claim each version makes.</li>
 </ol>
 <h4 id="hint-for-investigation-3-keep-state-task-local">Hint for investigation 3: Keep state task-local<a class="heading-anchor" href="#hint-for-investigation-3-keep-state-task-local" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The results sum to 13.</li>
-<li>Identify the input and the state boundary relevant to keep state task-local. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>a+b == 13</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Predict the effect of changing <code>go func(x int) { out &lt;- x * x }(n)</code> to <code>go func(x int) { out &lt;- x + x }(n)</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
 </ol>
 <h4 id="hint-for-investigation-4-establish-a-start-boundary">Hint for investigation 4: Establish a start boundary<a class="heading-anchor" href="#hint-for-investigation-4-establish-a-start-boundary" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The worker returns ready only after release.</li>
-<li>Identify the input and the state boundary relevant to establish a start boundary. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>&lt;-out == &quot;ready&quot;</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Predict the effect of changing <code>go func() { &lt;-start; out &lt;- &quot;ready&quot; }()</code> to <code>go func() { &lt;-start; out &lt;- &quot;ready!&quot; }()</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
 </ol>
 <h4 id="hint-for-investigation-5-reject-premature-completion">Hint for investigation 5: Reject premature completion<a class="heading-anchor" href="#hint-for-investigation-5-reject-premature-completion" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The result is unavailable before release and equals 1 afterward.</li>
-<li>Identify the input and the state boundary relevant to reject premature completion. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>&lt;-out == 1</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Predict the effect of changing <code>go func() { &lt;-start; out &lt;- 1 }()</code> to <code>go func() { &lt;-start; out &lt;- 2 }()</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
 </ol>
 <h4 id="hint-for-investigation-6-transfer-deterministic-aggregation">Hint for investigation 6: Transfer deterministic aggregation<a class="heading-anchor" href="#hint-for-investigation-6-transfer-deterministic-aggregation" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The sum is 30.</li>
-<li>Identify the input and the state boundary relevant to transfer deterministic aggregation. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>sum == 30</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Predict the effect of changing <code>go func(x int) { out &lt;- x * x }(n)</code> to <code>go func(x int) { out &lt;- x + x }(n)</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
 </ol>
 <h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
 <p>Close the reference. Rebuild one normal case and one boundary case from a blank pad. Explain the role of goroutine without using its name in the definition. Then change the domain while keeping the same invariant. Record the new input, your prediction and the observed output. If your program passes only because its input is hard-coded, explain which part would need a reusable function in a larger project.</p>
 <h3 id="next-step-and-sources">Next step and sources<a class="heading-anchor" href="#next-step-and-sources" aria-label="Link to this section">#</a></h3>
-<p><a href="https://go.dev/doc/effective_go#concurrency">Primary language or library documentation</a>, reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. This source supports the API contract; it does not verify the classroom worker. Runtime receipts are recorded separately by the repository validation tools. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.</p>
+<p><a href="https://go.dev/doc/effective_go#concurrency">Primary language or library documentation</a>, reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for go-024: Goroutines and explicit completion.
 Read courses/go/guides/go-024.md and my saved attempt based on courses/go/lessons/go-024.go.

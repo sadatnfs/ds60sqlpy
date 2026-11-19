@@ -202,6 +202,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="worked-case-a-read-a-completed-application">Worked case A: read a completed application<a class="heading-anchor" href="#worked-case-a-read-a-completed-application" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-bash">python3 lab.py submit
 python3 lab.py urls</code></pre>
+<p>Event logging is switched on for every application by the shared defaults:</p>
+<p>From <a href="../projects/cluster-lab/conf/spark-defaults.conf.html"><code>projects/cluster-lab/conf/spark-defaults.conf</code></a>:</p>
+<pre class="highlighted-code"><code class="language-properties"><span class="syntax-attribute">spark.eventLog.enabled</span>               <span class="syntax-string">true</span>
+<span class="syntax-attribute">spark.eventLog.dir</span>                   <span class="syntax-string">file:/events</span></code></pre>
+<p><code>/events</code> is a mounted directory in the workshop state, so the history server can read the log after the driver container has gone.</p>
 <p>Open the History Server URL, find the exact application ID from the bounded JSON result and inspect its completed stages. Allow its configured scan interval to observe finalized events; the absence of a new listing immediately after submission does not establish data loss. Keep the result receipt, event filenames and source identity together.</p>
 <pre class="highlighted-code"><code class="language-text">driver setting: spark.eventLog.enabled=true
 driver location: spark.eventLog.dir=file:/events

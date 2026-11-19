@@ -12,7 +12,7 @@ explanatory solution artifact.
 - Required prompts per surface: **1510**
 - Current learner-artifact prompts: **1568**
 - Current companion-guide prompts: **1565**
-- Current explanatory-solution prompts: **1565**
+- Current explanatory-solution prompts: **1567**
 
 | Lesson | Baseline | Target | Learner | Guide | Solution minimum | Status |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
@@ -30,10 +30,10 @@ explanatory solution artifact.
 | `python-09` | 2 | 6 | 7 | 7 | 7 | PASS |
 | `python-10` | 2 | 6 | 7 | 7 | 7 | PASS |
 | `python-foundations-04` | 0 | 6 | 8 | 8 | 8 | PASS |
-| `python-11` | 2 | 6 | 8 | 8 | 7 | PASS |
+| `python-11` | 2 | 6 | 8 | 8 | 8 | PASS |
 | `python-12` | 2 | 6 | 7 | 7 | 7 | PASS |
 | `python-13` | 2 | 6 | 7 | 7 | 7 | PASS |
-| `python-14` | 1 | 6 | 7 | 7 | 6 | PASS |
+| `python-14` | 1 | 6 | 7 | 7 | 7 | PASS |
 | `python-15` | 5 | 10 | 10 | 10 | 10 | PASS |
 | `python-16` | 3 | 6 | 8 | 8 | 8 | PASS |
 | `python-17` | 3 | 6 | 8 | 8 | 8 | PASS |

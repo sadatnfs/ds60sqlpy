@@ -217,32 +217,32 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Explain why one pass is sufficient for keep_positive.</p>
 <p><strong>Expected:</strong> Input-range traversal only, no size prepass.</p>
 <p><strong>Reasoning:</strong> A single-pass source cannot promise a second traversal.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Check your explanation against the function body: one <code>for</code> loop reads each element once, and nothing calls <code>std::ranges::size</code> or traverses <code>xs</code> again.</p>
 <h3 id="exercise-2-preserve-multiplicity">Exercise 2: Preserve multiplicity<a class="heading-anchor" href="#exercise-2-preserve-multiplicity" aria-label="Link to this section">#</a></h3>
 <p>Filter [-1, 0, 2, 2] with &gt;0.</p>
 <p><strong>Expected:</strong> [2, 2].</p>
 <p><strong>Reasoning:</strong> Generic code still needs explicit bag semantics.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Assert <code>keep_positive(std::vector&lt;int&gt;{-1, 0, 2, 2}) == std::vector&lt;int&gt;{2, 2}</code>, as Worked example 1 does; the duplicate 2 must appear twice.</p>
 <h3 id="exercise-3-retain-ownership">Exercise 3: Retain ownership<a class="heading-anchor" href="#exercise-3-retain-ownership" aria-label="Link to this section">#</a></h3>
 <p>Call with a temporary vector and use result afterward.</p>
 <p><strong>Expected:</strong> Result remains valid and owns its elements.</p>
 <p><strong>Reasoning:</strong> An owning return separates result lifetime from input lifetime.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Store <code>auto out = keep_positive(std::vector&lt;int&gt;{3, -1});</code> and assert <code>out == std::vector&lt;int&gt;{3}</code> on a later line, after the temporary is destroyed.</p>
 <h3 id="exercise-4-repair-two-pass-design">Exercise 4: Repair two-pass design<a class="heading-anchor" href="#exercise-4-repair-two-pass-design" aria-label="Link to this section">#</a></h3>
 <p>Review counting an input_range then traversing it again.</p>
 <p><strong>Expected:</strong> Use one pass or require forward_range with justification.</p>
 <p><strong>Reasoning:</strong> Constraints must match actual operations.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Run the reviewed function on a single-pass source such as <code>std::views::istream&lt;int&gt;</code> over a <code>std::istringstream</code>, and confirm the second traversal sees no elements.</p>
 <h3 id="exercise-5-check-empty-input">Exercise 5: Check empty input<a class="heading-anchor" href="#exercise-5-check-empty-input" aria-label="Link to this section">#</a></h3>
 <p>Use an empty vector and an empty span.</p>
 <p><strong>Expected:</strong> Both yield empty vectors.</p>
 <p><strong>Reasoning:</strong> Different range types share the same semantic boundary.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Assert <code>keep_positive(std::vector&lt;int&gt;{}).empty()</code> and <code>keep_positive(std::span&lt;const int&gt;{}).empty()</code>.</p>
 <h3 id="exercise-6-transfer-a-projection">Exercise 6: Transfer a projection<a class="heading-anchor" href="#exercise-6-transfer-a-projection" aria-label="Link to this section">#</a></h3>
 <p>Filter records by their points while retaining complete records.</p>
 <p><strong>Expected:</strong> Output retains IDs, values and duplicate qualifying rows.</p>
 <p><strong>Reasoning:</strong> A projection should not accidentally erase domain identity.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p></article>
+<p><strong>Verify:</strong> Use input with two qualifying records that have equal points, and assert the output keeps both with every field unchanged.</p></article>
   </main>
 </body>
 </html>

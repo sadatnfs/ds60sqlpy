@@ -212,22 +212,20 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Inspect current object UID, resourceVersion, managedFields and desired source before a live change. The ordinary worker uses create/read/delete, so it does not claim server-side-apply behavior from a one-shot Run.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-compare-the-two-overlays">Worked example 1: Compare the two overlays<a class="heading-anchor" href="#worked-example-1-compare-the-two-overlays" aria-label="Link to this section">#</a></h4>
-<p>Local fixture paths are fixtures/kustomize/overlays/dev and overlays/test. Their declared counts are1 and2. The expected JSON files preserve all other Deployment fields.</p>
+<p>Local fixture paths are fixtures/kustomize/overlays/dev and overlays/test. Their declared counts are 1 and 2. The expected JSON files preserve all other Deployment fields.</p>
 <p><strong>Expected:</strong> Only spec.replicas differs in the intended rendered objects.</p>
 <h4 id="worked-example-2-read-a-field-owner-conflict">Worked example 2: Read a field-owner conflict<a class="heading-anchor" href="#worked-example-2-read-a-field-owner-conflict" aria-label="Link to this section">#</a></h4>
 <p>Synthetic current manager teacher-controller owns spec.replicas=2. Manager lesson-review requests 1 and receives a conflict on that field.</p>
 <p><strong>Expected:</strong> Coordinate ownership or revise intent; do not automatically force-overwrite the other manager.</p>
 <h3 id="inspect-the-specific-owned-object">Inspect the specific owned object<a class="heading-anchor" href="#inspect-the-specific-owned-object" aria-label="Link to this section">#</a></h3>
 <p>Only after the chapter&#x27;s host capability is provisioned and its resources remain present, use the explicit receipt fields described in <a href="../host-labs.md.html">host-labs.md</a>. A completed one-shot browser Run has already cleaned its objects. The following read does not provision the missing capability and does not justify changing credentials after a Forbidden result.</p>
-<p>POSIX:</p>
+<p>Bash on Linux, macOS or Ubuntu under WSL 2:</p>
 <pre class="highlighted-code"><code class="language-bash">: <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_KUBECONFIG<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt path</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 : <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_CONTEXT<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt context</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 : <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_NAMESPACE<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt namespace</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<span class="syntax-string">&quot;</span> --context <span class="syntax-string">&quot;</span>$LAB_CONTEXT<span class="syntax-string">&quot;</span> --namespace <span class="syntax-string">&quot;</span>$LAB_NAMESPACE<span class="syntax-string">&quot;</span> get deployment hello -o json</code></pre>
-<p>PowerShell:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">-not</span> $env:LAB_KUBECONFIG <span class="syntax-operator">-or</span> <span class="syntax-operator">-not</span> $env:LAB_CONTEXT <span class="syntax-operator">-or</span> <span class="syntax-operator">-not</span> $env:LAB_NAMESPACE<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;Owned receipt fields are required.&#x27;</span> <span class="syntax-punctuation">}</span>
-<span class="syntax-punctuation">&amp;</span> kubectl <span class="syntax-punctuation">-</span>-kubeconfig $env:LAB_KUBECONFIG <span class="syntax-punctuation">-</span>-context $env:LAB_CONTEXT <span class="syntax-punctuation">-</span>-namespace $env:LAB_NAMESPACE get deployment hello -o json
-<span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>$LASTEXITCODE <span class="syntax-operator">-ne</span> 0<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;The scoped observation failed.&#x27;</span> <span class="syntax-punctuation">}</span></code></pre>
+<p>Windows uses the same Bash commands inside WSL 2. The lab adapter refuses native Windows credential handling, so do not run kubectl against the receipt from PowerShell. From PowerShell, only open your WSL 2 distribution (the name reported by <code>wsl.exe --list --verbose</code>), change to your checkout with its Linux path, then run the Bash block above unchanged:</p>
+<pre class="highlighted-code"><code class="language-powershell">wsl<span class="syntax-punctuation">.</span>exe <span class="syntax-punctuation">-</span>-distribution Ubuntu</code></pre>
 <p>Retain only the fields needed by this chapter&#x27;s prediction. A NotFound result may be expected after one-shot cleanup; a Forbidden result may identify a deliberately absent advanced capability. Neither result authorizes an ambient-context fallback.</p>
 <h3 id="run-and-bounded-evidence">Run and bounded evidence<a class="heading-anchor" href="#run-and-bounded-evidence" aria-label="Link to this section">#</a></h3>
 <p>The app artifact is a reading worksheet, <code>courses/kubernetes/lessons/k8s-024.md</code>. The current browser adapter does not provide the full <strong>prepared offline Kustomize plus separate stateful field-manager host lab</strong> operation. Use the synthetic fixture and offline check first. Live work follows <a href="../host-labs.md.html">the scoped host-lab guide</a> only when the named capability and owned target have been provisioned. A worksheet or static check is never a cluster execution receipt.</p>
@@ -235,33 +233,33 @@ kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<sp
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-locate-the-source-of-intent">Exercise 1: Locate the source of intent<a class="heading-anchor" href="#exercise-1-locate-the-source-of-intent" aria-label="Link to this section">#</a></h4>
 <p>Identify base resource and overlay replica transform.</p>
-<p><strong>Expected result/shape:</strong> One local Deployment base plus explicit dev1/test2 overrides.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: One local Deployment base plus explicit dev1/test2 overrides.</p>
+<p><strong>Expected result/shape:</strong> One local Deployment base plus explicit dev (1 replica) and test (2 replicas) overrides.</p>
+<p><strong>Verify:</strong> Open the base and each overlay <code>kustomization.yaml</code> and point to the <code>resources</code> and <code>replicas</code> entries you used.</p>
 <p><strong>Progressive hints:</strong> Read resources and replicas entries before rendering.</p>
 <h4 id="exercise-2-render-with-prepared-tooling">Exercise 2: Render with prepared tooling<a class="heading-anchor" href="#exercise-2-render-with-prepared-tooling" aria-label="Link to this section">#</a></h4>
 <p>Run the pinned local renderer if available and retain its version/output.</p>
 <p><strong>Expected result/shape:</strong> Actual output is compared with expected JSON; missing tool is recorded as unavailable.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Actual output is compared with expected JSON; missing tool is recorded as unavailable.</p>
+<p><strong>Verify:</strong> Record the renderer version and compare the rendered output with the expected JSON structurally, not by eye.</p>
 <p><strong>Progressive hints:</strong> Rendering is not an API mutation.</p>
 <h4 id="exercise-3-compare-the-full-diff">Exercise 3: Compare the full diff<a class="heading-anchor" href="#exercise-3-compare-the-full-diff" aria-label="Link to this section">#</a></h4>
 <p>Verify that dev and test outputs differ only at spec.replicas.</p>
 <p><strong>Expected result/shape:</strong> Exactly one intended field path changes.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Exactly one intended field path changes.</p>
+<p><strong>Verify:</strong> Diff the two rendered outputs and confirm that the only differing path is <code>spec.replicas</code>.</p>
 <p><strong>Progressive hints:</strong> Inspect namespace, image, security and resource kinds as well as replicas.</p>
 <h4 id="exercise-4-interpret-field-ownership">Exercise 4: Interpret field ownership<a class="heading-anchor" href="#exercise-4-interpret-field-ownership" aria-label="Link to this section">#</a></h4>
 <p>Explain the teacher-controller/lesson-review conflict.</p>
 <p><strong>Expected result/shape:</strong> The same field has competing intent; manager identity and current UID/version are recorded.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: The same field has competing intent; manager identity and current UID/version are recorded.</p>
+<p><strong>Verify:</strong> Read <code>metadata.managedFields</code> for the contested field and name both managers; resolving the conflict with <code>kubectl apply --server-side --force-conflicts</code> would hide it.</p>
 <p><strong>Progressive hints:</strong> Managed fields are not the same as RBAC identity.</p>
 <h4 id="exercise-5-reject-a-namespace-escape">Exercise 5: Reject a namespace escape<a class="heading-anchor" href="#exercise-5-reject-a-namespace-escape" aria-label="Link to this section">#</a></h4>
 <p>Review an overlay adding an unrelated namespace or unapproved image.</p>
 <p><strong>Expected result/shape:</strong> The output fails the course ownership/allowlist review before apply.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: The output fails the course ownership/allowlist review before apply.</p>
+<p><strong>Verify:</strong> Check the rendered namespace and image against the course allowlist before any apply; a render that succeeds locally can still be refused.</p>
 <p><strong>Progressive hints:</strong> A local render is data, not authorization.</p>
 <h4 id="exercise-6-preserve-reproducibility">Exercise 6: Preserve reproducibility<a class="heading-anchor" href="#exercise-6-preserve-reproducibility" aria-label="Link to this section">#</a></h4>
 <p>Record source overlay, renderer version, rendered hash, diff and any actual apply/readback.</p>
 <p><strong>Expected result/shape:</strong> A reviewer can separate render, admission, reconciliation and application evidence.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: A reviewer can separate render, admission, reconciliation and application evidence.</p>
+<p><strong>Verify:</strong> Ask a reviewer to reproduce your rendered hash from the recorded overlay and renderer version alone.</p>
 <p><strong>Progressive hints:</strong> Do not silently edit the rendered file alone.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain the mechanism behind the first example, then distinguish it from this boundary case: Coordinate ownership or revise intent; do not automatically force-overwrite the other manager. State which observations are synthetic and which, if any, were read from your owned runtime.</p>
@@ -269,7 +267,7 @@ kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<sp
 <p>A rendered file can be valid YAML and still contain an unsupported API, an unapproved image or a namespace escape. A server dry-run can provide admission evidence but is not a completed reconciliation. An apply response is still weaker than application verification.</p>
 <p>Do not edit generated output as a hidden second source of truth without recording the change in the overlay. Retain the base/overlay identity, rendered diff and actual runtime receipt when a host apply is performed.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
-<p>Close the answer and reconstruct the reasoning for Exercise6, Preserve reproducibility. Name the exact source and observed identity you would require before claiming the changed case succeeded.</p>
+<p>Close the answer and reconstruct the reasoning for Exercise 6 (Preserve reproducibility). Name the exact source and observed identity you would require before claiming the changed case succeeded.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue to <code>k8s-025</code> after preserving the six evidence records.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>

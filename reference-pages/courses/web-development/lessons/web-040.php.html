@@ -197,11 +197,36 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">declare</span><span class="syntax-punctuation">(</span>strict_types<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">);</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment">// web-040: Build a validated study-session value object.</span></span>
-<span class="source-line"><span class="syntax-comment">// Implement the task with local synthetic values. Do not use real credentials.</span></span>
-<span class="source-line"><span class="syntax-comment">// Keep separate checks for the normal case and the boundary in Exercise 5.</span></span>
+<span class="source-line"><span class="syntax-comment">// web-040: Objects, constructors and immutable value boundaries</span></span>
+<span class="source-line"><span class="syntax-comment">// Exercises. Hints are in the guide; answers are in the solutions folder.</span></span>
+<span class="source-line"><span class="syntax-comment">// 1. Name the invariant enforced by the constructor.</span></span>
+<span class="source-line"><span class="syntax-comment">// 2. Add a method that formats the duration.</span></span>
+<span class="source-line"><span class="syntax-comment">// 3. Build a validated study-session value object.</span></span>
+<span class="source-line"><span class="syntax-comment">// 4. Diagnose a setter that allows invalid state after construction.</span></span>
+<span class="source-line"><span class="syntax-comment">// 5. Test an empty topic and zero duration.</span></span>
+<span class="source-line"><span class="syntax-comment">// 6. Explain shallow readonly versus deep immutability.</span></span>
+<span class="source-line"><span class="syntax-comment">//</span></span>
+<span class="source-line"><span class="syntax-comment">// Worked example 1: A validated value</span></span>
+<span class="source-line"><span class="syntax-comment">// final class Duration {</span></span>
+<span class="source-line"><span class="syntax-comment">//   public function __construct(public readonly int $minutes) {</span></span>
+<span class="source-line"><span class="syntax-comment">//     if ($minutes &lt; 0) throw new InvalidArgumentException(&#x27;Negative duration&#x27;);</span></span>
+<span class="source-line"><span class="syntax-comment">//   }</span></span>
+<span class="source-line"><span class="syntax-comment">// }</span></span>
+<span class="source-line"><span class="syntax-comment">//</span></span>
+<span class="source-line"><span class="syntax-comment">// Worked example 2: Derived behavior</span></span>
+<span class="source-line"><span class="syntax-comment">// $duration = new Duration(45);</span></span>
+<span class="source-line"><span class="syntax-comment">// echo $duration-&gt;minutes . &#x27; minutes&#x27;;</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-keyword">echo</span> <span class="syntax-string">&quot;</span><span class="syntax-string">My implementation goes here.</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">function</span> <span class="syntax-function">check</span><span class="syntax-punctuation">(</span>bool $condition<span class="syntax-punctuation">,</span> string $message<span class="syntax-punctuation">)</span><span class="syntax-operator">:</span> void</span>
+<span class="source-line"><span class="syntax-punctuation">{</span></span>
+<span class="source-line">  <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>$condition<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> RuntimeException<span class="syntax-punctuation">(</span>$message<span class="syntax-punctuation">);</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"><span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">// Write your implementation here and add one check() call for each case you test.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">echo</span> <span class="syntax-string">&quot;</span><span class="syntax-string">web-040 attempt finished without a failed check</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span></code></pre></article>
   </main>
 </body>

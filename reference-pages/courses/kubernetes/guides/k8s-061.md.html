@@ -201,10 +201,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="purpose-vocabulary-and-mental-model">Purpose, vocabulary and mental model<a class="heading-anchor" href="#purpose-vocabulary-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>A topology label describes placement, such as a node or availability zone. Locality-aware routing tries to prefer nearby endpoints to reduce latency or cross-zone traffic, subject to implementation and policy. It is a preference or constraint with tradeoffs, not a guarantee of balanced load or failure tolerance.</p>
 <p>Spreading replicas across zones can improve resilience to a zone failure, but only if scheduling, storage and dependencies also span the required failure domains. A local preference can concentrate traffic on a small number of endpoints if placement is uneven. Capacity and availability must be considered together.</p>
-<p>Topology features evolve with Kubernetes versions. Fields, hints and traffic-distribution semantics should be read for the actual release and data plane. The lesson teaches the reasoning with a synthetic two-zone example and does not promise that every local kind cluster can reproduce cloud-zone behavior.</p>
+<p>Kubernetes 1.37 offers two Service-level mechanisms. The <code>spec.trafficDistribution</code> field accepts <code>PreferSameZone</code>, which sends a caller&#x27;s traffic to ready endpoints in its own zone and falls back cluster-wide when that zone has none, and <code>PreferSameNode</code>, which prefers the caller&#x27;s node, then its zone, then the cluster. <code>PreferClose</code>, the first value to reach GA in 1.33, is now a deprecated alias for <code>PreferSameZone</code>. The older <code>service.kubernetes.io/topology-mode: Auto</code> annotation assigns zone hints in proportion to allocatable CPU, includes safeguards for small endpoint counts and takes precedence over the field when both are set. Without either, traffic is spread across all ready endpoints. The EndpointSlice controller publishes these preferences as hints, and the service proxy must honor them. The lesson&#x27;s synthetic two-zone example does not promise that a local kind cluster reproduces cloud-zone behavior.</p>
 <h3 id="mechanism-and-field-by-field-reasoning">Mechanism and field-by-field reasoning<a class="heading-anchor" href="#mechanism-and-field-by-field-reasoning" aria-label="Link to this section">#</a></h3>
 <p>Separate workload placement from traffic selection. Topology spread constraints influence where Pods can be scheduled; Service routing policy influences which eligible endpoint a caller uses. One does not automatically configure the other.</p>
 <p>For the synthetic example, zoneA has two ready app endpoints and zoneB has one. A local-only rule can overload the single endpoint in zoneB even when total cluster capacity appears sufficient. A failover policy must define what happens when a zone has no eligible local endpoint.</p>
+<p>A spread constraint such as <code>maxSkew: 1</code> with <code>topologyKey: topology.kubernetes.io/zone</code> and <code>whenUnsatisfiable: DoNotSchedule</code> keeps the per-zone counts of matching Pods within one of each other, which is what keeps zone preferences safe. <code>PreferSameZone</code> does not rebalance load: a zone with one endpoint sends all of its traffic there. The stricter <code>internalTrafficPolicy: Local</code> uses only endpoints on the caller&#x27;s node and drops traffic when there are none, so it is a requirement rather than a preference.</p>
 <h3 id="trace-the-request-or-control-path">Trace the request or control path<a class="heading-anchor" href="#trace-the-request-or-control-path" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">scheduler placement -&gt; endpoint distribution across nodes/zones
 caller location + routing policy -&gt; eligible/preferred endpoint set
@@ -219,11 +220,29 @@ capacity and failover behavior -&gt; actual latency and availability</code></pre
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected observation:</strong> Equal client counts do not imply equal load per endpoint under strict locality.</p>
 <h4 id="worked-example-2-separate-placement-and-routing">Worked example 2: Separate placement and routing<a class="heading-anchor" href="#worked-example-2-separate-placement-and-routing" aria-label="Link to this section">#</a></h4>
-<p>Both decisions need their own configuration.</p>
-<pre class="highlighted-code"><code class="language-text">spread constraint: where replicas may run
-traffic preference: where a caller sends requests
-failover rule: what happens when nearby endpoints are absent</code></pre>
-<p><strong>Expected observation:</strong> A spread configuration alone does not prove local routing.</p>
+<p>The Service field sets a routing preference; the Deployment excerpt sets a scheduling rule. Both use the synthetic hello labels.</p>
+<pre class="highlighted-code"><code class="language-yaml"><span class="syntax-tag">apiVersion</span><span class="syntax-punctuation">:</span> v1
+<span class="syntax-tag">kind</span><span class="syntax-punctuation">:</span> Service
+<span class="syntax-tag">metadata</span><span class="syntax-punctuation">:</span>
+  <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> hello
+<span class="syntax-tag">spec</span><span class="syntax-punctuation">:</span>
+  <span class="syntax-tag">selector</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-tag">app</span><span class="syntax-punctuation">:</span> hello
+  <span class="syntax-tag">ports</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-punctuation">-</span> <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> http
+      <span class="syntax-tag">port</span><span class="syntax-punctuation">:</span> 80
+      <span class="syntax-tag">targetPort</span><span class="syntax-punctuation">:</span> http
+  <span class="syntax-tag">trafficDistribution</span><span class="syntax-punctuation">:</span> PreferSameZone
+---
+<span class="syntax-comment"># Deployment Pod template excerpt: spec.template.spec</span>
+<span class="syntax-tag">topologySpreadConstraints</span><span class="syntax-punctuation">:</span>
+  <span class="syntax-punctuation">-</span> <span class="syntax-tag">maxSkew</span><span class="syntax-punctuation">:</span> 1
+    <span class="syntax-tag">topologyKey</span><span class="syntax-punctuation">:</span> topology.kubernetes.io/zone
+    <span class="syntax-tag">whenUnsatisfiable</span><span class="syntax-punctuation">:</span> DoNotSchedule
+    <span class="syntax-tag">labelSelector</span><span class="syntax-punctuation">:</span>
+      <span class="syntax-tag">matchLabels</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-tag">app</span><span class="syntax-punctuation">:</span> hello</code></pre>
+<p><strong>Expected observation:</strong> The spread constraint keeps the per-zone counts of hello Pods within one of each other; the Service field makes each caller prefer ready endpoints in its own zone and fall back cluster-wide only when its zone has none. Neither setting configures the other.</p>
 <h3 id="run-boundary-and-the-owned-host-lab">Run boundary and the owned host lab<a class="heading-anchor" href="#run-boundary-and-the-owned-host-lab" aria-label="Link to this section">#</a></h3>
 <p>The classroom saves a reading worksheet for this lesson. It does not provide the full advanced networking or controller operation in the ordinary Run adapter. The original admitted Kubernetes reference cases keep their existing contracts. A manifest being valid YAML does not mean it is admitted by that adapter, supported by your cluster, or successfully routed at runtime.</p>
 <p>Start with the original synthetic topology and manifests in <a href="../fixtures/networking/README.md.html">the networking fixture</a>. Its static checker makes no API calls. It checks internal consistency of the teaching inputs and cannot establish a live CNI, DNS, load balancer, controller or NetworkPolicy result. The fixture inventory names the extra capability required for each optional live observation.</p>
@@ -247,13 +266,13 @@ kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<sp
 <p><strong>Expected evidence:</strong> Inspect endpoint distribution and actual load, not only total replicas.</p>
 <p><strong>Progressive hint:</strong> Name the caller and the first layer that can distinguish the possible causes. Compare the relevant object fields before changing a route, policy or workload.</p>
 <h4 id="exercise-5-explain-version-dependent-topology-behavior">Exercise 5: Explain version-dependent topology behavior.<a class="heading-anchor" href="#exercise-5-explain-version-dependent-topology-behavior" aria-label="Link to this section">#</a></h4>
-<p><strong>Expected evidence:</strong> Use the actual API/controller/data-plane support matrix.</p>
+<p><strong>Expected evidence:</strong> Name the trafficDistribution values the pinned release accepts (PreferSameZone, PreferSameNode and the deprecated PreferClose), the precedence of the topology-mode annotation and whether the data plane honors EndpointSlice hints.</p>
 <p><strong>Progressive hint:</strong> Name the caller and the first layer that can distinguish the possible causes. Compare the relevant object fields before changing a route, policy or workload.</p>
 <h4 id="exercise-6-defend-a-locality-tradeoff">Exercise 6: Defend a locality tradeoff.<a class="heading-anchor" href="#exercise-6-defend-a-locality-tradeoff" aria-label="Link to this section">#</a></h4>
 <p><strong>Expected evidence:</strong> Latency/cost benefits are balanced against capacity and failure behavior.</p>
 <p><strong>Progressive hint:</strong> Name the caller and the first layer that can distinguish the possible causes. Compare the relevant object fields before changing a route, policy or workload.</p>
 <h3 id="diagnosis-failure-boundaries-and-common-mistakes">Diagnosis, failure boundaries and common mistakes<a class="heading-anchor" href="#diagnosis-failure-boundaries-and-common-mistakes" aria-label="Link to this section">#</a></h3>
-<p>The controlled failure in this chapter is: Diagnose local preference with insufficient nearby capacity. Its distinguishing result is Inspect endpoint distribution and actual load, not only total replicas. Keep that observation separate from guesses about adjacent layers. A DNS answer is not proof of a listening process. A Ready Pod is not proof of an externally reachable listener. A load-balancer address is not proof of TLS identity, path routing or a correct application response.</p>
+<p>Exercise 4 is this chapter&#x27;s controlled failure: Diagnose local preference with insufficient nearby capacity. The distinguishing result: Inspect endpoint distribution and actual load, not only total replicas. Keep that observation separate from guesses about adjacent layers. A DNS answer is not proof of a listening process. A Ready Pod is not proof of an externally reachable listener. A load-balancer address is not proof of TLS identity, path routing or a correct application response.</p>
 <p>Use bounded observations from the actual caller&#x27;s network namespace. Preserve timestamps, object UIDs, generation or resource versions where relevant, and the intended image identity. A stale healthy result from another namespace or an earlier revision cannot qualify the current path. Avoid broad packet captures, all-namespace dumps and secret output when a smaller field-level observation answers the question.</p>
 <p>Do not repair a failed example by disabling NetworkPolicy, making a workload privileged, publishing every port or selecting another cluster. Those changes alter the contract rather than explain the failure. An unavailable capability is a valid boundary to report. Rehearse its mechanism with the synthetic fixture until the owned target is deliberately provisioned.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
@@ -261,8 +280,9 @@ kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<sp
 <p>Complete the six evidence records before advancing. For optional live work, review the owned resource ledger and UID-aware cleanup result. Keep source validation, API acceptance, controller status, actual traffic, application output and cleanup as distinct evidence. No local exercise establishes every cloud provider, CNI implementation, Kubernetes version or public production deployment.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
-<li><a href="https://kubernetes.io/docs/concepts/services-networking/topology-aware-routing/">Official reference 1</a></li>
-<li><a href="https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/">Official reference 2</a></li>
+<li><a href="https://kubernetes.io/docs/concepts/services-networking/topology-aware-routing/">Kubernetes documentation: Topology-aware routing</a></li>
+<li><a href="https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/">Kubernetes documentation: Topology spread constraints</a></li>
+<li><a href="https://kubernetes.io/docs/reference/networking/virtual-ips/#traffic-distribution">Kubernetes documentation: Traffic distribution</a></li>
 </ul>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for k8s-061: Topology, zones and locality-aware traffic.

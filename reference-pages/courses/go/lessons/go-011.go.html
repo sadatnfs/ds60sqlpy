@@ -198,11 +198,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-keyword">import</span> <span class="syntax-string">&quot;fmt&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">func</span> main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 1: Preserve a cause: Wrap ErrMissing with a record-reading context.</span></span>
-<span class="source-line">	<span class="syntax-comment">// Expected: errors.Is still recognizes ErrMissing.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 1: Preserve a cause: change one input: Copy worked example 1 into a scratch pad and change `err := fmt.Errorf(&quot;read record: %w&quot;, ErrMissing)` to `err := fmt.Errorf(&quot;read record: %v&quot;, ErrMissing)`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Expected: The changed run panics with `wrapped cause` because `errors.Is(err, ErrMissing)` no longer holds. Restoring the original line brings back the worked observation: errors.Is still recognizes ErrMissing.</span></span>
 <span class="source-line"></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 2: Reject text equality: Construct two separate errors with the same wording.</span></span>
-<span class="source-line">	<span class="syntax-comment">// Expected: Their identities differ.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 2: Reject text equality: diagnose an edited check: A careless edit changed the check in worked example 2 so that it reads `check(errors.Is(a, b), &quot;identity not text&quot;)`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Expected: Before the repair the program panics with `identity not text`; after it the line reads `check(!errors.Is(a, b), &quot;identity not text&quot;)` again and their identities differ.</span></span>
 <span class="source-line"></span>
 <span class="source-line">	<span class="syntax-comment">// Exercise 3: Inspect a typed boundary: Return a LimitError carrying an allowed maximum and inspect it with errors.As.</span></span>
 <span class="source-line">	<span class="syntax-comment">// Expected: The extracted limit is 3.</span></span>

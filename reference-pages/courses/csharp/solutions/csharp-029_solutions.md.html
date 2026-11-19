@@ -194,37 +194,47 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/csharp/solutions/csharp-029_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="csharp-029-explanation-and-comparison">csharp-029: explanation and comparison<a class="heading-anchor" href="#csharp-029-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="csharp-029_solution.cs.html">csharp-029_solution.cs</a>. Its assertions are always active under the prepared classroom compile settings.</p>
+<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="csharp-029_solution.cs.html">csharp-029_solution.cs</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Await values explicitly:</strong> The task handle and the eventual integer are distinct values even when this fixture completes immediately. Await yields 7 and confirms successful completion.</p>
 <p><strong>Compose and observe failure:</strong> Awaiting establishes ownership of both success and failure instead of losing an unobserved background result. WhenAll retains input order and await exposes the task exception.</p>
-<h3 id="reason-through-the-six-tasks">Reason through the six tasks<a class="heading-anchor" href="#reason-through-the-six-tasks" aria-label="Link to this section">#</a></h3>
-<ol>
-<li><strong>Predict and explain.</strong> Distinguish the Task&lt;int&gt; handle from its awaited integer.</li>
-</ol>
-<ol start="2">
-<li><strong>Guided modification.</strong> Combine three completed tasks and predict output ordering.</li>
-</ol>
-<ol start="3">
-<li><strong>Independent construction.</strong> Write an async method returning a validated total.</li>
-</ol>
-<ol start="4">
-<li><strong>Diagnose a defect.</strong> Diagnose forgetting to await an operation whose failure matters.</li>
-</ol>
-<ol start="5">
-<li><strong>Boundary evidence.</strong> Test successful, failed and empty WhenAll inputs.</li>
-</ol>
-<ol start="6">
-<li><strong>Transfer and justify.</strong> Explain when CPU work might need scheduling separately from an asynchronous I/O API.</li>
-</ol>
-<p>For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.</p>
+<h3 id="task-answers">Task answers<a class="heading-anchor" href="#task-answers" aria-label="Link to this section">#</a></h3>
+<h4 id="task-1-predict-and-explain">Task 1: Predict and explain<a class="heading-anchor" href="#task-1-predict-and-explain" aria-label="Link to this section">#</a></h4>
+<p>Distinguish the Task&lt;int&gt; handle from its awaited integer.</p>
+<p>No separate reference answer has been written for this task. Example A is the evidence to compare with: The task handle and the eventual integer are distinct values even when this fixture completes immediately. Await yields 7 and confirms successful completion.</p>
+<h4 id="task-2-guided-modification">Task 2: Guided modification<a class="heading-anchor" href="#task-2-guided-modification" aria-label="Link to this section">#</a></h4>
+<p>Combine three completed tasks and predict output ordering.</p>
+<p>No separate reference answer has been written for this task. Start from Example B: Awaiting establishes ownership of both success and failure instead of losing an unobserved background result. WhenAll retains input order and await exposes the task exception.</p>
+<h4 id="task-3-independent-construction">Task 3: Independent construction<a class="heading-anchor" href="#task-3-independent-construction" aria-label="Link to this section">#</a></h4>
+<p>Write an async method returning a validated total.</p>
+<p><strong>Reference answer.</strong> It runs as the <code>Task 3</code> block of the reference program.</p>
+<pre class="highlighted-code"><code class="language-csharp"><span class="syntax-keyword">async</span> Task<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span> TotalAsync<span class="syntax-punctuation">(</span>IEnumerable<span class="syntax-operator">&lt;</span>Task<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;&gt;</span> parts<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">int</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span> values <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> Task<span class="syntax-punctuation">.</span>WhenAll<span class="syntax-punctuation">(</span>parts<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">.</span>Any<span class="syntax-punctuation">(</span><span class="syntax-keyword">value</span> <span class="syntax-operator">=&gt;</span> <span class="syntax-keyword">value</span> <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-function">ArgumentException</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;negative part&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
+  <span class="syntax-keyword">return</span> values<span class="syntax-punctuation">.</span>Sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">var</span> parts <span class="syntax-operator">=</span> <span class="syntax-keyword">new</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span> <span class="syntax-punctuation">{</span> Task<span class="syntax-punctuation">.</span>FromResult<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> Task<span class="syntax-punctuation">.</span>FromResult<span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+Check<span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> TotalAsync<span class="syntax-punctuation">(</span>parts<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;validated total&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Observe:</strong> Parts 2 and 5 produce the validated total 7.</p>
+<p>The method awaits every part before validating, so it never sums a partially known or negative input.</p>
+<h4 id="task-4-diagnose-a-defect">Task 4: Diagnose a defect<a class="heading-anchor" href="#task-4-diagnose-a-defect" aria-label="Link to this section">#</a></h4>
+<p>Diagnose forgetting to await an operation whose failure matters.</p>
+<p>No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson&#x27;s pitfalls: Async void is mainly for required event-handler signatures, not general composable methods. Blocking with Result can deadlock in synchronization contexts. Task.Run does not make a blocking external API inherently scalable.</p>
+<h4 id="task-5-boundary-evidence">Task 5: Boundary evidence<a class="heading-anchor" href="#task-5-boundary-evidence" aria-label="Link to this section">#</a></h4>
+<p>Test successful, failed and empty WhenAll inputs.</p>
+<p>No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Await values explicitly) and Example B (Compose and observe failure).</p>
+<h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
+<p>Explain when CPU work might need scheduling separately from an asynchronous I/O API.</p>
+<p>No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry <strong>Task</strong>, and state one limitation of your choice.</p>
 <h3 id="mechanism-and-diagnostic-reasoning">Mechanism and diagnostic reasoning<a class="heading-anchor" href="#mechanism-and-diagnostic-reasoning" aria-label="Link to this section">#</a></h3>
 <p>A Task represents eventual completion, failure or cancellation. Async methods let control return to a caller while an awaited operation is incomplete. Async does not automatically mean a new thread, and awaiting a task does not block a thread in the same way as calling Wait or Result. For I/O, the goal is to avoid holding a thread idle while another system works.</p>
 <p>Keep task ownership visible: the caller should await work whose result or failure matters. Fire-and-forget work can outlive its owner and lose exceptions. CPU-heavy work has different scheduling needs from asynchronous I/O. This chapter uses already completed and explicitly coordinated tasks so results do not depend on network access or arbitrary delays.</p>
 <p><code>async Task&lt;int&gt;</code> declares an asynchronous result. <code>await</code> obtains the completed result or rethrows the task failure. Task.WhenAll combines completion of several tasks; its result order follows the input task order, not completion order.</p>
 <p>Async void is mainly for required event-handler signatures, not general composable methods. Blocking with Result can deadlock in synchronization contexts. Task.Run does not make a blocking external API inherently scalable.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.</p></article>
+<p>Run the reference and confirm that it prints <code>csharp-029: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
   </main>
 </body>
 </html>

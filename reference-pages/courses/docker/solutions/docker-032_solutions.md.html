@@ -194,33 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-032_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-032-explanatory-solutions">docker-032: explanatory solutions<a class="heading-anchor" href="#docker-032-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These are explanations of the supplied teaching fixtures, not fabricated engine results.</p>
-<h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
-<p>A minimal image may omit a shell, curl, a package manager or debugging tools. Their absence can reduce image size and unnecessary functionality, but it changes how you inspect failures. An application can be correct without a shell; an attempted <code>docker exec ... sh</code> failure may describe tooling, not the application.</p>
-<p>Debugging should preserve the original artifact and evidence. Installing tools into a live container changes its writable layer and can hide the conditions that caused the failure. Prefer structured inspection, existing runtime libraries, bounded logs and an explicitly prepared diagnostic workflow.</p>
-<p>A separate debug image or ephemeral diagnostic container can be useful when its permissions, network access and data exposure are deliberately scoped. It must not become an excuse to mount the whole host or attach to unrelated production workloads.</p>
-<p>The fixture already has Python, so a short standard-library request can test HTTP without adding curl. Use container inspection for configuration and logs for application behavior. If you need a shell in a different project, verify that the selected image actually contains one.</p>
-<p>Record whether each diagnostic ran inside the app container, a peer container or the host. The vantage point determines which DNS names, loopback address, files and permissions were observed.</p>
+<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-032.md</code>.</p>
 <h3 id="exercise-1-predict-a-missing-shell-error-in-a-minimal-image">Exercise 1: Predict a missing-shell error in a minimal image.<a class="heading-anchor" href="#exercise-1-predict-a-missing-shell-error-in-a-minimal-image" aria-label="Link to this section">#</a></h3>
-<p>The diagnostic command needs its own dependency. Do not conclude that the application is broken merely because a familiar tool is absent.</p>
-<p><strong>Expected:</strong> It may be expected image content, not an app crash.</p>
+<p><strong>Expected answer:</strong> It may be expected image content, not an app crash.</p>
+<p><strong>Why:</strong> The diagnostic command needs its own dependency. Do not conclude that the application is broken merely because a familiar tool is absent.</p>
 <h3 id="exercise-2-choose-a-prepared-tool-for-one-http-request">Exercise 2: Choose a prepared tool for one HTTP request.<a class="heading-anchor" href="#exercise-2-choose-a-prepared-tool-for-one-http-request" aria-label="Link to this section">#</a></h3>
-<p>Adding a new package is unnecessary for this bounded observation. Reuse a declared runtime while keeping timeout and output limits explicit.</p>
-<p><strong>Expected:</strong> Use Python already present in the fixture.</p>
+<p><strong>Expected answer:</strong> Use Python already present in the fixture.</p>
+<p><strong>Why:</strong> Adding a new package is unnecessary for this bounded observation. Reuse a declared runtime while keeping timeout and output limits explicit.</p>
 <h3 id="exercise-3-create-a-vantage-point-diagnosis-table">Exercise 3: Create a vantage-point diagnosis table.<a class="heading-anchor" href="#exercise-3-create-a-vantage-point-diagnosis-table" aria-label="Link to this section">#</a></h3>
-<p>The table helps explain why one request works and another fails. It prevents applying a host-network fix to a container-loopback problem.</p>
-<p><strong>Expected:</strong> Host, peer and app observations with distinct address scopes.</p>
+<p><strong>Expected evidence:</strong> Host, peer and app observations with distinct address scopes.</p>
+<p><strong>Why:</strong> The table helps explain why one request works and another fails. It prevents applying a host-network fix to a container-loopback problem.</p>
 <h3 id="exercise-4-diagnose-an-interactive-repair-that-cannot-survive-recreation">Exercise 4: Diagnose an interactive repair that cannot survive recreation.<a class="heading-anchor" href="#exercise-4-diagnose-an-interactive-repair-that-cannot-survive-recreation" aria-label="Link to this section">#</a></h3>
-<p>Record the useful finding, then implement the repair in source and rebuild. Treat the altered live container as diagnostic state, not a release artifact.</p>
-<p><strong>Expected:</strong> The maintained image was never changed.</p>
+<p><strong>Expected answer:</strong> The maintained image was never changed.</p>
+<p><strong>Why:</strong> Record the useful finding, then implement the repair in source and rebuild. Treat the altered live container as diagnostic state, not a release artifact.</p>
 <h3 id="exercise-5-explain-why-host-filesystem-mounts-are-excessive-for-this-lab">Exercise 5: Explain why host filesystem mounts are excessive for this lab.<a class="heading-anchor" href="#exercise-5-explain-why-host-filesystem-mounts-are-excessive-for-this-lab" aria-label="Link to this section">#</a></h3>
-<p>The fixture can be inspected through its own image, logs and volume. Broader mounts change authority without adding necessary evidence.</p>
-<p><strong>Expected:</strong> They expose data unrelated to the app diagnosis.</p>
+<p><strong>Expected answer:</strong> They expose data unrelated to the app diagnosis.</p>
+<p><strong>Why:</strong> The fixture can be inspected through its own image, logs and volume. Broader mounts change authority without adding necessary evidence.</p>
 <h3 id="exercise-6-write-a-repeatable-minimal-image-incident-procedure">Exercise 6: Write a repeatable minimal-image incident procedure.<a class="heading-anchor" href="#exercise-6-write-a-repeatable-minimal-image-incident-procedure" aria-label="Link to this section">#</a></h3>
-<p>A repeatable procedure works for another learner and preserves the original symptom. It should not depend on tools installed manually during a previous incident.</p>
-<p><strong>Expected:</strong> Preserve artifact, inspect state, run bounded prepared probes and test a source repair.</p>
+<p><strong>Expected evidence:</strong> Preserve artifact, inspect state, run bounded prepared probes and test a source repair.</p>
+<p><strong>Why:</strong> A repeatable procedure works for another learner and preserves the original symptom. It should not depend on tools installed manually during a previous incident.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful solution identifies the exact object, the phase when a setting takes effect, the expected normal result and an observation that disproves it. Repeating a command until it succeeds hides the mechanism. Change one variable, keep a failure record, and test the intended behavior again. Source examples here are small enough to inspect; a production system additionally needs ownership, lifecycle, data recovery and operational review. The host exercises are optional and must stay within the learner-created project.</p></article>
+<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>
 </body>
 </html>

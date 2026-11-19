@@ -198,11 +198,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-keyword">import</span> <span class="syntax-string">&quot;fmt&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">func</span> main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 1: Read an in-memory file: Read data/input.txt containing red and a newline.</span></span>
-<span class="source-line">	<span class="syntax-comment">// Expected: The bytes decode to red followed by a newline.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 1: Read an in-memory file: change one input: Copy worked example 1 into a scratch pad and change `files := fstest.MapFS{&quot;data/input.txt&quot;: &amp;fstest.MapFile{Data: []byte(&quot;red\n&quot;)}}` to `files := fstest.MapFS{&quot;data/input.txt!&quot;: &amp;fstest.MapFile{Data: []byte(&quot;red\n&quot;)}}`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Expected: The changed run panics with `file read` because `err == nil &amp;&amp; string(v) == &quot;red\n&quot;` no longer holds. Restoring the original line brings back the worked observation: the bytes decode to red followed by a newline.</span></span>
 <span class="source-line"></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 2: Observe a missing file: Read absent.txt from an empty filesystem.</span></span>
-<span class="source-line">	<span class="syntax-comment">// Expected: The error matches fs.ErrNotExist.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 2: Observe a missing file: debug a regression: Introduce one deliberate defect into a copy of worked example 2 that makes `errors.Is(err, fs.ErrNotExist)` fail, then explain how the panic message leads back to the faulty line.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Expected: The defective copy panics with `missing file`; the repaired copy reproduces the worked observation: the error matches fs.ErrNotExist.</span></span>
 <span class="source-line"></span>
 <span class="source-line">	<span class="syntax-comment">// Exercise 3: Reject traversal syntax: Validate ../private and data/input.txt.</span></span>
 <span class="source-line">	<span class="syntax-comment">// Expected: The traversal path is invalid and the relative data path is valid.</span></span>
@@ -213,8 +213,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">	<span class="syntax-comment">// Exercise 5: Separate empty content from absence: Read an existing zero-byte file.</span></span>
 <span class="source-line">	<span class="syntax-comment">// Expected: Reading succeeds and returns zero bytes.</span></span>
 <span class="source-line"></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 6: Transfer a subtree boundary: Create an fs.Sub rooted at data and read only its relative item.</span></span>
-<span class="source-line">	<span class="syntax-comment">// Expected: item.txt is readable within the logical subtree.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 6: Transfer confinement to a real directory with os.Root: Open an owned temporary directory as an os.Root, create item.txt through it, then try to open ../outside.txt through the same root.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Expected: item.txt is created inside the root and the escaping name is rejected.</span></span>
 <span class="source-line"></span>
 <span class="source-line">	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Implement the six investigations in your saved pad.&quot;</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-punctuation">}</span></span>

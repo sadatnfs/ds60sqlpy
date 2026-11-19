@@ -194,37 +194,36 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/csharp/solutions/csharp-046_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="csharp-046-explanation-and-comparison">csharp-046: explanation and comparison<a class="heading-anchor" href="#csharp-046-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="csharp-046_solution.cs.html">csharp-046_solution.cs</a>. Its assertions are always active under the prepared classroom compile settings.</p>
+<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="csharp-046_solution.cs.html">csharp-046_solution.cs</a>. It runs both worked examples, and its assertions are always active under the prepared classroom compile settings.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Use a target-typed collection:</strong> The compact syntax still creates concrete storage according to its target. The target types select array and list representations.</p>
-<p><strong>Keep constructor policy visible:</strong> Concise construction should preserve a clear relationship between input parameters and behavior. The supplied factor is used by the instance operation.</p>
-<h3 id="reason-through-the-six-tasks">Reason through the six tasks<a class="heading-anchor" href="#reason-through-the-six-tasks" aria-label="Link to this section">#</a></h3>
-<ol>
-<li><strong>Predict and explain.</strong> Identify the target type of each collection expression.</li>
-</ol>
-<ol start="2">
-<li><strong>Guided modification.</strong> Use an empty collection expression with an explicit target.</li>
-</ol>
-<ol start="3">
-<li><strong>Independent construction.</strong> Refactor one simple class to a primary constructor without changing behavior.</li>
-</ol>
-<ol start="4">
-<li><strong>Diagnose a defect.</strong> Diagnose copying new syntax into a project targeting an older language version.</li>
-</ol>
-<ol start="5">
-<li><strong>Boundary evidence.</strong> Test empty spread and zero scaling.</li>
-</ol>
-<ol start="6">
-<li><strong>Transfer and justify.</strong> Review a proposed new feature and justify adopting it using readability, compatibility and tooling evidence.</li>
-</ol>
-<p>For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.</p>
+<p><strong>Keep constructor policy visible:</strong> Concise construction should preserve a clear relationship between input parameters and behavior. The three newer checks compile only with C# 13 or 14, which the net10.0 target selects by default; an older target would reject them at compile time. The supplied factor is used by the instance operation, nameof(List&lt;&gt;) is List, missing?.Capacity = 32 leaves the null builder alone, and \e is the escape character.</p>
+<h3 id="task-answers">Task answers<a class="heading-anchor" href="#task-answers" aria-label="Link to this section">#</a></h3>
+<h4 id="task-1-predict-and-explain">Task 1: Predict and explain<a class="heading-anchor" href="#task-1-predict-and-explain" aria-label="Link to this section">#</a></h4>
+<p>Identify the target type of each collection expression.</p>
+<p>No separate reference answer has been written for this task. Example A is the evidence to compare with: The compact syntax still creates concrete storage according to its target. The target types select array and list representations.</p>
+<h4 id="task-2-guided-modification">Task 2: Guided modification<a class="heading-anchor" href="#task-2-guided-modification" aria-label="Link to this section">#</a></h4>
+<p>Use an empty collection expression with an explicit target.</p>
+<p>No separate reference answer has been written for this task. Start from Example B: Concise construction should preserve a clear relationship between input parameters and behavior. The three newer checks compile only with C# 13 or 14, which the net10.0 target selects by default; an older target would reject them at compile time. The supplied factor is used by the instance operation, nameof(List&lt;&gt;) is List, missing?.Capacity = 32 leaves the null builder alone, and \e is the escape character.</p>
+<h4 id="task-3-independent-construction">Task 3: Independent construction<a class="heading-anchor" href="#task-3-independent-construction" aria-label="Link to this section">#</a></h4>
+<p>Refactor one simple class to a primary constructor without changing behavior.</p>
+<p>No reference answer has been written for this task yet. It needs a project or platform outside the single-file pad, so record your own build and run evidence and judge it against the vocabulary entry <strong>Language version</strong> and the lesson notes.</p>
+<h4 id="task-4-diagnose-a-defect">Task 4: Diagnose a defect<a class="heading-anchor" href="#task-4-diagnose-a-defect" aria-label="Link to this section">#</a></h4>
+<p>Diagnose copying new syntax into a project targeting an older language version.</p>
+<p>No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson&#x27;s pitfalls: Newer syntax is not inherently better. A collection expression is not universally lazy. Do not use latest or preview as an unexplained fix for a compiler error.</p>
+<h4 id="task-5-boundary-evidence">Task 5: Boundary evidence<a class="heading-anchor" href="#task-5-boundary-evidence" aria-label="Link to this section">#</a></h4>
+<p>Test empty spread and zero scaling.</p>
+<p>No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Use a target-typed collection) and Example B (Keep constructor policy visible).</p>
+<h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
+<p>Review a proposed new feature and justify adopting it using readability, compatibility and tooling evidence.</p>
+<p>No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry <strong>Language version</strong>, and state one limitation of your choice.</p>
 <h3 id="mechanism-and-diagnostic-reasoning">Mechanism and diagnostic reasoning<a class="heading-anchor" href="#mechanism-and-diagnostic-reasoning" aria-label="Link to this section">#</a></h3>
 <p>Language evolution adds concise ways to express familiar contracts. Primary constructors, collection expressions and improved patterns can reduce noise, but unfamiliar syntax should be introduced by its meaning rather than used to make code look advanced. Version-aware code records the target language generation and avoids accidentally relying on a preview feature.</p>
-<p>C# 14 accompanies .NET 10. This chapter uses established modern features supported by that target and explains the broader C# 14 release boundary through official documentation. New syntax does not relax nullability, ownership or equality rules. A code review should ask whether a feature makes the domain relationship easier to see and whether contributors can diagnose its errors.</p>
-<p>A collection expression such as <code>[1, 2, 3]</code> is target-typed. A primary constructor supplies parameters used by members. <code>nameof</code> produces a symbol name while retaining compile-time refactoring support.</p>
+<p>C# 14 accompanies .NET 10 and is the default for the classroom&#x27;s net10.0 target. C# 13 (.NET 9) added params collections, the System.Threading.Lock type for lock statements and the \e escape sequence. C# 14 adds the field keyword in property accessors, extension members, null-conditional assignment such as a?.B = c, nameof for unbound generic types such as List&lt;&gt; and implicit span conversions. Example B exercises three of these features. New syntax does not relax nullability, ownership or equality rules. A code review should ask whether a feature makes the domain relationship easier to see and whether contributors can diagnose its errors.</p>
+<p>A collection expression such as <code>[1, 2, 3]</code> is target-typed. A primary constructor supplies parameters used by members. <code>nameof</code> produces a symbol name while retaining compile-time refactoring support; since C# 14 it also accepts an unbound generic type such as <code>nameof(List&lt;&gt;)</code>. <code>missing?.Capacity = 32</code> assigns only when <code>missing</code> is not null, and <code>\e</code> is the escape character U+001B.</p>
 <p>Newer syntax is not inherently better. A collection expression is not universally lazy. Do not use latest or preview as an unexplained fix for a compiler error.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.</p></article>
+<p>Run the reference and confirm that it prints <code>csharp-046: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
   </main>
 </body>
 </html>

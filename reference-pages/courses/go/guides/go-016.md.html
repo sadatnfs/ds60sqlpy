@@ -197,7 +197,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Beginner. Allow about 90 minutes, then revisit the transfer case later. Prerequisites: go-015</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
-<p>By the end, explain closure, callback, early termination; implement the six investigations below; and defend the expected result of a changed input before running it. A passing reference is evidence about that program, not a certification of your independent understanding.</p>
+<p>Write closures with independent state and an iterator that stops early when its consumer breaks out of a range loop. Along the way, explain closure, callback, early termination, iterator function; implement the six investigations below; and defend the expected result of a changed input before running it.</p>
 <h3 id="why-this-mechanism-matters">Why this mechanism matters<a class="heading-anchor" href="#why-this-mechanism-matters" aria-label="Link to this section">#</a></h3>
 <p>A function value can be stored, passed and called like other values. A closure also refers to variables from its surrounding scope. That makes callbacks concise, but it makes lifetime and mutation worth tracing explicitly. Two closures can intentionally share one variable; two independent constructor calls can create separate state. A callback contract should describe when it is called, whether it may stop iteration and whether it can retain supplied values. Iterator-style APIs can avoid allocating intermediate slices, but early termination and cleanup must still be well defined. Do not confuse deferred execution with concurrent execution: a closure is not a goroutine by itself.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
@@ -205,10 +205,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li><strong>Closure:</strong> A function value that refers to surrounding variables.</li>
 <li><strong>Callback:</strong> A function supplied for another operation to invoke.</li>
 <li><strong>Early termination:</strong> Ending traversal once the caller has enough evidence.</li>
+<li><strong>Iterator function:</strong> A function of type iter.Seq that a for range loop can traverse.</li>
 </ul>
 <h3 id="syntax-anatomy-and-reasoning">Syntax anatomy and reasoning<a class="heading-anchor" href="#syntax-anatomy-and-reasoning" aria-label="Link to this section">#</a></h3>
-<p>func(int) int is a function type. An anonymous func literal creates a function value. Returning a closure from makeCounter retains access to its captured count. A visitor returning bool can stop a traversal when false. Passing a function as a parameter makes selection policy explicit without an interface type when only one operation is needed.</p>
-<h3 id="classroom-execution-contract">Classroom execution contract<a class="heading-anchor" href="#classroom-execution-contract" aria-label="Link to this section">#</a></h3>
+<p>func(int) int is a function type. An anonymous func literal creates a function value. Returning a closure from makeCounter retains access to its captured count. A visitor returning bool can stop a traversal when false. Passing a function as a parameter makes selection policy explicit without an interface type when only one operation is needed. The iter package names this visitor shape: iter.Seq[V] is func(yield func(V) bool), and for x := range seq runs the loop body as the yield callback, so break, continue and return keep their ordinary meaning.</p>
+<h3 id="run-this-lesson">Run this lesson<a class="heading-anchor" href="#run-this-lesson" aria-label="Link to this section">#</a></h3>
 <p>Choose Go in the unified Docker classroom. Save your own pad before experimenting. The prepared worker stages it as <code>main.go</code>, compiles it, and executes the resulting program with bounded time and output. The pad is one source file. It does not supply interactive input, arbitrary command-line arguments, package installation, Kubernetes credentials or a host Docker socket. Every ordinary reference here uses the standard library, synthetic local data and explicit checks. A failed <code>check</code> panics and produces a nonzero process result; do not remove it to make the run appear successful.</p>
 <p>The explanatory solution snippets belong inside <code>func main()</code> unless they declare a helper. <code>check</code> is a tiny teaching helper that panics when a condition is false. The separate reference supplies required imports and helpers and implements all six cases. Use that complete source only after an attempt or an explicit reveal. For an independently prepared Go project, the equivalent local build is <code>go build -o lesson main.go</code>, followed by <code>./lesson</code>; use Linux or WSL 2 for that optional workflow. Compiling proves syntax and type consistency, while the executed checks establish the stated example contracts.</p>
 <p>Each worked example below is a complete Go file. Copy one whole block into your saved pad and run it. Example 2 includes the first case as well as the second, so its setup is complete. Its supporting declarations may be reused in later investigations. The separate reference implements all six cases.</p>
@@ -219,6 +220,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 
 <span class="syntax-keyword">import</span> <span class="syntax-punctuation">(</span>
 	<span class="syntax-string">&quot;fmt&quot;</span>
+	<span class="syntax-string">&quot;iter&quot;</span>
 <span class="syntax-punctuation">)</span>
 
 <span class="syntax-keyword">func</span> check<span class="syntax-punctuation">(</span>ok <span class="syntax-keyword">bool</span><span class="syntax-punctuation">,</span> message <span class="syntax-keyword">string</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
@@ -242,6 +244,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 		<span class="syntax-punctuation">}</span>
 	<span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">func</span> countTo<span class="syntax-punctuation">(</span>limit <span class="syntax-keyword">int</span><span class="syntax-punctuation">,</span> produced <span class="syntax-operator">*</span><span class="syntax-keyword">int</span><span class="syntax-punctuation">)</span> iter<span class="syntax-punctuation">.</span>Seq<span class="syntax-punctuation">[</span><span class="syntax-keyword">int</span><span class="syntax-punctuation">]</span> <span class="syntax-punctuation">{</span>
+	<span class="syntax-keyword">return</span> <span class="syntax-keyword">func</span><span class="syntax-punctuation">(</span>yield <span class="syntax-keyword">func</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">bool</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+		<span class="syntax-keyword">for</span> i <span class="syntax-operator">:=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span> i <span class="syntax-operator">&lt;=</span> limit<span class="syntax-punctuation">;</span> i<span class="syntax-operator">++</span> <span class="syntax-punctuation">{</span>
+			<span class="syntax-operator">*</span>produced<span class="syntax-operator">++</span>
+			<span class="syntax-keyword">if</span> <span class="syntax-punctuation">!</span>yield<span class="syntax-punctuation">(</span>i<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+				<span class="syntax-keyword">return</span>
+			<span class="syntax-punctuation">}</span>
+		<span class="syntax-punctuation">}</span>
+	<span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span>
 
 <span class="syntax-keyword">func</span> main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
 	<span class="syntax-comment">// Capture a changing variable</span>
@@ -261,6 +273,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 
 <span class="syntax-keyword">import</span> <span class="syntax-punctuation">(</span>
 	<span class="syntax-string">&quot;fmt&quot;</span>
+	<span class="syntax-string">&quot;iter&quot;</span>
 <span class="syntax-punctuation">)</span>
 
 <span class="syntax-keyword">func</span> check<span class="syntax-punctuation">(</span>ok <span class="syntax-keyword">bool</span><span class="syntax-punctuation">,</span> message <span class="syntax-keyword">string</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
@@ -281,6 +294,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 	<span class="syntax-keyword">for</span> i <span class="syntax-operator">:=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span> i <span class="syntax-operator">&lt;=</span> limit<span class="syntax-punctuation">;</span> i<span class="syntax-operator">++</span> <span class="syntax-punctuation">{</span>
 		<span class="syntax-keyword">if</span> <span class="syntax-punctuation">!</span>f<span class="syntax-punctuation">(</span>i<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
 			<span class="syntax-keyword">return</span>
+		<span class="syntax-punctuation">}</span>
+	<span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">func</span> countTo<span class="syntax-punctuation">(</span>limit <span class="syntax-keyword">int</span><span class="syntax-punctuation">,</span> produced <span class="syntax-operator">*</span><span class="syntax-keyword">int</span><span class="syntax-punctuation">)</span> iter<span class="syntax-punctuation">.</span>Seq<span class="syntax-punctuation">[</span><span class="syntax-keyword">int</span><span class="syntax-punctuation">]</span> <span class="syntax-punctuation">{</span>
+	<span class="syntax-keyword">return</span> <span class="syntax-keyword">func</span><span class="syntax-punctuation">(</span>yield <span class="syntax-keyword">func</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">bool</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+		<span class="syntax-keyword">for</span> i <span class="syntax-operator">:=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span> i <span class="syntax-operator">&lt;=</span> limit<span class="syntax-punctuation">;</span> i<span class="syntax-operator">++</span> <span class="syntax-punctuation">{</span>
+			<span class="syntax-operator">*</span>produced<span class="syntax-operator">++</span>
+			<span class="syntax-keyword">if</span> <span class="syntax-punctuation">!</span>yield<span class="syntax-punctuation">(</span>i<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+				<span class="syntax-keyword">return</span>
+			<span class="syntax-punctuation">}</span>
 		<span class="syntax-punctuation">}</span>
 	<span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span>
@@ -306,75 +329,75 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>
 <p>For each example, write the input values, the state that can change, and the expected observation. Explain which result would disprove your current interpretation. For concurrency, predict a guaranteed relationship rather than an arbitrary scheduling order. For an error case, identify whether it is rejected at compilation or returned during execution.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
-<h4 id="exercise-1-capture-a-changing-variable">Exercise 1: Capture a changing variable<a class="heading-anchor" href="#exercise-1-capture-a-changing-variable" aria-label="Link to this section">#</a></h4>
-<p>Create a closure referring to factor, change factor, then call it.</p>
-<p><strong>Expected:</strong> The closure uses the new factor 3.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
-<h4 id="exercise-2-create-independent-counters">Exercise 2: Create independent counters<a class="heading-anchor" href="#exercise-2-create-independent-counters" aria-label="Link to this section">#</a></h4>
-<p>Construct two counter closures and call the first twice.</p>
-<p><strong>Expected:</strong> The first returns 1 then 2; the second starts at 1.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<h4 id="exercise-1-capture-a-changing-variable-change-one-input">Exercise 1: Capture a changing variable: change one input<a class="heading-anchor" href="#exercise-1-capture-a-changing-variable-change-one-input" aria-label="Link to this section">#</a></h4>
+<p>Copy worked example 1 into a scratch pad and change <code>factor = 3</code> to <code>factor = 4</code>. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</p>
+<p><strong>Expected:</strong> The changed run panics with <code>capture variable</code> because <code>multiply(4) == 12</code> no longer holds. Restoring the original line brings back the worked observation: the closure uses the new factor 3.</p>
+<p><strong>Verify:</strong> Compare your written prediction with the panic message <code>capture variable</code> and name the value that made <code>multiply(4) == 12</code> false. After restoring the input, the program must print its success line again.</p>
+<h4 id="exercise-2-create-independent-counters-diagnose-an-edited-check">Exercise 2: Create independent counters: diagnose an edited check<a class="heading-anchor" href="#exercise-2-create-independent-counters-diagnose-an-edited-check" aria-label="Link to this section">#</a></h4>
+<p>A careless edit changed the check in worked example 2 so that it reads <code>check(a() != 1 &amp;&amp; a() == 2 &amp;&amp; b() == 1, &quot;independent closures&quot;)</code>. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.</p>
+<p><strong>Expected:</strong> Before the repair the program panics with <code>independent closures</code>; after it the line reads <code>check(a() == 1 &amp;&amp; a() == 2 &amp;&amp; b() == 1, &quot;independent closures&quot;)</code> again and the first returns 1 then 2; the second starts at 1.</p>
+<p><strong>Verify:</strong> Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that <code>a() == 1 &amp;&amp; a() == 2 &amp;&amp; b() == 1</code> accepts.</p>
 <h4 id="exercise-3-inject-a-transformation">Exercise 3: Inject a transformation<a class="heading-anchor" href="#exercise-3-inject-a-transformation" aria-label="Link to this section">#</a></h4>
 <p>Map a doubling callback over 1, 2 and 3.</p>
 <p><strong>Expected:</strong> The result is 2, 4 and 6.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>len(v) == 3 &amp;&amp; v[0] == 2 &amp;&amp; v[2] == 6</code>. As a control, change <code>v := mapInts([]int{1, 2, 3}, func(x int) int { return 2 * x })</code> to <code>v := mapInts([]int{1, 2, 3}, func(x int) int { return 2 + x })</code>: the run must panic with <code>callback</code>. Restore the line before continuing.</p>
 <h4 id="exercise-4-stop-a-visitor-early">Exercise 4: Stop a visitor early<a class="heading-anchor" href="#exercise-4-stop-a-visitor-early" aria-label="Link to this section">#</a></h4>
 <p>Visit 1 through 5 and stop after observing 3.</p>
 <p><strong>Expected:</strong> Exactly three values are visited.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>count == 3</code>. As a control, change <code>visit(5, func(x int) bool { count++; return x &lt; 3 })</code> to <code>visit(5, func(x int) bool { count++; return x &lt;= 3 })</code>: the run must panic with <code>early stop</code>. Restore the line before continuing.</p>
 <h4 id="exercise-5-handle-an-empty-traversal">Exercise 5: Handle an empty traversal<a class="heading-anchor" href="#exercise-5-handle-an-empty-traversal" aria-label="Link to this section">#</a></h4>
 <p>Visit an empty range with a callback that would increment a count.</p>
 <p><strong>Expected:</strong> The callback is never invoked.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
-<h4 id="exercise-6-transfer-explicit-state">Exercise 6: Transfer explicit state<a class="heading-anchor" href="#exercise-6-transfer-explicit-state" aria-label="Link to this section">#</a></h4>
-<p>Collect only even values from a bounded visitor.</p>
-<p><strong>Expected:</strong> The collected values are 2 and 4.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>count == 0</code>. As a control, change <code>count := 0</code> to <code>count := 1</code>: the run must panic with <code>empty callback</code>. Restore the line before continuing.</p>
+<h4 id="exercise-6-transfer-the-visitor-to-a-range-over-func-iterator">Exercise 6: Transfer the visitor to a range-over-func iterator<a class="heading-anchor" href="#exercise-6-transfer-the-visitor-to-a-range-over-func-iterator" aria-label="Link to this section">#</a></h4>
+<p>Range over an iter.Seq[int] that yields 1 through 5, append each value, and break after 2.</p>
+<p><strong>Expected:</strong> The loop collects 1 and 2, and the iterator produces exactly two values.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>len(got) == 2 &amp;&amp; got[0] == 1 &amp;&amp; got[1] == 2 &amp;&amp; produced == 2</code>. As a control, change <code>if x == 2 {</code> to <code>if x != 2 {</code>: the run must panic with <code>range over func</code>. Restore the line before continuing.</p>
 <p>Implement these in the answer-free learner source. Keep one independent check per claim. A task can require tracing, construction, a changed input or a deliberate safe failure. Do not run a data race, corrupt memory or contact a shared cluster merely to demonstrate why it would be wrong.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Read a compiler error from the first location in your source, then fix one cause at a time. Unused imports and variables are errors in Go; add an import when its use exists, rather than copying a large unused import list. A panic from <code>check</code> identifies a violated example contract. Compare the actual value with the expected value and inspect the state transition that produced it. A returned <code>error</code> is a value that the caller must handle; an ignored error can make later output look plausible while the original operation failed.</p>
 <p>The lesson-specific explanations in the two examples identify the important counterexamples. Extend that reasoning to every investigation: explain why a plausible alternative would fail, and preserve a tiny input that distinguishes it. Treat empty data, missing values and cancellation as domain cases with explicit policies. In concurrent work, replace sleeps used as synchronization with channels, mutexes or an explicit ownership protocol.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<h4 id="hint-for-investigation-1-capture-a-changing-variable">Hint for investigation 1: Capture a changing variable<a class="heading-anchor" href="#hint-for-investigation-1-capture-a-changing-variable" aria-label="Link to this section">#</a></h4>
+<h4 id="hint-for-investigation-1-capture-a-changing-variable-change-one-input">Hint for investigation 1: Capture a changing variable: change one input<a class="heading-anchor" href="#hint-for-investigation-1-capture-a-changing-variable-change-one-input" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The closure uses the new factor 3.</li>
-<li>Identify the input and the state boundary relevant to capture a changing variable. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>multiply(4) == 12</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Compute the checked value with <code>factor = 4</code> in place before running, then compare it with the value <code>multiply(4) == 12</code> expects.</li>
 </ol>
-<h4 id="hint-for-investigation-2-create-independent-counters">Hint for investigation 2: Create independent counters<a class="heading-anchor" href="#hint-for-investigation-2-create-independent-counters" aria-label="Link to this section">#</a></h4>
+<h4 id="hint-for-investigation-2-create-independent-counters-diagnose-an-edited-check">Hint for investigation 2: Create independent counters: diagnose an edited check<a class="heading-anchor" href="#hint-for-investigation-2-create-independent-counters-diagnose-an-edited-check" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The first returns 1 then 2; the second starts at 1.</li>
-<li>Identify the input and the state boundary relevant to create independent counters. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>a() == 1 &amp;&amp; a() == 2 &amp;&amp; b() == 1</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Compare <code>check(a() != 1 &amp;&amp; a() == 2 &amp;&amp; b() == 1, &quot;independent closures&quot;)</code> with the same line in worked example 2 and state the claim each version makes.</li>
 </ol>
 <h4 id="hint-for-investigation-3-inject-a-transformation">Hint for investigation 3: Inject a transformation<a class="heading-anchor" href="#hint-for-investigation-3-inject-a-transformation" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The result is 2, 4 and 6.</li>
-<li>Identify the input and the state boundary relevant to inject a transformation. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>len(v) == 3 &amp;&amp; v[0] == 2 &amp;&amp; v[2] == 6</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Predict the effect of changing <code>v := mapInts([]int{1, 2, 3}, func(x int) int { return 2 * x })</code> to <code>v := mapInts([]int{1, 2, 3}, func(x int) int { return 2 + x })</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
 </ol>
 <h4 id="hint-for-investigation-4-stop-a-visitor-early">Hint for investigation 4: Stop a visitor early<a class="heading-anchor" href="#hint-for-investigation-4-stop-a-visitor-early" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Exactly three values are visited.</li>
-<li>Identify the input and the state boundary relevant to stop a visitor early. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>count == 3</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Predict the effect of changing <code>visit(5, func(x int) bool { count++; return x &lt; 3 })</code> to <code>visit(5, func(x int) bool { count++; return x &lt;= 3 })</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
 </ol>
 <h4 id="hint-for-investigation-5-handle-an-empty-traversal">Hint for investigation 5: Handle an empty traversal<a class="heading-anchor" href="#hint-for-investigation-5-handle-an-empty-traversal" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The callback is never invoked.</li>
-<li>Identify the input and the state boundary relevant to handle an empty traversal. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>count == 0</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Predict the effect of changing <code>count := 0</code> to <code>count := 1</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
 </ol>
-<h4 id="hint-for-investigation-6-transfer-explicit-state">Hint for investigation 6: Transfer explicit state<a class="heading-anchor" href="#hint-for-investigation-6-transfer-explicit-state" aria-label="Link to this section">#</a></h4>
+<h4 id="hint-for-investigation-6-transfer-the-visitor-to-a-range-over-func-iterator">Hint for investigation 6: Transfer the visitor to a range-over-func iterator<a class="heading-anchor" href="#hint-for-investigation-6-transfer-the-visitor-to-a-range-over-func-iterator" aria-label="Link to this section">#</a></h4>
 <ol>
-<li>Restate the expected observation: The collected values are 2 and 4.</li>
-<li>Identify the input and the state boundary relevant to transfer explicit state. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>Restate the expected observation: The loop collects 1 and 2, and the iterator produces exactly two values.</li>
+<li>The check <code>len(got) == 2 &amp;&amp; got[0] == 1 &amp;&amp; got[1] == 2 &amp;&amp; produced == 2</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Predict the effect of changing <code>if x == 2 {</code> to <code>if x != 2 {</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
 </ol>
 <h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
 <p>Close the reference. Rebuild one normal case and one boundary case from a blank pad. Explain the role of closure without using its name in the definition. Then change the domain while keeping the same invariant. Record the new input, your prediction and the observed output. If your program passes only because its input is hard-coded, explain which part would need a reusable function in a larger project.</p>
 <h3 id="next-step-and-sources">Next step and sources<a class="heading-anchor" href="#next-step-and-sources" aria-label="Link to this section">#</a></h3>
-<p><a href="https://go.dev/ref/spec">Primary language or library documentation</a>, reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. This source supports the API contract; it does not verify the classroom worker. Runtime receipts are recorded separately by the repository validation tools. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.</p>
+<p><a href="https://go.dev/ref/spec">Primary language or library documentation</a>, reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for go-016: Closures, callbacks and controlled iteration.
 Read courses/go/guides/go-016.md and my saved attempt based on courses/go/lessons/go-016.go.
@@ -382,7 +405,7 @@ Ask me to predict The closure uses the new factor 3. and explain the mechanism.
 Give one progressive hint about my first incorrect assumption.
 Keep courses/go/solutions/go-016_solution.go and courses/go/solutions/go-016_solutions.md closed until I request a reveal or comparison.
 Check compiler or runtime evidence, distinguish local models from real integrations,
-and finish with a fresh boundary case about early termination.</code></pre></article>
+and finish with a fresh boundary case about iterator function.</code></pre></article>
   </main>
 </body>
 </html>

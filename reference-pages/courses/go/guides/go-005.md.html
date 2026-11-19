@@ -197,7 +197,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Beginner. Allow about 90 minutes, then revisit the transfer case later. Prerequisites: go-004</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
-<p>By the end, explain backing array, capacity, aliasing; implement the six investigations below; and defend the expected result of a changed input before running it. A passing reference is evidence about that program, not a certification of your independent understanding.</p>
+<p>Predict when two slices share a backing array and make independent copies or capacity-limited appends on purpose. Along the way, explain backing array, capacity, aliasing; implement the six investigations below; and defend the expected result of a changed input before running it.</p>
 <h3 id="why-this-mechanism-matters">Why this mechanism matters<a class="heading-anchor" href="#why-this-mechanism-matters" aria-label="Link to this section">#</a></h3>
 <p>An array includes its length in its type and owns a fixed sequence of elements. A slice is a descriptor containing a pointer into backing storage, a length and a capacity. Copying that descriptor does not copy the elements. Two slices can therefore observe each other&#x27;s mutations. append may reuse available storage or allocate new storage; code must not depend on which choice happens unless it controls the capacity contract. A full slice expression can restrict capacity and force a later append to allocate. The practical question is not whether a value looks like a collection, but who can mutate the same storage and for how long.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
@@ -208,7 +208,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ul>
 <h3 id="syntax-anatomy-and-reasoning">Syntax anatomy and reasoning<a class="heading-anchor" href="#syntax-anatomy-and-reasoning" aria-label="Link to this section">#</a></h3>
 <p>[]int constructs a slice type; [3]int constructs an array type. values[a:b] selects indices a through b-1. len is the visible element count and cap is the maximum length before reallocation is required. copy(dst,src) copies the smaller length and returns that count. append returns a new slice descriptor, so retain the returned value. A nil slice has length zero and can be appended to.</p>
-<h3 id="classroom-execution-contract">Classroom execution contract<a class="heading-anchor" href="#classroom-execution-contract" aria-label="Link to this section">#</a></h3>
+<h3 id="run-this-lesson">Run this lesson<a class="heading-anchor" href="#run-this-lesson" aria-label="Link to this section">#</a></h3>
 <p>Choose Go in the unified Docker classroom. Save your own pad before experimenting. The prepared worker stages it as <code>main.go</code>, compiles it, and executes the resulting program with bounded time and output. The pad is one source file. It does not supply interactive input, arbitrary command-line arguments, package installation, Kubernetes credentials or a host Docker socket. Every ordinary reference here uses the standard library, synthetic local data and explicit checks. A failed <code>check</code> panics and produces a nonzero process result; do not remove it to make the run appear successful.</p>
 <p>The explanatory solution snippets belong inside <code>func main()</code> unless they declare a helper. <code>check</code> is a tiny teaching helper that panics when a condition is false. The separate reference supplies required imports and helpers and implements all six cases. Use that complete source only after an attempt or an explicit reveal. For an independently prepared Go project, the equivalent local build is <code>go build -o lesson main.go</code>, followed by <code>./lesson</code>; use Linux or WSL 2 for that optional workflow. Compiling proves syntax and type consistency, while the executed checks establish the stated example contracts.</p>
 <p>Each worked example below is a complete Go file. Copy one whole block into your saved pad and run it. Example 2 includes the first case as well as the second, so its setup is complete. Its supporting declarations may be reused in later investigations. The separate reference implements all six cases.</p>
@@ -276,75 +276,75 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>
 <p>For each example, write the input values, the state that can change, and the expected observation. Explain which result would disprove your current interpretation. For concurrency, predict a guaranteed relationship rather than an arbitrary scheduling order. For an error case, identify whether it is rejected at compilation or returned during execution.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
-<h4 id="exercise-1-observe-shared-storage">Exercise 1: Observe shared storage<a class="heading-anchor" href="#exercise-1-observe-shared-storage" aria-label="Link to this section">#</a></h4>
-<p>Take the first two elements of 1, 2, 3 and change the first through the slice.</p>
-<p><strong>Expected:</strong> The original first element becomes 9.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
-<h4 id="exercise-2-make-an-independent-copy">Exercise 2: Make an independent copy<a class="heading-anchor" href="#exercise-2-make-an-independent-copy" aria-label="Link to this section">#</a></h4>
-<p>Copy 1, 2, 3 into a new slice and mutate that copy.</p>
-<p><strong>Expected:</strong> The original stays 1 while the copy starts 9.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<h4 id="exercise-1-observe-shared-storage-change-one-input">Exercise 1: Observe shared storage: change one input<a class="heading-anchor" href="#exercise-1-observe-shared-storage-change-one-input" aria-label="Link to this section">#</a></h4>
+<p>Copy worked example 1 into a scratch pad and change <code>view[0] = 9</code> to <code>view[1] = 9</code>. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</p>
+<p><strong>Expected:</strong> The changed run panics with <code>alias</code> because <code>values[0] == 9</code> no longer holds. Restoring the original line brings back the worked observation: the original first element becomes 9.</p>
+<p><strong>Verify:</strong> Compare your written prediction with the panic message <code>alias</code> and name the value that made <code>values[0] == 9</code> false. After restoring the input, the program must print its success line again.</p>
+<h4 id="exercise-2-make-an-independent-copy-debug-a-regression">Exercise 2: Make an independent copy: debug a regression<a class="heading-anchor" href="#exercise-2-make-an-independent-copy-debug-a-regression" aria-label="Link to this section">#</a></h4>
+<p>A regression changed one token in worked example 2, so one line now reads <code>values := []int{2, 2, 3}</code>. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.</p>
+<p><strong>Expected:</strong> Before the repair the program panics with <code>copy</code>; after it the line reads <code>values := []int{1, 2, 3}</code> again and the original stays 1 while the copy starts 9.</p>
+<p><strong>Verify:</strong> Keep the failing and the repaired runs. Explain why the changed token alters the value tested by <code>values[0] == 1 &amp;&amp; cloned[0] == 9</code> for this input.</p>
 <h4 id="exercise-3-restrict-append-capacity">Exercise 3: Restrict append capacity<a class="heading-anchor" href="#exercise-3-restrict-append-capacity" aria-label="Link to this section">#</a></h4>
 <p>Take values[:1:1] and append 8.</p>
 <p><strong>Expected:</strong> The original second element remains 2.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>values[1] == 2 &amp;&amp; grown[1] == 8</code>. As a control, change <code>values := []int{1, 2, 3}</code> to <code>values := []int{1, 3, 3}</code>: the run must panic with <code>capacity boundary</code>. Restore the line before continuing.</p>
 <h4 id="exercise-4-inspect-a-truncated-copy">Exercise 4: Inspect a truncated copy<a class="heading-anchor" href="#exercise-4-inspect-a-truncated-copy" aria-label="Link to this section">#</a></h4>
 <p>Copy three source elements into a length-two destination.</p>
 <p><strong>Expected:</strong> Exactly two elements are copied.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>n == 2 &amp;&amp; dst[1] == 5</code>. As a control, change <code>dst := make([]int, 2)</code> to <code>dst := make([]int, 3)</code>: the run must panic with <code>copy length</code>. Restore the line before continuing.</p>
 <h4 id="exercise-5-grow-an-empty-slice">Exercise 5: Grow an empty slice<a class="heading-anchor" href="#exercise-5-grow-an-empty-slice" aria-label="Link to this section">#</a></h4>
 <p>Append 7 to a nil slice.</p>
 <p><strong>Expected:</strong> The result has length 1 and value 7.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>len(values) == 1 &amp;&amp; values[0] == 7</code>. As a control, change <code>values = append(values, 7)</code> to <code>values = append(values, 8)</code>: the run must panic with <code>append nil</code>. Restore the line before continuing.</p>
 <h4 id="exercise-6-transfer-array-semantics">Exercise 6: Transfer array semantics<a class="heading-anchor" href="#exercise-6-transfer-array-semantics" aria-label="Link to this section">#</a></h4>
 <p>Copy a fixed array and mutate the copy.</p>
 <p><strong>Expected:</strong> The original array remains unchanged.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>a[0] == 1 &amp;&amp; b[0] == 9</code>. As a control, change <code>a := [2]int{1, 2}</code> to <code>a := [2]int{2, 2}</code>: the run must panic with <code>array copy</code>. Restore the line before continuing.</p>
 <p>Implement these in the answer-free learner source. Keep one independent check per claim. A task can require tracing, construction, a changed input or a deliberate safe failure. Do not run a data race, corrupt memory or contact a shared cluster merely to demonstrate why it would be wrong.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Read a compiler error from the first location in your source, then fix one cause at a time. Unused imports and variables are errors in Go; add an import when its use exists, rather than copying a large unused import list. A panic from <code>check</code> identifies a violated example contract. Compare the actual value with the expected value and inspect the state transition that produced it. A returned <code>error</code> is a value that the caller must handle; an ignored error can make later output look plausible while the original operation failed.</p>
 <p>The lesson-specific explanations in the two examples identify the important counterexamples. Extend that reasoning to every investigation: explain why a plausible alternative would fail, and preserve a tiny input that distinguishes it. Treat empty data, missing values and cancellation as domain cases with explicit policies. In concurrent work, replace sleeps used as synchronization with channels, mutexes or an explicit ownership protocol.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<h4 id="hint-for-investigation-1-observe-shared-storage">Hint for investigation 1: Observe shared storage<a class="heading-anchor" href="#hint-for-investigation-1-observe-shared-storage" aria-label="Link to this section">#</a></h4>
+<h4 id="hint-for-investigation-1-observe-shared-storage-change-one-input">Hint for investigation 1: Observe shared storage: change one input<a class="heading-anchor" href="#hint-for-investigation-1-observe-shared-storage-change-one-input" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The original first element becomes 9.</li>
-<li>Identify the input and the state boundary relevant to observe shared storage. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>values[0] == 9</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Compute the checked value with <code>view[1] = 9</code> in place before running, then compare it with the value <code>values[0] == 9</code> expects.</li>
 </ol>
-<h4 id="hint-for-investigation-2-make-an-independent-copy">Hint for investigation 2: Make an independent copy<a class="heading-anchor" href="#hint-for-investigation-2-make-an-independent-copy" aria-label="Link to this section">#</a></h4>
+<h4 id="hint-for-investigation-2-make-an-independent-copy-debug-a-regression">Hint for investigation 2: Make an independent copy: debug a regression<a class="heading-anchor" href="#hint-for-investigation-2-make-an-independent-copy-debug-a-regression" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The original stays 1 while the copy starts 9.</li>
-<li>Identify the input and the state boundary relevant to make an independent copy. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>values[0] == 1 &amp;&amp; cloned[0] == 9</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Compare <code>values := []int{2, 2, 3}</code> with the same line in worked example 2 and state the claim each version makes.</li>
 </ol>
 <h4 id="hint-for-investigation-3-restrict-append-capacity">Hint for investigation 3: Restrict append capacity<a class="heading-anchor" href="#hint-for-investigation-3-restrict-append-capacity" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The original second element remains 2.</li>
-<li>Identify the input and the state boundary relevant to restrict append capacity. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>values[1] == 2 &amp;&amp; grown[1] == 8</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Predict the effect of changing <code>values := []int{1, 2, 3}</code> to <code>values := []int{1, 3, 3}</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
 </ol>
 <h4 id="hint-for-investigation-4-inspect-a-truncated-copy">Hint for investigation 4: Inspect a truncated copy<a class="heading-anchor" href="#hint-for-investigation-4-inspect-a-truncated-copy" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Exactly two elements are copied.</li>
-<li>Identify the input and the state boundary relevant to inspect a truncated copy. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>n == 2 &amp;&amp; dst[1] == 5</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Predict the effect of changing <code>dst := make([]int, 2)</code> to <code>dst := make([]int, 3)</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
 </ol>
 <h4 id="hint-for-investigation-5-grow-an-empty-slice">Hint for investigation 5: Grow an empty slice<a class="heading-anchor" href="#hint-for-investigation-5-grow-an-empty-slice" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The result has length 1 and value 7.</li>
-<li>Identify the input and the state boundary relevant to grow an empty slice. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>len(values) == 1 &amp;&amp; values[0] == 7</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Predict the effect of changing <code>values = append(values, 7)</code> to <code>values = append(values, 8)</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
 </ol>
 <h4 id="hint-for-investigation-6-transfer-array-semantics">Hint for investigation 6: Transfer array semantics<a class="heading-anchor" href="#hint-for-investigation-6-transfer-array-semantics" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The original array remains unchanged.</li>
-<li>Identify the input and the state boundary relevant to transfer array semantics. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>a[0] == 1 &amp;&amp; b[0] == 9</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Predict the effect of changing <code>a := [2]int{1, 2}</code> to <code>a := [2]int{2, 2}</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
 </ol>
 <h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
 <p>Close the reference. Rebuild one normal case and one boundary case from a blank pad. Explain the role of backing array without using its name in the definition. Then change the domain while keeping the same invariant. Record the new input, your prediction and the observed output. If your program passes only because its input is hard-coded, explain which part would need a reusable function in a larger project.</p>
 <h3 id="next-step-and-sources">Next step and sources<a class="heading-anchor" href="#next-step-and-sources" aria-label="Link to this section">#</a></h3>
-<p><a href="https://go.dev/ref/spec">Primary language or library documentation</a>, reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. This source supports the API contract; it does not verify the classroom worker. Runtime receipts are recorded separately by the repository validation tools. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.</p>
+<p><a href="https://go.dev/ref/spec">Primary language or library documentation</a>, reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for go-005: Arrays, slices and backing-storage ownership.
 Read courses/go/guides/go-005.md and my saved attempt based on courses/go/lessons/go-005.go.

@@ -198,11 +198,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-keyword">import</span> <span class="syntax-string">&quot;fmt&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">func</span> main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 1: Drain before iteration ends: Buffer 2 and 3, close and sum the channel.</span></span>
-<span class="source-line">	<span class="syntax-comment">// Expected: Both values arrive and the sum is 5.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 1: Drain before iteration ends: change one input: Copy worked example 1 into a scratch pad and change `ch &lt;- 2` to `ch &lt;- 3`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Expected: The changed run panics with `drain` because `sum == 5` no longer holds. Restoring the original line brings back the worked observation: both values arrive and the sum is 5.</span></span>
 <span class="source-line"></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 2: Distinguish zero from closed: Send zero, close, then receive twice with comma-ok.</span></span>
-<span class="source-line">	<span class="syntax-comment">// Expected: The first zero has ok true; the second has ok false.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 2: Distinguish zero from closed: debug a regression: A regression changed one token in worked example 2, so one line now reads `ch &lt;- 1`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Expected: Before the repair the program panics with `closed presence`; after it the line reads `ch &lt;- 0` again and the first zero has ok true; the second has ok false.</span></span>
 <span class="source-line"></span>
 <span class="source-line">	<span class="syntax-comment">// Exercise 3: Use sender ownership: Run a producer sending 1 and 2 before closing output.</span></span>
 <span class="source-line">	<span class="syntax-comment">// Expected: The consumer receives exactly two values.</span></span>

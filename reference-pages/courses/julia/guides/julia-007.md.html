@@ -198,13 +198,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Beginner; approximately 90 minutes. Direct prerequisites: <code>julia-006</code>.</p>
 <p>Trace array storage and indexing while choosing deliberately between copies and shared views.</p>
 <h3 id="classroom-execution">Classroom execution<a class="heading-anchor" href="#classroom-execution" aria-label="Link to this section">#</a></h3>
-<p>Choose <strong>Julia language and scientific computing</strong> in <code>/classroom</code>, open this unit, and select its prepared <code>julia</code> runtime. The worker starts a fresh <code>main.jl</code> process with two Julia threads, a fixed package environment, no startup file and offline package settings. Both worked examples are complete under that environment. Save your current pad before replacing it. No package, model or dataset is fetched by a lesson.</p>
+<p>Open <code>julia-007</code> in <code>/classroom</code> with its prepared <code>julia</code> runtime. Worked case A (inspect a column-major matrix) and worked case B (mutate a view and a copy) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing <code>julia-007: all reference checks passed</code>. The <a href="../README.md.html">course overview</a> describes the shared runtime: a fresh offline <code>main.jl</code> process with two threads and a fixed package environment.</p>
 <h3 id="shape-and-storage-are-separate-descriptions">Shape and storage are separate descriptions<a class="heading-anchor" href="#shape-and-storage-are-separate-descriptions" aria-label="Link to this section">#</a></h3>
 <p>An array has element values, an element type and an index shape. A matrix can contain six values arranged as two rows and three columns. Julia&#x27;s ordinary dense arrays use column-major storage, so a linear traversal visits a column before moving to the next. A scientific formula should state its intended axes rather than relying on storage order to supply meaning.</p>
 <p><code>size</code> reports axis lengths, <code>length</code> reports the number of elements and <code>eltype</code> describes their stored type. Generic code can inspect <code>axes</code> and use <code>eachindex</code>. Standard arrays are one-based, but not every possible custom array type has identical indexing conventions.</p>
 <p>Indexing a slice with an ordinary range often produces a copy, while <code>view</code> or <code>@view</code> creates a window into the original storage. Both can display the same values initially. Their difference becomes visible when one is mutated or when allocation costs matter.</p>
 <h3 id="worked-case-a-inspect-a-column-major-matrix">Worked case A: inspect a column-major matrix<a class="heading-anchor" href="#worked-case-a-inspect-a-column-major-matrix" aria-label="Link to this section">#</a></h3>
-<p>Reshaping the values 1 through 6 into a2-by -3 matrix fills its first column before the second. The example checks selected coordinates, the complete shape and the sum. <code>reshape</code> can share the underlying data, so a shape transformation should not automatically be treated as a deep copy.</p>
+<p>Reshaping the values 1 through 6 into a 2-by-3 matrix fills its first column before the second. The example checks selected coordinates, the complete shape and the sum. <code>reshape</code> can share the underlying data, so a shape transformation should not automatically be treated as a deep copy.</p>
 <pre class="highlighted-code"><code class="language-julia"><span class="syntax-keyword">using</span> Test
 
 <span class="syntax-keyword">function</span> worked_a<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
@@ -247,12 +247,12 @@ worked_b<span class="syntax-punctuation">(</span><span class="syntax-punctuation
 <p>The examples verify concrete storage-sharing and shape properties. They do not claim that views are always faster than copies. Access patterns, specialization and repeated reuse can affect performance, so compare semantically equivalent implementations under a measured workload.</p>
 <h3 id="six-investigations">Six investigations<a class="heading-anchor" href="#six-investigations" aria-label="Link to this section">#</a></h3>
 <h4 id="1-read-a-shape">1. Read a shape<a class="heading-anchor" href="#1-read-a-shape" aria-label="Link to this section">#</a></h4>
-<p>Compare a length 2 vector with a2-by -1 matrix.</p>
-<p><strong>Expected:</strong> Their sizes are(2,) and(2,1).</p>
+<p>Compare a length 2 vector with a 2-by-1 matrix.</p>
+<p><strong>Expected:</strong> Their sizes are <code>(2,)</code> and <code>(2, 1)</code>.</p>
 <p><strong>Hint:</strong> Element count does not determine the number of axes.</p>
 <h4 id="2-trace-column-order">2. Trace column order<a class="heading-anchor" href="#2-trace-column-order" aria-label="Link to this section">#</a></h4>
 <p>Locate value 5 in the reshaped matrix.</p>
-<p><strong>Expected:</strong> It is at row 1,column 3.</p>
+<p><strong>Expected:</strong> It is at row 1, column 3.</p>
 <p><strong>Hint:</strong> Follow columns through the input vector.</p>
 <h4 id="3-take-a-snapshot">3. Take a snapshot<a class="heading-anchor" href="#3-take-a-snapshot" aria-label="Link to this section">#</a></h4>
 <p>Mutate an ordinary slice from a vector.</p>
@@ -276,7 +276,7 @@ worked_b<span class="syntax-punctuation">(</span><span class="syntax-punctuation
 <li><a href="https://docs.julialang.org/en/v1/manual/interfaces/">Array interfaces</a></li>
 </ul>
 <h3 id="study-companion">Study companion<a class="heading-anchor" href="#study-companion" aria-label="Link to this section">#</a></h3>
-<p>Use the repository learning-companion skill with this lesson ID, your prediction and your actual source/output. Ask for a diagnosis of the first incorrect type, shape, state transition or assumption. Keep observed execution distinct from a timing claim, inferred mathematical result or external deployment.</p></article>
+<p>A repository-aware assistant with the learning-companion skill can review <code>julia-007</code> with you. Give it your prediction for one investigation, your source and the actual output, and ask it to find the first incorrect assumption about array shape, column major, copy, view or aliasing.</p></article>
   </main>
 </body>
 </html>

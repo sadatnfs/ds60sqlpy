@@ -214,7 +214,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercise-5-interpret-a-local-simulation">Exercise 5: Interpret a local simulation<a class="heading-anchor" href="#exercise-5-interpret-a-local-simulation" aria-label="Link to this section">#</a></h3>
 <p>The actual execution surface determines the scope of the evidence.</p>
 <p><strong>Expected:</strong> It demonstrates the mapped mathematical reduction, not network communication or multi-host performance.</p>
-<p>Use the CPU model as a numerical oracle for a later real deployment, retaining separate receipts.</p>
+<p>Use the CPU model as a numerical oracle for a later real deployment, retaining separate run records.</p>
 <h3 id="exercise-6-specify-a-scaling-study">Exercise 6: Specify a scaling study<a class="heading-anchor" href="#exercise-6-specify-a-scaling-study" aria-label="Link to this section">#</a></h3>
 <p>Changing total batch size or training semantics can make a throughput comparison scientifically misleading even when both programs complete.</p>
 <p><strong>Expected:</strong> A plan fixing effective data/reduction, recording actual devices, synchronizing work, and separating communication, compilation and execution.</p>

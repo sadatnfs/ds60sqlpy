@@ -213,7 +213,7 @@ proxy -&gt; separate upstream HTTP or TLS connection -&gt; app response</code></
 <h4 id="worked-example-1-classify-two-failures">Worked example 1: Classify two failures<a class="heading-anchor" href="#worked-example-1-classify-two-failures" aria-label="Link to this section">#</a></h4>
 <p>These are intentionally synthetic symptoms.</p>
 <pre class="highlighted-code"><code class="language-text">TLS name mismatch: client cannot verify requested identity
-HTTP404: an HTTP server responded but route/content was not found</code></pre>
+HTTP 404: an HTTP server responded but route/content was not found</code></pre>
 <p><strong>Expected observation:</strong> The second occurs after a successful enough transport exchange to receive HTTP.</p>
 <h4 id="worked-example-2-trace-two-encrypted-hops">Worked example 2: Trace two encrypted hops<a class="heading-anchor" href="#worked-example-2-trace-two-encrypted-hops" aria-label="Link to this section">#</a></h4>
 <p>Each connection has its own peer identity.</p>
@@ -249,7 +249,7 @@ kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<sp
 <p><strong>Expected evidence:</strong> Client-facing identity and upstream identity are both explicit.</p>
 <p><strong>Progressive hint:</strong> Name the caller and the first layer that can distinguish the possible causes. Compare the relevant object fields before changing a route, policy or workload.</p>
 <h3 id="diagnosis-failure-boundaries-and-common-mistakes">Diagnosis, failure boundaries and common mistakes<a class="heading-anchor" href="#diagnosis-failure-boundaries-and-common-mistakes" aria-label="Link to this section">#</a></h3>
-<p>The controlled failure in this chapter is: Diagnose certificate mismatch separately from 404. Its distinguishing result is Identity validation versus HTTP routing/content. Keep that observation separate from guesses about adjacent layers. A DNS answer is not proof of a listening process. A Ready Pod is not proof of an externally reachable listener. A load-balancer address is not proof of TLS identity, path routing or a correct application response.</p>
+<p>Exercise 4 is this chapter&#x27;s controlled failure: Diagnose certificate mismatch separately from 404. The distinguishing result: Identity validation versus HTTP routing/content. Keep that observation separate from guesses about adjacent layers. A DNS answer is not proof of a listening process. A Ready Pod is not proof of an externally reachable listener. A load-balancer address is not proof of TLS identity, path routing or a correct application response.</p>
 <p>Use bounded observations from the actual caller&#x27;s network namespace. Preserve timestamps, object UIDs, generation or resource versions where relevant, and the intended image identity. A stale healthy result from another namespace or an earlier revision cannot qualify the current path. Avoid broad packet captures, all-namespace dumps and secret output when a smaller field-level observation answers the question.</p>
 <p>Do not repair a failed example by disabling NetworkPolicy, making a workload privileged, publishing every port or selecting another cluster. Those changes alter the contract rather than explain the failure. An unavailable capability is a valid boundary to report. Rehearse its mechanism with the synthetic fixture until the owned target is deliberately provisioned.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
@@ -257,8 +257,8 @@ kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<sp
 <p>Complete the six evidence records before advancing. For optional live work, review the owned resource ledger and UID-aware cleanup result. Keep source validation, API acceptance, controller status, actual traffic, application output and cleanup as distinct evidence. No local exercise establishes every cloud provider, CNI implementation, Kubernetes version or public production deployment.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
-<li><a href="https://kubernetes.io/docs/concepts/configuration/secret/">Official reference 1</a></li>
-<li><a href="https://gateway-api.sigs.k8s.io/guides/user-guides/tls/">Official reference 2</a></li>
+<li><a href="https://kubernetes.io/docs/concepts/configuration/secret/">Kubernetes documentation: Secret</a></li>
+<li><a href="https://gateway-api.sigs.k8s.io/guides/user-guides/tls/">Gateway API documentation: TLS</a></li>
 </ul>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for k8s-055: TLS termination, certificates and upstream identity.

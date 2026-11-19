@@ -194,33 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-016_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-016-explanatory-solutions">docker-016: explanatory solutions<a class="heading-anchor" href="#docker-016-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These are explanations of the supplied teaching fixtures, not fabricated engine results.</p>
-<h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
-<p>A multi-stage Dockerfile uses more than one FROM instruction. Each stage has its own filesystem and configuration. A builder stage can contain compilers and tests; a final stage can copy only the artifacts required to run. This reduces unnecessary tooling in the shipped image and makes the build-to-runtime boundary inspectable.</p>
-<p>Copying a binary is not proof that it is self-contained. Dynamically linked programs require compatible libraries and an appropriate loader. Language runtimes, certificates, timezone data and user identity can also be necessary. A tiny image that fails at startup is not an improvement over a larger correct one.</p>
-<p>Multi-stage design is about an explicit artifact contract. Define what the build produces, what tests validate it, what the final image needs and how the final image is exercised. The runtime test must execute the final stage, because tests in the builder can pass using files or tools absent from the shipped stage.</p>
-<p>Name stages with <code>AS build</code>, then use <code>COPY --from=build /path /destination</code>. The source path refers to that stage’s filesystem, not the local host. <code>--target</code> deliberately stops at a named stage for debugging or testing. Do not accidentally distribute a debug stage containing credentials or development-only files.</p>
-<p>The following Python example demonstrates stage selection with a text artifact; compiled-language lessons apply the same pattern to actual build output. It does not claim to reduce Python runtime size. A real optimized build requires measuring the resulting image and testing its runtime assumptions.</p>
+<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-016.md</code>.</p>
 <h3 id="exercise-1-locate-the-filesystem-used-by-copy-from">Exercise 1: Locate the filesystem used by COPY --from.<a class="heading-anchor" href="#exercise-1-locate-the-filesystem-used-by-copy-from" aria-label="Link to this section">#</a></h3>
-<p>It is not a host path. This distinction lets the final stage copy exactly the artifact created by the build without relying on a developer’s local output directory.</p>
-<p><strong>Expected:</strong> The named build stage.</p>
+<p><strong>Expected evidence:</strong> The named build stage.</p>
+<p><strong>Why:</strong> It is not a host path. This distinction lets the final stage copy exactly the artifact created by the build without relying on a developer’s local output directory.</p>
 <h3 id="exercise-2-predict-failure-when-a-shared-library-is-omitted">Exercise 2: Predict failure when a shared library is omitted.<a class="heading-anchor" href="#exercise-2-predict-failure-when-a-shared-library-is-omitted" aria-label="Link to this section">#</a></h3>
-<p>The loader and dependencies are part of runtime requirements. A successful compile does not prove the executable can start in a different filesystem.</p>
-<p><strong>Expected:</strong> The final process fails even if builder tests passed.</p>
+<p><strong>Expected answer:</strong> The final process fails even if builder tests passed.</p>
+<p><strong>Why:</strong> The loader and dependencies are part of runtime requirements. A successful compile does not prove the executable can start in a different filesystem.</p>
 <h3 id="exercise-3-design-a-builder-to-runtime-artifact-list">Exercise 3: Design a builder-to-runtime artifact list.<a class="heading-anchor" href="#exercise-3-design-a-builder-to-runtime-artifact-list" aria-label="Link to this section">#</a></h3>
-<p>Include certificates or configuration defaults only when needed. The list should be small enough to review and broad enough to run correctly.</p>
-<p><strong>Expected:</strong> Executable or package plus explicit required runtime assets.</p>
+<p><strong>Expected evidence:</strong> Executable or package plus explicit required runtime assets.</p>
+<p><strong>Why:</strong> Include certificates or configuration defaults only when needed. The list should be small enough to review and broad enough to run correctly.</p>
 <h3 id="exercise-4-diagnose-an-accidentally-shipped-debug-target">Exercise 4: Diagnose an accidentally shipped debug target.<a class="heading-anchor" href="#exercise-4-diagnose-an-accidentally-shipped-debug-target" aria-label="Link to this section">#</a></h3>
-<p>A named target changes what is built. Verify the release command and artifact rather than assuming the last intended stage was selected.</p>
-<p><strong>Expected:</strong> Inspect final stage selection and image contents.</p>
+<p><strong>Expected answer:</strong> Inspect final stage selection and image contents.</p>
+<p><strong>Why:</strong> A named target changes what is built. Verify the release command and artifact rather than assuming the last intended stage was selected.</p>
 <h3 id="exercise-5-explain-why-a-smaller-image-is-not-automatically-safer">Exercise 5: Explain why a smaller image is not automatically safer.<a class="heading-anchor" href="#exercise-5-explain-why-a-smaller-image-is-not-automatically-safer" aria-label="Link to this section">#</a></h3>
-<p>Size is one useful measurement, but security also depends on what executes, what it can access and how its dependencies are maintained.</p>
-<p><strong>Expected:</strong> Correct dependencies, patching and privileges still matter.</p>
+<p><strong>Expected answer:</strong> Correct dependencies, patching and privileges still matter.</p>
+<p><strong>Why:</strong> Size is one useful measurement, but security also depends on what executes, what it can access and how its dependencies are maintained.</p>
 <h3 id="exercise-6-specify-final-image-acceptance">Exercise 6: Specify final-image acceptance.<a class="heading-anchor" href="#exercise-6-specify-final-image-acceptance" aria-label="Link to this section">#</a></h3>
-<p>This exposes missing libraries, permissions and files that builder tests can hide. Preserve the exact tested image identity for delivery.</p>
-<p><strong>Expected:</strong> Run the exact final image under intended user, mounts and network.</p>
+<p><strong>Expected evidence:</strong> Run the exact final image under intended user, mounts and network.</p>
+<p><strong>Why:</strong> This exposes missing libraries, permissions and files that builder tests can hide. Preserve the exact tested image identity for delivery.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful solution identifies the exact object, the phase when a setting takes effect, the expected normal result and an observation that disproves it. Repeating a command until it succeeds hides the mechanism. Change one variable, keep a failure record, and test the intended behavior again. Source examples here are small enough to inspect; a production system additionally needs ownership, lifecycle, data recovery and operational review. The host exercises are optional and must stay within the learner-created project.</p></article>
+<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>
 </body>
 </html>

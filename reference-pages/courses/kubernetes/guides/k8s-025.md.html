@@ -212,22 +212,20 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A negative fixture containing a hook Job or ClusterRole should fail the course review before any lifecycle operation. Do not run plugins or fetch a chart from an unrecorded remote source to satisfy a missing dependency.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-trace-one-values-substitution">Worked example 1: Trace one values substitution<a class="heading-anchor" href="#worked-example-1-trace-one-values-substitution" aria-label="Link to this section">#</a></h4>
-<p>Default values replicas 1 and approved image0.2.0 produce the expected fixed Deployment. An override to replicas 2 changes only spec.replicas in this chart.</p>
+<p>Default values replicas 1 and approved image 0.2.0 produce the expected fixed Deployment. An override to replicas 2 changes only spec.replicas in this chart.</p>
 <p><strong>Expected:</strong> The rendered resource set remains one Deployment with no namespace escape or new lifecycle object.</p>
 <h4 id="worked-example-2-detect-a-hidden-hook">Worked example 2: Detect a hidden hook<a class="heading-anchor" href="#worked-example-2-detect-a-hidden-hook" aria-label="Link to this section">#</a></h4>
 <p>A rendered Job contains metadata.annotations.helm.sh/hook=post-install. Even if its name sounds harmless, it represents a lifecycle action absent from the ordinary Deployment contract.</p>
 <p><strong>Expected:</strong> Reject it from this course operation before install; rendering itself does not execute the hook.</p>
 <h3 id="inspect-the-specific-owned-object">Inspect the specific owned object<a class="heading-anchor" href="#inspect-the-specific-owned-object" aria-label="Link to this section">#</a></h3>
 <p>Only after the chapter&#x27;s host capability is provisioned and its resources remain present, use the explicit receipt fields described in <a href="../host-labs.md.html">host-labs.md</a>. A completed one-shot browser Run has already cleaned its objects. The following read does not provision the missing capability and does not justify changing credentials after a Forbidden result.</p>
-<p>POSIX:</p>
+<p>Bash on Linux, macOS or Ubuntu under WSL 2:</p>
 <pre class="highlighted-code"><code class="language-bash">: <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_KUBECONFIG<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt path</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 : <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_CONTEXT<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt context</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 : <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_NAMESPACE<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt namespace</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<span class="syntax-string">&quot;</span> --context <span class="syntax-string">&quot;</span>$LAB_CONTEXT<span class="syntax-string">&quot;</span> --namespace <span class="syntax-string">&quot;</span>$LAB_NAMESPACE<span class="syntax-string">&quot;</span> get deployment hello -o json</code></pre>
-<p>PowerShell:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">-not</span> $env:LAB_KUBECONFIG <span class="syntax-operator">-or</span> <span class="syntax-operator">-not</span> $env:LAB_CONTEXT <span class="syntax-operator">-or</span> <span class="syntax-operator">-not</span> $env:LAB_NAMESPACE<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;Owned receipt fields are required.&#x27;</span> <span class="syntax-punctuation">}</span>
-<span class="syntax-punctuation">&amp;</span> kubectl <span class="syntax-punctuation">-</span>-kubeconfig $env:LAB_KUBECONFIG <span class="syntax-punctuation">-</span>-context $env:LAB_CONTEXT <span class="syntax-punctuation">-</span>-namespace $env:LAB_NAMESPACE get deployment hello -o json
-<span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>$LASTEXITCODE <span class="syntax-operator">-ne</span> 0<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;The scoped observation failed.&#x27;</span> <span class="syntax-punctuation">}</span></code></pre>
+<p>Windows uses the same Bash commands inside WSL 2. The lab adapter refuses native Windows credential handling, so do not run kubectl against the receipt from PowerShell. From PowerShell, only open your WSL 2 distribution (the name reported by <code>wsl.exe --list --verbose</code>), change to your checkout with its Linux path, then run the Bash block above unchanged:</p>
+<pre class="highlighted-code"><code class="language-powershell">wsl<span class="syntax-punctuation">.</span>exe <span class="syntax-punctuation">-</span>-distribution Ubuntu</code></pre>
 <p>Retain only the fields needed by this chapter&#x27;s prediction. A NotFound result may be expected after one-shot cleanup; a Forbidden result may identify a deliberately absent advanced capability. Neither result authorizes an ambient-context fallback.</p>
 <h3 id="run-and-bounded-evidence">Run and bounded evidence<a class="heading-anchor" href="#run-and-bounded-evidence" aria-label="Link to this section">#</a></h3>
 <p>The app artifact is a reading worksheet, <code>courses/kubernetes/lessons/k8s-025.md</code>. The current browser adapter does not provide the full <strong>qualified offline Helm rendering; no release installation in normal worker</strong> operation. Use the synthetic fixture and offline check first. Live work follows <a href="../host-labs.md.html">the scoped host-lab guide</a> only when the named capability and owned target have been provisioned. A worksheet or static check is never a cluster execution receipt.</p>
@@ -236,32 +234,32 @@ kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<sp
 <h4 id="exercise-1-inventory-the-vendored-chart">Exercise 1: Inventory the vendored chart<a class="heading-anchor" href="#exercise-1-inventory-the-vendored-chart" aria-label="Link to this section">#</a></h4>
 <p>List metadata, values, schema, template and expected output.</p>
 <p><strong>Expected result/shape:</strong> One local template, no dependencies/plugins/hooks/CRDs.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: One local template, no dependencies/plugins/hooks/CRDs.</p>
+<p><strong>Verify:</strong> Compare your inventory with a directory listing; the chart must have no <code>charts/</code> dependencies, no <code>crds/</code> directory and exactly one template.</p>
 <p><strong>Progressive hints:</strong> Inspect the complete directory, not only values.yaml.</p>
 <h4 id="exercise-2-render-the-default-locally">Exercise 2: Render the default locally<a class="heading-anchor" href="#exercise-2-render-the-default-locally" aria-label="Link to this section">#</a></h4>
 <p>Use already prepared pinned Helm and compare output with expected-default.json.</p>
 <p><strong>Expected result/shape:</strong> One Deployment with replicas 1 and approved image; record actual renderer receipt or unavailable status.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: One Deployment with replicas 1 and approved image; record actual renderer receipt or unavailable status.</p>
+<p><strong>Verify:</strong> Record <code>helm version</code> and diff the <code>helm template</code> output against <code>expected-default.json</code> structurally.</p>
 <p><strong>Progressive hints:</strong> No network dependency step is part of this fixture.</p>
 <h4 id="exercise-3-review-an-allowed-override">Exercise 3: Review an allowed override<a class="heading-anchor" href="#exercise-3-review-an-allowed-override" aria-label="Link to this section">#</a></h4>
 <p>Render replicas 2 and diff the full object.</p>
 <p><strong>Expected result/shape:</strong> Only spec.replicas changes.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Only spec.replicas changes.</p>
+<p><strong>Verify:</strong> Diff the default and override renders; only one field path may differ.</p>
 <p><strong>Progressive hints:</strong> Schema validation and full diff serve different checks.</p>
 <h4 id="exercise-4-reject-invalid-values">Exercise 4: Reject invalid values<a class="heading-anchor" href="#exercise-4-reject-invalid-values" aria-label="Link to this section">#</a></h4>
 <p>Try replicas 3, an unapproved image or an extra unknown key in a scratch values file.</p>
 <p><strong>Expected result/shape:</strong> Schema/review rejection before any cluster operation.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Schema/review rejection before any cluster operation.</p>
+<p><strong>Verify:</strong> Render each scratch values file and record which schema rule rejects it before any cluster operation.</p>
 <p><strong>Progressive hints:</strong> Read enum, const and additionalProperties restrictions.</p>
 <h4 id="exercise-5-detect-lifecycle-resources">Exercise 5: Detect lifecycle resources<a class="heading-anchor" href="#exercise-5-detect-lifecycle-resources" aria-label="Link to this section">#</a></h4>
 <p>Review a supplied hook annotation or cluster-scoped kind.</p>
 <p><strong>Expected result/shape:</strong> The output is outside the normal worker contract and is not installed.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: The output is outside the normal worker contract and is not installed.</p>
+<p><strong>Verify:</strong> Search the rendered output for <code>helm.sh/hook</code> annotations and for any kind other than Deployment.</p>
 <p><strong>Progressive hints:</strong> A chart can produce more than its headline Deployment.</p>
 <h4 id="exercise-6-hand-off-a-reviewed-render">Exercise 6: Hand off a reviewed render<a class="heading-anchor" href="#exercise-6-hand-off-a-reviewed-render" aria-label="Link to this section">#</a></h4>
 <p>Record chart/values hashes, renderer version, full diff and separate apply/application acceptance.</p>
 <p><strong>Expected result/shape:</strong> A reviewer can reproduce the local render and identify the exact owned runtime boundary.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: A reviewer can reproduce the local render and identify the exact owned runtime boundary.</p>
+<p><strong>Verify:</strong> A reviewer must reproduce the render from your chart hash, values hash and renderer version without contacting a cluster.</p>
 <p><strong>Progressive hints:</strong> Do not equate helm template with helm install.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain the mechanism behind the first example, then distinguish it from this boundary case: Reject it from this course operation before install; rendering itself does not execute the hook. State which observations are synthetic and which, if any, were read from your owned runtime.</p>
@@ -269,7 +267,7 @@ kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<sp
 <p>Pin chart contents, dependency inputs, values, renderer version and rendered output identity. A chart version string alone can be reused or refer to changed bytes. Diff the complete output before applying, including security and namespace fields.</p>
 <p>If Helm is unavailable, the live render row remains unavailable while the source/expected-output reasoning can be completed offline. A valid render is not API acceptance, reconciliation or application correctness. Those remain separate owned operations with their own cleanup receipts.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
-<p>Close the answer and reconstruct the reasoning for Exercise6, Hand off a reviewed render. Name the exact source and observed identity you would require before claiming the changed case succeeded.</p>
+<p>Close the answer and reconstruct the reasoning for Exercise 6 (Hand off a reviewed render). Name the exact source and observed identity you would require before claiming the changed case succeeded.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue to <code>k8s-026</code> after preserving the six evidence records.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>

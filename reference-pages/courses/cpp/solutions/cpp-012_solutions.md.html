@@ -219,32 +219,32 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Split add declaration, definition and caller using the supplied host-project recipe.</p>
 <p><strong>Expected:</strong> math.hpp, math.cpp and main.cpp build one executable returning 5.</p>
 <p><strong>Reasoning:</strong> The compiler sees declarations; the linker finds the body.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Confirm <code>math.hpp</code> holds only the declaration, <code>math.cpp</code> the single definition and <code>main.cpp</code> the caller, then run the executable and check that <code>add(2, 3)</code> produced 5.</p>
 <h3 id="exercise-2-compile-one-object">Exercise 2: Compile one object<a class="heading-anchor" href="#exercise-2-compile-one-object" aria-label="Link to this section">#</a></h3>
 <p>Compile main.cpp with -c before linking.</p>
 <p><strong>Expected:</strong> main.o exists even though the function body is in math.cpp.</p>
 <p><strong>Reasoning:</strong> -c stops before the final link stage.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Run <code>g++ -std=c++20 -c main.cpp</code>, then list the directory and confirm <code>main.o</code> exists and no executable has been produced yet.</p>
 <h3 id="exercise-3-link-the-complete-set">Exercise 3: Link the complete set<a class="heading-anchor" href="#exercise-3-link-the-complete-set" aria-label="Link to this section">#</a></h3>
 <p>Link main.o and math.o.</p>
 <p><strong>Expected:</strong> Executable runs, exit 0 and value 5.</p>
 <p><strong>Reasoning:</strong> Both object files contribute definitions/references.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Link with <code>g++ main.o math.o -o app</code>, run <code>./app</code>, and check both the printed value 5 and a status of 0 from <code>echo $?</code>.</p>
 <h3 id="exercise-4-diagnose-missing-object">Exercise 4: Diagnose missing object<a class="heading-anchor" href="#exercise-4-diagnose-missing-object" aria-label="Link to this section">#</a></h3>
 <p>Omit math.o deliberately.</p>
 <p><strong>Expected:</strong> Nonzero link status naming an unresolved add symbol.</p>
 <p><strong>Reasoning:</strong> Changing an include cannot supply a missing linked definition.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Link <code>main.o</code> alone and keep the undefined reference to <code>add(int, int)</code> message and the nonzero status; no new executable may appear.</p>
 <h3 id="exercise-5-diagnose-duplicate-definition">Exercise 5: Diagnose duplicate definition<a class="heading-anchor" href="#exercise-5-diagnose-duplicate-definition" aria-label="Link to this section">#</a></h3>
 <p>Put a non-inline add body in a header included by both files.</p>
 <p><strong>Expected:</strong> A duplicate-definition link failure; restore one source definition.</p>
 <p><strong>Reasoning:</strong> Include guards operate per translation unit.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Compile both files and link them; the linker must report a multiple definition of <code>add(int, int)</code>, and the error must disappear once the body moves back to <code>math.cpp</code>.</p>
 <h3 id="exercise-6-transfer-a-library-boundary">Exercise 6: Transfer a library boundary<a class="heading-anchor" href="#exercise-6-transfer-a-library-boundary" aria-label="Link to this section">#</a></h3>
 <p>Add subtract declaration and definition and a caller test 5-3.</p>
 <p><strong>Expected:</strong> Result 2 with one definition and matching signature.</p>
 <p><strong>Reasoning:</strong> Changing parameter types creates a different overload, not the intended definition.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p></article>
+<p><strong>Verify:</strong> Assert <code>subtract(5, 3) == 2</code> in <code>main.cpp</code>, and check that the declaration in <code>math.hpp</code> and the definition in <code>math.cpp</code> have the same parameter types.</p></article>
   </main>
 </body>
 </html>

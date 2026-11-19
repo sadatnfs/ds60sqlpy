@@ -9,7 +9,7 @@
     content="default-src 'none'; style-src 'self' file: 'unsafe-inline'; font-src data:; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
   >
   <link rel="stylesheet" href="../src/ds60sqlpy/assets/vendor/textbook/fonts.css">
-  <title>python-pro-02 · Concurrency and Parallelism Decision Lab · DS60</title>
+  <title>python-pro-02 · Choosing Concurrency or Parallelism · DS60</title>
   <style>
     :root {
       --paper: #f6f2e8;
@@ -312,7 +312,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <div class="shell">
       <section class="hero">
         <p class="eyebrow">python · lesson python-pro-02</p>
-        <h1>Concurrency and Parallelism Decision Lab</h1>
+        <h1>Choosing Concurrency or Parallelism</h1>
         <p class="hero-copy">Professional Python engineering</p>
         <div class="meta">
           <span class="tag">advanced</span>
@@ -384,11 +384,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
         <div class="artifact-content"><h3 id="guide--concurrency-and-parallelism-decision-lab">Concurrency and parallelism decision lab<a class="heading-anchor" href="#guide--concurrency-and-parallelism-decision-lab" aria-label="Link to this section">#</a></h3>
 <p><strong>Stable ID:</strong> <code>python-pro-02</code></p>
 <p><strong>Level:</strong> advanced</p>
-<p><strong>Estimated time:</strong> 180–240 minutes</p>
+<p><strong>Estimated time:</strong> 180-240 minutes</p>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Catalog prerequisite:</strong> <code>python-15</code></li>
-<li>Python Days 1–15</li>
+<li>Python Days 1-15</li>
 <li>Functions, exceptions, context managers, and basic testing</li>
 <li><code>async</code>/<code>await</code> vocabulary from Bridge Day 7 is helpful but not required</li>
 </ul>
@@ -468,7 +468,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <pre class="highlighted-code"><code class="language-text">producer -&gt; queue(maxsize=2) -&gt; three long-lived consumers</code></pre>
 <p>When the queue is full, <code>await queue.put(...)</code> pauses the producer. This is backpressure. The consumer count bounds active worker calls.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
-<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python and data science</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
 <p><strong>Optional contributor route:</strong> use the prepared environment in <a href="../reference-pages/CONTRIBUTING.md.html">CONTRIBUTING</a> on Linux, macOS or Windows through WSL 2. The commands below assume its packages are already installed. They are not prerequisites for opening this lesson in the Docker classroom. Local <code>.learning/</code> files and CLI progress belong to this checkout; they do not read or update the Docker classroom&#x27;s named learning volume.</p>
 <p>Work from the repository root. First run the answer-free learner module named in this guide&#x27;s original walkthrough. Read each TODO as a contract: record the input, returned value, raised exception, and side effect before implementing it. Then run the focused test command in <strong>Self-check</strong>. Keep exploratory changes in a copy or a new test; the checked-in solution remains a comparison artifact.</p>
 <p>Prepared POSIX/WSL contributor terminal:</p>
@@ -579,7 +579,7 @@ results<span class="syntax-punctuation">,</span> peak <span class="syntax-operat
 <p>Prepared POSIX/WSL contributor terminal:</p>
 <pre class="highlighted-code"><code class="language-bash">uv run --no-sync python python/professional/solutions/py_pro_02_concurrency_parallelism_solution.py --with-processes</code></pre>
 <p>The workload is intentionally small for safety; process startup may make it slower than sequential execution. That observation is part of the lesson.</p>
-<p><strong>Verify:</strong> isolate CPU work; make the CPU function a top-level function with serializable arguments and results; use: and ProcessPoolExecutor; run process creation only beneath: the documented POSIX/WSL command: The workload is intentionally small for safety; process startup may make it slower than sequential execution.</p>
+<p><strong>Verify:</strong> run the solution module with <code>--with-processes</code> and record its process-pool result and wall time beside the sequential run; confirm that the worker function is defined at module top level, that the pool is created from <code>multiprocessing.get_context(&quot;spawn&quot;)</code>, and that no process starts outside the <code>__main__</code> guard. A slower pool on this small workload is the expected startup-cost observation.</p>
 <h5 id="guide--exercise-6-reason-about-shared-state">Exercise 6: reason about shared state<a class="heading-anchor" href="#guide--exercise-6-reason-about-shared-state" aria-label="Link to this section">#</a></h5>
 <p>Implement <code>deterministic_lost_update</code>. Force two workers to read the same snapshot, then apply both writes. Compare with two serialized increments.</p>
 <p>List three repairs:</p>
@@ -647,7 +647,7 @@ results<span class="syntax-punctuation">,</span> peak <span class="syntax-operat
 </ul>
 <h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into the AI tutor while the repository root is open:</p>
-<pre class="highlighted-code"><code class="language-text">Tutor me through `python-pro-02` — Concurrency and parallelism decision lab.
+<pre class="highlighted-code"><code class="language-text">Tutor me through `python-pro-02`: Concurrency and parallelism decision lab.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize choosing async, threads, or processes and bounding concurrent work. Use exactly these maintained learner materials:
@@ -1079,7 +1079,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <p><strong>Reference reasoning:</strong> Choose concurrency from workload behavior, then bound task ownership, queued work, active work, cancellation, and process/thread lifecycle explicitly. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> Unbounded task creation, swallowed cancellation, shared mutation, or process startup outside a main guard can make correct-looking code leak work or fail on Windows.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
-<p><strong>Verify:</strong> isolate CPU work; make the CPU function a top-level function with serializable arguments and results; use: and ProcessPoolExecutor; run process creation only beneath: Windows PowerShell: macOS/Linux: The workload is intentionally small for safety; process startup may make it slower than sequential execution.</p>
+<p><strong>Verify:</strong> run the solution module with <code>--with-processes</code> and record its process-pool result and wall time beside the sequential run; confirm that the worker function is defined at module top level, that the pool is created from <code>multiprocessing.get_context(&quot;spawn&quot;)</code>, and that no process starts outside the <code>__main__</code> guard. A slower pool on this small workload is the expected startup-cost observation.</p>
 <h5 id="solution-1--exercise-6-reason-about-shared-state">Exercise 6: reason about shared state<a class="heading-anchor" href="#solution-1--exercise-6-reason-about-shared-state" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Implement <code>deterministic_lost_update</code>. Force two workers to read the same snapshot, then apply both writes. Compare with two serialized increments. List three repairs: - one owner task/process receives update messages, - a lock protects the complete read/modify/write unit, or - an external system performs an atomic update.</p>
 <p><strong>Reference reasoning:</strong> Choose concurrency from workload behavior, then bound task ownership, queued work, active work, cancellation, and process/thread lifecycle explicitly. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
@@ -1467,7 +1467,7 @@ merely ran is not evidence of mastery.</code></pre></div>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through `python-pro-02` — Concurrency and parallelism decision lab.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through `python-pro-02`: Concurrency and parallelism decision lab.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize choosing async, threads, or processes and bounding concurrent work. Use exactly these maintained learner materials:
@@ -1501,8 +1501,8 @@ merely ran is not evidence of mastery.</textarea>
       </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
-        <a class="nav-card" href="python-svc-01.html"><small>Previous lesson</small><strong>python-svc-01</strong><span>Reliable HTTP Clients and External-Service Boundaries</span></a>
-        <a class="nav-card next" href="python-data-01.html"><small>Next lesson</small><strong>python-data-01</strong><span>Columnar Data, Arrow, and Embedded Analytical SQL</span></a>
+        <a class="nav-card" href="python-svc-01.html"><small>Previous lesson</small><strong>python-svc-01</strong><span>Reliable HTTP Clients for External Services</span></a>
+        <a class="nav-card next" href="python-data-01.html"><small>Next lesson</small><strong>python-data-01</strong><span>Columnar Data with Arrow, Parquet, and DuckDB</span></a>
       </nav>
     </div>
   </main>

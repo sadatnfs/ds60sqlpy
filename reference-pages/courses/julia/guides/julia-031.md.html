@@ -198,7 +198,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Advanced; approximately 150 minutes. Direct prerequisites: <code>julia-003</code>, <code>julia-010</code>, <code>julia-027</code>.</p>
 <p>Inspect syntax without evaluating untrusted text, implement a hygienic single-evaluation macro and call a precisely typed Linux C function.</p>
 <h3 id="classroom-execution">Classroom execution<a class="heading-anchor" href="#classroom-execution" aria-label="Link to this section">#</a></h3>
-<p>Choose <strong>Julia language and scientific computing</strong> in <code>/classroom</code>, open this unit, and select its prepared <code>julia</code> runtime. The worker starts a fresh <code>main.jl</code> process with two Julia threads, a fixed package environment, no startup file and offline package settings. Both worked examples are complete under that environment. Save your current pad before replacing it. No package, model or dataset is fetched by a lesson.</p>
+<p>Open <code>julia-031</code> in <code>/classroom</code> with its prepared <code>julia</code> runtime. Worked case A (inspect and expand a bounded expression) and worked case B (count bytes through the actual C library) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing <code>julia-031: all reference checks passed</code>. The <a href="../README.md.html">course overview</a> describes the shared runtime: a fresh offline <code>main.jl</code> process with two threads and a fixed package environment.</p>
 <h3 id="code-can-be-represented-as-data">Code can be represented as data<a class="heading-anchor" href="#code-can-be-represented-as-data" aria-label="Link to this section">#</a></h3>
 <p>Julia represents many syntax forms as expressions. Quoting <code>:(1 + 2)</code> constructs a representation instead of immediately adding. <code>Meta.parse</code> converts a source string into syntax, but parsing alone does not validate its safety or intended meaning. Evaluating arbitrary parsed input can execute arbitrary program behavior. Configuration and learner records should remain data with a defined schema.</p>
 <p>Macros transform syntax before the resulting code executes. Ordinary functions receive evaluated argument values. Prefer a function when values are sufficient; macros add complexity around name resolution, evaluation count and source locations. A macro is useful when it must introduce control structure or inspect the caller&#x27;s expression.</p>
@@ -279,8 +279,8 @@ worked_b<span class="syntax-punctuation">(</span><span class="syntax-punctuation
 <p>C++ APIs add name mangling, object layout and exception conventions; a reviewed C wrapper is often the clearer boundary. Python interoperability likewise needs a prepared bridge and compatible environments, which this runtime does not install during lessons. Connect to the existing <a href="../../c/README.md.html">C</a> and <a href="../../cpp/README.md.html">C++</a> paths for memory and ABI fundamentals. Successful <code>strlen</code> execution qualifies this narrow interface, not arbitrary native libraries or unsafe pointers.</p>
 <h3 id="six-investigations">Six investigations<a class="heading-anchor" href="#six-investigations" aria-label="Link to this section">#</a></h3>
 <h4 id="1-inspect-syntax">1. Inspect syntax<a class="heading-anchor" href="#1-inspect-syntax" aria-label="Link to this section">#</a></h4>
-<p>Identify the head and first argument of parsed 1+2.</p>
-<p><strong>Expected:</strong> The head is:call and the function symbol is:+.</p>
+<p>Identify the head and first argument of parsed <code>1 + 2</code>.</p>
+<p><strong>Expected:</strong> The head is <code>:call</code> and the function symbol is <code>:+</code>.</p>
 <p><strong>Hint:</strong> Parsing constructs syntax.</p>
 <h4 id="2-detect-duplicate-evaluation">2. Detect duplicate evaluation<a class="heading-anchor" href="#2-detect-duplicate-evaluation" aria-label="Link to this section">#</a></h4>
 <p>Explain what the counter would show if the macro evaluated its argument twice.</p>
@@ -308,7 +308,7 @@ worked_b<span class="syntax-punctuation">(</span><span class="syntax-punctuation
 <li><a href="https://docs.julialang.org/en/v1/manual/calling-c-and-fortran-code/">Calling C and Fortran</a></li>
 </ul>
 <h3 id="study-companion">Study companion<a class="heading-anchor" href="#study-companion" aria-label="Link to this section">#</a></h3>
-<p>Use the repository learning-companion skill with this lesson ID, your prediction and your actual source/output. Ask for a diagnosis of the first incorrect type, shape, state transition or assumption. Keep observed execution distinct from a timing claim, inferred mathematical result or external deployment.</p></article>
+<p>A repository-aware assistant with the learning-companion skill can review <code>julia-031</code> with you. Give it your prediction for one investigation, your source and the actual output, and ask it to find the first incorrect assumption about Expr, macro hygiene, single evaluation, ccall, ABI or UTF8.</p></article>
   </main>
 </body>
 </html>

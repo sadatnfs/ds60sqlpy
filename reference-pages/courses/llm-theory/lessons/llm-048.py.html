@@ -200,30 +200,32 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 1: Prove one-step distribution preservation</span></span>
-<span class="source-line"><span class="syntax-comment"># Usep[.5, .3, .2] andq[.2, .5, .3]; calculate acceptedmass, rejectionmass andresidual.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: acceptedmass[.2, .3, .2]; rejection.3; residual[1, 0, 0]; combinedmassp.</span></span>
+<span class="source-line"><span class="syntax-comment"># Use target p = [0.5, 0.3, 0.2] and draft q = [0.2, 0.5, 0.3]; calculate the accepted</span></span>
+<span class="source-line"><span class="syntax-comment"># mass, rejection mass and residual.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: accepted mass[.2, .3, .2]; rejection .3; residual[1, 0, 0]; combined mass p.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 2: Exercise acceptance andcorrection paths</span></span>
-<span class="source-line"><span class="syntax-comment"># Propose token1 withacceptancedraw.8, then token2 withdraw.5.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: token1 rejected andcorrected to0; token2 accepted.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Exercise acceptance and correction paths</span></span>
+<span class="source-line"><span class="syntax-comment"># Propose token 1 with acceptance draw .8, then token 2 with draw .5.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: token 1 rejected and corrected to 0; token 2 accepted.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 3: Check an all-accepted round andbonus token</span></span>
-<span class="source-line"><span class="syntax-comment"># Setdraft andtarget equal top; propose tokens0, 1 withdraws.1, .6, andusebonusdraw.7.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: Check an all-accepted round and bonus token</span></span>
+<span class="source-line"><span class="syntax-comment"># Set draft and target both equal to p; propose tokens 0, 1 with draws 0.1, 0.6, and use</span></span>
+<span class="source-line"><span class="syntax-comment"># bonus draw 0.7.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: emitted[0, 1, 1]; accepted_count2; no rejection.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Stop at the first rejection</span></span>
-<span class="source-line"><span class="syntax-comment"># Useconstanttargetp, draftq, proposal draws.1, .3 andacceptance draws.2, .9.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: draft[0, 1]; acceptedprefix[0]; correction0; emitted[0, 0].</span></span>
+<span class="source-line"><span class="syntax-comment"># Use constant target p, draft q, proposal draws 0.1, 0.3 and acceptance draws 0.2, 0.9.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: draft[0, 1]; accepted prefix[0]; correction 0; emitted[0, 0].</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Rollback actual K/V arrays</span></span>
-<span class="source-line"><span class="syntax-comment"># Startcacheprefix[2], appendthetwo proposals, thenrollbackandappend thecorrection;</span></span>
-<span class="source-line"><span class="syntax-comment"># comparewithafreshcache[2, 0, 0].</span></span>
+<span class="source-line"><span class="syntax-comment"># Start with cache prefix [2], append the two proposals, then roll back and append the</span></span>
+<span class="source-line"><span class="syntax-comment"># correction; compare with a fresh cache [2, 0, 0].</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: tokens, keys, values and attention output match a fresh cache; retaining a rejected token breaks parity.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 6: Handle equality,EOS,budgets andinvalid support</span></span>
-<span class="source-line"><span class="syntax-comment"># Checkp=q hasnoresidual, stoponanacceptedEOS2, capoutputat2 tokens, andreject a zero-</span></span>
-<span class="source-line"><span class="syntax-comment"># probability draftproposal.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: rejection mass is0 and residual isNone; accepted EOS stops generation; the token cap is respected; unsupported proposals raiseValueError.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6: Handle equality, EOS, budgets and invalid support</span></span>
+<span class="source-line"><span class="syntax-comment"># Check that p=q has no residual, stop on an accepted EOS 2, cap output at 2 tokens, and</span></span>
+<span class="source-line"><span class="syntax-comment"># reject a zero-probability draft proposal.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: rejection mass is 0 and residual is None; accepted EOS stops generation; the token cap is respected; unsupported proposals raise ValueError.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Read the guide and implement the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>

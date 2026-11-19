@@ -198,8 +198,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
 <p>A mutex protects a state invariant across several operations. Every relevant access must follow the same protocol: locking writes while reading without synchronization can still race. Atomic operations protect specific values and ordering relationships, but do not automatically make a multi-field transaction atomic. Prefer a mutex for a compound invariant that must be inspected and changed together. Never copy a mutex after use. Keep critical sections small, avoid calling unknown callbacks while holding a lock, and define lock ordering when several locks are unavoidable. A correct observed count is not by itself proof of correct synchronization.</p>
 <p>sync.Mutex uses Lock and Unlock; defer Unlock after acquisition handles early returns. atomic.Int64 supplies typed Load, Store and Add. sync.Once runs one initialization function. Keep synchronized state in a pointer-owned holder so it is not copied accidentally. count++ on an ordinary shared integer is a read-modify-write sequence, not an atomic operation.</p>
-<h3 id="1-protect-a-concurrent-count">1. Protect a concurrent count<a class="heading-anchor" href="#1-protect-a-concurrent-count" aria-label="Link to this section">#</a></h3>
-<p>Run four workers doing 100 protected increments each.</p>
+<h3 id="1-protect-a-concurrent-count-change-one-input">1. Protect a concurrent count: change one input<a class="heading-anchor" href="#1-protect-a-concurrent-count-change-one-input" aria-label="Link to this section">#</a></h3>
+<p>Copy worked example 1 into a scratch pad and change <code>for i := 0; i &lt; 4; i++ {</code> to <code>for i := 1; i &lt; 4; i++ {</code>. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</p>
+<p>The unchanged code is worked example 1:</p>
 <pre class="highlighted-code"><code class="language-go">c <span class="syntax-operator">:=</span> <span class="syntax-operator">&amp;</span>LockedCount<span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span>
 <span class="syntax-keyword">var</span> wg sync<span class="syntax-punctuation">.</span>WaitGroup
 <span class="syntax-keyword">for</span> i <span class="syntax-operator">:=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span> i <span class="syntax-punctuation">&lt;</span> <span class="syntax-number">4</span><span class="syntax-punctuation">;</span> i<span class="syntax-operator">++</span> <span class="syntax-punctuation">{</span>
@@ -213,15 +214,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-punctuation">}</span>
 wg<span class="syntax-punctuation">.</span>Wait<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 check<span class="syntax-punctuation">(</span>c<span class="syntax-punctuation">.</span>Value<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">400</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;count&quot;</span><span class="syntax-punctuation">)</span></code></pre>
-<p><strong>Expected:</strong> The joined final count is 400.</p>
+<p><strong>Expected:</strong> The changed run panics with <code>count</code> because <code>c.Value() == 400</code> no longer holds. Restoring the original line brings back the worked observation: the joined final count is 400.</p>
 <p>Reads and writes use the same lock. The join establishes task completion before inspection.</p>
-<h3 id="2-use-a-typed-atomic">2. Use a typed atomic<a class="heading-anchor" href="#2-use-a-typed-atomic" aria-label="Link to this section">#</a></h3>
-<p>Add 3 and 4 through atomic.Int64.</p>
+<h3 id="2-use-a-typed-atomic-debug-a-regression">2. Use a typed atomic: debug a regression<a class="heading-anchor" href="#2-use-a-typed-atomic-debug-a-regression" aria-label="Link to this section">#</a></h3>
+<p>A regression changed <code>n.Add(3)</code> to <code>n.Add(4)</code> in worked example 2. Run worked example 2 with that change, use the failure to explain the defect and repair it without changing the check.</p>
+<p>The unchanged code is worked example 2:</p>
 <pre class="highlighted-code"><code class="language-go"><span class="syntax-keyword">var</span> n atomic<span class="syntax-punctuation">.</span>Int64
 n<span class="syntax-punctuation">.</span>Add<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
 n<span class="syntax-punctuation">.</span>Add<span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span>
 check<span class="syntax-punctuation">(</span>n<span class="syntax-punctuation">.</span>Load<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;atomic&quot;</span><span class="syntax-punctuation">)</span></code></pre>
-<p><strong>Expected:</strong> Load returns 7.</p>
+<p><strong>Expected:</strong> Before the repair the program panics with <code>atomic</code>; after it the line reads <code>n.Add(3)</code> again and load returns 7.</p>
 <p>Use the atomic access API consistently. Mixing it with ordinary conflicting accesses undermines the protocol.</p>
 <h3 id="3-protect-a-pair-relationship">3. Protect a pair relationship<a class="heading-anchor" href="#3-protect-a-pair-relationship" aria-label="Link to this section">#</a></h3>
 <p>Transfer 3 between two balances initially 5 and 5.</p>

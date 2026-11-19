@@ -200,21 +200,21 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 1: Construct XOR</span></span>
-<span class="source-line"><span class="syntax-comment"># Evaluate two rectified differences on inputs(0,0),(0,1),(1,0),(1,1).</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: outputs[0,1,1,0].</span></span>
+<span class="source-line"><span class="syntax-comment"># Evaluate two rectified differences on inputs (0, 0), (0, 1), (1, 0), (1, 1).</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: outputs [0, 1, 1, 0].</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 2: Remove the nonlinearity</span></span>
 <span class="source-line"><span class="syntax-comment"># Sum the two raw difference columns before applying a threshold.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: all four sums0.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: all four sums 0.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Compose affine matrices</span></span>
 <span class="source-line"><span class="syntax-comment"># Multiply two fixed matrices and verify that a two-layer linear computation equals one</span></span>
 <span class="source-line"><span class="syntax-comment"># matrix product.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: two paths agree within1e-6.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: two paths agree within 1e-6.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Inspect a dead region</span></span>
-<span class="source-line"><span class="syntax-comment"># Evaluate ReLU and its tape gradient at-2 and+2.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: values[0,2], gradients[0,1].</span></span>
+<span class="source-line"><span class="syntax-comment"># Evaluate ReLU and its tape gradient at -2 and+2.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: values [0, 2], gradients [0, 1].</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Show symmetry</span></span>
 <span class="source-line"><span class="syntax-comment"># Create two hidden units with identical columns and compare their activations on every</span></span>
@@ -222,9 +222,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-comment"># Expected: hidden columns match exactly.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Transfer outside the corners</span></span>
-<span class="source-line"><span class="syntax-comment"># Evaluate the fixed construction at(.2,.8) and(.8,.2), and state what it computes away</span></span>
-<span class="source-line"><span class="syntax-comment"># from binary inputs.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: both outputs.6; function is absolute difference.</span></span>
+<span class="source-line"><span class="syntax-comment"># Evaluate the fixed construction at (0.2, 0.8) and (0.8, 0.2), and state what it computes</span></span>
+<span class="source-line"><span class="syntax-comment"># away from binary inputs.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: both outputs 0.6; function is absolute difference.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Read the guide and implement the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>

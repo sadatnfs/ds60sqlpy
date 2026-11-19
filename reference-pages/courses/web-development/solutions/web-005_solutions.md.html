@@ -194,31 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-005_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-005-explanatory-solutions">web-005: explanatory solutions<a class="heading-anchor" href="#web-005-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.</p>
-<h3 id="why-the-mechanism-works">Why the mechanism works<a class="heading-anchor" href="#why-the-mechanism-works" aria-label="Link to this section">#</a></h3>
-<p>Lists express relationships that paragraphs do not. An ordered list describes a sequence where position matters. An unordered list groups peers without requiring order. A description list pairs terms with explanations. These structures help reading tools announce item counts and relationships. A row of hyphens in plain text may look like a list but does not expose that structure.</p>
-<p>A quotation identifies borrowed language and should have a source when appropriate. Code identifies literal program text, while pre preserves whitespace. The combination pre and code is useful for multiline snippets. Long lines still need an overflow policy. Never use a quotation element simply to indent text or a list merely to create a visual column.</p>
-<p>A list contains li elements; nested lists belong inside the parent li they elaborate. A description list contains dt terms and dd explanations. A short inline token uses code without pre. Literal less-than signs in displayed code must be escaped because the containing HTML still has to parse correctly.</p>
+<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-005.md</code>.</p>
 <h3 id="exercise-1-choose-a-list-type-for-steps-and-an-unordered-tool-collection">Exercise 1: Choose a list type for steps and an unordered tool collection.<a class="heading-anchor" href="#exercise-1-choose-a-list-type-for-steps-and-an-unordered-tool-collection" aria-label="Link to this section">#</a></h3>
-<p>Steps use ol; interchangeable peer tools use ul.</p>
-<p>Trace the smallest example before editing. Name which values are source and which are observations.</p>
+<p><strong>Expected answer:</strong> Steps use ol; interchangeable peer tools use ul.</p>
+<p><strong>Why:</strong> An ordered list communicates sequence, so assistive technology announces item numbers; an unordered list signals interchangeable items.</p>
 <h3 id="exercise-2-add-two-vocabulary-terms-with-definitions">Exercise 2: Add two vocabulary terms with definitions.<a class="heading-anchor" href="#exercise-2-add-two-vocabulary-terms-with-definitions" aria-label="Link to this section">#</a></h3>
-<p>A dl contains paired dt and dd elements.</p>
-<p>Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.</p>
+<p><strong>Expected evidence:</strong> A dl contains paired dt and dd elements.</p>
+<p><strong>Why:</strong> A description list associates each dt with its dd, so the relationship is expressed by markup instead of bold text.</p>
 <h3 id="exercise-3-build-a-study-checklist-with-a-code-example-and-glossary">Exercise 3: Build a study checklist with a code example and glossary.<a class="heading-anchor" href="#exercise-3-build-a-study-checklist-with-a-code-example-and-glossary" aria-label="Link to this section">#</a></h3>
-<p>The page exposes list, code and definition structures without relying on spacing.</p>
-<p>Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.</p>
+<p><strong>Expected evidence:</strong> The page exposes list, code and definition structures without relying on spacing.</p>
+<p><strong>Why:</strong> Each element tells browsers and assistive technology what the content is, so the page stays meaningful without spacing or color.</p>
 <h3 id="exercise-4-repair-a-nested-list-placed-as-a-sibling-of-its-parent-item">Exercise 4: Repair a nested list placed as a sibling of its parent item.<a class="heading-anchor" href="#exercise-4-repair-a-nested-list-placed-as-a-sibling-of-its-parent-item" aria-label="Link to this section">#</a></h3>
-<p>The nested list belongs inside the associated li.</p>
-<p>Keep the failing input. Identify the first layer where the observed result differs from the intended contract.</p>
+<p><strong>Expected evidence:</strong> The nested list belongs inside the associated li.</p>
+<p><strong>Why:</strong> ul and ol may contain only li children, so a sublist must sit inside an item to show that it belongs to that step.</p>
 <h3 id="exercise-5-test-a-long-code-line-in-a-narrow-preview">Exercise 5: Test a long code line in a narrow preview.<a class="heading-anchor" href="#exercise-5-test-a-long-code-line-in-a-narrow-preview" aria-label="Link to this section">#</a></h3>
-<p>The code region can scroll without making the entire page horizontally overflow.</p>
-<p>Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.</p>
+<p><strong>Expected evidence:</strong> The code region can scroll without making the entire page horizontally overflow.</p>
+<p><strong>Why:</strong> overflow-x: auto on the code container creates a local scroll area, so the rest of the page keeps its width.</p>
 <h3 id="exercise-6-explain-the-difference-between-preserving-whitespace-and-preserving-meaning">Exercise 6: Explain the difference between preserving whitespace and preserving meaning.<a class="heading-anchor" href="#exercise-6-explain-the-difference-between-preserving-whitespace-and-preserving-meaning" aria-label="Link to this section">#</a></h3>
-<p>Pre preserves formatting; semantic elements additionally communicate content roles.</p>
-<p>Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.</p>
-<h3 id="reference-comparison-and-limits">Reference comparison and limits<a class="heading-anchor" href="#reference-comparison-and-limits" aria-label="Link to this section">#</a></h3>
-<p>Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.</p></article>
+<p><strong>Expected answer:</strong> Pre preserves formatting; semantic elements additionally communicate content roles.</p>
+<p><strong>Why:</strong> pre only preserves spaces and line breaks; semantic elements state what the content is, which whitespace alone cannot.</p>
+<h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
+<p>Open <code>courses/web-development/solutions/web-005_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
   </main>
 </body>
 </html>

@@ -202,29 +202,23 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Reconstruct a mean from count 4, total 100.</p>
 <p>The mean is 25.</p>
-<p><strong>Expected evidence:</strong> The mean is 25.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Change chunk boundaries without changing observations.</p>
 <p>The semantic total/count remain unchanged, subject to floating-point tolerance.</p>
-<p><strong>Expected evidence:</strong> The semantic total/count remain unchanged, subject to floating-point tolerance.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Implement an all-missing finalization rule.</p>
 <p>Return an explicit missing mean when count is zero.</p>
-<p><strong>Expected evidence:</strong> Return an explicit missing mean when count is zero.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose averaging chunk medians.</p>
 <p>Keep sufficient distribution state or recompute the exact combined median.</p>
-<p><strong>Expected evidence:</strong> Keep sufficient distribution state or recompute the exact combined median.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Process an empty chunk among nonempty chunks.</p>
 <p>It leaves the accumulated state unchanged.</p>
-<p><strong>Expected evidence:</strong> It leaves the accumulated state unchanged.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>State what a scalability claim still requires.</p>
 <p>Measure representative peak memory, elapsed work and equivalent outputs under controlled conditions.</p>
-<p><strong>Expected evidence:</strong> Measure representative peak memory, elapsed work and equivalent outputs under controlled conditions.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference contains explicit behavioral assertions for its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The reference makes 3 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>
 </body>
 </html>

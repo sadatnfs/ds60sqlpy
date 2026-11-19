@@ -199,28 +199,29 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">Copy to .learning before editing. Six independent attempts belong below.</span></span>
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 1: Build an identity residual</span></span>
-<span class="source-line"><span class="syntax-comment"># Create a width 2 residual with zero kernel and scale buffer 1.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: output equals input; one parameter and one buffer.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Apply a swapping kernel</span></span>
+<span class="source-line"><span class="syntax-comment"># Create Residual(2), set its kernel to [[0, 1], [1, 0]] and its scale buffer to 2, and</span></span>
+<span class="source-line"><span class="syntax-comment"># evaluate the row [1, 2].</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: output [[5, 4]].</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 2: Keep state stable across calls</span></span>
-<span class="source-line"><span class="syntax-comment"># Call the same module on a second batch with the same width.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: same kernel object and parameter count 4.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Predict state for a wider module</span></span>
+<span class="source-line"><span class="syntax-comment"># Create Residual(3) and count its parameter scalars and buffers.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: 9 kernel scalars and 1 buffer.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 3: Check a known residual transform</span></span>
-<span class="source-line"><span class="syntax-comment"># Assign an identity kernel and scale.5.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: output 1.5*x.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: Differentiate Cube at a new point</span></span>
+<span class="source-line"><span class="syntax-comment"># Backpropagate the sum of 3*Cube(x) at x = -1.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: gradient 9.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Reject incompatible feature width</span></span>
 <span class="source-line"><span class="syntax-comment"># Pass a width 3 row to the width 2 module.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: ValueError naming feature width.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Validate a custom cube derivative</span></span>
-<span class="source-line"><span class="syntax-comment"># Run grad check on Cube.apply at float64 values.2, -.7.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: grad check True.</span></span>
+<span class="source-line"><span class="syntax-comment"># Run gradcheck on Cube.apply at float64 values 0.2, -0.7.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: gradcheck returns True.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Inspect the incoming-gradient factor</span></span>
-<span class="source-line"><span class="syntax-comment"># Differentiate the sum of 2*Cube(x) atx 2.</span></span>
+<span class="source-line"><span class="syntax-comment"># Differentiate the sum of 2*Cube(x) at x = 2.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: gradient 24.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>

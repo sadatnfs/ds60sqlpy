@@ -198,11 +198,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-keyword">import</span> <span class="syntax-string">&quot;fmt&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">func</span> main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 1: Predict a first value: Bind greeting to Hello, Go and check its exact text.</span></span>
-<span class="source-line">	<span class="syntax-comment">// Expected: greeting equals Hello, Go.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 1: Predict a first value: change one input: Copy worked example 1 into a scratch pad and change `greeting := &quot;Hello, Go&quot;` to `greeting := &quot;Hello, Go!&quot;`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Expected: The changed run panics with `greeting` because `greeting == &quot;Hello, Go&quot;` no longer holds. Restoring the original line brings back the worked observation: greeting equals Hello, Go.</span></span>
 <span class="source-line"></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 2: Compute before formatting: Add 2 and 3, then format total=5.</span></span>
-<span class="source-line">	<span class="syntax-comment">// Expected: The integer is 5 and the text is total=5.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 2: Compute before formatting: debug a regression: A regression changed one token in worked example 2, so one line now reads `total := 2 - 3`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Expected: Before the repair the program panics with `format`; after it the line reads `total := 2 + 3` again and the integer is 5 and the text is total=5.</span></span>
 <span class="source-line"></span>
 <span class="source-line">	<span class="syntax-comment">// Exercise 3: Trace statement order: Start count at 1, add 1, then multiply by 3.</span></span>
 <span class="source-line">	<span class="syntax-comment">// Expected: The final count is 6.</span></span>

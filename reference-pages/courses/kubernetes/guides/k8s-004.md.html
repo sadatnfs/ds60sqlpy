@@ -231,15 +231,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Expected:</strong> The target identity is not established; no mutation or cleanup is authorized by this receipt.</p>
 <h3 id="inspect-the-specific-owned-object">Inspect the specific owned object<a class="heading-anchor" href="#inspect-the-specific-owned-object" aria-label="Link to this section">#</a></h3>
 <p>Only after the chapter&#x27;s host capability is provisioned and its resources remain present, use the explicit receipt fields described in <a href="../host-labs.md.html">host-labs.md</a>. A completed one-shot browser Run has already cleaned its objects. The following read does not provision the missing capability and does not justify changing credentials after a Forbidden result.</p>
-<p>POSIX:</p>
+<p>Bash on Linux, macOS or Ubuntu under WSL 2:</p>
 <pre class="highlighted-code"><code class="language-bash">: <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_KUBECONFIG<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt path</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 : <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_CONTEXT<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt context</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 : <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_NAMESPACE<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt namespace</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<span class="syntax-string">&quot;</span> --context <span class="syntax-string">&quot;</span>$LAB_CONTEXT<span class="syntax-string">&quot;</span> --namespace <span class="syntax-string">&quot;</span>$LAB_NAMESPACE<span class="syntax-string">&quot;</span> get deployment hello -o json</code></pre>
-<p>PowerShell:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">-not</span> $env:LAB_KUBECONFIG <span class="syntax-operator">-or</span> <span class="syntax-operator">-not</span> $env:LAB_CONTEXT <span class="syntax-operator">-or</span> <span class="syntax-operator">-not</span> $env:LAB_NAMESPACE<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;Owned receipt fields are required.&#x27;</span> <span class="syntax-punctuation">}</span>
-<span class="syntax-punctuation">&amp;</span> kubectl <span class="syntax-punctuation">-</span>-kubeconfig $env:LAB_KUBECONFIG <span class="syntax-punctuation">-</span>-context $env:LAB_CONTEXT <span class="syntax-punctuation">-</span>-namespace $env:LAB_NAMESPACE get deployment hello -o json
-<span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>$LASTEXITCODE <span class="syntax-operator">-ne</span> 0<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;The scoped observation failed.&#x27;</span> <span class="syntax-punctuation">}</span></code></pre>
+<p>Windows uses the same Bash commands inside WSL 2. The lab adapter refuses native Windows credential handling, so do not run kubectl against the receipt from PowerShell. From PowerShell, only open your WSL 2 distribution (the name reported by <code>wsl.exe --list --verbose</code>), change to your checkout with its Linux path, then run the Bash block above unchanged:</p>
+<pre class="highlighted-code"><code class="language-powershell">wsl<span class="syntax-punctuation">.</span>exe <span class="syntax-punctuation">-</span>-distribution Ubuntu</code></pre>
 <p>Retain only the fields needed by this chapter&#x27;s prediction. A NotFound result may be expected after one-shot cleanup; a Forbidden result may identify a deliberately absent advanced capability. Neither result authorizes an ambient-context fallback.</p>
 <h3 id="run-and-bounded-evidence">Run and bounded evidence<a class="heading-anchor" href="#run-and-bounded-evidence" aria-label="Link to this section">#</a></h3>
 <p>The app artifact is a reading worksheet, <code>courses/kubernetes/lessons/k8s-004.md</code>. The current browser adapter does not provide the full <strong>effective-authorization and explicit-target host observation</strong> operation. Use the synthetic fixture and offline check first. Live work follows <a href="../host-labs.md.html">the scoped host-lab guide</a> only when the named capability and owned target have been provisioned. A worksheet or static check is never a cluster execution receipt.</p>
@@ -248,32 +246,32 @@ kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<sp
 <h4 id="exercise-1-identify-the-request-tuple">Exercise 1: Identify the request tuple<a class="heading-anchor" href="#exercise-1-identify-the-request-tuple" aria-label="Link to this section">#</a></h4>
 <p>Write the caller, namespace, API group, resource, name and verb for an owned hello Deployment read.</p>
 <p><strong>Expected result/shape:</strong> A six-field request includes apps/deployments, hello, get and the explicit leased namespace.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: A six-field request includes apps/deployments, hello, get and the explicit leased namespace.</p>
+<p><strong>Verify:</strong> Rewrite the tuple as one <code>kubectl auth can-i get deployments.apps/hello</code> question with explicit <code>--kubeconfig</code>, <code>--context</code> and <code>--namespace</code> flags; each of your six fields must map to one part of that command.</p>
 <p><strong>Progressive hints:</strong> Separate the resource kind from its API plural and caller identity.</p>
 <h4 id="exercise-2-read-the-role-grant">Exercise 2: Read the Role grant<a class="heading-anchor" href="#exercise-2-read-the-role-grant" aria-label="Link to this section">#</a></h4>
 <p>Compare get hello with list deployments and create namespaces under the example Role.</p>
 <p><strong>Expected result/shape:</strong> Only get hello is granted by this Role; list and namespace creation are absent.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Only get hello is granted by this Role; list and namespace creation are absent.</p>
+<p><strong>Verify:</strong> For each of the three requests, find a single Role rule whose verbs, resources and resourceNames all match it; a request with no fully matching rule is not granted by this Role.</p>
 <p><strong>Progressive hints:</strong> Look at verbs, resourceNames and scope independently.</p>
 <h4 id="exercise-3-check-namespace-identity">Exercise 3: Check namespace identity<a class="heading-anchor" href="#exercise-3-check-namespace-identity" aria-label="Link to this section">#</a></h4>
 <p>Compare the ns-1 receipt with the ns-2 readback.</p>
 <p><strong>Expected result/shape:</strong> Refuse despite the matching namespace name and owner label.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Refuse despite the matching namespace name and owner label.</p>
+<p><strong>Verify:</strong> Decide using <code>metadata.uid</code> alone, then confirm that the matching name and owner label cannot change that decision.</p>
 <p><strong>Progressive hints:</strong> A name can be reused; the UID identifies this object instance.</p>
 <h4 id="exercise-4-observe-least-privilege">Exercise 4: Observe least privilege<a class="heading-anchor" href="#exercise-4-observe-least-privilege" aria-label="Link to this section">#</a></h4>
 <p>With an explicitly provisioned lease, record an own-namespace permitted action and a denied cluster/Secret action.</p>
 <p><strong>Expected result/shape:</strong> Actual allow/deny results are recorded separately from source policy; no credentials enter the worksheet.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Actual allow/deny results are recorded separately from source policy; no credentials enter the worksheet.</p>
+<p><strong>Verify:</strong> Each row of your record must name the verb, resource and namespace and the yes/no answer the server returned under the owned receipt; it must contain no token or kubeconfig text.</p>
 <p><strong>Progressive hints:</strong> Use the host guide targeting flags and a self-authorization check.</p>
-<h4 id="exercise-5-inspect-expiry-and-cleanup-reserve">Exercise 5: Inspect expiry and cleanup reserve<a class="heading-anchor" href="#exercise-5-inspect-expiry-and-cleanup-reserve" aria-label="Link to this section">#</a></h4>
-<p>Evaluate a synthetic lease expiring in30 seconds for60 seconds of work plus15 seconds cleanup and5 seconds margin.</p>
-<p><strong>Expected result/shape:</strong> Refuse because30&lt;80.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Refuse because30&lt;80.</p>
-<p><strong>Progressive hints:</strong> Add the full work, cleanup and margin budget before comparing expiry.</p>
+<h4 id="exercise-5-bind-a-clusterrole-inside-one-namespace">Exercise 5: Bind a ClusterRole inside one namespace<a class="heading-anchor" href="#exercise-5-bind-a-clusterrole-inside-one-namespace" aria-label="Link to this section">#</a></h4>
+<p>A RoleBinding in namespace lesson-a references the built-in ClusterRole view. Predict whether the bound identity can list Pods in lesson-a, list Pods in lesson-b and list Secrets in lesson-a.</p>
+<p><strong>Expected result/shape:</strong> Pods in lesson-a: allowed. Pods in lesson-b: denied, because a RoleBinding grants only inside its own namespace. Secrets in lesson-a: denied, because the default view role excludes Secrets.</p>
+<p><strong>Verify:</strong> Check the binding&#x27;s <code>metadata.namespace</code> and the resources listed by the <code>view</code> ClusterRole; a request outside that namespace or for a resource the role omits is denied.</p>
+<p><strong>Progressive hints:</strong> A RoleBinding may reference a ClusterRole, but the grant stays inside the binding&#x27;s namespace.</p>
 <h4 id="exercise-6-explain-additive-authorization">Exercise 6: Explain additive authorization<a class="heading-anchor" href="#exercise-6-explain-additive-authorization" aria-label="Link to this section">#</a></h4>
 <p>Describe why one narrow Role file cannot prove that no other privilege exists.</p>
 <p><strong>Expected result/shape:</strong> A written answer includes other RoleBindings/ClusterRoleBindings and actual effective authorization evidence.</p>
-<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: A written answer includes other RoleBindings/ClusterRoleBindings and actual effective authorization evidence.</p>
+<p><strong>Verify:</strong> Your answer must name at least one binding outside this Role file that could add a permission, and cite <code>kubectl auth can-i --list</code> under the owned receipt as the effective result.</p>
 <p><strong>Progressive hints:</strong> RBAC grants combine; absence from one file is not a global denial proof.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain the mechanism behind the first example, then distinguish it from this boundary case: The target identity is not established; no mutation or cleanup is authorized by this receipt. State which observations are synthetic and which, if any, were read from your owned runtime.</p>
@@ -281,7 +279,7 @@ kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<sp
 <p>Separate missing authentication, an expired lease, a wrong target UID and an authorization denial. They have different repairs. Retrying with an ambient administrator context would change the experiment and bypass the intended boundary. A successful own-namespace read does not prove cluster-wide permission, and a Role YAML file does not prove the server loaded that policy.</p>
 <p>The offline checker models only the explicit permission matrix and receipt equality. It makes no API request. A live claim requires the actual owned identity, a fresh namespace readback and positive/negative authorization observations.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
-<p>Close the answer and reconstruct the reasoning for Exercise6, Explain additive authorization. Name the exact source and observed identity you would require before claiming the changed case succeeded.</p>
+<p>Close the answer and reconstruct the reasoning for Exercise 6 (Explain additive authorization). Name the exact source and observed identity you would require before claiming the changed case succeeded.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue to <code>k8s-005</code> after preserving the six evidence records.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>

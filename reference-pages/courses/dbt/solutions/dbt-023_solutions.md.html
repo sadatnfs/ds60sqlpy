@@ -305,9 +305,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
             d<span class="syntax-punctuation">,</span>
             models<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span>
                 <span class="syntax-string">&quot;</span><span class="syntax-string">events</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">(</span>
-                    <span class="syntax-string">&quot;</span><span class="syntax-string">{{</span><span class="syntax-string"> config(materialized=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">table</span><span class="syntax-string">&#x27;</span><span class="syntax-string">) }} select range as id, </span><span class="syntax-string">&quot;</span>
-                    <span class="syntax-string">&quot;</span><span class="syntax-string">range </span><span class="syntax-string">%</span><span class="syntax-string"> 5 as segment, range </span><span class="syntax-string">%</span><span class="syntax-string"> 7 as amount from </span><span class="syntax-string">&quot;</span>
-                    <span class="syntax-string">&quot;</span><span class="syntax-string">range(10000)</span><span class="syntax-string">&quot;</span>
+                    <span class="syntax-string">&quot;</span><span class="syntax-string">{{</span><span class="syntax-string"> config(materialized=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">table</span><span class="syntax-string">&#x27;</span><span class="syntax-string">) }}</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span>
+                    <span class="syntax-string">&quot;</span><span class="syntax-string">select range as id, range </span><span class="syntax-string">%</span><span class="syntax-string"> 5 as segment, range </span><span class="syntax-string">%</span><span class="syntax-string"> 7 as amount</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span>
+                    <span class="syntax-string">&quot;</span><span class="syntax-string">from range(10000)</span><span class="syntax-string">&quot;</span>
                 <span class="syntax-punctuation">)</span>
             <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
         <span class="syntax-punctuation">)</span>
@@ -338,8 +338,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
         p <span class="syntax-operator">=</span> project<span class="syntax-punctuation">(</span>
             d<span class="syntax-punctuation">,</span>
             models<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span>
-                <span class="syntax-string">&quot;</span><span class="syntax-string">events</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">select * from (values (1,5),(1,5),(2,7)) as t(id,amount)</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
-                <span class="syntax-string">&quot;</span><span class="syntax-string">incorrect_fast_path</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">select distinct id,amount from </span><span class="syntax-string">{{</span><span class="syntax-string"> ref(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">events</span><span class="syntax-string">&#x27;</span><span class="syntax-string">) }}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+                <span class="syntax-string">&quot;</span><span class="syntax-string">events</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">select * from (values (1, 5), (1, 5), (2, 7)) as t(id, amount)</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+                <span class="syntax-string">&quot;</span><span class="syntax-string">incorrect_fast_path</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">select distinct id, amount from </span><span class="syntax-string">{{</span><span class="syntax-string"> ref(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">events</span><span class="syntax-string">&#x27;</span><span class="syntax-string">) }}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
             <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
         <span class="syntax-punctuation">)</span>
         invoke<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">build</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
@@ -361,7 +361,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
     main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="interpretation">Interpretation<a class="heading-anchor" href="#interpretation" aria-label="Link to this section">#</a></h3>
-<p>Measure database work with a correctness oracle and a clearly defined interval. Review plans as evidence about this query and version, retain multiset/ordering semantics and include the complete refresh/read workload when choosing materializations.</p></article>
+<p>Review plans as evidence about this query and version, retain multiset/ordering semantics and include the complete refresh/read workload when choosing materializations.</p></article>
   </main>
 </body>
 </html>

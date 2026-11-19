@@ -197,7 +197,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Beginner. Allow about 90 minutes, then revisit the transfer case later. Prerequisites: go-011</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
-<p>By the end, explain deferred call, stack unwind, cleanup boundary; implement the six investigations below; and defend the expected result of a changed input before running it. A passing reference is evidence about that program, not a certification of your independent understanding.</p>
+<p>Predict defer order and argument capture, and keep cleanup running when a deliberate panic is recovered at a boundary. Along the way, explain deferred call, stack unwind, cleanup boundary; implement the six investigations below; and defend the expected result of a changed input before running it.</p>
 <h3 id="why-this-mechanism-matters">Why this mechanism matters<a class="heading-anchor" href="#why-this-mechanism-matters" aria-label="Link to this section">#</a></h3>
 <p>defer schedules a function call to execute when the surrounding function returns. It is a resource-lifetime tool, not a general background execution mechanism. Deferred calls run in last-in-first-out order, and their arguments are evaluated when the defer statement executes. Closures can instead read variables at the later execution time. panic unwinds the current goroutine&#x27;s stack, running defers; recover can intercept it only in the appropriate deferred call during that unwind. Expected invalid input should normally be returned as an error. Recovering every panic and returning a success-shaped value conceals defects and can leave callers unable to distinguish completed work from aborted work.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
@@ -208,7 +208,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ul>
 <h3 id="syntax-anatomy-and-reasoning">Syntax anatomy and reasoning<a class="heading-anchor" href="#syntax-anatomy-and-reasoning" aria-label="Link to this section">#</a></h3>
 <p>defer cleanup() registers a call. defer func(){ ... }() registers a closure. A helper function is useful when each loop iteration needs its own cleanup boundary; deferring inside a long loop otherwise accumulates cleanup until the whole function returns. recover returns the active panic value when called correctly from a deferred function. A named return variable can be changed by deferred code, which is powerful but can make flow harder to read.</p>
-<h3 id="classroom-execution-contract">Classroom execution contract<a class="heading-anchor" href="#classroom-execution-contract" aria-label="Link to this section">#</a></h3>
+<h3 id="run-this-lesson">Run this lesson<a class="heading-anchor" href="#run-this-lesson" aria-label="Link to this section">#</a></h3>
 <p>Choose Go in the unified Docker classroom. Save your own pad before experimenting. The prepared worker stages it as <code>main.go</code>, compiles it, and executes the resulting program with bounded time and output. The pad is one source file. It does not supply interactive input, arbitrary command-line arguments, package installation, Kubernetes credentials or a host Docker socket. Every ordinary reference here uses the standard library, synthetic local data and explicit checks. A failed <code>check</code> panics and produces a nonzero process result; do not remove it to make the run appear successful.</p>
 <p>The explanatory solution snippets belong inside <code>func main()</code> unless they declare a helper. <code>check</code> is a tiny teaching helper that panics when a condition is false. The separate reference supplies required imports and helpers and implements all six cases. Use that complete source only after an attempt or an explicit reveal. For an independently prepared Go project, the equivalent local build is <code>go build -o lesson main.go</code>, followed by <code>./lesson</code>; use Linux or WSL 2 for that optional workflow. Compiling proves syntax and type consistency, while the executed checks establish the stated example contracts.</p>
 <p>Each worked example below is a complete Go file. Copy one whole block into your saved pad and run it. Example 2 includes the first case as well as the second, so its setup is complete. Its supporting declarations may be reused in later investigations. The separate reference implements all six cases.</p>
@@ -317,75 +317,75 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>
 <p>For each example, write the input values, the state that can change, and the expected observation. Explain which result would disprove your current interpretation. For concurrency, predict a guaranteed relationship rather than an arbitrary scheduling order. For an error case, identify whether it is rejected at compilation or returned during execution.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
-<h4 id="exercise-1-trace-cleanup-order">Exercise 1: Trace cleanup order<a class="heading-anchor" href="#exercise-1-trace-cleanup-order" aria-label="Link to this section">#</a></h4>
-<p>Register first and second cleanup markers and return.</p>
-<p><strong>Expected:</strong> The observed order is second then first.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
-<h4 id="exercise-2-compare-captured-arguments">Exercise 2: Compare captured arguments<a class="heading-anchor" href="#exercise-2-compare-captured-arguments" aria-label="Link to this section">#</a></h4>
-<p>Defer a call with x as an argument, then change x.</p>
-<p><strong>Expected:</strong> The deferred argument retains the earlier value 1.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<h4 id="exercise-1-trace-cleanup-order-predict-an-edited-check">Exercise 1: Trace cleanup order: predict an edited check<a class="heading-anchor" href="#exercise-1-trace-cleanup-order-predict-an-edited-check" aria-label="Link to this section">#</a></h4>
+<p>Copy worked example 1 into a scratch pad and change <code>check(deferOrder() == &quot;second,first&quot;, &quot;defer order&quot;)</code> to <code>check(deferOrder() == &quot;second,first!&quot;, &quot;defer order&quot;)</code> inside its check. Before running, predict whether the check still passes and explain why; then restore it.</p>
+<p><strong>Expected:</strong> The changed run panics with <code>defer order</code> because the edited check no longer holds. Restoring the original line brings back the worked observation: the observed order is second then first.</p>
+<p><strong>Verify:</strong> Compare your written prediction with the panic message <code>defer order</code> and name the value that made <code>deferOrder() == &quot;second,first&quot;</code> false. After restoring the input, the program must print its success line again.</p>
+<h4 id="exercise-2-compare-captured-arguments-diagnose-an-edited-check">Exercise 2: Compare captured arguments: diagnose an edited check<a class="heading-anchor" href="#exercise-2-compare-captured-arguments-diagnose-an-edited-check" aria-label="Link to this section">#</a></h4>
+<p>A careless edit changed the check in worked example 2 so that it reads <code>check(deferArgument() != 1, &quot;argument evaluation&quot;)</code>. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.</p>
+<p><strong>Expected:</strong> Before the repair the program panics with <code>argument evaluation</code>; after it the line reads <code>check(deferArgument() == 1, &quot;argument evaluation&quot;)</code> again and the deferred argument retains the earlier value 1.</p>
+<p><strong>Verify:</strong> Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that <code>deferArgument() == 1</code> accepts.</p>
 <h4 id="exercise-3-compare-a-closure-read">Exercise 3: Compare a closure read<a class="heading-anchor" href="#exercise-3-compare-a-closure-read" aria-label="Link to this section">#</a></h4>
 <p>Defer a closure reading x, then change x to 2.</p>
 <p><strong>Expected:</strong> The closure observes 2.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>deferClosure() == 2</code>. As a control, change <code>check(deferClosure() == 2, &quot;closure read&quot;)</code> to <code>check(deferClosure() != 2, &quot;closure read&quot;)</code> inside that check: it must panic with <code>closure read</code>, which shows the check can fail. Restore it.</p>
 <h4 id="exercise-4-contain-a-deliberate-panic">Exercise 4: Contain a deliberate panic<a class="heading-anchor" href="#exercise-4-contain-a-deliberate-panic" aria-label="Link to this section">#</a></h4>
 <p>Panic with the known value broken inside a helper that recovers it.</p>
 <p><strong>Expected:</strong> The helper reports broken explicitly.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>recoverKnown() == &quot;broken&quot;</code>. As a control, change <code>check(recoverKnown() == &quot;broken&quot;, &quot;recovered value&quot;)</code> to <code>check(recoverKnown() != &quot;broken&quot;, &quot;recovered value&quot;)</code> inside that check: it must panic with <code>recovered value</code>, which shows the check can fail. Restore it.</p>
 <h4 id="exercise-5-preserve-cleanup-during-failure">Exercise 5: Preserve cleanup during failure<a class="heading-anchor" href="#exercise-5-preserve-cleanup-during-failure" aria-label="Link to this section">#</a></h4>
 <p>Register cleanup and then panic inside a recovered helper.</p>
 <p><strong>Expected:</strong> The cleanup marker is still set.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>cleanedAfterPanic()</code> and confirm the success line. Then name an input that would make it fail and the panic message (<code>cleanup on panic</code>) you would expect.</p>
 <h4 id="exercise-6-transfer-function-scoped-cleanup">Exercise 6: Transfer function-scoped cleanup<a class="heading-anchor" href="#exercise-6-transfer-function-scoped-cleanup" aria-label="Link to this section">#</a></h4>
 <p>Run three helpers, each with its own deferred marker.</p>
 <p><strong>Expected:</strong> All three markers are present after the loop.</p>
-<p><strong>Verify:</strong> Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail.</p>
+<p><strong>Verify:</strong> Keep a check equivalent to <code>count == 3</code>. As a control, change <code>for i := 0; i &lt; 3; i++ {</code> to <code>for i := 0; i &lt;= 3; i++ {</code>: the run must panic with <code>iteration cleanup</code>. Restore the line before continuing.</p>
 <p>Implement these in the answer-free learner source. Keep one independent check per claim. A task can require tracing, construction, a changed input or a deliberate safe failure. Do not run a data race, corrupt memory or contact a shared cluster merely to demonstrate why it would be wrong.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Read a compiler error from the first location in your source, then fix one cause at a time. Unused imports and variables are errors in Go; add an import when its use exists, rather than copying a large unused import list. A panic from <code>check</code> identifies a violated example contract. Compare the actual value with the expected value and inspect the state transition that produced it. A returned <code>error</code> is a value that the caller must handle; an ignored error can make later output look plausible while the original operation failed.</p>
 <p>The lesson-specific explanations in the two examples identify the important counterexamples. Extend that reasoning to every investigation: explain why a plausible alternative would fail, and preserve a tiny input that distinguishes it. Treat empty data, missing values and cancellation as domain cases with explicit policies. In concurrent work, replace sleeps used as synchronization with channels, mutexes or an explicit ownership protocol.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<h4 id="hint-for-investigation-1-trace-cleanup-order">Hint for investigation 1: Trace cleanup order<a class="heading-anchor" href="#hint-for-investigation-1-trace-cleanup-order" aria-label="Link to this section">#</a></h4>
+<h4 id="hint-for-investigation-1-trace-cleanup-order-predict-an-edited-check">Hint for investigation 1: Trace cleanup order: predict an edited check<a class="heading-anchor" href="#hint-for-investigation-1-trace-cleanup-order-predict-an-edited-check" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The observed order is second then first.</li>
-<li>Identify the input and the state boundary relevant to trace cleanup order. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>deferOrder() == &quot;second,first&quot;</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Compute the checked value with <code>check(deferOrder() == &quot;second,first!&quot;, &quot;defer order&quot;)</code> in place before running, then compare it with the value <code>deferOrder() == &quot;second,first&quot;</code> expects.</li>
 </ol>
-<h4 id="hint-for-investigation-2-compare-captured-arguments">Hint for investigation 2: Compare captured arguments<a class="heading-anchor" href="#hint-for-investigation-2-compare-captured-arguments" aria-label="Link to this section">#</a></h4>
+<h4 id="hint-for-investigation-2-compare-captured-arguments-diagnose-an-edited-check">Hint for investigation 2: Compare captured arguments: diagnose an edited check<a class="heading-anchor" href="#hint-for-investigation-2-compare-captured-arguments-diagnose-an-edited-check" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The deferred argument retains the earlier value 1.</li>
-<li>Identify the input and the state boundary relevant to compare captured arguments. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>deferArgument() == 1</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Compare <code>check(deferArgument() != 1, &quot;argument evaluation&quot;)</code> with the same line in worked example 2 and state the claim each version makes.</li>
 </ol>
 <h4 id="hint-for-investigation-3-compare-a-closure-read">Hint for investigation 3: Compare a closure read<a class="heading-anchor" href="#hint-for-investigation-3-compare-a-closure-read" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The closure observes 2.</li>
-<li>Identify the input and the state boundary relevant to compare a closure read. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>deferClosure() == 2</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Name one input that would make <code>deferClosure() == 2</code> false. A check that no input can falsify is not evidence.</li>
 </ol>
 <h4 id="hint-for-investigation-4-contain-a-deliberate-panic">Hint for investigation 4: Contain a deliberate panic<a class="heading-anchor" href="#hint-for-investigation-4-contain-a-deliberate-panic" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The helper reports broken explicitly.</li>
-<li>Identify the input and the state boundary relevant to contain a deliberate panic. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>recoverKnown() == &quot;broken&quot;</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Name one input that would make <code>recoverKnown() == &quot;broken&quot;</code> false. A check that no input can falsify is not evidence.</li>
 </ol>
 <h4 id="hint-for-investigation-5-preserve-cleanup-during-failure">Hint for investigation 5: Preserve cleanup during failure<a class="heading-anchor" href="#hint-for-investigation-5-preserve-cleanup-during-failure" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The cleanup marker is still set.</li>
-<li>Identify the input and the state boundary relevant to preserve cleanup during failure. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>cleanedAfterPanic()</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Name one input that would make <code>cleanedAfterPanic()</code> false. A check that no input can falsify is not evidence.</li>
 </ol>
 <h4 id="hint-for-investigation-6-transfer-function-scoped-cleanup">Hint for investigation 6: Transfer function-scoped cleanup<a class="heading-anchor" href="#hint-for-investigation-6-transfer-function-scoped-cleanup" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: All three markers are present after the loop.</li>
-<li>Identify the input and the state boundary relevant to transfer function-scoped cleanup. Trace that boundary before changing code.</li>
-<li>Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input.</li>
+<li>The check <code>count == 3</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
+<li>Predict the effect of changing <code>for i := 0; i &lt; 3; i++ {</code> to <code>for i := 0; i &lt;= 3; i++ {</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
 </ol>
 <h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
 <p>Close the reference. Rebuild one normal case and one boundary case from a blank pad. Explain the role of deferred call without using its name in the definition. Then change the domain while keeping the same invariant. Record the new input, your prediction and the observed output. If your program passes only because its input is hard-coded, explain which part would need a reusable function in a larger project.</p>
 <h3 id="next-step-and-sources">Next step and sources<a class="heading-anchor" href="#next-step-and-sources" aria-label="Link to this section">#</a></h3>
-<p><a href="https://go.dev/ref/spec">Primary language or library documentation</a>, reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. This source supports the API contract; it does not verify the classroom worker. Runtime receipts are recorded separately by the repository validation tools. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.</p>
+<p><a href="https://go.dev/ref/spec">Primary language or library documentation</a>, reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for go-012: Defer, cleanup and deliberate panic boundaries.
 Read courses/go/guides/go-012.md and my saved attempt based on courses/go/lessons/go-012.go.

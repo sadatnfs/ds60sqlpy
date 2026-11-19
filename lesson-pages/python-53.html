@@ -9,7 +9,7 @@
     content="default-src 'none'; style-src 'self' file: 'unsafe-inline'; font-src data:; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
   >
   <link rel="stylesheet" href="../src/ds60sqlpy/assets/vendor/textbook/fonts.css">
-  <title>python-53 · MLOps MLflow Experiment Tracking · DS60</title>
+  <title>python-53 · Experiment Tracking with MLflow · DS60</title>
   <style>
     :root {
       --paper: #f6f2e8;
@@ -312,7 +312,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <div class="shell">
       <section class="hero">
         <p class="eyebrow">python · lesson python-53</p>
-        <h1>MLOps MLflow Experiment Tracking</h1>
+        <h1>Experiment Tracking with MLflow</h1>
         <p class="hero-copy">Production, advanced topics, and capstone</p>
         <div class="meta">
           <span class="tag">advanced</span>
@@ -474,10 +474,8 @@ mlflow<span class="syntax-operator">.</span>set_experiment<span class="syntax-pu
     <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>run<span class="syntax-operator">.</span>info<span class="syntax-operator">.</span>run_id<span class="syntax-punctuation">)</span></code></pre>
 <p>Use actual calculated metrics in the notebook; the literal metric above only shows the logging API. Keep <code>artifacts/day53/</code> as a learner-local ignored artifact, not a source file to commit.</p>
 <h4 id="guide--view-the-local-ui">View the local UI<a class="heading-anchor" href="#guide--view-the-local-ui" aria-label="Link to this section">#</a></h4>
-<p>macOS/Linux:</p>
+<p>Linux, macOS, or Ubuntu in Windows WSL 2:</p>
 <pre class="highlighted-code"><code class="language-bash">.venv/bin/mlflow ui --backend-store-uri sqlite:///artifacts/day53/tracking.sqlite --host <span class="syntax-number">127</span>.0.0.1</code></pre>
-<p>Windows PowerShell:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>mlflow<span class="syntax-punctuation">.</span>exe ui <span class="syntax-punctuation">-</span>-backend-store-uri sqlite<span class="syntax-punctuation">:</span><span class="syntax-punctuation">/</span><span class="syntax-punctuation">/</span><span class="syntax-punctuation">/</span>artifacts<span class="syntax-punctuation">/</span>day53<span class="syntax-punctuation">/</span>tracking<span class="syntax-punctuation">.</span>sqlite <span class="syntax-punctuation">-</span>-host 127<span class="syntax-punctuation">.</span>0<span class="syntax-punctuation">.</span>0<span class="syntax-punctuation">.</span>1</code></pre>
 <p>Open <code>http://127.0.0.1:5000</code>, and stop the process with Ctrl+C when finished. The server binds locally and the lesson works offline.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p><strong>Default Docker classroom:</strong> open <code>python-53</code> for its guide, notebook and capability notice. The default Core does not include the <code>production</code> extra, so the complete legacy notebook is unavailable there until that app environment is deliberately prepared. Pressing Run or choosing a notebook kernel does not install packages.</p>
@@ -491,11 +489,8 @@ mlflow<span class="syntax-operator">.</span>set_experiment<span class="syntax-pu
 <li>Keep experiments in new scratch cells. Do not edit the official solution while attempting the numbered practice.</li>
 <li>Restart the kernel and run from the first cell before calling the lesson complete. A clean run catches hidden state and stale variables.</li>
 </ol>
-<p>Windows PowerShell:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m jupyter lab</code></pre>
-<p>macOS/Linux:</p>
+<p>Linux, macOS, or Ubuntu in Windows WSL 2:</p>
 <pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
-<p>If the Windows environment uses the documented conda-prefix fallback, use <code>.\.venv\python.exe</code> in place of <code>.\.venv\Scripts\python.exe</code>.</p>
 <h4 id="guide--concept-deep-dive-mlflow-run-identity-params-metrics-artifacts-and-reproducible-evidence">Concept deep dive: MLflow run identity, params, metrics, artifacts, and reproducible evidence<a class="heading-anchor" href="#guide--concept-deep-dive-mlflow-run-identity-params-metrics-artifacts-and-reproducible-evidence" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
 <p>Experiment tracking records evidence about a run; it does not make the run reproducible by itself. An experiment groups comparable runs. A run represents one execution. Parameters describe configuration, metrics are numeric observations (possibly by step), tags add searchable context, and artifacts preserve files or models.</p>
@@ -506,7 +501,6 @@ mlflow<span class="syntax-operator">.</span>set_experiment<span class="syntax-pu
 <li><strong><code>log_param</code> versus <code>log_metric</code>:</strong> stores fixed configuration separately from numeric measurements that may evolve by step.</li>
 <li><strong><code>log_artifact</code> / model logging:</strong> copies output into the run&#x27;s artifact store; verify reload and input contract rather than trusting existence.</li>
 </ul>
-<p>Read an API call from the inside out: identify the data entering the operation, the state learned (if any), the value returned, and the evidence that would make the result trustworthy. A method returning without an exception proves only that the syntax and immediate runtime path worked.</p>
 <h5 id="guide--focused-example-a-separate-comparable-configuration-from-results">Focused example A: separate comparable configuration from results<a class="heading-anchor" href="#guide--focused-example-a-separate-comparable-configuration-from-results" aria-label="Link to this section">#</a></h5>
 <p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
 <pre class="highlighted-code"><code class="language-python">run_record <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
@@ -530,7 +524,6 @@ mlflow<span class="syntax-operator">.</span>set_experiment<span class="syntax-pu
 <p><strong>Expected observation:</strong> Configuration, measured outcomes, and contextual labels are distinct, making search and comparison less ambiguous.</p>
 <p><strong>Assumption to name:</strong> The data snapshot and metric definition are stable enough that two records are actually comparable.</p>
 <h5 id="guide--focused-example-b-create-and-inspect-a-fully-local-temporary-run">Focused example B: create and inspect a fully local temporary run<a class="heading-anchor" href="#guide--focused-example-b-create-and-inspect-a-fully-local-temporary-run" aria-label="Link to this section">#</a></h5>
-<p>This second example changes one important condition. Compare it with Example A instead of reading it as unrelated syntax.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
 <span class="syntax-keyword">from</span> tempfile <span class="syntax-keyword">import</span> TemporaryDirectory
 <span class="syntax-keyword">import</span> mlflow
@@ -594,15 +587,15 @@ original_uri <span class="syntax-operator">=</span> mlflow<span class="syntax-op
 <ol>
 <li>Log additional parameters such as Logistic Regression <code>C</code> and compare runs.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 1; MLflow run identity, params, metrics, artifacts, and reproducible evidence; query the exact run IDs and print each LogisticRegression C, split/data hash, ROC AUC, status, and artifact URI; assert the comparison uses the same split and metric definition.</p>
+<p><strong>Verify:</strong> Query the exact run IDs and print each LogisticRegression C, split/data hash, ROC AUC, status, and artifact URI; assert the comparison uses the same split and metric definition.</p>
 <ol start="2">
 <li>Save a confusion-matrix PNG and log it as an artifact.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 2; MLflow run identity, params, metrics, artifacts, and reproducible evidence; save a confusion-matrix PNG with labeled axes, log it under the selected run, fetch its artifact listing, and assert the downloaded file is a valid nonempty PNG tied to that run ID.</p>
+<p><strong>Verify:</strong> Save a confusion-matrix PNG with labeled axes, log it under the selected run, fetch its artifact listing, and assert the downloaded file is a valid nonempty PNG tied to that run ID.</p>
 <ol start="3">
 <li>Try a different classifier, such as Random Forest, and compare ROC AUC.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 3; MLflow run identity, params, metrics, artifacts, and reproducible evidence; run RandomForest and the baseline on the same data/split/metric, print both run IDs, parameters, ROC AUC, and fit status, and state that the final test was not used to choose between them.</p>
+<p><strong>Verify:</strong> Run RandomForest and the baseline on the same data/split/metric, print both run IDs, parameters, ROC AUC, and fit status, and state that the final test was not used to choose between them.</p>
 <h5 id="guide--progressive-hints">Progressive hints<a class="heading-anchor" href="#guide--progressive-hints" aria-label="Link to this section">#</a></h5>
 <ol>
 <li>Make one run per configuration and include split seed, metric name, and model type. Avoid changing several uncontrolled factors at once.</li>
@@ -675,7 +668,7 @@ original_uri <span class="syntax-operator">=</span> mlflow<span class="syntax-op
 </ul>
 <h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into the AI tutor while the repository root is open:</p>
-<pre class="highlighted-code"><code class="language-text">Tutor me through `python-53` : Day 53 : Experiment Tracking with MLflow.
+<pre class="highlighted-code"><code class="language-text">Tutor me through `python-53` (Day 53: Experiment Tracking with MLflow).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize MLflow run identity, params, metrics, artifacts, and reproducible evidence. Use exactly these maintained learner materials:
@@ -728,7 +721,7 @@ merely ran is not evidence of mastery.</code></pre></div>
         </header>
 
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-53-mlops-intro-experiment-tracking-with-mlflow">Day 53 : MLOps intro: experiment tracking with MLflow<a class="heading-anchor" href="#learner--cell-1--day-53-mlops-intro-experiment-tracking-with-mlflow" aria-label="Link to this section">#</a></h3>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-53-experiment-tracking-with-mlflow">Day 53: Experiment Tracking with MLflow<a class="heading-anchor" href="#learner--cell-1--day-53-experiment-tracking-with-mlflow" aria-label="Link to this section">#</a></h3>
 <p>Objectives:</p>
 <ul>
 <li>Track params, metrics, and artifacts with MLflow.</li>
@@ -806,7 +799,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><h4 id="learner--cell-6--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-6--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
 <p>Select the <code>Python (ds60sqlpy)</code> kernel, start at the first cell, and write each prediction before execution. Keep attempts in the provided scratch cell or new cells. Restart the kernel and run from the top before calling the work reproducible.</p>
-<h4 id="learner--cell-6--concept-lab-mlflow-run-identity-params-metrics-artifacts-and-reproducible-evidence">Concept lab : MLflow run identity, params, metrics, artifacts, and reproducible evidence<a class="heading-anchor" href="#learner--cell-6--concept-lab-mlflow-run-identity-params-metrics-artifacts-and-reproducible-evidence" aria-label="Link to this section">#</a></h4>
+<h4 id="learner--cell-6--concept-lab-mlflow-run-identity-params-metrics-artifacts-and-reproducible-evidence">Concept lab: MLflow run identity, params, metrics, artifacts, and reproducible evidence<a class="heading-anchor" href="#learner--cell-6--concept-lab-mlflow-run-identity-params-metrics-artifacts-and-reproducible-evidence" aria-label="Link to this section">#</a></h4>
 <h5 id="learner--cell-6--mental-model">Mental model<a class="heading-anchor" href="#learner--cell-6--mental-model" aria-label="Link to this section">#</a></h5>
 <p>Experiment tracking records evidence about a run; it does not make the run reproducible by itself. An experiment groups comparable runs. A run represents one execution. Parameters describe configuration, metrics are numeric observations (possibly by step), tags add searchable context, and artifacts preserve files or models.</p>
 <p>Comparability requires the same data/split/metric definitions. A model artifact should carry an input example/signature and provenance. Local file tracking is useful for study but is not a shared registry, access control system, or backup.</p>
@@ -817,7 +810,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <li><strong><code>log_artifact</code> / model logging:</strong> copies output into the run&#x27;s artifact store; verify reload and input contract rather than trusting existence.</li>
 </ul>
 <p>For every call, identify input data, learned state, returned value, and a check that can fail. That habit prevents a successful cell from being mistaken for a correct analysis.</p></article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><h5 id="learner--cell-7--focused-example-a-separate-comparable-configuration-from-results">Focused example A : separate comparable configuration from results<a class="heading-anchor" href="#learner--cell-7--focused-example-a-separate-comparable-configuration-from-results" aria-label="Link to this section">#</a></h5>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><h5 id="learner--cell-7--focused-example-a-separate-comparable-configuration-from-results">Focused example A: separate comparable configuration from results<a class="heading-anchor" href="#learner--cell-7--focused-example-a-separate-comparable-configuration-from-results" aria-label="Link to this section">#</a></h5>
 <p><strong>Predict first:</strong> write down the expected shape, type, ordering, or direction of the result. Then run the next cell.</p>
 <p><strong>Assumption:</strong> The data snapshot and metric definition are stable enough that two records are actually comparable. The dictionary below is an illustrative schema with invented values, not measured model evidence.</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line">run_record <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span></span>
@@ -841,7 +834,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p><strong>Expected observation:</strong> Configuration, measured outcomes, and contextual labels are distinct, making search and comparison less ambiguous.</p>
 <p>Do not force exact equality for estimates based on samples. Record the seed, sample size, tolerance, and metric where they matter.</p></article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><h5 id="learner--cell-10--focused-example-b-create-and-inspect-a-fully-local-temporary-run">Focused example B : create and inspect a fully local temporary run<a class="heading-anchor" href="#learner--cell-10--focused-example-b-create-and-inspect-a-fully-local-temporary-run" aria-label="Link to this section">#</a></h5>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><h5 id="learner--cell-10--focused-example-b-create-and-inspect-a-fully-local-temporary-run">Focused example B: create and inspect a fully local temporary run<a class="heading-anchor" href="#learner--cell-10--focused-example-b-create-and-inspect-a-fully-local-temporary-run" aria-label="Link to this section">#</a></h5>
 <p>This example changes one important condition. Predict how and why the result should differ from Example A.</p>
 <p><strong>Assumption:</strong> The temporary store proves API mechanics only; it is intentionally deleted and not a durable team record.</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path</span>
@@ -907,15 +900,15 @@ merely ran is not evidence of mastery.</code></pre></div>
 <ol>
 <li>Log additional parameters such as Logistic Regression <code>C</code> and compare runs.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 1 : MLflow run identity, params, metrics, artifacts, and reproducible evidence : query the exact run IDs and print each LogisticRegression C, split/data hash, ROC AUC, status, and artifact URI; assert the comparison uses the same split and metric definition.</p>
+<p><strong>Verify:</strong> Query the exact run IDs and print each LogisticRegression C, split/data hash, ROC AUC, status, and artifact URI; assert the comparison uses the same split and metric definition.</p>
 <ol start="2">
 <li>Save a confusion-matrix PNG and log it as an artifact.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 2 : MLflow run identity, params, metrics, artifacts, and reproducible evidence : save a confusion-matrix PNG with labeled axes, log it under the selected run, fetch its artifact listing, and assert the downloaded file is a valid nonempty PNG tied to that run ID.</p>
+<p><strong>Verify:</strong> Save a confusion-matrix PNG with labeled axes, log it under the selected run, fetch its artifact listing, and assert the downloaded file is a valid nonempty PNG tied to that run ID.</p>
 <ol start="3">
 <li>Try a different classifier, such as Random Forest, and compare ROC AUC.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 3 : MLflow run identity, params, metrics, artifacts, and reproducible evidence : run RandomForest and the baseline on the same data/split/metric, print both run IDs, parameters, ROC AUC, and fit status, and state that the final test was not used to choose between them.</p>
+<p><strong>Verify:</strong> Run RandomForest and the baseline on the same data/split/metric, print both run IDs, parameters, ROC AUC, and fit status, and state that the final test was not used to choose between them.</p>
 <h5 id="learner--cell-13--progressive-hints">Progressive hints<a class="heading-anchor" href="#learner--cell-13--progressive-hints" aria-label="Link to this section">#</a></h5>
 <ol>
 <li>Make one run per configuration and include split seed, metric name, and model type. Avoid changing several uncontrolled factors at once.</li>
@@ -929,15 +922,15 @@ merely ran is not evidence of mastery.</code></pre></div>
 <ol start="4">
 <li><strong>Failure-state handling:</strong> Run an experiment that intentionally raises after logging parameters. Verify MLflow records a failed status and useful exception context without exposing raw data or secrets. <strong>Progressive hint:</strong> Use the run context manager so exception exit marks the run failed. Log safe stage/status information before re-raising.</li>
 </ol>
-<p><strong>Verify:</strong> Failure-state handling : query the intentional-failure run ID and assert status FAILED, parameters remain present, no success metric/artifact is fabricated, and captured exception context excludes sentinel raw data/secret strings.</p>
+<p><strong>Verify:</strong> Failure-state handling: query the intentional-failure run ID and assert status FAILED, parameters remain present, no success metric/artifact is fabricated, and captured exception context excludes sentinel raw data/secret strings.</p>
 <ol start="5">
 <li><strong>Provenance manifest:</strong> Log a JSON provenance artifact containing data fingerprint, code revision, dependency lock hash, feature schema, split policy, and metric definitions. <strong>Progressive hint:</strong> Use portable identifiers and hashes, not developer-specific absolute paths. Validate required fields before ending the run.</li>
 </ol>
-<p><strong>Verify:</strong> Provenance manifest : download the provenance JSON by run ID, validate all required fields/types, recompute data/code/lock hashes, and fail promotion when one hash or feature-schema order is tampered.</p>
+<p><strong>Verify:</strong> Provenance manifest: download the provenance JSON by run ID, validate all required fields/types, recompute data/code/lock hashes, and fail promotion when one hash or feature-schema order is tampered.</p>
 <ol start="6">
 <li><strong>Reload and signature check:</strong> Log a fitted pipeline with an input example/signature, reload it by run URI, and assert prediction parity on a fixed fixture. <strong>Progressive hint:</strong> The fixture must use the documented schema and never come from hidden notebook state. Compare probabilities within a tolerance.</li>
 </ol>
-<p><strong>Verify:</strong> Reload and signature check : load the pipeline from its exact run URI in a fresh process, validate signature columns/types, and assert fixed-fixture predictions match pre-log values within 1e-12; reject a missing/reordered feature.</p>
+<p><strong>Verify:</strong> Reload and signature check: load the pipeline from its exact run URI in a fresh process, validate signature columns/types, and assert fixed-fixture predictions match pre-log values within 1e-12; reject a missing/reordered feature.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Expanded mastery lab scratch space</span></span>
 <span class="source-line"><span class="syntax-comment">#</span></span>
@@ -978,7 +971,7 @@ merely ran is not evidence of mastery.</code></pre></div>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-53-solutions-mlops-with-mlflow-experiment-tracking">Day 53: Solutions: MLOps with MLflow Experiment Tracking<a class="heading-anchor" href="#solution-1--day-53-solutions-mlops-with-mlflow-experiment-tracking" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-53-solutions-experiment-tracking-with-mlflow">Day 53 Solutions: Experiment Tracking with MLflow<a class="heading-anchor" href="#solution-1--day-53-solutions-experiment-tracking-with-mlflow" aria-label="Link to this section">#</a></h3>
 <p>We track a scikit‑learn grid search with MLflow, log the best model as an artifact, and load it for reuse.</p>
 <p>Contents</p>
 <ul>
@@ -1018,7 +1011,7 @@ experiment <span class="syntax-operator">=</span> mlflow<span class="syntax-oper
         <span class="syntax-keyword">raise</span> RuntimeError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Existing experiment has a different artifact location</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
     experiment_id <span class="syntax-operator">=</span> experiment<span class="syntax-operator">.</span>experiment_id
 mlflow<span class="syntax-operator">.</span>set_experiment<span class="syntax-punctuation">(</span>experiment_id<span class="syntax-operator">=</span>experiment_id<span class="syntax-punctuation">)</span></code></pre>
-<p>Worked reference for Exercise 1; Grid search with autologging</p>
+<p>Worked reference for Exercise 1: Grid search with autologging</p>
 <pre class="highlighted-code"><code class="language-python">mlflow<span class="syntax-operator">.</span>sklearn<span class="syntax-operator">.</span>autolog<span class="syntax-punctuation">(</span>log_models<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span> log_input_examples<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span> silent<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
 
 param_grid <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">n_estimators</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">30</span><span class="syntax-punctuation">,</span> <span class="syntax-number">60</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">max_depth</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span>
@@ -1040,7 +1033,7 @@ cv <span class="syntax-operator">=</span> GridSearchCV<span class="syntax-punctu
 <li>Start a run context so logs are grouped</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 2; Log and load best model</p>
+<p>Worked reference for Exercise 2: Log and load best model</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">with</span> mlflow<span class="syntax-operator">.</span>start_run<span class="syntax-punctuation">(</span>run_name<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">rf_best_model</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> run<span class="syntax-punctuation">:</span>
     best <span class="syntax-operator">=</span> RandomForestClassifier<span class="syntax-punctuation">(</span>random_state<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-operator">*</span>cv<span class="syntax-operator">.</span>best_params_<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>Xtr<span class="syntax-punctuation">,</span> ytr<span class="syntax-punctuation">)</span>
     proba <span class="syntax-operator">=</span> best<span class="syntax-operator">.</span>predict_proba<span class="syntax-punctuation">(</span>Xte<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span>
@@ -1067,7 +1060,7 @@ loaded <span class="syntax-operator">=</span> mlflow<span class="syntax-operator
 <li>Use mlflow ui to compare runs: <code>mlflow ui --port 5000</code></li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 3; Model Registry (concepts)</p>
+<p>Worked reference for Exercise 3: Model Registry (concepts)</p>
 <ul>
 <li>Register models for stages: Staging → Production</li>
 <li>Transition approvals and CI checks gate promotions</li>
@@ -1095,17 +1088,17 @@ loaded <span class="syntax-operator">=</span> mlflow<span class="syntax-operator
 <p><strong>Prompt:</strong> Log additional parameters such as Logistic Regression <code>C</code> and compare runs.</p>
 <p><strong>How to reason about it:</strong> Log one controlled configuration per run, including split seed, model type, metric definition, and direct hyperparameters. Use tags for context rather than encoding all meaning in a run name.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 1; MLflow run identity, params, metrics, artifacts, and reproducible evidence; query the exact run IDs and print each LogisticRegression C, split/data hash, ROC AUC, status, and artifact URI; assert the comparison uses the same split and metric definition.</p>
+<p><strong>Verify:</strong> Query the exact run IDs and print each LogisticRegression C, split/data hash, ROC AUC, status, and artifact URI; assert the comparison uses the same split and metric definition.</p>
 <h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Save a confusion-matrix PNG and log it as an artifact.</p>
 <p><strong>How to reason about it:</strong> Create the confusion matrix under ignored <code>artifacts/</code>, label axes, close the figure, and log it. The artifact must correspond to the same evaluation rows and threshold as the run&#x27;s numeric metrics.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 2; MLflow run identity, params, metrics, artifacts, and reproducible evidence; save a confusion-matrix PNG with labeled axes, log it under the selected run, fetch its artifact listing, and assert the downloaded file is a valid nonempty PNG tied to that run ID.</p>
+<p><strong>Verify:</strong> Save a confusion-matrix PNG with labeled axes, log it under the selected run, fetch its artifact listing, and assert the downloaded file is a valid nonempty PNG tied to that run ID.</p>
 <h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Try a different classifier, such as Random Forest, and compare ROC AUC.</p>
 <p><strong>How to reason about it:</strong> Compare classifiers on one frozen split and include runtime/complexity beside ROC AUC. A model-family change is a new run, not an overwritten metric in the prior run.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 3; MLflow run identity, params, metrics, artifacts, and reproducible evidence; run RandomForest and the baseline on the same data/split/metric, print both run IDs, parameters, ROC AUC, and fit status, and state that the final test was not used to choose between them.</p>
+<p><strong>Verify:</strong> Run RandomForest and the baseline on the same data/split/metric, print both run IDs, parameters, ROC AUC, and fit status, and state that the final test was not used to choose between them.</p>
 <h5 id="solution-1--exercise-4-failure-state-handling">Exercise 4: Failure-state handling<a class="heading-anchor" href="#solution-1--exercise-4-failure-state-handling" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Run an experiment that intentionally raises after logging parameters. Verify MLflow records a failed status and useful exception context without exposing raw data or secrets.</p>
 <p><strong>Reasoning before implementation:</strong> Use the run context manager so exception exit marks the run failed. Log safe stage/status information before re-raising.</p>
@@ -1153,7 +1146,7 @@ loaded <span class="syntax-operator">=</span> mlflow<span class="syntax-operator
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="solution-2--cell-1--day-53-solutions-mlops-with-mlflow-experiment-tracking">Day 53: Solutions: MLOps with MLflow Experiment Tracking<a class="heading-anchor" href="#solution-2--cell-1--day-53-solutions-mlops-with-mlflow-experiment-tracking" aria-label="Link to this section">#</a></h3>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="solution-2--cell-1--day-53-solutions-experiment-tracking-with-mlflow">Day 53 Solutions: Experiment Tracking with MLflow<a class="heading-anchor" href="#solution-2--cell-1--day-53-solutions-experiment-tracking-with-mlflow" aria-label="Link to this section">#</a></h3>
 <p>We track a scikit‑learn grid search with MLflow, log the best model as an artifact, and load it for reuse.</p>
 <p>Contents</p>
 <ul>
@@ -1195,7 +1188,7 @@ loaded <span class="syntax-operator">=</span> mlflow<span class="syntax-operator
 <span class="source-line">    experiment_id <span class="syntax-operator">=</span> experiment<span class="syntax-operator">.</span>experiment_id</span>
 <span class="source-line">mlflow<span class="syntax-operator">.</span>set_experiment<span class="syntax-punctuation">(</span>experiment_id<span class="syntax-operator">=</span>experiment_id<span class="syntax-punctuation">)</span></span></code></pre>
 </article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><p>Worked reference for Exercise 1; Grid search with autologging</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><p>Worked reference for Exercise 1: Grid search with autologging</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line">mlflow<span class="syntax-operator">.</span>sklearn<span class="syntax-operator">.</span>autolog<span class="syntax-punctuation">(</span>log_models<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span> log_input_examples<span class="syntax-operator">=</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span> silent<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line"></span>
 <span class="source-line">param_grid <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">n_estimators</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">30</span><span class="syntax-punctuation">,</span> <span class="syntax-number">60</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">max_depth</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span></span>
@@ -1218,7 +1211,7 @@ loaded <span class="syntax-operator">=</span> mlflow<span class="syntax-operator
 <li>Start a run context so logs are grouped</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 2; Log and load best model</p></article>
+<p>Worked reference for Exercise 2: Log and load best model</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">with</span> mlflow<span class="syntax-operator">.</span>start_run<span class="syntax-punctuation">(</span>run_name<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">rf_best_model</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> run<span class="syntax-punctuation">:</span></span>
 <span class="source-line">    best <span class="syntax-operator">=</span> RandomForestClassifier<span class="syntax-punctuation">(</span>random_state<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-operator">*</span>cv<span class="syntax-operator">.</span>best_params_<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>Xtr<span class="syntax-punctuation">,</span> ytr<span class="syntax-punctuation">)</span></span>
 <span class="source-line">    proba <span class="syntax-operator">=</span> best<span class="syntax-operator">.</span>predict_proba<span class="syntax-punctuation">(</span>Xte<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span></span>
@@ -1246,7 +1239,7 @@ loaded <span class="syntax-operator">=</span> mlflow<span class="syntax-operator
 <li>Use mlflow ui to compare runs: <code>mlflow ui --port 5000</code></li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 3; Model Registry (concepts)</p>
+<p>Worked reference for Exercise 3: Model Registry (concepts)</p>
 <ul>
 <li>Register models for stages: Staging → Production</li>
 <li>Transition approvals and CI checks gate promotions</li>
@@ -1274,17 +1267,17 @@ loaded <span class="syntax-operator">=</span> mlflow<span class="syntax-operator
 <p><strong>Prompt:</strong> Log additional parameters such as Logistic Regression <code>C</code> and compare runs.</p>
 <p><strong>How to reason about it:</strong> Log one controlled configuration per run, including split seed, model type, metric definition, and direct hyperparameters. Use tags for context rather than encoding all meaning in a run name.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 1; MLflow run identity, params, metrics, artifacts, and reproducible evidence; query the exact run IDs and print each LogisticRegression C, split/data hash, ROC AUC, status, and artifact URI; assert the comparison uses the same split and metric definition.</p>
+<p><strong>Verify:</strong> Query the exact run IDs and print each LogisticRegression C, split/data hash, ROC AUC, status, and artifact URI; assert the comparison uses the same split and metric definition.</p>
 <h5 id="solution-2--cell-7--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-2--cell-7--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Save a confusion-matrix PNG and log it as an artifact.</p>
 <p><strong>How to reason about it:</strong> Create the confusion matrix under ignored <code>artifacts/</code>, label axes, close the figure, and log it. The artifact must correspond to the same evaluation rows and threshold as the run&#x27;s numeric metrics.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 2; MLflow run identity, params, metrics, artifacts, and reproducible evidence; save a confusion-matrix PNG with labeled axes, log it under the selected run, fetch its artifact listing, and assert the downloaded file is a valid nonempty PNG tied to that run ID.</p>
+<p><strong>Verify:</strong> Save a confusion-matrix PNG with labeled axes, log it under the selected run, fetch its artifact listing, and assert the downloaded file is a valid nonempty PNG tied to that run ID.</p>
 <h5 id="solution-2--cell-7--exercise-3-original-lesson-practice">Exercise 3: Original lesson practice<a class="heading-anchor" href="#solution-2--cell-7--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Try a different classifier, such as Random Forest, and compare ROC AUC.</p>
 <p><strong>How to reason about it:</strong> Compare classifiers on one frozen split and include runtime/complexity beside ROC AUC. A model-family change is a new run, not an overwritten metric in the prior run.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 3; MLflow run identity, params, metrics, artifacts, and reproducible evidence; run RandomForest and the baseline on the same data/split/metric, print both run IDs, parameters, ROC AUC, and fit status, and state that the final test was not used to choose between them.</p>
+<p><strong>Verify:</strong> Run RandomForest and the baseline on the same data/split/metric, print both run IDs, parameters, ROC AUC, and fit status, and state that the final test was not used to choose between them.</p>
 <h5 id="solution-2--cell-7--exercise-4-failure-state-handling">Exercise 4: Failure-state handling<a class="heading-anchor" href="#solution-2--cell-7--exercise-4-failure-state-handling" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Run an experiment that intentionally raises after logging parameters. Verify MLflow records a failed status and useful exception context without exposing raw data or secrets.</p>
 <p><strong>Reasoning before implementation:</strong> Use the run context manager so exception exit marks the run failed. Log safe stage/status information before re-raising.</p>
@@ -1320,7 +1313,7 @@ loaded <span class="syntax-operator">=</span> mlflow<span class="syntax-operator
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through `python-53` : Day 53 : Experiment Tracking with MLflow.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through `python-53` (Day 53: Experiment Tracking with MLflow).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize MLflow run identity, params, metrics, artifacts, and reproducible evidence. Use exactly these maintained learner materials:
@@ -1354,8 +1347,8 @@ merely ran is not evidence of mastery.</textarea>
       </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
-        <a class="nav-card" href="python-52.html"><small>Previous lesson</small><strong>python-52</strong><span>Scalability Dask</span></a>
-        <a class="nav-card next" href="python-54.html"><small>Next lesson</small><strong>python-54</strong><span>Monitoring Model Governance</span></a>
+        <a class="nav-card" href="python-52.html"><small>Previous lesson</small><strong>python-52</strong><span>Scaling with Dask and Chunked pandas</span></a>
+        <a class="nav-card next" href="python-54.html"><small>Next lesson</small><strong>python-54</strong><span>Model Monitoring and Governance</span></a>
       </nav>
     </div>
   </main>

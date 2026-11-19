@@ -198,11 +198,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-keyword">import</span> <span class="syntax-string">&quot;fmt&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">func</span> main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 1: Trace a prefix sum: Sum 2, 4 and 6 while checking every visited prefix.</span></span>
-<span class="source-line">	<span class="syntax-comment">// Expected: The final sum is 12 and three elements were visited.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 1: Trace a prefix sum: change one input: Copy worked example 1 into a scratch pad and change `items := []int{2, 4, 6}` to `items := []int{3, 4, 6}`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Expected: The changed run panics with `sum` because `sum == 12 &amp;&amp; len(items) == 3` no longer holds. Restoring the original line brings back the worked observation: the final sum is 12 and three elements were visited.</span></span>
 <span class="source-line"></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 2: Handle empty data: Apply the same summation to an empty slice.</span></span>
-<span class="source-line">	<span class="syntax-comment">// Expected: The result is 0 with no special invented element.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 2: Handle empty data: debug a regression: A regression changed one token in worked example 2, so one line now reads `sum := 1`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Expected: Before the repair the program panics with `empty sum`; after it the line reads `sum := 0` again and the result is 0 with no special invented element.</span></span>
 <span class="source-line"></span>
 <span class="source-line">	<span class="syntax-comment">// Exercise 3: Use a safe guard: Guard access to the first element of an empty slice with a length check.</span></span>
 <span class="source-line">	<span class="syntax-comment">// Expected: The condition is false and no indexing occurs.</span></span>

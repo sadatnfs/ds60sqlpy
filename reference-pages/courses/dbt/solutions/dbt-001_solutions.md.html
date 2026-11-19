@@ -201,6 +201,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Expected:</strong> Each file has a distinct responsibility.</p>
 <h3 id="2-change-the-expression">2. Change the expression<a class="heading-anchor" href="#2-change-the-expression" aria-label="Link to this section">#</a></h3>
 <p>The source expression changes while the result remains equal. That is a concrete example of why source identity and result equality are different evidence.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-comment"># Uses the tempfile import and the project(), invoke() and rows() helpers in main.py.</span>
+<span class="syntax-keyword">with</span> tempfile<span class="syntax-operator">.</span>TemporaryDirectory<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> d<span class="syntax-punctuation">:</span>
+    p <span class="syntax-operator">=</span> project<span class="syntax-punctuation">(</span>d<span class="syntax-punctuation">,</span> models<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">answer</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">select 21 * 2 as answer</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
+    invoke<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">build</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> rows<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">select answer from answer</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">42</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span></code></pre>
 <p><strong>Expected:</strong> The database still returns 42.</p>
 <h3 id="3-introduce-invalid-sql">3. Introduce invalid SQL<a class="heading-anchor" href="#3-introduce-invalid-sql" aria-label="Link to this section">#</a></h3>
 <p>Do not continue publication after a failed command. Preserve the diagnostic and distinguish parsing/template errors from SQL execution errors.</p>
@@ -341,7 +346,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
     main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="interpretation">Interpretation<a class="heading-anchor" href="#interpretation" aria-label="Link to this section">#</a></h3>
-<p>Build and inspect a local dbt project through its real adapter. Keep parsing, compilation, materialization and validation distinct. This gives you a reliable basis for the later incremental, contract and publication lessons without depending on a hosted warehouse.</p></article>
+<p>Keep parsing, compilation, materialization and validation distinct. This gives you a reliable basis for the later incremental, contract and publication lessons without depending on a hosted warehouse.</p></article>
   </main>
 </body>
 </html>

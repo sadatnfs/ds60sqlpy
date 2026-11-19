@@ -194,24 +194,24 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/scala-spark/guides/spark-036.md</code></p>
     </header>
     <article class="document"><h2 id="spark-036-foreachbatch-idempotent-sinks-and-failure-injection">spark-036: foreachBatch, idempotent sinks and failure injection<a class="heading-anchor" href="#spark-036-foreachbatch-idempotent-sinks-and-failure-injection" aria-label="Link to this section">#</a></h2>
-<p>Authored paired Scala/PySpark teaching content. The default fixtures are tiny,local and deterministic. Runtime acceptance,logical correctness and learner understanding remain separate evidence.</p>
+<p>Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
-<p>Advanced; approximately 135 minutes. Direct design prerequisites: <code>spark-035</code>. The prepared baseline is Spark4.0.1,Scala binary2.13,JDK17 and Python3.12. Read the <a href="../execution-baseline.md.html">execution baseline</a>;a proposed future tuple is not a runtime receipt.</p>
+<p>Advanced; approximately 135 minutes. Direct prerequisites: <code>spark-035</code>. The prepared baseline is Spark 4.0.1, Scala binary 2.13, JDK 17 and Python 3.12. Read the <a href="../execution-baseline.md.html">execution baseline</a>.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open <code>spark-036</code> in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed <code>spark-local-scala</code> or <code>spark-local-python</code> profile,save your pad and run the complete source. Scala stages as <code>Main.scala</code> with <code>object Main</code>;Python stages as <code>main.py</code> with a main guard. Each program creates its own local[2] session,disables the UI,binds the driver to loopback and stops the session in finally. No external dataset,package download,JDBC connection or cloud service is requested.</p>
-<p>The <a href="../lessons/spark-036.scala.html">Scala learner</a> and <a href="../lessons/spark-036.py.html">PySpark learner</a> run two complete demonstrations and retain six explicit task stubs. Use the <a href="../solutions/spark-036_solutions.md.html">explained solutions</a> only after an attempt or an explicit worked comparison;the <a href="../solutions/spark-036_solution.scala.html">Scala reference</a> and <a href="../solutions/spark-036_solution.py.html">PySpark reference</a> contain complete assertions. A bounded collect is used only for the declared tiny fixture;do not copy it onto an unbounded or large production table.</p>
+<p>Open <code>spark-036</code> in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed <code>spark-local-scala</code> or <code>spark-local-python</code> profile, save your pad and run the complete source. Scala stages as <code>Main.scala</code> with <code>object Main</code>;Python stages as <code>main.py</code> with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.</p>
+<p>The <a href="../lessons/spark-036.scala.html">Scala learner</a> and <a href="../lessons/spark-036.py.html">PySpark learner</a> run two complete demonstrations and retain six explicit task stubs. Use the <a href="../solutions/spark-036_solutions.md.html">explained solutions</a> only after an attempt or an explicit worked comparison; the <a href="../solutions/spark-036_solution.scala.html">Scala reference</a> and <a href="../solutions/spark-036_solution.py.html">PySpark reference</a> contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
 <ul>
 <li>Design an idempotent microbatch sink instead of assuming foreachBatch is exactly once.</li>
-<li>State the input and output grain,schema,NULL policy and ordering before executing a transformation.</li>
-<li>Compare each language implementation with independent literal expectations,not only with the other implementation.</li>
+<li>State the input and output grain, schema, NULL policy and ordering before executing a transformation.</li>
+<li>Compare each language implementation with independent literal expectations, not only with the other implementation.</li>
 </ul>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><strong>foreachBatch:</strong> A callback receiving a static microbatch DataFrame and its batch ID, with at-least-once execution by default.</li>
 </ul>
 <ul>
-<li><strong>Idempotency key:</strong> A stable identity used to recognize repeated logical work;here query namespace plus batch ID.</li>
+<li><strong>Idempotency key:</strong> A stable identity used to recognize repeated logical work; here query namespace plus batch ID.</li>
 </ul>
 <ul>
 <li><strong>Staging:</strong> Writing a candidate result that readers do not yet consider committed.</li>
@@ -234,8 +234,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The filesystem assumptions are explicit:one writer, prepared local storage and same-directory atomic rename. The program does not fsync a durable transaction log or coordinate distributed writers. A rename that is atomic for local visibility is not automatically an object-store transaction or a power-loss guarantee. A production database sink would need its own transaction and uniqueness constraints, with data and deduplication record committed together.</p>
 <h3 id="inject-failure-at-a-precise-point">Inject failure at a precise point<a class="heading-anchor" href="#inject-failure-at-a-precise-point" aria-label="Link to this section">#</a></h3>
 <p>The first actual streaming callback writes staging bytes, then raises injected_before_publication before rename. The exception escapes the callback and reaches awaitTermination as a streaming query failure. The temporary file is removed in finally, while no committed stream-v1 batch exists. The attempted batch ID is recorded as 0. This is a failed query with an expected diagnostic, not a swallowed error reported as success.</p>
-<p>Restarting the compatible source/checkpoint repeats batch 0. The query ID persists and run ID changes. This time publication completes and the sink exposes exactly two rows. The attempt ledger is[0,0], while the committed logical batch count is one. Delivery count and committed effect count are different measurements. A direct replay of an already committed manual batch separately tests the no-op branch that would be needed after an uncertain post-publication response.</p>
-<p>The callback persists the batch while performing multiple validation and collection actions, then unpersists in finally. Without this choice, multiple actions can recompute input and distort work metrics. Persistence is not the idempotency mechanism;it only controls repeated execution within the callback. The durable key/content comparison controls repeated callback deliveries.</p>
+<p>Restarting the compatible source/checkpoint repeats batch 0. The query ID persists and run ID changes. This time publication completes and the sink exposes exactly two rows. The attempt ledger is [0, 0], while the committed logical batch count is one. Delivery count and committed effect count are different measurements. A direct replay of an already committed manual batch separately tests the no-op branch that would be needed after an uncertain post-publication response.</p>
+<p>The callback persists the batch while performing multiple validation and collection actions, then unpersists in finally. Without this choice, multiple actions can recompute input and distort work metrics. Persistence is not the idempotency mechanism; it only controls repeated execution within the callback. The durable key/content comparison controls repeated callback deliveries.</p>
 <h3 id="use-a-deliberately-unsafe-control">Use a deliberately unsafe control<a class="heading-anchor" href="#use-a-deliberately-unsafe-control" aria-label="Link to this section">#</a></h3>
 <p>A separate unsafe-demo file appends the same canonical text twice and therefore contains four occurrences. It never shares a path with the real sink. This deterministic counterexample shows exactly what a naive external append can do under repeated delivery. The repaired sink retains two rows for that logical batch and then accepts a genuinely new batch containing 3:300.</p>
 <p>Every path is inside a fresh current-job scratch root. The reference waits with a deadline, stops only queries it created, then removes only that root before stopping its session. The checkpoint remains intact during the failure/restart experiment. No existing learner checkpoint or external database is touched. The final evidence states the precise local protocol, observed failure point, attempt IDs, committed rows and limitations rather than claiming universal end-to-end exactly-once execution.</p>
@@ -307,7 +307,7 @@ text <span class="syntax-operator">=</span> canonical_batch<span class="syntax-p
 <span class="syntax-keyword">assert</span> text <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">1,100</span><span class="syntax-string">\n</span><span class="syntax-string">2,200</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span>
 <span class="syntax-keyword">assert</span> publish_batch<span class="syntax-punctuation">(</span>sink<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">demo-v1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> text<span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> publish_batch<span class="syntax-punctuation">(</span>sink<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">demo-v1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> text<span class="syntax-punctuation">)</span></code></pre>
-<p>The same key and canonical content publishes once. This direct helper demonstration isolates the sink rule;the reference exercises the real foreachBatch failure and replay separately.</p>
+<p>The same key and canonical content publishes once. This direct helper demonstration isolates the sink rule; the reference exercises the real foreachBatch failure and replay separately.</p>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">var</span> failed <span class="syntax-operator">=</span> <span class="syntax-keyword">false</span>
 <span class="syntax-keyword">try</span> publishBatch<span class="syntax-punctuation">(</span>sink<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;demo-failure&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0L</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;1,100\n&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">)</span>
@@ -322,59 +322,59 @@ assert<span class="syntax-punctuation">(</span>failed <span class="syntax-operat
 <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Failure injection disappeared</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">assert</span> published_rows<span class="syntax-punctuation">(</span>sink<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">demo-failure</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></code></pre>
-<p>Failure after staging leaves no published row. The expected exception is inspected explicitly;temporary-file cleanup is not mistaken for a successful commit.</p>
+<p>Failure after staging leaves no published row. The expected exception is inspected explicitly; temporary-file cleanup is not mistaken for a successful commit.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-define-canonical-bounded-microbatch-content">Exercise 1: Define canonical bounded microbatch content<a class="heading-anchor" href="#exercise-1-define-canonical-bounded-microbatch-content" aria-label="Link to this section">#</a></h4>
-<p>Validate the explicit bigint schema, nonnegative cents, positive IDs and at most 8 rows;return sorted id, cents newline records preserving multiplicity.</p>
+<p>Validate the explicit bigint schema, nonnegative cents, positive IDs and at most 8 rows; return sorted id, cents newline records preserving multiplicity.</p>
 <p><strong>Expected result/shape:</strong> Exact text 1,100 newline 2,200 newline, with a stable SHA256 after repartitioning.</p>
 <p><strong>Verify:</strong> Compare exact bytes and reject NULL cents before publication.</p>
-<p><strong>Progressive hint:</strong> Content validation precedes the digest;the digest is not itself a business oracle.</p>
+<p><strong>Progressive hint:</strong> Content validation precedes the digest; the digest is not itself a business oracle.</p>
 <h4 id="exercise-2-publish-one-logical-batch-idempotently">Exercise 2: Publish one logical batch idempotently<a class="heading-anchor" href="#exercise-2-publish-one-logical-batch-idempotently" aria-label="Link to this section">#</a></h4>
 <p>Publish the same canonical content twice under identity manual-v1 and batch 7. Compare the existing receipt instead of appending.</p>
-<p><strong>Expected result/shape:</strong> First call publishes true;second returns false;exactly 2 logical rows remain.</p>
+<p><strong>Expected result/shape:</strong> First call publishes true; second returns false; exactly 2 logical rows remain.</p>
 <p><strong>Verify:</strong> Assert return values, unchanged receipt bytes and one batch file.</p>
-<p><strong>Progressive hint:</strong> The identity includes a stable query namespace and batch ID;run ID must not reset it.</p>
+<p><strong>Progressive hint:</strong> The identity includes a stable query namespace and batch ID; run ID must not reset it.</p>
 <h4 id="exercise-3-inject-a-real-callback-failure-before-publication">Exercise 3: Inject a real callback failure before publication<a class="heading-anchor" href="#exercise-3-inject-a-real-callback-failure-before-publication" aria-label="Link to this section">#</a></h4>
 <p>Run the actual foreachBatch query with failure after staging and before rename. Retain the wrapped streaming exception and attempted batch ID.</p>
-<p><strong>Expected result/shape:</strong> The query fails with injected_before_publication;no stream-v1 batch is visible and the attempted batch ID is 0.</p>
+<p><strong>Expected result/shape:</strong> The query fails with injected_before_publication; no stream-v1 batch is visible and the attempted batch ID is 0.</p>
 <p><strong>Verify:</strong> Check the exception marker, empty published rows and inactive query.</p>
 <p><strong>Progressive hint:</strong> The exception must escape the callback so Spark cannot mark the batch successful.</p>
 <h4 id="exercise-4-recover-the-same-checkpoint-and-observe-replay">Exercise 4: Recover the same checkpoint and observe replay<a class="heading-anchor" href="#exercise-4-recover-the-same-checkpoint-and-observe-replay" aria-label="Link to this section">#</a></h4>
 <p>Restart the same source/checkpoint/query namespace without failure. Compare attempts and logical query/run IDs.</p>
-<p><strong>Expected result/shape:</strong> Batch 0 is attempted again and publishes 2 rows once. Query ID persists;run ID changes.</p>
+<p><strong>Expected result/shape:</strong> Batch 0 is attempted again and publishes 2 rows once. Query ID persists; run ID changes.</p>
 <p><strong>Verify:</strong> Assert attempt sequence 0,0, exact rows and corresponding identities.</p>
-<p><strong>Progressive hint:</strong> foreachBatch provides at-least-once callback execution;the sink supplies replay safety.</p>
+<p><strong>Progressive hint:</strong> foreachBatch provides at-least-once callback execution; the sink supplies replay safety.</p>
 <h4 id="exercise-5-expose-a-non-idempotent-append-counterexample">Exercise 5: Expose a non-idempotent append counterexample<a class="heading-anchor" href="#exercise-5-expose-a-non-idempotent-append-counterexample" aria-label="Link to this section">#</a></h4>
 <p>Append the same canonical batch text twice to a separate unsafe-demo file, then compare it with the idempotent published batch.</p>
-<p><strong>Expected result/shape:</strong> Unsafe append has 4 row occurrences;the committed batch remains 2.</p>
+<p><strong>Expected result/shape:</strong> Unsafe append has 4 row occurrences; the committed batch remains 2.</p>
 <p><strong>Verify:</strong> Compare exact repeated lines and preserve the unsafe file as a separate diagnostic until owned cleanup.</p>
 <p><strong>Progressive hint:</strong> A retry after an uncertain response is enough to duplicate append side effects.</p>
 <h4 id="exercise-6-reject-identity-collisions-and-admit-the-next-batch">Exercise 6: Reject identity collisions and admit the next batch<a class="heading-anchor" href="#exercise-6-reject-identity-collisions-and-admit-the-next-batch" aria-label="Link to this section">#</a></h4>
 <p>Reject different content under an existing batch key, then publish a new source file 3:300 and resume the real query.</p>
 <p><strong>Expected result/shape:</strong> The conflicting key fails without replacing its receipt. Stream batch 1 adds one row, leaving IDs 1,2,3 and total 600 across two batch files.</p>
 <p><strong>Verify:</strong> Assert collision rejection, old receipt equality, attempt sequence 0,0,1 and exact 3-row sink.</p>
-<p><strong>Progressive hint:</strong> A duplicate key is safe only if its content agrees;new work receives a new batch ID.</p>
+<p><strong>Progressive hint:</strong> A duplicate key is safe only if its content agrees; new work receives a new batch ID.</p>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
 <p>Do not use runId as the replay key. Do not suppress a repeated batch ID without checking content and query namespace. Do not catch a callback failure and return success to Spark. A local rename protocol is not a distributed transaction or an fsync durability claim. A declared tiny collection bound must be checked before collection, and a missing capability is not permission to download a connector or open a database.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
-<p>Explain the contract of <code>encodeBatch</code> / <code>encode_batch</code> without reading its solution. Trace the specified boundary case,then explain the final exercise&#x27;s evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.</p>
+<p>Explain the contract of <code>encodeBatch</code> / <code>encode_batch</code> without reading its solution. Trace the specified boundary case, then explain the final exercise&#x27;s evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
-<p>Use the <a href="../README.md.html">course route</a> to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. Keep runtime/profile receipts separate from any cluster-performance or production-recovery claim.</p>
+<p>Use the <a href="../README.md.html">course route</a> to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.</p>
 <h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://spark.apache.org/docs/4.0.1/streaming/apis-on-dataframes-and-datasets.html#using-foreach-and-foreachbatch">Spark4.0.1 foreachBatch semantics</a></li>
 </ul>
 <ul>
-<li><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/file/Files.html#move(java.nio.file.Path,java.nio.file.Path,java.nio.file.CopyOption...">Java17 atomic file move</a>)</li>
+<li><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/file/Files.html#move(java.nio.file.Path,java.nio.file.Path,java.nio.file.CopyOption...">Java 17 atomic file move</a>)</li>
 </ul>
 <ul>
 <li><a href="https://docs.python.org/3/library/os.html#os.rename">Python rename semantics</a></li>
 </ul>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to coach me through spark-036: foreachBatch, idempotent sinks and failure injection.
-Read courses/scala-spark/guides/spark-036.md and courses/scala-spark/lessons/spark-036.py;the paired sources are courses/scala-spark/lessons/spark-036.scala and courses/scala-spark/lessons/spark-036.py.
-Direct prerequisites: spark-035. Explain the schema,row grain and new Scala/Python/Spark syntax,ask me to predict a concrete result,then inspect my attempt. Give one hint at a time,review exact result and boundary evidence,and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
-Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies,start a remote service,reset existing checkpoints or alter unrelated learner work.
+Read courses/scala-spark/guides/spark-036.md and courses/scala-spark/lessons/spark-036.py; the paired sources are courses/scala-spark/lessons/spark-036.scala and courses/scala-spark/lessons/spark-036.py.
+Direct prerequisites: spark-035. Explain the schema, row grain and new Scala/Python/Spark syntax, ask me to predict a concrete result, then inspect my attempt. Give one hint at a time, review exact result and boundary evidence, and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
+Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies, start a remote service, reset existing checkpoints or alter unrelated learner work.
 Done when all six contracts have inspected evidence and I can explain the stated assumptions and a meaningful failure case.</code></pre></article>
   </main>
 </body>

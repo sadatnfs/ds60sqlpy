@@ -198,11 +198,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-keyword">import</span> <span class="syntax-string">&quot;fmt&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">func</span> main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 1: Capture a changing variable: Create a closure referring to factor, change factor, then call it.</span></span>
-<span class="source-line">	<span class="syntax-comment">// Expected: The closure uses the new factor 3.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 1: Capture a changing variable: change one input: Copy worked example 1 into a scratch pad and change `factor = 3` to `factor = 4`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Expected: The changed run panics with `capture variable` because `multiply(4) == 12` no longer holds. Restoring the original line brings back the worked observation: the closure uses the new factor 3.</span></span>
 <span class="source-line"></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 2: Create independent counters: Construct two counter closures and call the first twice.</span></span>
-<span class="source-line">	<span class="syntax-comment">// Expected: The first returns 1 then 2; the second starts at 1.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 2: Create independent counters: diagnose an edited check: A careless edit changed the check in worked example 2 so that it reads `check(a() != 1 &amp;&amp; a() == 2 &amp;&amp; b() == 1, &quot;independent closures&quot;)`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Expected: Before the repair the program panics with `independent closures`; after it the line reads `check(a() == 1 &amp;&amp; a() == 2 &amp;&amp; b() == 1, &quot;independent closures&quot;)` again and the first returns 1 then 2; the second starts at 1.</span></span>
 <span class="source-line"></span>
 <span class="source-line">	<span class="syntax-comment">// Exercise 3: Inject a transformation: Map a doubling callback over 1, 2 and 3.</span></span>
 <span class="source-line">	<span class="syntax-comment">// Expected: The result is 2, 4 and 6.</span></span>
@@ -213,8 +213,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">	<span class="syntax-comment">// Exercise 5: Handle an empty traversal: Visit an empty range with a callback that would increment a count.</span></span>
 <span class="source-line">	<span class="syntax-comment">// Expected: The callback is never invoked.</span></span>
 <span class="source-line"></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 6: Transfer explicit state: Collect only even values from a bounded visitor.</span></span>
-<span class="source-line">	<span class="syntax-comment">// Expected: The collected values are 2 and 4.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 6: Transfer the visitor to a range-over-func iterator: Range over an iter.Seq[int] that yields 1 through 5, append each value, and break after 2.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Expected: The loop collects 1 and 2, and the iterator produces exactly two values.</span></span>
 <span class="source-line"></span>
 <span class="source-line">	fmt<span class="syntax-punctuation">.</span>Println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Implement the six investigations in your saved pad.&quot;</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-punctuation">}</span></span>

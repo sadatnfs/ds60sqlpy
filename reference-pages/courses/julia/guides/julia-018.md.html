@@ -198,7 +198,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Intermediate; approximately 150 minutes. Direct prerequisites: <code>julia-017</code>.</p>
 <p>Use calendar arithmetic deliberately and reconstruct features using both event and availability time.</p>
 <h3 id="classroom-execution">Classroom execution<a class="heading-anchor" href="#classroom-execution" aria-label="Link to this section">#</a></h3>
-<p>Choose <strong>Julia language and scientific computing</strong> in <code>/classroom</code>, open this unit, and select its prepared <code>julia</code> runtime. The worker starts a fresh <code>main.jl</code> process with two Julia threads, a fixed package environment, no startup file and offline package settings. Both worked examples are complete under that environment. Save your current pad before replacing it. No package, model or dataset is fetched by a lesson.</p>
+<p>Open <code>julia-018</code> in <code>/classroom</code> with its prepared <code>julia</code> runtime. Worked case A (month arithmetic and clamping) and worked case B (choose an available historical value) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing <code>julia-018: all reference checks passed</code>. The <a href="../README.md.html">course overview</a> describes the shared runtime: a fresh offline <code>main.jl</code> process with two threads and a fixed package environment.</p>
 <h3 id="calendar-time-is-not-one-uniform-integer">Calendar time is not one uniform integer<a class="heading-anchor" href="#calendar-time-is-not-one-uniform-integer" aria-label="Link to this section">#</a></h3>
 <p>A date identifies a calendar day, while a datetime adds a clock value. A calendar month does not have a fixed number of days. Adding a month and adding thirty days can therefore produce different results. The difference is meaningful for billing periods, cohorts and scientific observation windows.</p>
 <p>Julia&#x27;s standard Dates types do not automatically attach an IANA time zone or resolve daylight-saving ambiguity. The fixture datetimes in this unit are explicitly interpreted as UTC by the application contract. They are not a demonstration of timezone conversion. A real local-time workflow needs a separately prepared timezone-aware approach and a policy for ambiguous or nonexistent local times.</p>
@@ -295,7 +295,7 @@ worked_b<span class="syntax-punctuation">(</span><span class="syntax-punctuation
 <p><strong>Hint:</strong> Filter availability as well as event time.</p>
 <h4 id="4-state-cutoff-equality">4. State cutoff equality<a class="heading-anchor" href="#4-state-cutoff-equality" aria-label="Link to this section">#</a></h4>
 <p>Look up at the exact availability timestamp.</p>
-<p><strong>Expected:</strong> The inclusive fixture admits the row.</p>
+<p><strong>Expected:</strong> The inclusive cutoff returns the row whose availability time equals the lookup time.</p>
 <p><strong>Hint:</strong> Use the declared boundary policy.</p>
 <h4 id="5-preserve-entity-identity">5. Preserve entity identity<a class="heading-anchor" href="#5-preserve-entity-identity" aria-label="Link to this section">#</a></h4>
 <p>Look up an absent entity.</p>
@@ -311,7 +311,7 @@ worked_b<span class="syntax-punctuation">(</span><span class="syntax-punctuation
 <li><a href="../../../python/professional/README.md.html">Existing point-in-time data workflows</a></li>
 </ul>
 <h3 id="study-companion">Study companion<a class="heading-anchor" href="#study-companion" aria-label="Link to this section">#</a></h3>
-<p>Use the repository learning-companion skill with this lesson ID, your prediction and your actual source/output. Ask for a diagnosis of the first incorrect type, shape, state transition or assumption. Keep observed execution distinct from a timing claim, inferred mathematical result or external deployment.</p></article>
+<p>A repository-aware assistant with the learning-companion skill can review <code>julia-018</code> with you. Give it your prediction for one investigation, your source and the actual output, and ask it to find the first incorrect assumption about Dates, calendar period, duration, point-in-time or tie rule.</p></article>
   </main>
 </body>
 </html>

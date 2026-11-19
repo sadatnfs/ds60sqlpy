@@ -198,7 +198,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Beginner; approximately 90 minutes. Direct prerequisites: <code>julia-005</code>.</p>
 <p>Write reusable functions with explicit contracts and distinguish local rebinding from mutation of a passed object.</p>
 <h3 id="classroom-execution">Classroom execution<a class="heading-anchor" href="#classroom-execution" aria-label="Link to this section">#</a></h3>
-<p>Choose <strong>Julia language and scientific computing</strong> in <code>/classroom</code>, open this unit, and select its prepared <code>julia</code> runtime. The worker starts a fresh <code>main.jl</code> process with two Julia threads, a fixed package environment, no startup file and offline package settings. Both worked examples are complete under that environment. Save your current pad before replacing it. No package, model or dataset is fetched by a lesson.</p>
+<p>Open <code>julia-006</code> in <code>/classroom</code> with its prepared <code>julia</code> runtime. Worked case A (a small configurable transformation) and worked case B (rebinding and mutation are different) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing <code>julia-006: all reference checks passed</code>. The <a href="../README.md.html">course overview</a> describes the shared runtime: a fresh offline <code>main.jl</code> process with two threads and a fixed package environment.</p>
 <h3 id="a-function-describes-a-reusable-transformation">A function describes a reusable transformation<a class="heading-anchor" href="#a-function-describes-a-reusable-transformation" aria-label="Link to this section">#</a></h3>
 <p>A function receives arguments and returns a value. Julia permits several methods for one function name; later lessons explain dispatch. First focus on the contract: valid inputs, the returned result, mutation and failure behavior. Explicit <code>return</code> statements can make that contract easy to read even though Julia also returns the final expression of a function body.</p>
 <p>Positional arguments are supplied by their position. Keyword arguments name a choice such as a scale or threshold. Defaults are part of the API and should not be used to hide an important scientific assumption. A caller should be able to determine which configuration produced a result.</p>
@@ -298,7 +298,7 @@ worked_b<span class="syntax-punctuation">(</span><span class="syntax-punctuation
 <li><a href="https://docs.julialang.org/en/v1/manual/methods/">Julia methods</a></li>
 </ul>
 <h3 id="study-companion">Study companion<a class="heading-anchor" href="#study-companion" aria-label="Link to this section">#</a></h3>
-<p>Use the repository learning-companion skill with this lesson ID, your prediction and your actual source/output. Ask for a diagnosis of the first incorrect type, shape, state transition or assumption. Keep observed execution distinct from a timing claim, inferred mathematical result or external deployment.</p></article>
+<p>A repository-aware assistant with the learning-companion skill can review <code>julia-006</code> with you. Give it your prediction for one investigation, your source and the actual output, and ask it to find the first incorrect assumption about function, keyword argument, closure, higher-order function or mutation.</p></article>
   </main>
 </body>
 </html>

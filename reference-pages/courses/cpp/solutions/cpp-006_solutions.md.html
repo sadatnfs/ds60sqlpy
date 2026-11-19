@@ -201,7 +201,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>For 12x, from_chars can store 12 and report no conversion error, yet its pointer stops at x. The parser therefore treats error-code success as only the first condition. The second condition compares the pointer with end. Empty input has no digits; huge input exceeds int range; whitespace is outside this deliberately strict grammar. Keep these reasons separate in a production ledger so a user can distinguish syntax, range and policy rejection.</p>
 <h3 id="parsing-as-a-trust-boundary">Parsing as a trust boundary<a class="heading-anchor" href="#parsing-as-a-trust-boundary" aria-label="Link to this section">#</a></h3>
 <p>Parsing converts a sequence of characters into a value under a grammar. The grammar here is deliberately strict: an optional minus sign followed by decimal digits represent an int, with no surrounding whitespace, plus sign or trailing suffix accepted by this wrapper. The raw string remains evidence until the entire field is accepted. A useful parser does not publish a partially parsed prefix as a trusted record.</p>
-<p>from_chars returns two pieces of information. The error code tells whether conversion was possible and within range. The pointer identifies where conversion stopped. For42, the pointer reaches the end. For12x, conversion can succeed for12 while the pointer stops before x. The wrapper requires both success and full consumption. This is why checking only the error code admits a malformed business field.</p>
+<p>from_chars returns two pieces of information. The error code tells whether conversion was possible and within range. The pointer identifies where conversion stopped. For 42, the pointer reaches the end. For 12x, conversion can succeed for 12 while the pointer stops before x. The wrapper requires both success and full consumption. This is why checking only the error code admits a malformed business field.</p>
 <p>optional&lt;int&gt; separates absence from a present number. A present zero is valid and must not be confused with rejection. Test the optional itself for presence, then read its value. Testing <code>*result != 0</code> as though it meant success changes the input policy and loses legitimate zero records. Dereferencing an absent optional is also outside the intended contract, so branch on presence first.</p>
 <p>The string_view parameter borrows characters only for the duration of the call. The returned int owns its value and does not refer back to those characters. That makes a parsed result safe after the input string changes or dies. Returning a view into a temporary normalization buffer would have a very different lifetime problem, even though the parser computation looked correct.</p>
 <p>Whitespace normalization is a separate policy. If the data contract allows trimming, perform it explicitly before strict conversion and retain enough raw context to explain rejections. Do not silently switch to a parser that skips spaces or accepts prefixes just to make a failing fixture pass. Overflow is another distinct rejection: twenty-one decimal nines must not wrap into a plausible small int. The error result is safer than performing unchecked arithmetic while building the value.</p>
@@ -217,32 +217,32 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Parse 42 and 12x and inspect pointer distance.</p>
 <p><strong>Expected:</strong> 42 consumes 2; 12x consumes 2 of 3 and is rejected.</p>
 <p><strong>Reasoning:</strong> Conversion success alone is insufficient.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Print <code>ptr - s.data()</code> for both inputs (2 and 2) next to <code>s.size()</code> (2 and 3); only the input whose distance equals its size may be accepted.</p>
 <h3 id="exercise-2-retain-zero">Exercise 2: Retain zero<a class="heading-anchor" href="#exercise-2-retain-zero" aria-label="Link to this section">#</a></h3>
 <p>Parse 0 and -7 through optional&lt;int&gt;.</p>
 <p><strong>Expected:</strong> Both are present values.</p>
 <p><strong>Reasoning:</strong> A zero value is not an absent optional.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Assert <code>parse_int(&quot;0&quot;) == 0</code> and <code>parse_int(&quot;-7&quot;) == -7</code>; checking <code>has_value()</code> alone would not catch a wrong value.</p>
 <h3 id="exercise-3-build-a-ledger">Exercise 3: Build a ledger<a class="heading-anchor" href="#exercise-3-build-a-ledger" aria-label="Link to this section">#</a></h3>
 <p>Classify [12, 12x, empty, 0] as raw strings.</p>
 <p><strong>Expected:</strong> Two accepted values [12, 0], two rejected records.</p>
 <p><strong>Reasoning:</strong> Preserve rejected raw input and reason.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Collect accepted values into a vector and count rejections, then assert the vector equals <code>{12, 0}</code> and the rejected count is 2, with the empty string among the rejected.</p>
 <h3 id="exercise-4-repair-prefix-acceptance">Exercise 4: Repair prefix acceptance<a class="heading-anchor" href="#exercise-4-repair-prefix-acceptance" aria-label="Link to this section">#</a></h3>
 <p>Change the condition to check only ec in a scratch copy.</p>
 <p><strong>Expected:</strong> 12x is incorrectly accepted until ptr==end is restored.</p>
 <p><strong>Reasoning:</strong> Inspect the unconsumed suffix.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> In the scratch copy, Worked example 2&#x27;s <code>assert(!parse_int(&quot;12x&quot;))</code> must abort; restoring the <code>ptr</code> comparison must make it pass again.</p>
 <h3 id="exercise-5-reject-overflow">Exercise 5: Reject overflow<a class="heading-anchor" href="#exercise-5-reject-overflow" aria-label="Link to this section">#</a></h3>
 <p>Parse 21 decimal nines.</p>
 <p><strong>Expected:</strong> Absent result with out-of-range conversion, never a wrapped integer.</p>
 <p><strong>Reasoning:</strong> The range error occurs before publishing a trusted value.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<p><strong>Verify:</strong> Assert <code>!parse_int(std::string(21, &#x27;9&#x27;))</code>, and in a scratch copy check that <code>ec == std::errc::result_out_of_range</code> to confirm the reason.</p>
 <h3 id="exercise-6-define-whitespace-policy">Exercise 6: Define whitespace policy<a class="heading-anchor" href="#exercise-6-define-whitespace-policy" aria-label="Link to this section">#</a></h3>
 <p>Compare literal space-42-space with a deliberately trimmed copy.</p>
 <p><strong>Expected:</strong> Strict parser rejects original; explicit trim accepts 42.</p>
 <p><strong>Reasoning:</strong> Trimming is an input policy that belongs before parsing.</p>
-<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p></article>
+<p><strong>Verify:</strong> Assert <code>!parse_int(&quot; 42 &quot;)</code> and <code>parse_int(trimmed) == 42</code>, where <code>trimmed</code> is produced by your trim step rather than typed by hand.</p></article>
   </main>
 </body>
 </html>

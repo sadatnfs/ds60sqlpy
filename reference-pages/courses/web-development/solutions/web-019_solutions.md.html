@@ -194,31 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-019_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-019-explanatory-solutions">web-019: explanatory solutions<a class="heading-anchor" href="#web-019-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.</p>
-<h3 id="why-the-mechanism-works">Why the mechanism works<a class="heading-anchor" href="#why-the-mechanism-works" aria-label="Link to this section">#</a></h3>
-<p>A pseudo-class selects an element based on a condition such as focus, checked state or its position among siblings. A pseudo-element represents a stylable part associated with an element, such as before or after. Generated decorative content can enrich presentation, but essential instructions should exist as real document content because generated content has inconsistent accessibility implications.</p>
-<p>State should remain grounded in a real control or application contract. Styling a checkbox&#x27;s checked state makes use of built-in behavior. A decorative class named active does not prove that a control is selected, and CSS cannot perform server authorization. Use native state first and add custom state only with a clear interaction model.</p>
-<p><code>:focus-within</code> matches a container while one of its descendants has focus. <code>input:checked + span</code> selects a neighboring label fragment after a checked input. Attribute selectors can target a declared state, but the application is responsible for keeping that state accurate. Hover must be an enhancement because touch and keyboard interactions may not provide the same hover behavior.</p>
+<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-019.md</code>.</p>
 <h3 id="exercise-1-distinguish-a-condition-selector-from-generated-content">Exercise 1: Distinguish a condition selector from generated content.<a class="heading-anchor" href="#exercise-1-distinguish-a-condition-selector-from-generated-content" aria-label="Link to this section">#</a></h3>
-<p>A pseudo-class selects an existing state; a pseudo-element styles a represented part.</p>
-<p>Trace the smallest example before editing. Name which values are source and which are observations.</p>
+<p><strong>Expected answer:</strong> A pseudo-class selects an existing state; a pseudo-element styles a represented part.</p>
+<p><strong>Why:</strong> A pseudo-class such as :focus selects existing elements in a state, while a pseudo-element such as ::before styles a generated part.</p>
 <h3 id="exercise-2-add-focus-within-feedback-around-a-labeled-input">Exercise 2: Add focus-within feedback around a labeled input.<a class="heading-anchor" href="#exercise-2-add-focus-within-feedback-around-a-labeled-input" aria-label="Link to this section">#</a></h3>
-<p>The group is highlighted while the control has focus.</p>
-<p>Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.</p>
+<p><strong>Expected evidence:</strong> The group is highlighted while the control has focus.</p>
+<p><strong>Why:</strong> :focus-within matches an element when it or any descendant has focus, so the whole field group can change.</p>
 <h3 id="exercise-3-build-a-preferences-list-whose-selected-state-is-visible-and-semantic">Exercise 3: Build a preferences list whose selected state is visible and semantic.<a class="heading-anchor" href="#exercise-3-build-a-preferences-list-whose-selected-state-is-visible-and-semantic" aria-label="Link to this section">#</a></h3>
-<p>Native checkboxes carry the state and text styling reinforces it.</p>
-<p>Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.</p>
+<p><strong>Expected evidence:</strong> Native checkboxes carry the state and text styling reinforces it.</p>
+<p><strong>Why:</strong> The checkbox keeps the real state and keyboard behavior, and the sibling selector reflects that state visually.</p>
 <h3 id="exercise-4-remove-an-essential-instruction-placed-only-in-before-and-restore-it-as-html">Exercise 4: Remove an essential instruction placed only in ::before and restore it as HTML.<a class="heading-anchor" href="#exercise-4-remove-an-essential-instruction-placed-only-in-before-and-restore-it-as-html" aria-label="Link to this section">#</a></h3>
-<p>The instruction becomes real document content available independently of generated decoration.</p>
-<p>Keep the failing input. Identify the first layer where the observed result differs from the intended contract.</p>
+<p><strong>Expected evidence:</strong> The instruction becomes real document content available independently of generated decoration.</p>
+<p><strong>Why:</strong> Generated content is not reliably exposed to assistive technology or copy and paste, so essential text belongs in the document.</p>
 <h3 id="exercise-5-operate-the-controls-without-hover">Exercise 5: Operate the controls without hover.<a class="heading-anchor" href="#exercise-5-operate-the-controls-without-hover" aria-label="Link to this section">#</a></h3>
-<p>All actions and state information remain usable by keyboard and touch.</p>
-<p>Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.</p>
+<p><strong>Expected evidence:</strong> All actions and state information remain usable by keyboard and touch.</p>
+<p><strong>Why:</strong> Hover is unavailable on touch and keyboard, so anything shown only on hover is lost to those users.</p>
 <h3 id="exercise-6-explain-why-css-state-cannot-authorize-a-server-action">Exercise 6: Explain why CSS state cannot authorize a server action.<a class="heading-anchor" href="#exercise-6-explain-why-css-state-cannot-authorize-a-server-action" aria-label="Link to this section">#</a></h3>
-<p>Presentation can be changed by the client; the server must enforce permission using trusted context.</p>
-<p>Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.</p>
-<h3 id="reference-comparison-and-limits">Reference comparison and limits<a class="heading-anchor" href="#reference-comparison-and-limits" aria-label="Link to this section">#</a></h3>
-<p>Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.</p></article>
+<p><strong>Expected answer:</strong> Presentation can be changed by the client; the server must enforce permission using trusted context.</p>
+<p><strong>Why:</strong> Users can change styles and requests freely, so permission decisions must use trusted server-side identity and data.</p>
+<h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
+<p>Open <code>courses/web-development/solutions/web-019_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
   </main>
 </body>
 </html>

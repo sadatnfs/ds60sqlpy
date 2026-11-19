@@ -222,8 +222,8 @@ node 192.0.2.10 hosts the Pod; it is a separate address role</code></pre>
 <p><strong>Expected observation:</strong> The client selects a Service endpoint while the final listener belongs to a Pod.</p>
 <h4 id="worked-example-2-predict-pod-replacement">Worked example 2: Predict Pod replacement<a class="heading-anchor" href="#worked-example-2-predict-pod-replacement" aria-label="Link to this section">#</a></h4>
 <p>The Service can remain stable while one backend changes.</p>
-<pre class="highlighted-code"><code class="language-text">before: Service10.96.0.20 -&gt; Pod UID-A at10.244.1.7
-after:  Service10.96.0.20 -&gt; Pod UID-B at10.244.1.9</code></pre>
+<pre class="highlighted-code"><code class="language-text">before: Service 10.96.0.20 -&gt; Pod UID-A at 10.244.1.7
+after:  Service 10.96.0.20 -&gt; Pod UID-B at 10.244.1.9</code></pre>
 <p><strong>Expected observation:</strong> The stable service destination does not prove the same backend process handled both requests.</p>
 <h3 id="run-boundary-and-the-owned-host-lab">Run boundary and the owned host lab<a class="heading-anchor" href="#run-boundary-and-the-owned-host-lab" aria-label="Link to this section">#</a></h3>
 <p>The classroom saves a reading worksheet for this lesson. It does not provide the full advanced networking or controller operation in the ordinary Run adapter. The original admitted Kubernetes reference cases keep their existing contracts. A manifest being valid YAML does not mean it is admitted by that adapter, supported by your cluster, or successfully routed at runtime.</p>
@@ -254,7 +254,7 @@ kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<sp
 <p><strong>Expected evidence:</strong> Service continuity and backend identity are separate observations.</p>
 <p><strong>Progressive hint:</strong> Name the caller and the first layer that can distinguish the possible causes. Compare the relevant object fields before changing a route, policy or workload.</p>
 <h3 id="diagnosis-failure-boundaries-and-common-mistakes">Diagnosis, failure boundaries and common mistakes<a class="heading-anchor" href="#diagnosis-failure-boundaries-and-common-mistakes" aria-label="Link to this section">#</a></h3>
-<p>The controlled failure in this chapter is: Diagnose a host browser trying a ClusterIP directly. Its distinguishing result is The host may have no route to that virtual cluster destination. Keep that observation separate from guesses about adjacent layers. A DNS answer is not proof of a listening process. A Ready Pod is not proof of an externally reachable listener. A load-balancer address is not proof of TLS identity, path routing or a correct application response.</p>
+<p>Exercise 4 is this chapter&#x27;s controlled failure: Diagnose a host browser trying a ClusterIP directly. The distinguishing result: The host may have no route to that virtual cluster destination. Keep that observation separate from guesses about adjacent layers. A DNS answer is not proof of a listening process. A Ready Pod is not proof of an externally reachable listener. A load-balancer address is not proof of TLS identity, path routing or a correct application response.</p>
 <p>Use bounded observations from the actual caller&#x27;s network namespace. Preserve timestamps, object UIDs, generation or resource versions where relevant, and the intended image identity. A stale healthy result from another namespace or an earlier revision cannot qualify the current path. Avoid broad packet captures, all-namespace dumps and secret output when a smaller field-level observation answers the question.</p>
 <p>Do not repair a failed example by disabling NetworkPolicy, making a workload privileged, publishing every port or selecting another cluster. Those changes alter the contract rather than explain the failure. An unavailable capability is a valid boundary to report. Rehearse its mechanism with the synthetic fixture until the owned target is deliberately provisioned.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
@@ -262,8 +262,8 @@ kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<sp
 <p>Complete the six evidence records before advancing. For optional live work, review the owned resource ledger and UID-aware cleanup result. Keep source validation, API acceptance, controller status, actual traffic, application output and cleanup as distinct evidence. No local exercise establishes every cloud provider, CNI implementation, Kubernetes version or public production deployment.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
-<li><a href="https://kubernetes.io/docs/concepts/services-networking/">Official reference 1</a></li>
-<li><a href="https://kubernetes.io/docs/concepts/services-networking/service/">Official reference 2</a></li>
+<li><a href="https://kubernetes.io/docs/concepts/services-networking/">Kubernetes documentation: Services, load balancing and networking</a></li>
+<li><a href="https://kubernetes.io/docs/concepts/services-networking/service/">Kubernetes documentation: Service</a></li>
 </ul>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for k8s-043: Three address spaces: Pod IP, node IP and Service IP.

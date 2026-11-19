@@ -194,9 +194,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/scala-spark/guides/spark-001.md</code></p>
     </header>
     <article class="document"><h2 id="spark-001-choose-a-scala-first-or-pyspark-first-local-route">spark-001: Choose a Scala-first or PySpark-first local route<a class="heading-anchor" href="#spark-001-choose-a-scala-first-or-pyspark-first-local-route" aria-label="Link to this section">#</a></h2>
-<p>Authored classroom lesson. Content availability and runtime readiness are separate checks. Read the current capability notice before running. No opening or saving this lesson installs tools, starts a cluster or proves mastery.</p>
+<p>Authored classroom lesson. Content availability and runtime readiness are separate checks. Read the current capability notice before running. Opening or saving this lesson does not install tools, start a cluster or prove mastery.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
-<p>Beginner; 45 minutes. Direct design prerequisites: none. Use the subject browser to open prerequisite lessons or review their concepts. Runtime readiness is checked separately before execution.</p>
+<p>Beginner; 45 minutes. Direct prerequisites: none. Use the subject browser to open prerequisite lessons or review their concepts. Runtime readiness is checked separately before execution.</p>
 <p>Learner artifact: <a href="../lessons/spark-001.md.html">spark-001.md</a>. Keep <a href="../solutions/spark-001_solutions.md.html">solutions</a> closed until an attempt or explicit reveal.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
 <ul>
@@ -209,7 +209,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ul>
 <li><strong>JDK:</strong> the development kit including compiler/runtime tools for Java bytecode</li>
 <li><strong>JVM:</strong> the process executing compatible bytecode</li>
-<li><strong>binary line:</strong> a compatibility family such as Scala2.13, reflected by artifact suffix _2.13</li>
+<li><strong>binary line:</strong> a compatibility family such as Scala 2.13, reflected by artifact suffix _2.13</li>
 <li><strong>driver:</strong> the program coordinating a Spark application</li>
 <li><strong>local[2]:</strong> a local Spark master using two worker threads, not two remote computers</li>
 </ul>
@@ -238,18 +238,18 @@ receipt: profile absent; no executed probe</code></pre>
 <h4 id="exercise-2-select-a-language-entry">Exercise 2: Select a language entry<a class="heading-anchor" href="#exercise-2-select-a-language-entry" aria-label="Link to this section">#</a></h4>
 <p>Choose a route for two learners: no programming background, and tested Python skills.</p>
 <p><strong>Inputs/evidence:</strong> For spark-001 Exercise 2, Learner A has no prior language; B can write functions and pytest tests.</p>
-<p><strong>Expected result/shape:</strong> For spark-001 Exercise 2, A takes spark002-010; B takes spark011 after a python-10 competency check; both enter spark012.</p>
+<p><strong>Expected result/shape:</strong> For spark-001 Exercise 2, A takes spark-002 to spark-010; B takes spark-011 after a python-10 competency check; both enter spark-012.</p>
 <p><strong>Verify:</strong> For spark-001 Exercise 2, name both routes and explain why Scala-first needs no Python.</p>
 <p><strong>Progressive hints:</strong></p>
 <ol>
 <li>Prior knowledge changes the entry point.</li>
 <li>Do not require both languages before beginning.</li>
-<li>Scala010 OR Python bridge011 establishes readiness for012.</li>
+<li>Scala spark-010 OR Python bridge spark-011 establishes readiness for spark-012.</li>
 </ol>
 <h4 id="exercise-3-check-the-binary-suffix">Exercise 3: Check the binary suffix<a class="heading-anchor" href="#exercise-3-check-the-binary-suffix" aria-label="Link to this section">#</a></h4>
 <p>Review dependency labels before any download.</p>
-<p><strong>Inputs/evidence:</strong> For spark-001 Exercise 3, spark-sql_2.13 at4.2.0 versus a proposed spark-sql_3 substitution.</p>
-<p><strong>Expected result/shape:</strong> For spark-001 Exercise 3, retain the documented Scala2.13 line; reject the unsupported Scala3 substitution for this profile.</p>
+<p><strong>Inputs/evidence:</strong> For spark-001 Exercise 3, spark-sql_2.13 at 4.2.0 versus a proposed spark-sql_3 substitution.</p>
+<p><strong>Expected result/shape:</strong> For spark-001 Exercise 3, retain the documented Scala 2.13 line; reject the unsupported Scala3 substitution for this profile.</p>
 <p><strong>Verify:</strong> For spark-001 Exercise 3, cite the binary suffix and actual profile receipt separately.</p>
 <p><strong>Progressive hints:</strong></p>
 <ol>
@@ -281,7 +281,7 @@ receipt: profile absent; no executed probe</code></pre>
 </ol>
 <h4 id="exercise-6-transfer-a-version-report">Exercise 6: Transfer a version report<a class="heading-anchor" href="#exercise-6-transfer-a-version-report" aria-label="Link to this section">#</a></h4>
 <p>Explain a report that has Python but no JVM.</p>
-<p><strong>Inputs/evidence:</strong> For spark-001 Exercise 6, Python3.12 present; java unavailable; Spark profile absent.</p>
+<p><strong>Inputs/evidence:</strong> For spark-001 Exercise 6, Python 3.12 present; java unavailable; Spark profile absent.</p>
 <p><strong>Expected result/shape:</strong> For spark-001 Exercise 6, ordinary Python may run, but Scala/Spark is unavailable; no installation occurs on Run.</p>
 <p><strong>Verify:</strong> For spark-001 Exercise 6, name the missing layer and preserve your route/prediction notes.</p>
 <p><strong>Progressive hints:</strong></p>
@@ -298,13 +298,13 @@ receipt: profile absent; no executed probe</code></pre>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
 <p>Close the source. Explain the mechanism in your own words, name the boundary that a plausible wrong answer crosses, and predict a changed fixture before running again.</p>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
-<p>Do not confuse Scala3 with the selected Scala2.13 Spark binary family. Do not treat a proposed tuple or an exit 0 from another program as a Spark qualification receipt. Never route this lesson to an ambient remote master.</p>
+<p>Do not confuse Scala3 with the selected Scala 2.13 Spark binary family. Do not treat a proposed tuple or an exit 0 from another program as a Spark qualification receipt. Never route this lesson to an ambient remote master.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue with <a href="spark-002.md.html">spark-002</a> for Scala-first study, or use the authored <a href="spark-011.md.html">PySpark bridge, spark-011</a> when its Python prerequisites are familiar. See the <a href="../README.md.html">course README</a> for how these routes meet.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to coach spark-001.
 Read courses/scala-spark/guides/spark-001.md and courses/scala-spark/lessons/spark-001.md.
-Direct design prerequisites: none. This lesson is authored; check its current runtime readiness and direct prerequisites.
+Direct prerequisites: none. This lesson is authored; check its current runtime readiness and direct prerequisites.
 Explain one mechanism, ask me to predict, let me attempt one exercise, then give one hint at a time.
 Do not read courses/scala-spark/solutions/ until I make an honest attempt or explicitly ask for a reveal.
 Review my exact values, diagnostics or written evidence; distinguish source inspection, process success and verified understanding.

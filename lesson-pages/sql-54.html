@@ -9,7 +9,7 @@
     content="default-src 'none'; style-src 'self' file: 'unsafe-inline'; font-src data:; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
   >
   <link rel="stylesheet" href="../src/ds60sqlpy/assets/vendor/textbook/fonts.css">
-  <title>sql-54 · Project 3 DWH Part 3 Aggregations · DS60</title>
+  <title>sql-54 · Data Warehouse Project, Part 3: Aggregate Tables · DS60</title>
   <style>
     :root {
       --paper: #f6f2e8;
@@ -312,7 +312,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <div class="shell">
       <section class="hero">
         <p class="eyebrow">sql · lesson sql-54</p>
-        <h1>Project 3 DWH Part 3 Aggregations</h1>
+        <h1>Data Warehouse Project, Part 3: Aggregate Tables</h1>
         <p class="hero-copy">Applied analytics and capstones</p>
         <div class="meta">
           <span class="tag">advanced</span>
@@ -407,9 +407,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>Start the Linux-container engine and run <code>./classroom</code> from the repository root. On Windows, use Ubuntu in WSL 2 or the thin <code>START_DOCKER_CLASSROOM.cmd</code> wrapper. Choose <strong>PostgreSQL</strong> on the shared <code>/classroom</code> home, then open <strong>sql-54</strong>. The <a href="../reference-pages/docs/one-command-classroom.md.html">launcher guide</a> covers first preparation, strict resume and the saved project selection. No host Python or PostgreSQL installation is required for this browser route.</p>
 <ol>
-<li>Read the prerequisite and fixture notes before running the file. Use only the local disposable <code>advanced_sql_training</code> database. A simple snippet such as <code>SELECT 1;</code> needs no training-schema reset.</li>
+<li>Read the prerequisite and fixture notes before running the file. Use only the local disposable <code>advanced_sql_training</code> database.</li>
 <li>Choose <strong>Whole SQL lesson (psql)</strong> for the cataloged learner script. This preserves the lesson&#x27;s reviewed psql directives, relative includes and transaction behavior. <strong>SQL snippet</strong> is appropriate for ordinary SQL statements, but is not a replacement for an entire script&#x27;s setup.</li>
-<li>When the lesson requires the course training data, use the explicit preparation action and read its reset acknowledgement. It replaces the course-owned <code>training</code> schema. Do not reset unrelated data or prepare every lesson by habit; stateful sequences have their own ordering.</li>
+<li>The <strong>Course database</strong> panel above the code shows whether the course training tables are loaded. Missing tables load automatically before your first run (or choose <strong>Load course tables</strong>) and stay loaded for later lessons. <strong>Reset training data</strong> restores the original rows only when your own changes made results differ; it keeps your saved code and notes.</li>
 <li>Edit the learner copy in the classroom and save your prediction before running. Its whole-script workspace is <code>.learning/sql/sql-54/lesson/workspace/sql/postgres-60day/day54_project3_dwh_part3_aggregations.sql</code>. For browser work this path is inside the Docker learning volume, not a newly created host folder beside your checkout. The checked-in source remains the answer-free starting artifact.</li>
 <li>Run the whole script and inspect the full transcript. The runner uses <code>psql -X -v ON_ERROR_STOP=1 -f</code>. SELECT output has columns, rows and a row count; DDL/DML has command tags; intentional checks may produce NOTICE messages. An unexpected ERROR or nonzero exit is a failure to diagnose, even when an earlier query printed plausible values.</li>
 <li>Verify the lesson&#x27;s expected grain, ordering, constraints and declared transaction or cleanup outcome. Keep required ROLLBACK statements. The warehouse sequence and other explicitly stateful exercises explain when state is committed. Read saved output without rerunning it when reviewing an earlier attempt.</li>
@@ -428,7 +428,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is Aggregate table, Idempotent refresh, Late-arriving fact. Its worked SQL reads or creates <code>agg_sales_category_month</code>, <code>agg_sales_customer_month</code>, <code>fact_sales</code>, <code>dim_date</code>, <code>dim_product</code>.</p>
 <p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
-<p>The worked walkthrough&#x27;s lesson-specific task is: For one target year/month, delete category, customer, and product aggregate rows, rebuild each independently from facts, and commit or roll back the whole unit together. Reconcile each table&#x27;s period revenue with a fact-only control before considering the refresh successful. The first runnable example has a concrete contract: Example 1 must print the expected DDL command tag for <code>agg_sales_category_month</code>. Verify the object in <code>pg_catalog.pg_class</code>, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state. Its final projection is the columns written in the final <code>SELECT</code>. Verify the command tag in <code>pg_catalog</code>/<code>information_schema</code>, run one accepted value and one value the declared rule rejects, and confirm the lesson rollback removes the course-owned object. Where this query can emit <code>NULL</code>, identify the exact source expression and explain whether the output preserves, classifies, or rejects it.</p>
+<p>The worked walkthrough&#x27;s lesson-specific task is: For one target year/month, delete category, customer, and product aggregate rows, rebuild each independently from facts, and commit or roll back the whole unit together. Reconcile each table&#x27;s period revenue with a fact-only control before considering the refresh successful. The first runnable example has a concrete contract: Example 1 must print the expected DDL command tag for <code>agg_sales_category_month</code>. Verify the object in <code>pg_catalog.pg_class</code>, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.</p>
 <h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
 <p>These worked excerpts come from <code>sql/postgres-60day/day54_project3_dwh_part3_aggregations.sql</code>. Use <strong>Whole SQL lesson (psql)</strong> in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared <code>psql</code> routes are described above.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
@@ -498,7 +498,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Refresh one period idempotently and reconcile it to facts.</li>
 </ul>
 <h4 id="guide--preconditions-and-state">Preconditions and state<a class="heading-anchor" href="#guide--preconditions-and-state" aria-label="Link to this section">#</a></h4>
-<p>Run Day 52 first in the same database. The learner creates its aggregate tables, loads them, performs data-quality checks, and rolls the entire Day 54 transaction back.</p>
+<p>Run Day 52 first in the same database, either its learner file or <code>day52_solutions.sql</code>; Day 54 uses only the base warehouse. The learner creates its aggregate tables, loads them, performs data-quality checks, and rolls the entire Day 54 transaction back.</p>
 <p>The starter grains are <code>(year, month, category)</code> and <code>(year, month, customer_sk)</code>. Revenue is summed from <code>fact_sales.amount</code>; date attributes come from <code>dim_date</code>.</p>
 <h4 id="guide--practice-map">Practice map<a class="heading-anchor" href="#guide--practice-map" aria-label="Link to this section">#</a></h4>
 <p>Use the numbered <strong>Exercises</strong> section above as the single authoritative practice contract. Its prompts, expected shapes, and verification checks map one-for-one to the learner SQL and both solution companions.</p>
@@ -519,7 +519,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ul>
 <h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in the AI tutor:</p>
-<pre class="highlighted-code"><code class="language-text">Tutor me through sql-54 — Project3 DWH Part3 Aggregations.
+<pre class="highlighted-code"><code class="language-text">Tutor me through sql-54: Data Warehouse Project, Part 3: Aggregate Tables.
 
 I have completed the direct catalog prerequisite: `sql-53`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day54_project3_dwh_part3_aggregations.md
@@ -770,9 +770,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
         <div class="artifact-content"><h3 id="solution-1--day-54-solutions-warehouse-aggregates-and-refresh-procedure">Day 54 Solutions: Warehouse Aggregates and Refresh Procedure<a class="heading-anchor" href="#solution-1--day-54-solutions-warehouse-aggregates-and-refresh-procedure" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
 <p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
-psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql\postgres-60day\solutions\day54_solutions.sql</span><span class="syntax-string">&quot;</span></code></pre>
-<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># Linux, macOS, or Windows through WSL 2, from the repository root</span>
 psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/postgres-60day/solutions/day54_solutions.sql</code></pre>
 <p><code>psql</code> prints each result/command tag in the terminal. Stop at the first unexpected <code>ERROR</code>; later output cannot repair an earlier failed invariant. Compare your own SQL, row grain, column names, row counts, <code>NULL</code> policy, and ordering with the explanation before comparing syntax.</p>
@@ -787,7 +785,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li>For DDL/DML, a command tag proves only that PostgreSQL accepted a statement. Catalog checks, negative cases, row-count reconciliation, and the declared transaction boundary prove behavior and cleanup.</li>
 </ul>
 <p>The exact final queries are not the only valid syntax. A join, subquery, CTE, window, or conditional aggregate can be an alternative when it preserves the same grain, <code>NULL</code> semantics, deterministic ordering, and safety. Prefer the form whose intermediate relations a reviewer can verify; optimize only after correctness is established with evidence.</p>
-<p>Run <a href="sql-52.html#solution-2"><code>day52_solutions.sql</code></a> first in the same database. Day 54 creates and tests aggregate objects inside a transaction, then rolls everything back. The complete runnable answer is <a href="sql-54.html#solution-2"><code>day54_solutions.sql</code></a>.</p>
+<p>Run Day 52 first in the same database, either <a href="sql-52.html#solution-2"><code>day52_solutions.sql</code></a> or the Day 52 learner file; Day 54 needs only the base warehouse. Day 54 creates and tests aggregate objects inside a transaction, then rolls everything back. The complete runnable answer is <a href="sql-54.html#solution-2"><code>day54_solutions.sql</code></a>.</p>
 <h4 id="solution-1--exercise-1-aggsalesproductmonth">Exercise 1: <code>agg_sales_product_month</code><a class="heading-anchor" href="#solution-1--exercise-1-aggsalesproductmonth" aria-label="Link to this section">#</a></h4>
 <p>The answer uses this grain and schema:</p>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span>
@@ -888,11 +886,11 @@ fact_total <span class="syntax-keyword">AS</span> <span class="syntax-punctuatio
 <li><strong>Alternative/trade-off:</strong> For sql-54 Exercise 2, the chosen form is justified by this lesson-specific rationale: The executable solution creates: Within one procedure call it: 1. Evaluate another form against the concrete expected result (one row per <code>year</code>, <code>month</code>, and <code>product_sk</code>) and the verification above.</li>
 <li><strong>Edge case:</strong> Run with 1 minus one and 1 plus one eligible rows; require the output cap of 1 while retaining <code>dd.year DESC, dd.month DESC</code>.</li>
 </ul>
-<h4 id="solution-1--required-days-52-54-sequence">Required Days 52–54 sequence<a class="heading-anchor" href="#solution-1--required-days-52-54-sequence" aria-label="Link to this section">#</a></h4>
-<pre class="highlighted-code"><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d course -f day52_solutions.sql
-psql -X -v ON_ERROR_STOP=1 -d course -f day53_solutions.sql
-psql -X -v ON_ERROR_STOP=1 -d course -f day54_solutions.sql</code></pre>
-<p>Day 52 persists course-owned warehouse state. Days 53 and 54 prove their solutions and roll back. Day 54 does not require Day 53 changes to persist.</p>
+<h4 id="solution-1--required-days-52-to-54-sequence">Required Days 52 to 54 sequence<a class="heading-anchor" href="#solution-1--required-days-52-to-54-sequence" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f day52_solutions.sql
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f day53_solutions.sql
+psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f day54_solutions.sql</code></pre>
+<p>Day 52 persists course-owned warehouse state. Days 53 and 54 prove their solutions and roll back. Day 54 does not require Day 53 changes to persist. Either Day 52 file, learner or solution, is a valid starting point for these solutions.</p>
 <h4 id="solution-1--reasoning-state-and-pitfalls">Reasoning, state, and pitfalls<a class="heading-anchor" href="#solution-1--reasoning-state-and-pitfalls" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>State the aggregate grain in the primary key; otherwise duplicate loads can silently inflate reports.</li>
@@ -975,7 +973,7 @@ psql -X -v ON_ERROR_STOP=1 -d course -f day54_solutions.sql</code></pre>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- Day 54 solutions: aggregate tables and refresh procedure</span></span>
-<span class="source-line"><span class="syntax-comment">-- SOLUTION READING MAP — sql-54: Project3 DWH Part3 Aggregations</span></span>
+<span class="source-line"><span class="syntax-comment">-- SOLUTION READING MAP for sql-54: Data Warehouse Project, Part 3: Aggregate Tables</span></span>
 <span class="source-line"><span class="syntax-comment">-- Explanation: sql/postgres-60day/solutions/day54_solutions.md</span></span>
 <span class="source-line"><span class="syntax-comment">-- Run from the repository root only against advanced_sql_training:</span></span>
 <span class="source-line"><span class="syntax-comment">--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day54_solutions.sql</span></span>
@@ -994,7 +992,7 @@ psql -X -v ON_ERROR_STOP=1 -d course -f day54_solutions.sql</code></pre>
 <span class="source-line"><span class="syntax-keyword">DO</span> $require_day52$</span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
 <span class="source-line">  <span class="syntax-keyword">IF</span> to_regclass<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;dwh.fact_sales&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">THEN</span></span>
-<span class="source-line">    RAISE <span class="syntax-keyword">EXCEPTION</span> <span class="syntax-string">&#x27;Run day52_solutions.sql before Day 54&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    RAISE <span class="syntax-keyword">EXCEPTION</span> <span class="syntax-string">&#x27;Run Day 52 (the learner file or day52_solutions.sql) before Day 54&#x27;</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$require_day52$<span class="syntax-punctuation">;</span></span>
@@ -1269,7 +1267,7 @@ psql -X -v ON_ERROR_STOP=1 -d course -f day54_solutions.sql</code></pre>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through sql-54 — Project3 DWH Part3 Aggregations.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through sql-54: Data Warehouse Project, Part 3: Aggregate Tables.
 
 I have completed the direct catalog prerequisite: `sql-53`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day54_project3_dwh_part3_aggregations.md
@@ -1302,8 +1300,8 @@ transfer task that I answer without looking back. Done when I can explain the ro
       </section>
 
       <nav class="lesson-nav" aria-label="Previous and next lessons">
-        <a class="nav-card" href="sql-53.html"><small>Previous lesson</small><strong>sql-53</strong><span>Project 3 DWH Part 2 SCD</span></a>
-        <a class="nav-card next" href="sql-55.html"><small>Next lesson</small><strong>sql-55</strong><span>Project 4 BI Part 1</span></a>
+        <a class="nav-card" href="sql-53.html"><small>Previous lesson</small><strong>sql-53</strong><span>Data Warehouse Project, Part 2: Slowly Changing Dimensions</span></a>
+        <a class="nav-card next" href="sql-55.html"><small>Next lesson</small><strong>sql-55</strong><span>BI Project, Part 1: Drill-Downs and Subtotals</span></a>
       </nav>
     </div>
   </main>

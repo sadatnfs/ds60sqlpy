@@ -202,29 +202,23 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
 <p>Predict x after y &lt;- x; y[1] &lt;- 9 for a numeric vector.</p>
 <p>x retains its earlier first value.</p>
-<p><strong>Expected evidence:</strong> x retains its earlier first value.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
 <p>Remove names from a labeled vector.</p>
 <p>The values remain while names become NULL.</p>
-<p><strong>Expected evidence:</strong> The values remain while names become NULL.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Construct a two-column shape from four numbers.</p>
 <p>A 2 by 2 matrix retains four values.</p>
-<p><strong>Expected evidence:</strong> A 2 by 2 matrix retains four values.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Diagnose a shared environment counter changing through another name.</p>
 <p>Use a fresh environment when independent state is required.</p>
-<p><strong>Expected evidence:</strong> Use a fresh environment when independent state is required.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>Test exact equality of c(A=1) and 1.</p>
 <p>identical is FALSE because one object is named.</p>
-<p><strong>Expected evidence:</strong> identical is FALSE because one object is named.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>State a function return contract including metadata.</p>
 <p>Specify and test names, dimensions and class that downstream code relies on.</p>
-<p><strong>Expected evidence:</strong> Specify and test names, dimensions and class that downstream code relies on.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference contains explicit behavioral assertions for its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The reference makes 5 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
   </main>
 </body>
 </html>

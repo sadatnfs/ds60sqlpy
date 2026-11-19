@@ -199,17 +199,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">Copy to .learning before editing. Six independent attempts belong below.</span></span>
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 1: Freeze the geometric task</span></span>
-<span class="source-line"><span class="syntax-comment"># Use training x-2, -1, 1, 2 with labels 0, 0, 1, 1 and test x-3, 3.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: 4training records, 2test records.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1: Fit normalization on new training values</span></span>
+<span class="source-line"><span class="syntax-comment"># Use training inputs 0, 2, 4, 6, compute the mean and population standard deviation, and</span></span>
+<span class="source-line"><span class="syntax-comment"># transform the test input 8.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: mean 3; scale \(\sqrt{5}\); transformed test value \(\sqrt{5}\), about 2.2361.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 2: Fit explicit normalization</span></span>
-<span class="source-line"><span class="syntax-comment"># Calculate training mean and population standard deviation.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: mean 0; scale sqrt 2.5.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2: Count a new confusion table</span></span>
+<span class="source-line"><span class="syntax-comment"># Compare predictions True, False, True, True with truth True, False, False, True.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: TP 2, TN 1, FP 1, FN 0.</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 3: Train a fixed classifier</span></span>
-<span class="source-line"><span class="syntax-comment"># Zero-initialize the weight and run 40 SGD.1 steps with binary logits loss.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: positive finite weight after 40 updates.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: Classify with a fixed weight</span></span>
+<span class="source-line"><span class="syntax-comment"># With weight 2 and no bias, classify the normalized inputs -1.5, -0.2, 0 and 0.4 at logit</span></span>
+<span class="source-line"><span class="syntax-comment"># 0, counting 0 as positive.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: False, False, True, True.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Account for every test prediction</span></span>
 <span class="source-line"><span class="syntax-comment"># Threshold test logits at 0 and calculate confusion counts.</span></span>
@@ -221,7 +223,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Reveal a group-specific failure</span></span>
 <span class="source-line"><span class="syntax-comment"># Flip only the positive group decision and report group counts.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: negative 0/1errors; positive 1/1.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: negative class: 0 of 1 wrong; positive class: 1 of 1 wrong.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Read the guide and implement the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>

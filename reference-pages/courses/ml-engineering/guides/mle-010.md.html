@@ -204,7 +204,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>MlflowClient receives explicit local tracking and registry URIs. create_experiment defines an owned experiment and artifact location, create_run obtains its identity, and log_param/log_metric/log_artifact attach evidence. set_terminated records the final status. get_run and list_artifacts establish actual stored readback rather than assuming a logging call was sufficient.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open this subject in <code>/classroom</code>, then show its code and notes. The prepared <code>data-engineering</code> worker runs <code>main.py</code> in a fresh temporary directory. The examples use installed packages and synthetic local fixtures; no account, cloud service, network request or package download is required. Save source and notes before switching lessons. Temporary databases, project files and tracking artifacts are recreated by each complete program and removed after the job. The classroom retains the submitted source and bounded output, not an indefinitely running external service. The guide distinguishes this local execution from the deployment decisions that need an owned production environment.</p>
+<p>Open <code>mle-010</code> in <code>/classroom</code>. Its starter <code>main.py</code> contains both worked cases, &quot;Record and retrieve a complete local run&quot; and &quot;Retain observations from a failed workflow&quot;, and prints the dictionary each case returns. The prepared <code>data-engineering</code> worker runs it in a fresh temporary directory. An <code>AssertionError</code> means that an observation differs from the case&#x27;s stated contract. Cases that use MLflow, Feast or a saved model create the tracking store, feature repository or artifact in a temporary directory and remove it when the case returns. The serving checks call the FastAPI application in process through its test client; no port is opened, and no account, cloud service, network request or package download is involved. Save source and notes before switching lessons.</p>
 <h3 id="worked-case-1-record-and-retrieve-a-complete-local-run">Worked case 1: Record and retrieve a complete local run<a class="heading-anchor" href="#worked-case-1-record-and-retrieve-a-complete-local-run" aria-label="Link to this section">#</a></h3>
 <p>The first case logs a threshold, Brier value and manifest file, marks the run finished and retrieves the stored metadata and artifact path. The manifest identifies feature order and a small data hash.</p>
 <p><strong>Expected evidence:</strong> The run is FINISHED, its metric is 0.2 and the evidence artifact is listed.</p>
@@ -327,7 +327,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
     <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>example_two<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="practice">Practice<a class="heading-anchor" href="#practice" aria-label="Link to this section">#</a></h3>
-<p>Make each requested change in a saved copy. Compare both the expected result and the deliberately changed assumption. The separate reference explains the answers.</p>
+<p>The starter contains both worked cases, so a task can change either one. Make each change in a saved copy, run it, and compare the printed result with the task&#x27;s check before opening the separate explained answers.</p>
 <h4 id="1-bind-source-identity">1. Bind source identity<a class="heading-anchor" href="#1-bind-source-identity" aria-label="Link to this section">#</a></h4>
 <p>Add a source revision or digest tag to a run.</p>
 <p><strong>Check:</strong> It identifies the implementation used.</p>
@@ -355,13 +355,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="diagnose-errors-and-misleading-results">Diagnose errors and misleading results<a class="heading-anchor" href="#diagnose-errors-and-misleading-results" aria-label="Link to this section">#</a></h3>
 <p>If expected evidence is missing, inspect the run identifier, destination URI, terminal status and artifact location. Do not infer a successful upload from an old local file. Retain failures and separate a reproducible local fixture from a deployed tracking-service claim.</p>
 <h3 id="transfer-to-independent-work">Transfer to independent work<a class="heading-anchor" href="#transfer-to-independent-work" aria-label="Link to this section">#</a></h3>
-<p>Use real tracking APIs to bind parameters, metrics, artifacts and terminal outcomes to an owned run. Verify readback and maintain explicit local routing. The artifact and registry lesson adds the consumer contract needed for serving.</p>
+<p>Verify readback and maintain explicit local routing. The artifact and registry lesson adds the consumer contract needed for serving.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
-<li><a href="https://mlflow.org/docs/latest/tracking/backend-stores/">MLflow documentation: Actual MLflow tracking and artifact lineage</a></li>
+<li><a href="https://mlflow.org/docs/latest/self-hosting/architecture/backend-store/">MLflow docs: Backend Stores</a></li>
 </ul>
 <h3 id="tutor-guidance">Tutor guidance<a class="heading-anchor" href="#tutor-guidance" aria-label="Link to this section">#</a></h3>
-<p>Use the repository learning-companion skill for <code>mle-010</code>. Inspect the learner&#x27;s own source and observations, ask for an explanation of the relevant data or state contract, and give a focused hint. Separate an assertion on this fixture from a claim about an external dataset or deployed service.</p></article>
+<p>Use the repository&#x27;s <code>$guide-ds60sqlpy-learning</code> skill (<code>.agents/skills/guide-ds60sqlpy-learning/SKILL.md</code>) for <code>mle-010</code>. Inspect the learner&#x27;s own source and printed output first. Ask for an explanation of MLflow, run, parameter, metric, artifact and status in their own words, then give one focused hint at a time. Keep an assertion on this synthetic fixture separate from a claim about an external dataset or deployed service.</p></article>
   </main>
 </body>
 </html>

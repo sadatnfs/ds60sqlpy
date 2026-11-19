@@ -194,33 +194,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-004_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-004-explanatory-solutions">docker-004: explanatory solutions<a class="heading-anchor" href="#docker-004-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These are explanations of the supplied teaching fixtures, not fabricated engine results.</p>
-<h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
-<p>PID is a process identifier within a process namespace. The container’s initial process has PID 1 in that namespace and participates in special Linux signal and child-reaping behavior. Docker normally considers a container alive while its main process remains alive. Starting a server in the background and allowing the main shell to exit therefore does not create a durable service.</p>
-<p>A signal is a notification delivered to a process. A graceful termination handler stops accepting new work, lets bounded in-flight work finish, closes resources and exits. An abrupt kill cannot perform application cleanup. Docker stop ordinarily sends the configured stop signal, waits for a grace period and then forces termination if necessary.</p>
-<p>The exec form of a Dockerfile command gives the runtime an argument array directly. The shell form starts a shell, whose signal forwarding and child handling can become relevant. An init process can reap adopted children and forward signals, but it does not add application-specific transaction recovery. Good shutdown is a cooperation between the orchestrator, process tree and application.</p>
-<p>Compare <code>CMD [&quot;python&quot;, &quot;server.py&quot;]</code> with <code>CMD python server.py</code>. The JSON array has no shell interpolation; each string is one argument. Compose <code>init: true</code> requests a small init where supported. The fixture uses it, sets a stop grace period, and logs to standard streams. Do not add an infinite sleep to hide that the real application exited.</p>
-<p>For a shutdown investigation record the main process, signal, elapsed time, exit status and whether data is consistent. Exit 137 often indicates a SIGKILL-style termination, but by itself does not prove an out-of-memory cause. Inspect the engine’s OOMKilled state and events before concluding why a process was killed.</p>
+<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-004.md</code>.</p>
 <h3 id="exercise-1-predict-what-happens-when-the-main-process-exits">Exercise 1: Predict what happens when the main process exits.<a class="heading-anchor" href="#exercise-1-predict-what-happens-when-the-main-process-exits" aria-label="Link to this section">#</a></h3>
-<p>A container is not a VM with an independent background boot lifecycle. Its main process lifecycle drives the container state even if a script attempted to background work.</p>
-<p><strong>Expected:</strong> The container enters an exited state.</p>
+<p><strong>Expected answer:</strong> The container enters an exited state.</p>
+<p><strong>Why:</strong> A container is not a VM with an independent background boot lifecycle. Its main process lifecycle drives the container state even if a script attempted to background work.</p>
 <h3 id="exercise-2-compare-exec-form-and-shell-form-startup">Exercise 2: Compare exec-form and shell-form startup.<a class="heading-anchor" href="#exercise-2-compare-exec-form-and-shell-form-startup" aria-label="Link to this section">#</a></h3>
-<p>The difference affects expansion and process hierarchy. It is not a claim that every shell command is wrong, but shell wrappers must intentionally forward signals and wait for children.</p>
-<p><strong>Expected:</strong> An argument array versus an intervening shell.</p>
+<p><strong>Expected answer:</strong> An argument array versus an intervening shell.</p>
+<p><strong>Why:</strong> The difference affects expansion and process hierarchy. It is not a claim that every shell command is wrong, but shell wrappers must intentionally forward signals and wait for children.</p>
 <h3 id="exercise-3-write-a-four-step-graceful-shutdown-sequence">Exercise 3: Write a four-step graceful shutdown sequence.<a class="heading-anchor" href="#exercise-3-write-a-four-step-graceful-shutdown-sequence" aria-label="Link to this section">#</a></h3>
-<p>An unbounded drain can prevent shutdown forever. Resource cleanup should be explicit, and data correctness may need a transaction or recovery protocol beyond closing file handles.</p>
-<p><strong>Expected:</strong> Stop new work, bound draining, close owned resources, exit.</p>
+<p><strong>Expected evidence:</strong> Stop new work, bound draining, close owned resources, exit.</p>
+<p><strong>Why:</strong> An unbounded drain can prevent shutdown forever. Resource cleanup should be explicit, and data correctness may need a transaction or recovery protocol beyond closing file handles.</p>
 <h3 id="exercise-4-diagnose-a-service-kept-alive-only-by-sleep">Exercise 4: Diagnose a service kept alive only by sleep.<a class="heading-anchor" href="#exercise-4-diagnose-a-service-kept-alive-only-by-sleep" aria-label="Link to this section">#</a></h3>
-<p>The sleep process can make a status look running while the real server has crashed. Measure the application’s endpoint and actual process rather than adding a liveness placeholder.</p>
-<p><strong>Expected:</strong> The alive container does not prove the application is healthy.</p>
+<p><strong>Expected answer:</strong> The alive container does not prove the application is healthy.</p>
+<p><strong>Why:</strong> The sleep process can make a status look running while the real server has crashed. Measure the application’s endpoint and actual process rather than adding a liveness placeholder.</p>
 <h3 id="exercise-5-explain-why-exit-137-is-not-a-complete-oom-diagnosis">Exercise 5: Explain why exit 137 is not a complete OOM diagnosis.<a class="heading-anchor" href="#exercise-5-explain-why-exit-137-is-not-a-complete-oom-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>A user or timeout can also send a kill signal. Correlate termination state with OOMKilled and relevant events before recommending memory changes.</p>
-<p><strong>Expected:</strong> It identifies a termination pattern, not its unique cause.</p>
+<p><strong>Expected answer:</strong> It identifies a termination pattern, not its unique cause.</p>
+<p><strong>Why:</strong> A user or timeout can also send a kill signal. Correlate termination state with OOMKilled and relevant events before recommending memory changes.</p>
 <h3 id="exercise-6-design-a-shutdown-acceptance-check-for-a-writer">Exercise 6: Design a shutdown acceptance check for a writer.<a class="heading-anchor" href="#exercise-6-design-a-shutdown-acceptance-check-for-a-writer" aria-label="Link to this section">#</a></h3>
-<p>The important observation is what readers see after recovery. A clean exit code is useful but cannot by itself prove that a partially written application record is valid.</p>
-<p><strong>Expected:</strong> Bounded stop, consistent persisted record and restart recovery.</p>
+<p><strong>Expected evidence:</strong> Bounded stop, consistent persisted record and restart recovery.</p>
+<p><strong>Why:</strong> The important observation is what readers see after recovery. A clean exit code is useful but cannot by itself prove that a partially written application record is valid.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful solution identifies the exact object, the phase when a setting takes effect, the expected normal result and an observation that disproves it. Repeating a command until it succeeds hides the mechanism. Change one variable, keep a failure record, and test the intended behavior again. Source examples here are small enough to inspect; a production system additionally needs ownership, lifecycle, data recovery and operational review. The host exercises are optional and must stay within the learner-created project.</p></article>
+<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
   </main>
 </body>
 </html>

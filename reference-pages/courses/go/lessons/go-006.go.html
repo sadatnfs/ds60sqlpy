@@ -198,11 +198,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-keyword">import</span> <span class="syntax-string">&quot;fmt&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">func</span> main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 1: Distinguish zero from missing: Read present key zero and absent key missing with comma-ok.</span></span>
-<span class="source-line">	<span class="syntax-comment">// Expected: Both values are 0, but only zero is present.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 1: Distinguish zero from missing: change one input: Copy worked example 1 into a scratch pad and change `m := map[string]int{&quot;zero&quot;: 0}` to `m := map[string]int{&quot;zero&quot;: 1}`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Expected: The changed run panics with `presence` because `a == b &amp;&amp; okA &amp;&amp; !okB` no longer holds. Restoring the original line brings back the worked observation: both values are 0, but only zero is present.</span></span>
 <span class="source-line"></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 2: Build a frequency table: Count red, blue and red.</span></span>
-<span class="source-line">	<span class="syntax-comment">// Expected: red has count 2 and blue has count 1.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 2: Build a frequency table: debug a regression: A regression changed one token in worked example 2, so one line now reads `for _, v := range []string{&quot;red!&quot;, &quot;blue&quot;, &quot;red&quot;} {`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Expected: Before the repair the program panics with `counts`; after it the line reads `for _, v := range []string{&quot;red&quot;, &quot;blue&quot;, &quot;red&quot;} {` again and red has count 2 and blue has count 1.</span></span>
 <span class="source-line"></span>
 <span class="source-line">	<span class="syntax-comment">// Exercise 3: Sort report keys: Extract keys beta and alpha and sort them.</span></span>
 <span class="source-line">	<span class="syntax-comment">// Expected: The first output key is alpha.</span></span>
