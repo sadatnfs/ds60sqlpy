@@ -123,6 +123,25 @@ def test_runner_error_line_is_preferred_and_used_in_the_copy() -> None:
     assert "line 5" in str(result["title"])
 
 
+def test_name_errors_suggest_a_defined_name_when_the_traceback_has_none() -> None:
+    # Python 3.11's traceback module prints no "Did you mean" for NameError.
+    source = "total = 10\nprint(totl)\nprnt(total)\nprint(zzz)\n"
+
+    def hint(name: str, line: int) -> str:
+        output = (
+            "Traceback (most recent call last):\n"
+            f'  File "main.py", line {line}, in <module>\n'
+            f"NameError: name '{name}' is not defined\n"
+        )
+        result = explain_pad_run("python", {"output": output, "returncode": 1}, source)
+        assert result is not None and result["kind"] == "runtime"
+        return str(result["hint"])
+
+    assert "`total`" in hint("totl", 2)
+    assert "`print`" in hint("prnt", 3)
+    assert "Did you mean" not in hint("zzz", 4)
+
+
 def test_unrecognized_failures_fall_back_to_the_last_error_line() -> None:
     result = explain_run(
         "python-core", "starting\nfatal: worker quota reached\n", 2, status="failed"

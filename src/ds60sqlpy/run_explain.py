@@ -8,6 +8,8 @@ text with certainty; otherwise it is ``None``.
 
 from __future__ import annotations
 
+import ast
+import builtins
 import difflib
 import json
 import re
@@ -411,6 +413,27 @@ def _name_hint(suggestion: str | None, declare: str) -> str:
     return f"Check the spelling and capitalization, or {declare} before this line uses it."
 
 
+def _python_close_name(missing: str, source_lines: tuple[str, ...] | None) -> str | None:
+    """Suggest a defined name when the traceback has none (Python 3.11 omits it)."""
+    try:
+        tree = ast.parse("\n".join(source_lines or ()))
+    except (SyntaxError, ValueError):
+        return None
+    names = {name for name in dir(builtins) if not name.startswith("_")}
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store):
+            names.add(node.id)
+        elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            names.add(node.name)
+        elif isinstance(node, ast.arg):
+            names.add(node.arg)
+        elif isinstance(node, ast.alias):
+            names.add((node.asname or node.name).partition(".")[0])
+    names.discard(missing)
+    close = difflib.get_close_matches(missing, sorted(names), n=1, cutoff=0.8)
+    return close[0] if close else None
+
+
 # Python ---------------------------------------------------------------------
 
 _PY_FRAME = re.compile(r'^\s*File "(?P<file>[^"\n]+)", line (?P<line>\d+)(?:, in .+)?\s*$')
@@ -499,7 +522,7 @@ def _python(lines: list[str], context: _Context, output: str) -> _Finding | None
             line, column = int(notebook.group("line")), None
     if not name or not exception_line:
         return None
-    kind, title, hint = _python_message(name, qualified, message, code_text)
+    kind, title, hint = _python_message(name, qualified, message, code_text, context.source_lines)
     return _Finding(kind, title, hint, exception_line, line, column)
 
 
@@ -519,7 +542,11 @@ def _python_column(lines: list[str], index: int, source_line: str | None) -> tup
 
 
 def _python_message(
-    name: str, qualified: str, message: str, code_text: str
+    name: str,
+    qualified: str,
+    message: str,
+    code_text: str,
+    source_lines: tuple[str, ...] | None = None,
 ) -> tuple[str, str, str]:
     if name in {"SyntaxError", "IndentationError", "TabError"}:
         return ("syntax", *_python_syntax(name, message, code_text))
@@ -534,6 +561,8 @@ def _python_message(
     if name == "NameError":
         found = re.search(r"name '([^']+)' is not defined", message)
         module = re.search(r"forget to import '([^']+)'", message)
+        if suggestion is None and found:
+            suggestion = _python_close_name(found.group(1), source_lines)
         hint = (
             f"Add `import {module.group(1)}` at the top of the program, then run again."
             if module
