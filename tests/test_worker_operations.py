@@ -624,8 +624,7 @@ def test_node_output_hides_only_node_internals() -> None:
     case = {item["case"]: item["output"] for item in json.loads(fixtures.read_text())}
     assert display_output("javascript-node", case["syntax"]) == (
         'file:///tmp/job-xxxxxxxx/main.mjs:2\nconsole.log("Hello, " + name;\n'
-        "                        ^^^^\n\nSyntaxError: missing ) after argument list\n\n"
-        "Node.js v24.22.3\n"
+        "                        ^^^^\n\nSyntaxError: missing ) after argument list\n"
     )
     assertion = display_output("javascript-node", case["assertion"])
     assert assertion.startswith("AssertionError [ERR_ASSERTION]: Expected values")
@@ -684,3 +683,262 @@ def test_pyspark_json_copy_of_an_error_is_hidden_but_the_traceback_stays() -> No
     assert "AnalysisException: [UNRESOLVED_COLUMN.WITH_SUGGESTION]" in shown
     learner = '{"ts": "now", "level": "ERROR", "logger": "my_job", "msg": "kept"}\n'
     assert display_output("spark-local-python", learner) == learner
+
+
+def _fixture(profile: str, name: str) -> dict[str, Any]:
+    cases = json.loads((ROOT / f"tests/fixtures/run_explain/{profile}.json").read_text())
+    return next(case for case in cases if case["case"] == name)
+
+
+def _explained(profile: str, case: dict[str, Any], output: str) -> tuple[object, ...]:
+    from ds60sqlpy.run_explain import explain_run
+
+    result = explain_run(
+        profile, output, case["returncode"], status=case["status"], source=case["source"]
+    )
+    assert result is not None
+    return result["kind"], result["title"], result["line"], result["column"]
+
+
+def test_stan_settings_list_is_hidden_but_the_exception_and_its_line_stay() -> None:
+    from ds60sqlpy.worker_operations import display_output
+
+    case = _fixture("stan-cpu", "reject-shown")
+    shown = display_output("stan-cpu", case["output"])
+    assert shown == (
+        "\n--- Translating Stan model to C++ code ---\n\n--- Compiling C++ code ---\n\n"
+        "--- Linking model ---\n\nException: lesson check failed "
+        "(in '/tmp/job-xxxxxxxx/main.stan', line 2, column 2 to column 32)\n"
+    )
+    assert _explained("stan-cpu", case, shown) == _explained("stan-cpu", case, case["output"])
+    # CmdStan lists its settings before each chain; the model's messages stay.
+    output = case["output"]
+    settings = output[output.index("method = sample") : output.index("\n\nException")]
+    chains = f"{settings}\n\nmodel note\n\nChain 1: 100 retained draws\n{settings}\n\nmodel note\n"
+    assert display_output("stan-cpu", chains) == (
+        "\nmodel note\n\nChain 1: 100 retained draws\n\nmodel note\n"
+    )
+    unfinished = "method = sample (Default)\n  sample\nmodel note\nnum_threads = 1 (Default)\n"
+    assert display_output("stan-cpu", unfinished) == unfinished
+
+
+def test_identical_stan_initialization_rejections_are_counted_once() -> None:
+    from ds60sqlpy.worker_operations import display_output
+
+    case = _fixture("stan-cpu", "bad-scale-shown")
+    shown = display_output("stan-cpu", case["output"])
+    rejection = (
+        "Rejecting initial value:\n  Error evaluating the log probability at the initial value.\n"
+        "Exception: normal_lpdf: Scale parameter is -1, but must be positive! "
+        "(in '/tmp/job-xxxxxxxx/main.stan', line 6, column 2 to column 24)\n"
+    )
+    assert case["output"].count(rejection) == 100 and shown.count(rejection) == 1
+    assert (
+        rejection + "(The same message repeated 99 more times.)\n\n"
+        "Initialization between (-2, 2) failed after 100 attempts. \n"
+    ) in shown
+    assert shown.endswith("Initialization failed.\n")
+    assert _explained("stan-cpu", case, shown) == _explained("stan-cpu", case, case["output"])
+    log_zero = (
+        "Rejecting initial value:\n"
+        "  Log probability evaluates to log(0), i.e. negative infinity.\n"
+        "  Stan can't start sampling from this initial value.\n"
+    )
+    assert display_output("stan-cpu", log_zero * 2 + "\nInitialization failed.\n") == (
+        log_zero + "(The same message repeated 1 more time.)\n\nInitialization failed.\n"
+    )
+    # Lines the model prints between attempts, and look-alike text, keep every copy.
+    printed = ("trying a start value\n\n" + log_zero) * 3
+    assert display_output("stan-cpu", printed) == printed
+    look_alike = "Rejecting initial value:\n  my own note\nException: none\n" * 3
+    assert display_output("stan-cpu", look_alike) == look_alike
+
+
+def test_swift_program_keeps_what_it_printed_before_a_crash(tmp_path: Path) -> None:
+    import subprocess
+
+    from ds60sqlpy.worker_operations import language_commands
+
+    if not (shutil.which("stdbuf") and shutil.which("cc")):
+        pytest.skip("stdbuf and a C compiler stand in for the Swift runtime")
+    # Compiled Swift prints through C stdio and stops a fatal error with a trap;
+    # this program does the same. Its stdout is a pipe, so it is block-buffered.
+    tmp_path.mkdir(exist_ok=True)
+    (tmp_path / "crash.c").write_text(
+        "#include <stdio.h>\n"
+        'int main(void) { puts("first line"); puts("second line"); __builtin_trap(); }\n'
+    )
+    _, command = language_commands("swift-linux", tmp_path)
+    subprocess.run(["cc", "crash.c", "-o", command[-1]], cwd=tmp_path, check=True, timeout=60)
+    output = BoundedOutput()
+    code, interrupted = run_process(
+        command,
+        tmp_path,
+        child_environment(tmp_path),
+        time.monotonic() + 15,
+        threading.Event(),
+        output,
+    )
+    assert interrupted is None and code is not None and code < 0
+    assert output.snapshot()[0] == "first line\nsecond line\n"
+
+
+def test_swift_crash_report_is_hidden_but_the_fatal_error_line_stays() -> None:
+    from ds60sqlpy.worker_operations import display_output
+
+    index = _fixture("swift-linux", "index-out-of-range")
+    shown = display_output("swift-linux", index["output"])
+    assert shown == "Swift/ContiguousArrayBuffer.swift:692: Fatal error: Index out of range\n"
+    assert _explained("swift-linux", index, shown) == _explained(
+        "swift-linux", index, index["output"]
+    )
+    precondition = _fixture("swift-linux", "precondition")
+    shown = display_output("swift-linux", precondition["output"])
+    assert shown == "program/main.swift:5: Precondition failed: total was 2\n"
+    assert _explained("swift-linux", precondition, shown)[2] == 5
+    # Without the backtracer's closing line nothing is hidden.
+    cut = precondition["output"].split("\nBacktrace took")[0]
+    assert display_output("swift-linux", cut) == cut
+
+
+def test_hidden_crash_report_stays_in_the_raw_log(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from ds60sqlpy import worker_operations
+
+    report = _fixture("swift-linux", "precondition")["output"]
+    tmp_path.mkdir(exist_ok=True)
+    program = tmp_path / "crash"
+    program.write_text(
+        f"#!{sys.executable}\nimport sys\nprint('before the crash')\n"
+        f"sys.stdout.write({report!r})\nsys.exit(1)\n"
+    )
+    program.chmod(0o755)
+    monkeypatch.setattr(
+        worker_operations, "language_commands", lambda profile, directory: ([], [str(program)])
+    )
+    result = execute_operation(
+        "swift-linux", "", tmp_path / "job", 15, threading.Event(), lambda _: None
+    )
+    assert result.output == (
+        "before the crash\nprogram/main.swift:5: Precondition failed: total was 2\n"
+    )
+    assert result.raw_output == "before the crash\n" + report
+
+
+def test_dbt_shows_results_and_errors_without_its_progress_log() -> None:
+    from ds60sqlpy.worker_operations import display_output
+
+    case = _fixture("dbt-duckdb", "missing-column")
+    assert display_output("dbt-duckdb", case["output"]) == (
+        "3 of 3 ERROR creating sql table model main.lesson_model "
+        "........................ [ERROR in 0.03s]\n"
+        "Failure in model lesson_model (models/lesson_model.sql)\n"
+        "  Runtime Error in model lesson_model (models/lesson_model.sql)\n"
+        '  Binder Error: Referenced column "nope" not found in FROM clause!\n'
+        '  Candidate bindings: "updated_at", "customer_id"\n'
+        "Done. PASS=2 WARN=0 ERROR=1 SKIP=0 NO-OP=0 TOTAL=3\n"
+    )
+    for name in ("missing-column", "jinja-var", "parser-error"):
+        failed = _fixture("dbt-duckdb", name)
+        shown = display_output("dbt-duckdb", failed["output"])
+        assert "Running with dbt" not in shown and " START " not in shown
+        assert _explained("dbt-duckdb", failed, shown) == _explained(
+            "dbt-duckdb", failed, failed["output"]
+        )
+    # Lines the model logs or prints itself stay.
+    built = (
+        "22:14:13  Running with dbt=1.11.16\n"
+        "22:14:13  learner note: building orders\n"
+        "learner print: hello\n"
+        "22:14:14  Found 1 model, 2 seeds, 1 source, 511 macros\n"
+        "22:14:14  Found 3 paid orders\n"
+        "22:14:14  3 of 3 OK created sql table model main.lesson_model "
+        "............................ [OK in 0.03s]\n"
+        "22:14:14  Completed successfully\n"
+        "22:14:14  Done. PASS=3 WARN=0 ERROR=0 SKIP=0 NO-OP=0 TOTAL=3\n"
+        "dbt model built successfully\n"
+    )
+    assert display_output("dbt-duckdb", built) == (
+        "learner note: building orders\nlearner print: hello\nFound 3 paid orders\n"
+        "3 of 3 OK created sql table model main.lesson_model "
+        "............................ [OK in 0.03s]\n"
+        "Done. PASS=3 WARN=0 ERROR=0 SKIP=0 NO-OP=0 TOTAL=3\ndbt model built successfully\n"
+    )
+
+
+def test_r_headers_drop_only_the_runner_calls() -> None:
+    from ds60sqlpy.worker_operations import display_output
+
+    # The filter names the exact source() call that the runner makes.
+    runner = (ROOT / "src/ds60sqlpy/worker_figures.R").read_text()
+    assert 'source("main.R", local = globalenv(), echo = FALSE, keep.source = TRUE)' in runner
+    parse = _fixture("r-statistics", "unexpected-symbol")
+    shown = display_output("r-statistics", parse["output"])
+    assert shown == (
+        "Error: \n  main.R:2:8: unexpected symbol\n1: x <- 5\n2: y <- x x\n          ^\n"
+        "Execution halted\n"
+    )
+    assert _explained("r-statistics", parse, shown)[2:] == (2, 8)
+    missing = _fixture("r-statistics", "object-not-found")
+    shown = display_output("r-statistics", missing["output"])
+    assert shown == "Error: object 'y' not found\nCalls: print\nExecution halted\n"
+    assert _explained("r-statistics", missing, shown) == _explained(
+        "r-statistics", missing, missing["output"]
+    )
+    warnings = (
+        "Warning messages:\n1: In eval(ei, envir) :\n  this long warning was written on purpose\n"
+        "2: In eval(ei, envir) : NAs introduced by coercion\n3: In sqrt(-1) : NaNs produced\n"
+    )
+    assert display_output("r-statistics", warnings) == (
+        "Warning messages:\n1: this long warning was written on purpose\n"
+        "2: NAs introduced by coercion\n3: In sqrt(-1) : NaNs produced\n"
+    )
+    single = "Warning message:\nIn eval(ei, envir) : NAs introduced by coercion\n"
+    assert (
+        display_output("r-statistics", single) == "Warning message:\nNAs introduced by coercion\n"
+    )
+    learner = "Error in check(v) : bad value: 3\nError in eval(expr, env) : boom\n"
+    assert display_output("r-statistics", learner) == learner
+
+
+def test_spark_scala_stack_hides_only_the_launcher_frames_below_main() -> None:
+    from ds60sqlpy.worker_operations import display_output
+
+    case = _fixture("spark-local-scala", "assertion-shown")
+    shown = display_output("spark-local-scala", case["output"])
+    assert shown == (
+        'Exception in thread "main" java.lang.AssertionError: assertion failed: total was 2\n'
+        "\tat scala.Predef$.assert(Predef.scala:279)\n\tat Main$.main(Main.scala:4)\n"
+        "\tat Main.main(Main.scala)\n"
+    )
+    assert _explained("spark-local-scala", case, shown) == _explained(
+        "spark-local-scala", case, case["output"]
+    )
+    analysis = _fixture("spark-local-scala", "analysis-exception")
+    shown = display_output("spark-local-scala", analysis["output"])
+    assert "\tat Main$.main(Main.scala:6)\n\tat Main.main(Main.scala)\n\tSuppressed: " in shown
+    assert "SparkSubmit" not in shown and "jdk.internal.reflect" not in shown
+    assert _explained("spark-local-scala", analysis, shown)[2] == 6
+    # A stack trace that the program prints itself keeps every frame.
+    printed = case["output"].replace('Exception in thread "main" ', "")
+    assert display_output("spark-local-scala", printed) == printed
+
+
+def test_node_version_line_after_an_uncaught_error_is_hidden() -> None:
+    from ds60sqlpy.worker_operations import display_output
+
+    case = _fixture("javascript-node", "reference-error")
+    shown = display_output("javascript-node", case["output"])
+    assert shown.endswith(
+        "ReferenceError: totl is not defined\n    at file:///tmp/job-xxxxxxxx/main.mjs:2:13\n"
+    )
+    assert "Node.js" not in shown
+    assert _explained("javascript-node", case, shown) == _explained(
+        "javascript-node", case, case["output"]
+    )
+    typescript = _fixture("typescript-node", "runtime-type-error")
+    assert display_output("typescript-node", typescript["output"]).endswith("main.mjs:3:19\n")
+    # A version that the program prints itself stays.
+    for printed in ("Node.js v24.22.3\n", "Running on\nNode.js v24.22.3\n"):
+        assert display_output("javascript-node", printed) == printed

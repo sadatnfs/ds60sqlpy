@@ -11,6 +11,17 @@
     "expected_column": null
   },
   {
+    "case": "runtime-type-error-shown",
+    "source": "const scores: number[] = [];\nconst first = scores[0];\nconsole.log(first.toFixed(2));\n",
+    "output": "file:///tmp/job-xxxxxxxx/compiled/main.mjs:3\nconsole.log(first.toFixed(2));\n                  ^\n\nTypeError: Cannot read properties of undefined (reading 'toFixed')\n    at file:///tmp/job-xxxxxxxx/compiled/main.mjs:3:19\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "runtime",
+    "expected_line": null,
+    "expected_column": null
+  },
+  {
     "case": "ts-syntax",
     "source": "const value = ;\nconsole.log(value);\n",
     "output": "main.mts(1,15): error TS1109: Expression expected.\n",

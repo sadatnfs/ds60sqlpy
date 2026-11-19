@@ -2,9 +2,12 @@
 
 Fixtures are actual worker and pad payloads from deliberately broken programs.
 Only random temporary names, Spark ports and the local interpreter prefix were
-replaced with stable placeholders. Cases named ``*-shown`` rerun the same
-program after the runner began hiding its own lines (JVM notices, worker
-traceback frames, build summaries); both forms must explain alike.
+replaced with stable placeholders. Cases named ``*-shown`` are what the learner
+saw after the runner began hiding its own lines (JVM notices, worker traceback
+frames, build summaries, CmdStan settings, dbt progress, Swift crash reports,
+Spark launcher frames, R runner calls, the Node version line) and counting
+repeated Stan initialization messages. Where the same program also has an
+unfiltered case, both forms must explain alike.
 """
 
 from __future__ import annotations

@@ -120,9 +120,16 @@ such as compiled TypeScript or dbt's wrapped SQL, are left out rather than
 guessed. Python pad tracebacks omit the classroom runner's own frames and show
 the program as `main.py`, with the editor's line numbers. Other runtimes hide
 only lines that come from the runner or the runtime's internals, such as JVM
-startup notices, Node's internal stack frames, the R runner's `Calls:` chain,
-.NET build summaries and Spark's INFO logs. Every line your program prints
-stays visible, and the job receipt keeps the complete log as `raw_output`.
+startup notices, Node's internal stack frames and its closing `Node.js` version
+line, the R runner's `Calls:` chain and its own calls in error headers,
+CmdStan's settings list, Swift's crash report after the fatal error line, the
+Spark launcher's frames below `main`, dbt's progress log and timestamps, .NET
+build summaries and Spark's INFO logs. When Stan repeats the same
+initialization message, the result shows it once with a count, and a Swift
+program's printed lines appear even when it crashes. Every line your program
+prints stays visible, and the job receipt keeps the complete log as
+`raw_output`; **Show the full log** under the result displays it whenever lines
+were hidden.
 
 CUDA reading and CPU-model variants work without an NVIDIA device. Optional
 NVIDIA variants require explicit setup and a real device probe. A CPU

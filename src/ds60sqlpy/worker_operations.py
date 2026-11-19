@@ -205,10 +205,47 @@ def _runner_notices(command: list[str], environment: Mapping[str, str]) -> tuple
 _NODE_FRAME = re.compile(r"\s+at (?:async )?(?P<call>\S.*?)(?P<brace> \{)?")
 _NODE_SOURCE = re.compile(r"node:[\w./-]+:\d+")
 _CARET = re.compile(r"\s*\^+\s*")
+_NODE_VERSION = re.compile(r"Node\.js v\d+\.\d+\.\d+")
 _R_WRAPPER_CALLS = re.compile(r"Calls: \.ds60_run(?P<cut> -> | \.\.\. )(?P<rest>.*)")
 _R_WRAPPER = ["source", "withVisible", "eval", "eval"]
+# source() evaluates each top-level expression as eval(ei, envir), and the
+# runner's own source() call reports parse errors; neither is the learner's code.
+_R_RUNNER_ERROR = re.compile(
+    r"Error in (?:eval\(ei, envir\)|"
+    r'source\("main\.R", local = globalenv\(\), echo = FALSE, keep\.source = TRUE\)) :'
+)
+_R_RUNNER_WARNING = re.compile(r"(?P<number>\d+: )?In eval\(ei, envir\) :(?P<rest> .*)?")
 _PYSPARK_CONTEXT_LOG = re.compile(
     r'\{"ts": "[^"]*", "level": "ERROR", "logger": "(?:DataFrame|SQL)QueryContextLogger", '
+)
+_SPARK_MAIN_FRAME = re.compile(r"\tat [\w$]+\.main\([\w$]+\.scala\)")
+_SPARK_LAUNCH_FRAME = re.compile(
+    r"\tat (?:(?:java\.base/)?(?:jdk\.internal\.reflect\.|java\.lang\.reflect\.Method\.invoke\()"
+    r"|org\.apache\.spark\.deploy\.)"
+)
+_STAN_ARGUMENT = re.compile(r" *[a-z][a-z0-9_]*(?: = .*)?")
+_STAN_LAST_ARGUMENT = re.compile(r"num_threads = \d+(?: \(Default\))?")
+# Stan prints one of these three-line messages for each rejected starting point.
+_STAN_REJECTION_CAUSES = {
+    "  Error evaluating the log probability at the initial value.",
+    "  Log probability evaluates to log(0), i.e. negative infinity.",
+    "  Gradient evaluated at the initial value is not finite.",
+}
+_STAN_CANNOT_START = "  Stan can't start sampling from this initial value."
+_SWIFT_CRASH_START = re.compile(
+    r"\*\*\* Signal \d+: Backtracing from 0x[0-9a-f]+\.\.\. done \*\*\*"
+)
+_SWIFT_CRASH_END = re.compile(r"Backtrace took \d+(?:\.\d+)?s")
+_DBT_LOG = re.compile(r"\d{2}:\d{2}:\d{2}  (?P<message>.*)")
+_DBT_PROGRESS = re.compile(
+    r"Running with dbt=\S+|Registered adapter: \S+|Concurrency: \d+ threads? \(target='[^']*'\)"
+    r"|Found (?:\d+ [a-z ]+, )*\d+ macros(?:, \d+ [a-z ]+)*|\d+ of \d+ START .+ \[RUN\]"
+    # The runner loads these two fixture seeds before every build.
+    r"|\d+ of \d+ OK loaded seed file main\.(?:customers|raw_orders) \.+ \[INSERT \d+ in [\d.]+s\]"
+    r"|Finished running .+ in \d+ hours \d+ minutes and [\d.]+ seconds \([\d.]+s\)\."
+    r"|Completed successfully"
+    r"|Completed with \d+ errors?, \d+ partial success(?:es)?, and \d+ warnings?:"
+    r"|  compiled code at target/\S+"
 )
 
 
@@ -301,6 +338,36 @@ def _without_r_wrapper_calls(text: str) -> str:
     return "\n".join(lines)
 
 
+def _without_r_runner_calls(text: str) -> str:
+    """Drop the runner's own calls from R's error and warning headers.
+
+    ``Error in eval(ei, envir) : boom`` becomes ``Error: boom`` and a warning
+    ``In eval(ei, envir) : NAs introduced`` becomes ``NAs introduced``, as R
+    prints them without a call. An error keeps its layout, so a parse error's
+    ``main.R:2:8:`` location stays on its own line.
+    """
+    if "(ei, envir)" not in text and 'source("main.R", ' not in text:
+        return text
+    lines = text.split("\n")
+    shown: list[str] = []
+    index = 0
+    while index < len(lines):
+        line = lines[index]
+        index += 1
+        if error := _R_RUNNER_ERROR.match(line):
+            line = "Error:" + line[error.end() :]
+        elif warning := _R_RUNNER_WARNING.fullmatch(line):
+            number = warning.group("number") or ""
+            if warning.group("rest"):
+                line = number + warning.group("rest")[1:]
+            elif index < len(lines) and lines[index].startswith("  "):
+                # R put a long warning on the next line because of the call.
+                line = number + lines[index][2:]
+                index += 1
+        shown.append(line)
+    return "\n".join(shown)
+
+
 def _without_pyspark_context_logs(text: str) -> str:
     """Drop PySpark's one-line JSON copy of a DataFrame or SQL error.
 
@@ -312,17 +379,201 @@ def _without_pyspark_context_logs(text: str) -> str:
     return "\n".join(line for line in text.split("\n") if not _PYSPARK_CONTEXT_LOG.match(line))
 
 
+def _without_spark_launch_frames(text: str) -> str:
+    """Drop the frames below ``main`` in the stack of an uncaught exception.
+
+    spark-submit calls the program's ``main`` through reflection, so the bottom
+    of that stack names only the launcher. The exception, the learner's frames
+    and the Spark frames above them stay.
+    """
+    if 'Exception in thread "main" ' not in text:
+        return text
+    lines = text.split("\n")
+    start = next(
+        (i for i, line in enumerate(lines) if line.startswith('Exception in thread "main" ')), None
+    )
+    if start is None:
+        return text
+    shown = lines[:start]
+    index = start
+    while index < len(lines):
+        shown.append(lines[index])
+        index += 1
+        if _SPARK_MAIN_FRAME.fullmatch(shown[-1]):
+            end = index
+            while end < len(lines) and _SPARK_LAUNCH_FRAME.match(lines[end]):
+                end += 1
+            if end > index and (end == len(lines) or not lines[end].startswith("\tat ")):
+                index = end
+    return "\n".join(shown)
+
+
+def _without_stan_arguments(text: str) -> str:
+    """Drop the settings list CmdStan prints before each sampling chain.
+
+    It runs from ``method = sample`` to ``num_threads`` and repeats the runner's
+    fixed arguments. The model's own messages and exceptions follow it.
+    """
+    if "method = sample (Default)" not in text:
+        return text
+    lines = text.split("\n")
+    shown: list[str] = []
+    index = 0
+    while index < len(lines):
+        if lines[index] == "method = sample (Default)":
+            end = next(
+                (
+                    i
+                    for i in range(index + 1, min(len(lines), index + 100))
+                    if _STAN_LAST_ARGUMENT.fullmatch(lines[i])
+                    or not _STAN_ARGUMENT.fullmatch(lines[i])
+                ),
+                None,
+            )
+            if end is not None and _STAN_LAST_ARGUMENT.fullmatch(lines[end]):
+                index = end + 1
+                continue
+        shown.append(lines[index])
+        index += 1
+    return "\n".join(shown)
+
+
+def _stan_rejection(lines: list[str]) -> bool:
+    """Whether three lines are one of Stan's "Rejecting initial value" messages."""
+    return (
+        len(lines) == 3
+        and lines[0] == "Rejecting initial value:"
+        and lines[1] in _STAN_REJECTION_CAUSES
+        and (lines[2].startswith("Exception: ") or lines[2] == _STAN_CANNOT_START)
+    )
+
+
+def _without_repeated_stan_rejections(text: str) -> str:
+    """Show a run of identical Stan initialization rejections once, with a count.
+
+    When every starting point fails the same way, Stan prints the same
+    three-line message for each of its 100 attempts before "Initialization
+    failed". Only exact consecutive copies are counted, so anything the model
+    prints between attempts keeps every copy.
+    """
+    if "Rejecting initial value:" not in text:
+        return text
+    lines = text.split("\n")
+    shown: list[str] = []
+    index = 0
+    while index < len(lines):
+        block = lines[index : index + 3]
+        if not _stan_rejection(block):
+            shown.append(lines[index])
+            index += 1
+            continue
+        repeats = 0
+        while lines[index + 3 * (repeats + 1) : index + 3 * (repeats + 2)] == block:
+            repeats += 1
+        shown.extend(block)
+        if repeats:
+            times = "time" if repeats == 1 else "times"
+            shown.append(f"(The same message repeated {repeats} more {times}.)")
+        index += 3 * (repeats + 1)
+    return "\n".join(shown)
+
+
+def _without_swift_crash_report(text: str) -> str:
+    """Drop the report Swift's backtracer prints after a runtime crash.
+
+    The report (threads, registers and loaded images) follows the fatal error
+    line, such as ``main.swift:5: Fatal error: ...``, which stays.
+    """
+    if "Backtracing from 0x" not in text:
+        return text
+    lines = text.split("\n")
+    shown: list[str] = []
+    index = 0
+    while index < len(lines):
+        if _SWIFT_CRASH_START.fullmatch(lines[index]):
+            end = next(
+                (i for i in range(index + 1, len(lines)) if _SWIFT_CRASH_END.fullmatch(lines[i])),
+                None,
+            )
+            if end is not None:
+                # One blank line sets the report off on each side.
+                if shown and not shown[-1]:
+                    shown.pop()
+                index = end + 2 if end + 2 < len(lines) and not lines[end + 1] else end + 1
+                continue
+        shown.append(lines[index])
+        index += 1
+    return "\n".join(shown)
+
+
+def _without_node_version(text: str) -> str:
+    """Drop the ``Node.js v24.x.y`` line that ends Node's report of an uncaught error."""
+    if "Node.js v" not in text:
+        return text
+    lines = text.split("\n")
+    end = len(lines)
+    while end and not lines[end - 1]:
+        end -= 1
+    if (
+        end >= 3
+        and _NODE_VERSION.fullmatch(lines[end - 1])
+        and not lines[end - 2]
+        and lines[end - 3]
+    ):
+        del lines[end - 2 : end]
+    return "\n".join(lines)
+
+
+def _without_dbt_progress(text: str) -> str:
+    """Show dbt's results without its progress log.
+
+    Hidden: version and setup lines, START lines, the runner's own seed loading,
+    timings, separators, the compiled file's path and the earlier seed step's
+    summary. Each model result, every error with its message, the final
+    PASS/WARN/ERROR counts and anything the model logs stay, without timestamps.
+    """
+    if "Running with dbt=" not in text:
+        return text
+    lines = text.split("\n")
+    logged = [_DBT_LOG.fullmatch(line) for line in lines]
+    totals = [
+        i
+        for i, match in enumerate(logged)
+        if match is not None and match.group("message").startswith("Done. PASS=")
+    ]
+    earlier = set(totals[:-1])
+    shown: list[str] = []
+    for index, (line, match) in enumerate(zip(lines, logged, strict=True)):
+        if match is None:
+            shown.append(line)
+            continue
+        message = match.group("message")
+        if message and not _DBT_PROGRESS.fullmatch(message) and index not in earlier:
+            shown.append(message)
+    return "\n".join(shown)
+
+
 def display_output(profile_id: str, text: str) -> str:
     """Return a runner log as the learner sees it.
 
-    Only lines from the runner or from the runtime's own internals are hidden.
+    Only lines from the runner or from the runtime's own internals are hidden,
+    or counted when the runtime repeats the same message, and only the runner's
+    part of a kept line (a dbt timestamp, an R runner call) is removed.
     """
     if profile_id in {"javascript-node", "typescript-node"}:
-        return _without_node_internals(text)
+        return _without_node_version(_without_node_internals(text))
     if profile_id == "r-statistics":
-        return _without_r_wrapper_calls(text)
+        return _without_r_runner_calls(_without_r_wrapper_calls(text))
     if profile_id == "spark-local-python":
         return _without_pyspark_context_logs(text)
+    if profile_id == "spark-local-scala":
+        return _without_spark_launch_frames(text)
+    if profile_id == "stan-cpu":
+        return _without_repeated_stan_rejections(_without_stan_arguments(text))
+    if profile_id == "swift-linux":
+        return _without_swift_crash_report(text)
+    if profile_id == "dbt-duckdb":
+        return _without_dbt_progress(text)
     return text
 
 
@@ -931,6 +1182,8 @@ def language_commands(profile_id: str, directory: Path) -> tuple[list[list[str]]
             ]
         ], [str(directory / "program")]
     if profile_id == "swift-linux":
+        # A crash stops the program before it flushes a full stdout buffer, so
+        # what it printed first would be lost; line buffering keeps each line.
         return [
             [
                 "swiftc",
@@ -943,7 +1196,7 @@ def language_commands(profile_id: str, directory: Path) -> tuple[list[list[str]]
                 "-o",
                 "program",
             ]
-        ], [str(directory / "program")]
+        ], ["stdbuf", "-oL", str(directory / "program")]
     if profile_id == "csharp-dotnet":
         # The trusted project is immutable and admits only Program.cs. Offline
         # NuGet sources and disabled build servers keep every attempt bounded.
