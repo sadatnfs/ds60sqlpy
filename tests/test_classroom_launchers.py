@@ -196,6 +196,12 @@ elif 'config' in a and '--hash' in a:
 elif 'config' in a and '--quiet' not in a:
  service=a[-1];print('services:\n  '+service+':\n    image: '+images[service])
  if service=='lab':print('    network_mode: '+c.get('desired_network','service:postgres'))
+ try:
+  # Real Compose configs can exceed a pipe buffer; Compose exits 255 when its
+  # reader closes the pipe early.
+  for i in range(c.get('config_padding',0)):print('  extra-'+str(i)+':\n    image: x:'+str(i))
+  sys.stdout.flush()
+ except BrokenPipeError:os._exit(255)
 elif 'ps' in a and '--quiet' in a:
  if a[-1] in containers:print(containers[a[-1]])
 elif 'ps' in a and '--services' in a:
@@ -768,6 +774,17 @@ def test_plain_repeat_resumes_exact_containers_without_build_or_pull(launcher: A
         "python-core-worker",
     ]
     assert json.loads(launcher.config.read_text())["containers"] == original
+
+
+def test_large_compose_config_is_read_to_the_end_on_start_and_resume(launcher: Any) -> None:
+    # Over 1 MB per config call: a reader that stops early leaves Compose writing
+    # into a closed pipe, and pipefail would turn that into a silent failure.
+    launcher.set(config_padding=40000)
+    first = launcher.run("--starter", "--no-browser")
+    assert first.returncode == 0, first.stdout + first.stderr
+    resumed = launcher.run("--no-browser")
+    assert resumed.returncode == 0, resumed.stdout + resumed.stderr
+    assert "Classroom command failed" not in first.stderr + resumed.stderr
 
 
 def test_partial_build_remembers_selection_and_skips_completed_images(launcher: Any) -> None:

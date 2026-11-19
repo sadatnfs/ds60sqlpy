@@ -489,12 +489,14 @@ container_id() {
 }
 image_for() {
   # Compose config includes dependencies. Read only this service's image from
-  # its normalized YAML block, avoiding JSON/Python host prerequisites.
+  # its normalized YAML block, avoiding JSON/Python host prerequisites. awk reads
+  # to the end: stopping early closes the pipe while Compose is still writing,
+  # and Compose then exits 255 on the broken pipe (macOS pipes are small).
   local value
   value="$("${compose[@]}" config "$1" | awk -v service="$1" '
     $0 == "  " service ":" { active=1; next }
     active && /^  [^ ]/ { active=0 }
-    active && /^    image: / { sub(/^    image: /, ""); print; exit }
+    active && !found && /^    image: / { sub(/^    image: /, ""); print; found=1 }
   ')"
   [[ "$value" =~ ^[A-Za-z0-9_./:@+-]+$ ]] || fail "Compose did not resolve a usable image for $1."
   printf '%s' "$value"
@@ -510,10 +512,11 @@ check_config() {
     # created app. Normalize only that field to its existing runtime namespace,
     # then compare every remaining desired setting against the stored hash.
     # A stale namespace is repaired separately after PostgreSQL becomes healthy.
+    # As in image_for, awk reads the whole config so Compose never hits a closed pipe.
     desired_network="$("${compose[@]}" config lab | awk '
       $0 == "  lab:" { active=1; next }
       active && /^  [^ ]/ { active=0 }
-      active && /^    network_mode: / { sub(/^    network_mode: /, ""); print; exit }
+      active && !found && /^    network_mode: / { sub(/^    network_mode: /, ""); print; found=1 }
     ')"
     [ "$desired_network" = service:postgres ] || fail 'The desired app network mode changed. Use ./classroom --rebuild to apply the updated configuration.'
     network="$("$docker_cli" inspect --format '{{.HostConfig.NetworkMode}}' "$id")"
