@@ -63,6 +63,7 @@ class Lesson:
     stateful_group: str | None = None
     runner: str = ""
     topics: tuple[str, ...] = ()
+    outcome: str = ""
 
     def __post_init__(self) -> None:
         if not self.runner:
@@ -97,6 +98,7 @@ class Lesson:
             ),
             runner=str(value.get("runner", infer_runner(str(value["lesson_path"]), raw_track))),
             topics=tuple(map(str, value.get("topics", []))),
+            outcome=str(value.get("outcome", "")),
         )
 
 

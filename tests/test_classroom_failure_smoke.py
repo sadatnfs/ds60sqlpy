@@ -79,9 +79,7 @@ class FakeClient(ClassroomClient):
                 else " ".join(smoke.DIAGNOSTICS[profile])
                 if invalid
                 else "{'checks': 6, 'status': 'passed'}\n",
-                "detail": "Total execution deadline exceeded; child processes reaped."
-                if timeout
-                else "",
+                "detail": "Stopped at the time limit." if timeout else "",
                 "truncated": False,
                 "checks": [],
             }

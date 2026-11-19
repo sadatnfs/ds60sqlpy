@@ -1,0 +1,57 @@
+[
+  {
+    "case": "runtime-type-error",
+    "source": "const scores: number[] = [];\nconst first = scores[0];\nconsole.log(first.toFixed(2));\n",
+    "output": "file:///tmp/job-xxxxxxxx/compiled/main.mjs:3\nconsole.log(first.toFixed(2));\n                  ^\n\nTypeError: Cannot read properties of undefined (reading 'toFixed')\n    at file:///tmp/job-xxxxxxxx/compiled/main.mjs:3:19\n    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)\n    at async node:internal/modules/esm/loader:647:26\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)\n\nNode.js v24.22.3\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "runtime",
+    "expected_line": null,
+    "expected_column": null
+  },
+  {
+    "case": "ts-syntax",
+    "source": "const value = ;\nconsole.log(value);\n",
+    "output": "main.mts(1,15): error TS1109: Expression expected.\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "syntax",
+    "expected_line": 1,
+    "expected_column": 15
+  },
+  {
+    "case": "ts2304",
+    "source": "const total = 5;\nconsole.log(totl);\n",
+    "output": "main.mts(2,13): error TS2552: Cannot find name 'totl'. Did you mean 'total'?\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "compile",
+    "expected_line": 2,
+    "expected_column": 13
+  },
+  {
+    "case": "ts2304-no-suggestion",
+    "source": "console.log(missingValue);\n",
+    "output": "main.mts(1,13): error TS2304: Cannot find name 'missingValue'.\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "compile",
+    "expected_line": 1,
+    "expected_column": 13
+  },
+  {
+    "case": "ts2322",
+    "source": "const count: number = \"five\";\nconsole.log(count);\n",
+    "output": "main.mts(1,7): error TS2322: Type 'string' is not assignable to type 'number'.\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "compile",
+    "expected_line": 1,
+    "expected_column": 7
+  }
+]

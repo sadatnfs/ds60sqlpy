@@ -23,7 +23,11 @@ from ds60sqlpy.curriculum_framework import RUNNERS
 from ds60sqlpy.execution import ALLOWED_TIMEOUT_SECONDS, PadRunner
 from ds60sqlpy.lesson_reader import render_artifact, rendered_targets
 from ds60sqlpy.module_service import ModuleService
+from ds60sqlpy.run_explain import explain_pad_run
 from ds60sqlpy.sql_lesson import SqlLessonRunner
+from ds60sqlpy.sql_readiness import Readiness, ensure_before_run, uses_course_database
+from ds60sqlpy.sql_readiness import inspect as inspect_sql
+from ds60sqlpy.sql_readiness import prepare as prepare_sql
 from ds60sqlpy.sql_runner import SqlRunner, SqlRunnerError
 
 
@@ -122,6 +126,12 @@ class LabServer(CourseHTTPServer):
             }
         return {**result, "receipt_saved": True, "receipt_id": receipt["id"]}
 
+    @staticmethod
+    def _explained(response: dict[str, Any], language: str, source: str) -> dict[str, Any]:
+        """Add a beginner explanation to a failed response; the saved receipt is unchanged."""
+        explanation = explain_pad_run(language, response, source)
+        return response if explanation is None else {**response, "explanation": explanation}
+
     def action(self, payload: dict[str, Any]) -> dict[str, Any]:
         """Dispatch only catalog-bound operations, with strict input types."""
 
@@ -176,10 +186,33 @@ class LabServer(CourseHTTPServer):
         lesson = self.catalog.get(lesson_id)
         if action == "capabilities":
             return self.capabilities.lesson(lesson_id)
+        if action in {"sql-status", "sql-prepare"}:
+            try:
+                runner = SqlRunner(self.catalog, capture_output=True)
+            except SqlRunnerError as exc:
+                return {"readiness": Readiness(state="unavailable", detail=str(exc)).as_payload()}
+            if action == "sql-status":
+                try:
+                    return {"readiness": inspect_sql(self.catalog, lesson_id, runner).as_payload()}
+                except SqlRunnerError as exc:
+                    state = Readiness(state="unavailable", detail=str(exc))
+                    return {"readiness": state.as_payload()}
+            if not self.execution_lock.acquire(blocking=False):
+                raise ValueError(
+                    "A run is in progress. Wait for its result before preparing the database."
+                )
+            try:
+                readiness, transcript = prepare_sql(self.catalog, lesson_id, runner)
+                return {"readiness": readiness.as_payload(), "output": transcript}
+            except SqlRunnerError as exc:
+                raise ValueError(str(exc)) from exc
+            finally:
+                self.execution_lock.release()
         if action == "lesson":
             return {
                 **self.coaching.lesson(lesson_id),
                 "capabilities": self.capabilities.lesson(lesson_id),
+                "course_database": uses_course_database(lesson),
                 "sql_snippet_starter": (
                     "SELECT current_database() AS database_name, current_user AS database_user;\n"
                     if lesson.runner == "sql"
@@ -219,8 +252,14 @@ class LabServer(CourseHTTPServer):
                     "A pad is already running. Wait for its result before running again."
                 )
             try:
+                preparation = ensure_before_run(self.catalog, lesson_id)
                 result = self.sql_lessons.run(lesson_id, code, timeout_seconds=timeout)
-                return self._save_run_receipt(lesson_id, "sql", "lesson", code, result)
+                response = self._explained(
+                    self._save_run_receipt(lesson_id, "sql", "lesson", code, result), "sql", code
+                )
+                if preparation:
+                    response["database_preparation"] = preparation
+                return response
             finally:
                 self.execution_lock.release()
         if action in {"save-pad", "read-pad", "pad-history", "read-history", "run"}:
@@ -274,17 +313,40 @@ class LabServer(CourseHTTPServer):
                 type(timeout) is not int or timeout not in ALLOWED_TIMEOUT_SECONDS
             ):
                 raise ValueError("Choose a run limit of 15, 60 or 120 seconds.")
+            purpose = payload.get("purpose", "practice")
+            if not isinstance(purpose, str) or purpose not in {"practice", "solution"}:
+                raise ValueError("Choose a practice run or a worked-solution run.")
+            solution = purpose == "solution"
             if not self.execution_lock.acquire(blocking=False):
                 raise ValueError(
                     "A pad is already running. Wait for its result before running again."
                 )
             try:
-                result = (
-                    self.pads.run(lesson_id, language, code)
-                    if timeout is None
-                    else self.pads.run(lesson_id, language, code, timeout_seconds=timeout)
+                preparation = (
+                    ensure_before_run(self.catalog, lesson_id)
+                    if language == "sql" or uses_course_database(lesson)
+                    else None
                 )
-                return self._save_run_receipt(lesson_id, language, "snippet", code, result)
+                # Practice runs keep their original call; only a worked-solution run
+                # asks the runner not to save the submitted code as the pad.
+                options: dict[str, Any] = {}
+                if timeout is not None:
+                    options["timeout_seconds"] = timeout
+                if solution:
+                    options["save"] = False
+                result = self.pads.run(lesson_id, language, code, **options)
+                # A worked-solution run is shown once and kept out of the learner's
+                # saved pad and run history.
+                response = self._explained(
+                    {**result, "purpose": "solution"}
+                    if solution
+                    else self._save_run_receipt(lesson_id, language, "snippet", code, result),
+                    language,
+                    code,
+                )
+                if preparation:
+                    response["database_preparation"] = preparation
+                return response
             finally:
                 self.execution_lock.release()
         raise ValueError("Unknown learning-lab action.")
@@ -300,10 +362,14 @@ class LabRequestHandler(CourseRequestHandler):
     def do_GET(self) -> None:  # noqa: N802
         route = urlsplit(self.path).path
         classroom_routes = {"/", "/classroom", "/learn", "/journeys", "/journey-preview"}
+        script = "text/javascript; charset=utf-8"
         assets = {
             "/assets/classroom.css": ("classroom.css", "text/css; charset=utf-8"),
-            "/assets/classroom.js": ("classroom.js", "text/javascript; charset=utf-8"),
-            "/assets/browser-preview.js": ("browser-preview.js", "text/javascript; charset=utf-8"),
+            "/assets/classroom.js": ("classroom.js", script),
+            "/assets/browser-preview.js": ("browser-preview.js", script),
+            "/assets/classroom-editor.js": ("classroom-editor.js", script),
+            "/assets/classroom-shell.js": ("classroom-shell.js", script),
+            "/assets/codemirror.js": ("vendor/codemirror.v6.min.js", script),
         }
         if route not in classroom_routes | set(assets) | {
             "/assets/rich-content.css",

@@ -1,0 +1,79 @@
+[
+  {
+    "case": "conversion",
+    "source": "int count = \"five\";\nConsole.WriteLine(count);\n",
+    "output": "An issue was encountered verifying workloads. For more information, run \"dotnet workload update\".\n/tmp/job-xxxxxxxx/Program.cs(1,13): error CS0029: Cannot implicitly convert type 'string' to 'int' [/tmp/job-xxxxxxxx/Lesson.csproj]\n\nBuild FAILED.\n\n/tmp/job-xxxxxxxx/Program.cs(1,13): error CS0029: Cannot implicitly convert type 'string' to 'int' [/tmp/job-xxxxxxxx/Lesson.csproj]\n    0 Warning(s)\n    1 Error(s)\n\nTime Elapsed 00:00:00.83\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "compile",
+    "expected_line": 1,
+    "expected_column": 13
+  },
+  {
+    "case": "debug-assert",
+    "source": "using System.Diagnostics;\n\nint total = 1 + 1;\nDebug.Assert(total == 3, \"total was \" + total);\nConsole.WriteLine(\"after\");\n",
+    "output": "An issue was encountered verifying workloads. For more information, run \"dotnet workload update\".\n\nBuild succeeded.\n    0 Warning(s)\n    0 Error(s)\n\nTime Elapsed 00:00:00.92\nProcess terminated.\nAssertion failed.\ntotal was 2\n   at Program.<Main>$(String[] args) in /tmp/job-xxxxxxxx/Program.cs:line 4\n",
+    "returncode": -6,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "assertion",
+    "expected_line": 4,
+    "expected_column": null
+  },
+  {
+    "case": "index-exception",
+    "source": "int[] scores = { 90, 85 };\nint index = 5;\nConsole.WriteLine(scores[index]);\n",
+    "output": "An issue was encountered verifying workloads. For more information, run \"dotnet workload update\".\n\nBuild succeeded.\n    0 Warning(s)\n    0 Error(s)\n\nTime Elapsed 00:00:00.86\nUnhandled exception. System.IndexOutOfRangeException: Index was outside the bounds of the array.\n   at Program.<Main>$(String[] args) in /tmp/job-xxxxxxxx/Program.cs:line 3\n",
+    "returncode": -6,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "runtime",
+    "expected_line": 3,
+    "expected_column": null
+  },
+  {
+    "case": "index-exception-shown",
+    "source": "int[] scores = { 90, 85 };\nint index = 5;\nConsole.WriteLine(scores[index]);\n",
+    "output": "Unhandled exception. System.IndexOutOfRangeException: Index was outside the bounds of the array.\n   at Program.<Main>$(String[] args) in /tmp/job-xxxxxxxx/Program.cs:line 3\n",
+    "returncode": -6,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "runtime",
+    "expected_line": 3,
+    "expected_column": null
+  },
+  {
+    "case": "missing-semicolon",
+    "source": "Console.WriteLine(\"hi\")\nConsole.WriteLine(\"bye\");\n",
+    "output": "An issue was encountered verifying workloads. For more information, run \"dotnet workload update\".\n/tmp/job-xxxxxxxx/Program.cs(1,24): error CS1002: ; expected [/tmp/job-xxxxxxxx/Lesson.csproj]\n\nBuild FAILED.\n\n/tmp/job-xxxxxxxx/Program.cs(1,24): error CS1002: ; expected [/tmp/job-xxxxxxxx/Lesson.csproj]\n    0 Warning(s)\n    1 Error(s)\n\nTime Elapsed 00:00:00.61\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "syntax",
+    "expected_line": 1,
+    "expected_column": 24
+  },
+  {
+    "case": "name-missing",
+    "source": "int total = 5;\nConsole.WriteLine(totl);\n",
+    "output": "An issue was encountered verifying workloads. For more information, run \"dotnet workload update\".\n/tmp/job-xxxxxxxx/Program.cs(2,19): error CS0103: The name 'totl' does not exist in the current context [/tmp/job-xxxxxxxx/Lesson.csproj]\n/tmp/job-xxxxxxxx/Program.cs(1,5): warning CS0219: The variable 'total' is assigned but its value is never used [/tmp/job-xxxxxxxx/Lesson.csproj]\n\nBuild FAILED.\n\n/tmp/job-xxxxxxxx/Program.cs(1,5): warning CS0219: The variable 'total' is assigned but its value is never used [/tmp/job-xxxxxxxx/Lesson.csproj]\n/tmp/job-xxxxxxxx/Program.cs(2,19): error CS0103: The name 'totl' does not exist in the current context [/tmp/job-xxxxxxxx/Lesson.csproj]\n    1 Warning(s)\n    1 Error(s)\n\nTime Elapsed 00:00:00.84\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "compile",
+    "expected_line": 2,
+    "expected_column": 19
+  },
+  {
+    "case": "name-missing-shown",
+    "source": "int total = 5;\nConsole.WriteLine(totl);\n",
+    "output": "/tmp/job-xxxxxxxx/Program.cs(2,19): error CS0103: The name 'totl' does not exist in the current context\n/tmp/job-xxxxxxxx/Program.cs(1,5): warning CS0219: The variable 'total' is assigned but its value is never used\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "compile",
+    "expected_line": 2,
+    "expected_column": 19
+  }
+]

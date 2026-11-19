@@ -17,7 +17,7 @@ import pytest
 
 from ds60sqlpy.catalog import Catalog
 from ds60sqlpy.curriculum_framework import RUNNERS
-from ds60sqlpy.execution import MAX_OUTPUT_BYTES, PadResult, PadRunner
+from ds60sqlpy.execution import MAX_OUTPUT_BYTES, PadResult, PadRunner, lesson_search_path
 from ds60sqlpy.sql_notebook import validate_course_database_target
 
 
@@ -261,6 +261,40 @@ def test_plot_cache_is_shared_across_lessons_and_preserves_existing_files(
     assert environments[1]["MPLCONFIGDIR"] == str(cache)
     assert cache == course.repo_root / ".learning/cache/matplotlib" / sys.platform
     assert sentinel.read_text(encoding="utf-8") == "preserved"
+
+
+def test_sql_snippets_use_the_lesson_scripts_own_search_path(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    real = Catalog.load()
+    lesson = replace(real.get("sql-29"), prerequisites=())
+    script = tmp_path / lesson.lesson_path
+    script.parent.mkdir(parents=True)
+    script.write_text(real.resolve(lesson.lesson_path).read_text(encoding="utf-8"))
+    catalog = Catalog(tmp_path, (lesson,))
+    assert lesson_search_path(catalog, "sql-29") == "training,public"
+    runner = PadRunner(catalog)
+    environments: list[dict[str, str]] = []
+
+    def capture(command: list[str], environment: dict[str, str], language: str) -> PadResult:
+        environments.append(environment)
+        return PadResult(
+            language=language, returncode=0, output="", elapsed_seconds=0, stopped=None
+        )
+
+    monkeypatch.setattr(runner, "_execute", capture)
+    runner.run("sql-29", "sql", "SELECT customer_id FROM customers;\n")
+    assert environments[-1]["DS60_PAD_SEARCH_PATH"] == "training,public"
+    # Only a plain top-level statement counts; anything else keeps the server default.
+    script.write_text("-- SET search_path TO training;\nSET search_path TO x; DROP TABLE y;\n")
+    assert lesson_search_path(catalog, "sql-29") is None
+    runner.run("sql-29", "sql", "SELECT 1;\n")
+    assert "DS60_PAD_SEARCH_PATH" not in environments[-1]
+    assert {
+        lesson_search_path(real, item.id)
+        for item in real
+        if item.lesson_path.startswith("sql/postgres-60day/day")
+    } == {"training,public", "dwh,training,public"}
 
 
 def test_empty_saved_pad_and_changed_versions_remain_recoverable(course: Catalog) -> None:

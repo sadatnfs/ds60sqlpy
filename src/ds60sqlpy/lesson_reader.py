@@ -94,6 +94,8 @@ _SOURCE_LANGUAGES = {
     ".csv": "csv",
     ".tsv": "text",
     ".toml": "toml",
+    ".properties": "text",
+    ".conf": "text",
     ".lock": "text",
 }
 _REFERENCE_SUFFIXES = {".md", ".ipynb", *_SOURCE_LANGUAGES}

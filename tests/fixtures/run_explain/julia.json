@@ -1,0 +1,57 @@
+[
+  {
+    "case": "assertion",
+    "source": "total = 1 + 1\n@assert total == 3 \"total was $total\"\n",
+    "output": "ERROR: LoadError: AssertionError: total was 2\nStacktrace:\n [1] top-level scope\n   @ ~/main.jl:2\n [2] include(mod::Module, _path::String)\n   @ Base ./Base.jl:309\n [3] exec_options(opts::Base.JLOptions)\n   @ Base ./client.jl:344\n [4] _start()\n   @ Base ./client.jl:577\nin expression starting at /tmp/job-xxxxxxxx/main.jl:2\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "assertion",
+    "expected_line": 2,
+    "expected_column": null
+  },
+  {
+    "case": "method-error",
+    "source": "total = 1 + \"2\"\nprintln(total)\n",
+    "output": "ERROR: LoadError: MethodError: no method matching +(::Int64, ::String)\nThe function `+` exists, but no method is defined for this combination of argument types.\n\nClosest candidates are:\n  +(::Any, ::Any, !Matched::Any, !Matched::Any...)\n   @ Base operators.jl:653\n  +(::Number, !Matched::LinearAlgebra.UniformScaling)\n   @ LinearAlgebra /opt/julia/share/julia/stdlib/v1.13/LinearAlgebra/src/uniformscaling.jl:148\n  +(::Number, !Matched::Missing)\n   @ Base missing.jl:121\n  ...\n\nStacktrace:\n [1] top-level scope\n   @ ~/main.jl:1\n [2] include(mod::Module, _path::String)\n   @ Base ./Base.jl:309\n [3] exec_options(opts::Base.JLOptions)\n   @ Base ./client.jl:344\n [4] _start()\n   @ Base ./client.jl:577\nin expression starting at /tmp/job-xxxxxxxx/main.jl:1\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "runtime",
+    "expected_line": 1,
+    "expected_column": null
+  },
+  {
+    "case": "missing-package",
+    "source": "using NotAPackage\n",
+    "output": "ERROR: LoadError: ArgumentError: Package NotAPackage not found in current path.\n- Run `import Pkg; Pkg.add(\"NotAPackage\")` to install the NotAPackage package.\nStacktrace:\n  [1] macro expansion\n    @ ./loading.jl:2550 [inlined]\n  [2] macro expansion\n    @ ./lock.jl:376 [inlined]\n  [3] __require(into::Module, mod::Symbol)\n    @ Base ./loading.jl:2533\n  [4] require\n    @ ./loading.jl:2509 [inlined]\n  [5] eval_import_path\n    @ ./module.jl:36 [inlined]\n  [6] eval_import_path_all(at::Module, path::Expr, keyword::String)\n    @ Base ./module.jl:60\n  [7] _eval_using(to::Module, path::Expr)\n    @ Base ./module.jl:137\n  [8] top-level scope\n    @ ~/main.jl:1\n  [9] include(mod::Module, _path::String)\n    @ Base ./Base.jl:309\n [10] exec_options(opts::Base.JLOptions)\n    @ Base ./client.jl:344\n [11] _start()\n    @ Base ./client.jl:577\nin expression starting at /tmp/job-xxxxxxxx/main.jl:1\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "runtime",
+    "expected_line": 1,
+    "expected_column": null
+  },
+  {
+    "case": "parse-error",
+    "source": "x = (1 + 2\nprintln(x)\n",
+    "output": "ERROR: LoadError: ParseError:\n# Error @ /tmp/job-xxxxxxxx/main.jl:1:11\nx = (1 + 2\n#         └ ── Expected `)` or `,`\nStacktrace:\n [1] top-level scope\n   @ ~/main.jl:1\n [2] include(mod::Module, _path::String)\n   @ Base ./Base.jl:309\n [3] exec_options(opts::Base.JLOptions)\n   @ Base ./client.jl:344\n [4] _start()\n   @ Base ./client.jl:577\nin expression starting at /tmp/job-xxxxxxxx/main.jl:1\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "syntax",
+    "expected_line": 1,
+    "expected_column": 11
+  },
+  {
+    "case": "undefvar",
+    "source": "x = 5\nprintln(y)\n",
+    "output": "ERROR: LoadError: UndefVarError: `y` not defined in `Main`\nSuggestion: check for spelling errors or missing imports.\nStacktrace:\n [1] top-level scope\n   @ ~/main.jl:2\n [2] include(mod::Module, _path::String)\n   @ Base ./Base.jl:309\n [3] exec_options(opts::Base.JLOptions)\n   @ Base ./client.jl:344\n [4] _start()\n   @ Base ./client.jl:577\nin expression starting at /tmp/job-xxxxxxxx/main.jl:2\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "runtime",
+    "expected_line": 2,
+    "expected_column": null
+  }
+]

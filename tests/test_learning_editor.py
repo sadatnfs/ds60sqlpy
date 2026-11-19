@@ -53,6 +53,9 @@ def test_error_navigation_uses_only_valid_submitted_source_lines() -> None:
         ('  File "C:\\work\\.submission-abc_def.py", line 2\n', 3, 2),
         ('Printed text File "practice.py", line 2\n', 3, None),
         ('  File "/lib/practice.py.bak", line 2\n', 3, None),
+        # Learner tracebacks are trimmed to start at the learner file, shown as main.py.
+        ('Traceback (most recent call last):\n  File "main.py", line 2, in <module>\n', 3, 2),
+        ('  File "main.py", line 9\n', 3, None),
     ]
     expression = (
         f"const cases = {json.dumps(cases)};\n"

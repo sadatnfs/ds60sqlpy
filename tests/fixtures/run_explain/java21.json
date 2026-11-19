@@ -1,0 +1,79 @@
+[
+  {
+    "case": "array-index",
+    "source": "public class Main {\n    public static void main(String[] args) {\n        int[] scores = {90, 85};\n        System.out.println(scores[2]);\n    }\n}\n",
+    "output": "Picked up JAVA_TOOL_OPTIONS: -XX:ActiveProcessorCount=2 -XX:ParallelGCThreads=2 -XX:ConcGCThreads=1\nPicked up JAVA_TOOL_OPTIONS: -XX:ActiveProcessorCount=2 -XX:ParallelGCThreads=2 -XX:ConcGCThreads=1\nException in thread \"main\" java.lang.ArrayIndexOutOfBoundsException: Index 2 out of bounds for length 2\n\tat Main.main(Main.java:4)\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "runtime",
+    "expected_line": 4,
+    "expected_column": null
+  },
+  {
+    "case": "array-index-shown",
+    "source": "public class Main {\n    public static void main(String[] args) {\n        int[] scores = {90, 85};\n        System.out.println(scores[2]);\n    }\n}\n",
+    "output": "Exception in thread \"main\" java.lang.ArrayIndexOutOfBoundsException: Index 2 out of bounds for length 2\n\tat Main.main(Main.java:4)\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "runtime",
+    "expected_line": 4,
+    "expected_column": null
+  },
+  {
+    "case": "assertion",
+    "source": "public class Main {\n    public static void main(String[] args) {\n        int total = 1 + 1;\n        assert total == 3 : \"total was \" + total;\n    }\n}\n",
+    "output": "Picked up JAVA_TOOL_OPTIONS: -XX:ActiveProcessorCount=2 -XX:ParallelGCThreads=2 -XX:ConcGCThreads=1\nPicked up JAVA_TOOL_OPTIONS: -XX:ActiveProcessorCount=2 -XX:ParallelGCThreads=2 -XX:ConcGCThreads=1\nException in thread \"main\" java.lang.AssertionError: total was 2\n\tat Main.main(Main.java:4)\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "assertion",
+    "expected_line": 4,
+    "expected_column": null
+  },
+  {
+    "case": "cannot-find-symbol",
+    "source": "public class Main {\n    public static void main(String[] args) {\n        int total = 5;\n        System.out.println(totl);\n    }\n}\n",
+    "output": "Picked up JAVA_TOOL_OPTIONS: -XX:ActiveProcessorCount=2 -XX:ParallelGCThreads=2 -XX:ConcGCThreads=1\nMain.java:4: error: cannot find symbol\n        System.out.println(totl);\n                           ^\n  symbol:   variable totl\n  location: class Main\n1 error\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "compile",
+    "expected_line": 4,
+    "expected_column": 28
+  },
+  {
+    "case": "class-name",
+    "source": "public class Hello {\n    public static void main(String[] args) {\n        System.out.println(\"hi\");\n    }\n}\n",
+    "output": "Picked up JAVA_TOOL_OPTIONS: -XX:ActiveProcessorCount=2 -XX:ParallelGCThreads=2 -XX:ConcGCThreads=1\nMain.java:1: error: class Hello is public, should be declared in a file named Hello.java\npublic class Hello {\n       ^\n1 error\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "compile",
+    "expected_line": 1,
+    "expected_column": 8
+  },
+  {
+    "case": "incompatible-types",
+    "source": "public class Main {\n    public static void main(String[] args) {\n        int count = \"five\";\n        System.out.println(count);\n    }\n}\n",
+    "output": "Picked up JAVA_TOOL_OPTIONS: -XX:ActiveProcessorCount=2 -XX:ParallelGCThreads=2 -XX:ConcGCThreads=1\nMain.java:3: error: incompatible types: String cannot be converted to int\n        int count = \"five\";\n                    ^\n1 error\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "compile",
+    "expected_line": 3,
+    "expected_column": 21
+  },
+  {
+    "case": "missing-semicolon",
+    "source": "public class Main {\n    public static void main(String[] args) {\n        System.out.println(\"hi\")\n    }\n}\n",
+    "output": "Picked up JAVA_TOOL_OPTIONS: -XX:ActiveProcessorCount=2 -XX:ParallelGCThreads=2 -XX:ConcGCThreads=1\nMain.java:3: error: ';' expected\n        System.out.println(\"hi\")\n                                ^\n1 error\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "syntax",
+    "expected_line": 3,
+    "expected_column": 33
+  }
+]

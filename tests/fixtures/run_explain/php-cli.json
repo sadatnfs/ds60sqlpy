@@ -1,0 +1,68 @@
+[
+  {
+    "case": "assertion",
+    "source": "<?php\n$total = 1 + 1;\nassert($total === 3, \"total was $total\");\n",
+    "output": "No syntax errors detected in main.php\nFatal error: Uncaught AssertionError: total was 2 in /tmp/job-xxxxxxxx/main.php:3\nStack trace:\n#0 /tmp/job-xxxxxxxx/main.php(3): assert(false, 'total was 2')\n#1 {main}\n  thrown in /tmp/job-xxxxxxxx/main.php on line 3\n",
+    "returncode": 255,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "assertion",
+    "expected_line": 3,
+    "expected_column": null
+  },
+  {
+    "case": "assertion-shown",
+    "source": "<?php\n$total = 1 + 1;\nassert($total === 3, \"total was $total\");\n",
+    "output": "Fatal error: Uncaught AssertionError: total was 2 in /tmp/job-xxxxxxxx/main.php:3\nStack trace:\n#0 /tmp/job-xxxxxxxx/main.php(3): assert(false, 'total was 2')\n#1 {main}\n  thrown in /tmp/job-xxxxxxxx/main.php on line 3\n",
+    "returncode": 255,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "assertion",
+    "expected_line": 3,
+    "expected_column": null
+  },
+  {
+    "case": "parse-error",
+    "source": "<?php\necho \"hi\"\necho \"there\";\n",
+    "output": "Parse error: syntax error, unexpected token \"echo\", expecting \",\" or \";\" in main.php on line 3\nErrors parsing main.php\n",
+    "returncode": 255,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "syntax",
+    "expected_line": 3,
+    "expected_column": null
+  },
+  {
+    "case": "parse-error-shown",
+    "source": "<?php\necho \"hi\"\necho \"there\";\n",
+    "output": "Parse error: syntax error, unexpected token \"echo\", expecting \",\" or \";\" in /tmp/job-xxxxxxxx/main.php on line 3\n",
+    "returncode": 255,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "syntax",
+    "expected_line": 3,
+    "expected_column": null
+  },
+  {
+    "case": "type-error",
+    "source": "<?php\ndeclare(strict_types=1);\n\nfunction add(int $a, int $b): int\n{\n    return $a + $b;\n}\n\necho add(\"1\", 2);\n",
+    "output": "No syntax errors detected in main.php\nFatal error: Uncaught TypeError: add(): Argument #1 ($a) must be of type int, string given, called in /tmp/job-xxxxxxxx/main.php on line 9 and defined in /tmp/job-xxxxxxxx/main.php:4\nStack trace:\n#0 /tmp/job-xxxxxxxx/main.php(9): add('1', 2)\n#1 {main}\n  thrown in /tmp/job-xxxxxxxx/main.php on line 4\n",
+    "returncode": 255,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "runtime",
+    "expected_line": 9,
+    "expected_column": null
+  },
+  {
+    "case": "undefined-function",
+    "source": "<?php\n$total = 5;\nshow_total($total);\n",
+    "output": "No syntax errors detected in main.php\nFatal error: Uncaught Error: Call to undefined function show_total() in /tmp/job-xxxxxxxx/main.php:3\nStack trace:\n#0 {main}\n  thrown in /tmp/job-xxxxxxxx/main.php on line 3\n",
+    "returncode": 255,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "runtime",
+    "expected_line": 3,
+    "expected_column": null
+  }
+]

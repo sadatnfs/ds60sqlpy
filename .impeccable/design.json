@@ -1,0 +1,834 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-19T04:13:04+00:00",
+  "title": "Design System: DS60 Classroom",
+  "extensions": {
+    "colorMeta": {
+      "house-ultramarine": {
+        "role": "primary",
+        "displayName": "House Ultramarine",
+        "canonical": "#2f3fb3",
+        "tonalRamp": [
+          "oklch(15.0% 0.183 270.5)",
+          "oklch(26.4% 0.183 270.5)",
+          "oklch(37.9% 0.183 270.5)",
+          "oklch(49.3% 0.183 270.5)",
+          "oklch(60.7% 0.183 270.5)",
+          "oklch(72.1% 0.183 270.5)",
+          "oklch(83.6% 0.183 270.5)",
+          "oklch(95.0% 0.183 270.5)"
+        ]
+      },
+      "ultramarine-wash": {
+        "role": "primary",
+        "displayName": "Ultramarine Wash",
+        "canonical": "#ebedfb",
+        "tonalRamp": [
+          "oklch(15.0% 0.019 279.5)",
+          "oklch(26.4% 0.019 279.5)",
+          "oklch(37.9% 0.019 279.5)",
+          "oklch(49.3% 0.019 279.5)",
+          "oklch(60.7% 0.019 279.5)",
+          "oklch(72.1% 0.019 279.5)",
+          "oklch(83.6% 0.019 279.5)",
+          "oklch(95.0% 0.019 279.5)"
+        ]
+      },
+      "light-table": {
+        "role": "neutral",
+        "displayName": "Light Table",
+        "canonical": "#f3f4f7",
+        "tonalRamp": [
+          "oklch(15.0% 0.004 271.4)",
+          "oklch(26.4% 0.004 271.4)",
+          "oklch(37.9% 0.004 271.4)",
+          "oklch(49.3% 0.004 271.4)",
+          "oklch(60.7% 0.004 271.4)",
+          "oklch(72.1% 0.004 271.4)",
+          "oklch(83.6% 0.004 271.4)",
+          "oklch(95.0% 0.004 271.4)"
+        ]
+      },
+      "page-white": {
+        "role": "neutral",
+        "displayName": "Page White",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "oklch(15.0% 0.000 89.9)",
+          "oklch(26.4% 0.000 89.9)",
+          "oklch(37.9% 0.000 89.9)",
+          "oklch(49.3% 0.000 89.9)",
+          "oklch(60.7% 0.000 89.9)",
+          "oklch(72.1% 0.000 89.9)",
+          "oklch(83.6% 0.000 89.9)",
+          "oklch(95.0% 0.000 89.9)"
+        ]
+      },
+      "margin-grey": {
+        "role": "neutral",
+        "displayName": "Margin Grey",
+        "canonical": "#eef0f4",
+        "tonalRamp": [
+          "oklch(15.0% 0.006 264.5)",
+          "oklch(26.4% 0.006 264.5)",
+          "oklch(37.9% 0.006 264.5)",
+          "oklch(49.3% 0.006 264.5)",
+          "oklch(60.7% 0.006 264.5)",
+          "oklch(72.1% 0.006 264.5)",
+          "oklch(83.6% 0.006 264.5)",
+          "oklch(95.0% 0.006 264.5)"
+        ]
+      },
+      "press-black": {
+        "role": "neutral",
+        "displayName": "Press Black",
+        "canonical": "#15181e",
+        "tonalRamp": [
+          "oklch(15.0% 0.013 264.2)",
+          "oklch(26.4% 0.013 264.2)",
+          "oklch(37.9% 0.013 264.2)",
+          "oklch(49.3% 0.013 264.2)",
+          "oklch(60.7% 0.013 264.2)",
+          "oklch(72.1% 0.013 264.2)",
+          "oklch(83.6% 0.013 264.2)",
+          "oklch(95.0% 0.013 264.2)"
+        ]
+      },
+      "graphite": {
+        "role": "neutral",
+        "displayName": "Graphite",
+        "canonical": "#535a68",
+        "tonalRamp": [
+          "oklch(15.0% 0.024 264.3)",
+          "oklch(26.4% 0.024 264.3)",
+          "oklch(37.9% 0.024 264.3)",
+          "oklch(49.3% 0.024 264.3)",
+          "oklch(60.7% 0.024 264.3)",
+          "oklch(72.1% 0.024 264.3)",
+          "oklch(83.6% 0.024 264.3)",
+          "oklch(95.0% 0.024 264.3)"
+        ]
+      },
+      "hairline": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "#d9dde4",
+        "tonalRamp": [
+          "oklch(15.0% 0.010 261.8)",
+          "oklch(26.4% 0.010 261.8)",
+          "oklch(37.9% 0.010 261.8)",
+          "oklch(49.3% 0.010 261.8)",
+          "oklch(60.7% 0.010 261.8)",
+          "oklch(72.1% 0.010 261.8)",
+          "oklch(83.6% 0.010 261.8)",
+          "oklch(95.0% 0.010 261.8)"
+        ]
+      },
+      "rule-grey": {
+        "role": "neutral",
+        "displayName": "Rule Grey",
+        "canonical": "#c3c8d2",
+        "tonalRamp": [
+          "oklch(15.0% 0.015 264.5)",
+          "oklch(26.4% 0.015 264.5)",
+          "oklch(37.9% 0.015 264.5)",
+          "oklch(49.3% 0.015 264.5)",
+          "oklch(60.7% 0.015 264.5)",
+          "oklch(72.1% 0.015 264.5)",
+          "oklch(83.6% 0.015 264.5)",
+          "oklch(95.0% 0.015 264.5)"
+        ]
+      },
+      "listing-slate": {
+        "role": "neutral",
+        "displayName": "Listing Slate",
+        "canonical": "#111d32",
+        "tonalRamp": [
+          "oklch(15.0% 0.044 261.0)",
+          "oklch(26.4% 0.044 261.0)",
+          "oklch(37.9% 0.044 261.0)",
+          "oklch(49.3% 0.044 261.0)",
+          "oklch(60.7% 0.044 261.0)",
+          "oklch(72.1% 0.044 261.0)",
+          "oklch(83.6% 0.044 261.0)",
+          "oklch(95.0% 0.044 261.0)"
+        ]
+      },
+      "listing-ink": {
+        "role": "neutral",
+        "displayName": "Listing Ink",
+        "canonical": "#e8efff",
+        "tonalRamp": [
+          "oklch(15.0% 0.023 266.9)",
+          "oklch(26.4% 0.023 266.9)",
+          "oklch(37.9% 0.023 266.9)",
+          "oklch(49.3% 0.023 266.9)",
+          "oklch(60.7% 0.023 266.9)",
+          "oklch(72.1% 0.023 266.9)",
+          "oklch(83.6% 0.023 266.9)",
+          "oklch(95.0% 0.023 266.9)"
+        ]
+      },
+      "listing-rule": {
+        "role": "neutral",
+        "displayName": "Listing Rule",
+        "canonical": "#2a3954",
+        "tonalRamp": [
+          "oklch(15.0% 0.052 261.7)",
+          "oklch(26.4% 0.052 261.7)",
+          "oklch(37.9% 0.052 261.7)",
+          "oklch(49.3% 0.052 261.7)",
+          "oklch(60.7% 0.052 261.7)",
+          "oklch(72.1% 0.052 261.7)",
+          "oklch(83.6% 0.052 261.7)",
+          "oklch(95.0% 0.052 261.7)"
+        ]
+      },
+      "proof-red": {
+        "role": "tertiary",
+        "displayName": "Proof Red",
+        "canonical": "#b4232f",
+        "tonalRamp": [
+          "oklch(15.0% 0.180 22.9)",
+          "oklch(26.4% 0.180 22.9)",
+          "oklch(37.9% 0.180 22.9)",
+          "oklch(49.3% 0.180 22.9)",
+          "oklch(60.7% 0.180 22.9)",
+          "oklch(72.1% 0.180 22.9)",
+          "oklch(83.6% 0.180 22.9)",
+          "oklch(95.0% 0.180 22.9)"
+        ]
+      },
+      "proof-red-wash": {
+        "role": "tertiary",
+        "displayName": "Proof Red Wash",
+        "canonical": "#fdeced",
+        "tonalRamp": [
+          "oklch(15.0% 0.019 13.4)",
+          "oklch(26.4% 0.019 13.4)",
+          "oklch(37.9% 0.019 13.4)",
+          "oklch(49.3% 0.019 13.4)",
+          "oklch(60.7% 0.019 13.4)",
+          "oklch(72.1% 0.019 13.4)",
+          "oklch(83.6% 0.019 13.4)",
+          "oklch(95.0% 0.019 13.4)"
+        ]
+      },
+      "pass-green": {
+        "role": "tertiary",
+        "displayName": "Pass Green",
+        "canonical": "#1f7a3a",
+        "tonalRamp": [
+          "oklch(15.0% 0.129 148.9)",
+          "oklch(26.4% 0.129 148.9)",
+          "oklch(37.9% 0.129 148.9)",
+          "oklch(49.3% 0.129 148.9)",
+          "oklch(60.7% 0.129 148.9)",
+          "oklch(72.1% 0.129 148.9)",
+          "oklch(83.6% 0.129 148.9)",
+          "oklch(95.0% 0.129 148.9)"
+        ]
+      },
+      "pass-green-wash": {
+        "role": "tertiary",
+        "displayName": "Pass Green Wash",
+        "canonical": "#e7f5ec",
+        "tonalRamp": [
+          "oklch(15.0% 0.019 157.9)",
+          "oklch(26.4% 0.019 157.9)",
+          "oklch(37.9% 0.019 157.9)",
+          "oklch(49.3% 0.019 157.9)",
+          "oklch(60.7% 0.019 157.9)",
+          "oklch(72.1% 0.019 157.9)",
+          "oklch(83.6% 0.019 157.9)",
+          "oklch(95.0% 0.019 157.9)"
+        ]
+      },
+      "caution-amber": {
+        "role": "tertiary",
+        "displayName": "Caution Amber",
+        "canonical": "#c27c0e",
+        "tonalRamp": [
+          "oklch(15.0% 0.137 69.5)",
+          "oklch(26.4% 0.137 69.5)",
+          "oklch(37.9% 0.137 69.5)",
+          "oklch(49.3% 0.137 69.5)",
+          "oklch(60.7% 0.137 69.5)",
+          "oklch(72.1% 0.137 69.5)",
+          "oklch(83.6% 0.137 69.5)",
+          "oklch(95.0% 0.137 69.5)"
+        ]
+      },
+      "proof-red-deep": {
+        "role": "tertiary",
+        "displayName": "Proof Red Deep",
+        "canonical": "#9b1d28",
+        "tonalRamp": [
+          "oklch(15.0% 0.161 22.6)",
+          "oklch(26.4% 0.161 22.6)",
+          "oklch(37.9% 0.161 22.6)",
+          "oklch(49.3% 0.161 22.6)",
+          "oklch(60.7% 0.161 22.6)",
+          "oklch(72.1% 0.161 22.6)",
+          "oklch(83.6% 0.161 22.6)",
+          "oklch(95.0% 0.161 22.6)"
+        ]
+      },
+      "listing-deep": {
+        "role": "neutral",
+        "displayName": "Listing Deep",
+        "canonical": "#0d1626",
+        "tonalRamp": [
+          "oklch(15.0% 0.035 261.4)",
+          "oklch(26.4% 0.035 261.4)",
+          "oklch(37.9% 0.035 261.4)",
+          "oklch(49.3% 0.035 261.4)",
+          "oklch(60.7% 0.035 261.4)",
+          "oklch(72.1% 0.035 261.4)",
+          "oklch(83.6% 0.035 261.4)",
+          "oklch(95.0% 0.035 261.4)"
+        ]
+      },
+      "listing-panel": {
+        "role": "neutral",
+        "displayName": "Listing Panel",
+        "canonical": "#182540",
+        "tonalRamp": [
+          "oklch(15.0% 0.054 263.7)",
+          "oklch(26.4% 0.054 263.7)",
+          "oklch(37.9% 0.054 263.7)",
+          "oklch(49.3% 0.054 263.7)",
+          "oklch(60.7% 0.054 263.7)",
+          "oklch(72.1% 0.054 263.7)",
+          "oklch(83.6% 0.054 263.7)",
+          "oklch(95.0% 0.054 263.7)"
+        ]
+      },
+      "listing-selection": {
+        "role": "neutral",
+        "displayName": "Listing Selection",
+        "canonical": "#4a6aa880",
+        "tonalRamp": [
+          "oklch(15.0% 0.105 262.6)",
+          "oklch(26.4% 0.105 262.6)",
+          "oklch(37.9% 0.105 262.6)",
+          "oklch(49.3% 0.105 262.6)",
+          "oklch(60.7% 0.105 262.6)",
+          "oklch(72.1% 0.105 262.6)",
+          "oklch(83.6% 0.105 262.6)",
+          "oklch(95.0% 0.105 262.6)"
+        ]
+      },
+      "listing-selection-match": {
+        "role": "neutral",
+        "displayName": "Listing Selection Match",
+        "canonical": "#4a6aa84d",
+        "tonalRamp": [
+          "oklch(15.0% 0.105 262.6)",
+          "oklch(26.4% 0.105 262.6)",
+          "oklch(37.9% 0.105 262.6)",
+          "oklch(49.3% 0.105 262.6)",
+          "oklch(60.7% 0.105 262.6)",
+          "oklch(72.1% 0.105 262.6)",
+          "oklch(83.6% 0.105 262.6)",
+          "oklch(95.0% 0.105 262.6)"
+        ]
+      },
+      "listing-search": {
+        "role": "neutral",
+        "displayName": "Listing Search",
+        "canonical": "#ffd39b40",
+        "tonalRamp": [
+          "oklch(15.0% 0.087 73.0)",
+          "oklch(26.4% 0.087 73.0)",
+          "oklch(37.9% 0.087 73.0)",
+          "oklch(49.3% 0.087 73.0)",
+          "oklch(60.7% 0.087 73.0)",
+          "oklch(72.1% 0.087 73.0)",
+          "oklch(83.6% 0.087 73.0)",
+          "oklch(95.0% 0.087 73.0)"
+        ]
+      },
+      "listing-search-current": {
+        "role": "neutral",
+        "displayName": "Listing Search Current",
+        "canonical": "#ffd39b80",
+        "tonalRamp": [
+          "oklch(15.0% 0.087 73.0)",
+          "oklch(26.4% 0.087 73.0)",
+          "oklch(37.9% 0.087 73.0)",
+          "oklch(49.3% 0.087 73.0)",
+          "oklch(60.7% 0.087 73.0)",
+          "oklch(72.1% 0.087 73.0)",
+          "oklch(83.6% 0.087 73.0)",
+          "oklch(95.0% 0.087 73.0)"
+        ]
+      },
+      "syntax-keyword": {
+        "role": "neutral",
+        "displayName": "Syntax Keyword",
+        "canonical": "#cbb5ff",
+        "tonalRamp": [
+          "oklch(15.0% 0.105 297.7)",
+          "oklch(26.4% 0.105 297.7)",
+          "oklch(37.9% 0.105 297.7)",
+          "oklch(49.3% 0.105 297.7)",
+          "oklch(60.7% 0.105 297.7)",
+          "oklch(72.1% 0.105 297.7)",
+          "oklch(83.6% 0.105 297.7)",
+          "oklch(95.0% 0.105 297.7)"
+        ]
+      },
+      "syntax-string": {
+        "role": "neutral",
+        "displayName": "Syntax String",
+        "canonical": "#a9e6b1",
+        "tonalRamp": [
+          "oklch(15.0% 0.096 148.1)",
+          "oklch(26.4% 0.096 148.1)",
+          "oklch(37.9% 0.096 148.1)",
+          "oklch(49.3% 0.096 148.1)",
+          "oklch(60.7% 0.096 148.1)",
+          "oklch(72.1% 0.096 148.1)",
+          "oklch(83.6% 0.096 148.1)",
+          "oklch(95.0% 0.096 148.1)"
+        ]
+      },
+      "syntax-number": {
+        "role": "neutral",
+        "displayName": "Syntax Number",
+        "canonical": "#ffd39b",
+        "tonalRamp": [
+          "oklch(15.0% 0.087 73.0)",
+          "oklch(26.4% 0.087 73.0)",
+          "oklch(37.9% 0.087 73.0)",
+          "oklch(49.3% 0.087 73.0)",
+          "oklch(60.7% 0.087 73.0)",
+          "oklch(72.1% 0.087 73.0)",
+          "oklch(83.6% 0.087 73.0)",
+          "oklch(95.0% 0.087 73.0)"
+        ]
+      },
+      "syntax-comment": {
+        "role": "neutral",
+        "displayName": "Syntax Comment",
+        "canonical": "#a4b3ca",
+        "tonalRamp": [
+          "oklch(15.0% 0.037 258.9)",
+          "oklch(26.4% 0.037 258.9)",
+          "oklch(37.9% 0.037 258.9)",
+          "oklch(49.3% 0.037 258.9)",
+          "oklch(60.7% 0.037 258.9)",
+          "oklch(72.1% 0.037 258.9)",
+          "oklch(83.6% 0.037 258.9)",
+          "oklch(95.0% 0.037 258.9)"
+        ]
+      },
+      "syntax-function": {
+        "role": "neutral",
+        "displayName": "Syntax Function",
+        "canonical": "#91d8fc",
+        "tonalRamp": [
+          "oklch(15.0% 0.087 231.2)",
+          "oklch(26.4% 0.087 231.2)",
+          "oklch(37.9% 0.087 231.2)",
+          "oklch(49.3% 0.087 231.2)",
+          "oklch(60.7% 0.087 231.2)",
+          "oklch(72.1% 0.087 231.2)",
+          "oklch(83.6% 0.087 231.2)",
+          "oklch(95.0% 0.087 231.2)"
+        ]
+      },
+      "syntax-type": {
+        "role": "neutral",
+        "displayName": "Syntax Type",
+        "canonical": "#f8b6d5",
+        "tonalRamp": [
+          "oklch(15.0% 0.086 349.3)",
+          "oklch(26.4% 0.086 349.3)",
+          "oklch(37.9% 0.086 349.3)",
+          "oklch(49.3% 0.086 349.3)",
+          "oklch(60.7% 0.086 349.3)",
+          "oklch(72.1% 0.086 349.3)",
+          "oklch(83.6% 0.086 349.3)",
+          "oklch(95.0% 0.086 349.3)"
+        ]
+      },
+      "syntax-property": {
+        "role": "neutral",
+        "displayName": "Syntax Property",
+        "canonical": "#f7df96",
+        "tonalRamp": [
+          "oklch(15.0% 0.095 92.0)",
+          "oklch(26.4% 0.095 92.0)",
+          "oklch(37.9% 0.095 92.0)",
+          "oklch(49.3% 0.095 92.0)",
+          "oklch(60.7% 0.095 92.0)",
+          "oklch(72.1% 0.095 92.0)",
+          "oklch(83.6% 0.095 92.0)",
+          "oklch(95.0% 0.095 92.0)"
+        ]
+      },
+      "syntax-operator": {
+        "role": "neutral",
+        "displayName": "Syntax Operator",
+        "canonical": "#b6e4f5",
+        "tonalRamp": [
+          "oklch(15.0% 0.053 222.4)",
+          "oklch(26.4% 0.053 222.4)",
+          "oklch(37.9% 0.053 222.4)",
+          "oklch(49.3% 0.053 222.4)",
+          "oklch(60.7% 0.053 222.4)",
+          "oklch(72.1% 0.053 222.4)",
+          "oklch(83.6% 0.053 222.4)",
+          "oklch(95.0% 0.053 222.4)"
+        ]
+      },
+      "syntax-punctuation": {
+        "role": "neutral",
+        "displayName": "Syntax Punctuation",
+        "canonical": "#c5cfe0",
+        "tonalRamp": [
+          "oklch(15.0% 0.026 261.1)",
+          "oklch(26.4% 0.026 261.1)",
+          "oklch(37.9% 0.026 261.1)",
+          "oklch(49.3% 0.026 261.1)",
+          "oklch(60.7% 0.026 261.1)",
+          "oklch(72.1% 0.026 261.1)",
+          "oklch(83.6% 0.026 261.1)",
+          "oklch(95.0% 0.026 261.1)"
+        ]
+      },
+      "syntax-invalid": {
+        "role": "neutral",
+        "displayName": "Syntax Invalid",
+        "canonical": "#ffadb3",
+        "tonalRamp": [
+          "oklch(15.0% 0.097 14.6)",
+          "oklch(26.4% 0.097 14.6)",
+          "oklch(37.9% 0.097 14.6)",
+          "oklch(49.3% 0.097 14.6)",
+          "oklch(60.7% 0.097 14.6)",
+          "oklch(72.1% 0.097 14.6)",
+          "oklch(83.6% 0.097 14.6)",
+          "oklch(95.0% 0.097 14.6)"
+        ]
+      },
+      "ink-start": {
+        "role": "secondary",
+        "displayName": "Start Blue",
+        "canonical": "#1d4fb8",
+        "tonalRamp": [
+          "oklch(15.0% 0.175 262.6)",
+          "oklch(26.4% 0.175 262.6)",
+          "oklch(37.9% 0.175 262.6)",
+          "oklch(49.3% 0.175 262.6)",
+          "oklch(60.7% 0.175 262.6)",
+          "oklch(72.1% 0.175 262.6)",
+          "oklch(83.6% 0.175 262.6)",
+          "oklch(95.0% 0.175 262.6)"
+        ]
+      },
+      "ink-analysis": {
+        "role": "secondary",
+        "displayName": "Analysis Teal",
+        "canonical": "#0e6f66",
+        "tonalRamp": [
+          "oklch(15.0% 0.083 184.8)",
+          "oklch(26.4% 0.083 184.8)",
+          "oklch(37.9% 0.083 184.8)",
+          "oklch(49.3% 0.083 184.8)",
+          "oklch(60.7% 0.083 184.8)",
+          "oklch(72.1% 0.083 184.8)",
+          "oklch(83.6% 0.083 184.8)",
+          "oklch(95.0% 0.083 184.8)"
+        ]
+      },
+      "ink-statistics": {
+        "role": "secondary",
+        "displayName": "Statistics Violet",
+        "canonical": "#6a3d9a",
+        "tonalRamp": [
+          "oklch(15.0% 0.148 303.4)",
+          "oklch(26.4% 0.148 303.4)",
+          "oklch(37.9% 0.148 303.4)",
+          "oklch(49.3% 0.148 303.4)",
+          "oklch(60.7% 0.148 303.4)",
+          "oklch(72.1% 0.148 303.4)",
+          "oklch(83.6% 0.148 303.4)",
+          "oklch(95.0% 0.148 303.4)"
+        ]
+      },
+      "ink-ml-ai": {
+        "role": "secondary",
+        "displayName": "ML Magenta",
+        "canonical": "#9b2463",
+        "tonalRamp": [
+          "oklch(15.0% 0.164 353.1)",
+          "oklch(26.4% 0.164 353.1)",
+          "oklch(37.9% 0.164 353.1)",
+          "oklch(49.3% 0.164 353.1)",
+          "oklch(60.7% 0.164 353.1)",
+          "oklch(72.1% 0.164 353.1)",
+          "oklch(83.6% 0.164 353.1)",
+          "oklch(95.0% 0.164 353.1)"
+        ]
+      },
+      "ink-data-engineering": {
+        "role": "secondary",
+        "displayName": "Engineering Rust",
+        "canonical": "#9a4510",
+        "tonalRamp": [
+          "oklch(15.0% 0.129 46.8)",
+          "oklch(26.4% 0.129 46.8)",
+          "oklch(37.9% 0.129 46.8)",
+          "oklch(49.3% 0.129 46.8)",
+          "oklch(60.7% 0.129 46.8)",
+          "oklch(72.1% 0.129 46.8)",
+          "oklch(83.6% 0.129 46.8)",
+          "oklch(95.0% 0.129 46.8)"
+        ]
+      },
+      "ink-languages": {
+        "role": "secondary",
+        "displayName": "Languages Green",
+        "canonical": "#2f6a1c",
+        "tonalRamp": [
+          "oklch(15.0% 0.126 139.2)",
+          "oklch(26.4% 0.126 139.2)",
+          "oklch(37.9% 0.126 139.2)",
+          "oklch(49.3% 0.126 139.2)",
+          "oklch(60.7% 0.126 139.2)",
+          "oklch(72.1% 0.126 139.2)",
+          "oklch(83.6% 0.126 139.2)",
+          "oklch(95.0% 0.126 139.2)"
+        ]
+      },
+      "ink-infrastructure": {
+        "role": "secondary",
+        "displayName": "Infrastructure Slate Blue",
+        "canonical": "#3a4a66",
+        "tonalRamp": [
+          "oklch(15.0% 0.052 261.3)",
+          "oklch(26.4% 0.052 261.3)",
+          "oklch(37.9% 0.052 261.3)",
+          "oklch(49.3% 0.052 261.3)",
+          "oklch(60.7% 0.052 261.3)",
+          "oklch(72.1% 0.052 261.3)",
+          "oklch(83.6% 0.052 261.3)",
+          "oklch(95.0% 0.052 261.3)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "The catalog title on the home page only; display-compact below 800px."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Section titles such as the contents heading."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Contents part headings and lesson titles in lists."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Interface prose and descriptions."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Buttons, tabs, badges and form labels."
+      },
+      "chapter": {
+        "displayName": "Chapter",
+        "purpose": "Lesson guides in Latin Modern at --reading-size (1.15rem; 1.0625rem below 800px; 1.25rem in reading focus)."
+      },
+      "folio": {
+        "displayName": "Folio",
+        "purpose": "A lesson's tabular position number in house ultramarine."
+      },
+      "listing": {
+        "displayName": "Listing",
+        "purpose": "Code, run results and inline code."
+      },
+      "display-compact": {
+        "displayName": "Display Compact",
+        "purpose": "The catalog title below 800px."
+      },
+      "lead": {
+        "displayName": "Lead",
+        "purpose": "The catalog introduction and the search palette's query field."
+      },
+      "chapter-section": {
+        "displayName": "Chapter Section",
+        "purpose": "Guide sections, relative to the reading size, with a hairline above."
+      }
+    },
+    "shadows": [
+      {
+        "name": "page",
+        "value": "0 1px 2px #15181e0f, 0 8px 24px -12px #15181e29",
+        "purpose": "Resting panels and the contents row under the pointer."
+      },
+      {
+        "name": "lift",
+        "value": "0 2px 4px #15181e14, 0 18px 40px -18px #15181e40",
+        "purpose": "Floating surfaces only, such as the search palette."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out-expo",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "State transitions on controls (0.15s) and the result ink-in (0.45s)."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "compact",
+        "value": "800px"
+      },
+      {
+        "name": "spread-sticky",
+        "value": "1100px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Default Button",
+      "kind": "button",
+      "refersTo": "button-default",
+      "description": "Every ordinary action: page white, rule-grey border, ultramarine wash on hover.",
+      "html": "<button class=\"ds-btn\">Check runtime</button>",
+      "css": ".ds-btn { font: 600 0.875rem/1.3 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; min-height: 40px; padding: 8px 14px; color: #15181e; background: #ffffff; border: 1px solid #c3c8d2; border-radius: 4px; cursor: pointer; transition: background-color .15s cubic-bezier(0.16,1,0.3,1), border-color .15s cubic-bezier(0.16,1,0.3,1); } .ds-btn:hover { background: #ebedfb; border-color: #2f3fb3; } .ds-btn:focus-visible { outline: 2px solid #2f3fb3; outline-offset: 2px; } .ds-btn:active { box-shadow: inset 0 1px 2px #15181e26; }"
+    },
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one main action in a region, such as Run code or Load course tables.",
+      "html": "<button class=\"ds-btn-primary\">Run code</button>",
+      "css": ".ds-btn-primary { font: 600 0.875rem/1.3 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; min-height: 40px; padding: 8px 14px; color: #ffffff; background: #2f3fb3; border: 1px solid #2f3fb3; border-radius: 4px; cursor: pointer; } .ds-btn-primary:hover { filter: brightness(0.92); } .ds-btn-primary:focus-visible { outline: 2px solid #2f3fb3; outline-offset: 2px; }"
+    },
+    {
+      "name": "Search Field",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "Text and search inputs: page white, rule-grey border, graphite placeholder.",
+      "html": "<input class=\"ds-input\" type=\"search\" placeholder=\"Topic or lesson ID\" aria-label=\"Find in this path\">",
+      "css": ".ds-input { font: 400 0.875rem/1.3 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; min-height: 40px; padding: 8px 10px; color: #15181e; background: #ffffff; border: 1px solid #c3c8d2; border-radius: 4px; } .ds-input::placeholder { color: #535a68; } .ds-input:hover { border-color: #535a68; } .ds-input:focus-visible { outline: 2px solid #2f3fb3; outline-offset: 2px; }"
+    },
+    {
+      "name": "Thumb Tab",
+      "kind": "chip",
+      "refersTo": "thumb-tab",
+      "description": "Subject-area index tab with a spot-ink swatch and a tabular count; selected tabs fill with the ink.",
+      "html": "<span class=\"ds-tabs\"><button class=\"ds-thumb\" aria-pressed=\"true\">Statistics <small>6</small></button><button class=\"ds-thumb\" aria-pressed=\"false\">Languages <small>14</small></button></span>",
+      "css": ".ds-tabs { display: inline-flex; gap: 6px; } .ds-thumb { --ink: #6a3d9a; display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 6px 12px; font: 600 0.8125rem/1.3 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #15181e; background: #ffffff; border: 1px solid #d9dde4; border-radius: 4px; cursor: pointer; } .ds-thumb + .ds-thumb { --ink: #2f6a1c; } .ds-thumb::before { content: ''; width: 9px; height: 9px; border-radius: 2px; background: var(--ink); } .ds-thumb small { font-weight: 500; color: #535a68; font-variant-numeric: tabular-nums; } .ds-thumb:hover { border-color: var(--ink); } .ds-thumb[aria-pressed='true'] { color: #ffffff; background: var(--ink); border-color: var(--ink); } .ds-thumb[aria-pressed='true']::before { background: currentColor; } .ds-thumb[aria-pressed='true'] small { color: inherit; opacity: .85; } .ds-thumb:focus-visible { outline: 2px solid #2f3fb3; outline-offset: 2px; }"
+    },
+    {
+      "name": "Lesson Badge",
+      "kind": "chip",
+      "refersTo": "badge",
+      "description": "Subject, level, kind and study-time labels in the chapter opener.",
+      "html": "<span class=\"ds-badge\">intermediate</span>",
+      "css": ".ds-badge { display: inline-block; padding: 2px 8px; font: 600 0.75rem/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #535a68; background: #ffffff; border: 1px solid #d9dde4; border-radius: 4px; }"
+    },
+    {
+      "name": "Chapter Opener",
+      "kind": "custom",
+      "refersTo": "folio",
+      "description": "A lesson's tabular folio in house ultramarine beside its title.",
+      "html": "<div class=\"ds-opener\"><span class=\"ds-folio\">33</span><h1>Pattern Matching: LIKE, Regular Expressions, and Full-Text Search</h1></div>",
+      "css": ".ds-opener { display: grid; grid-template-columns: auto 1fr; gap: 0 20px; align-items: start; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #15181e; } .ds-folio { font-size: 3rem; line-height: .95; font-weight: 760; letter-spacing: -0.04em; color: #2f3fb3; font-variant-numeric: tabular-nums; } .ds-opener h1 { margin: 0; font-size: 1.75rem; line-height: 1.15; font-weight: 720; letter-spacing: -0.025em; }"
+    },
+    {
+      "name": "Result Console",
+      "kind": "custom",
+      "refersTo": "result-console",
+      "description": "Run output printed on listing slate directly under the run controls; unwrapped so tables keep their columns.",
+      "html": "<div class=\"ds-result\"><p class=\"ds-result-status\">Exit 0 · 0.31 seconds</p><pre class=\"ds-log\"> customer_id |  full_name\n-------------+------------\n           1 | Customer 1\n           2 | Customer 2</pre></div>",
+      "css": ".ds-result { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; } .ds-result-status { margin: 0 0 8px; font-size: .8125rem; color: #1f7a3a; } .ds-result-status::before { content: ''; display: inline-block; width: 8px; height: 8px; margin-right: 8px; border-radius: 50%; background: #1f7a3a; } .ds-log { margin: 0; max-height: 420px; overflow: auto; white-space: pre; padding: 12px 14px; font: .8125rem/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: #e8efff; background: #111d32; border: 1px solid #2a3954; border-radius: 8px; }"
+    },
+    {
+      "name": "Course Database Panel",
+      "kind": "custom",
+      "refersTo": "panel",
+      "description": "Status slip at the top of the code page for database lessons, with one primary action at most.",
+      "html": "<section class=\"ds-db\" data-state=\"missing\"><h3>Course database</h3><p>The course training tables are not loaded yet. They load automatically the first time you run code here, or load them now.</p><button class=\"ds-db-action\">Load course tables</button></section>",
+      "css": ".ds-db { padding: 12px 14px; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #15181e; background: #eef0f4; border: 1px solid #d9dde4; border-radius: 8px; } .ds-db h3 { display: flex; align-items: center; gap: 8px; margin: 0 0 4px; font-size: .875rem; } .ds-db h3::before { content: ''; width: 9px; height: 9px; border-radius: 50%; background: #c27c0e; } .ds-db p { margin: 0 0 8px; font-size: .8125rem; line-height: 1.5; } .ds-db-action { min-height: 34px; padding: 5px 12px; font: 600 .8125rem/1.3 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #ffffff; background: #2f3fb3; border: 1px solid #2f3fb3; border-radius: 4px; cursor: pointer; } .ds-db-action:hover { filter: brightness(.92); } .ds-db-action:focus-visible { outline: 2px solid #2f3fb3; outline-offset: 2px; }"
+    },
+    {
+      "name": "Exercises Panel",
+      "kind": "custom",
+      "refersTo": "panel",
+      "description": "Problem set on the code page: numbered problem index, serif problem text, one-at-a-time hints and a worked solution behind an explicit choice.",
+      "html": "<section class=\"ds-ex\"><div class=\"ds-ex-head\"><h3>Exercises</h3><p>1 of 6 solved</p><button class=\"ds-ex-quiet\">Hide</button></div><div class=\"ds-ex-body\"><ol class=\"ds-ex-index\"><li><button class=\"ds-ex-step\" data-state=\"solved\">1</button></li><li><button class=\"ds-ex-step\" aria-current=\"step\">2</button></li><li><button class=\"ds-ex-step\">3</button></li></ol><h4>Exercise 2: Query writing</h4><p class=\"ds-ex-text\">Find emails that match the course's lowercase example.com pattern.</p><dl class=\"ds-ex-facts\"><dt>Expected result</dt><dd>Only matching non-null email rows, in ID order.</dd></dl><div class=\"ds-ex-hint\"><span>Hint 1</span><p>Anchor both ends and escape the literal dot.</p></div><div class=\"ds-ex-actions\"><button>Show the next hint (2 of 2)</button><button>Show the solution</button><button>Mark as solved</button></div></div></section>",
+      "css": ".ds-ex { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #15181e; background: #ffffff; border: 1px solid #d9dde4; border-radius: 8px; } .ds-ex-head { display: flex; align-items: center; gap: 10px; padding: 6px 6px 6px 14px; background: #eef0f4; border-bottom: 1px solid #d9dde4; border-radius: 8px 8px 0 0; } .ds-ex-head h3 { margin: 0; font-size: .875rem; } .ds-ex-head p { margin: 0 auto 0 0; font-size: .8125rem; font-weight: 600; color: #535a68; font-variant-numeric: tabular-nums; } .ds-ex-quiet { min-height: 32px; padding: 4px 10px; font: 600 .8125rem/1.3 system-ui, sans-serif; background: transparent; border: 1px solid transparent; border-radius: 4px; } .ds-ex-body { padding: 12px 14px 14px; } .ds-ex-index { display: flex; gap: 4px; margin: 0 0 12px; padding: 0; list-style: none; } .ds-ex-step { min-width: 36px; min-height: 36px; font: 700 .8125rem/1 system-ui, sans-serif; font-variant-numeric: tabular-nums; color: #15181e; background: #ffffff; border: 1px solid #c3c8d2; border-radius: 4px; } .ds-ex-step[data-state=solved] { color: #1f7a3a; } .ds-ex-step[data-state=solved]::after { content: '\\2713'; margin-left: 3px; font-size: .85em; } .ds-ex-step[aria-current=step] { color: #ffffff; background: #2f3fb3; border-color: #2f3fb3; } .ds-ex h4 { margin: 0 0 8px; font-size: 1.1875rem; letter-spacing: -.015em; } .ds-ex-text, .ds-ex-facts dd, .ds-ex-hint p { font-family: 'Latin Modern', 'Iowan Old Style', Georgia, serif; font-size: 1.0625rem; line-height: 1.6; margin: 0; } .ds-ex-facts { display: grid; grid-template-columns: max-content 1fr; gap: 6px 14px; margin: 12px 0 0; } .ds-ex-facts dt { font-size: .8125rem; font-weight: 600; color: #535a68; padding-top: .2em; } .ds-ex-facts dd { font-size: 1rem; } .ds-ex-hint { display: grid; grid-template-columns: max-content 1fr; gap: 2px 12px; margin-top: 12px; padding: 10px 12px; background: #eef0f4; border: 1px solid #d9dde4; border-radius: 4px; } .ds-ex-hint span { font-size: .75rem; font-weight: 700; color: #2f3fb3; padding-top: .25em; } .ds-ex-hint p { font-size: 1rem; } .ds-ex-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; } .ds-ex-actions button { min-height: 40px; padding: 8px 14px; font: 600 .875rem/1.3 system-ui, sans-serif; background: #ffffff; border: 1px solid #c3c8d2; border-radius: 4px; }"
+    },
+    {
+      "name": "Comparison Listing",
+      "kind": "custom",
+      "refersTo": "result-console",
+      "description": "Learner code compared with a worked solution on listing slate; search amber marks lines only in the learner's code, selection blue lines only in the solution.",
+      "html": "<ol class=\"ds-cmp\"><li><span></span><code>SELECT</code></li><li data-kind=\"mine\"><span>Yours</span><code>  id</code></li><li data-kind=\"solution\"><span>Solution</span><code>  id,</code></li><li data-kind=\"solution\"><span>Solution</span><code>  email</code></li><li><span></span><code>FROM customers;</code></li><li data-kind=\"skip\"><span></span><code>4 matching lines</code></li></ol>",
+      "css": ".ds-cmp { margin: 0; padding: 8px 0; list-style: none; font: .875rem/1.6 ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace; color: #e8efff; background: #111d32; border: 1px solid #2a3954; border-radius: 8px; } .ds-cmp li { display: grid; grid-template-columns: 5.5rem 1fr; white-space: pre; } .ds-cmp span { padding: 0 10px; text-align: right; font: 700 .75rem/1.85 system-ui, sans-serif; color: #97a7be; } .ds-cmp li[data-kind=mine] { background: #ffd39b40; } .ds-cmp li[data-kind=mine] span { color: #ffd39b; } .ds-cmp li[data-kind=solution] { background: #4a6aa880; } .ds-cmp li[data-kind=solution] span { color: #91d8fc; } .ds-cmp li[data-kind=skip] { color: #97a7be; font-style: italic; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Technical Manual You Can Run",
+    "overview": "The classroom is printed like a two-color engineering manual. White pages sit on a cool light-table ground; the text is press black; one spot ink marks each part of the library, with a house ultramarine for the catalog and the interface. Every subject is a thumb-indexed part, and every lesson is a spread: the chapter on the left page, a runnable listing and its printed result on the right. Learners read, predict, run and read the result without losing their place.\n\nDensity is that of a reference book, not a marketing site: hairline rules, tabular folio numerals and compact 4px controls carry the structure. Code and output are set on dark slate, like listings in a printed manual, so they read as a different material from the prose. The interface speaks in the system grotesque; chapters speak in Latin Modern, the typeface of a typeset textbook.\n\nThe world deliberately refuses the course-platform card grid with progress rings, gradient heroes and decorative glass.",
+    "keyCharacteristics": [
+      "Two inks per surface: press black plus one spot ink (house ultramarine or a subject area's ink).",
+      "Pages, not cards: hairline rules and 3px part rules divide content.",
+      "Tabular numerals for folios, counts and timings.",
+      "Dark slate listings and results under light pages.",
+      "Latin Modern chapters, system grotesque interface."
+    ],
+    "rules": [
+      {
+        "name": "The One Spot Ink Rule",
+        "body": "A surface uses press black plus exactly one spot ink: house ultramarine on the catalog and interface, or the current subject's ink on its part. Two spot inks never compete on one surface.",
+        "section": "colors"
+      },
+      {
+        "name": "The Color Is Never Alone Rule",
+        "body": "Every subject ink travels with a text label (thumb tab text, part heading, subject name), so color never carries meaning by itself.",
+        "section": "colors"
+      },
+      {
+        "name": "The Doing and Reading Rule",
+        "body": "Anything you operate is set in the grotesque; anything you study is set in Latin Modern. Never set a control in the serif or a chapter paragraph in the grotesque.",
+        "section": "typography"
+      },
+      {
+        "name": "The Tabular Figures Rule",
+        "body": "Folios, counts, timings and progress use tabular numerals so columns of numbers align like a printed index.",
+        "section": "typography"
+      },
+      {
+        "name": "The Paper Not Glass Rule",
+        "body": "Surfaces are opaque paper. No blur, no translucency, no glow; a floating dialog earns the lift shadow and nothing more.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** keep each surface to press black plus one spot ink (The One Spot Ink Rule).",
+      "**Do** pair every subject ink with its text label.",
+      "**Do** set chapters in Latin Modern at 1.0625rem/1.75 within 78ch, and interface text in the system grotesque.",
+      "**Do** use tabular numerals for folios, counts, timings and progress.",
+      "**Do** print run output on listing slate directly under the run controls, unwrapped.",
+      "**Do** keep controls at 4px corners and 40px minimum height, panels at 8px."
+    ],
+    "donts": [
+      "**Don't** build uniform card grids, progress rings or gradient heroes; the home page is a contents page.",
+      "**Don't** add eyebrow or kicker labels above headings.",
+      "**Don't** use colored side borders thicker than 1px on cards or callouts.",
+      "**Don't** use blur, translucency or glow (The Paper Not Glass Rule).",
+      "**Don't** let two subject inks share one surface."
+    ]
+  }
+}

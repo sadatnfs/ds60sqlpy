@@ -1,0 +1,110 @@
+[
+  {
+    "case": "division-by-zero",
+    "source": "SELECT 10 / 0 AS ratio;\n",
+    "output": "{\"error_type\": \"DivisionByZero\", \"sqlstate\": \"22012\", \"error_line\": null, \"message\": \"division by zero\", \"transaction\": \"Current transaction rolled back; earlier explicit commits are preserved.\"}\n",
+    "returncode": 1,
+    "status": null,
+    "stopped": null,
+    "error_line": null,
+    "expected_kind": "database",
+    "expected_line": null,
+    "expected_column": null
+  },
+  {
+    "case": "lesson-missing-column",
+    "source": "SELECT 1 AS ok;\n\nSELECT nme\nFROM training.customers;\n",
+    "output": " ok \n----\n  1\n(1 row)\n\npsql:/workspace/.learning/sql/sql-07/lesson/workspace/sql/postgres-60day/.submission-xxxxxxxx.sql:4: ERROR:  column \"nme\" does not exist\nLINE 1: SELECT nme\n               ^\n",
+    "returncode": 3,
+    "status": null,
+    "stopped": null,
+    "error_line": 4,
+    "expected_kind": "database",
+    "expected_line": 4,
+    "expected_column": null
+  },
+  {
+    "case": "lesson-syntax",
+    "source": "SELECT 1 AS ok;\nSELEC 2;\n",
+    "output": " ok \n----\n  1\n(1 row)\n\npsql:/workspace/.learning/sql/sql-07/lesson/workspace/sql/postgres-60day/.submission-xxxxxxxx.sql:2: ERROR:  syntax error at or near \"SELEC\"\nLINE 1: SELEC 2;\n        ^\n",
+    "returncode": 3,
+    "status": null,
+    "stopped": null,
+    "error_line": 2,
+    "expected_kind": "syntax",
+    "expected_line": 2,
+    "expected_column": null
+  },
+  {
+    "case": "missing-column",
+    "source": "SELECT nme\nFROM training.customers;\n",
+    "output": "{\"error_type\": \"UndefinedColumn\", \"sqlstate\": \"42703\", \"error_line\": 1, \"message\": \"column \\\"nme\\\" does not exist\", \"transaction\": \"Current transaction rolled back; earlier explicit commits are preserved.\"}\n",
+    "returncode": 1,
+    "status": null,
+    "stopped": null,
+    "error_line": 1,
+    "expected_kind": "database",
+    "expected_line": 1,
+    "expected_column": null
+  },
+  {
+    "case": "missing-relation",
+    "source": "SELECT *\nFROM training.custmers;\n",
+    "output": "{\"error_type\": \"UndefinedTable\", \"sqlstate\": \"42P01\", \"error_line\": 2, \"message\": \"relation \\\"training.custmers\\\" does not exist\", \"transaction\": \"Current transaction rolled back; earlier explicit commits are preserved.\"}\n",
+    "returncode": 1,
+    "status": null,
+    "stopped": null,
+    "error_line": 2,
+    "expected_kind": "database",
+    "expected_line": 2,
+    "expected_column": null
+  },
+  {
+    "case": "syntax-end-of-input",
+    "source": "SELECT *\nFROM\n",
+    "output": "{\"error_type\": \"SyntaxError\", \"sqlstate\": \"42601\", \"error_line\": 3, \"message\": \"syntax error at end of input\", \"transaction\": \"Current transaction rolled back; earlier explicit commits are preserved.\"}\n",
+    "returncode": 1,
+    "status": null,
+    "stopped": null,
+    "error_line": 3,
+    "expected_kind": "syntax",
+    "expected_line": 3,
+    "expected_column": null
+  },
+  {
+    "case": "syntax-first-word",
+    "source": "SELEC 1;\n",
+    "output": "{\"error_type\": \"SyntaxError\", \"sqlstate\": \"42601\", \"error_line\": 1, \"message\": \"syntax error at or near \\\"SELEC\\\"\", \"transaction\": \"Current transaction rolled back; earlier explicit commits are preserved.\"}\n",
+    "returncode": 1,
+    "status": null,
+    "stopped": null,
+    "error_line": 1,
+    "expected_kind": "syntax",
+    "expected_line": 1,
+    "expected_column": null
+  },
+  {
+    "case": "syntax-later-line",
+    "source": "SELECT 1 AS one,\n       2 AS two\nFORM training.customers;\n",
+    "output": "{\"error_type\": \"SyntaxError\", \"sqlstate\": \"42601\", \"error_line\": 3, \"message\": \"syntax error at or near \\\"FORM\\\"\", \"transaction\": \"Current transaction rolled back; earlier explicit commits are preserved.\"}\n",
+    "returncode": 1,
+    "status": null,
+    "stopped": null,
+    "error_line": 3,
+    "expected_kind": "syntax",
+    "expected_line": 3,
+    "expected_column": null
+  },
+  {
+    "case": "unique-violation",
+    "source": "CREATE TEMP TABLE pad_demo (id integer PRIMARY KEY);\nINSERT INTO pad_demo VALUES (1);\nINSERT INTO pad_demo VALUES (1);\n",
+    "output": "{\"error_type\": \"UniqueViolation\", \"sqlstate\": \"23505\", \"error_line\": null, \"message\": \"duplicate key value violates unique constraint \\\"pad_demo_pkey\\\"\", \"transaction\": \"Current transaction rolled back; earlier explicit commits are preserved.\"}\n",
+    "returncode": 1,
+    "status": null,
+    "stopped": null,
+    "error_line": null,
+    "expected_kind": "database",
+    "expected_line": null,
+    "expected_column": null
+  }
+]

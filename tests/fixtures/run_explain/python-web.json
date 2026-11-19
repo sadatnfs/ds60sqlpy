@@ -1,0 +1,35 @@
+[
+  {
+    "case": "flask-404-assertion",
+    "source": "from flask import Flask\n\napp = Flask(__name__)\n\n\n@app.get(\"/\")\ndef home():\n    return {\"ok\": True}\n\n\nclient = app.test_client()\nresponse = client.get(\"/missing\")\nassert response.status_code == 200, response.status_code\n",
+    "output": "Traceback (most recent call last):\n  File \"<frozen runpy>\", line 198, in _run_module_as_main\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"/opt/worker/src/ds60sqlpy/worker_figures.py\", line 69, in <module>\n    main()\n  File \"/opt/worker/src/ds60sqlpy/worker_figures.py\", line 65, in main\n    return _run()\n           ^^^^^^\n  File \"/opt/worker/src/ds60sqlpy/worker_figures.py\", line 55, in _run\n    runpy.run_path(\"main.py\", run_name=\"__main__\")\n  File \"<frozen runpy>\", line 287, in run_path\n  File \"<frozen runpy>\", line 98, in _run_module_code\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"main.py\", line 13, in <module>\n    assert response.status_code == 200, response.status_code\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: 404\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "assertion",
+    "expected_line": 13,
+    "expected_column": 8
+  },
+  {
+    "case": "key-error",
+    "source": "payload = {\"name\": \"Ada\"}\nprint(payload[\"email\"])\n",
+    "output": "Traceback (most recent call last):\n  File \"<frozen runpy>\", line 198, in _run_module_as_main\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"/opt/worker/src/ds60sqlpy/worker_figures.py\", line 69, in <module>\n    main()\n  File \"/opt/worker/src/ds60sqlpy/worker_figures.py\", line 65, in main\n    return _run()\n           ^^^^^^\n  File \"/opt/worker/src/ds60sqlpy/worker_figures.py\", line 55, in _run\n    runpy.run_path(\"main.py\", run_name=\"__main__\")\n  File \"<frozen runpy>\", line 287, in run_path\n  File \"<frozen runpy>\", line 98, in _run_module_code\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"main.py\", line 2, in <module>\n    print(payload[\"email\"])\n          ~~~~~~~^^^^^^^^^\nKeyError: 'email'\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "runtime",
+    "expected_line": 2,
+    "expected_column": 7
+  },
+  {
+    "case": "syntax",
+    "source": "values = [1, 2, 3]\nfor value in values\n    print(value)\n",
+    "output": "Traceback (most recent call last):\n  File \"<frozen runpy>\", line 198, in _run_module_as_main\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"/opt/worker/src/ds60sqlpy/worker_figures.py\", line 69, in <module>\n    main()\n  File \"/opt/worker/src/ds60sqlpy/worker_figures.py\", line 65, in main\n    return _run()\n           ^^^^^^\n  File \"/opt/worker/src/ds60sqlpy/worker_figures.py\", line 55, in _run\n    runpy.run_path(\"main.py\", run_name=\"__main__\")\n  File \"<frozen runpy>\", line 286, in run_path\n  File \"<frozen runpy>\", line 259, in _get_code_from_file\n  File \"main.py\", line 2\n    for value in values\n                       ^\nSyntaxError: expected ':'\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "syntax",
+    "expected_line": 2,
+    "expected_column": 20
+  }
+]

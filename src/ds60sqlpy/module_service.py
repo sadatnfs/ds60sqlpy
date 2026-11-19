@@ -7,6 +7,12 @@ from typing import Any
 
 from ds60sqlpy.browser_runs import BROWSER_PROFILES, BrowserRunStore, browser_capability
 from ds60sqlpy.catalog import Catalog
+from ds60sqlpy.exercises import (
+    REVEAL_MESSAGE,
+    exercise_solution,
+    lesson_exercises,
+    reference_program_payload,
+)
 from ds60sqlpy.lesson_reader import reference_relative_path, render_artifact, rendered_targets
 from ds60sqlpy.module_drafts import DRAFT_PROFILES, draft_capability, worked_examples
 from ds60sqlpy.module_jobs import SERVICES, ModuleJobs, profile_readiness
@@ -336,6 +342,7 @@ class ModuleService:
                 payload.get("source"),
                 payload.get("timeout_seconds", 60),
                 payload.get("request_id"),
+                payload.get("purpose", "practice"),
             )
         if action == "module-solutions":
             if payload.get("reveal") is not True:
@@ -354,6 +361,32 @@ class ModuleService:
                 for i, path in enumerate(lesson.solution_paths)
             ]
             return {"documents": documents}
+        if action == "module-exercises":
+            return lesson_exercises(
+                lesson_id=lesson.id,
+                language=lesson.language,
+                guide=self.catalog.content_path(lesson.guide_path),
+                solutions=[self.catalog.content_path(path) for path in lesson.solution_paths],
+                repo_root=self.catalog.root,
+                targets=self.targets,
+                guide_link_prefix="module-guide--",
+            )
+        if action in {"module-exercise-solution", "module-reference-program"}:
+            if payload.get("reveal") is not True:
+                raise ValueError(REVEAL_MESSAGE)
+            solutions = [self.catalog.content_path(path) for path in lesson.solution_paths]
+            if action == "module-reference-program":
+                return reference_program_payload(
+                    solutions=solutions, language=lesson.language, repo_root=self.catalog.root
+                )
+            return exercise_solution(
+                lesson_id=lesson.id,
+                number=payload.get("number"),
+                language=lesson.language,
+                solutions=solutions,
+                repo_root=self.catalog.root,
+                targets=self.targets,
+            )
         raise ValueError("Unknown module action.")
 
     def close(self) -> None:

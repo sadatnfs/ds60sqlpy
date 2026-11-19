@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import re
+from collections import Counter
 from pathlib import Path
 from typing import Any
 
@@ -918,6 +919,9 @@ def _python_lessons(root: Path) -> list[dict[str, Any]]:
                             4: "python-foundations-02",
                             9: "python-foundations-03",
                             11: "python-foundations-04",
+                            # Days 46-49 are optional deep-learning and NLP lessons
+                            # outside the Core image; Day 50 builds on Day 45.
+                            50: "python-45",
                         }.get(day, f"python-{day - 1:02d}")
                     ]
                 ),
@@ -1046,6 +1050,276 @@ def _bridge_lessons(root: Path) -> list[dict[str, Any]]:
     return lessons
 
 
+# Readable titles by stable lesson ID; files, IDs and saved work keep their historical names.
+LESSON_TITLES: dict[str, str] = {
+    "python-01": "Python Setup and the REPL",
+    "python-02": "Variables and Core Types",
+    "python-03": "Control Flow, Truthiness, and Exceptions",
+    "python-04": "Loops, Comprehensions, and Generators",
+    "python-05": "Functions, Docstrings, and Type Hints",
+    "python-06": "Lists, Tuples, Sets, and Dictionaries",
+    "python-07": "Strings, Regular Expressions, and pathlib",
+    "python-08": "Files, JSON, CSV, and Context Managers",
+    "python-09": "Modules, Packages, and Imports",
+    "python-10": "Testing with pytest",
+    "python-foundations-04": "Build Your First Data Investigation",
+    "python-11": "Debugging, Logging, and Profiling",
+    "python-12": "Classes and Dataclasses",
+    "python-13": "Functional Tools: itertools and functools",
+    "python-14": "Code Quality with Ruff, mypy, and pytest",
+    "python-15": "Project: A Testable Command-Line Data Tool",
+    "python-16": "NumPy Arrays, Vectorization, and Broadcasting",
+    "python-17": "pandas Series, DataFrames, and Indexing",
+    "python-18": "Loading and Cleaning Data with pandas",
+    "python-19": "Grouping, Pivoting, and Melting in pandas",
+    "python-20": "Merging and Joining DataFrames",
+    "python-21": "Time Series with pandas",
+    "python-22": "Advanced pandas: Vectorization, query, and Categoricals",
+    "python-23": "Streaming Data Pipelines with Generators",
+    "python-24": "Exploratory Data Analysis Best Practices",
+    "python-25": "Visualization with Matplotlib and seaborn",
+    "python-26": "Interactive Visualization with Plotly and Altair",
+    "python-27": "Geospatial and Domain-Specific Visualization",
+    "python-28": "Feature Engineering with scikit-learn",
+    "python-29": "Data Validation with Schemas",
+    "python-30": "Project: Reproducible EDA and Preprocessing",
+    "python-32": "Statistical Inference: Intervals and Tests",
+    "python-33": "Linear Algebra and Matrices",
+    "python-34": "scikit-learn Estimators and Pipelines",
+    "python-35": "Model Evaluation and Cross-Validation",
+    "python-36": "PCA and Feature Selection",
+    "python-37": "Regularized Linear Models",
+    "python-38": "Decision Trees and Random Forests",
+    "python-39": "Gradient Boosting with XGBoost and LightGBM",
+    "python-40": "Hyperparameter Tuning with Grid and Randomized Search",
+    "python-41": "Handling Class Imbalance",
+    "python-42": "K-Means Clustering and Anomaly Detection",
+    "python-43": "Model Interpretation with SHAP and Partial Dependence",
+    "python-44": "Serving a Model with FastAPI",
+    "python-45": "Project: End-to-End Modeling",
+    "python-47": "PyTorch Tensors, Modules, and Training Loops",
+    "python-48": "Transfer Learning with CNNs",
+    "python-49": "NLP Basics with Hugging Face and spaCy",
+    "python-50": "Time-Series Forecasting and Evaluation",
+    "python-51": "Target Encoding and Leakage-Safe Features",
+    "python-52": "Scaling with Dask and Chunked pandas",
+    "python-53": "Experiment Tracking with MLflow",
+    "python-54": "Model Monitoring and Governance",
+    "python-55": "Containerizing a FastAPI Model Service",
+    "python-56": "Workflow Orchestration with Prefect",
+    "python-57": "Security, Privacy, and Ethics",
+    "python-58": "Code Review, Refactoring, and Tests",
+    "python-59": "Capstone Kickoff and Planning",
+    "python-60": "Capstone Completion and Presentation",
+    "python-pro-01": "Package Engineering and a Local Release Workflow",
+    "python-svc-01": "Reliable HTTP Clients for External Services",
+    "python-pro-02": "Choosing Concurrency or Parallelism",
+    "python-data-01": "Columnar Data with Arrow, Parquet, and DuckDB",
+    "python-stats-01": "Resampling, Experiments, and Causal Limits",
+    "python-data-02": "Exact Decimals, Unicode Text, and Calendar Boundaries",
+    "python-ml-02": "Leakage-Safe Evaluation Across Groups and Time",
+    "python-pro-03": "Restartable File Pipelines and Durability Guarantees",
+    "sql-start-02": "Values, NULL, and Deterministic Order",
+    "sql-01": "SELECT, WHERE, ORDER BY, and LIMIT",
+    "sql-02": "Aggregates, GROUP BY, and HAVING",
+    "sql-03": "Inner Joins and Predicate Placement",
+    "sql-04": "Outer Joins and Unmatched Rows",
+    "sql-05": "Cross Joins and Self-Joins",
+    "sql-06": "Set Operations: UNION, INTERSECT, and EXCEPT",
+    "sql-07": "Week 1 Project: From Questions to Queries",
+    "sql-08": "Scalar and Inline Subqueries",
+    "sql-09": "Correlated Subqueries and EXISTS",
+    "sql-10": "Changing Data with Subqueries: INSERT, UPDATE, DELETE, and Upsert",
+    "sql-11": "CASE Expressions and Conditional Logic",
+    "sql-12": "String Functions and Text Processing",
+    "sql-13": "Date and Time Functions and Time Zones",
+    "sql-14": "Numeric Types, Casting, and Precision",
+    "sql-15": "Phase 1 Project: Multi-Dimensional Revenue Report",
+    "sql-16": "Window Function Fundamentals: OVER, PARTITION BY, and Frames",
+    "sql-17": "Ranking with ROW_NUMBER, RANK, and DENSE_RANK",
+    "sql-18": "LAG and LEAD: Comparing Neighboring Rows",
+    "sql-19": "Running Totals and Moving Windows",
+    "sql-20": "FIRST_VALUE, LAST_VALUE, and Window Frames",
+    "sql-21": "Distribution Functions: NTILE, PERCENT_RANK, and CUME_DIST",
+    "sql-22": "Advanced Windows: Named Windows, Multiple Partitions, and Exclusions",
+    "sql-23": "Common Table Expressions (CTEs)",
+    "sql-24": "Recursive CTEs for Hierarchies and Graphs",
+    "sql-27": "Pivoting and Unpivoting",
+    "sql-28": "JSONB and XML in PostgreSQL",
+    "sql-29": "Pattern Matching: LIKE, Regular Expressions, and Full-Text Search",
+    "sql-30": "Phase 2 Project: Cohort Retention and Customer Lifetime Value",
+    "sql-31": "Reading Plans with EXPLAIN and EXPLAIN ANALYZE",
+    "sql-32": "B-Tree Index Fundamentals",
+    "sql-33": "Composite, Covering, and Partial Indexes",
+    "sql-34": "Query Optimization Techniques",
+    "sql-35": "Avoiding Common Performance Pitfalls",
+    "sql-36": "Materialized Views and Caching",
+    "sql-37": "Partitioning and Sharding",
+    "sql-38": "Transactions and Isolation Levels",
+    "sql-39": "Locks, Blocking, and Deadlocks",
+    "sql-40": "Advanced Analytic Functions",
+    "sql-41": "Complex Aggregations: FILTER, String Aggregation, and CUBE",
+    "sql-42": "Data Quality and Validation",
+    "sql-43": "Logical Export, Staging, and Restore Checks",
+    "sql-44": "Monitoring and Diagnostics",
+    "sql-45": "Phase 3 Project: Query Optimization",
+    "sql-46": "E-Commerce Project, Part 1: Lifetime Value and Cohorts",
+    "sql-47": "E-Commerce Project, Part 2: Cohort Retention",
+    "sql-48": "E-Commerce Project, Part 3: Product Affinity and Attribution",
+    "sql-49": "Finance Project, Part 1: Revenue Forecasting",
+    "sql-50": "Finance Project, Part 2: Budget Variance",
+    "sql-51": "Finance Project, Part 3: Cash Flow",
+    "sql-52": "Data Warehouse Project, Part 1: Star Schema",
+    "sql-53": "Data Warehouse Project, Part 2: Slowly Changing Dimensions",
+    "sql-54": "Data Warehouse Project, Part 3: Aggregate Tables",
+    "sql-55": "BI Project, Part 1: Drill-Downs and Subtotals",
+    "sql-56": "BI Project, Part 2: Percentiles and CUBE",
+    "sql-57": "BI Project, Part 3: Trends and Anomalies",
+    "sql-58": "Final Capstone, Part 1: Ingestion and Data Quality",
+    "sql-59": "Final Capstone, Part 2: Stakeholder Analytics",
+    "sql-60": "Final Capstone, Part 3: End-to-End Sign-Off",
+    "sql-types-01": "Native PostgreSQL Types and Full-Text Search",
+    "sql-temporal-01": "Temporal Data and Domain Modelling",
+    "bridge-01": "Configuration, Logging, and Typed CLI Boundaries",
+    "bridge-02": "Protocols, Context Managers, and Decorators",
+    "bridge-03": "Safe Parameterized Queries with Psycopg",
+    "bridge-04": "Transactions, Idempotency, and Retries",
+    "bridge-05": "Database Tests, Fixtures, and Test Doubles",
+    "bridge-06": "Bulk ETL and Data Validation",
+    "bridge-07": "Async I/O and Bounded Concurrency",
+    "bridge-08": "Production Capstone: Observability, Security, and Recovery",
+}
+
+
+# One-sentence learner outcomes shown under a lesson title; the phase remains the fallback.
+LESSON_OUTCOMES: dict[str, str] = {
+    "python-01": (
+        "Run a short program in the classroom, read its output, and fix a first NameError."
+    ),
+    "python-02": "Convert text to numbers and Booleans on purpose, then format the result.",
+    "python-03": "Order branches correctly and catch only the errors you can handle.",
+    "python-04": (
+        "Repeat work with loops, build lists with comprehensions, and consume generators lazily."
+    ),
+    "python-05": (
+        "Write functions with clear parameters, return values, docstrings, and type hints."
+    ),
+    "python-06": "Choose a list, tuple, set, or dictionary for what the data must guarantee.",
+    "python-07": "Clean text, match patterns with regular expressions, and build portable paths.",
+    "python-08": "Read and write text, JSON, and CSV files safely with context managers.",
+    "python-09": "Split code into modules and packages and run a package with python -m.",
+    "python-10": (
+        "Write pytest tests for normal, boundary, and invalid inputs and read the failures."
+    ),
+    "python-11": "Find bugs from tracebacks and logs, and measure before optimizing.",
+    "python-12": "Model related data and behavior with classes and dataclasses.",
+    "python-13": "Compose iterators with itertools and functools instead of hand-written loops.",
+    "python-14": "Format, lint, and type-check code with Ruff and mypy.",
+    "python-15": "Build and test a small command-line tool that summarizes a CSV file.",
+    "python-16": "Create NumPy arrays and replace loops with vectorized, broadcast operations.",
+    "python-17": "Select pandas rows and columns by label, position, and Boolean mask.",
+    "python-18": "Load a dataset, profile it, and clean it without changing the raw data.",
+    "python-19": "Summarize groups and reshape tables with groupby, pivot_table, and melt.",
+    "python-20": "Join tables on keys and check row counts and unmatched records.",
+    "python-21": "Resample, roll, and lag time-stamped data with an explicit time zone.",
+    "python-22": "Replace row-wise apply with vectorized code, query, and categoricals.",
+    "python-23": "Build lazy, batched data pipelines from generator functions.",
+    "python-24": "Profile a dataset and record questions, caveats, and quality checks.",
+    "python-25": "Make labeled Matplotlib and seaborn charts and export them reproducibly.",
+    "python-26": "Make interactive Plotly and Altair charts and export offline HTML.",
+    "python-27": "Map geographic data with the right coordinate reference system.",
+    "python-28": "Encode, scale, and bin features in scikit-learn without leaking test data.",
+    "python-29": "Turn data expectations into pandera schemas that fail with clear messages.",
+    "python-30": "Deliver a reproducible EDA and preprocessing project with a decision log.",
+    "python-31": "Simulate probabilities and apply Bayes' rule to base-rate problems.",
+    "python-32": "Compute confidence intervals and hypothesis tests and interpret them correctly.",
+    "python-33": "Use matrix shapes, rank, and least squares to fit a linear model.",
+    "python-34": "Fit scikit-learn estimators inside leakage-safe pipelines.",
+    "python-35": "Choose metrics and cross-validation designs that give honest estimates.",
+    "python-36": "Reduce dimensions with PCA and select features, fitting both inside CV.",
+    "python-37": "Tune ridge and lasso penalties and interpret coefficient shrinkage.",
+    "python-38": "Train decision trees and random forests and measure held-out importance.",
+    "python-39": "Train gradient-boosted models with early stopping and a fair comparison.",
+    "python-40": "Tune hyperparameters with grid and randomized search and nested CV.",
+    "python-41": "Evaluate rare-class models and choose a decision threshold deliberately.",
+    "python-42": "Cluster with k-means and rank anomalies, checking stability.",
+    "python-43": (
+        "Explain a model with SHAP, partial dependence, and permutation importance, without "
+        "causal claims."
+    ),
+    "python-44": "Serve a trained pipeline behind a validated FastAPI endpoint.",
+    "python-45": "Deliver an end-to-end modeling project with a baseline and a saved pipeline.",
+    "python-46": "Explain tensors, gradients, and the optimizer loop behind neural networks.",
+    "python-47": "Write a correct PyTorch training and evaluation loop.",
+    "python-48": "Adapt a pretrained CNN with frozen layers and an offline fallback.",
+    "python-49": "Tokenize text and compare a local baseline with a cached pretrained model.",
+    "python-50": "Forecast with time-safe splits and compare against naive baselines.",
+    "python-51": "Build out-of-fold target encodings that do not leak labels.",
+    "python-52": "Process larger-than-memory data with Dask partitions and chunked pandas.",
+    "python-53": "Track runs, parameters, metrics, and artifacts with MLflow.",
+    "python-54": "Monitor drift and delayed labels and decide when to retrain.",
+    "python-55": "Containerize a FastAPI model service with a small image and a health check.",
+    "python-56": "Orchestrate retryable, idempotent tasks with Prefect.",
+    "python-57": "Minimize and protect personal data and check fairness evidence.",
+    "python-58": "Refactor safely behind tests and review code changes.",
+    "python-59": "Scope a capstone: decision, data contract, baseline, and stop rules.",
+    "python-60": "Finish, reproduce, and present a capstone with clearly scoped claims.",
+}
+
+
+def _clean_outcome(lines: list[str]) -> str:
+    raw = " ".join(" ".join(lines).split())
+    text = re.sub(
+        r"`([^`]*)`|\*\*([^*]+)\*\*|\[([^\]]+)\]\([^)]*\)",
+        lambda m: next(group for group in m.groups() if group is not None),
+        raw,
+    ).strip()
+    # List items are often sentence fragments ("distinguish x and y;").
+    text = text.rstrip(";,: ")
+    if text[:1].islower() and not raw.startswith("`"):
+        text = text[0].upper() + text[1:]
+    return text if not text or text.endswith((".", "?", "!")) else text + "."
+
+
+def _derived_outcome(root: Path, item: dict[str, Any]) -> str | None:
+    """The lesson's own goal: its source ``Focus:`` line, else its first objective."""
+
+    source = root / item["lesson_path"]
+    if source.suffix in {".sql", ".py"} and source.is_file():
+        lines = source.read_text(encoding="utf-8").splitlines()
+        for index, line in enumerate(lines):
+            focus = re.match(r"\s*(?:--|#)\s*Focus:\s*(\S.*)$", line)
+            if focus:
+                parts = [focus.group(1)]
+                for follow in lines[index + 1 :]:
+                    more = re.match(r"\s*(?:--|#)[ \t]{2,}(\S.*)$", follow)
+                    if more is None:
+                        break
+                    parts.append(more.group(1))
+                if outcome := _clean_outcome(parts):
+                    return outcome
+    guide = root / item["guide_path"]
+    if guide.suffix == ".md" and guide.is_file():
+        lines = guide.read_text(encoding="utf-8").splitlines()
+        for index, line in enumerate(lines):
+            if line.strip() != "## Learning objectives":
+                continue
+            rest = lines[index + 1 :]
+            # Skip blank lines and an introduction such as "By the end, you can:".
+            while rest and (not rest[0].strip() or rest[0].rstrip().endswith(":")):
+                rest.pop(0)
+            bullet = re.match(r"(?:[-*]|\d+\.)[ \t]+(\S.*)$", rest[0]) if rest else None
+            if bullet is None:
+                return None
+            parts = [bullet.group(1)]
+            for follow in rest[1:]:
+                if not re.match(r"[ \t]+\S", follow):
+                    break
+                parts.append(follow.strip())
+            return _clean_outcome(parts) or None
+    return None
+
+
 def build_catalog(repo_root: Path | None = None) -> dict[str, Any]:
     """Return the complete catalog payload."""
 
@@ -1061,6 +1335,24 @@ def build_catalog(repo_root: Path | None = None) -> dict[str, Any]:
     identifiers = [item["id"] for item in lessons]
     if len(identifiers) != len(set(identifiers)):
         raise ValueError("Extensions must not replace existing lesson IDs.")
+    stale = (set(LESSON_TITLES) | set(LESSON_OUTCOMES)) - set(identifiers)
+    if stale:
+        raise ValueError(f"Title or outcome overrides name unknown lessons: {sorted(stale)}")
+    derived = {
+        item["id"]: outcome
+        for item in lessons
+        if item["id"] not in LESSON_OUTCOMES
+        and "outcome" not in item
+        and (outcome := _derived_outcome(root, item))
+    }
+    # Text shared by several lessons is template prose, not a lesson's own goal.
+    shared = {text for text, count in Counter(derived.values()).items() if count > 2}
+    for item in lessons:
+        item["title"] = LESSON_TITLES.get(item["id"], item["title"])
+        if item["id"] in LESSON_OUTCOMES:
+            item["outcome"] = LESSON_OUTCOMES[item["id"]]
+        elif derived.get(item["id"]) not in (None, *shared):
+            item["outcome"] = derived[item["id"]]
     track_days = [(item["track"], item["day"]) for item in lessons]
     if len(track_days) != len(set(track_days)):
         raise ValueError("Catalog contains duplicate track/day pairs.")

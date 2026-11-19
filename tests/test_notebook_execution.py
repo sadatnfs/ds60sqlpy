@@ -406,3 +406,44 @@ def test_real_pad_runner_does_not_forward_private_worker_arguments(
     result = runner.run("python-01", "python", source)
     assert result["returncode"] == 0, result["output"]
     assert "PAD_ARGUMENTS:[]" in result["output"]
+
+
+def test_pad_tracebacks_start_at_the_learner_file_named_main_py(tmp_path: Path) -> None:
+    from dataclasses import replace
+
+    from ds60sqlpy.catalog import Catalog
+    from ds60sqlpy.execution import PadRunner
+
+    lesson = replace(Catalog.load().get("python-01"), prerequisites=())
+    runner = PadRunner(Catalog(tmp_path, (lesson,)), python=sys.executable)
+    source = 'def price(item):\n    return {"apple": 1}[item]\n\nprint(price("pear"))\n'
+    runtime = runner.run("python-01", "python", source)
+    output = runtime["output"]
+    assert output.startswith(
+        'Traceback (most recent call last):\n  File "main.py", line 4, in <module>\n'
+    )
+    assert '  File "main.py", line 2, in price\n    return {"apple": 1}[item]\n' in output
+    assert "^" in output and output.endswith("KeyError: 'pear'\n")
+    assert runtime["error_line"] == 2
+    for internal in ("<string>", "notebook_execution", "runpy", ".submission-", str(tmp_path)):
+        assert internal not in output
+    syntax = runner.run("python-01", "python", "total = 1\nif total > 0\n    print(total)\n")
+    assert syntax["output"].startswith('  File "main.py", line 2\n    if total > 0\n')
+    assert syntax["output"].endswith("^\nSyntaxError: expected ':'\n")
+    assert syntax["error_line"] == 2 and "Traceback" not in syntax["output"]
+
+
+def test_learner_traceback_hook_keeps_runner_failures_complete(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    from ds60sqlpy.notebook_execution import learner_excepthook
+
+    hook = learner_excepthook(tmp_path / "learner.py")
+    try:
+        raise RuntimeError("runner failed")
+    except RuntimeError as error:
+        hook(RuntimeError, error, error.__traceback__)
+    report = capsys.readouterr().err
+    assert report.startswith("Traceback (most recent call last):\n")
+    assert f'File "{__file__}"' in report and "main.py" not in report
+    assert report.endswith("RuntimeError: runner failed\n")

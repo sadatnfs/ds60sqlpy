@@ -19,6 +19,7 @@ from urllib.request import HTTPRedirectHandler, ProxyHandler, Request, build_ope
 
 from ds60sqlpy.modules import MAX_SOURCE_BYTES, ModuleCatalog, ModuleState
 from ds60sqlpy.plot_artifacts import read_saved_artifacts, validate_artifacts
+from ds60sqlpy.run_explain import explain_failed_checks, explain_run
 from ds60sqlpy.state_files import atomic_json_write, locked_update
 
 SERVICES = {
@@ -56,8 +57,10 @@ SERVICES = {
 TERMINAL = frozenset({"succeeded", "failed", "cancelled", "timed_out", "interrupted", "blocked"})
 PHASES = TERMINAL | {"queued", "preparing", "compiling", "running", "verifying"}
 IDENTIFIER = re.compile(r"[0-9a-f]{32}\Z")
-# UTF-8 control characters can expand sixfold in JSON, alongside checks and plots.
-MAX_RESPONSE = 2_000_000
+# UTF-8 control characters can expand sixfold in JSON. A response can carry the
+# shown log and the complete raw log, alongside checks and plots.
+MAX_RESPONSE = 3_000_000
+MAX_LOG_BYTES = 128_000
 
 
 class WorkerError(ValueError):
@@ -258,6 +261,9 @@ class ModuleJobs:
         output = value.get("output", "")
         if not isinstance(output, str):
             raise ValueError("Invalid worker log.")
+        raw_output = value.get("raw_output")
+        if raw_output is not None and not isinstance(raw_output, str):
+            raise ValueError("Invalid worker log.")
         code = value.get("returncode")
         if code is not None and type(code) is not int:
             raise ValueError("Invalid worker exit status.")
@@ -288,12 +294,40 @@ class ModuleJobs:
             or elapsed < 0
         ):
             raise ValueError("Invalid worker duration.")
+        bounded = output.encode()[:MAX_LOG_BYTES].decode("utf-8", errors="replace")
+        explanation = (
+            explain_run(
+                receipt["profile"],
+                bounded,
+                code,
+                status=value["status"],
+                source=str(receipt.get("source", "")),
+            )
+            if value["status"] in {"failed", "timed_out"}
+            else None
+        )
+        if (
+            value["status"] == "failed"
+            and any(not check["passed"] for check in checks)
+            and (explanation is None or explanation["kind"] == "unknown")
+        ):
+            explanation = explain_failed_checks()
         return {
             "status": value["status"],
-            "output": output.encode()[:128_000].decode("utf-8", errors="replace"),
+            "output": bounded,
+            # The shown log hides runner lines; the receipt keeps the full log.
+            **(
+                {
+                    "raw_output": raw_output.encode()[:MAX_LOG_BYTES].decode(
+                        "utf-8", errors="replace"
+                    )
+                }
+                if raw_output is not None
+                else {}
+            ),
             "returncode": code,
             "checks": checks,
-            "truncated": bool(value.get("truncated")) or len(output.encode()) > 128_000,
+            "truncated": bool(value.get("truncated")) or len(output.encode()) > MAX_LOG_BYTES,
             "elapsed_seconds": elapsed,
             "detail": str(value.get("detail", ""))[:4000],
             **(
@@ -301,11 +335,20 @@ class ModuleJobs:
                 if "artifacts" in value
                 else {}
             ),
+            **({"explanation": explanation} if explanation is not None else {}),
         }
 
     def start(
-        self, lesson_id: object, source: object, timeout: object, request_id: object
+        self,
+        lesson_id: object,
+        source: object,
+        timeout: object,
+        request_id: object,
+        purpose: object = "practice",
     ) -> dict[str, Any]:
+        """Start one bounded job; a worked-solution run never replaces the learner's draft."""
+        if not isinstance(purpose, str) or purpose not in {"practice", "solution"}:
+            raise ValueError("Choose a practice run or a worked-solution run.")
         lesson = self.catalog.get(lesson_id)
         if lesson.runtime_profile == "dax-offline":
             raise ValueError("Offline DAX drafts cannot create execution jobs.")
@@ -330,6 +373,7 @@ class ModuleJobs:
                     previous["lesson_id"] != lesson.id
                     or previous["source_sha256"] != source_hash
                     or previous["timeout_seconds"] != timeout
+                    or previous.get("purpose", "practice") != purpose
                 ):
                     raise ValueError(
                         "This request ID already identifies different source or limits."
@@ -339,7 +383,8 @@ class ModuleJobs:
                 raise ValueError(
                     "A module job is active or unresolved. Wait, reconnect, or cancel it."
                 )
-            self.state.save(lesson.id, {"source": source})
+            if purpose == "practice":
+                self.state.save(lesson.id, {"source": source})
             ready = self.client.readiness(lesson.runtime_profile)
             if not ready["ready"]:
                 raise ValueError(ready["detail"])
@@ -363,6 +408,8 @@ class ModuleJobs:
                 "detail": "Submitting to the prepared private worker.",
                 "created_at": datetime.now(UTC).isoformat(),
             }
+            if purpose == "solution":
+                value["purpose"] = "solution"
             with locked_update(self._path(key)):
                 atomic_json_write(self._path(key), value)
             self._reserve(key)
@@ -387,8 +434,9 @@ class ModuleJobs:
                     {
                         "status": "interrupted",
                         "detail": (
-                            f"Submission outcome is uncertain; source was saved. "
-                            f"Inspect the worker before retrying. {exc}"
+                            "Submission outcome is uncertain; "
+                            + ("source was saved. " if purpose == "practice" else "")
+                            + f"Inspect the worker before retrying. {exc}"
                         ),
                     },
                 )
@@ -411,6 +459,12 @@ class ModuleJobs:
                             change.update(
                                 status="timed_out",
                                 detail="Controller deadline exceeded; worker confirmed cleanup.",
+                                explanation=explain_run(
+                                    receipt["profile"],
+                                    change["output"],
+                                    change["returncode"],
+                                    status="timed_out",
+                                ),
                             )
                         receipt = self._update(key, change)
                         cancel_deadline = time.monotonic() + 8
@@ -423,6 +477,12 @@ class ModuleJobs:
                             change.update(
                                 status="timed_out",
                                 detail="Controller deadline exceeded; worker confirmed cleanup.",
+                                explanation=explain_run(
+                                    receipt["profile"],
+                                    change["output"],
+                                    change["returncode"],
+                                    status="timed_out",
+                                ),
                             )
                         receipt = self._update(key, change)
                     if receipt["status"] not in TERMINAL:

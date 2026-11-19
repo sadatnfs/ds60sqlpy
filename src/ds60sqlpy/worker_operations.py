@@ -10,6 +10,7 @@ import contextlib
 import importlib.util
 import json
 import os
+import re
 import shutil
 import signal
 import subprocess
@@ -20,7 +21,7 @@ from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from functools import partial
 from pathlib import Path
-from typing import Any
+from typing import Any, Protocol
 
 MAX_SOURCE_BYTES = 262_144
 MAX_OUTPUT_BYTES = 128_000
@@ -86,6 +87,12 @@ class OperationResult:
     detail: str
     checks: list[dict[str, Any]] = field(default_factory=list)
     artifacts: list[dict[str, Any]] = field(default_factory=list)
+    # The complete runner log, present only when the shown output hides runner lines.
+    raw_output: str | None = None
+
+
+class OutputSink(Protocol):
+    def append(self, data: bytes) -> None: ...
 
 
 class BoundedOutput:
@@ -136,6 +143,189 @@ class BoundedOutput:
             return text, truncated
 
 
+class _ChildOutput:
+    """Record one child's merged output and show it without runner JVM notices.
+
+    A JVM prints ``Picked up JAVA_TOOL_OPTIONS`` before any learner code runs.
+    Only those exact lines at the very start of this child's output are hidden;
+    a learner program that relays a child JVM's stderr keeps every line. The
+    retained raw log keeps the notices.
+    """
+
+    def __init__(
+        self, raw: BoundedOutput, shown: BoundedOutput, leading: tuple[bytes, ...]
+    ) -> None:
+        self.raw = raw
+        self.shown = shown
+        self._leading = list(leading)
+        self._pending = bytearray()
+        self._lock = threading.Lock()
+
+    def append(self, data: bytes) -> None:
+        with self._lock:
+            self.raw.append(data)
+            if self._leading:
+                self._pending.extend(data)
+                while self._leading:
+                    notice = self._leading[0]
+                    if len(self._pending) < len(notice) and notice.startswith(self._pending):
+                        return
+                    if not self._pending.startswith(notice):
+                        break
+                    del self._pending[: len(notice)]
+                    self._leading.pop(0)
+                self._leading.clear()
+                data = bytes(self._pending)
+                self._pending.clear()
+            if data:
+                self.shown.append(data)
+
+    def finish(self) -> None:
+        with self._lock:
+            self._leading.clear()
+            if self._pending:
+                self.shown.append(bytes(self._pending))
+                self._pending.clear()
+
+
+def _runner_notices(command: list[str], environment: Mapping[str, str]) -> tuple[bytes, ...]:
+    """Lines the runner's own JVMs print at startup, before any learner code."""
+    options = environment.get("JAVA_TOOL_OPTIONS")
+    if not options or not command:
+        return ()
+    notice = f"Picked up JAVA_TOOL_OPTIONS: {options}\n".encode()
+    name = Path(command[0]).name
+    if name == "spark-submit":
+        # The launcher and driver JVMs each print the notice; the driver then
+        # names the incubating vector module that Spark enables.
+        return (notice, notice, b"WARNING: Using incubator modules: jdk.incubator.vector\n")
+    return (notice,) if name in {"java", "javac", "jar", "scalac"} else ()
+
+
+_NODE_FRAME = re.compile(r"\s+at (?:async )?(?P<call>\S.*?)(?P<brace> \{)?")
+_NODE_SOURCE = re.compile(r"node:[\w./-]+:\d+")
+_CARET = re.compile(r"\s*\^+\s*")
+_R_WRAPPER_CALLS = re.compile(r"Calls: \.ds60_run(?P<cut> -> | \.\.\. )(?P<rest>.*)")
+_R_WRAPPER = ["source", "withVisible", "eval", "eval"]
+_PYSPARK_CONTEXT_LOG = re.compile(
+    r'\{"ts": "[^"]*", "level": "ERROR", "logger": "(?:DataFrame|SQL)QueryContextLogger", '
+)
+
+
+def _node_location(call: str) -> str:
+    return call[call.rindex(" (") + 2 : -1] if call.endswith(")") and " (" in call else call
+
+
+def _without_node_internals(text: str) -> str:
+    """Hide Node's module-loader frames and its own source excerpts after an error.
+
+    Frames inside ``node:internal/`` are hidden everywhere. Other built-in
+    frames are hidden only after the last learner or library frame, where Node
+    is merely the caller; a built-in that the program called stays visible.
+    """
+    if "node:" not in text:
+        return text
+    lines = text.split("\n")
+    shown: list[str] = []
+    index = 0
+    while index < len(lines):
+        if (
+            _NODE_SOURCE.fullmatch(lines[index])
+            and index + 2 < len(lines)
+            and _CARET.fullmatch(lines[index + 2])
+        ):
+            # For example node:internal/modules/run_main:107, a line of Node's
+            # own source and its caret, which only point inside Node.
+            index += 3
+            if index < len(lines) and not lines[index]:
+                index += 1
+            continue
+        block: list[tuple[str, str, bool]] = []
+        while index < len(lines) and (frame := _NODE_FRAME.fullmatch(lines[index])):
+            block.append(
+                (lines[index], _node_location(frame.group("call")), bool(frame.group("brace")))
+            )
+            index += 1
+        if not block:
+            shown.append(lines[index])
+            index += 1
+            continue
+        callers = [i for i, frame in enumerate(block) if not frame[1].startswith("node:")]
+        last = callers[-1] if callers else -1
+        kept = [
+            line
+            for i, (line, location, _) in enumerate(block)
+            if not location.startswith("node:internal/")
+            and not (location.startswith("node:") and i > last)
+        ]
+        if block[-1][2] and (not kept or kept[-1] != block[-1][0]):
+            # Node opens the error's extra properties at the end of the last frame.
+            if kept:
+                kept[-1] += " {"
+            elif shown:
+                shown[-1] += " {"
+        shown.extend(kept)
+    return "\n".join(shown)
+
+
+def _without_r_wrapper_calls(text: str) -> str:
+    """Drop the runner's ``.ds60_run -> source`` chain from R's ``Calls:`` line.
+
+    Calls inside the learner's own code stay, so ``Calls: f -> g`` remains.
+    """
+    if "Calls: .ds60_run" not in text:
+        return text
+    lines = []
+    for line in text.split("\n"):
+        match = _R_WRAPPER_CALLS.fullmatch(line)
+        if match is None:
+            lines.append(line)
+            continue
+        calls = match.group("rest").split(" -> ")
+        shortened = match.group("cut") == " ... "
+        if shortened:
+            # R kept only the outermost call and the innermost calls.
+            size = next(
+                (n for n in range(min(len(calls), 4), 0, -1) if calls[:n] == _R_WRAPPER[-n:]), 0
+            )
+        else:
+            size = 0
+            while size < min(len(calls), 4) and calls[size] == _R_WRAPPER[size]:
+                size += 1
+            if not size:
+                lines.append(line)  # Not the learner's source() chain.
+                continue
+        if calls[size:]:
+            prefix = "... " if shortened and not size else ""
+            lines.append("Calls: " + prefix + " -> ".join(calls[size:]))
+    return "\n".join(lines)
+
+
+def _without_pyspark_context_logs(text: str) -> str:
+    """Drop PySpark's one-line JSON copy of a DataFrame or SQL error.
+
+    PySpark 4 logs it, with the JVM stack, whenever such an error is raised; the
+    Python traceback that follows carries the same message.
+    """
+    if "QueryContextLogger" not in text:
+        return text
+    return "\n".join(line for line in text.split("\n") if not _PYSPARK_CONTEXT_LOG.match(line))
+
+
+def display_output(profile_id: str, text: str) -> str:
+    """Return a runner log as the learner sees it.
+
+    Only lines from the runner or from the runtime's own internals are hidden.
+    """
+    if profile_id in {"javascript-node", "typescript-node"}:
+        return _without_node_internals(text)
+    if profile_id == "r-statistics":
+        return _without_r_wrapper_calls(text)
+    if profile_id == "spark-local-python":
+        return _without_pyspark_context_logs(text)
+    return text
+
+
 def child_environment(
     directory: Path, base: Mapping[str, str] | None = None, *, profile_id: str | None = None
 ) -> dict[str, str]:
@@ -164,6 +354,9 @@ def child_environment(
         DOTNET_CLI_TELEMETRY_OPTOUT="1",
         DOTNET_SKIP_FIRST_TIME_EXPERIENCE="1",
         DOTNET_CLI_WORKLOAD_UPDATE_NOTIFY_DISABLE="1",
+        # Each job has a fresh CLI home, so every build is a "first run" whose
+        # workload check tells learners to run a command they cannot run.
+        DOTNET_SKIP_WORKLOAD_INTEGRITY_CHECK="1",
         DOTNET_CLI_DO_NOT_USE_MSBUILD_SERVER="1",
         DOTNET_NOLOGO="1",
         NUGET_PACKAGES=str(directory / "nuget"),
@@ -192,6 +385,8 @@ def child_environment(
         TF_NUM_INTRAOP_THREADS="2",
         TF_NUM_INTEROP_THREADS="1",
         SPARK_LOCAL_IP="127.0.0.1",
+        # Child JVMs that learner programs start inherit these CPU limits. The
+        # runner hides only its own JVMs' "Picked up" notice from the shown log.
         JAVA_TOOL_OPTIONS=(
             "-XX:ActiveProcessorCount=2 -XX:ParallelGCThreads=2 -XX:ConcGCThreads=1"
         ),
@@ -215,6 +410,10 @@ def child_environment(
             PYTENSOR_FLAGS=f"compiledir={directory / 'pytensor'},blas__ldflags=",
             NUMBA_NUM_THREADS="2",
         )
+    if profile_id == "tensorflow-cpu":
+        # Hide TensorFlow's C++ INFO lines, such as "Local rendezvous is
+        # aborting", which appear even on successful runs. Warnings remain.
+        environment.update(TF_CPP_MIN_LOG_LEVEL="1")
     if profile_id in {"cuda-cpp", "cuda-python", "pytorch-cuda", "tensorflow-cuda"}:
         environment.update(
             CUDA_VISIBLE_DEVICES="0",
@@ -231,6 +430,13 @@ def child_environment(
 _LIMIT_EXEC = """
 import os, resource, sys
 resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
+# Out of memory, the kernel stops the learner's program rather than the worker.
+# Raising the score needs no privilege, and child processes inherit it.
+try:
+    with open("/proc/self/oom_score_adj", "w") as score:
+        score.write("1000")
+except OSError:
+    pass
 file_limit = int(os.environ.pop("_DS60_FILE_LIMIT_BYTES", "33554432"))
 if file_limit not in (33554432, 67108864):
     raise SystemExit("Invalid internal file limit")
@@ -317,7 +523,7 @@ def run_process(
     environment: dict[str, str],
     deadline: float,
     cancel: threading.Event,
-    output: BoundedOutput,
+    output: OutputSink,
     *,
     file_limit_bytes: int = MAX_SCRATCH_BYTES,
 ) -> tuple[int | None, str | None]:
@@ -439,8 +645,14 @@ def _python_verifier(verification_id: str) -> str:
     return (
         "import runpy\n"
         "from pathlib import Path\n"
+        "from ds60sqlpy.worker_figures import report_learner_error\n"
         "from ds60sqlpy.worker_operations import verify_python_namespace\n"
-        "namespace = runpy.run_path('main.py', run_name='__main__')\n"
+        "try:\n"
+        "    namespace = runpy.run_path('main.py', run_name='__main__')\n"
+        "except Exception as error:\n"
+        "    if not report_learner_error(error):\n"
+        "        raise\n"
+        "    raise SystemExit(1) from None\n"
         f"verify_python_namespace(namespace, {verification_id!r}, Path('checks.json'))\n"
     )
 
@@ -622,7 +834,10 @@ def language_commands(profile_id: str, directory: Path) -> tuple[list[list[str]]
     if profile_id == "dbt-duckdb":
         return [], [sys.executable, "-u", "-m", "ds60sqlpy.dbt_runner"]
     if profile_id == "stan-cpu":
-        return [["make", "--no-print-directory", "-C", "/opt/cmdstan", str(directory / "main")]], [
+        # -s keeps make from echoing its long stanc/g++ command lines.
+        return [
+            ["make", "--no-print-directory", "-s", "-C", "/opt/cmdstan", str(directory / "main")]
+        ], [
             sys.executable,
             "-u",
             "-m",
@@ -659,7 +874,10 @@ def language_commands(profile_id: str, directory: Path) -> tuple[list[list[str]]
             "-d",
             "allow_url_fopen=0",
         ]
-        return [[*flags, "-l", "main.php"]], [*flags, "main.php"]
+        # PHP parses the whole file before running it, so a parse error still
+        # stops the program first. A separate "php -l" pass only added the
+        # "No syntax errors detected in main.php" line to every run.
+        return [], [*flags, "main.php"]
     if profile_id == "c17":
         return [
             [
@@ -742,6 +960,11 @@ def language_commands(profile_id: str, directory: Path) -> tuple[list[list[str]]
                 "--nologo",
                 "--verbosity",
                 "quiet",
+                # "dotnet build" forces a closing summary onto its default console
+                # logger, which repeats every diagnostic. Report each one once.
+                "-noConsoleLogger",
+                "-logger:Microsoft.Build.Logging.ConsoleLogger,Microsoft.Build;"
+                "Verbosity=quiet;NoSummary",
                 "-p:UseSharedCompilation=false",
                 "-o",
                 "compiled",
@@ -1118,7 +1341,27 @@ def execute_operation(
         for path in directory.iterdir():
             os.chown(path, 65534, 65534)
         environment["_DS60_DROP_USER"] = "1"
-    output = BoundedOutput(observer=on_output)
+    # The shown log is what the learner reads; the raw log keeps every runner line.
+    raw = BoundedOutput()
+    shown = BoundedOutput(
+        observer=None
+        if on_output is None
+        else lambda text, truncated: on_output(display_output(profile_id, text), truncated)
+    )
+
+    def run(command: list[str], until: float, **limits: int) -> tuple[int | None, str | None]:
+        sink = _ChildOutput(raw, shown, _runner_notices(command, environment))
+        try:
+            return run_process(command, directory, environment, until, cancel, sink, **limits)
+        finally:
+            sink.finish()
+
+    def logs() -> tuple[str, bool, str | None]:
+        text, truncated = shown.snapshot()
+        text = display_output(profile_id, text)
+        complete = raw.snapshot()[0]
+        return text, truncated, None if complete == text else complete
+
     deadline = time.monotonic() + timeout_seconds
     compiling: list[list[str]] = []
     if profile_id in {"cuda-cpp", "cuda-python", "pytorch-cuda", "tensorflow-cuda"}:
@@ -1244,28 +1487,21 @@ def execute_operation(
         limits = (
             {"file_limit_bytes": MAX_SCRATCH_BYTES * 2} if profile_id == "csharp-dotnet" else {}
         )
-        code, interrupted = run_process(
-            compile_command,
-            directory,
-            environment,
-            min(deadline, time.monotonic() + 60),
-            cancel,
-            output,
-            **limits,
-        )
+        code, interrupted = run(compile_command, min(deadline, time.monotonic() + 60), **limits)
         if interrupted or code != 0:
-            text, truncated = output.snapshot()
+            text, truncated, raw_text = logs()
             return OperationResult(
                 code,
                 text,
                 truncated,
                 interrupted or "failed",
                 "Compilation did not produce a runnable artifact.",
+                raw_output=raw_text,
             )
     on_status("running")
     if verification_id:
         on_status("verifying")
-    code, interrupted = run_process(command, directory, environment, deadline, cancel, output)
+    code, interrupted = run(command, deadline)
     checks = _read_checks(directory) if verification_id else []
     if verification_id and not checks:
         checks = [
@@ -1275,24 +1511,32 @@ def execute_operation(
                 "detail": "The registered verifier did not produce a valid check report.",
             }
         ]
-    text, truncated = output.snapshot()
+    text, truncated, raw_text = logs()
     status = interrupted or (
         "succeeded" if code == 0 and all(c["passed"] for c in checks) else "failed"
     )
-    detail = (
-        "Registered verification completed."
-        if verification_id
-        else "Execution completed; no verifier was requested."
-    )
     if interrupted:
         detail = {
-            "cancelled": "Cancelled and child processes reaped.",
-            "timed_out": "Total execution deadline exceeded; child processes reaped.",
-            "failed": "Scratch allowance exceeded; child processes reaped.",
+            "cancelled": "Cancelled; the program was stopped.",
+            "timed_out": "Stopped at the time limit.",
+            "failed": "Scratch allowance exceeded; the program was stopped.",
         }[interrupted]
+    elif code is not None and code < 0:
+        detail = (
+            # abort(): the program's own runtime stopped it, e.g. an uncaught exception.
+            f"The program stopped itself after an error (signal {-code})."
+            if code == -signal.SIGABRT
+            else f"The program was stopped by the system (signal {-code})."
+        )
+    elif code:
+        detail = f"The program finished with exit code {code}."
+    else:
+        detail = "The lesson checks ran." if verification_id else "The program finished."
     from ds60sqlpy.plot_artifacts import read_artifacts
 
     artifacts, capture_warning = read_artifacts(directory)
     if capture_warning:
         detail += " " + capture_warning
-    return OperationResult(code, text, truncated, status, detail, checks, artifacts)
+    return OperationResult(
+        code, text, truncated, status, detail, checks, artifacts, raw_output=raw_text
+    )

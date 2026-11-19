@@ -1,0 +1,68 @@
+[
+  {
+    "case": "assert-eq",
+    "source": "fn main() {\n    let total = 1 + 1;\n    assert_eq!(total, 3);\n}\n",
+    "output": "\nthread 'main' (906) panicked at main.rs:3:5:\nassertion `left == right` failed\n  left: 2\n right: 3\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n",
+    "returncode": 101,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "assertion",
+    "expected_line": 3,
+    "expected_column": 5
+  },
+  {
+    "case": "cannot-find-value",
+    "source": "fn main() {\n    let total = 5;\n    println!(\"{}\", totl);\n}\n",
+    "output": "error[E0425]: cannot find value `totl` in this scope\n --> main.rs:3:20\n  |\n3 |     println!(\"{}\", totl);\n  |                    ^^^^\n  |\nhelp: a local variable with a similar name exists\n  |\n3 |     println!(\"{}\", total);\n  |                       +\n\nerror: aborting due to 1 previous error\n\nFor more information about this error, try `rustc --explain E0425`.\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "compile",
+    "expected_line": 3,
+    "expected_column": 20
+  },
+  {
+    "case": "mismatched-types",
+    "source": "fn main() {\n    let count: i32 = \"five\";\n    println!(\"{count}\");\n}\n",
+    "output": "error[E0308]: mismatched types\n --> main.rs:2:22\n  |\n2 |     let count: i32 = \"five\";\n  |                ---   ^^^^^^ expected `i32`, found `&str`\n  |                |\n  |                expected due to this\n\nerror: aborting due to 1 previous error\n\nFor more information about this error, try `rustc --explain E0308`.\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "compile",
+    "expected_line": 2,
+    "expected_column": 22
+  },
+  {
+    "case": "missing-semicolon",
+    "source": "fn main() {\n    let total = 5\n    println!(\"{total}\");\n}\n",
+    "output": "error: expected `;`, found `println`\n --> main.rs:2:18\n  |\n2 |     let total = 5\n  |                  ^ help: add `;` here\n3 |     println!(\"{total}\");\n  |     ------- unexpected token\n\nerror: aborting due to 1 previous error\n\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "syntax",
+    "expected_line": 2,
+    "expected_column": 18
+  },
+  {
+    "case": "moved-value",
+    "source": "fn main() {\n    let name = String::from(\"Ada\");\n    let other = name;\n    println!(\"{name} {other}\");\n}\n",
+    "output": "error[E0382]: borrow of moved value: `name`\n --> main.rs:4:16\n  |\n2 |     let name = String::from(\"Ada\");\n  |         ---- move occurs because `name` has type `String`, which does not implement the `Copy` trait\n3 |     let other = name;\n  |                 ---- value moved here\n4 |     println!(\"{name} {other}\");\n  |                ^^^^ value borrowed here after move\n  |\nhelp: consider cloning the value if the performance cost is acceptable\n  |\n3 |     let other = name.clone();\n  |                     ++++++++\n\nerror: aborting due to 1 previous error\n\nFor more information about this error, try `rustc --explain E0382`.\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "compile",
+    "expected_line": 4,
+    "expected_column": 16
+  },
+  {
+    "case": "panic-index",
+    "source": "fn main() {\n    let scores = vec![90, 85];\n    let index = 5;\n    println!(\"{}\", scores[index]);\n}\n",
+    "output": "\nthread 'main' (885) panicked at main.rs:4:26:\nindex out of bounds: the len is 2 but the index is 5\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n",
+    "returncode": 101,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "runtime",
+    "expected_line": 4,
+    "expected_column": 26
+  }
+]

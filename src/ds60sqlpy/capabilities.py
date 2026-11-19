@@ -141,7 +141,7 @@ def probe_sql(python: str | None) -> tuple[bool, str]:
             False,
             "SQL pads require a limited course login, separate from the bootstrap administrator.",
         )
-    return True, "The local course database and limited SQL login are ready."
+    return True, "The course database is reachable."
 
 
 def _setup(group: str) -> str:
@@ -247,7 +247,13 @@ class CapabilityService:
                     "title": "SQL snippet",
                     "available": descriptor["available"],
                     "can_run": descriptor["available"],
-                    "reason": descriptor["reason"],
+                    "reason": (
+                        "Runs the SQL you type against the course database and shows up to "
+                        "100 rows. Successful changes are kept; Reset training data restores "
+                        "the original rows."
+                        if descriptor["available"]
+                        else descriptor["reason"]
+                    ),
                     "timeout_seconds": self.timeout_seconds,
                     "allowed_timeout_seconds": list(ALLOWED_TIMEOUT_SECONDS),
                 }
@@ -255,7 +261,8 @@ class CapabilityService:
             if primary and lesson.lesson_path.endswith(".sql"):
                 supported = shutil.which("psql") is not None
                 reason = (
-                    "Runs the guarded learner SQL file, fixed psql directives and includes."
+                    "Runs this lesson's whole SQL script with psql, as the course checks it. "
+                    "Missing course tables load first."
                     if descriptor["available"]
                     else descriptor["reason"]
                 )

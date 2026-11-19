@@ -1,0 +1,35 @@
+[
+  {
+    "case": "arrow-conversion",
+    "source": "import pyarrow as pa\n\nnumbers = pa.array([1, 2, \"three\"])\nprint(numbers)\n",
+    "output": "Traceback (most recent call last):\n  File \"<frozen runpy>\", line 198, in _run_module_as_main\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"/opt/worker/src/ds60sqlpy/worker_figures.py\", line 69, in <module>\n    main()\n  File \"/opt/worker/src/ds60sqlpy/worker_figures.py\", line 65, in main\n    return _run()\n           ^^^^^^\n  File \"/opt/worker/src/ds60sqlpy/worker_figures.py\", line 55, in _run\n    runpy.run_path(\"main.py\", run_name=\"__main__\")\n  File \"<frozen runpy>\", line 287, in run_path\n  File \"<frozen runpy>\", line 98, in _run_module_code\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"main.py\", line 3, in <module>\n    numbers = pa.array([1, 2, \"three\"])\n              ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"pyarrow/array.pxi\", line 375, in pyarrow.lib.array\n  File \"pyarrow/array.pxi\", line 46, in pyarrow.lib._sequence_to_array\n  File \"pyarrow/error.pxi\", line 155, in pyarrow.lib.pyarrow_internal_check_status\n  File \"pyarrow/error.pxi\", line 92, in pyarrow.lib.check_status\npyarrow.lib.ArrowInvalid: Could not convert 'three' with type str: tried to convert to int64\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "runtime",
+    "expected_line": 3,
+    "expected_column": 11
+  },
+  {
+    "case": "assertion",
+    "source": "expected = 3\nactual = 1 + 1\nassert actual == expected, f\"got {actual}\"\n",
+    "output": "Traceback (most recent call last):\n  File \"<frozen runpy>\", line 198, in _run_module_as_main\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"/opt/worker/src/ds60sqlpy/worker_figures.py\", line 69, in <module>\n    main()\n  File \"/opt/worker/src/ds60sqlpy/worker_figures.py\", line 65, in main\n    return _run()\n           ^^^^^^\n  File \"/opt/worker/src/ds60sqlpy/worker_figures.py\", line 55, in _run\n    runpy.run_path(\"main.py\", run_name=\"__main__\")\n  File \"<frozen runpy>\", line 287, in run_path\n  File \"<frozen runpy>\", line 98, in _run_module_code\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"main.py\", line 3, in <module>\n    assert actual == expected, f\"got {actual}\"\n           ^^^^^^^^^^^^^^^^^^\nAssertionError: got 2\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "assertion",
+    "expected_line": 3,
+    "expected_column": 8
+  },
+  {
+    "case": "syntax",
+    "source": "values = [1, 2, 3]\nfor value in values\n    print(value)\n",
+    "output": "Traceback (most recent call last):\n  File \"<frozen runpy>\", line 198, in _run_module_as_main\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"/opt/worker/src/ds60sqlpy/worker_figures.py\", line 69, in <module>\n    main()\n  File \"/opt/worker/src/ds60sqlpy/worker_figures.py\", line 65, in main\n    return _run()\n           ^^^^^^\n  File \"/opt/worker/src/ds60sqlpy/worker_figures.py\", line 55, in _run\n    runpy.run_path(\"main.py\", run_name=\"__main__\")\n  File \"<frozen runpy>\", line 286, in run_path\n  File \"<frozen runpy>\", line 259, in _get_code_from_file\n  File \"main.py\", line 2\n    for value in values\n                       ^\nSyntaxError: expected ':'\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "syntax",
+    "expected_line": 2,
+    "expected_column": 20
+  }
+]

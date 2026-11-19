@@ -199,6 +199,29 @@ def test_job_persists_source_hash_result_and_idempotency_without_replaying(
         recovered.close()
 
 
+def test_worked_solution_job_keeps_the_learner_draft(authored: ModuleCatalog) -> None:
+    client = FakeClient()
+    state = ModuleState(authored)
+    state.save("cpp-009", {"source": "my attempt"})
+    jobs = ModuleJobs(authored, state, client)
+    key = "e" * 32
+    try:
+        with pytest.raises(ValueError, match="worked-solution"):
+            jobs.start("cpp-009", "int main() {}", 15, "f" * 32, "answer")
+        jobs.start("cpp-009", "int main() {}", 15, key, "solution")
+        result = wait_status(jobs, key, "succeeded")
+        assert result["purpose"] == "solution" and result["output"] == "42\n"
+        assert state.read("cpp-009")["source"] == "my attempt"
+        assert jobs.history("cpp-009")[0]["purpose"] == "solution"
+        with pytest.raises(ValueError, match="different"):
+            jobs.start("cpp-009", "int main() {}", 15, key)
+        practice = "0" * 32
+        jobs.start("cpp-009", "int main(){return 0;}", 15, practice)
+        assert "purpose" not in wait_status(jobs, practice, "succeeded")
+    finally:
+        jobs.close()
+
+
 def test_busy_and_cancel_use_owned_job_identity(authored: ModuleCatalog) -> None:
     client = FakeClient(hold=True)
     jobs = ModuleJobs(authored, ModuleState(authored), client)
@@ -617,4 +640,71 @@ def test_get_reconciles_a_published_terminal_snapshot_before_returning(
         if thread is not None:
             thread.join(timeout=5)
             assert not thread.is_alive()
+        jobs.close()
+
+
+def test_only_failed_or_timed_out_snapshots_carry_an_explanation(
+    authored: ModuleCatalog,
+) -> None:
+    fixtures = Path(__file__).parent / "fixtures/run_explain/cpp20.json"
+    case = next(
+        item
+        for item in json.loads(fixtures.read_text(encoding="utf-8"))
+        if item["case"] == "missing-semicolon"
+    )
+    client = FakeClient(hold=True)
+    jobs = ModuleJobs(authored, ModuleState(authored), client)
+    key = "ab" * 16
+    try:
+        jobs.start("cpp-009", case["source"], 15, key)
+        worker = client.jobs[key]
+        for status, code in (("running", None), ("cancelled", -15)):
+            assert "explanation" not in jobs._snapshot(
+                dict(worker, status=status, returncode=code), key
+            )
+        success = dict(worker, status="succeeded", returncode=0, output="42\n")
+        assert "explanation" not in jobs._snapshot(success, key)
+        timed_out = jobs._snapshot(dict(worker, status="timed_out", returncode=-15), key)
+        assert timed_out["explanation"]["kind"] == "timeout"
+        check = {"name": "weights", "passed": False, "detail": "Fixed oracle values."}
+        verifier = jobs._snapshot(
+            dict(worker, status="failed", returncode=1, output="", checks=[check]), key
+        )
+        assert verifier["explanation"]["kind"] == "assertion"
+        assert "checks did not pass" in verifier["explanation"]["title"]
+        failed = jobs._snapshot(
+            dict(worker, status="failed", returncode=1, output=case["output"]), key
+        )
+        assert failed["explanation"]["kind"] == "syntax"
+        assert (failed["explanation"]["line"], failed["explanation"]["column"]) == (4, 24)
+        assert jobs._update(key, failed)["explanation"] == failed["explanation"]
+    finally:
+        jobs.close()
+
+
+def test_receipt_keeps_the_complete_runner_log_beside_the_shown_output(
+    authored: ModuleCatalog,
+) -> None:
+    client = FakeClient(hold=True)
+    jobs = ModuleJobs(authored, ModuleState(authored), client)
+    key = "cd" * 16
+    notice = "Picked up JAVA_TOOL_OPTIONS: -XX:ActiveProcessorCount=2\n"
+    try:
+        jobs.start("cpp-009", "int main(){return 0;}\n", 15, key)
+        running = jobs._snapshot(dict(client.jobs[key], output="Hello\n"), key)
+        assert "raw_output" not in running
+        with pytest.raises(ValueError, match="worker log"):
+            jobs._snapshot(dict(client.jobs[key], raw_output=["not", "text"]), key)
+        done = dict(
+            client.jobs[key],
+            status="succeeded",
+            returncode=0,
+            output="Hello\n",
+            raw_output=notice + "Hello\n",
+        )
+        shown = jobs._update(key, jobs._snapshot(done, key))
+        assert (shown["output"], shown["raw_output"]) == ("Hello\n", notice + "Hello\n")
+        saved = json.loads(jobs._path(key).read_text(encoding="utf-8"))
+        assert (saved["output"], saved["raw_output"]) == ("Hello\n", notice + "Hello\n")
+    finally:
         jobs.close()

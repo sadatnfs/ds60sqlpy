@@ -13,6 +13,13 @@ from typing import Any
 from ds60sqlpy.catalog import Catalog
 from ds60sqlpy.classroom_runs import ClassroomRunStore
 from ds60sqlpy.execution import MAX_CODE_BYTES
+from ds60sqlpy.exercises import (
+    REVEAL_MESSAGE,
+    exercise_number,
+    exercise_solution,
+    lesson_exercises,
+    reference_program_payload,
+)
 from ds60sqlpy.lesson_reader import (
     ReaderTarget,
     reader_relative_path,
@@ -129,6 +136,10 @@ class ClassroomService:
             return self.index()
         if action == "classroom-solutions":
             return self.solutions(payload)
+        if action == "classroom-exercises":
+            return self.exercises(payload)
+        if action in {"classroom-exercise-solution", "classroom-reference-program"}:
+            return self.revealed_exercise(action, payload)
         if action in {"classroom-history", "classroom-run-result"}:
             lesson_id, language = payload.get("lesson_id"), payload.get("language")
             mode = payload.get("mode", "snippet")
@@ -179,7 +190,7 @@ class ClassroomService:
                     "source_level": lesson.level,
                     "status": "authored",
                     "engine": "legacy",
-                    "outcome": lesson.phase,
+                    "outcome": lesson.outcome or lesson.phase,
                     "prerequisites": list(lesson.prerequisites),
                     "estimated_minutes": lesson.estimated_minutes,
                     "minutes": lesson.estimated_minutes,
@@ -292,3 +303,57 @@ class ClassroomService:
                 for position, path in enumerate(lesson.solution_paths)
             ]
         }
+
+    def exercises(self, payload: dict[str, Any]) -> dict[str, Any]:
+        """Return a lesson's exercises and progressive hints, never solution text."""
+        lesson_id = payload.get("lesson_id")
+        if not isinstance(lesson_id, str):
+            raise ValueError("Choose a cataloged lesson ID.")
+        if lesson_id not in self.legacy_ids:
+            return self.dispatch({"action": "module-exercises", "lesson_id": lesson_id})
+        lesson = self.catalog.get(lesson_id)
+        return lesson_exercises(
+            lesson_id=lesson.id,
+            language=lesson.runner,
+            guide=self.catalog.resolve(lesson.guide_path),
+            solutions=[self.catalog.resolve(path) for path in lesson.solution_paths],
+            repo_root=self.catalog.repo_root,
+            targets=self.targets,
+            guide_link_prefix="lab-guide--",
+        )
+
+    def revealed_exercise(self, action: str, payload: dict[str, Any]) -> dict[str, Any]:
+        """Apply the explicit reveal boundary to one solution or the reference programs."""
+        if payload.get("reveal") is not True:
+            raise ValueError(REVEAL_MESSAGE)
+        lesson_id = payload.get("lesson_id")
+        if not isinstance(lesson_id, str):
+            raise ValueError("Choose a cataloged lesson ID.")
+        reference = action == "classroom-reference-program"
+        if lesson_id not in self.legacy_ids:
+            if reference:
+                return self.dispatch(
+                    {"action": "module-reference-program", "lesson_id": lesson_id, "reveal": True}
+                )
+            return self.dispatch(
+                {
+                    "action": "module-exercise-solution",
+                    "lesson_id": lesson_id,
+                    "number": exercise_number(payload.get("number")),
+                    "reveal": True,
+                }
+            )
+        lesson = self.catalog.get(lesson_id)
+        solutions = [self.catalog.resolve(path) for path in lesson.solution_paths]
+        if reference:
+            return reference_program_payload(
+                solutions=solutions, language=lesson.runner, repo_root=self.catalog.repo_root
+            )
+        return exercise_solution(
+            lesson_id=lesson.id,
+            number=payload.get("number"),
+            language=lesson.runner,
+            solutions=solutions,
+            repo_root=self.catalog.repo_root,
+            targets=self.targets,
+        )

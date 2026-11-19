@@ -8,11 +8,35 @@ import io
 import json
 import runpy
 import sys
+import warnings
 from pathlib import Path
 from typing import Any
 
 from ds60sqlpy import plot_artifacts
 from ds60sqlpy.plot_artifacts import publish_artifact
+
+LEARNER_FILE = "main.py"
+
+
+def report_learner_error(error: Exception) -> bool:
+    """Report an uncaught learner error from its first ``main.py`` frame.
+
+    This mirrors ``notebook_execution.learner_excepthook`` for the legacy pad.
+    Line numbers, caret markers, chained exceptions and later library frames are
+    kept, and a SyntaxError points at the learner's line. The report goes
+    through ``sys.excepthook`` because libraries such as PyTensor install their
+    own hook. Returns False for a failure without a learner frame, such as a
+    runner error, which the caller re-raises with Python's complete traceback.
+    """
+
+    start = error.__traceback__
+    while start is not None and start.tb_frame.f_code.co_filename != LEARNER_FILE:
+        start = start.tb_next
+    if start is None and not (isinstance(error, SyntaxError) and error.filename == LEARNER_FILE):
+        return False
+    # Python's own hook prints the exception's attached traceback, not the argument.
+    sys.excepthook(type(error), error.with_traceback(start), start)
+    return True
 
 
 def _run() -> None:
@@ -50,9 +74,16 @@ def _run() -> None:
     from ds60sqlpy.plot_capture import install_display_hooks
 
     install_display_hooks(patch_plotly, patch_matplotlib)
+    # PyMC imports ArviZ, which announces its coming refactor on every fresh run.
+    warnings.filterwarnings(
+        "ignore",
+        message=r"\s*ArviZ is undergoing a major refactor",
+        category=FutureWarning,
+        module="arviz",
+    )
     try:
-        sys.argv = ["main.py"]
-        runpy.run_path("main.py", run_name="__main__")
+        sys.argv = [LEARNER_FILE]
+        runpy.run_path(LEARNER_FILE, run_name="__main__")
     finally:
         pyplot = sys.modules.get("matplotlib.pyplot")
         if pyplot is not None:
@@ -62,7 +93,12 @@ def _run() -> None:
 
 def main() -> None:
     with plot_artifacts.output_directory(Path.cwd()):
-        return _run()
+        try:
+            return _run()
+        except Exception as error:
+            if not report_learner_error(error):
+                raise
+            raise SystemExit(1) from None
 
 
 if __name__ == "__main__":

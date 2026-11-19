@@ -1,0 +1,79 @@
+[
+  {
+    "case": "assertion",
+    "source": "import assert from \"node:assert/strict\";\n\nconst total = 1 + 1;\nassert.equal(total, 3);\n",
+    "output": "node:internal/modules/run_main:107\n    triggerUncaughtException(\n    ^\n\nAssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n2 !== 3\n\n    at file:///tmp/job-xxxxxxxx/main.mjs:4:8\n    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)\n    at async node:internal/modules/esm/loader:647:26\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: 2,\n  expected: 3,\n  operator: 'strictEqual',\n  diff: 'simple'\n}\n\nNode.js v24.22.3\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "assertion",
+    "expected_line": 4,
+    "expected_column": 8
+  },
+  {
+    "case": "assertion-shown",
+    "source": "import assert from \"node:assert/strict\";\n\nconst total = 1 + 1;\nassert.equal(total, 3);\n",
+    "output": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n2 !== 3\n\n    at file:///tmp/job-xxxxxxxx/main.mjs:4:8 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: 2,\n  expected: 3,\n  operator: 'strictEqual',\n  diff: 'simple'\n}\n\nNode.js v24.22.3\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "assertion",
+    "expected_line": 4,
+    "expected_column": 8
+  },
+  {
+    "case": "missing-package",
+    "source": "import _ from \"lodash\";\n\nconsole.log(_);\n",
+    "output": "node:internal/modules/package_json_reader:331\n  throw new ERR_MODULE_NOT_FOUND(packageName, fileURLToPath(base), null);\n        ^\n\nError [ERR_MODULE_NOT_FOUND]: Cannot find package 'lodash' imported from /tmp/job-xxxxxxxx/main.mjs\n    at Object.getPackageJSONURL (node:internal/modules/package_json_reader:331:9)\n    at packageResolve (node:internal/modules/esm/resolve:784:25)\n    at moduleResolve (node:internal/modules/esm/resolve:873:18)\n    at defaultResolve (node:internal/modules/esm/resolve:1006:11)\n    at #cachedDefaultResolve (node:internal/modules/esm/loader:705:20)\n    at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:725:38)\n    at ModuleLoader.resolveSync (node:internal/modules/esm/loader:763:56)\n    at #resolve (node:internal/modules/esm/loader:687:17)\n    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:607:35)\n    at ModuleJob.syncLink (node:internal/modules/esm/module_job:276:33) {\n  code: 'ERR_MODULE_NOT_FOUND'\n}\n\nNode.js v24.22.3\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "runtime",
+    "expected_line": null,
+    "expected_column": null
+  },
+  {
+    "case": "reference-error",
+    "source": "const total = 5;\nconsole.log(totl);\n",
+    "output": "file:///tmp/job-xxxxxxxx/main.mjs:2\nconsole.log(totl);\n            ^\n\nReferenceError: totl is not defined\n    at file:///tmp/job-xxxxxxxx/main.mjs:2:13\n    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)\n    at async node:internal/modules/esm/loader:647:26\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)\n\nNode.js v24.22.3\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "runtime",
+    "expected_line": 2,
+    "expected_column": 13
+  },
+  {
+    "case": "syntax",
+    "source": "const name = \"Ada\";\nconsole.log(\"Hello, \" + name;\n",
+    "output": "file:///tmp/job-xxxxxxxx/main.mjs:2\nconsole.log(\"Hello, \" + name;\n                        ^^^^\n\nSyntaxError: missing ) after argument list\n    at compileSourceTextModule (node:internal/modules/esm/utils:319:16)\n    at ModuleLoader.moduleStrategy (node:internal/modules/esm/translators:89:18)\n    at #translate (node:internal/modules/esm/loader:438:20)\n    at afterLoad (node:internal/modules/esm/loader:506:29)\n    at ModuleLoader.loadAndTranslate (node:internal/modules/esm/loader:511:12)\n    at #getOrCreateModuleJobAfterResolve (node:internal/modules/esm/loader:564:36)\n    at afterResolve (node:internal/modules/esm/loader:611:52)\n    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:617:12)\n    at node:internal/modules/esm/loader:636:32\n    at TracingChannel.tracePromise (node:diagnostics_channel:370:14)\n\nNode.js v24.22.3\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "syntax",
+    "expected_line": 2,
+    "expected_column": 25
+  },
+  {
+    "case": "syntax-shown",
+    "source": "const name = \"Ada\";\nconsole.log(\"Hello, \" + name;\n",
+    "output": "file:///tmp/job-xxxxxxxx/main.mjs:2\nconsole.log(\"Hello, \" + name;\n                        ^^^^\n\nSyntaxError: missing ) after argument list\n\nNode.js v24.22.3\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "syntax",
+    "expected_line": 2,
+    "expected_column": 25
+  },
+  {
+    "case": "type-error",
+    "source": "const user = undefined;\nconsole.log(user.name);\n",
+    "output": "file:///tmp/job-xxxxxxxx/main.mjs:2\nconsole.log(user.name);\n                 ^\n\nTypeError: Cannot read properties of undefined (reading 'name')\n    at file:///tmp/job-xxxxxxxx/main.mjs:2:18\n    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)\n    at async node:internal/modules/esm/loader:647:26\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)\n\nNode.js v24.22.3\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "runtime",
+    "expected_line": 2,
+    "expected_column": 18
+  }
+]

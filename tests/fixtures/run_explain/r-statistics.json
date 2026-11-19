@@ -1,0 +1,68 @@
+[
+  {
+    "case": "could-not-find-function",
+    "source": "values <- c(1, 2, 3)\nmeen(values)\n",
+    "output": "Error in meen(values) : could not find function \"meen\"\nCalls: .ds60_run -> source -> withVisible -> eval -> eval\nExecution halted\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "runtime",
+    "expected_line": null,
+    "expected_column": null
+  },
+  {
+    "case": "missing-package",
+    "source": "library(dplyrr)\n",
+    "output": "Error in library(dplyrr) : there is no package called ‘dplyrr’\nCalls: .ds60_run -> source -> withVisible -> eval -> eval -> library\nExecution halted\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "runtime",
+    "expected_line": null,
+    "expected_column": null
+  },
+  {
+    "case": "object-not-found",
+    "source": "x <- 5\nprint(y)\n",
+    "output": "Error in eval(ei, envir) : object 'y' not found\nCalls: .ds60_run -> source -> withVisible -> eval -> eval -> print\nExecution halted\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "runtime",
+    "expected_line": null,
+    "expected_column": null
+  },
+  {
+    "case": "object-not-found-shown",
+    "source": "x <- 5\nprint(y)\n",
+    "output": "Error in eval(ei, envir) : object 'y' not found\nCalls: print\nExecution halted\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "runtime",
+    "expected_line": null,
+    "expected_column": null
+  },
+  {
+    "case": "stopifnot",
+    "source": "total <- 1 + 1\nstopifnot(total == 3)\n",
+    "output": "Error: total == 3 is not TRUE\nExecution halted\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "assertion",
+    "expected_line": null,
+    "expected_column": null
+  },
+  {
+    "case": "unexpected-symbol",
+    "source": "x <- 5\ny <- x x\nprint(y)\n",
+    "output": "Error in source(\"main.R\", local = globalenv(), echo = FALSE, keep.source = TRUE) : \n  main.R:2:8: unexpected symbol\n1: x <- 5\n2: y <- x x\n          ^\nCalls: .ds60_run -> source\nExecution halted\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "syntax",
+    "expected_line": 2,
+    "expected_column": 8
+  }
+]

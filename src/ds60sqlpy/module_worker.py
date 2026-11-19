@@ -142,6 +142,7 @@ class WorkerJob:
     artifacts: list[dict[str, Any]] = field(default_factory=list)
     truncated: bool = False
     detail: str = "Accepted; waiting for the owned execution thread."
+    raw_output: str | None = None
     started: float = field(default_factory=time.monotonic)
     finished: float | None = None
     cancel: threading.Event = field(default_factory=threading.Event)
@@ -158,6 +159,7 @@ class WorkerJob:
             "elapsed_seconds": round((self.finished or time.monotonic()) - self.started, 3),
             "detail": self.detail,
             **({"artifacts": self.artifacts} if self.artifacts else {}),
+            **({"raw_output": self.raw_output} if self.raw_output is not None else {}),
         }
 
 
@@ -296,6 +298,7 @@ class WorkerState:
                 job.artifacts = result.artifacts
                 job.truncated = result.truncated
                 job.detail = result.detail
+                job.raw_output = result.raw_output
                 if self.profile in {"cuda-cpp", "cuda-python", "pytorch-cuda", "tensorflow-cuda"}:
                     from ds60sqlpy.gpu_runtime import needs_device_review
 

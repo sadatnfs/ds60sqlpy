@@ -13,7 +13,7 @@ registered subject and return to its saved code and notes.
 | Learning systems and language models | TensorFlow, PyTorch, NLP, LLM theory, applied LLM systems |
 | Infrastructure and acceleration | Docker, Kubernetes, GPU computing and CUDA |
 
-Use **All learning paths** or **Switch subject** to change direction. Subject
+Use **All subjects**, search (Ctrl+K or Cmd+K) or **Switch subject** to change direction. Subject
 names and individual color themes identify the current path. Search within a
 path, filter its stage or choose a lesson from the list. A filter changes what
 you see; it does not erase your current draft.
@@ -27,9 +27,14 @@ applied systems. The statistics book also works as a reference.
 
 ## Read the explanation
 
-A lesson puts its guide beside its coding or reading workspace. Mathematics
-renders with fractions, powers and indices. Code blocks are highlighted by
-language and remain copyable. Those resources are bundled locally.
+A lesson opens as a two-page spread: its guide on the left, its coding or
+reading workspace on the right. Drag the divider to resize the two pages, or
+choose **Hide lesson list** for more room; the classroom remembers both
+choices. On a phone, **Lesson**, **Code** and **Result** jump between the
+parts. Mathematics renders with fractions, powers and indices. Code blocks are
+highlighted by language and remain copyable. The code editor highlights syntax
+and numbers lines; Ctrl+Enter (Cmd+Enter on a Mac) runs and Ctrl+S saves.
+Those resources are bundled locally.
 
 Use **Focus on reading** for a wider explanation and **Show code and notes**
 to return to practice. The section chooser jumps within a long guide.
@@ -43,6 +48,39 @@ Statistics/ML, Applied Science and Bayesian Computing are tutorial tracks with
 complete worked examples and answered discussion directly, without mandatory
 exams or hidden answers.
 
+## Work through the exercises
+
+When a lesson has exercises, an **Exercises** panel sits at the top of the code
+page, above your prediction and the editor, so the problem stays in view while
+you write. Choose a problem by its number or with the arrow buttons (the arrow
+keys also move between numbers). Each problem shows its prompt and what a good
+answer looks like; **How to check your answer** stays folded until you want it.
+**Show a hint** opens the lesson's hints one at a time. In the chapter, **Work
+through these in the code pad** jumps from the exercise section to the panel.
+
+**Show the solution** first asks you to make an honest attempt, then opens that
+problem's worked solution with three tools:
+
+- **Run the solution** runs it in the same runtime and shows its output under
+  **Result of the worked solution**. Your code, your saved draft and your saved
+  runs do not change. The button appears only when the answer runs on its own;
+  an answer that builds on the rest of the lesson's program says so instead.
+- **Compare with my code** lists your code beside the solution, line by line.
+  Spacing and blank lines are ignored. Lines marked *Yours* appear only in your
+  code and lines marked *Solution* only in the solution; a different line can
+  still be a correct answer.
+- **Use in my editor** puts the solution in the editor as one step. **Undo**
+  (or Ctrl+Z, Cmd+Z on a Mac) brings your code back.
+
+Lessons with a complete reference program, such as the language modules, also
+offer **Show the reference program**, which uses the same tools on the whole
+program. **Mark as solved** records your own judgment; the count, the hints you
+opened and your place are remembered in this browser. For a whole SQL lesson
+script, the panel offers **Switch to the snippet pad**, where exercise answers
+belong, because the lesson script stays answer-free. SQL snippet results read as
+sentences above the result tables, and errors give PostgreSQL's message with
+its SQLSTATE code.
+
 ## Choose the right execution environment
 
 The capability notice describes the selected lesson or variant. A runtime
@@ -52,7 +90,7 @@ Follow its preparation command instead of installing tools inside the pad.
 | Workspace | What a Run does |
 | --- | --- |
 | Python | Executes current source in a fresh process; supported notebook-style cells share state only within that Run |
-| PostgreSQL | Runs a SQL snippet or the selected guarded whole-script psql workflow |
+| PostgreSQL | Runs a SQL snippet or the lesson's whole psql script; missing course tables load first, as the **Course database** panel explains |
 | C, C++, Go, C#, Rust, Swift, Java, Scala | Compiles the declared single-source artifact before execution |
 | Node JavaScript / TypeScript | Runs Node code, or checks and compiles TypeScript before Node execution |
 | HTML/CSS or browser JavaScript/D3 | Opens a separate browser preview with local inline code and bundled resources |
@@ -73,6 +111,18 @@ Compiled-language workers choose filenames and compiler arguments for you.
 Read the first diagnostic, change one thing and retry. Larger multi-file
 builds, interactive servers and project-specific dependencies use their
 separately documented fixtures.
+
+A failed run also carries a short explanation: one plain-language sentence,
+the editor line and column when the runtime's file naming maps them exactly,
+and one concrete next step. It is derived only from the submitted source and
+the actual output, which stays available in full. Positions in generated code,
+such as compiled TypeScript or dbt's wrapped SQL, are left out rather than
+guessed. Python pad tracebacks omit the classroom runner's own frames and show
+the program as `main.py`, with the editor's line numbers. Other runtimes hide
+only lines that come from the runner or the runtime's internals, such as JVM
+startup notices, Node's internal stack frames, the R runner's `Calls:` chain,
+.NET build summaries and Spark's INFO logs. Every line your program prints
+stays visible, and the job receipt keeps the complete log as `raw_output`.
 
 CUDA reading and CPU-model variants work without an NVIDIA device. Optional
 NVIDIA variants require explicit setup and a real device probe. A CPU

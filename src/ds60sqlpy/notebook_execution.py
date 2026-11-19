@@ -14,9 +14,12 @@ import runpy
 import sys
 import tempfile
 import tokenize
+import traceback
+from collections.abc import Callable
 from contextlib import suppress
 from dataclasses import dataclass
 from pathlib import Path
+from types import TracebackType
 from typing import Any
 
 _CELL_MARKER = re.compile(r"^#\s*%%(?:[ \t].*)?$")
@@ -182,6 +185,47 @@ def _exit_status(error: BaseException) -> int:
             return 0
         return error.code if isinstance(error.code, int) else 1
     return 130 if isinstance(error, KeyboardInterrupt) else 1
+
+
+def learner_excepthook(
+    path: Path, display_name: str = "main.py"
+) -> Callable[[type[BaseException], BaseException, TracebackType | None], None]:
+    """Show an uncaught learner error from its first learner frame, as ``display_name``.
+
+    Line numbers, caret markers and chained exceptions are kept. A failure without
+    a learner frame, such as a runner error, keeps Python's complete traceback.
+    """
+
+    learner = str(Path(path).resolve())
+
+    def hook(kind: type[BaseException], value: BaseException, tb: TracebackType | None) -> None:
+        try:
+            start = tb
+            while start is not None and start.tb_frame.f_code.co_filename != learner:
+                start = start.tb_next
+            syntax = isinstance(value, SyntaxError) and value.filename == learner
+            if start is None and not syntax:
+                sys.__excepthook__(kind, value, tb)
+                return
+            report = traceback.TracebackException(kind, value, start)
+            pending: list[traceback.TracebackException | None] = [report]
+            seen: set[int] = set()
+            while pending:
+                item = pending.pop()
+                if item is None or id(item) in seen:
+                    continue
+                seen.add(id(item))
+                for frame in item.stack:
+                    if frame.filename == learner:
+                        frame.filename = display_name
+                if getattr(item, "filename", None) == learner:
+                    item.filename = display_name
+                pending.extend((item.__cause__, item.__context__, *(item.exceptions or ())))
+            sys.stderr.write("".join(report.format()))
+        except Exception:
+            sys.__excepthook__(kind, value, tb)
+
+    return hook
 
 
 def execute_python_file(path: Path, runtime_directory: Path) -> int:

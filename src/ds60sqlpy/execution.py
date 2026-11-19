@@ -69,7 +69,8 @@ def matplotlib_cache_environment(repo_root: Path) -> dict[str, str]:
 PYTHON_WORKER = r"""
 import base64, hashlib, io, sys, warnings
 from pathlib import Path
-from ds60sqlpy.notebook_execution import execute_python_file, python_cells
+from ds60sqlpy.notebook_execution import (execute_python_file, learner_excepthook,
+    python_cells)
 
 runtime = Path(sys.argv[2])
 import json
@@ -122,6 +123,9 @@ if interactive:
 warnings.filterwarnings('ignore',
     message=r'FigureCanvasAgg is non-interactive, and thus cannot be shown',
     category=UserWarning)
+
+# Show an uncaught learner error from its first learner frame, named main.py.
+sys.excepthook = learner_excepthook(Path(sys.argv[1]))
 try:
     status = execute_python_file(Path(sys.argv[1]), runtime)
     if status:
@@ -141,7 +145,7 @@ SQL_WORKER = (
     + repr(COURSE_ROLE_QUERY)
     + "\n"
     + r"""
-import json, math, os, sys
+import json, math, os, re, sys
 from decimal import Decimal
 from pathlib import Path
 try:
@@ -182,12 +186,17 @@ def transport_value(value):
     return value
 
 query = Path(sys.argv[1]).read_text(encoding="utf-8")
+# The lesson script's own schema search path, validated by the parent process.
+search_path = os.environ.get("DS60_PAD_SEARCH_PATH", "")
+if search_path and not re.fullmatch(r"[a-z_][a-z0-9_]*(?:,[a-z_][a-z0-9_]*){0,7}", search_path):
+    raise SystemExit("Invalid lesson search path")
 class CourseRoleError(ValueError):
     pass
 
 try:
     with psycopg.connect("",
-            options="-c statement_timeout=5000 -c lock_timeout=2000") as conn:
+            options="-c statement_timeout=5000 -c lock_timeout=2000"
+            + (" -c search_path=" + search_path if search_path else "")) as conn:
         if conn.info.dbname != "advanced_sql_training":
             raise ValueError("The SQL pad requires the disposable course database.")
         privileged = conn.execute(COURSE_ROLE_QUERY).fetchone()
@@ -219,7 +228,11 @@ except Exception as exc:
     statement_failure = (isinstance(exc, psycopg.Error) and isinstance(sqlstate, str)
         and len(sqlstate) == 5 and sqlstate != "40003"
         and not sqlstate.startswith(("08", "57P0")))
-    rollback_known = isinstance(exc, CourseRoleError) or statement_failure
+    # psycopg refuses client-side COPY without a SQLSTATE; closing the
+    # connection then rolls the open transaction back.
+    client_copy = (isinstance(exc, psycopg.Error) and sqlstate is None
+        and str(exc).startswith("COPY cannot be used"))
+    rollback_known = isinstance(exc, CourseRoleError) or statement_failure or client_copy
     position = getattr(getattr(exc, 'diag', None), 'statement_position', None)
     error_line = (query[:int(position)-1].count('\n')+1
         if isinstance(position, str) and position.isdecimal()
@@ -227,9 +240,13 @@ except Exception as exc:
     print(json.dumps({"error_type": type(exc).__name__,
         "sqlstate": sqlstate,
         "error_line": error_line,
-        "message": str(exc).splitlines()[0] if rollback_known
+        "message": (
+            "COPY ... TO STDOUT and COPY ... FROM STDIN stream rows through a client "
+            "program such as psql, which the SQL snippet pad is not. Use Whole SQL "
+            "lesson (psql) for a lesson script that uses COPY, or SELECT the rows here."
+            if client_copy else str(exc).splitlines()[0] if rollback_known
             else "SQL transaction outcome is unknown. "
-                "Do not automatically rerun; inspect the database state first.",
+                "Do not automatically rerun; inspect the database state first."),
         "transaction": (
             "Current transaction rolled back; earlier explicit commits are preserved."
             if rollback_known else
@@ -283,6 +300,31 @@ class PadResult:
     elapsed_seconds: float
     stopped: str | None
     output_truncated: bool = False
+
+
+# A cataloged SQL lesson script states its schema search path in its own first
+# statement. The SQL snippet pad uses the same path, so the lesson's tables and
+# worked solutions resolve exactly as they do in the whole-lesson script.
+_LESSON_SEARCH_PATH = re.compile(
+    r"^SET\s+search_path\s+TO\s+([a-z_][a-z0-9_]*(?:\s*,\s*[a-z_][a-z0-9_]*){0,7})\s*;\s*$",
+    re.IGNORECASE | re.MULTILINE,
+)
+
+
+def lesson_search_path(catalog: Catalog, lesson_id: str) -> str | None:
+    """Return the search path a cataloged SQL lesson script sets, as `a,b`, if any."""
+
+    lesson = catalog.get(lesson_id)
+    if not lesson.lesson_path.endswith(".sql"):
+        return None
+    try:
+        text = catalog.resolve(lesson.lesson_path).read_text(encoding="utf-8")
+    except (OSError, ValueError):
+        return None
+    match = _LESSON_SEARCH_PATH.search(text)
+    if match is None:
+        return None
+    return ",".join(part.strip().lower() for part in match.group(1).split(","))
 
 
 class PadRunner:
@@ -467,9 +509,19 @@ class PadRunner:
             return path
 
     def run(
-        self, lesson_id: str, language: str, code: str, *, timeout_seconds: int | None = None
+        self,
+        lesson_id: str,
+        language: str,
+        code: str,
+        *,
+        timeout_seconds: int | None = None,
+        save: bool = True,
     ) -> dict[str, Any]:
-        """Save, execute, and bound one trusted local code submission."""
+        """Execute and bound one local submission, saving it as the pad unless save is False.
+
+        A worked-solution run passes save=False so the learner's saved pad and its
+        history stay exactly as they were.
+        """
 
         definition = RUNNERS.get(language)
         if definition is None:
@@ -486,7 +538,13 @@ class PadRunner:
         executor = cast(Literal["python", "sql"], definition.executor)
         if self.python is None:
             raise ValueError("Install Python 3.12, then set DS60_PYTHON to its executable path.")
-        path = self.save(lesson_id, language, code)
+        if save:
+            path = self.save(lesson_id, language, code)
+        else:
+            if not isinstance(code, str) or len(code.encode("utf-8")) > MAX_CODE_BYTES:
+                raise ValueError(f"Pad input must be text of at most {MAX_CODE_BYTES} UTF-8 bytes.")
+            path = self._path(lesson_id, language)
+            path.parent.mkdir(parents=True, exist_ok=True)
         snapshot = None
         try:
             # A concurrent explicit save may change practice.py after this Run
@@ -502,11 +560,12 @@ class PadRunner:
             ) as source:
                 snapshot = Path(source.name)
                 source.write(code)
-            result = (
-                self._run_snapshot(snapshot, executor)
-                if timeout_seconds is None
-                else self._run_snapshot(snapshot, executor, timeout_seconds=timeout_seconds)
-            )
+            options: dict[str, Any] = {}
+            if timeout_seconds is not None:
+                options["timeout_seconds"] = timeout_seconds
+            if executor == "sql":
+                options["search_path"] = lesson_search_path(self.catalog, lesson_id)
+            result = self._run_snapshot(snapshot, executor, **options)
             return {**result, "source_sha256": hashlib.sha256(code.encode("utf-8")).hexdigest()}
         finally:
             if snapshot is not None:
@@ -518,6 +577,7 @@ class PadRunner:
         language: Literal["python", "sql"],
         *,
         timeout_seconds: int | None = None,
+        search_path: str | None = None,
     ) -> dict[str, Any]:
         assert self.python is not None
         environment = dict(os.environ)
@@ -585,6 +645,12 @@ class PadRunner:
         environment.update(
             {name: value for name, value in database_environment.items() if name.startswith("PG")}
         )
+        environment.pop("DS60_PAD_SEARCH_PATH", None)
+        if search_path is not None:
+            if re.fullmatch(r"[a-z_][a-z0-9_]*(?:,[a-z_][a-z0-9_]*){0,7}", search_path) is None:
+                raise ValueError("The lesson's schema search path is not a plain schema list.")
+            # Applied as a session default; the learner's own SET search_path still wins.
+            environment["DS60_PAD_SEARCH_PATH"] = search_path
         command = [self.python, "-I", "-u", "-c", SQL_WORKER, str(path)]
         result = (
             self._execute(command, environment, language)

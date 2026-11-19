@@ -188,6 +188,34 @@ def test_lab_requires_exact_origin_and_session_token_before_execution(tmp_path: 
         thread.join(timeout=3)
 
 
+def test_worked_solution_run_keeps_the_saved_pad_and_run_history(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    server = LabServer(
+        Catalog.load(), progress_path=tmp_path / "progress.json", python=sys.executable
+    )
+    server.pads = PadRunner(local_catalog(tmp_path / "pads"))
+
+    def no_receipt(*args: object, **kwargs: object) -> None:
+        raise AssertionError("A worked-solution run must not create a learner run receipt.")
+
+    monkeypatch.setattr(server._classroom.runs, "record", no_receipt)
+    scope = {"lesson_id": "python-01", "language": "python"}
+    try:
+        server.action({"action": "save-pad", **scope, "code": "print('mine')\n"})
+        result = server.action(
+            {"action": "run", **scope, "code": "print(6 * 7)\n", "purpose": "solution"}
+        )
+        assert result["output"].strip() == "42" and result["purpose"] == "solution"
+        assert "receipt_saved" not in result
+        assert server.action({"action": "read-pad", **scope})["code"] == "print('mine')\n"
+        assert server.action({"action": "pad-history", **scope})["history"] == []
+        with pytest.raises(ValueError, match="worked-solution"):
+            server.action({"action": "run", **scope, "code": "print(1)\n", "purpose": "answer"})
+    finally:
+        server.server_close()
+
+
 def test_workspace_does_not_copy_into_its_own_payload(tmp_path: Path) -> None:
     source = tmp_path / "course"
     (source / "python").mkdir(parents=True)
@@ -378,3 +406,30 @@ def test_authenticated_capabilities_generic_saved_work_and_bounded_run_options(
         server.shutdown()
         server.server_close()
         serving.join(timeout=3)
+
+
+def test_failed_pad_responses_explain_the_error_without_changing_receipts(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    catalog = local_catalog(tmp_path)
+    monkeypatch.setattr("ds60sqlpy.lab.rendered_targets", lambda catalog: {})
+    server = LabServer(catalog, progress_path=tmp_path / "progress.json", python=sys.executable)
+    run = {"action": "run", "lesson_id": "python-01", "language": "python"}
+    try:
+        failed = server.action({**run, "code": "total = 10\nprint(totl)\n"})
+        explanation = failed["explanation"]
+        assert (explanation["kind"], explanation["line"]) == ("runtime", 2)
+        assert "`totl`" in explanation["title"] and "`total`" in explanation["hint"]
+        receipt = server.action(
+            {
+                "action": "classroom-run-result",
+                "lesson_id": "python-01",
+                "language": "python",
+                "mode": "snippet",
+                "receipt_id": failed["receipt_id"],
+            }
+        )["receipt"]
+        assert "explanation" not in receipt["result"]
+        assert "explanation" not in server.action({**run, "code": "print(42)\n"})
+    finally:
+        server.server_close()

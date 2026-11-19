@@ -1,0 +1,57 @@
+[
+  {
+    "case": "assertion",
+    "source": "#include <assert.h>\n\nint main(void) {\n    int total = 1 + 1;\n    assert(total == 3);\n    return 0;\n}\n",
+    "output": "program: main.c:5: main: Assertion `total == 3' failed.\n",
+    "returncode": -6,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "assertion",
+    "expected_line": 5,
+    "expected_column": null
+  },
+  {
+    "case": "implicit-declaration",
+    "source": "#include <stdio.h>\n\nint main(void) {\n    prinf(\"hi\\n\");\n    return 0;\n}\n",
+    "output": "main.c: In function ‘main’:\nmain.c:4:5: error: implicit declaration of function ‘prinf’; did you mean ‘printf’? [-Wimplicit-function-declaration]\n    4 |     prinf(\"hi\\n\");\n      |     ^~~~~\n      |     printf\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "compile",
+    "expected_line": 4,
+    "expected_column": 5
+  },
+  {
+    "case": "missing-semicolon",
+    "source": "#include <stdio.h>\n\nint main(void) {\n    printf(\"hi\\n\")\n    return 0;\n}\n",
+    "output": "main.c: In function ‘main’:\nmain.c:4:19: error: expected ‘;’ before ‘return’\n    4 |     printf(\"hi\\n\")\n      |                   ^\n      |                   ;\n    5 |     return 0;\n      |     ~~~~~~         \n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "syntax",
+    "expected_line": 4,
+    "expected_column": 19
+  },
+  {
+    "case": "segfault",
+    "source": "#include <stddef.h>\n\nint main(void) {\n    int *pointer = NULL;\n    *pointer = 1;\n    return 0;\n}\n",
+    "output": "",
+    "returncode": -11,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "runtime",
+    "expected_line": null,
+    "expected_column": null
+  },
+  {
+    "case": "undeclared",
+    "source": "#include <stdio.h>\n\nint main(void) {\n    total = 5;\n    printf(\"%d\\n\", total);\n    return 0;\n}\n",
+    "output": "main.c: In function ‘main’:\nmain.c:4:5: error: ‘total’ undeclared (first use in this function)\n    4 |     total = 5;\n      |     ^~~~~\nmain.c:4:5: note: each undeclared identifier is reported only once for each function it appears in\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "compile",
+    "expected_line": 4,
+    "expected_column": 5
+  }
+]

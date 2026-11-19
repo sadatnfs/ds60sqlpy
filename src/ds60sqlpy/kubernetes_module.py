@@ -203,7 +203,7 @@ def _fixture_template(value: Any, *, task: bool = False) -> bool:
         if container["image"] == "ds60sqlpy-k8s-fixture:0.1.0":
             raise KubernetesRefusal(
                 "This saved source uses fixture 0.1.0. Prepare the current 0.2.0 fixture "
-                "and a fresh owned lease,"
+                "and a fresh owned lease, "
                 "then review and update your own image field. Saved learner source is not "
                 "rewritten."
             )
@@ -292,7 +292,9 @@ def _fixture_template(value: Any, *, task: bool = False) -> bool:
 def parse_manifests(source: str) -> list[dict[str, Any]]:
     """Reject aliases, duplicate keys, unknown fields and arbitrary workload execution."""
     if not isinstance(source, str) or len(source.encode("utf-8")) > MAX_SOURCE_BYTES:
-        raise KubernetesRefusal("The manifest must contain at most48000 UTF-8 bytes.")
+        raise KubernetesRefusal(
+            f"The manifest must contain at most {MAX_SOURCE_BYTES:,} UTF-8 bytes."
+        )
     try:
         import yaml  # type: ignore[import-untyped]  # Optional, pinned worker-only parser.
     except ImportError as exc:

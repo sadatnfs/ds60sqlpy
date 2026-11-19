@@ -1,9 +1,30 @@
 <!doctype html>
+<!--
+THESIS: The classroom is a two-color technical manual you can run. Every subject
+is a thumb-indexed part printed in its own spot ink; every lesson is a spread
+with the chapter on the left page and a runnable listing on the right. It
+refuses the course-platform card grid with progress rings.
+OWN-WORLD: White pages on a cool light-table ground, black ink plus one spot ink
+per subject (a house ultramarine on the catalog), dark slates for code and
+output, 1px rules, tabular folio numerals, solid spot-color thumb tabs, crisp
+4px controls. System grotesque for the interface, Latin Modern for chapters.
+STORY: Find a subject in the contents or the Ctrl+K index, open a lesson spread,
+read on the left, predict and run on the right, and read the printed result
+directly under the listing without losing your place.
+FIRST VIEWPORT: Title block with the library colophon and Continue/Start
+actions; the thumb index of seven areas; the contents begin with Start here.
+FORM: Technical manual, candidate 5 of 7; staging: contents page plus lesson
+spread; seed ccbdb85d.
+-->
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
+    <meta
+      name="description"
+      content="A local classroom for programming, data science, statistics, machine learning and systems: lessons, code editors and saved progress in one browser interface."
+    />
     <title>DS60 Classroom · Course catalog</title>
     <link
       rel="icon"
@@ -17,38 +38,60 @@
   <body data-mode="light">
     <a class="skip" href="#main">Skip to learning content</a>
     <header class="site-header">
-      <button id="home-button" class="brand" aria-label="DS60 Classroom, all learning paths">
+      <button id="home-button" class="brand">
         <span class="brand-mark" aria-hidden="true">d.</span
         ><span
-          >DS60 <strong>Classroom</strong
-          ><small>Programming, data science and systems.</small></span
+          >DS60 <strong>Classroom</strong><small>Programming, data science and systems</small></span
         >
       </button>
+      <button
+        id="palette-button"
+        class="search-trigger"
+        type="button"
+        aria-haspopup="dialog"
+        aria-controls="palette"
+        aria-keyshortcuts="Control+K Meta+K"
+      >
+        <span class="search-icon" aria-hidden="true"></span
+        ><span class="search-trigger-label">Search lessons and subjects</span
+        ><kbd class="search-kbd" aria-hidden="true">Ctrl K</kbd>
+      </button>
       <nav aria-label="Classroom">
-        <button id="paths-button">All learning paths</button
+        <button id="paths-button">All subjects</button
         ><a href="/reference-pages/docs/docker-classroom.md.html">Setup &amp; saved work</a
-        ><button id="theme-toggle" aria-pressed="false">Dark appearance</button>
+        ><button id="theme-toggle" class="theme-toggle" aria-pressed="false"
+          >Dark appearance</button
+        >
       </nav>
     </header>
     <div id="status" class="status" role="status" aria-live="polite"></div>
     <main id="main" tabindex="-1">
       <section id="home-view" class="home-view" aria-labelledby="home-title">
         <div class="home-intro">
-          <div>
-            <p class="eyebrow">COURSE CATALOG</p>
-            <h1 id="home-title" tabindex="-1">
-              Programming, data science<br /><em>and systems.</em>
-            </h1>
+          <div class="home-copy">
+            <h1 id="home-title" tabindex="-1"> Programming, data science <em>and systems.</em> </h1>
             <p class="intro-copy">
-              Select a subject to view lessons, worked examples and coding exercises. Code, notes
-              and run history are saved in your local classroom.
+              Read a lesson, run its code in a prepared Docker runtime and keep your notes next to
+              the results. Everything runs on your machine and works offline once it is prepared.
             </p>
+            <div class="home-actions">
+              <button id="resume" class="primary" hidden></button
+              ><button class="quick-start" type="button" data-open-subject="python"
+                >Start Python</button
+              ><button class="quick-start" type="button" data-open-subject="sql">Start SQL</button>
+            </div>
             <p id="catalog-summary" class="catalog-summary"> Loading the classroom library... </p>
           </div>
-          <aside class="pace-card">
-            <span class="tiny-heading">STUDY PLANNING</span>
-            <h2>Session duration</h2>
-            <label for="pace">Time for a typical study session</label
+          <aside class="pace-card" aria-labelledby="start-guide-title">
+            <h2 id="start-guide-title">Three steps per lesson</h2>
+            <ol class="start-steps">
+              <li><strong>Read</strong> the guide and its worked examples.</li>
+              <li><strong>Predict, then run</strong> the code in the editor beside it.</li>
+              <li
+                ><strong>Explain</strong> the result in your notes; they are saved with the run.</li
+              >
+            </ol>
+            <label for="pace">Typical study session</label
             ><select id="pace">
               <option value="15">15 minutes</option>
               <option value="30" selected>30 minutes</option>
@@ -56,15 +99,12 @@
               <option value="90">90 minutes</option>
             </select>
             <p id="pace-note">
-              This preference estimates the number of study sessions. It does not restrict lesson
-              access or change code execution timeouts.
+              Used only to estimate sessions per lesson. It never limits access or run time.
             </p>
-            <button id="resume" class="primary" hidden></button>
           </aside>
         </div>
         <div class="browse-heading">
           <div>
-            <p class="eyebrow">SUBJECTS</p>
             <h2>Browse courses</h2>
           </div>
           <div class="search-control">
@@ -72,13 +112,21 @@
             ><input
               id="catalog-search"
               type="search"
-              placeholder="Try Python, Transformers, joins, or C++"
+              placeholder="Try pandas, window functions, attention or Rust"
               autocomplete="off"
             />
           </div>
         </div>
+        <div
+          id="subject-filters"
+          class="subject-filters"
+          role="toolbar"
+          aria-label="Filter subjects by area"
+        ></div>
         <p id="search-summary" class="muted" role="status"></p>
-        <div id="subject-cards" class="subject-cards"></div>
+        <div id="subject-cards" class="subject-cards">
+          <div class="toc-skeleton" aria-hidden="true"><span></span><span></span><span></span></div>
+        </div>
         <section
           id="search-lessons"
           class="search-lessons"
@@ -101,14 +149,22 @@
       </section>
       <section id="workspace-view" class="workspace-view" hidden aria-label="Learning workspace">
         <div class="workspace-top">
-          <button id="back-paths" class="quiet">← All paths</button><span id="subject-label"></span
+          <button id="back-paths" class="quiet">← All subjects</button
+          ><span id="subject-label"></span
+          ><button
+            id="sidebar-toggle"
+            class="quiet sidebar-toggle"
+            type="button"
+            aria-controls="lesson-sidebar"
+            aria-expanded="true"
+          >
+            Hide lesson list</button
           ><button id="lesson-menu" aria-expanded="false" aria-controls="lesson-sidebar">
             Browse lessons
           </button>
         </div>
         <div class="workspace-grid">
           <aside id="lesson-sidebar" class="lesson-sidebar" aria-label="Lesson navigation">
-            <p class="eyebrow">COURSE</p>
             <h2 id="path-title"></h2>
             <p id="path-description" class="muted"></p>
             <label for="subject-select">Switch subject</label
@@ -131,6 +187,7 @@
           </aside>
           <div class="workspace-content">
             <section class="lesson-heading">
+              <p id="lesson-folio" class="lesson-folio" aria-hidden="true"></p>
               <div id="badges" class="badges"></div>
               <h1 id="title" tabindex="-1">Your learning workspace</h1>
               <p id="outcome" class="outcome"></p>
@@ -160,17 +217,20 @@
               </details>
             </section>
             <section id="planned" class="panel" hidden></section>
+            <nav class="spread-switch" aria-label="Jump within this lesson">
+              <button type="button" data-spread-target="guide">Lesson</button
+              ><button type="button" data-spread-target="pad-title">Code</button
+              ><button type="button" data-spread-target="runtime-results">Result</button>
+            </nav>
             <div id="authored" class="panes" hidden>
               <section class="panel reading-pane">
                 <div class="panel-head">
-                  <div>
-                    <span class="tiny-heading">LESSON</span>
-                    <h2>The lesson</h2>
-                  </div>
+                  <h2>Lesson</h2>
                   <button id="reading-toggle" aria-pressed="false"> Focus on reading </button>
                 </div>
+                <div class="reading-progress" aria-hidden="true"><span></span></div>
                 <div class="reader-tools">
-                  <label for="section-jump">Jump to a section</label
+                  <label for="section-jump">Contents</label
                   ><select id="section-jump">
                     <option value="">Choose a section</option></select
                   ><label id="chapter-read-label" class="check-label" hidden
@@ -189,13 +249,38 @@
               </section>
               <section class="panel practice-pane">
                 <div class="panel-head">
-                  <div>
-                    <span class="tiny-heading">EDITOR</span>
-                    <h2 id="pad-title">Code and reflection</h2>
+                  <h2 id="pad-title" tabindex="-1">Code and reflection</h2>
+                  <div class="panel-head-tools">
+                    <span id="language" class="badge"></span
+                    ><button
+                      id="code-focus-toggle"
+                      type="button"
+                      aria-pressed="false"
+                      aria-controls="authored"
+                      >Focus on code</button
+                    >
                   </div>
-                  <span id="language" class="badge"></span>
                 </div>
                 <div class="pad-body">
+                  <section
+                    id="sql-readiness"
+                    class="db-status"
+                    data-state="checking"
+                    aria-labelledby="sql-readiness-title"
+                    hidden
+                  >
+                    <h3 id="sql-readiness-title">Course database</h3>
+                    <p id="sql-readiness-text" role="status" aria-live="polite"
+                      >Checking the course database...</p
+                    >
+                    <div class="db-status-actions">
+                      <button id="sql-ready-action" class="primary" type="button" hidden></button
+                      ><button id="sql-ready-reset" type="button" hidden>Reset training data</button
+                      ><button id="sql-ready-refresh" class="quiet" type="button"
+                        >Check again</button
+                      >
+                    </div>
+                  </section>
                   <div id="legacy-workspace" hidden>
                     <label for="runner">Execution language</label
                     ><select id="runner"></select>
@@ -205,8 +290,133 @@
                     </div>
                   </div>
                   <label id="variant-label" for="variant" hidden>Language variant</label
-                  ><select id="variant" hidden></select
-                  ><label id="prediction-label" for="prediction">Predict before you run</label
+                  ><select id="variant" hidden></select>
+                  <section
+                    id="exercise-dock"
+                    class="exercise-dock"
+                    aria-labelledby="exercise-dock-title"
+                    hidden
+                  >
+                    <div class="exercise-head">
+                      <h3 id="exercise-dock-title">Exercises</h3>
+                      <p id="exercise-progress" class="exercise-progress"></p>
+                      <button
+                        id="exercise-collapse"
+                        class="quiet"
+                        type="button"
+                        aria-expanded="true"
+                        aria-controls="exercise-body"
+                        >Hide</button
+                      >
+                    </div>
+                    <div id="exercise-body" class="exercise-body">
+                      <details id="exercise-intro" class="exercise-intro" hidden>
+                        <summary>How to approach these exercises</summary>
+                        <div id="exercise-intro-html" class="guide exercise-text"></div>
+                      </details>
+                      <nav class="exercise-pager" aria-label="Exercises in this lesson">
+                        <button
+                          id="exercise-prev"
+                          class="exercise-turn"
+                          type="button"
+                          aria-label="Previous exercise"
+                          >&larr;</button
+                        ><ol id="exercise-steps" class="exercise-steps"></ol
+                        ><button
+                          id="exercise-next"
+                          class="exercise-turn"
+                          type="button"
+                          aria-label="Next exercise"
+                          >&rarr;</button
+                        >
+                      </nav>
+                      <article class="exercise-card" aria-labelledby="exercise-title">
+                        <h4 id="exercise-title" tabindex="-1"></h4>
+                        <div id="exercise-prompt" class="guide exercise-text"></div>
+                        <dl id="exercise-facts" class="exercise-facts" hidden></dl>
+                        <details id="exercise-check" class="exercise-check" hidden>
+                          <summary>How to check your answer</summary>
+                          <dl id="exercise-check-facts" class="exercise-facts"></dl>
+                        </details>
+                        <p id="exercise-mode-note" class="exercise-note" hidden>
+                          <span
+                            >Write exercise answers in the SQL snippet pad. This lesson script stays
+                            answer-free.</span
+                          >
+                          <button id="exercise-snippet" type="button"
+                            >Switch to the snippet pad</button
+                          >
+                        </p>
+                        <ol id="exercise-hints" class="exercise-hints" hidden></ol>
+                        <div class="exercise-actions">
+                          <button id="exercise-hint" type="button">Show a hint</button
+                          ><button
+                            id="exercise-solve"
+                            type="button"
+                            aria-controls="exercise-solution"
+                            >Show the solution</button
+                          ><button id="exercise-done" type="button" aria-pressed="false"
+                            >Mark as solved</button
+                          >
+                        </div>
+                        <div id="exercise-confirm" class="exercise-confirm" hidden>
+                          <p id="exercise-confirm-text"
+                            >Give it one honest try first. Answers you work out yourself are the
+                            ones you remember.</p
+                          >
+                          <div class="exercise-confirm-actions">
+                            <button id="exercise-confirm-yes" class="primary" type="button"
+                              >Show the solution</button
+                            ><button id="exercise-confirm-no" type="button">Keep trying</button>
+                          </div>
+                        </div>
+                      </article>
+                      <section
+                        id="exercise-solution"
+                        class="exercise-solution"
+                        aria-labelledby="exercise-solution-title"
+                        hidden
+                      >
+                        <div class="exercise-solution-head">
+                          <h4 id="exercise-solution-title" tabindex="-1">Worked solution</h4>
+                          <button id="exercise-hide-solution" class="quiet" type="button"
+                            >Hide solution</button
+                          >
+                        </div>
+                        <div class="exercise-solution-tools">
+                          <button id="exercise-run-solution" type="button">Run the solution</button
+                          ><button
+                            id="exercise-compare"
+                            type="button"
+                            aria-pressed="false"
+                            aria-controls="exercise-diff"
+                            >Compare with my code</button
+                          ><button id="exercise-use-solution" type="button"
+                            >Use in my editor</button
+                          >
+                        </div>
+                        <p id="exercise-solution-note" class="exercise-solution-note"></p>
+                        <div id="exercise-diff" class="exercise-diff" hidden></div>
+                        <div id="exercise-solution-html" class="guide exercise-text"></div>
+                      </section>
+                      <div id="exercise-reference" class="exercise-reference" hidden>
+                        <p
+                          >The lesson also has a complete reference program that covers every
+                          exercise.</p
+                        >
+                        <button id="exercise-reference-show" type="button"
+                          >Show the reference program</button
+                        >
+                      </div>
+                      <p
+                        id="exercise-status"
+                        class="exercise-status"
+                        role="status"
+                        aria-live="polite"
+                      ></p>
+                    </div>
+                  </section>
+                  <label id="prediction-label" for="prediction">Predict before you run</label
                   ><textarea
                     id="prediction"
                     class="reflection"
@@ -220,10 +430,7 @@
                     hidden
                   >
                     <div class="browser-live-heading">
-                      <div
-                        ><span class="tiny-heading">STUDY PLANNING</span
-                        ><h3>Preview studio</h3></div
-                      >
+                      <h3>Preview studio</h3>
                       <button
                         id="browser-studio-toggle"
                         type="button"
@@ -259,9 +466,23 @@
                   <div id="browser-studio" class="browser-studio" data-browser="false">
                     <div id="source-section">
                       <div class="source-heading">
-                        <label for="source">Source or worksheet</label>
+                        <label id="source-label" for="source">Your code</label>
                         <div>
-                          <button
+                          <span class="text-size" role="group" aria-label="Code text size"
+                            ><button
+                              id="code-smaller"
+                              class="quiet"
+                              type="button"
+                              aria-label="Smaller code text"
+                              >A&minus;</button
+                            ><button
+                              id="code-larger"
+                              class="quiet"
+                              type="button"
+                              aria-label="Larger code text"
+                              >A+</button
+                            ></span
+                          ><button
                             id="syntax-toggle"
                             class="quiet"
                             aria-pressed="false"
@@ -287,30 +508,6 @@
                         Tab indents. Escape then Tab leaves the editor. Ctrl/Cmd+S saves;
                         Ctrl/Cmd+Enter runs.
                       </p>
-                      <details id="runtime-details">
-                        <summary id="runtime-summary">How this code runs</summary>
-                        <p id="runtime-guidance"></p>
-                      </details>
-                      <div id="legacy-pad-tools" hidden>
-                        <button id="starter">Load lesson starter</button>
-                        <details class="history">
-                          <summary>Recover an earlier saved pad</summary>
-                          <label for="pad-history">Earlier version</label
-                          ><select id="pad-history"></select>
-                          <div class="toolbar">
-                            <button id="load-history" disabled>Load a copy</button
-                            ><button id="refresh-history"> Refresh versions </button>
-                          </div>
-                        </details>
-                        <details id="sql-setup" class="notice" hidden>
-                          <summary>Prepare SQL training data</summary>
-                          <p>
-                            This resets only the disposable course training schema in
-                            advanced_sql_training. Saved pads remain in your workspace.
-                          </p>
-                          <button id="prepare-sql"> Reset and verify training schema </button>
-                        </details>
-                      </div>
                     </div>
                     <div id="browser-preview-home" hidden>
                       <div class="browser-viewport-tools">
@@ -374,16 +571,85 @@
                   </div>
                   <p id="save-state" class="save-state" role="status" aria-live="polite"></p>
                   <div class="toolbar run-tools">
-                    <button id="run" class="primary">Run code</button
-                    ><label class="sr-only" for="timeout">Run deadline</label
-                    ><select id="timeout" aria-label="Run deadline">
-                      <option value="15">15 seconds</option>
-                      <option value="60" selected>60 seconds</option>
-                      <option value="120">120 seconds</option></select
-                    ><button id="cancel" disabled>Cancel job</button
-                    ><button id="save">Save work</button><button id="refresh">Check runtime</button
-                    ><button id="reconnect" hidden>Reconnect saved job</button
-                    ><button id="recover" hidden> Confirm manual recovery </button>
+                    <div class="run-main">
+                      <button id="run" class="primary" aria-keyshortcuts="Control+Enter Meta+Enter"
+                        >Run code</button
+                      ><kbd id="run-shortcut" class="run-shortcut" title="Keyboard shortcut for Run"
+                        >Ctrl Enter</kbd
+                      ><button id="cancel" disabled>Cancel job</button
+                      ><span id="run-timer" class="run-timer" aria-hidden="true"></span>
+                    </div>
+                    <div class="run-extra">
+                      <label class="run-limit" for="timeout">Time limit</label
+                      ><select id="timeout">
+                        <option value="15">15 seconds</option>
+                        <option value="60" selected>60 seconds</option>
+                        <option value="120">120 seconds</option></select
+                      ><button id="save">Save work</button
+                      ><button id="refresh">Check runtime</button
+                      ><button id="reconnect" hidden>Reconnect saved job</button
+                      ><button id="recover" hidden> Confirm manual recovery </button>
+                    </div>
+                  </div>
+                  <section id="runtime-results" class="results" aria-labelledby="results-title">
+                    <div class="results-head">
+                      <h3 id="results-title">Result</h3>
+                      <button id="copy-output" class="quiet" type="button">Copy output</button>
+                    </div>
+                    <p id="job-status" class="muted" aria-live="polite">
+                      No run yet for this lesson.
+                    </p>
+
+                    <div id="run-explanation" class="run-explanation" hidden></div>
+                    <pre
+                      id="output"
+                      class="result-log"
+                      tabindex="0"
+                      aria-label="Program output"
+                      data-note="true"
+                    >
+Press Run code. What your program prints, and any error messages, appear here.</pre
+                    >
+                    <details id="raw-log" class="raw-log" hidden>
+                      <summary>Show the full log, including the runner's own messages</summary>
+                      <pre
+                        id="raw-output"
+                        class="result-log"
+                        tabindex="0"
+                        aria-label="Full log of this run"
+                      ></pre>
+                    </details>
+                    <p id="run-storage-status" class="muted" role="status"></p>
+                    <details id="receipt-source-details" hidden>
+                      <summary>Source used for this run</summary>
+                      <div id="receipt-source"></div>
+                    </details>
+                    <div id="sql-results" class="sql-results"></div>
+                    <div id="figures"></div>
+                    <ul id="checks" class="checks"></ul>
+                    <button id="error-line" hidden>Inspect source line</button>
+                    <details id="job-history" class="history">
+                      <summary>Saved runs</summary>
+                      <div id="history"></div>
+                    </details>
+                  </section>
+                  <div class="pad-more">
+                    <details id="runtime-details">
+                      <summary id="runtime-summary">How this code runs</summary>
+                      <p id="runtime-guidance"></p>
+                    </details>
+                    <div id="legacy-pad-tools" hidden>
+                      <button id="starter">Load lesson starter</button>
+                      <details class="history">
+                        <summary>Recover an earlier saved pad</summary>
+                        <label for="pad-history">Earlier version</label
+                        ><select id="pad-history"></select>
+                        <div class="toolbar">
+                          <button id="load-history" disabled>Load a copy</button
+                          ><button id="refresh-history"> Refresh versions </button>
+                        </div>
+                      </details>
+                    </div>
                   </div>
                   <label id="explanation-label" for="explanation">Explain the evidence</label
                   ><textarea
@@ -427,27 +693,6 @@
                   <button id="offline-compare" type="button">Open worked comparison</button>
                   <div id="offline-cases" class="sql-results" aria-live="polite"></div>
                 </section>
-                <section id="runtime-results" class="results" aria-labelledby="results-title">
-                  <h3 id="results-title">Execution results</h3>
-                  <p id="job-status" class="muted"> No run yet for this lesson. </p>
-
-                  <pre id="output" class="result-log" tabindex="0" aria-label="Runtime output">
-Your output and compiler diagnostics will appear here.</pre
-                  >
-                  <p id="run-storage-status" class="muted" role="status"></p>
-                  <details id="receipt-source-details" hidden>
-                    <summary>Source used for this run</summary>
-                    <div id="receipt-source"></div>
-                  </details>
-                  <div id="sql-results" class="sql-results"></div>
-                  <div id="figures"></div>
-                  <ul id="checks" class="checks"></ul>
-                  <button id="error-line" hidden>Inspect source line</button>
-                  <details id="job-history" class="history">
-                    <summary>Saved runs</summary>
-                    <div id="history"></div>
-                  </details>
-                </section>
               </section>
             </div>
           </div>
@@ -468,7 +713,33 @@ Your output and compiler diagnostics will appear here.</pre
     <script>
       const SERVER_TOKEN = "";
     </script>
+    <dialog id="palette" class="palette" aria-label="Search lessons and subjects">
+      <div class="palette-search">
+        <span class="search-icon" aria-hidden="true"></span
+        ><label class="sr-only" for="palette-input">Search lessons and subjects</label
+        ><input
+          id="palette-input"
+          type="search"
+          role="combobox"
+          aria-expanded="true"
+          aria-controls="palette-results"
+          aria-autocomplete="list"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="Search by topic, lesson title or ID"
+        />
+      </div>
+      <ul id="palette-results" class="palette-results" role="listbox" aria-label="Results"></ul>
+      <div class="palette-footer" aria-hidden="true">
+        <span><kbd>↑</kbd><kbd>↓</kbd> move</span><span><kbd>Enter</kbd> open</span
+        ><span><kbd>Esc</kbd> close</span><span><kbd>/</kbd> or <kbd>Ctrl K</kbd> search</span
+        ><span><kbd>Ctrl Enter</kbd> run</span><span><kbd>Ctrl S</kbd> save</span>
+      </div>
+    </dialog>
     <script src="/assets/browser-preview.js" defer></script>
     <script src="/assets/classroom.js" defer></script>
+    <script src="/assets/codemirror.js" defer></script>
+    <script src="/assets/classroom-editor.js" defer></script>
+    <script src="/assets/classroom-shell.js" defer></script>
   </body>
 </html>

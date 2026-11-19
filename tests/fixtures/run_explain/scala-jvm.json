@@ -1,0 +1,35 @@
+[
+  {
+    "case": "index-out-of-bounds",
+    "source": "object Main {\n  def main(args: Array[String]): Unit = {\n    val xs = List(1, 2)\n    println(xs(5))\n  }\n}\n",
+    "output": "Picked up JAVA_TOOL_OPTIONS: -XX:ActiveProcessorCount=2 -XX:ParallelGCThreads=2 -XX:ConcGCThreads=1\nPicked up JAVA_TOOL_OPTIONS: -XX:ActiveProcessorCount=2 -XX:ParallelGCThreads=2 -XX:ConcGCThreads=1\nException in thread \"main\" java.lang.IndexOutOfBoundsException: 5\n\tat scala.collection.LinearSeqOps.apply(LinearSeq.scala:131)\n\tat scala.collection.LinearSeqOps.apply$(LinearSeq.scala:128)\n\tat scala.collection.immutable.List.apply(List.scala:79)\n\tat Main$.main(Main.scala:4)\n\tat Main.main(Main.scala)\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "runtime",
+    "expected_line": 4,
+    "expected_column": null
+  },
+  {
+    "case": "not-found",
+    "source": "object Main {\n  def main(args: Array[String]): Unit = {\n    printn(\"hello\")\n  }\n}\n",
+    "output": "Picked up JAVA_TOOL_OPTIONS: -XX:ActiveProcessorCount=2 -XX:ParallelGCThreads=2 -XX:ConcGCThreads=1\nMain.scala:3: error: not found: value printn\n    printn(\"hello\")\n    ^\n1 error\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "compile",
+    "expected_line": 3,
+    "expected_column": 5
+  },
+  {
+    "case": "require",
+    "source": "object Main {\n  def main(args: Array[String]): Unit = {\n    val age = -1\n    require(age >= 0, \"age must not be negative\")\n  }\n}\n",
+    "output": "Picked up JAVA_TOOL_OPTIONS: -XX:ActiveProcessorCount=2 -XX:ParallelGCThreads=2 -XX:ConcGCThreads=1\nPicked up JAVA_TOOL_OPTIONS: -XX:ActiveProcessorCount=2 -XX:ParallelGCThreads=2 -XX:ConcGCThreads=1\nException in thread \"main\" java.lang.IllegalArgumentException: requirement failed: age must not be negative\n\tat scala.Predef$.require(Predef.scala:337)\n\tat Main$.main(Main.scala:4)\n\tat Main.main(Main.scala)\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "assertion",
+    "expected_line": 4,
+    "expected_column": null
+  }
+]

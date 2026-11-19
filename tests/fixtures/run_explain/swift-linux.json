@@ -1,0 +1,46 @@
+[
+  {
+    "case": "cannot-find",
+    "source": "@main\nstruct Lesson {\n    static func main() {\n        let total = 5\n        print(totl)\n    }\n}\n",
+    "output": "main.swift:5:15: error: cannot find 'totl' in scope\n3 |     static func main() {\n4 |         let total = 5\n5 |         print(totl)\n  |               `- error: cannot find 'totl' in scope\n6 |     }\n7 | }\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "compile",
+    "expected_line": 5,
+    "expected_column": 15
+  },
+  {
+    "case": "index-out-of-range",
+    "source": "@main\nstruct Lesson {\n    static func main() {\n        let scores = [90, 85]\n        let index = 5\n        print(scores[index])\n    }\n}\n",
+    "output": "Swift/ContiguousArrayBuffer.swift:692: Fatal error: Index out of range\n\n*** Signal 5: Backtracing from 0xffff7f6062fc... done ***\n\n*** Program crashed: System trap at 0x0000ffff7f6062fc ***\n\nPlatform: arm64 Linux (Ubuntu 24.04.5 LTS)\n\nThread 0 \"program\" crashed:\n\n  0               0x0000ffff7f6062fc closure #1 in closure #1 in _assertionFailure(_:_:file:line:flags:) + 468 in libswiftCore.so\n  1 [ra]          0x0000ffff7f75eeb0 _assertionFailure(_:_:file:line:flags:) + 215 in libswiftCore.so\n  2 [ra]          0x0000ffff7fb89f60 specialized Array.subscript.getter + 111 in libswiftSwiftOnoneSupport.so\n  3 [ra]          0x0000aaaab9ff0fa8 static Lesson.main() + 111 in program\n  4 [ra] [system] 0x0000aaaab9ff0f0c static Lesson.$main() + 11 in program\n  5 [ra]          0x0000aaaab9ff102c main + 11 in program\n  6 [ra]          0x0000ffff7f0784c4 <unknown> in libc.so.6\n  7 [ra]          0x0000ffff7f078598 <unknown> in libc.so.6\n...\n\n\nRegisters:\n\n x0 0x0000aaaaf6aea018  01 00 01 00 00 00 00 00 01 00 00 00 00 00 00 00  ················\n x1 0x0000000000000002  2\n x2 0x0000aaa05c00a73c  187605715035964\n x3 0x0000aaaaf6aea010  03 00 02 00 02 00 01 00 01 00 01 00 00 00 00 00  ················\n x4 0x0000000000000002  2\n x5 0x0000aaaaf6afc300  3c a7 00 5c a0 aa 00 00 0d dd cb e4 4f cf ac 7f  <§·\\ ª···ÝËäOÏ¬·\n x6 0x7faccf4fe4cbdd0d  9199956080859012365\n x7 0x646e49203a726f72  7236802053999325042\n x8 0x0000000000000000  0\n x9 0x0000000000000000  0\nx10 0x0000000000000020  32\nx11 0x0000000000000000  0\nx12 0x0000ffff7fbef790  00 00 4a 7f ff ff 00 00 60 f7 be 7f ff ff 00 00  ··J·ÿÿ··`÷¾·ÿÿ··\nx13 0x000000000000002d  45\nx14 0x0000000000000001  1\nx15 0x000000000000013d  317\nx16 0x0000ffff7fa30038  90 6d 0e 7f ff ff 00 00 58 77 5f 7f ff ff 00 00  ·m··ÿÿ··Xw_·ÿÿ··\nx17 0x0000ffff7f0e6d90  a0 08 00 b4 fd 7b bc a9 fd 03 00 91 f5 5b 02 a9   ··´ý{¼©ý···õ[·©\nx18 0x000000000000000f  15\nx19 0x0000ffffeb9e5438  49 5a 9e eb ff ff 00 00 00 00 00 00 00 00 00 00  IZ·ëÿÿ··········\nx20 0x0000000000000001  1\nx21 0x0000aaaaba00fd30  00 00 00 00 00 00 00 00 08 e9 a2 7f ff ff 00 00  ·········é¢·ÿÿ··\nx22 0x0000aaaab9ff1020  fd 7b bf a9 fd 03 00 91 b6 ff ff 97 e0 03 1f 2a  ý{¿©ý···¶ÿÿ·à··*\nx23 0x0000ffffeb9e5448  63 5a 9e eb ff ff 00 00 a5 5a 9e eb ff ff 00 00  cZ·ëÿÿ··¥Z·ëÿÿ··\nx24 0x0000ffff7fbf8b58  00 00 00 00 00 00 00 00 58 57 9e eb ff ff 00 00  ········XW·ëÿÿ··\nx25 0x0000000000000000  0\nx26 0x0000ffff7fbf9000  50 a3 bf 7f ff ff 00 00 10 00 00 00 00 00 00 00  P£¿·ÿÿ··········\nx27 0x0000aaaaba00fd30  00 00 00 00 00 00 00 00 08 e9 a2 7f ff ff 00 00  ·········é¢·ÿÿ··\nx28 0x0000000000000000  0\n fp 0x0000ffffeb9e5180  00 52 9e eb ff ff 00 00 b0 ee 75 7f ff ff 00 00  ·R·ëÿÿ··°îu·ÿÿ··\n lr 0x0000ffff7f6062fc  20 00 20 d4 28 00 80 52 89 9f 81 52 03 00 00 14   · Ô(··R···R····\n sp 0x0000ffffeb9e5160  12 00 00 00 00 00 00 00 02 00 00 00 00 00 00 00  ················\n pc 0x0000ffff7f6062fc  20 00 20 d4 28 00 80 52 89 9f 81 52 03 00 00 14   · Ô(··R···R····\n\n\nImages (11 omitted):\n\n0x0000aaaab9ff0000–0x0000aaaab9ff1310 109d7847fd0563d757580ca6f8033c3096d2b793 program                      /tmp/job-xxxxxxxx/program\n0x0000ffff7f050000–0x0000ffff7f1e9f81 27027b96e5b8c475fc327aa445bea1c71d37b4e2 libc.so.6                    /usr/lib/aarch64-linux-gnu/libc.so.6\n0x0000ffff7f4a0000–0x0000ffff7f9fb930 cbb8576a31f6240960fe9a745d335e56392dfa90 libswiftCore.so              /usr/lib/swift/linux/libswiftCore.so\n0x0000ffff7fb60000–0x0000ffff7fb9b980 108d7667f583a75629e45c11f4854c5aa3a7cc21 libswiftSwiftOnoneSupport.so /usr/lib/swift/linux/libswiftSwiftOnoneSupport.so\n\nBacktrace took 0.00s\n\n",
+    "returncode": -5,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "runtime",
+    "expected_line": null,
+    "expected_column": null
+  },
+  {
+    "case": "precondition",
+    "source": "@main\nstruct Lesson {\n    static func main() {\n        let total = 1 + 1\n        precondition(total == 3, \"total was \\(total)\")\n    }\n}\n",
+    "output": "program/main.swift:5: Precondition failed: total was 2\n\n*** Signal 5: Backtracing from 0xffffb4beec50... done ***\n\n*** Program crashed: System trap at 0x0000ffffb4beec50 ***\n\nPlatform: arm64 Linux (Ubuntu 24.04.5 LTS)\n\nThread 0 \"program\" crashed:\n\n  0               0x0000ffffb4beec50 _assertionFailure(_:_:file:line:flags:) + 160 in libswiftCore.so\n  1 [ra]          0x0000aaaabe6110b8 static Lesson.main() + 315 in program\n  2 [ra] [system] 0x0000aaaabe610f5c static Lesson.$main() + 11 in program\n  3 [ra]          0x0000aaaabe6110c4 main + 11 in program\n  4 [ra]          0x0000ffffb45084c4 <unknown> in libc.so.6\n  5 [ra]          0x0000ffffb4508598 <unknown> in libc.so.6\n...\n\n\nRegisters:\n\n x0 0x8b00000000322070  10016005571275268208\n x1 0x0000000000000001  1\n x2 0x0000000aaaaf2bad  45813279661\n x3 0x0000aaaaf2b9b010  01 00 01 00 01 00 00 00 00 00 00 00 00 00 00 00  ················\n x4 0x0000000000000002  2\n x5 0x0000aaaaf2bad300  ad 2b af aa 0a 00 00 00 9e eb 1b 72 1a 99 5a 31  ­+¯ª·····ë·r··Z1\n x6 0x315a991a721beb9e  3556323194625059742\n x7 0x696166206e6f6974  7593462736201148788\n x8 0x0000000000000000  0\n x9 0x0000000000000000  0\nx10 0x0000000000000020  32\nx11 0x0000000000000000  0\nx12 0x0000ffffb5086790  00 00 93 b4 ff ff 00 00 60 67 08 b5 ff ff 00 00  ···´ÿÿ··`g·µÿÿ··\nx13 0x000000000000002d  45\nx14 0x0000000000000001  1\nx15 0x6177206c61326f74  7023117793766829940\nx16 0x0000ffffb4ec0038  90 6d 57 b4 ff ff 00 00 58 77 a8 b4 ff ff 00 00  ·mW´ÿÿ··Xw¨´ÿÿ··\nx17 0x0000ffffb4576d90  a0 08 00 b4 fd 7b bc a9 fd 03 00 91 f5 5b 02 a9   ··´ý{¼©ý···õ[·©\nx18 0x000000000000000f  15\nx19 0x0000ffffe94c96e8  49 9a 4c e9 ff ff 00 00 00 00 00 00 00 00 00 00  I·Léÿÿ··········\nx20 0x0000ffffe94c9520  74 6f 74 61 6c 20 77 61 73 20 32 00 00 00 00 eb  total was 2····ë\nx21 0x0000aaaabe62fd30  00 00 00 00 00 00 00 00 08 e9 eb b4 ff ff 00 00  ·········éë´ÿÿ··\nx22 0x0000aaaabe6110b8  fd 7b bf a9 fd 03 00 91 a4 ff ff 97 e0 03 1f 2a  ý{¿©ý···¤ÿÿ·à··*\nx23 0x0000ffffe94c96f8  63 9a 4c e9 ff ff 00 00 a5 9a 4c e9 ff ff 00 00  c·Léÿÿ··¥·Léÿÿ··\nx24 0x0000ffffb508fb58  00 00 00 00 00 00 00 00 08 9a 4c e9 ff ff 00 00  ··········Léÿÿ··\nx25 0x0000000000000000  0\nx26 0x0000ffffb5090000  50 13 09 b5 ff ff 00 00 10 00 00 00 00 00 00 00  P··µÿÿ··········\nx27 0x0000aaaabe62fd30  00 00 00 00 00 00 00 00 08 e9 eb b4 ff ff 00 00  ·········éë´ÿÿ··\nx28 0x0000000000000000  0\n fp 0x0000ffffe94c94a0  30 95 4c e9 ff ff 00 00 b8 10 61 be aa aa 00 00  0·Léÿÿ··¸·a¾ªª··\n lr 0x0000ffffb4beec50  20 00 20 d4 28 00 80 52 89 12 80 52 60 17 00 d0   · Ô(··R···R`··Ð\n sp 0x0000ffffe94c9430  01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ················\n pc 0x0000ffffb4beec50  20 00 20 d4 28 00 80 52 89 12 80 52 60 17 00 d0   · Ô(··R···R`··Ð\n\n\nImages (12 omitted):\n\n0x0000aaaabe610000–0x0000aaaabe611370 43f90d7a24b7fdb6b15e3115f6198e7e0fcdaeb5 program         /tmp/job-xxxxxxxx/program\n0x0000ffffb44e0000–0x0000ffffb4679f81 27027b96e5b8c475fc327aa445bea1c71d37b4e2 libc.so.6       /usr/lib/aarch64-linux-gnu/libc.so.6\n0x0000ffffb4930000–0x0000ffffb4e8b930 cbb8576a31f6240960fe9a745d335e56392dfa90 libswiftCore.so /usr/lib/swift/linux/libswiftCore.so\n\nBacktrace took 0.00s\n\n",
+    "returncode": -5,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "assertion",
+    "expected_line": 5,
+    "expected_column": null
+  },
+  {
+    "case": "type-mismatch",
+    "source": "@main\nstruct Lesson {\n    static func main() {\n        let count: Int = \"five\"\n        print(count)\n    }\n}\n",
+    "output": "main.swift:4:26: error: cannot convert value of type 'String' to specified type 'Int'\n2 | struct Lesson {\n3 |     static func main() {\n4 |         let count: Int = \"five\"\n  |                          `- error: cannot convert value of type 'String' to specified type 'Int'\n5 |         print(count)\n6 |     }\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "compile",
+    "expected_line": 4,
+    "expected_column": 26
+  }
+]

@@ -222,6 +222,7 @@ elif 'up' in a or 'start' in a:
   containers.setdefault(service,'owned-'+service+'-'+str(len(containers)))
   if service=='lab':c['lab_port']=os.getenv('DS60_PUBLIC_PORT','49152')
   save()
+elif 'exec' in a and 'psql' in a and c.get('fail')=='roles':sys.exit(7)
 elif 'exec' in a and c.get('fail')=='http':sys.exit(7)
 """
     )
@@ -320,6 +321,25 @@ def built_services(calls: list[dict[str, Any]]) -> list[str]:
         else:
             result.append(args[-1])
     return result
+
+
+def test_launcher_prepares_security_lab_roles_without_blocking_startup(launcher: Any) -> None:
+    result = launcher.run()
+    assert result.returncode == 0, result.stderr
+    commands = [x["args"] for x in launcher.calls()]
+    roles = [a for a in commands if "exec" in a and "psql" in a]
+    assert len(roles) == 1
+    assert roles[0][roles[0].index("exec") :][:3] == ["exec", "-T", "postgres"]
+    assert "/docker-entrypoint-initdb.d/02-security-lab-roles.sql" in roles[0]
+    assert {"-U", "ds60_admin", "ON_ERROR_STOP=1"} <= set(roles[0])
+    starts = [a for a in commands if "up" in a]
+    assert commands.index(starts[0]) < commands.index(roles[0]) < commands.index(starts[1])
+
+    launcher.set(fail="roles")
+    failed = launcher.run()
+    assert failed.returncode == 0, failed.stderr
+    assert "sql-sec-01 lab roles could not be prepared" in failed.stdout
+    assert launcher.opened()[-1][-1] == "http://127.0.0.1:49152/classroom"
 
 
 def test_default_command_builds_all_profiles_then_starts_health_checks_before_browser(

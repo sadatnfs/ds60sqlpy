@@ -1,0 +1,57 @@
+[
+  {
+    "case": "declared-not-used",
+    "source": "package main\n\nimport \"fmt\"\n\nfunc main() {\n    count := 3\n    fmt.Println(\"hi\")\n}\n",
+    "output": "main.go:6:5: declared and not used: count\n",
+    "returncode": 2,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "compile",
+    "expected_line": 6,
+    "expected_column": 5
+  },
+  {
+    "case": "imported-not-used",
+    "source": "package main\n\nimport (\n    \"fmt\"\n    \"os\"\n)\n\nfunc main() {\n    fmt.Println(\"hi\")\n}\n",
+    "output": "main.go:5:5: \"os\" imported and not used\n",
+    "returncode": 2,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "compile",
+    "expected_line": 5,
+    "expected_column": 5
+  },
+  {
+    "case": "panic-index",
+    "source": "package main\n\nimport \"fmt\"\n\nfunc main() {\n    scores := []int{90, 85}\n    index := 5\n    fmt.Println(scores[index])\n}\n",
+    "output": "panic: runtime error: index out of range [5] with length 2\n\ngoroutine 1 [running]:\nmain.main()\n\t/tmp/job-xxxxxxxx/main.go:8 +0x1c\n",
+    "returncode": 2,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "runtime",
+    "expected_line": 8,
+    "expected_column": null
+  },
+  {
+    "case": "syntax",
+    "source": "package main\n\nimport \"fmt\"\n\nfunc main() {\n    fmt.Println(\"hi\"\n}\n",
+    "output": "main.go:6:21: syntax error: unexpected newline in argument list; possibly missing comma or )\n",
+    "returncode": 2,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "syntax",
+    "expected_line": 6,
+    "expected_column": 21
+  },
+  {
+    "case": "undefined",
+    "source": "package main\n\nimport \"fmt\"\n\nfunc main() {\n    total := 5\n    fmt.Println(totl)\n    _ = total\n}\n",
+    "output": "main.go:7:17: undefined: totl\n",
+    "returncode": 2,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "compile",
+    "expected_line": 7,
+    "expected_column": 17
+  }
+]

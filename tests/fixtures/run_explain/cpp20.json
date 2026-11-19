@@ -1,0 +1,57 @@
+[
+  {
+    "case": "conversion",
+    "source": "#include <string>\n\nint main() {\n    std::string name = 42;\n    return 0;\n}\n",
+    "output": "main.cpp: In function ‘int main()’:\nmain.cpp:4:24: error: conversion from ‘int’ to non-scalar type ‘std::string’ {aka ‘std::__cxx11::basic_string<char>’} requested\n    4 |     std::string name = 42;\n      |                        ^~\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "compile",
+    "expected_line": 4,
+    "expected_column": 24
+  },
+  {
+    "case": "missing-semicolon",
+    "source": "#include <iostream>\n\nint main() {\n    std::cout << \"hi\\n\"\n    return 0;\n}\n",
+    "output": "main.cpp: In function ‘int main()’:\nmain.cpp:4:24: error: expected ‘;’ before ‘return’\n    4 |     std::cout << \"hi\\n\"\n      |                        ^\n      |                        ;\n    5 |     return 0;\n      |     ~~~~~~              \n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "syntax",
+    "expected_line": 4,
+    "expected_column": 24
+  },
+  {
+    "case": "out-of-range",
+    "source": "#include <iostream>\n#include <vector>\n\nint main() {\n    std::vector<int> values{1, 2};\n    std::cout << values.at(5) << '\\n';\n    return 0;\n}\n",
+    "output": "terminate called after throwing an instance of 'std::out_of_range'\n  what():  vector::_M_range_check: __n (which is 5) >= this->size() (which is 2)\n",
+    "returncode": -6,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "runtime",
+    "expected_line": null,
+    "expected_column": null
+  },
+  {
+    "case": "ownership-link-error",
+    "source": "int main() {\n    return 0;\n}\n",
+    "output": "/usr/bin/ld: verifier.o: in function `main':\n/opt/worker/courses/cpp/fixtures/cpp-ownership-v1.cpp:33: undefined reference to `ds60::positive_sum(std::vector<int, std::allocator<int> > const&)'\n/usr/bin/ld: /opt/worker/courses/cpp/fixtures/cpp-ownership-v1.cpp:35: undefined reference to `ds60::positive_sum(std::vector<int, std::allocator<int> > const&)'\n/usr/bin/ld: /opt/worker/courses/cpp/fixtures/cpp-ownership-v1.cpp:36: undefined reference to `ds60::positive_sum(std::vector<int, std::allocator<int> > const&)'\n/usr/bin/ld: /opt/worker/courses/cpp/fixtures/cpp-ownership-v1.cpp:39: undefined reference to `ds60::positive_sum(std::vector<int, std::allocator<int> > const&)'\n/usr/bin/ld: /opt/worker/courses/cpp/fixtures/cpp-ownership-v1.cpp:43: undefined reference to `ds60::replace_at(std::vector<int, std::allocator<int> >&, unsigned long, int)'\n/usr/bin/ld: /opt/worker/courses/cpp/fixtures/cpp-ownership-v1.cpp:48: undefined reference to `ds60::replace_at(std::vector<int, std::allocator<int> >&, unsigned long, int)'\n/usr/bin/ld: /opt/worker/courses/cpp/fixtures/cpp-ownership-v1.cpp:51: undefined reference to `ds60::replace_at(std::vector<int, std::allocator<int> >&, unsigned long, int)'\n/usr/bin/ld: /opt/worker/courses/cpp/fixtures/cpp-ownership-v1.cpp:55: undefined reference to `ds60::checked_read(std::vector<int, std::allocator<int> > const&, long long)'\n/usr/bin/ld: /opt/worker/courses/cpp/fixtures/cpp-ownership-v1.cpp:57: undefined reference to `ds60::checked_read(std::vector<int, std::allocator<int> > const&, long long)'\n/usr/bin/ld: /opt/worker/courses/cpp/fixtures/cpp-ownership-v1.cpp:59: undefined reference to `ds60::checked_read(std::vector<int, std::allocator<int> > const&, long long)'\n/usr/bin/ld: /opt/worker/courses/cpp/fixtures/cpp-ownership-v1.cpp:61: undefined reference to `ds60::checked_read(std::vector<int, std::allocator<int> > const&, long long)'\n/usr/bin/ld: /opt/worker/courses/cpp/fixtures/cpp-ownership-v1.cpp:64: undefined reference to `ds60::nonnegative_copy(std::vector<int, std::allocator<int> > const&)'\n/usr/bin/ld: /opt/worker/courses/cpp/fixtures/cpp-ownership-v1.cpp:71: undefined reference to `ds60::nonnegative_copy(std::vector<int, std::allocator<int> > const&)'\n/usr/bin/ld: /opt/worker/courses/cpp/fixtures/cpp-ownership-v1.cpp:73: undefined reference to `ds60::nonnegative_copy(std::vector<int, std::allocator<int> > const&)'\ncollect2: error: ld returned 1 exit status\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "compile",
+    "expected_line": null,
+    "expected_column": null
+  },
+  {
+    "case": "undeclared",
+    "source": "#include <iostream>\n\nint main() {\n    int total = 5;\n    std::cout << totl << '\\n';\n    return 0;\n}\n",
+    "output": "main.cpp: In function ‘int main()’:\nmain.cpp:5:18: error: ‘totl’ was not declared in this scope; did you mean ‘total’?\n    5 |     std::cout << totl << '\\n';\n      |                  ^~~~\n      |                  total\nmain.cpp:4:9: warning: unused variable ‘total’ [-Wunused-variable]\n    4 |     int total = 5;\n      |         ^~~~~\n",
+    "returncode": 1,
+    "status": "failed",
+    "stopped": null,
+    "expected_kind": "compile",
+    "expected_line": 5,
+    "expected_column": 18
+  }
+]

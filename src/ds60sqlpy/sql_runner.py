@@ -131,6 +131,45 @@ class SqlRunner:
 
         return self.run_file(self.catalog.repo_root / "sql" / "postgres-60day" / "00_setup.sql")
 
+    def query(self, statement: str) -> SqlRun:
+        """Run one read-only status statement and return its unaligned text output."""
+
+        command = [
+            self.executable,
+            "-X",
+            "--no-password",
+            "-v",
+            "ON_ERROR_STOP=1",
+            "-A",
+            "-t",
+            "-c",
+            statement,
+        ]
+        environment = course_psql_environment(
+            self.database_url,
+            application_name="ds60sqlpy-course-status",
+            connect_timeout=5,
+        )
+        environment["PGOPTIONS"] = "-c statement_timeout=5000 -c default_transaction_read_only=on"
+        try:
+            result = subprocess.run(
+                command,
+                check=False,
+                env=environment,
+                stdin=subprocess.DEVNULL,
+                capture_output=True,
+                text=True,
+                timeout=15,
+            )
+        except subprocess.TimeoutExpired as exc:
+            raise SqlRunnerError("The course database did not answer a status check.") from exc
+        return SqlRun(
+            path=self.catalog.repo_root,
+            returncode=result.returncode,
+            stdout=result.stdout or "",
+            stderr=result.stderr or "",
+        )
+
     def verify(self) -> SqlRun:
         """Run fail-fast invariants against the course seed data."""
 

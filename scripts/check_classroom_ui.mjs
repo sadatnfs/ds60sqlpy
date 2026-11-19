@@ -120,6 +120,7 @@ function environment({ browserPreviewClass } = {}) {
     document: {
       getElementById: element,
       createElement: (tag) => new Element(tag),
+      createTextNode: (text) => ({ nodeType: 3, textContent: String(text) }),
       addEventListener: (name, fn) => {
         const handlers = documentHandlers.get(name) || [];
         handlers.push(fn);
@@ -1524,6 +1525,7 @@ await test("all registered subject accents meet text contrast in both appearance
       "applied-science",
       "bayesian-computing",
       "julia",
+      "spark-deployment",
     ]),
   );
   const luminance = (hex) => {
@@ -2373,6 +2375,329 @@ await test("DAX worked reference does not replace edits made during the response
   assert.equal(e.element("offline-cases").children.length, 3);
   assert.match(e.element("status").textContent, /not executed/);
   assert.equal(e.requests.filter((r) => r.body.action === "module-run").length, 0);
+});
+
+await test("a failed run shows its plain explanation and line action, and a reset clears it", async () => {
+  const e = environment();
+  e.current();
+  e.element("source").value = "total = \nprint(total)";
+  e.run(`showJob({
+    job_id: "j1",
+    lesson_id: "llm-009",
+    status: "failed",
+    source: "total = \\nprint(total)",
+    output: "SyntaxError: invalid syntax",
+    returncode: 1,
+    elapsed_seconds: 0.25,
+    checks: [],
+    explanation: {
+      kind: "syntax",
+      title: "Python could not read line \`1\`.",
+      line: 1,
+      column: 9,
+      hint: "Finish the assignment, then run again.",
+      raw: "SyntaxError: invalid syntax",
+    },
+  })`);
+  const box = e.element("run-explanation");
+  assert.equal(box.hidden, false);
+  const title = box.children[0].children.map((part) => part.textContent).join("");
+  assert.equal(title, "Python could not read line 1.");
+  assert.equal(box.children[0].children[1].tagName, "CODE");
+  assert.ok(box.children.some((child) => /Show line 1/.test(child.textContent)));
+  assert.match(
+    e.element("job-status").textContent,
+    /^Stopped with an error · failed after 0\.25 s/,
+  );
+  e.run("resetResult()");
+  assert.equal(box.hidden, true);
+  assert.equal(box.children.length, 0);
+});
+
+await test("a finished run that printed nothing says how to show a value", async () => {
+  const e = environment();
+  e.current();
+  e.element("source").value = "x = 1";
+  e.run(`showJob({ job_id: "j2", lesson_id: "llm-009", status: "succeeded", source: "x = 1",
+    output: "", returncode: 0, elapsed_seconds: 0.1, checks: [] })`);
+  assert.match(e.element("output").textContent, /without printing anything.*print\(value\)/);
+  assert.match(e.element("job-status").textContent, /^Finished · succeeded in 0\.10 s/);
+  assert.equal(e.element("run-explanation").hidden, true);
+  assert.equal(e.element("raw-log").hidden, true);
+});
+
+await test("the full log is offered only when runner messages were hidden", async () => {
+  const e = environment();
+  e.current();
+  e.run(`showJob({ job_id: "j3", lesson_id: "llm-009", status: "failed", source: "x",
+    output: "NameError: name 'x' is not defined", returncode: 1, elapsed_seconds: 0.1, checks: [],
+    raw_output: "Traceback (most recent call last):\\n  File \\"<frozen runpy>\\"\\nNameError: name 'x' is not defined" })`);
+  assert.equal(e.element("raw-log").hidden, false);
+  assert.match(e.element("raw-output").textContent, /frozen runpy/);
+  assert.equal(e.element("output").textContent, "NameError: name 'x' is not defined");
+  e.run("resetResult()");
+  assert.equal(e.element("raw-log").hidden, true);
+  assert.equal(e.element("raw-output").textContent, "");
+});
+
+await test("Focus on code widens the workbench, excludes reading focus and is remembered", async () => {
+  const e = environment();
+  e.current();
+  e.run("trackId = 'python'");
+  await e.event("code-focus-toggle");
+  assert.match(e.element("authored").className, /\bcode-focus\b/);
+  assert.equal(e.element("code-focus-toggle")["aria-pressed"], "true");
+  assert.equal(e.storage.get("ds60.classroom.code.python"), "true");
+  await e.event("reading-toggle");
+  assert.doesNotMatch(e.element("authored").className, /code-focus/);
+  assert.match(e.element("authored").className, /reading-focus/);
+  assert.equal(e.storage.get("ds60.classroom.code.python"), "false");
+});
+
+const sqlExercises = {
+  lesson_id: "sql-29",
+  language: "sql",
+  reference_program: true,
+  exercises: [
+    {
+      number: 1,
+      title: "Query writing",
+      prompt_html: "<p>Find customer names.</p>",
+      details: [
+        { label: "Expected result", html: "<p>Matching rows.</p>" },
+        { label: "Verify", html: "<p>Count the misses.</p>" },
+      ],
+      hints: ["<p>Use ILIKE.</p>", "<p>Anchor the prefix.</p>"],
+      has_solution: true,
+    },
+    {
+      number: 2,
+      title: "Prediction",
+      prompt_html: "<p>Predict the rows.</p>",
+      details: [],
+      hints: [],
+      has_solution: true,
+    },
+  ],
+};
+function sqlLesson(e, mode = "snippet") {
+  e.current("sql-29", "sql");
+  e.run(
+    `current.engine = "legacy"; current.mode = ${JSON.stringify(mode)};
+     current.effective = { allowed_timeout_seconds: [15, 60, 120], timeout_seconds: 60 };
+     current.runner = { id: "sql", modes: [{ id: "snippet" }, { id: "lesson" }] };`,
+  );
+}
+async function openExercises(e) {
+  e.run("loadExercises()");
+  await settle();
+  e.resolve(e.next("classroom-exercises"), sqlExercises);
+  await settle();
+}
+
+await test("exercises show progressive hints and reveal a solution only after confirmation", async () => {
+  const e = environment();
+  sqlLesson(e);
+  await openExercises(e);
+  assert.equal(e.element("exercise-dock").hidden, false);
+  assert.equal(e.element("exercise-title").textContent, "Exercise 1: Query writing");
+  assert.equal(e.element("exercise-progress").textContent, "0 of 2 solved");
+  assert.equal(e.element("exercise-steps").children.length, 2);
+  assert.equal(e.element("exercise-steps").children[0].children[0]["aria-current"], "step");
+  assert.deepEqual(
+    e.element("exercise-facts").children.map((item) => item.textContent || item.innerHTML),
+    ["Expected result", "<p>Matching rows.</p>"],
+  );
+  assert.equal(e.element("exercise-check").hidden, false);
+  assert.equal(e.element("exercise-mode-note").hidden, true);
+  assert.equal(e.element("exercise-hint").textContent, "Show a hint (1 of 2)");
+  await e.event("exercise-hint");
+  assert.equal(e.element("exercise-hints").children.length, 1);
+  assert.equal(e.element("exercise-hint").textContent, "Show the next hint (2 of 2)");
+  await e.event("exercise-hint");
+  assert.equal(e.element("exercise-hint").disabled, true);
+  await e.event("exercise-solve");
+  assert.equal(e.element("exercise-confirm").hidden, false);
+  assert.equal(e.requests.filter((r) => r.body.action === "classroom-exercise-solution").length, 0);
+  await e.event("exercise-confirm-no");
+  assert.equal(e.element("exercise-confirm").hidden, true);
+  await e.event("exercise-solve");
+  await e.event("exercise-confirm-yes");
+  await settle();
+  const request = e.next("classroom-exercise-solution");
+  assert.equal(request.body.lesson_id, "sql-29");
+  assert.equal(request.body.number, 1);
+  assert.equal(request.body.reveal, true);
+  e.resolve(request, {
+    number: 1,
+    html: "<h4>Exercise 1</h4><p>Because ILIKE ignores case.</p>",
+    code: [{ language: "sql", text: "SELECT 1;", standalone: true }],
+  });
+  await settle();
+  assert.equal(e.element("exercise-solution").hidden, false);
+  assert.equal(e.element("exercise-solution-title").textContent, "Worked solution for exercise 1");
+  assert.equal(e.element("exercise-run-solution").hidden, false);
+  assert.equal(e.element("exercise-compare").hidden, false);
+  assert.equal(e.element("exercise-use-solution").hidden, false);
+  const saved = JSON.parse(e.storage.get("ds60.classroom.exercises.sql-29"));
+  assert.equal(saved["1"].hints, 2);
+  assert.equal(saved["1"].seen, true);
+  await e.event("exercise-next");
+  assert.equal(e.element("exercise-title").textContent, "Exercise 2: Prediction");
+  assert.equal(e.element("exercise-solution").hidden, true);
+  assert.equal(e.element("exercise-hint").hidden, true);
+  assert.equal(JSON.parse(e.storage.get("ds60.classroom.exercises.sql-29")).current, 2);
+});
+
+await test("a worked-solution run leaves the learner's code alone and labels its result", async () => {
+  const e = environment();
+  sqlLesson(e);
+  await openExercises(e);
+  e.run(`openSolutionView({ kind: "exercise", number: 1, title: "Worked solution for exercise 1",
+    html: "", code: [{ language: "sql", text: "SELECT 1 AS a;", standalone: true }] })`);
+  e.element("source").value = "SELECT mine;";
+  const running = e.event("exercise-run-solution");
+  await settle();
+  const run = e.next("run");
+  assert.equal(run.body.purpose, "solution");
+  assert.equal(run.body.mode, "snippet");
+  assert.equal(run.body.code, "SELECT 1 AS a;\n");
+  assert.equal(e.requests.filter((r) => r.body.action === "save-pad").length, 0);
+  e.resolve(run, {
+    language: "sql",
+    returncode: 0,
+    elapsed_seconds: 0.2,
+    purpose: "solution",
+    output: JSON.stringify({
+      results: [{ columns: ["a"], rows: [[1]], truncated: false }],
+      transaction: "Committed success; explicit COMMIT/ROLLBACK change boundaries.",
+    }),
+  });
+  await running;
+  await settle();
+  assert.equal(e.element("results-title").textContent, "Result of the worked solution");
+  assert.match(e.element("run-storage-status").textContent, /worked solution.*not changed/);
+  assert.match(
+    e.element("output").textContent,
+    /^The query returned 1 row\. They are in the table/,
+  );
+  assert.match(e.element("output").textContent, /Changes were saved \(committed\)/);
+  assert.equal(e.element("source").value, "SELECT mine;");
+  assert.equal(e.run("legacyReceipts.size"), 0);
+  e.run("resetResult()");
+  assert.equal(e.element("results-title").textContent, "Result");
+});
+
+await test("SQL snippet errors read as sentences and fragments are not offered as runs", async () => {
+  const e = environment();
+  sqlLesson(e);
+  const transcript = e.run(
+    `sqlTranscript(${JSON.stringify(
+      JSON.stringify({
+        error_type: "UndefinedColumn",
+        sqlstate: "42703",
+        error_line: 1,
+        message: 'column "nme" does not exist',
+        transaction: "Current transaction rolled back; earlier explicit commits are preserved.",
+      }),
+    )})`,
+  );
+  assert.equal(
+    transcript,
+    'ERROR: column "nme" does not exist\nSQLSTATE 42703 · in the statement on line 1\n\n' +
+      "Nothing from this transaction was saved (rolled back). Anything you committed earlier is kept.",
+  );
+  assert.equal(e.run("sqlTranscript('not json')"), null);
+  assert.equal(
+    e.run(`sqlTranscript(JSON.stringify({ results: [{ status: "CREATE TABLE" },
+      { columns: ["n"], rows: [[1], [2]], truncated: false }], transaction: "x" }))`),
+    "Statement 1: CREATE TABLE\nStatement 2: 2 rows in Query result 1 below.\n\nx",
+  );
+  e.run(`openSolutionView({ kind: "exercise", number: 1, title: "t", html: "",
+    code: [{ language: "sql", text: "WHERE x", standalone: false }] })`);
+  assert.equal(e.element("exercise-run-solution").hidden, true);
+  assert.match(e.element("exercise-solution-note").textContent, /does not run on its own/);
+  assert.equal(
+    e.run('tracebackLine("Traceback\\n  File \\"main.py\\", line 2, in <module>", 3)'),
+    2,
+  );
+});
+
+await test("Compare with my code lists differing lines and folds long matches", async () => {
+  const e = environment();
+  sqlLesson(e);
+  await openExercises(e);
+  e.run(`openSolutionView({ kind: "exercise", number: 1, title: "t", html: "",
+    code: [{ language: "sql", text: "SELECT\\n  id,\\n  name\\nFROM t;", standalone: true }] })`);
+  e.element("source").value = "SELECT\n  id\n\nFROM   t;";
+  await e.event("exercise-compare");
+  const diff = e.element("exercise-diff");
+  assert.equal(diff.hidden, false);
+  assert.equal(e.element("exercise-compare")["aria-pressed"], "true");
+  assert.equal(
+    diff.children[0].textContent,
+    "2 lines match. 1 line marked Yours appears only in your code. 2 lines marked Solution " +
+      "appear only in the solution. Different does not mean wrong: compare what each version does.",
+  );
+  assert.deepEqual(
+    diff.children[1].children.map((row) => row.dataset.kind),
+    ["same", "mine", "solution", "solution", "same"],
+  );
+  const folded = e.run(`foldedDiff([...Array(10)].map(() => ({ kind: "same", text: "x" }))
+    .concat([{ kind: "mine", text: "y" }], [...Array(10)].map(() => ({ kind: "same", text: "x" }))))`);
+  assert.deepEqual(
+    Array.from(folded, (row) => row.kind + (row.count ? row.count : "")),
+    ["skip8", "same", "same", "mine", "same", "same", "skip8"],
+  );
+  await e.event("exercise-compare");
+  assert.equal(diff.hidden, true);
+});
+
+await test("Use in my editor replaces the code once and Undo restores it", async () => {
+  const e = environment();
+  e.current();
+  e.run(`exercise.lesson = "llm-009"; openSolutionView({ kind: "reference", title: "Reference program",
+    path: "courses/x/solutions/x_solution.py", html: "",
+    code: [{ language: "python", text: "print(42)\\n", standalone: true }] })`);
+  assert.match(e.element("exercise-solution-note").textContent, /^From courses\/x/);
+  e.element("source").value = "print('mine')\n";
+  const used = e.event("exercise-use-solution");
+  await settle();
+  e.resolve(e.next("module-save"), { session: {} });
+  await used;
+  await settle();
+  assert.equal(e.element("source").value, "print(42)\n");
+  const [message, undo] = e.element("exercise-status").children;
+  assert.match(message.textContent, /^The reference program is in your editor/);
+  await Promise.all(undo.handlers.click.map((fn) => fn()));
+  assert.equal(e.element("source").value, "print('mine')\n");
+  assert.match(e.element("exercise-status").textContent, /previous code is back/);
+});
+
+await test("marking exercises solved updates the index and offers the next unsolved one", async () => {
+  const e = environment();
+  sqlLesson(e, "lesson");
+  await openExercises(e);
+  assert.equal(e.element("exercise-mode-note").hidden, false);
+  await e.event("exercise-done");
+  assert.equal(e.element("exercise-done")["aria-pressed"], "true");
+  assert.equal(e.element("exercise-done").textContent, "Solved");
+  assert.equal(e.element("exercise-steps").children[0].children[0].dataset.state, "solved");
+  assert.equal(e.element("exercise-progress").textContent, "1 of 2 solved");
+  const [message, onward] = e.element("exercise-status").children;
+  assert.match(message.textContent, /1 of 2 solved/);
+  assert.equal(onward.textContent, "Next: exercise 2");
+  await Promise.all(onward.handlers.click.map((fn) => fn()));
+  assert.equal(e.element("exercise-title").textContent, "Exercise 2: Prediction");
+  await e.event("exercise-done");
+  assert.match(e.element("exercise-status").textContent, /^All 2 exercises are marked as solved/);
+  e.run(`showJob({ job_id: "s1", lesson_id: "sql-29", status: "succeeded", purpose: "solution",
+    source: "SELECT 1;", output: "1", returncode: 0, elapsed_seconds: 0.1, checks: [] })`);
+  assert.match(e.element("job-status").textContent, /^Worked solution · Finished/);
+  e.run(`showJob({ job_id: "s2", lesson_id: "sql-29", status: "succeeded",
+    source: "SELECT 2;", output: "2", returncode: 0, elapsed_seconds: 0.1, checks: [] })`);
+  assert.equal(e.element("results-title").textContent, "Result");
+  assert.equal(e.element("run-storage-status").textContent, "");
 });
 
 console.log(JSON.stringify({ checks, passed: true, final: true }));
