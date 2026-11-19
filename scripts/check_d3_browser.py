@@ -228,12 +228,21 @@ def interaction_checks(page: Any, identity: str, expect: Any) -> None:
     elif identity == "js-057":
         frame.get_by_role("button", name="Reset selection", exact=True).click()
         expect(frame.get_by_role("status")).to_have_text("Selected: 1, 2, 3, 4, 5")
-        bounds = frame.locator(".overlay").bounding_box()
+        # The classroom smooth-scrolls new results into view. Raw pointer moves skip
+        # Playwright's actionability checks, so start the drag with hover(), which
+        # waits until the chart is stable, in view and receives the pointer.
+        overlay = frame.locator(".overlay")
+        bounds = overlay.bounding_box()
         assert bounds is not None
-        y = bounds["y"] + bounds["height"] * 0.5
-        page.mouse.move(bounds["x"] + bounds["width"] * 0.2, y)
+        middle = bounds["height"] * 0.5
+        overlay.hover(position={"x": bounds["width"] * 0.2, "y": middle})
+        bounds = overlay.bounding_box()
+        assert bounds is not None
+        end = (bounds["x"] + bounds["width"] * 0.6, bounds["y"] + middle)
+        target = page.evaluate("([x, y]) => document.elementFromPoint(x, y)?.tagName", end)
+        assert target == "IFRAME", f"The brush gesture would end on {target}, not the chart"
         page.mouse.down()
-        page.mouse.move(bounds["x"] + bounds["width"] * 0.6, y, steps=6)
+        page.mouse.move(*end, steps=6)
         page.mouse.up()
         expect(frame.get_by_role("status")).to_have_text("Selected: 2, 3")
         frame.get_by_role("button", name="Select 2 through 4", exact=True).click()

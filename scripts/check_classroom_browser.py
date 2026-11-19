@@ -114,8 +114,12 @@ class Audit:
             page.screenshot(path=str(self.screenshots / (name + ".png")))
 
     def context(self, browser: Any, origin: str) -> Any:
+        # Reduced motion makes the result reveal scroll instantly. A smooth scroll can
+        # move a cross-origin preview frame after Playwright's stability check passes.
         context = browser.new_context(
-            viewport={"width": 1440, "height": 1000}, service_workers="block"
+            viewport={"width": 1440, "height": 1000},
+            service_workers="block",
+            reduced_motion="reduce",
         )
         context.set_default_timeout(20_000)
         context.on(

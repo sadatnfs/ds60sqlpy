@@ -109,8 +109,11 @@ def main() -> None:
     passed = False
     with api.sync_playwright() as playwright:
         browser = playwright.chromium.launch(headless=True, channel="chromium")
+        # Instant result reveals keep preview frames still while Playwright acts on them.
         context = browser.new_context(
-            viewport={"width": 1440, "height": 1100}, service_workers="block"
+            viewport={"width": 1440, "height": 1100},
+            service_workers="block",
+            reduced_motion="reduce",
         )
         context.set_default_timeout(20000)
         page = context.new_page()
